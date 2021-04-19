@@ -1,0 +1,9 @@
+## YAML Template.
+---
+spring:
+  #profile
+  profiles:
+    active: test
+logging:
+  level:
+    root: INFO
