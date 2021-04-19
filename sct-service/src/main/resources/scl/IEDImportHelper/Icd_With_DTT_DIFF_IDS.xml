@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SCL xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4">
+    <Header id="HeaderID" version="version" revision="Revision" toolID="toolID" nameStructure="IEDName"/>
+    <DataTypeTemplates>
+        <LNodeType lnClass="PIOC" id="LN1">
+            <DO name="Beh" type="DO11" transient="false"/>
+            <DO name="Op" type="DO21" transient="true"/>
+            <DO name="StrVal" type="DO31" transient="false"/>
+        </LNodeType>
+        <DOType cdc="WYE" id="DO11">
+            <DA fc="DC" dchg="false" qchg="false" dupd="false" name="dataNs" bType="VisString255">
+                <Val>IEC 61850-7-3:2007B</Val>
+            </DA>
+            <DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+        </DOType>
+        <DOType cdc="WYE" id="DO21">
+            <SDO name="res" type="DO41"/>
+            <DA fc="CF" dchg="true" qchg="false" dupd="false" name="angRef" bType="Enum" type="MultiplierKind"/>
+        </DOType>
+        <DOType cdc="WYE" id="DO31">
+            <SDO name="phsA" type="DO41"/>
+            <DA fc="CF" dchg="true" qchg="false" dupd="false" name="smpRate" bType="INT32U"/>
+            <DA fc="ST" dchg="false" qchg="false" dupd="false" name="origin" bType="Struct" type="DA31"/>
+        </DOType>
+        <DOType cdc="WYE" id="DO41">
+            <DA fc="CF" dchg="true" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+        </DOType>
+        <DAType id="DA11">
+            <BDA name="Check" bType="Check"/>
+            <BDA name="origin" bType="Struct" type="DA31"/>
+            <ProtNs type="8-MMS">IEC 61850-8-1:2003</ProtNs>
+        </DAType>
+        <DAType id="DA21">
+            <BDA name="T" bType="Timestamp"/>
+            <BDA name="ctlVal" bType="Enum" type="CtlModelKind"/>
+            <ProtNs type="8-MMS">IEC 61850-8-1:2003</ProtNs>
+        </DAType>
+        <DAType id="DA31">
+            <BDA name="Check" bType="Check"/>
+            <BDA name="operTm" bType="Timestamp"/>
+            <ProtNs type="8-MMS">IEC 61850-8-1:2003</ProtNs>
+        </DAType>
+        <EnumType id="CtlModelKind">
+            <EnumVal ord="1">Completed</EnumVal>
+            <EnumVal ord="2">Cancelled</EnumVal>
+            <EnumVal ord="3">New adjustments</EnumVal>
+            <EnumVal ord="4">Under way</EnumVal>
+        </EnumType>
+        <EnumType id="MultiplierKind">
+            <EnumVal ord="0">Va</EnumVal>
+            <EnumVal ord="1">Vb</EnumVal>
+            <EnumVal ord="2">Vc</EnumVal>
+            <EnumVal ord="3">Aa</EnumVal>
+            <EnumVal ord="4">Ab</EnumVal>
+            <EnumVal ord="5">Ac</EnumVal>
+            <EnumVal ord="6">Vab</EnumVal>
+            <EnumVal ord="7">Vbc</EnumVal>
+            <EnumVal ord="8">Vca</EnumVal>
+            <EnumVal ord="9">Vother</EnumVal>
+            <EnumVal ord="10">Aother</EnumVal>
+            <EnumVal ord="11">Synchrophasor</EnumVal>
+        </EnumType>
+    </DataTypeTemplates>
+</SCL>
