@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.model;
 
+import org.lfenergy.compas.sct.model.dto.ExtRefInfo;
 import org.lfenergy.compas.sct.model.dto.ResumedDataTemplate;
 
 import java.util.Set;
@@ -12,10 +13,10 @@ public interface ILNodeDTO {
     String getInst();
     String getLNodeClass();
     String getLNodeType();
-    <T extends IExtRefDTO> Set<T> getExtRefs();
+    Set<ExtRefInfo> getExtRefs();
     Set<ResumedDataTemplate> getResumedDataTemplates();
 
-    <T extends IExtRefDTO> void addExtRef(T extRef);
+    void addExtRef(ExtRefInfo extRef);
     void addResumedDataTemplate(ResumedDataTemplate dtt);
 
     void setInst(String inst);

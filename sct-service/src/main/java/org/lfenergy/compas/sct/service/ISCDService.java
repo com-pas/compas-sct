@@ -7,10 +7,10 @@ package org.lfenergy.compas.sct.service;
 import org.lfenergy.compas.exception.ScdException;
 import org.lfenergy.compas.scl.SCL;
 import org.lfenergy.compas.sct.exception.CompasDataAccessException;
-import org.lfenergy.compas.sct.model.IExtRefDTO;
 import org.lfenergy.compas.sct.model.IIedDTO;
 import org.lfenergy.compas.sct.model.IScd;
 import org.lfenergy.compas.sct.model.ISubNetworkDTO;
+import org.lfenergy.compas.sct.model.dto.ExtRefSignalInfo;
 import org.springframework.lang.NonNull;
 
 import java.util.Set;
@@ -90,9 +90,8 @@ public interface ISCDService<T extends IScd<UUID>> {
      * @return
      * @throws ScdException
      */
-
-    <D extends IIedDTO, U extends IExtRefDTO> Set<D> extractExtRefSources(T scdObj, String iedName,
-                                                                          String ldInst, U filter) throws ScdException;
+    <D extends IIedDTO> Set<D> extractExtRefBindingInfo(T scdObj, String iedName,
+                                                        String ldInst, ExtRefSignalInfo filter) throws ScdException;
 
     /**
      *

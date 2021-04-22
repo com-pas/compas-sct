@@ -16,7 +16,8 @@ class SimpleScdTest {
     void testScd(){
         UUID id = UUID.randomUUID();
         SimpleScd scd = DTO.createScd(id);
-        assertEquals(scd,scd);
+        SimpleScd scd2 = scd;
+        assertEquals(scd,scd2);
 
         assertAll("SCD",
                 () -> assertEquals(id, scd.getId()),

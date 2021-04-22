@@ -17,10 +17,10 @@ import org.lfenergy.compas.scl.TLLN0Enum;
 import org.lfenergy.compas.scl.TLN;
 import org.lfenergy.compas.scl.TSubNetwork;
 import org.lfenergy.compas.sct.model.IConnectedApDTO;
-import org.lfenergy.compas.sct.model.IExtRefDTO;
 import org.lfenergy.compas.sct.model.ISubNetworkDTO;
+import org.lfenergy.compas.sct.model.dto.ExtRefInfo;
+import org.lfenergy.compas.sct.model.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.model.dto.ResumedDataTemplate;
-import org.lfenergy.compas.sct.model.dto.ExtRefDTO;
 import org.lfenergy.compas.sct.model.dto.IedDTO;
 import org.lfenergy.compas.sct.model.dto.LDeviceDTO;
 import org.lfenergy.compas.sct.model.dto.LNodeDTO;
@@ -116,16 +116,15 @@ public class SimpleSqlScdService extends AbstractSqlScdService<SimpleScd, Simple
         LNodeDTO lN0DTO = new LNodeDTO();
         lN0DTO.setLNodeClass(TLLN0Enum.LLN_0.value());
         ln0ExtRefs.forEach((TExtRef tExtRef) -> {
-            ExtRefDTO extRefDTO = new ExtRefDTO(tExtRef);
+            ExtRefInfo extRefDTO = new ExtRefInfo(tExtRef);
             lN0DTO.addExtRef(extRefDTO);
         });
         lDeviceDTO.addLNode(lN0DTO);
         iedDTO.addLDevice(lDeviceDTO);
         return iedDTO;
     }
-
     @Override
-    public Set<IedDTO> extractExtRefSources(SimpleScd scdObj, String iedName, String ldInst, IExtRefDTO extRef) throws ScdException {
+    public Set<IedDTO> extractExtRefBindingInfo(SimpleScd scdObj, String iedName, String ldInst, ExtRefSignalInfo extRef) throws ScdException {
         SCL receiver = marshallerWrapper.unmarshall(scdObj.getRawXml());
         SclIEDManager sclIEDManager = new SclIEDManager(receiver);
         sclIEDManager.getExtRef(iedName,ldInst,extRef);
@@ -140,7 +139,7 @@ public class SimpleSqlScdService extends AbstractSqlScdService<SimpleScd, Simple
                 if(accessPoint.getServer() == null) continue;
                 List<TLDevice> deviceList = accessPoint.getServer().getLDevice();
                 for(TLDevice tlDevice : deviceList) {
-                    Set<LNodeDTO> lNodeDTOs = getExtRefSources(tlDevice,extRef, receiver.getDataTypeTemplates());
+                    Set<LNodeDTO> lNodeDTOs = getExtRefBindingInfo(tlDevice,extRef, receiver.getDataTypeTemplates());
                     LDeviceDTO lDeviceDTO = new LDeviceDTO();
                     lDeviceDTO.setLdName(tlDevice.getLdName());
                     lDeviceDTO.setLdInst(tlDevice.getInst());
@@ -156,6 +155,7 @@ public class SimpleSqlScdService extends AbstractSqlScdService<SimpleScd, Simple
         }
         return iedDTOs;
     }
+
 
     @Override
     public Set<SubNetworkDTO> getSubnetwork(SimpleScd scdObj) throws ScdException {
@@ -194,10 +194,11 @@ public class SimpleSqlScdService extends AbstractSqlScdService<SimpleScd, Simple
     /*------------------------------------------------------*/
     /* Handy methods                                        */
     /*------------------------------------------------------*/
-    public Set<LNodeDTO> getExtRefSources(TLDevice tlDevice, IExtRefDTO extRef, TDataTypeTemplates dtt) throws ScdException {
+
+    public Set<LNodeDTO> getExtRefBindingInfo(TLDevice tlDevice, ExtRefSignalInfo extRef, TDataTypeTemplates dtt) throws ScdException {
         List<TLN> lns = tlDevice.getLN();
         Set<LNodeDTO> lNodeDTOs = new HashSet<>();
-            for(TLN ln : lns){
+        for(TLN ln : lns){
             if(extRef.getPLN() != null && !ln.getLnClass().contains(extRef.getPLN())) continue;
             LNodeDTO lNodeDTO = new LNodeDTO();
             lNodeDTO.setLNodeType(ln.getLnType());

@@ -11,6 +11,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <packaging>pom</packaging>
     <artifactId>sct-coverage</artifactId>
     <name>SCT-Coverage</name>
 
