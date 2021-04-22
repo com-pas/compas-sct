@@ -18,7 +18,7 @@ class LNodeDTOTest {
     @Test
     public void testConstruction(){
         LNodeDTO lNodeDTO = DTO.createLNodeDTO();
-        lNodeDTO.addExtRef(DTO.createExtRefDTO());
+        lNodeDTO.addExtRef(DTO.createExtRefInfo());
         lNodeDTO.addResumedDataTemplate(new ResumedDataTemplate());
 
         assertAll("LNodeDTO",

@@ -22,7 +22,7 @@ import org.lfenergy.compas.scl.TLNodeType;
 import org.lfenergy.compas.scl.TPredefinedBasicTypeEnum;
 import org.lfenergy.compas.scl.TSDO;
 import org.lfenergy.compas.scl.TUnNaming;
-import org.lfenergy.compas.sct.model.IExtRefDTO;
+import org.lfenergy.compas.sct.model.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.model.dto.ResumedDataTemplate;
 
 import java.util.ArrayList;
@@ -572,7 +572,7 @@ public class SclDataTemplateManager {
     }
 
 
-    public static ResumedDataTemplate getResumedDTT(String lnType, IExtRefDTO extRef,
+    public static ResumedDataTemplate getResumedDTT(String lnType, ExtRefSignalInfo extRef,
                                                     TDataTypeTemplates dtt) throws ScdException {
         ResumedDataTemplate resumedDataTemplate = new ResumedDataTemplate();
         TLNodeType nodeType = dtt.getLNodeType()
@@ -615,16 +615,16 @@ public class SclDataTemplateManager {
         if(extSdoName1 != null){
             List<TSDO> sdos = SclDataTemplateManager.retrieveSdoOrDO(tdoType.getSDOOrDA(), TSDO.class);
             String sdoTypeId = sdos.stream()
-                .filter(tsdo -> extSdoName1.equals(tsdo.getName()))
-                .map(TSDO::getType)
-                .findFirst()
-                .orElseThrow(() -> new ScdException("Unknown doName.sdoName :" + extDoName + "." + extSdoName1));
+                    .filter(tsdo -> extSdoName1.equals(tsdo.getName()))
+                    .map(TSDO::getType)
+                    .findFirst()
+                    .orElseThrow(() -> new ScdException("Unknown doName.sdoName :" + extDoName + "." + extSdoName1));
 
             tdoType = dtt.getDOType()
-                .stream()
-                .filter(doType -> doType.getId().equals(sdoTypeId))
-                .findFirst()
-                .orElseThrow(() -> new ScdException("No referenced doName.sdoName :" + extDoName + "." + extSdoName1));
+                    .stream()
+                    .filter(doType -> doType.getId().equals(sdoTypeId))
+                    .findFirst()
+                    .orElseThrow(() -> new ScdException("No referenced doName.sdoName :" + extDoName + "." + extSdoName1));
 
             resumedDataTemplate.setDoName(extDoName + "." + extSdoName1);
         }

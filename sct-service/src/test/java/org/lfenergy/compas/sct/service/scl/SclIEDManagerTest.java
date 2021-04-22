@@ -16,7 +16,7 @@ import org.lfenergy.compas.scl.TIED;
 import org.lfenergy.compas.scl.TLDevice;
 import org.lfenergy.compas.scl.TLLN0Enum;
 import org.lfenergy.compas.scl.TLN;
-import org.lfenergy.compas.sct.model.dto.ExtRefDTO;
+import org.lfenergy.compas.sct.model.dto.ExtRefSignalInfo;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -200,7 +200,7 @@ class SclIEDManagerTest {
     void testShouldReturnOKWhenGetExtRef() throws ScdException {
         SCL scd = getSCLFromFile(SCD_WITH_IEDS_FILE);
         SclIEDManager sclIEDManager = new SclIEDManager(scd);
-        ExtRefDTO simpleExtRef = new ExtRefDTO();
+        ExtRefSignalInfo simpleExtRef = new ExtRefSignalInfo();
         simpleExtRef.setIntAddr("INTADDR2");
         simpleExtRef.setPLN(TLLN0Enum.LLN_0.value());
         simpleExtRef.setPDO("Op");
@@ -213,7 +213,7 @@ class SclIEDManagerTest {
     void testShouldReturnNOKWhenGetExtRefNoThingFound() throws ScdException {
         SCL scd = getSCLFromFile(SCD_WITH_IEDS_FILE);
         SclIEDManager sclIEDManager = new SclIEDManager(scd);
-        ExtRefDTO simpleExtRef = new ExtRefDTO();
+        ExtRefSignalInfo simpleExtRef = new ExtRefSignalInfo();
         simpleExtRef.setIntAddr("INTADDR1");
         simpleExtRef.setPLN(TLLN0Enum.LLN_0.value());
         simpleExtRef.setPDO("Op");
@@ -224,7 +224,7 @@ class SclIEDManagerTest {
     void testShouldReturnNOKWhenGetExtRefUnknownLD() throws ScdException {
         SCL scd = getSCLFromFile(SCD_WITH_IEDS_FILE);
         SclIEDManager sclIEDManager = new SclIEDManager(scd);
-        ExtRefDTO simpleExtRef = new ExtRefDTO();
+        ExtRefSignalInfo simpleExtRef = new ExtRefSignalInfo();
         simpleExtRef.setIntAddr("INTADDR1");
         simpleExtRef.setPLN(TLLN0Enum.LLN_0.value());
         simpleExtRef.setPDO("Op");

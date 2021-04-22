@@ -15,35 +15,24 @@ import org.lfenergy.compas.scl.THeader;
 import org.lfenergy.compas.scl.THitem;
 import org.lfenergy.compas.sct.exception.CompasDataAccessException;
 import org.lfenergy.compas.sct.model.dto.ConnectedApDTO;
-import org.lfenergy.compas.sct.model.dto.ExtRefDTO;
+import org.lfenergy.compas.sct.model.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.model.dto.IedDTO;
-import org.lfenergy.compas.sct.model.dto.ScdDTO;
 import org.lfenergy.compas.sct.model.dto.SubNetworkDTO;
 import org.lfenergy.compas.sct.model.entity.SimpleScd;
 import org.lfenergy.compas.sct.repository.SimpleScdRepository;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import javax.xml.transform.Result;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -234,12 +223,12 @@ class SqlScdServiceAndDBTest {
 
         SimpleScd scdObj = new SimpleScd();
         scdObj.setRawXml(getFileContent(SCD_WITH_IEDS_FILE));
-        ExtRefDTO extRef = new ExtRefDTO();
+        ExtRefSignalInfo extRef = new ExtRefSignalInfo();
         extRef.setIntAddr("INTADDR3");
         extRef.setPDO("Op.res");
         extRef.setDesc("DESC3");
 
-        Set<IedDTO> iedDTOs = simpleSqlScdService.extractExtRefSources(scdObj,IED_NAME, "LDPO", extRef);
+        Set<IedDTO> iedDTOs = simpleSqlScdService.extractExtRefBindingInfo(scdObj,IED_NAME, "LDPO", extRef);
         assertFalse(iedDTOs.isEmpty());
 
     }

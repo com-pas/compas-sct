@@ -12,7 +12,10 @@ import org.lfenergy.compas.scl.TPredefinedCDCEnum;
 import org.lfenergy.compas.scl.TServiceType;
 import org.lfenergy.compas.scl.TSubNetwork;
 import org.lfenergy.compas.sct.model.dto.ConnectedApDTO;
-import org.lfenergy.compas.sct.model.dto.ExtRefDTO;
+import org.lfenergy.compas.sct.model.dto.ExtRefBindingInfo;
+import org.lfenergy.compas.sct.model.dto.ExtRefInfo;
+import org.lfenergy.compas.sct.model.dto.ExtRefSignalInfo;
+import org.lfenergy.compas.sct.model.dto.ExtRefSourceInfo;
 import org.lfenergy.compas.sct.model.dto.IedDTO;
 import org.lfenergy.compas.sct.model.dto.LDeviceDTO;
 import org.lfenergy.compas.sct.model.dto.LNodeDTO;
@@ -59,7 +62,7 @@ public class DTO {
     }
 
     /*-----------------------------------------------*/
-    /*                   ExtRefDTO                   */
+    /*                   ExtRefInfo                  */
     /*-----------------------------------------------*/
     public static final String DESC = "DESC";
     public static final String P_DA = "d";
@@ -109,31 +112,51 @@ public class DTO {
 
         return tExtRef;
     }
-    public static ExtRefDTO createExtRefDTO(){
-        ExtRefDTO tExtRef = new ExtRefDTO();
-        tExtRef.setDesc(DESC);
-        tExtRef.setPDA(P_DA);
-        tExtRef.setPDO(P_DO);
-        tExtRef.setPLN(P_LN);
-        tExtRef.setPServT(TServiceType.fromValue(P_SERV_T));
-        tExtRef.setIntAddr(INT_ADDR);
 
-        tExtRef.setIedName(IED_NAME);
-        tExtRef.setLdInst(LD_INST);
-        tExtRef.setLnInst(LN_INST);
-        tExtRef.setLnClass(LN_CLASS);
-        tExtRef.setDaName(DA_NAME);
-        tExtRef.setDoName(DO_NAME);
-        tExtRef.setPrefix(PREFIX);
-        tExtRef.setServiceType(TServiceType.fromValue(SERVICE_TYPE));
+    public static ExtRefSignalInfo createExtRefSignalInfo(){
+        ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
+        signalInfo.setDesc(DESC);
+        signalInfo.setPDA(P_DA);
+        signalInfo.setPDO(P_DO);
+        signalInfo.setPLN(P_LN);
+        signalInfo.setPServT(TServiceType.fromValue(P_SERV_T));
+        signalInfo.setIntAddr(INT_ADDR);
 
-        tExtRef.setSrcLDInst(SRC_LD_INST);
-        tExtRef.setSrcLNInst(SRC_LN_INST);
-        tExtRef.setSrcLNClass(SRC_LN_CLASS);
-        tExtRef.setSrcPrefix(SRC_PREFIX);
-        tExtRef.setSrcCBName(SRC_CB_NAME);
+        return signalInfo;
+    }
 
-        return tExtRef;
+    public static ExtRefBindingInfo createExtRefBindingInfo(){
+        ExtRefBindingInfo bindingInfo = new ExtRefBindingInfo();
+        bindingInfo.setIedName(IED_NAME);
+        bindingInfo.setLdInst(LD_INST);
+        bindingInfo.setLnInst(LN_INST);
+        bindingInfo.setLnClass(LN_CLASS);
+        bindingInfo.setDaName(DA_NAME);
+        bindingInfo.setDoName(DO_NAME);
+        bindingInfo.setPrefix(PREFIX);
+        bindingInfo.setServiceType(TServiceType.fromValue(SERVICE_TYPE));
+
+        return bindingInfo;
+    }
+
+    public static ExtRefSourceInfo createExtRefSourceInfo(){
+        ExtRefSourceInfo sourceInfo = new ExtRefSourceInfo();
+        sourceInfo.setSrcLDInst(SRC_LD_INST);
+        sourceInfo.setSrcLNInst(SRC_LN_INST);
+        sourceInfo.setSrcLNClass(SRC_LN_CLASS);
+        sourceInfo.setSrcPrefix(SRC_PREFIX);
+        sourceInfo.setSrcCBName(SRC_CB_NAME);
+
+        return sourceInfo;
+    }
+
+    public static ExtRefInfo createExtRefInfo(){
+        ExtRefInfo extRefInfo = new ExtRefInfo();
+        extRefInfo.setSourceInfo(DTO.createExtRefSourceInfo());
+        extRefInfo.setBindingInfo(DTO.createExtRefBindingInfo());
+        extRefInfo.setSignalInfo(DTO.createExtRefSignalInfo());
+
+        return extRefInfo;
     }
     /*-----------------------------------------------*/
     /*                   ResumedDataTemplate         */

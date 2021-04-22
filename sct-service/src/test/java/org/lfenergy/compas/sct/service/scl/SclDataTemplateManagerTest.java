@@ -22,8 +22,8 @@ import org.lfenergy.compas.scl.TPredefinedBasicTypeEnum;
 import org.lfenergy.compas.scl.TPredefinedCDCEnum;
 
 
+import org.lfenergy.compas.sct.model.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.model.dto.ResumedDataTemplate;
-import org.lfenergy.compas.sct.model.dto.ExtRefDTO;
 
 import java.io.InputStream;
 import java.util.List;
@@ -40,9 +40,6 @@ class SclDataTemplateManagerTest {
     private static final String ICD_WITH_IDENTICAL_DTT = "scl/IEDImportHelper/Icd_With_Identical_DTT.xml";
     private static final String ICD_WITH_DTT_DIFF_IDS = "scl/IEDImportHelper/Icd_With_DTT_DIFF_IDS.xml";
     private static final String ICD_WITH_DTT_DIFF_CONTENT = "scl/IEDImportHelper/Icd_With_DTT_Same_IDs_Diff_Contents.xml";
-
-
-    //private MarshallerWrapper marshallerWrapper = createWrapper();
 
     @Test
     void ShouldReturnTrueWhenIsIdenticalForDTTEnumType() throws Exception  {
@@ -485,7 +482,7 @@ class SclDataTemplateManagerTest {
         SCL scd = getSCLFromFile(SCD_FILE);
         TDataTypeTemplates dtt = scd.getDataTypeTemplates();
         String lnType = "LN2";
-        ExtRefDTO extRef = new ExtRefDTO();
+        ExtRefSignalInfo extRef = new ExtRefSignalInfo();
         extRef.setIntAddr("IntAddr");
         extRef.setPLN(TLLN0Enum.LLN_0.value());
         extRef.setPDO("FACntRs.res");
@@ -506,7 +503,7 @@ class SclDataTemplateManagerTest {
         SCL scd = getSCLFromFile(SCD_FILE);
         TDataTypeTemplates dtt = scd.getDataTypeTemplates();
         String lnType = "LN2";
-        ExtRefDTO extRef = new ExtRefDTO();
+        ExtRefSignalInfo extRef = new ExtRefSignalInfo();
         extRef.setIntAddr("IntAddr");
         extRef.setPLN(TLLN0Enum.LLN_0.value());
         extRef.setPDO("FACntRs1.res");
@@ -520,7 +517,7 @@ class SclDataTemplateManagerTest {
         SCL scd = getSCLFromFile(SCD_FILE);
         TDataTypeTemplates dtt = scd.getDataTypeTemplates();
         String lnType = "LN210";
-        ExtRefDTO extRef = new ExtRefDTO();
+        ExtRefSignalInfo extRef = new ExtRefSignalInfo();
         extRef.setIntAddr("IntAddr");
         extRef.setPLN(TLLN0Enum.LLN_0.value());
         extRef.setPDO("FACntRs.res");
@@ -534,7 +531,7 @@ class SclDataTemplateManagerTest {
         SCL scd = getSCLFromFile(SCD_FILE);
         TDataTypeTemplates dtt = scd.getDataTypeTemplates();
         String lnType = "LN210";
-        ExtRefDTO extRef = new ExtRefDTO();
+        ExtRefSignalInfo extRef = new ExtRefSignalInfo();
         extRef.setIntAddr("IntAddr");
         extRef.setPLN(TLLN0Enum.LLN_0.value());
         extRef.setPDO("FACntRs.res1");
@@ -548,7 +545,7 @@ class SclDataTemplateManagerTest {
         SCL scd = getSCLFromFile(SCD_FILE);
         TDataTypeTemplates dtt = scd.getDataTypeTemplates();
         String lnType = "LN210";
-        ExtRefDTO extRef = new ExtRefDTO();
+        ExtRefSignalInfo extRef = new ExtRefSignalInfo();
         extRef.setIntAddr("IntAddr");
         extRef.setPLN(TLLN0Enum.LLN_0.value());
         extRef.setPDO("FACntRs.res1");

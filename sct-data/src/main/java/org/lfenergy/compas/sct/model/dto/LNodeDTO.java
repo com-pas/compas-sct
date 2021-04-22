@@ -8,8 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.lfenergy.compas.scl.TLN;
-import org.lfenergy.compas.sct.model.IControlBlockDTO;
-import org.lfenergy.compas.sct.model.IExtRefDTO;
 import org.lfenergy.compas.sct.model.ILNodeDTO;
 
 import java.util.HashSet;
@@ -22,7 +20,7 @@ public class LNodeDTO implements ILNodeDTO {
     private String inst;
     private String lNodeClass;
     private String lNodeType;
-    private Set<ExtRefDTO> extRefs = new HashSet<>();
+    private Set<ExtRefInfo> extRefs = new HashSet<>();
     private Set<ResumedDataTemplate> resumedDataTemplates = new HashSet<>();
 
     public LNodeDTO(String inst, String lNClass, String lNType) {
@@ -37,7 +35,7 @@ public class LNodeDTO implements ILNodeDTO {
         LNodeDTO lNodeDTO = new LNodeDTO(ln.getInst(),lnClass,ln.getLnType());
         if(ln.getInputs() != null){
             ln.getInputs().getExtRef().forEach(tExtRef -> {
-                ExtRefDTO extRefDTO = new ExtRefDTO(tExtRef);
+                ExtRefInfo extRefDTO = new ExtRefInfo(tExtRef);
                 lNodeDTO.addExtRef(extRefDTO);
             });
         }
@@ -45,13 +43,13 @@ public class LNodeDTO implements ILNodeDTO {
     }
 
     @Override
-    public Set<ExtRefDTO> getExtRefs() {
-        return Set.of(extRefs.toArray(new ExtRefDTO[0]));
+    public Set<ExtRefInfo> getExtRefs() {
+        return Set.of(extRefs.toArray(new ExtRefInfo[0]));
     }
 
     @Override
-    public <T extends IExtRefDTO> void addExtRef(T extRef) {
-        extRefs.add((ExtRefDTO) extRef);
+    public void addExtRef(ExtRefInfo extRef) {
+        extRefs.add(extRef);
     }
 
     @Override

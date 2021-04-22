@@ -6,22 +6,17 @@ package org.lfenergy.compas.sct.service.scl;
 
 
 import org.lfenergy.compas.exception.ScdException;
-import org.lfenergy.compas.scl.LN0;
 import org.lfenergy.compas.scl.SCL;
 import org.lfenergy.compas.scl.TAccessPoint;
 import org.lfenergy.compas.scl.TAnyLN;
-import org.lfenergy.compas.scl.TDataSet;
 import org.lfenergy.compas.scl.TExtRef;
-import org.lfenergy.compas.scl.TGSEControl;
 import org.lfenergy.compas.scl.TIED;
 import org.lfenergy.compas.scl.TLDevice;
 import org.lfenergy.compas.scl.TLLN0Enum;
 import org.lfenergy.compas.scl.TLN;
 import org.lfenergy.compas.scl.TLN0;
-import org.lfenergy.compas.scl.TReportControl;
-import org.lfenergy.compas.scl.TSampledValueControl;
 import org.lfenergy.compas.scl.TServer;
-import org.lfenergy.compas.sct.model.IExtRefDTO;
+import org.lfenergy.compas.sct.model.dto.ExtRefSignalInfo;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -121,8 +116,7 @@ public class SclIEDManager {
         return ln;
     }
 
-
-    public TExtRef getExtRef(String iedName, String ldInst, IExtRefDTO filter) throws ScdException {
+    public TExtRef getExtRef(String iedName, String ldInst, ExtRefSignalInfo filter) throws ScdException {
         TIED ied = receiver.getIED()
                 .stream()
                 .filter(tied -> iedName.equals(tied.getName()))
@@ -147,6 +141,7 @@ public class SclIEDManager {
         }
         return extRefs.get(0);
     }
+
 
     public static List<TLDevice> getIEDLDevice(TIED tied){
         return tied.getAccessPoint()
@@ -174,10 +169,10 @@ public class SclIEDManager {
                 .findFirst();
     }
 
-    public static List<TExtRef> extractLN0ExtRefs(TLDevice tlDevice, IExtRefDTO filter) {
-        if(tlDevice.getLN0().getInputs() == null) return new ArrayList<>();
+    public static List<TExtRef> extractLN0ExtRefs(TLDevice tlDevice, ExtRefSignalInfo filter) {
+        if (tlDevice.getLN0().getInputs() == null) return new ArrayList<>();
 
-        if(filter == null) {
+        if (filter == null) {
             return tlDevice.getLN0().getInputs().getExtRef();
         } else {
             return tlDevice.getLN0().getInputs().getExtRef()
@@ -200,7 +195,7 @@ public class SclIEDManager {
 
     }
 
-    public static List<TExtRef> extractLNExtRefs(TLDevice tlDevice, String lnClass, String lnInst, IExtRefDTO filter) throws ScdException {
+    public static List<TExtRef> extractLNExtRefs(TLDevice tlDevice, String lnClass, String lnInst, ExtRefSignalInfo filter) throws ScdException {
         TLN ln = tlDevice.getLN()
                 .stream()
                 .filter(tln -> tln.getLnClass().contains(lnClass))
@@ -217,9 +212,9 @@ public class SclIEDManager {
             return ln.getInputs().getExtRef();
         } else {
             return ln.getInputs().getExtRef()
-                .stream()
-                .filter(tExtRef -> filter.isIdentical(tExtRef))
-                .collect(Collectors.toList());
+                    .stream()
+                    .filter(tExtRef -> filter.isWrappedIn(tExtRef))
+                    .collect(Collectors.toList());
         }
     }
 }

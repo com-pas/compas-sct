@@ -17,4 +17,8 @@
     <artifactId>sct-data</artifactId>
     <name>SCT DATA</name>
 
+    <properties>
+        <sonar.coverage.jacoco.xmlReportPaths>${basedir}/${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
+    </properties>
+
 </project>
