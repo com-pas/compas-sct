@@ -6,20 +6,14 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.4.2</version>
-    </parent>
-
     <groupId>org.lfenergy.compas</groupId>
     <artifactId>compas-sct</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>local-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>COMPAS-SCT</name>
 
     <properties>
-        <compas.core.version>1.0-SNAPSHOT</compas.core.version>
+        <compas.core.version>local-SNAPSHOT</compas.core.version>
         <maven.compiler.target>11</maven.compiler.target>
         <maven.compiler.source>11</maven.compiler.source>
         <sonar.coverage.exclusions>sct-coverage/**</sonar.coverage.exclusions>
@@ -28,47 +22,14 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.junit.vintage</groupId>
-                    <artifactId>junit-vintage-engine</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.lfenergy.compas</groupId>
-            <artifactId>core-commons</artifactId>
+            <groupId>org.lfenergy.compas.core</groupId>
+            <artifactId>scl2007b4</artifactId>
             <version>${compas.core.version}</version>
         </dependency>
     </dependencies>
     <modules>
         <module>sct-data</module>
+        <module>sct-data-postgres</module>
         <module>sct-service</module>
         <module>sct-coverage</module>
     </modules>

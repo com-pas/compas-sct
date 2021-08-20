@@ -10,7 +10,7 @@
     <parent>
         <groupId>org.lfenergy.compas</groupId>
         <artifactId>compas-sct</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>local-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
