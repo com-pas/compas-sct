@@ -13,7 +13,7 @@ The following architecture is divided in three major parts:
 * sct-data : implements a generic abstract data service which should be extended by specific real data service for exchange with chosen database.
 * sct-app : *TODO*
 
-*Insert diagram here*
+![Package Diagram](images/PackageDiagram-CompasSCT.png)
 
 
 ## SCT COMMONS
