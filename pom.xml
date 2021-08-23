@@ -34,7 +34,7 @@
         <dependency>
             <groupId>org.lfenergy.compas.core</groupId>
             <artifactId>scl2007b4</artifactId>
-            <version>${compas.core.version}</version>
+            <version>0.2.1</version>
         </dependency>
     </dependencies>
     <modules>
