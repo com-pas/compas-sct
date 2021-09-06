@@ -38,10 +38,7 @@
         </dependency>
     </dependencies>
     <modules>
-        <module>sct-data</module>
-        <module>sct-data-pg</module>
         <module>sct-commons</module>
-        <module>sct-service</module>
         <module>sct-coverage</module>
     </modules>
 
