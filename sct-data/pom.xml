@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- SPDX-FileCopyrightText: 2020 RTE FRANCE -->
-<!-- -->
-<!-- SPDX-License-Identifier: Apache-2.0 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -11,29 +8,23 @@
         <groupId>org.lfenergy.compas</groupId>
         <artifactId>compas-sct</artifactId>
         <version>local-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <packaging>pom</packaging>
-    <artifactId>sct-coverage</artifactId>
-    <name>SCT-Coverage</name>
+    <groupId>org.lfenergy.compas</groupId>
+    <artifactId>sct-data</artifactId>
+    <version>local-SNAPSHOT</version>
 
     <properties>
-        <maven.deploy.skip>true</maven.deploy.skip>
+        <sonar.coverage.jacoco.xmlReportPaths>${basedir}/${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
+
     <dependencies>
         <dependency>
-            <groupId>org.lfenergy.compas</groupId>
-            <artifactId>sct-commons</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.lfenergy.compas</groupId>
-            <artifactId>sct-data</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
     </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -41,14 +32,21 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>report-aggregate</id>
+                        <id>default-prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
                         <phase>test</phase>
                         <goals>
-                            <goal>report-aggregate</goal>
+                            <goal>report</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
     </build>
+
 </project>
