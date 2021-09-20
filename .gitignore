@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: 2020 RTE FRANCE
+#
+# SPDX-License-Identifier: Apache-2.0
+
+HELP.md
+target/
+.scannerwork
+sonar-project.properties
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**
+!**/src/test/**
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+
+### VS Code ###
+.vscode/
