@@ -4,13 +4,12 @@
 
 package org.lfenergy.compas.sct.commons.scl.header;
 
-import org.lfenergy.compas.scl2007b4.model.SCL;
+
 import org.lfenergy.compas.scl2007b4.model.THeader;
 import org.lfenergy.compas.scl2007b4.model.THitem;
-import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import org.springframework.util.Assert;
+
 
 import java.util.Date;
 
@@ -27,9 +26,6 @@ public class HeaderAdapter extends SclElementAdapter<SclRootAdapter, THeader> {
     }
 
     public HeaderAdapter addHistoryItem(String who, String what, String why){
-        Assert.notNull(currentElem, "Stored SCD must have Header tag");
-        Assert.notNull(currentElem.getId(), "Stored SCD Header must have a unique ID");
-
         THitem tHitem = new THitem();
         tHitem.setRevision(currentElem.getRevision());
         tHitem.setVersion(currentElem.getVersion());
