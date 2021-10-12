@@ -6,6 +6,7 @@ package org.lfenergy.compas.sct.commons.scl;
 
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
@@ -14,11 +15,6 @@ import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter;
-import org.springframework.lang.NonNull;
-
-import java.util.List;
-
-
 
 @Getter
 @Setter

@@ -5,7 +5,6 @@
 package org.lfenergy.compas.sct.commons.scl;
 
 import lombok.Getter;
-import org.springframework.util.Assert;
 
 @Getter
 public abstract class SclElementAdapter<P extends SclElementAdapter, T> {
@@ -23,7 +22,9 @@ public abstract class SclElementAdapter<P extends SclElementAdapter, T> {
 
     public final void setCurrentElem(T currentElem){
         this.currentElem = currentElem;
-        Assert.isTrue(amChildElementRef(),"No relation between SCL parent element and child");
+        if(!amChildElementRef()){
+            throw new IllegalArgumentException("No relation between SCL parent element and child");
+        }
     }
 
     protected abstract boolean amChildElementRef();
