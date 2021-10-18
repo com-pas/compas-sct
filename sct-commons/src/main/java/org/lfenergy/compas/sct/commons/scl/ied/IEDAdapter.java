@@ -4,12 +4,16 @@
 
 package org.lfenergy.compas.sct.commons.scl.ied;
 
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.lfenergy.compas.scl2007b4.model.TIED;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
@@ -34,5 +38,51 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
     @Override
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getIED().contains(currentElem);
+    }
+
+    public void setIEDName(String iedName) {
+        currentElem.setName(iedName);
+    }
+
+
+    public List<LDeviceAdapter> getLDeviceAdapters(){
+        return currentElem.getAccessPoint()
+                .stream()
+                .filter(tAccessPoint -> tAccessPoint.getServer() != null)
+                .map(tAccessPoint -> tAccessPoint.getServer().getLDevice())
+                .flatMap(Collection::stream)
+                .map(tlDevice -> new LDeviceAdapter(this,tlDevice))
+                .collect(Collectors.toList());
+    }
+
+    public Optional<LDeviceAdapter> getLDeviceAdapterByLdInst(String ldInst){
+        return currentElem.getAccessPoint()
+                .stream()
+                .filter(tAccessPoint -> tAccessPoint.getServer() != null)
+                .map(tAccessPoint -> tAccessPoint.getServer().getLDevice())
+                .flatMap(Collection::stream)
+                .filter(tlDevice -> ldInst.equals(tlDevice.getInst()))
+                .map(tlDevice -> new LDeviceAdapter(this,tlDevice))
+                .findFirst();
+    }
+
+    public void updateLDeviceNodesType(Map<String, String> pairOldNewId) throws ScdException {
+        // renaming ldName
+        for(LDeviceAdapter lDeviceAdapter : getLDeviceAdapters()) {
+            lDeviceAdapter.updateLDName();
+            String lnType = lDeviceAdapter.getCurrentElem().getLN0().getLnType();
+            if(pairOldNewId.containsKey(lnType)){
+                lDeviceAdapter.getCurrentElem().getLN0().setLnType(pairOldNewId.get(lnType));
+            }
+            lDeviceAdapter.getCurrentElem()
+                    .getLN()
+                    .stream()
+                    .forEach(tln -> {
+                        if(pairOldNewId.containsKey(tln.getLnType())) {
+                            tln.setLnType(pairOldNewId.get(tln.getLnType()));
+                        }
+                    });
+
+        }
     }
 }

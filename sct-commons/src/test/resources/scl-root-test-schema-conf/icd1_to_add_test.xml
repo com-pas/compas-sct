@@ -1,0 +1,59 @@
+<!-- SPDX-FileCopyrightText: 2021 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+<SCL xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4">
+    <Header id="HeaderID" version="version" revision="Revision" toolID="toolID"/>
+    <IED name="IED_NAME">
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LD_INS1">
+                    <LN0 lnType="LN1" lnClass="LLN0" inst=""></LN0>
+                </LDevice>
+                <LDevice inst="LD_INS2">
+                    <LN0 lnType="LN1" lnClass="LLN0" inst=""></LN0>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
+    <DataTypeTemplates>
+        <LNodeType lnClass="LLN0" id="LN1">
+            <Private type="A" source="http://my.uri/B">B</Private>
+            <DO name="Beh" type="DO1"/>
+            <DO name="Op" type="DO2" transient="true"/>
+            <DO name="StrVal" type="DO3"/>
+        </LNodeType>
+        <DOType cdc="WYE" id="DO1">
+            <DA fc="DC" name="dataNs" bType="VisString255">
+                <Val>IEC 61850-7-3:2007B</Val>
+            </DA>
+        </DOType>
+        <DOType cdc="WYE" id="DO2">
+            <SDO name="res" type="DO4"/>
+            <DA fc="CF" dchg="true" name="angRef" bType="Enum" type="PhaseAngleReferenceKind"/>
+        </DOType>
+        <DOType cdc="WYE" id="DO3">
+            <DA fc="ST" name="origin" bType="Struct" type="DA1"/>
+        </DOType>
+        <DOType cdc="WYE" id="DO4">
+            <DA fc="CF" dchg="true" name="d" bType="VisString255" valKind="RO"/>
+        </DOType>
+        <DAType id="DA1">
+            <Private type="C1">C</Private>
+            <BDA name="Check" bType="Check"/>
+            <BDA name="origin" bType="Struct" type="DA2"/>
+            <ProtNs>IEC 61850-8-1:2003</ProtNs>
+        </DAType>
+        <DAType id="DA2">
+            <BDA name="ctlVal" bType="Enum" type="RecCycModKind"/>
+        </DAType>
+        <EnumType id="RecCycModKind">
+            <EnumVal ord="1">Completed</EnumVal>
+        </EnumType>
+        <EnumType id="PhaseAngleReferenceKind">
+            <EnumVal ord="0">Va</EnumVal>
+            <EnumVal ord="1">Vb</EnumVal>
+        </EnumType>
+    </DataTypeTemplates>
+</SCL>

@@ -26,6 +26,10 @@ public class MarshallerWrapper {
         this.marshaller = marshaller;
     }
 
+    public static SclMarshallerBuilder builder(){
+        return new SclMarshallerBuilder();
+    }
+
     public <T> String marshall(final T obj) {
         try {
             StringWriter sw = new StringWriter();
@@ -34,7 +38,7 @@ public class MarshallerWrapper {
 
             return sw.toString();
         } catch (JAXBException exp) {
-            String message = "Error marshalling the Class.";
+            String message = "Error marshalling the Class";
             log.error(message, exp);
             throw new CompasException(CompasErrorCode.MARSHAL_ERROR_CODE, message);
         }

@@ -1,0 +1,32 @@
+<!-- SPDX-FileCopyrightText: 2021 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+<SCL xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4">
+    <Header id="HeaderID" version="version" revision="Revision" toolID="toolID"/>
+    <IED name="IED_NAME">
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LD_INS1">
+                    <LN0 lnType="LNO1" lnClass="LLN0" inst=""></LN0>
+                </LDevice>
+                <LDevice inst="LD_INS2">
+                    <LN0 lnType="LNO1" lnClass="LLN0" inst=""></LN0>
+                    <LN lnType="LNO2" lnClass="ANCR" inst="1"></LN>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
+    <DataTypeTemplates>
+        <LNodeType id="LNO1" lnClass="LLN0">
+            <DO name="Beh" type="DO1"></DO>
+        </LNodeType>
+        <LNodeType id="LNO2" lnClass="ANCR">
+            <DO name="Beh" type="DO1"></DO>
+        </LNodeType>
+        <DOType id="DO1" cdc="WYE">
+            <DA fc="CF" dchg="true" name="d" bType="VisString255" valKind="RO"/>
+        </DOType>
+    </DataTypeTemplates>
+</SCL>

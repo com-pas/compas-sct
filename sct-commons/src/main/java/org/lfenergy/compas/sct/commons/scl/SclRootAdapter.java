@@ -8,6 +8,7 @@ package org.lfenergy.compas.sct.commons.scl;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.com.CommunicationAdapter;
@@ -18,33 +19,30 @@ import org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter;
 
 @Getter
 @Setter
+@Slf4j
 public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
 
     private static final short RELEASE = 4;
     private static final String REVISION = "B";
     private static final String VERSION = "2007";
 
-    public SclRootAdapter() {
-        super(null);
-        init();
-    }
-
-    public SclRootAdapter(SCL currentElem) {
-        super(null, currentElem);
-    }
 
     public SclRootAdapter(String hId, String hVersion, String hRevision) throws ScdException {
         super(null);
-        init();
-        addHeader(hId,hVersion,hRevision);
-    }
-
-    protected final void init(){
         currentElem = new SCL();
         currentElem.setRelease(RELEASE);
         currentElem.setVersion(VERSION);
         currentElem.setRevision(REVISION);
+        addHeader(hId,hVersion,hRevision);
     }
+
+    public SclRootAdapter(SCL scd) {
+        super(null,scd);
+        if(scd.getHeader() == null){
+            throw new IllegalArgumentException("Invalid SCD: no tag Header found");
+        }
+    }
+
 
     @Override
     protected boolean amChildElementRef() {
@@ -67,7 +65,7 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
         return new SubstationAdapter(this,ssName);
     }
 
-    public HeaderAdapter addHeader(@NonNull String hId, @NonNull String hVersion, @NonNull String hRevision) throws ScdException {
+    protected void addHeader(@NonNull String hId, @NonNull String hVersion, @NonNull String hRevision) throws ScdException {
 
         if(currentElem.getHeader() != null){
             throw new ScdException("SCL already contains header");
@@ -79,8 +77,37 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
         tHeader.setId(hId);
         tHeader.setToolID(HeaderAdapter.DEFAULT_TOOL_ID);
         currentElem.setHeader(tHeader);
-        return new HeaderAdapter(this,tHeader);
+    }
 
+    public IEDAdapter addIED(SCL icd, String iedName) throws ScdException {
+        if(icd.getIED().isEmpty()){
+            throw new ScdException("No IED to import from ICD file");
+        }
+
+        if(hasIED(iedName)){
+            String msg = "SCL file already contains IED: " + iedName;
+            log.error(msg);
+            throw new ScdException(msg);
+        }
+
+        // import DTT
+        DataTypeTemplateAdapter rcvDttAdapter = getDataTypeTemplateAdapter();
+        SclRootAdapter prvSclRootAdapter = new SclRootAdapter(icd);
+        DataTypeTemplateAdapter prvDttAdapter = prvSclRootAdapter.getDataTypeTemplateAdapter();
+        var pairOldNewId = rcvDttAdapter.importDTT(iedName,prvDttAdapter);
+
+        IEDAdapter prvIEDAdapter = new IEDAdapter(prvSclRootAdapter, icd.getIED().get(0));
+        prvIEDAdapter.setIEDName(iedName);
+        prvIEDAdapter.updateLDeviceNodesType(pairOldNewId);
+        //add IED
+        currentElem.getIED().add(prvIEDAdapter.currentElem);
+        return getIEDAdapter(iedName);
+    }
+
+    private boolean hasIED(String iedName) {
+        return currentElem.getIED()
+                .stream()
+                .anyMatch(tied -> tied.getName().equals(iedName));
     }
 
     public HeaderAdapter getHeaderAdapter() {
@@ -88,6 +115,9 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
     }
 
     public DataTypeTemplateAdapter getDataTypeTemplateAdapter(){
+        if(currentElem.getDataTypeTemplates() == null){
+            currentElem.setDataTypeTemplates(new TDataTypeTemplates());
+        }
         return new DataTypeTemplateAdapter(this, currentElem.getDataTypeTemplates());
     }
 

@@ -6,7 +6,12 @@ package org.lfenergy.compas.sct.commons.scl;
 
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.SCL;
+import org.lfenergy.compas.sct.commons.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.scl.dtt.AbstractDTTLevel;
+import org.lfenergy.compas.sct.commons.testhelpers.marshaller.SclTestMarshaller;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,27 +19,29 @@ public class SclRootAdapterTest {
 
 
     @Test
-    public void testConstruction(){
-        SclRootAdapter sclRootAdapter = new SclRootAdapter();
-        assertAll("ROOT",
-                () -> assertNull(sclRootAdapter.parentAdapter),
-                () -> assertEquals((short)4,sclRootAdapter.getRelease()),
-                () -> assertEquals("B",sclRootAdapter.getRevision()),
-                () -> assertEquals("2007",sclRootAdapter.getVersion()),
-                () -> assertTrue(sclRootAdapter.amChildElementRef())
+    public void testConstruction() throws ScdException {
+        AtomicReference<SclRootAdapter> sclRootAdapter = new AtomicReference<>();
+        assertDoesNotThrow(() ->
+                sclRootAdapter.set(new SclRootAdapter("hID", "hVersion", "hRevision"))
         );
 
-        assertDoesNotThrow(() -> new SclRootAdapter(new SCL()));
+        assertThrows(ScdException.class,
+                () ->  sclRootAdapter.get().addHeader("hID1","hVersion1","hRevision1"));
     }
 
     @Test
-    public void testAddHeader(){
-        SclRootAdapter sclRootAdapter = new SclRootAdapter();
-        assertDoesNotThrow(() ->
-                sclRootAdapter.addHeader("hID","hVersion","hRevision"));
+    void addIED() throws Exception {
 
-        assertThrows(ScdException.class,
-                () ->  sclRootAdapter.addHeader("hID1","hVersion1","hRevision1"));
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/add_ied_test.xml");
+        SCL icd1 = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/icd1_to_add_test.xml");
+        SCL icd2 = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/icd2_to_add_test.xml");
+
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        assertDoesNotThrow(() ->sclRootAdapter.addIED(icd1, "IED_NAME1"));
+        assertThrows(ScdException.class, () ->sclRootAdapter.addIED(icd1, "IED_NAME1"));
+        assertDoesNotThrow(() ->sclRootAdapter.addIED(icd2, "IED_NAME2"));
+
+        MarshallerWrapper marshallerWrapper = SclTestMarshaller.createWrapper();
+        System.out.println(marshallerWrapper.marshall(sclRootAdapter.getCurrentElem()));
     }
-
 }
