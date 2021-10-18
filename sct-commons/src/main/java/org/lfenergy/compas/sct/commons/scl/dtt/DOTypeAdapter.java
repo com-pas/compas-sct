@@ -57,8 +57,7 @@ public class DOTypeAdapter
             return false;
         }
 
-        if(currentElem.getSDOOrDA().size() != tdoType.getSDOOrDA().size() ||
-                currentElem.getSDOOrDA().size() != tdoType.getSDOOrDA().size()) {
+        if(currentElem.getSDOOrDA().size() != tdoType.getSDOOrDA().size() ) {
             return false;
         }
 
@@ -88,7 +87,7 @@ public class DOTypeAdapter
     protected boolean hasSameContent(TDA thisTDA, TDA inTDA) {
         if(!Objects.equals(thisTDA.getName(),inTDA.getName())
                 || !Objects.equals(thisTDA.getBType(),inTDA.getBType())
-                || !Objects.equals(thisTDA.getBType(),inTDA.getBType())
+                || !Objects.equals(thisTDA.getType(),inTDA.getType())
                 || !Objects.equals(thisTDA.getFc(),inTDA.getFc())
                 || !Objects.equals(thisTDA.getSAddr(), inTDA.getSAddr())
                 || !Objects.equals(thisTDA.getValKind(), inTDA.getValKind())
