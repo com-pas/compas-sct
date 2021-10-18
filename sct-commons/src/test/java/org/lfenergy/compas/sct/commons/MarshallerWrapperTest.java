@@ -21,14 +21,13 @@ import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamSource;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MarshallerWrapperTest {
-    private static final String SCL = "<SCL xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
+    private static final String SCL_CONTENT = "<SCL xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
             "xmlns=\"http://www.iec.ch/61850/2003/SCL\" version=\"2007\" revision=\"B\" release=\"4\">\n" +
             "    <Header id=\"HeaderID\" version=\"version\" revision=\"Revision\"" +
             "            toolID=\"toolID\" nameStructure=\"IEDName\"/>\n" +
@@ -51,7 +50,9 @@ public class MarshallerWrapperTest {
 
     @Test
     public void testMarshallShouldReturnOK() {
-        SclRootAdapter sclRootAdapter = new SclRootAdapter();
+        SCL scd = Mockito.mock(SCL.class);
+        Mockito.when(scd.getHeader()).thenReturn(new THeader());
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         String scl = marshallerWrapper.marshall(sclRootAdapter.getCurrentElem());
         System.out.println(scl);
     }
@@ -60,24 +61,28 @@ public class MarshallerWrapperTest {
     public void testMarshallShouldReturnNOK() throws JAXBException {
 
         Marshaller marshaller = Mockito.mock(Marshaller.class);
+        SCL scd = Mockito.mock(SCL.class);
+        Mockito.when(scd.getHeader()).thenReturn(new THeader());
+
         Unmarshaller unmarshaller = Mockito.mock(Unmarshaller.class);
         MarshallerWrapper marshallerWrapper = new MarshallerWrapper(unmarshaller,marshaller);
         Mockito.doThrow(JAXBException.class).when(marshaller).marshal(ArgumentMatchers.any(SCL.class),
                 ArgumentMatchers.any(Result.class));
-        SclRootAdapter sclRootAdapter = new SclRootAdapter();
+
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         assertThrows( CompasException.class, () -> marshallerWrapper.marshall(sclRootAdapter.getCurrentElem()));
     }
 
     @Test
     public void testUnmarshallShouldReturnOK() {
-        SCL scl = marshallerWrapper.unmarshall(SCL.getBytes(StandardCharsets.UTF_8),SCL.class);
+        SCL scl = marshallerWrapper.unmarshall(SCL_CONTENT.getBytes(StandardCharsets.UTF_8),SCL.class);
         assertEquals( 4, scl.getRelease());
     }
 
     @Test
     public void testUnmarshallShouldReturnNOK() throws JAXBException {
-        SCL scl = marshallerWrapper.unmarshall(SCL.getBytes(StandardCharsets.UTF_8),SCL.class);
-        assertThrows(CompasException.class, () -> marshallerWrapper.unmarshall(SCL.getBytes(StandardCharsets.UTF_8),
+        SCL scl = marshallerWrapper.unmarshall(SCL_CONTENT.getBytes(StandardCharsets.UTF_8),SCL.class);
+        assertThrows(CompasException.class, () -> marshallerWrapper.unmarshall(SCL_CONTENT.getBytes(StandardCharsets.UTF_8),
                 THeader.class));
 
 

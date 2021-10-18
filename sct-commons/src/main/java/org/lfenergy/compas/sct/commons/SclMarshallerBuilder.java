@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
-import org.lfenergy.compas.core.commons.Resources;
 import org.lfenergy.compas.core.commons.exception.CompasErrorCode;
 import org.lfenergy.compas.core.commons.exception.CompasException;
 import org.xml.sax.SAXException;
@@ -17,6 +16,7 @@ import org.xml.sax.SAXException;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.SchemaFactory;
 import java.io.IOException;
@@ -28,12 +28,12 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 
 @Slf4j
 public class SclMarshallerBuilder {
+
     private static final String COMPAS_SCL_SCHEMAS_JSONPATH = "/compas/scl/schemas";
     private static final String CONTEXT_PATH_PROP = "contextPath";
     private static final String XSD_PATH_PROP = "xsdPath";
@@ -156,6 +156,7 @@ public class SclMarshallerBuilder {
                     new StreamSource(new StringReader(combinedXsdSchema), "topSchema")
             );
             jaxbMarshaller.setSchema(schema);
+            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
             jaxbUnmarshaller.setSchema(schema);
 
             return new MarshallerWrapper(jaxbUnmarshaller,jaxbMarshaller);

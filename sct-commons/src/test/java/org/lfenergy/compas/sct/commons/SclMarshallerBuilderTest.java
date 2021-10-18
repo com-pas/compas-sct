@@ -21,7 +21,9 @@ class SclMarshallerBuilderTest {
     @Test
     void testGetResource() {
         SclMarshallerBuilder sclMarshallerBuilder = new SclMarshallerBuilder();
-        URL url = assertDoesNotThrow(() -> sclMarshallerBuilder.getResource("classpath:marshaller-builder/Employee.xsd"));
+        URL url = assertDoesNotThrow(
+                () -> sclMarshallerBuilder.getResource("classpath:marshaller-builder/Employee.xsd")
+        );
         String path = url.getPath();
         int idx = path.indexOf(':'); // for windows
         if(idx > 0){
@@ -43,9 +45,14 @@ class SclMarshallerBuilderTest {
 
         assertThrows(CompasException.class, () -> sclMarshallerBuilder.build());
         assertThrows(CompasException.class, () -> sclMarshallerBuilder.withProperties("classpath:dummy.yml").build());
-        assertThrows(CompasException.class,
-                () -> sclMarshallerBuilder.withProperties("classpath:marshaller-builder/scl_schema_error.yml").build());
-        MarshallerWrapper marshallerWrapper = sclMarshallerBuilder.withProperties("classpath:scl_schema.yml").build();
+        assertThrows(
+                CompasException.class,
+                () -> sclMarshallerBuilder.withProperties("classpath:marshaller-builder/scl_schema_error.yml").build()
+        );
+        MarshallerWrapper marshallerWrapper = sclMarshallerBuilder
+                .withProperties(
+                    "classpath:marshaller-builder/scl_schema.yml"
+                ).build();
         assertNotNull(marshallerWrapper);
     }
 }
