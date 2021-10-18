@@ -1,8 +1,11 @@
+// SPDX-FileCopyrightText: 2021 RTE FRANCE
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package org.lfenergy.compas.sct.commons.scl.dtt;
 
 import lombok.extern.slf4j.Slf4j;
 import org.lfenergy.compas.scl2007b4.model.TBDA;
-import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
 import org.lfenergy.compas.scl2007b4.model.TVal;
 import org.lfenergy.compas.sct.commons.Utils;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;

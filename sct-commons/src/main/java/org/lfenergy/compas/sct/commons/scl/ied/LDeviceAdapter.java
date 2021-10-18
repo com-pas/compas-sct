@@ -4,12 +4,10 @@
 
 package org.lfenergy.compas.sct.commons.scl.ied;
 
-import org.lfenergy.compas.scl2007b4.model.TIED;
+
 import org.lfenergy.compas.scl2007b4.model.TLDevice;
-import org.lfenergy.compas.scl2007b4.model.TLNodeType;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
-import org.lfenergy.compas.sct.commons.scl.dtt.IDTTComparable;
 
 import java.util.Collection;
 
