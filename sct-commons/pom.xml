@@ -114,7 +114,7 @@
                                 <artifactItem>
                                     <groupId>org.lfenergy.compas.xsd</groupId>
                                     <artifactId>compas-scl-xsd</artifactId>
-                                    <version>local-SNAPSHOT</version>
+                                    <version>0.0.4</version>
                                 </artifactItem>
                             </artifactItems>
                             <outputDirectory>${project.build.directory}</outputDirectory>
