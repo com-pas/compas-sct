@@ -10,7 +10,7 @@ import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
 
 
 public class DataTypeTemplateAdapter extends SclElementAdapter<SclRootAdapter, TDataTypeTemplates> {
