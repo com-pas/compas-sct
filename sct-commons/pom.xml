@@ -16,6 +16,8 @@
     <groupId>org.lfenergy.compas</groupId>
     <artifactId>sct-commons</artifactId>
     <version>local-SNAPSHOT</version>
+    <name>SCT-COMMONS</name>
+
 
     <properties>
         <sonar.coverage.jacoco.xmlReportPaths>${basedir}/${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>

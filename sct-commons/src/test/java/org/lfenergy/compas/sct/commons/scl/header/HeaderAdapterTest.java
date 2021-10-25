@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.sct.commons.scl.header;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.THeader;
 import org.lfenergy.compas.scl2007b4.model.THitem;
@@ -33,14 +34,14 @@ public class HeaderAdapterTest {
         hAdapter.addHistoryItem("who","what","why");
 
         assertNotNull(hAdapter.getCurrentElem().getHistory());
-        assertFalse(hAdapter.getCurrentElem().getHistory().getHitem().isEmpty());
+        Assertions.assertFalse(hAdapter.getCurrentElem().getHistory().getHitem().isEmpty());
         THitem tHitem = hAdapter.getCurrentElem().getHistory().getHitem().get(0);
         assertAll("HISTORY",
                 () -> assertEquals("who", tHitem.getWho()),
                 () -> assertEquals("what", tHitem.getWhat()),
                 () -> assertEquals("why", tHitem.getWhy()),
-                () -> assertEquals(hAdapter.getCurrentElem().getRevision(), tHitem.getRevision()),
-                () -> assertEquals(hAdapter.getCurrentElem().getVersion(), tHitem.getVersion())
+                () -> Assertions.assertEquals(hAdapter.getCurrentElem().getRevision(), tHitem.getRevision()),
+                () -> Assertions.assertEquals(hAdapter.getCurrentElem().getVersion(), tHitem.getVersion())
         );
     }
 }

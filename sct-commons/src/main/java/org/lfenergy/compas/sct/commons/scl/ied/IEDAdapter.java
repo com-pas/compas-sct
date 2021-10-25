@@ -5,9 +5,9 @@
 package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.lfenergy.compas.scl2007b4.model.TIED;
-import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.exception.ScdException;
 
 import java.util.Collection;
 import java.util.List;
@@ -84,5 +84,11 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
                     });
 
         }
+    }
+
+    public boolean findAccessPointByName(String apName) {
+        return currentElem.getAccessPoint()
+                .stream()
+                .anyMatch(tAccessPoint -> tAccessPoint.getName().equals(apName));
     }
 }

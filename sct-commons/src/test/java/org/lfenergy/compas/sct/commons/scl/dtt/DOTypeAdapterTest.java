@@ -5,7 +5,6 @@
 package org.lfenergy.compas.sct.commons.scl.dtt;
 
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.scl2007b4.model.TBDA;
 import org.lfenergy.compas.scl2007b4.model.TDA;
 import org.lfenergy.compas.scl2007b4.model.TDOType;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;

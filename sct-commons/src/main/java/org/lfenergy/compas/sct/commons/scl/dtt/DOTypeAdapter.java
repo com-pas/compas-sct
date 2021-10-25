@@ -6,8 +6,8 @@ package org.lfenergy.compas.sct.commons.scl.dtt;
 
 import lombok.extern.slf4j.Slf4j;
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.Utils;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
+import org.lfenergy.compas.sct.commons.Utils;
 
 import java.util.ArrayList;
 import java.util.List;

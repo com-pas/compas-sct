@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.sct.repository;
+package org.lfenergy.compas.sct.data.repository;
 
-public class CompasDataAccessException extends Exception {
+public class CompasDataAccessException extends RuntimeException {
 
     public CompasDataAccessException(String message, Throwable cause) {
         super(message, cause);

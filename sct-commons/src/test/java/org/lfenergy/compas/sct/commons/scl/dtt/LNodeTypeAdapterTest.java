@@ -13,7 +13,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class LNodeTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter, TLNodeType> {
+class LNodeTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TLNodeType> {
     @Override
     protected void completeInit() {
         TLNodeType tlNodeType = new TLNodeType();

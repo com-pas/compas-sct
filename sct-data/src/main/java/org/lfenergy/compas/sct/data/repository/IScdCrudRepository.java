@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.sct.repository;
+package org.lfenergy.compas.sct.data.repository;
 
 import java.util.Optional;
 

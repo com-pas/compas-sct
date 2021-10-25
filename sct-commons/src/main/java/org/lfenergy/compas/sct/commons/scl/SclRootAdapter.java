@@ -125,7 +125,12 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
         return new IEDAdapter(this,iedName);
     }
 
-    public CommunicationAdapter getCommunicationAdapter() {
+    public CommunicationAdapter getCommunicationAdapter(boolean createIfNotExists) throws ScdException {
+        if(currentElem.getCommunication() == null && !createIfNotExists){
+            throw new ScdException("SCD has no communication tag");
+        } else if(currentElem.getCommunication() == null && createIfNotExists){
+            currentElem.setCommunication(new TCommunication());
+        }
         return new CommunicationAdapter(this,currentElem.getCommunication());
     }
 }
