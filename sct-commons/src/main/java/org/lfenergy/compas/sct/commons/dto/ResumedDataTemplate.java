@@ -109,7 +109,7 @@ public class ResumedDataTemplate {
         return stringBuilder.toString();
     }
 
-    public ArrayList<String> getDaRefList(){
+    public List<String> getDaRefList(){
         ArrayList<String> daRefList = new ArrayList<>();
         daRefList.add(daName);
         for(String bda : bdaNames){

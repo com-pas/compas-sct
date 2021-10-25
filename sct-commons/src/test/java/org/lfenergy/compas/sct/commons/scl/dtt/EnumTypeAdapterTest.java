@@ -5,7 +5,6 @@
 package org.lfenergy.compas.sct.commons.scl.dtt;
 
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.scl2007b4.model.TDAType;
 import org.lfenergy.compas.scl2007b4.model.TEnumType;
 import org.lfenergy.compas.scl2007b4.model.TEnumVal;
 import org.mockito.Mockito;
@@ -14,7 +13,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class EnumTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter, TEnumType> {
+public class EnumTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TEnumType> {
 
     @Override
     protected void completeInit() {

@@ -5,11 +5,9 @@
 package org.lfenergy.compas.sct.commons.scl.sstation;
 
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.scl2007b4.model.TIED;
 import org.lfenergy.compas.scl2007b4.model.TSubstation;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 
 import static org.junit.jupiter.api.Assertions.*;
 

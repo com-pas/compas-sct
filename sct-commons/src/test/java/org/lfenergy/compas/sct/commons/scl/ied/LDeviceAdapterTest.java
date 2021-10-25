@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.scl.ied;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
@@ -20,6 +21,6 @@ class LDeviceAdapterTest {
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapter("IED_NAME"));
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS1").get());
         lDeviceAdapter.updateLDName();
-        assertEquals("IED_NAMELD_INS1",lDeviceAdapter.getCurrentElem().getLdName());
+        Assertions.assertEquals("IED_NAMELD_INS1",lDeviceAdapter.getCurrentElem().getLdName());
     }
 }

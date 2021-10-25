@@ -16,6 +16,9 @@ public abstract class SclElementAdapter<P extends SclElementAdapter, T> {
     }
 
     public SclElementAdapter(P parentAdapter, T currentElem) {
+        if(currentElem == null){
+            throw new IllegalArgumentException("The SCL element to adapt must be defined");
+        }
         this.parentAdapter = parentAdapter;
         setCurrentElem(currentElem);
     }

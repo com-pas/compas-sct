@@ -5,7 +5,6 @@
 package org.lfenergy.compas.sct.commons.dto;
 
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.dto.*;
 
 import java.util.List;
 import java.util.UUID;
