@@ -9,6 +9,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.MarshallerWrapper;
+import org.lfenergy.compas.sct.commons.dto.DTO;
+import org.lfenergy.compas.sct.commons.dto.DaTypeName;
+import org.lfenergy.compas.sct.commons.dto.DoTypeName;
+import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 
@@ -17,7 +21,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class DataTypeTemplateAdapterTest {
+class DataTypeTemplateAdapterTest {
 
 
 
@@ -42,7 +46,7 @@ public class DataTypeTemplateAdapterTest {
         init();
     }
     @Test
-    public void testAmChildElementRef() {
+    void testAmChildElementRef() {
         SclRootAdapter sclRootAdapter = dataTypeTemplateAdapter.getParentAdapter();
         assertThrows(
                 IllegalArgumentException.class,
@@ -337,5 +341,16 @@ public class DataTypeTemplateAdapterTest {
         System.out.println(marshallerWrapper.marshall(rcvDttAdapter.getParentAdapter().getCurrentElem()));
     }
 
+    @Test
+    void testGetBinderResumedDTT() throws Exception {
+        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
+
+        ExtRefSignalInfo signalInfo = DTO.createExtRefSignalInfo();
+        signalInfo.setPDO("Op.origin");
+        signalInfo.setPDA("origin");
+
+        assertDoesNotThrow(() -> dttAdapter.getBinderResumedDTT("LN1",signalInfo));
+
+    }
 
 }

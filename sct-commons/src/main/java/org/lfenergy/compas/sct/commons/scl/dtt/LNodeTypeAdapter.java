@@ -10,6 +10,7 @@ import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class LNodeTypeAdapter
         extends SclElementAdapter<DataTypeTemplateAdapter, TLNodeType>
@@ -62,4 +63,18 @@ public class LNodeTypeAdapter
                 .anyMatch(tdo -> tdo.getType().equals(doTypeId));
     }
 
+    public String getLNClass() {
+        if(!currentElem.getLnClass().isEmpty()){
+            return currentElem.getLnClass().get(0);
+        }
+        return null;
+    }
+
+    public Optional<String> getD0TypeId(String doName){
+        return currentElem.getDO()
+                .stream()
+                .filter(tdo -> doName.equals(tdo.getName()))
+                .map(TDO::getType)
+                .findFirst();
+    }
 }

@@ -8,7 +8,9 @@ import org.lfenergy.compas.scl2007b4.model.TConnectedAP;
 import org.lfenergy.compas.scl2007b4.model.TSubNetwork;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class SubNetworkAdapter extends SclElementAdapter<CommunicationAdapter, TSubNetwork> {
 
@@ -35,5 +37,20 @@ public class SubNetworkAdapter extends SclElementAdapter<CommunicationAdapter, T
             currentElem.getConnectedAP().add(tConnectedAP);
         }
         return new ConnectedAPAdapter(this,tConnectedAP);
+    }
+
+    public String getName() {
+        return currentElem.getName();
+    }
+
+    public String getType() {
+        return currentElem.getType();
+    }
+
+    public List<ConnectedAPAdapter> getConnectedAPAdapters() {
+        return currentElem.getConnectedAP()
+                .stream()
+                .map(ap -> new ConnectedAPAdapter(this,ap))
+                .collect(Collectors.toList());
     }
 }

@@ -26,7 +26,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MarshallerWrapperTest {
+class MarshallerWrapperTest {
     private static final String SCL_CONTENT = "<SCL xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
             "xmlns=\"http://www.iec.ch/61850/2003/SCL\" version=\"2007\" revision=\"B\" release=\"4\">\n" +
             "    <Header id=\"HeaderID\" version=\"version\" revision=\"Revision\"" +
@@ -36,7 +36,7 @@ public class MarshallerWrapperTest {
     MarshallerWrapper marshallerWrapper;
 
     @BeforeEach
-    public void setUp(){
+    void setUp(){
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(SCL.class);
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
@@ -49,7 +49,7 @@ public class MarshallerWrapperTest {
     }
 
     @Test
-    public void testMarshallShouldReturnOK() {
+    void testMarshallShouldReturnOK() {
         SCL scd = Mockito.mock(SCL.class);
         Mockito.when(scd.getHeader()).thenReturn(new THeader());
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -58,7 +58,7 @@ public class MarshallerWrapperTest {
     }
 
     @Test
-    public void testMarshallShouldReturnNOK() throws JAXBException {
+    void testMarshallShouldReturnNOK() throws JAXBException {
 
         Marshaller marshaller = Mockito.mock(Marshaller.class);
         SCL scd = Mockito.mock(SCL.class);
@@ -74,13 +74,13 @@ public class MarshallerWrapperTest {
     }
 
     @Test
-    public void testUnmarshallShouldReturnOK() {
+    void testUnmarshallShouldReturnOK() {
         SCL scl = marshallerWrapper.unmarshall(SCL_CONTENT.getBytes(StandardCharsets.UTF_8),SCL.class);
         assertEquals( 4, scl.getRelease());
     }
 
     @Test
-    public void testUnmarshallShouldReturnNOK() throws JAXBException {
+    void testUnmarshallShouldReturnNOK() throws JAXBException {
         SCL scl = marshallerWrapper.unmarshall(SCL_CONTENT.getBytes(StandardCharsets.UTF_8),SCL.class);
         assertThrows(CompasException.class, () -> marshallerWrapper.unmarshall(SCL_CONTENT.getBytes(StandardCharsets.UTF_8),
                 THeader.class));

@@ -9,6 +9,8 @@ import org.lfenergy.compas.scl2007b4.model.TBDA;
 import org.lfenergy.compas.scl2007b4.model.TDAType;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
 import org.lfenergy.compas.scl2007b4.model.TProtNs;
+import org.lfenergy.compas.sct.commons.dto.DaTypeName;
+import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 
 import java.util.List;
@@ -18,7 +20,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DATypeAdapter
         extends SclElementAdapter<DataTypeTemplateAdapter, TDAType>
-        implements IDTTComparable<TDAType>{
+        implements IDTTComparable<TDAType> {
+
     public DATypeAdapter(DataTypeTemplateAdapter parentAdapter, TDAType currentElem) {
         super(parentAdapter, currentElem);
     }
@@ -82,5 +85,53 @@ public class DATypeAdapter
             }
         }
         return true;
+    }
+
+    public void checkStructuredData(DaTypeName daName, int idx) throws ScdException {
+
+        int bdaSZ = daName.getStructNames().size();
+        if(daName.getStructNames().isEmpty() ||
+                idx >= bdaSZ) {
+            return;
+        }
+
+        String extBdaName = daName.getStructNames().get(idx);
+        TBDA bda = currentElem.getBDA().stream()
+                .filter(tbda -> extBdaName.equals(tbda.getName()))
+                .findFirst()
+                .orElseThrow(
+                        () -> new ScdException(
+                                String.format("Unknown bda(%s) in DaType (%s)", extBdaName, currentElem.getId())
+                        )
+                );
+
+        TPredefinedBasicTypeEnum bType = bda.getBType();
+
+        if(bType == TPredefinedBasicTypeEnum.STRUCT) {
+            if (idx >= bdaSZ - 1) {
+                throw new ScdException(
+                        String.format("Unknown bda(%s) in DaType (%s)", extBdaName, currentElem.getId())
+                );
+            }
+            DATypeAdapter daTypeAdapter = parentAdapter.getDATypeAdapterById(bda.getType())
+                    .orElseThrow(
+                            () -> new IllegalArgumentException(
+                                    String.format("%s: No referenced to BDA(%s)", daName, bda.getName())
+                            )
+                    );
+            daName.setType(bda.getType());
+            daName.setBType(bType.value());
+            daTypeAdapter.checkStructuredData(daName, idx + 1);
+        } else if( bType == TPredefinedBasicTypeEnum.ENUM) {
+            EnumTypeAdapter adapter = parentAdapter.getEnumTypeAdapterById(bda.getType())
+                    .orElseThrow(
+                            () -> new IllegalArgumentException(
+                                    String.format("%s: No referenced to BDA(%s)", daName, bda.getName())
+                            )
+                    );
+            log.debug("The enumType (%s) references the BDA (%s)", adapter.getCurrentElem().getId(), bda.getName());
+            daName.setType(bda.getType());
+            daName.setBType(bType.value());
+        }
     }
 }

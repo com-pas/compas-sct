@@ -17,14 +17,17 @@ import org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Getter
 @Setter
 @Slf4j
 public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
 
-    private static final short RELEASE = 4;
-    private static final String REVISION = "B";
-    private static final String VERSION = "2007";
+    public static final short RELEASE = 4;
+    public static final String REVISION = "B";
+    public static final String VERSION = "2007";
 
 
     public SclRootAdapter(String hId, String hVersion, String hRevision) throws ScdException {
@@ -35,6 +38,7 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
         currentElem.setRevision(REVISION);
         addHeader(hId,hVersion,hRevision);
     }
+
 
     public SclRootAdapter(SCL scd) {
         super(null,scd);
@@ -49,15 +53,15 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
         return true;
     }
 
-    public Short getRelease(){
+    public Short getSclRelease(){
         return currentElem.getRelease();
     }
 
-    public String getRevision(){
+    public String getSclRevision(){
         return currentElem.getRevision();
     }
 
-    public String getVersion(){
+    public String getSclVersion(){
         return currentElem.getVersion();
     }
 
@@ -132,5 +136,11 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
             currentElem.setCommunication(new TCommunication());
         }
         return new CommunicationAdapter(this,currentElem.getCommunication());
+    }
+
+    public List<IEDAdapter> getIEDAdapters() {
+        return currentElem.getIED().stream()
+                .map(tied -> new IEDAdapter(this,tied))
+                .collect(Collectors.toList());
     }
 }

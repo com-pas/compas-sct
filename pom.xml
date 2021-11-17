@@ -47,13 +47,32 @@
                 <artifactId>junit-jupiter-engine</artifactId>
                 <version>5.7.2</version>
             </dependency>
+            <dependency>
+                <groupId>org.lfenergy.compas.core</groupId>
+                <artifactId>scl2007b4</artifactId>
+                <version>0.2.1</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.2.6</version>
+            </dependency>
+            <!--<dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
+                <version>1.7.32</version>
+                <scope>test</scope>
+            </dependency>-->
         </dependencies>
     </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>org.lfenergy.compas.core</groupId>
             <artifactId>scl2007b4</artifactId>
-            <version>0.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
         </dependency>
     </dependencies>
     <modules>
@@ -61,6 +80,7 @@
         <module>sct-coverage</module>
         <module>sct-data</module>
         <module>sct-data-pg</module>
+        <module>sct-service</module>
     </modules>
 
     <build>
@@ -75,6 +95,11 @@
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>0.8.6</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.22.2</version>
                 </plugin>
             </plugins>
         </pluginManagement>

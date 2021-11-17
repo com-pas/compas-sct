@@ -5,10 +5,14 @@
 package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.lfenergy.compas.scl2007b4.model.TIED;
+import org.lfenergy.compas.scl2007b4.model.TServices;
+import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
+import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -86,9 +90,28 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
         }
     }
 
+    public TServices getServices(){
+        return currentElem.getServices();
+    }
+    public String getName(){
+        return currentElem.getName();
+    }
+
     public boolean findAccessPointByName(String apName) {
         return currentElem.getAccessPoint()
                 .stream()
                 .anyMatch(tAccessPoint -> tAccessPoint.getName().equals(apName));
+    }
+
+    public List<ExtRefBindingInfo> getExtRefBinders(ExtRefSignalInfo signalInfo) throws ScdException {
+        if(!signalInfo.isValid()){
+            throw new ScdException("Invalid ExtRef signal (pDO,pDA or intAddr))");
+        }
+        List<ExtRefBindingInfo> potentialBinders = new ArrayList<>();
+        List<LDeviceAdapter> lDeviceAdapters = getLDeviceAdapters();
+        for (LDeviceAdapter lDeviceAdapter : lDeviceAdapters) {
+            potentialBinders.addAll(lDeviceAdapter.getExtRefBinders(signalInfo));
+        }
+        return potentialBinders;
     }
 }

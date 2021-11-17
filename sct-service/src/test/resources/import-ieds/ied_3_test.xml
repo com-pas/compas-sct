@@ -1,0 +1,79 @@
+<!-- SPDX-FileCopyrightText: 2021 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+<SCL xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4">
+    <Header id="HeaderID" version="version" revision="Revision" toolID="toolID"/>
+    <IED name="IED_NAME3">
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LD_INST31">
+                    <LN0 lnType="LNEX3" lnClass="LLN0" inst="">
+                        <Inputs>
+                            <!-- Signal for internal binding (in LD_INST12 - LLNO)-->
+                            <!-- Signal for external binding (in IED 1 LD_INST22 - ANCR)-->
+                            <!-- Signal for external binding (in IED 2 LD_INST12 - LLNO)-->
+                            <ExtRef intAddr="INT_ADDR31" pDO="Do31.sdo31" pDA="da31.bda311.bda312.bda313"/>
+                        </Inputs>
+                    </LN0>
+                </LDevice>
+                <LDevice inst="LD_INST32"> <!-- binder for signal from LD_INST11/LLNO -->
+                    <LN0 lnType="LN1" lnClass="LLN0" inst=""/>
+                    <LN lnType="LN2" lnClass="ARCO" inst="1">
+                        <Inputs>
+                            <!-- Signal for external binding (in IED1LD_INST12/LLNO and IED2LD_INST22/LLNO)-->
+                            <ExtRef intAddr="INT_ADDR32" pDO="Do32.sdo32" pDA="da32.bda321.bda322"/>
+                        </Inputs>
+                    </LN>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
+    <DataTypeTemplates>
+        <LNodeType id="LNEX3" lnClass="LLN0">
+            <DO name="Do12" type="DO32"/>
+            <DO name="Do22" type="DO32"/>
+        </LNodeType>
+        <LNodeType id="LN1" lnClass="LLN0">
+            <DO name="Do31" type="DO31" transient="true"/> <!-- internal binding -->
+        </LNodeType>
+        <LNodeType id="LN2" lnClass="ARCO">
+            <DO name="Do11" type="DO31"/> <!-- binder for external IED 2-->
+            <DO name="Do21" type="DO31"/> <!-- binder for external IED 3-->
+        </LNodeType>
+        <DOType cdc="WYE" id="DO31">
+            <SDO name="sdo31" type="DO32"/> <!-- internal binding -->
+            <SDO name="sdo21" type="DO32"/> <!-- binder for external IED 2-->
+            <SDO name="sdo11" type="DO32"/> <!-- binder for external IED 3-->
+        </DOType>
+        <DOType cdc="WYE" id="DO32">
+            <SDO name="sdo32" type="DO33"/><!-- internal binding -->
+            <SDO name="sdo22" type="DO33"/><!-- binder for external IED 2-->
+            <SDO name="sdo12" type="DO33"/><!-- binder for external IED 3-->
+        </DOType>
+        <DOType cdc="WYE" id="DO33">
+            <DA fc="ST" name="da31" bType="Struct" type="DA31"/> <!-- internal binding -->
+            <DA fc="ST" name="da22" bType="Struct" type="DA31"/> <!-- binder for external IED 2-->
+            <DA fc="ST" name="da12" bType="Struct" type="DA31"/> <!-- binder for external IED 3-->
+        </DOType>
+        <DAType id="DA31">
+            <BDA name="bda311" bType="Struct" type="DA32"/> <!-- internal binding -->
+            <BDA name="bda221" bType="Struct" type="DA32"/> <!-- binder for external IED 2-->
+            <BDA name="bda121" bType="Struct" type="DA32"/> <!-- binder for external IED 3-->
+        </DAType>
+        <DAType id="DA32">
+            <BDA name="bda312" bType="Struct" type="DA33"/> <!-- internal binding -->
+            <BDA name="bda222" bType="Struct" type="DA33"/> <!-- binder for external IED 2-->
+            <BDA name="bda122" bType="Struct" type="DA33"/> <!-- binder for external IED 3-->
+        </DAType>
+        <DAType id="DA33">
+            <BDA name="bda313" bType="Enum" type="RecCycModKind"/> <!-- internal binding -->
+            <BDA name="bda223" bType="Enum" type="RecCycModKind"/> <!-- binder for external IED 2-->
+            <BDA name="bda123" bType="Enum" type="RecCycModKind"/> <!-- binder for external IED 3-->
+        </DAType>
+        <EnumType id="RecCycModKind">
+            <EnumVal ord="1">Completed-diff</EnumVal>
+        </EnumType>
+    </DataTypeTemplates>
+</SCL>

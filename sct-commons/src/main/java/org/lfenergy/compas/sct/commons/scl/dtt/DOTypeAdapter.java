@@ -6,12 +6,15 @@ package org.lfenergy.compas.sct.commons.scl.dtt;
 
 import lombok.extern.slf4j.Slf4j;
 import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.dto.DoTypeName;
+import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 
 @Slf4j
@@ -28,11 +31,20 @@ public class DOTypeAdapter
         return parentAdapter.getCurrentElem().getDOType().contains(currentElem);
     }
 
+    public boolean containsDAWithDAName(String da){
+        return currentElem.getSDOOrDA()
+                .stream()
+                .filter(unNaming -> unNaming.getClass().equals(TDA.class))
+                .map(TDA.class::cast)
+                .anyMatch(
+                    tda -> tda.getName().equals(da)
+                );
+    }
     public boolean containsDAWithEnumTypeId(String enumTypeId) {
         return currentElem.getSDOOrDA()
                 .stream()
                 .filter(unNaming -> unNaming.getClass().equals(TDA.class))
-                .map(tUnNaming -> (TDA)tUnNaming)
+                .map(TDA.class::cast)
                 .anyMatch(
                         tda -> tda.getBType().equals(TPredefinedBasicTypeEnum.ENUM) &&
                                 tda.getType().equals(enumTypeId)
@@ -43,7 +55,7 @@ public class DOTypeAdapter
         return currentElem.getSDOOrDA()
                 .stream()
                 .filter(unNaming -> unNaming.getClass().equals(TDA.class))
-                .map(tUnNaming -> (TDA)tUnNaming)
+                .map(TDA.class::cast)
                 .anyMatch(
                         tda -> TPredefinedBasicTypeEnum.STRUCT.equals(tda.getBType()) &&
                                 tda.getType().equals(daTypeId)
@@ -89,6 +101,7 @@ public class DOTypeAdapter
     }
 
     protected boolean hasSameContent(TDA thisTDA, TDA inTDA) {
+        final String countField = "count";
         if(!Objects.equals(thisTDA.getName(),inTDA.getName())
                 || !Objects.equals(thisTDA.getBType(),inTDA.getBType())
                 || !Objects.equals(thisTDA.getType(),inTDA.getType())
@@ -103,15 +116,15 @@ public class DOTypeAdapter
         }
         if(!Objects.equals(thisTDA.getCount(),inTDA.getCount())){
             if(thisTDA.getCount().isEmpty()){
-                Utils.setField(thisTDA,"count",null);
+                Utils.setField(thisTDA,countField,null);
             }
             if(inTDA.getCount().isEmpty()){
-                Utils.setField(inTDA,"count",null);
+                Utils.setField(inTDA,countField,null);
             }
             return false ;
         } else if(thisTDA.getCount().isEmpty()){
-            Utils.setField(thisTDA,"count",null);
-            Utils.setField(inTDA,"count",null);
+            Utils.setField(thisTDA,countField,null);
+            Utils.setField(inTDA,countField,null);
         }
 
         if((thisTDA.getBType() == TPredefinedBasicTypeEnum.ENUM ||
@@ -149,5 +162,49 @@ public class DOTypeAdapter
             }
         }
         return sdoList.stream().anyMatch(sdo -> sdo.getType().equals(doTypeId));
+    }
+
+    public void checkStructuredData(DoTypeName doName, int idx) throws ScdException {
+        if(doName.getStructNames().isEmpty() ||
+                idx >= doName.getStructNames().size()) {
+            return;
+        }
+
+        String extSDOName = doName.getStructNames().get(idx);
+        String sdoId = currentElem.getSDOOrDA()
+                .stream()
+                .filter(tUnNaming -> tUnNaming.getClass().equals(TSDO.class))
+                .map(TSDO.class::cast)
+                .filter(tsdo -> extSDOName.equals(tsdo.getName()))
+                .map(TSDO::getType)
+                .findFirst()
+                .orElseThrow(
+                        () -> new ScdException("Unknown doName.sdoName :" + doName)
+                );
+        DOTypeAdapter doTypeAdapter = parentAdapter.getDOTypeAdapterById(sdoId)
+                .orElseThrow(
+                        () -> new IllegalArgumentException(
+                                String.format("%s: No referenced to SDO(%s)", doName, extSDOName)
+                        )
+                );
+        doName.setCdc(currentElem.getCdc()); // override CDC
+        doTypeAdapter.checkStructuredData(doName, idx+1);
+    }
+
+    public Optional<TSDO> getSDObyName(String lastSdoName) {
+        return currentElem.getSDOOrDA()
+                .stream()
+                .filter(tUnNaming -> tUnNaming.getClass().equals(TSDO.class))
+                .map(TSDO.class::cast)
+                .filter(tsdo -> Objects.equals(lastSdoName,tsdo.getName()))
+                .findFirst();
+    }
+
+    public Optional<TDA> getDAByDaName(String extDaName) {
+        return currentElem.getSDOOrDA().stream()
+                .filter(tUnNaming -> tUnNaming.getClass().equals(TDA.class))
+                .map(TDA.class::cast)
+                .filter(tda -> extDaName.equals(tda.getName()))
+                .findFirst();
     }
 }

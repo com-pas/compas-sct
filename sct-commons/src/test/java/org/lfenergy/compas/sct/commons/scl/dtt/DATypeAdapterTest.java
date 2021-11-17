@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.TBDA;
 import org.lfenergy.compas.scl2007b4.model.TDAType;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
+import org.lfenergy.compas.sct.commons.dto.DaTypeName;
+import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
@@ -90,5 +92,22 @@ class DATypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TDAType
         DATypeAdapter rcvDATypeAdapter =  rcvDttAdapter.getDATypeAdapters().get(0);
         assertTrue(rcvDATypeAdapter.hasSameContentAs(rcvDATypeAdapter.getCurrentElem()));
         assertFalse(rcvDATypeAdapter.hasSameContentAs(rcvDttAdapter.getDATypeAdapters().get(1).getCurrentElem()));
+    }
+
+    @Test
+    void testCheckStructuredData() throws Exception {
+
+        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
+        DATypeAdapter daTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getDATypeAdapterById("DA1").get());
+        DaTypeName daTypeName = new DaTypeName("origin","origin.ctlVal");
+
+        daTypeAdapter.checkStructuredData(daTypeName,0);
+        assertEquals(TPredefinedBasicTypeEnum.ENUM.value(),daTypeName.getBType());
+        assertEquals("RecCycModKind",daTypeName.getType());
+        daTypeName.setStructNames(List.of("origin"));
+        assertThrows(ScdException.class, () -> daTypeAdapter.checkStructuredData(daTypeName,0));
+
+        DaTypeName daTypeName2 = new DaTypeName("d","check.ctlVal");
+        assertThrows(ScdException.class, () -> daTypeAdapter.checkStructuredData(daTypeName2,0));
     }
 }

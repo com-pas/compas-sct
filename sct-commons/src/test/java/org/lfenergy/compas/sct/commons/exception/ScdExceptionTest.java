@@ -8,13 +8,13 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ScdExceptionTest {
+class ScdExceptionTest {
     private static final String MSG = "MSG";
     private static final String ANOTHER_MSG = "ANOTHER_MSG";
     private static final String CAUSE_MSG = "CAUSE_MSG";
 
     @Test
-    public void testInit() {
+    void testInit() {
         ScdException exception = new ScdException(MSG);
         assertEquals(MSG, exception.getMessage());
         exception = new ScdException(ANOTHER_MSG, new RuntimeException(CAUSE_MSG));

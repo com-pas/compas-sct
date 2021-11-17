@@ -6,6 +6,7 @@ package org.lfenergy.compas.sct.commons.scl.dtt;
 
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.dto.DTO;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
@@ -42,6 +43,9 @@ class LNodeTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TLNo
         LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(
                 () -> new LNodeTypeAdapter(sclElementAdapter,tlNodeType)
         );
+
+        assertEquals(DTO.LN_CLASS,lNodeTypeAdapter.getLNClass());
+        assertTrue(lNodeTypeAdapter.getD0TypeId("Op").isPresent());
 
         assertTrue(lNodeTypeAdapter.hasSameContentAs(tlNodeType1));
         assertEquals(3,tlNodeType1.getDO().size());
@@ -94,7 +98,7 @@ class LNodeTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TLNo
         TLNodeType tlNodeType = new TLNodeType();
         tlNodeType.setId("BDA1");
         tlNodeType.setIedType("IEDTYPE");
-        tlNodeType.getLnClass().add("LNCLASS");
+        tlNodeType.getLnClass().add(DTO.LN_CLASS);
 
         TDO tdo = new TDO();
         tdo.setType("DO1");

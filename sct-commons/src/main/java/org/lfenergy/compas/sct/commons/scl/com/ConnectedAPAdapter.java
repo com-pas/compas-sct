@@ -17,4 +17,12 @@ public class ConnectedAPAdapter extends SclElementAdapter<SubNetworkAdapter, TCo
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getConnectedAP().contains(currentElem);
     }
+
+    public String getIedName() {
+        return currentElem.getIedName();
+    }
+
+    public String getApName() {
+        return currentElem.getApName();
+    }
 }
