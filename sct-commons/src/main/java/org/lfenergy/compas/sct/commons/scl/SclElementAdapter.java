@@ -6,16 +6,17 @@ package org.lfenergy.compas.sct.commons.scl;
 
 import lombok.Getter;
 
+
 @Getter
 public abstract class SclElementAdapter<P extends SclElementAdapter, T> {
     protected P parentAdapter;
     protected T currentElem;
 
-    public SclElementAdapter(P parentAdapter) {
+    protected SclElementAdapter(P parentAdapter) {
         this.parentAdapter = parentAdapter;
     }
 
-    public SclElementAdapter(P parentAdapter, T currentElem) {
+    protected SclElementAdapter(P parentAdapter, T currentElem) {
         if(currentElem == null){
             throw new IllegalArgumentException("The SCL element to adapt must be defined");
         }

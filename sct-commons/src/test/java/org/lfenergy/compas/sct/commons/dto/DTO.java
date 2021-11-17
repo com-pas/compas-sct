@@ -10,6 +10,18 @@ import java.util.List;
 import java.util.UUID;
 
 public class DTO {
+    /*-----------------------------------------------*/
+    /*                   ConnectedAPDTO              */
+    /*-----------------------------------------------*/
+    public static final String AP_NAME = "AP_NAME";
+    public static ConnectedApDTO createCapDTO(){
+
+        ConnectedApDTO cap = new ConnectedApDTO();
+        cap.setApName(AP_NAME);
+        cap.setIedName(IED_NAME);
+
+        return cap;
+    }
 
     /*-----------------------------------------------*/
     /*                   ExtRefInfo                  */
@@ -64,6 +76,53 @@ public class DTO {
     }
 
 
+    public static ExtRefSignalInfo createExtRefSignalInfo(){
+        ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
+        signalInfo.setDesc(DESC);
+        signalInfo.setPDA(P_DA);
+        signalInfo.setPDO(P_DO);
+        signalInfo.setPLN(P_LN);
+        signalInfo.setPServT(TServiceType.fromValue(P_SERV_T));
+        signalInfo.setIntAddr(INT_ADDR);
+
+        return signalInfo;
+    }
+
+    public static ExtRefBindingInfo createExtRefBindingInfo(){
+        ExtRefBindingInfo bindingInfo = new ExtRefBindingInfo();
+        bindingInfo.setIedName(IED_NAME);
+        bindingInfo.setLdInst(LD_INST);
+        bindingInfo.setLnInst(LN_INST);
+        bindingInfo.setLnClass(LN_CLASS);
+        bindingInfo.setDaName(new DaTypeName(DA_NAME));
+        bindingInfo.setDoName(new DoTypeName(DO_NAME));
+        bindingInfo.setPrefix(PREFIX);
+        bindingInfo.setServiceType(TServiceType.fromValue(SERVICE_TYPE));
+
+        return bindingInfo;
+    }
+
+    public static ExtRefSourceInfo createExtRefSourceInfo(){
+        ExtRefSourceInfo sourceInfo = new ExtRefSourceInfo();
+        sourceInfo.setSrcLDInst(SRC_LD_INST);
+        sourceInfo.setSrcLNInst(SRC_LN_INST);
+        sourceInfo.setSrcLNClass(SRC_LN_CLASS);
+        sourceInfo.setSrcPrefix(SRC_PREFIX);
+        sourceInfo.setSrcCBName(SRC_CB_NAME);
+
+        return sourceInfo;
+    }
+
+    public static ExtRefInfo createExtRefInfo(){
+        ExtRefInfo extRefInfo = new ExtRefInfo();
+        extRefInfo.setSourceInfo(DTO.createExtRefSourceInfo());
+        extRefInfo.setBindingInfo(DTO.createExtRefBindingInfo());
+        extRefInfo.setSignalInfo(DTO.createExtRefSignalInfo());
+
+        return extRefInfo;
+    }
+
+
     /*-----------------------------------------------*/
     /*                   ResumedDataTemplate         */
     /*-----------------------------------------------*/
@@ -73,29 +132,31 @@ public class DTO {
     public static final String FC = TFCEnum.CF.value();
     public static ResumedDataTemplate createRTT(){
         ResumedDataTemplate rDTT = new ResumedDataTemplate();
-        rDTT.setCdc(TPredefinedCDCEnum.fromValue(CDC));
-        rDTT.setFc(TFCEnum.fromValue(FC));
+
         rDTT.setLnType(LN_TYPE);
         rDTT.setLnClass(TLLN0Enum.LLN_0.value());
         rDTT.setDoName(DO_NAME);
         rDTT.setDaName(DA_NAME);
+        rDTT.getDoName().setCdc(TPredefinedCDCEnum.fromValue(CDC));
+        rDTT.getDaName().setFc(TFCEnum.fromValue(FC));
 
         return rDTT;
     }
 
     public static ResumedDataTemplate createRTT(String prefix, String lnClass, String lnInst){
         ResumedDataTemplate rDTT = new ResumedDataTemplate();
-        rDTT.setCdc(TPredefinedCDCEnum.fromValue(CDC));
-        rDTT.setFc(TFCEnum.fromValue(FC));
+
         rDTT.setLnType(LN_TYPE);
         rDTT.setLnClass(lnClass);
         rDTT.setLnInst(lnInst);
         rDTT.setPrefix(prefix);
-        rDTT.setType("type");
-        rDTT.setDoName("do");
-        rDTT.getSdoNames().addAll(List.of("sdo1","sdo2"));
-        rDTT.setDaName("da");
-        rDTT.getBdaNames().addAll(List.of("bda1","bda2"));
+
+        rDTT.setDoName("do.sdo1.sdo2");
+        rDTT.setDaName("da.bda1.bda2");
+        rDTT.getDoName().setCdc(TPredefinedCDCEnum.fromValue(CDC));
+        rDTT.getDaName().setFc(TFCEnum.fromValue(FC));
+        rDTT.getDaName().setBType("bType");
+        rDTT.getDaName().setType("type");
         rDTT.setValImport(true);
         rDTT.getDaiValues().put(1L,"toto");
 
@@ -132,5 +193,39 @@ public class DTO {
         optFields.setBufOvfl(true);
         optFields.setDataRef(true);
         return optFields;
+    }
+
+    /*-----------------------------------------------*/
+    /*                   LNodeDTO                    */
+    /*-----------------------------------------------*/
+    public static LNodeDTO createLNodeDTO(){
+        return new LNodeDTO(LN_INST,LN_CLASS,null,LN_TYPE);
+    }
+
+    /*-----------------------------------------------*/
+    /*                   LDeviceDTO                  */
+    /*-----------------------------------------------*/
+    public static final String LD_NAME = "LDPO";
+    public static LDeviceDTO createLdDTO(){
+
+        LDeviceDTO lDeviceDTO = new LDeviceDTO();
+        lDeviceDTO.setLdInst(LD_INST);
+        lDeviceDTO.setLdName(LD_NAME);
+
+        lDeviceDTO.addLNode(createLNodeDTO());
+
+        return lDeviceDTO;
+    }
+
+    /*-----------------------------------------------*/
+    /*                   IedDTO                      */
+    /*-----------------------------------------------*/
+
+    public static IedDTO createIedDTO(){
+
+        IedDTO iedDTO = new IedDTO();
+        iedDTO.setName(IED_NAME);
+        iedDTO.addLDevice(createLdDTO());
+        return iedDTO;
     }
 }

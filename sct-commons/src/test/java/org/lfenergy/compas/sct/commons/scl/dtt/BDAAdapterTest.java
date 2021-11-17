@@ -14,10 +14,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BDAAdapterTest extends AbstractDTTLevel<DATypeAdapter,TBDA> {
+class BDAAdapterTest extends AbstractDTTLevel<DATypeAdapter,TBDA> {
 
     @Test
-    public void testAmChildElementRef() throws ScdException {
+    void testAmChildElementRef() throws ScdException {
         init();
         assertDoesNotThrow(
                 () -> new BDAAdapter(sclElementAdapter,sclElement)

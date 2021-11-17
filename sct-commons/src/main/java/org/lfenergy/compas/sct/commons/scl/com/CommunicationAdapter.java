@@ -14,7 +14,9 @@ import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 public class CommunicationAdapter extends SclElementAdapter<SclRootAdapter, TCommunication> {
@@ -31,6 +33,11 @@ public class CommunicationAdapter extends SclElementAdapter<SclRootAdapter, TCom
     public boolean amChildElementRef() {
         return currentElem == parentAdapter.getCurrentElem().getCommunication();
     }
+
+    public SubNetworkAdapter getSubNetworkAdapters(String snName) throws ScdException {
+        return findSubnetworkByName(snName).orElseThrow(() -> new ScdException("Unknown Subnetwork : " + snName));
+    }
+
 
     public SubNetworkAdapter addSubnetwork(String snName, String snType,
                                            String iedName, String apName) throws ScdException {
@@ -59,5 +66,13 @@ public class CommunicationAdapter extends SclElementAdapter<SclRootAdapter, TCom
                 .filter(tSubNetwork -> tSubNetwork.getName().equals(snName))
                 .findFirst()
                 .map(tSubNetwork -> new SubNetworkAdapter(this,tSubNetwork));
+    }
+
+    public List<SubNetworkAdapter> getSubNetworkAdapters() {
+        return currentElem.getSubNetwork()
+                .stream()
+                .map(tSubNetwork -> new SubNetworkAdapter(this,tSubNetwork))
+                .collect(Collectors.toList());
+
     }
 }

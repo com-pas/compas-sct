@@ -25,17 +25,11 @@ public class ResumedDataTemplateTest {
 
         assertAll("COPY FROM",
                 () -> assertEquals(rDtt_b.getLnClass(), rDtt.getLnClass()),
-                () -> assertEquals(rDtt_b.getBType(), rDtt.getBType()),
-                () -> assertEquals(rDtt_b.getType(), rDtt.getType()),
                 () -> assertEquals(rDtt_b.getPrefix(), rDtt.getPrefix()),
-                () -> assertEquals(rDtt_b.getCdc(), rDtt.getCdc()),
                 () -> assertEquals(rDtt_b.getDaName(), rDtt.getDaName()),
                 () -> assertEquals(rDtt_b.getDoName(), rDtt.getDoName()),
                 () -> assertEquals(rDtt_b.getLnInst(), rDtt.getLnInst()),
                 () -> assertEquals(rDtt_b.getLnType(), rDtt.getLnType()),
-                () -> assertArrayEquals(rDtt_b.getBdaNames().toArray(), rDtt.getBdaNames().toArray()),
-                () -> assertArrayEquals(rDtt_b.getSdoNames().toArray(), rDtt.getSdoNames().toArray()),
-                () -> assertEquals(rDtt_b.getFc(), rDtt.getFc()),
                 () -> assertTrue(rDtt.isValImport()),
                 () -> assertArrayEquals(rDtt.getDaRefList().toArray(new String[0]), new String[]{"da","bda1","bda2"})
         );
@@ -46,7 +40,7 @@ public class ResumedDataTemplateTest {
         ResumedDataTemplate rDtt = DTO.createRTT("pre","lnclass","1");
         assertTrue(rDtt.isUpdatable());
 
-        rDtt.setFc(TFCEnum.BL);
+        rDtt.getDaName().setFc(TFCEnum.BL);
         assertFalse(rDtt.isUpdatable());
     }
 }

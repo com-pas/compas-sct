@@ -11,7 +11,7 @@ import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class CommunicationAdapterTest {
+class CommunicationAdapterTest {
 
     @Test
     public void testAmChildElementRef() throws ScdException {

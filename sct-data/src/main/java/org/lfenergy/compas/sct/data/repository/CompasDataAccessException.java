@@ -9,4 +9,8 @@ public class CompasDataAccessException extends RuntimeException {
     public CompasDataAccessException(String message, Throwable cause) {
         super(message, cause);
     }
+
+    public CompasDataAccessException(String message) {
+        super(message);
+    }
 }

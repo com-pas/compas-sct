@@ -9,4 +9,6 @@ public interface IScd <ID> {
     ID getId();
     byte[] getRawXml();
     ID getHeaderId();
+    String getHeaderRevision();
+    String getHeaderVersion();
 }

@@ -4,11 +4,13 @@
 
 package org.lfenergy.compas.sct.data.repository;
 
+import org.lfenergy.compas.sct.data.model.IScd;
+
 import java.util.Optional;
 
-public interface IScdCrudRepository<T,ID> {
-    <S extends T> S save(S s) throws CompasDataAccessException;
-    <S extends T> S update(S s) throws CompasDataAccessException;
+public interface IScdCrudRepository<T extends IScd,ID> {
+    T save(T s) throws CompasDataAccessException;
+    T update(T s) throws CompasDataAccessException;
     Optional<T> findById(ID id);
     boolean existsById(ID id) ;
     boolean existsByHeaderId(ID id) ;

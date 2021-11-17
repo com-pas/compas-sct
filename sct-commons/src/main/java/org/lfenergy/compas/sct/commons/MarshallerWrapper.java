@@ -38,8 +38,8 @@ public class MarshallerWrapper {
 
             return sw.toString();
         } catch (JAXBException exp) {
-            String message = "Error marshalling the Class";
-            log.error(message, exp);
+            String message = String.format("Error marshalling the Class: %s", exp);
+            log.error(message);
             throw new CompasException(CompasErrorCode.MARSHAL_ERROR_CODE, message);
         }
     }
@@ -58,8 +58,8 @@ public class MarshallerWrapper {
             }
             return cls.cast(result);
         } catch (JAXBException exp) {
-            String message = "Error unmarshalling to the Class.";
-            log.error(message, exp);
+            String message = String.format("Error unmarshalling to the Class: %s", exp.getLocalizedMessage());
+            log.error(message);
             throw new CompasException(CompasErrorCode.UNMARSHAL_ERROR_CODE, message);
         }
     }

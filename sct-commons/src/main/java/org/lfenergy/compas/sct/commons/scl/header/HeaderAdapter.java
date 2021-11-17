@@ -43,4 +43,16 @@ public class HeaderAdapter extends SclElementAdapter<SclRootAdapter, THeader> {
 
         return this;
     }
+
+    public String getHeaderId() {
+        return currentElem.getId();
+    }
+
+    public String getHeaderRevision() {
+        return currentElem.getRevision();
+    }
+
+    public String getHeaderVersion() {
+        return currentElem.getVersion();
+    }
 }
