@@ -159,7 +159,7 @@ public class SclManager {
 
         // Get CBs
         IEDAdapter srcIEDAdapter = sclRootAdapter.getIEDAdapter(bindingInfo.getIedName());
-        return srcIEDAdapter.getControlSetByBindingInfo(extRefInfo);
+        return srcIEDAdapter.getControlBlocksByBindingInfo(extRefInfo);
     }
 
     public TExtRef updateExtRefSource(SCL scd, ExtRefInfo extRefInfo) throws ScdException {
