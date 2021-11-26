@@ -4,10 +4,11 @@
 
 package org.lfenergy.compas.sct.commons.scl.ied;
 
-import com.fasterxml.jackson.databind.node.NullNode;
+import lombok.extern.slf4j.Slf4j;
 import org.lfenergy.compas.scl2007b4.model.TIED;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
 import org.lfenergy.compas.scl2007b4.model.TServices;
+import org.lfenergy.compas.sct.commons.Utils;
 import org.lfenergy.compas.sct.commons.dto.ControlBlock;
 import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
@@ -24,6 +25,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 
+@Slf4j
 public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
 
     public IEDAdapter(SclRootAdapter parentAdapter) {
@@ -118,11 +120,13 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
         return potentialBinders;
     }
 
-    public List<ControlBlock<?>> getControlSetByBindingInfo(ExtRefInfo extRefInfo) {
+    public List<ControlBlock<?>> getControlBlocksByBindingInfo(ExtRefInfo extRefInfo) {
+        log.debug(Utils.entering());
+        long startTime = System.nanoTime();
         if(extRefInfo.getBindingInfo() == null) {
             throw new IllegalArgumentException("ExtRef binding information are missing");
         }
-        return getLDeviceAdapters()
+        var cbs = getLDeviceAdapters()
                 .stream()
                 .map(lDeviceAdapter -> {
                     List<AbstractLNAdapter<?>> lnAdapters = new ArrayList<>();
@@ -146,11 +150,10 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
                     return lnAdapters;
                 })
                 .flatMap(Collection::stream)
-                .map(lnAdapter -> {
-
-                    return lnAdapter.getControlSetByExtRefInfo(extRefInfo);
-                })
+                .map(lnAdapter -> lnAdapter.getControlSetByExtRefInfo(extRefInfo))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
+        log.debug(Utils.leaving(startTime));
+        return cbs;
     }
 }

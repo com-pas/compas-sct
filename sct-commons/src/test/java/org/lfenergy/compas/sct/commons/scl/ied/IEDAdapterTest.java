@@ -125,7 +125,7 @@ public class IEDAdapterTest {
 
         ExtRefInfo extRefInfo = new ExtRefInfo();
         extRefInfo.setBindingInfo(new ExtRefBindingInfo());
-        List<ControlBlock<?>> controlBlocks = iAdapter.getControlSetByBindingInfo(extRefInfo);
+        List<ControlBlock<?>> controlBlocks = iAdapter.getControlBlocksByBindingInfo(extRefInfo);
 
         assertFalse(controlBlocks.isEmpty());
         assertEquals(ReportControlBlock.class,controlBlocks.get(0).getClass());
