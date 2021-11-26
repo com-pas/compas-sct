@@ -58,8 +58,6 @@ public class FCDAInfo {
     }
 
     public boolean isValid() {
-        return doName != null &&
-                !StringUtils.isBlank(doName.getName()) &&
-                !doName.getStructNames().isEmpty();
+        return doName != null && !StringUtils.isBlank(doName.toString());
     }
 }

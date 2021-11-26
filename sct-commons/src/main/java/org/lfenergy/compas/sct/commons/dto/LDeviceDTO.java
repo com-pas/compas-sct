@@ -6,18 +6,19 @@ package org.lfenergy.compas.sct.commons.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter;
+
+import lombok.extern.slf4j.Slf4j;
+import org.lfenergy.compas.sct.commons.Utils;
 import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.LN0Adapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LNAdapter;
 
-import java.util.Collection;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Getter
 @NoArgsConstructor
 public class LDeviceDTO {
@@ -31,15 +32,18 @@ public class LDeviceDTO {
     }
 
     public static LDeviceDTO from(LDeviceAdapter lDeviceAdapter, LogicalNodeOptions options) {
+        log.info(Utils.entering());
         LDeviceDTO lDeviceDTO = new LDeviceDTO();
-        lDeviceDTO.ldInst = lDeviceAdapter.getInst();
-        lDeviceDTO.ldName = lDeviceAdapter.getLdName();
-        List<LNAdapter> lnAdapters = lDeviceAdapter.getLNAdapters();
-        lDeviceDTO.lNodes = lnAdapters.stream()
-                .map(lnAdapter -> LNodeDTO.from(lnAdapter, options))
-                .collect(Collectors.toSet());
-        lDeviceDTO.lNodes.add(LNodeDTO.from(lDeviceAdapter.getLN0Adapter(),options));
-
+        if(lDeviceAdapter != null) {
+            lDeviceDTO.ldInst = lDeviceAdapter.getInst();
+            lDeviceDTO.ldName = lDeviceAdapter.getLdName();
+            lDeviceDTO.lNodes.add(LNodeDTO.from(lDeviceAdapter.getLN0Adapter(), options));
+            List<LNAdapter> lnAdapters = lDeviceAdapter.getLNAdapters();
+            lDeviceDTO.lNodes = lnAdapters.stream()
+                    .map(lnAdapter -> LNodeDTO.from(lnAdapter, options))
+                    .collect(Collectors.toSet());
+        }
+        log.info(Utils.leaving());
         return lDeviceDTO;
     }
 

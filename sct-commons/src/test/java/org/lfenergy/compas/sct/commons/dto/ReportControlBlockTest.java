@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -156,7 +157,7 @@ public class ReportControlBlockTest {
         );
 
         ReportControlBlock reportControlBlock = new ReportControlBlock(tReportControl);
-        assertAll("INIT",
+        assertAll("INIT : " + reportControlBlock,
                 () -> assertEquals(ID,reportControlBlock.getId()),
                 () -> assertEquals(DATASET_REF,reportControlBlock.getDataSetRef()),
                 () -> assertEquals(NAME,reportControlBlock.getName()),
@@ -165,6 +166,14 @@ public class ReportControlBlockTest {
                 () -> assertNotNull(reportControlBlock.getRptEnabled()),
                 () -> assertEquals(TPredefinedTypeOfSecurityEnum.NONE,reportControlBlock.getSecurityEnable())
         );
+    }
+
+    @Test
+    void testCast(){
+        Object cb  = new ReportControlBlock();
+        ReportControlBlock rpt = new ReportControlBlock();
+        assertEquals(ReportControlBlock.class, rpt.cast(cb).getClass());
+        assertThrows(UnsupportedOperationException.class, () -> rpt.cast(new SMVControlBlock()).getClass());
     }
 
     @Test
@@ -178,6 +187,7 @@ public class ReportControlBlockTest {
         Mockito.when(clientLN.getLnClass()).thenReturn(List.of(DTO.HOLDER_LN_CLASS));
 
         TControlWithIEDName.IEDName iedName = ReportControlBlock.toIEDName(clientLN);
+        assertEquals(clientLN.getApRef(),iedName.getApRef());
     }
 
 
