@@ -6,6 +6,7 @@ package org.lfenergy.compas.service;
 
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.SCL;
+import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.scl2007b4.model.THeader;
 import org.lfenergy.compas.scl2007b4.model.THitem;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
@@ -17,12 +18,14 @@ import org.lfenergy.compas.sct.commons.dto.DoTypeName;
 import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
-import org.lfenergy.compas.sct.commons.dto.IedDTO;
+import org.lfenergy.compas.sct.commons.dto.ExtRefSourceInfo;
 import org.lfenergy.compas.sct.commons.dto.LNodeDTO;
 import org.lfenergy.compas.sct.commons.dto.SubNetworkDTO;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
+import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
+import org.lfenergy.compas.sct.commons.scl.ied.LN0Adapter;
 import org.lfenergy.compas.service.testhelpers.SclTestMarshaller;
 
 import java.util.List;
@@ -128,23 +131,15 @@ class SclManagerTest {
         var extRefInfos = assertDoesNotThrow(() -> sclManager.getExtRefInfo(scd,"IED_NAME1","LD_INST11"));
         assertEquals(1,extRefInfos.size());
 
-        assertEquals("IED_NAME1",extRefInfos.get(0).getIedName());
+        assertEquals("IED_NAME1",extRefInfos.get(0).getHolderIedName());
 
         assertThrows(ScdException.class, () -> sclManager.getExtRefInfo(scd,"IED_NAME1","UNKNOWN_LD"));
     }
 
     @Test
     void testGetExtRefBinders() throws Exception {
-        SclRootAdapter sclRootAdapter=  new SclRootAdapter("hId",SclRootAdapter.VERSION,SclRootAdapter.REVISION);
-        SCL scd = sclRootAdapter.getCurrentElem();
-        assertNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
-        SCL icd1 = SclTestMarshaller.getSCLFromFile("/import-ieds/ied_1_test.xml");
-        SCL icd2 = SclTestMarshaller.getSCLFromFile("/import-ieds/ied_2_test.xml");
-        SCL icd3 = SclTestMarshaller.getSCLFromFile("/import-ieds/ied_3_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-cb/scd_get_binders_test.xml");
         SclManager sclManager = new SclManager();
-        assertDoesNotThrow(() -> sclManager.addIED(scd,"IED_NAME1",icd1));
-        assertDoesNotThrow(() -> sclManager.addIED(scd,"IED_NAME2",icd2));
-        assertDoesNotThrow(() -> sclManager.addIED(scd,"IED_NAME3",icd3));
 
         ExtRefSignalInfo signalInfo = createSignalInfo(
                 "Do11.sdo11","da11.bda111.bda112.bda113","INT_ADDR11"
@@ -209,8 +204,70 @@ class SclManagerTest {
                 )
         );
     }
-    
-    
+
+    @Test
+    void testGetExtRefSourceInfo() throws Exception {
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-cb/scd_get_cbs_test.xml");
+        String iedName = "IED_NAME2";
+        String ldInst = "LD_INST21";
+        String lnClass = TLLN0Enum.LLN_0.value();
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapter(iedName);
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iedAdapter.getLDeviceAdapterByLdInst(ldInst).get());
+        LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
+        List<TExtRef> extRefs = ln0Adapter.getExtRefs(null);
+        assertFalse(extRefs.isEmpty());
+
+        ExtRefInfo extRefInfo = new ExtRefInfo(extRefs.get(0));
+        extRefInfo.setHolderIedName(iedName);
+        extRefInfo.setHolderLdInst(ldInst);
+        extRefInfo.setHolderLnClass(lnClass);
+
+        SclManager sclManager = new SclManager();
+        var controlBlocks = sclManager.getExtRefSourceInfo(scd,extRefInfo);
+        assertEquals(2,controlBlocks.size());
+        controlBlocks.forEach(controlBlock -> assertTrue(
+                controlBlock.getName().equals("goose1") || controlBlock.getName().equals("smv1")
+                )
+        );
+    }
+
+    @Test
+    void testUpdateExtRefSource() throws Exception {
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-cb/scd_get_cbs_test.xml");
+        ExtRefInfo extRefInfo = new ExtRefInfo();
+        extRefInfo.setHolderIedName("IED_NAME2");
+        extRefInfo.setHolderLdInst("LD_INST21");
+        extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
+
+        SclManager sclManager = new SclManager();
+        assertThrows(IllegalArgumentException.class, () -> sclManager.updateExtRefSource(scd,extRefInfo)); // signal = null
+        extRefInfo.setSignalInfo(new ExtRefSignalInfo());
+        assertThrows(IllegalArgumentException.class, () -> sclManager.updateExtRefSource(scd,extRefInfo)); // signal invalid
+
+        extRefInfo.getSignalInfo().setIntAddr("INT_ADDR21");
+        extRefInfo.getSignalInfo().setPDA("da21.bda211.bda212.bda213");
+        extRefInfo.getSignalInfo().setPDO("Do21.sdo21");
+        assertThrows(IllegalArgumentException.class, () -> sclManager.updateExtRefSource(scd,extRefInfo)); // binding = null
+        extRefInfo.setBindingInfo(new ExtRefBindingInfo());
+        assertThrows(IllegalArgumentException.class, () -> sclManager.updateExtRefSource(scd,extRefInfo)); // binding invalid
+
+        extRefInfo.getBindingInfo().setIedName("IED_NAME2"); // internal binding
+        extRefInfo.getBindingInfo().setLdInst("LD_INST12");
+        extRefInfo.getBindingInfo().setLnClass(TLLN0Enum.LLN_0.value());
+        assertThrows(IllegalArgumentException.class, () -> sclManager.updateExtRefSource(scd,extRefInfo)); // CB not allowed
+
+        extRefInfo.getBindingInfo().setIedName("IED_NAME1");
+
+        extRefInfo.setSourceInfo(new ExtRefSourceInfo());
+        extRefInfo.getSourceInfo().setSrcLDInst(extRefInfo.getBindingInfo().getLdInst());
+        extRefInfo.getSourceInfo().setSrcLNClass(extRefInfo.getBindingInfo().getLnClass());
+        extRefInfo.getSourceInfo().setSrcCBName("goose1");
+        TExtRef extRef = assertDoesNotThrow( () -> sclManager.updateExtRefSource(scd,extRefInfo));
+        assertEquals(extRefInfo.getSourceInfo().getSrcCBName(),extRef.getSrcCBName());
+    }
+
+
     private ExtRefSignalInfo createSignalInfo(String pDO, String pDA, String intAddr){
 
         final String DESC = "DESC";
@@ -227,6 +284,4 @@ class SclManagerTest {
 
         return signalInfo;
     }
-
-
 }

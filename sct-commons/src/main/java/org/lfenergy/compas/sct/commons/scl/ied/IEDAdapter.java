@@ -4,9 +4,13 @@
 
 package org.lfenergy.compas.sct.commons.scl.ied;
 
+import com.fasterxml.jackson.databind.node.NullNode;
 import org.lfenergy.compas.scl2007b4.model.TIED;
+import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
 import org.lfenergy.compas.scl2007b4.model.TServices;
+import org.lfenergy.compas.sct.commons.dto.ControlBlock;
 import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
+import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
@@ -47,7 +51,6 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
     public void setIEDName(String iedName) {
         currentElem.setName(iedName);
     }
-
 
     public List<LDeviceAdapter> getLDeviceAdapters(){
         return currentElem.getAccessPoint()
@@ -113,5 +116,41 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
             potentialBinders.addAll(lDeviceAdapter.getExtRefBinders(signalInfo));
         }
         return potentialBinders;
+    }
+
+    public List<ControlBlock<?>> getControlSetByBindingInfo(ExtRefInfo extRefInfo) {
+        if(extRefInfo.getBindingInfo() == null) {
+            throw new IllegalArgumentException("ExtRef binding information are missing");
+        }
+        return getLDeviceAdapters()
+                .stream()
+                .map(lDeviceAdapter -> {
+                    List<AbstractLNAdapter<?>> lnAdapters = new ArrayList<>();
+                    if(extRefInfo.getBindingInfo().getLnClass() == null){
+                        lnAdapters.add(lDeviceAdapter.getLN0Adapter());
+                        lnAdapters.addAll(lDeviceAdapter.getLNAdapters());
+                    } else if(TLLN0Enum.LLN_0.value().equals(extRefInfo.getBindingInfo().getLnClass())){
+                        lnAdapters.add(lDeviceAdapter.getLN0Adapter());
+                    } else {
+                        try {
+                            lnAdapters.add(
+                                    lDeviceAdapter.getLNAdapter(
+                                            extRefInfo.getBindingInfo().getLnClass(),
+                                            extRefInfo.getBindingInfo().getLnInst(),
+                                            extRefInfo.getBindingInfo().getPrefix())
+                            );
+                        } catch (ScdException e) {
+                            throw new IllegalArgumentException(e);
+                        }
+                    }
+                    return lnAdapters;
+                })
+                .flatMap(Collection::stream)
+                .map(lnAdapter -> {
+
+                    return lnAdapter.getControlSetByExtRefInfo(extRefInfo);
+                })
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
     }
 }

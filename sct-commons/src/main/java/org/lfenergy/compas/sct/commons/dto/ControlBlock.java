@@ -22,6 +22,7 @@ import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 @Setter
 @NoArgsConstructor
 public abstract class ControlBlock<T extends ControlBlock> {
+
     protected String id; /// appID or smvID
     protected String name;
     protected String dataSetRef;
@@ -36,6 +38,13 @@ public abstract class ControlBlock<T extends ControlBlock> {
     protected long confRev;
     protected List<TControlWithIEDName.IEDName> iedNames = new ArrayList<>();
     protected TPredefinedTypeOfSecurityEnum securityEnable = TPredefinedTypeOfSecurityEnum.NONE;
+    // summarized info about the LN holding this CB
+    protected String iedName;
+    protected String ldInst;
+    protected String prefix;
+    protected String lnClass;
+    protected String lnInst;
+
 
     protected abstract Class<T> getClassType();
     public abstract TServiceType getServiceType();

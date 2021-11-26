@@ -7,7 +7,6 @@ package org.lfenergy.compas.sct.commons.dto;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.sct.commons.scl.com.ConnectedAPAdapter;
 import org.lfenergy.compas.sct.commons.scl.com.SubNetworkAdapter;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.util.List;
@@ -34,7 +33,7 @@ class SubNetworkDTOTest {
         Mockito.when(subNetworkAdapter.getName()).thenReturn("sName");
         Mockito.when(subNetworkAdapter.getType()).thenReturn(SubNetworkDTO.SubnetworkType.IP.toString());
         Mockito.when(connectedAPAdapter.getApName()).thenReturn(DTO.AP_NAME);
-        Mockito.when(connectedAPAdapter.getIedName()).thenReturn(DTO.IED_NAME);
+        Mockito.when(connectedAPAdapter.getIedName()).thenReturn(DTO.HOLDER_IED_NAME);
 
         SubNetworkDTO subNetworkDTO = SubNetworkDTO.from(subNetworkAdapter);
         assertEquals("sName",subNetworkDTO.getName());

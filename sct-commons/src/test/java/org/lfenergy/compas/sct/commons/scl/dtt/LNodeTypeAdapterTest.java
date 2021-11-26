@@ -44,7 +44,7 @@ class LNodeTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TLNo
                 () -> new LNodeTypeAdapter(sclElementAdapter,tlNodeType)
         );
 
-        assertEquals(DTO.LN_CLASS,lNodeTypeAdapter.getLNClass());
+        assertEquals(DTO.HOLDER_LN_CLASS,lNodeTypeAdapter.getLNClass());
         assertTrue(lNodeTypeAdapter.getD0TypeId("Op").isPresent());
 
         assertTrue(lNodeTypeAdapter.hasSameContentAs(tlNodeType1));
@@ -98,7 +98,7 @@ class LNodeTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TLNo
         TLNodeType tlNodeType = new TLNodeType();
         tlNodeType.setId("BDA1");
         tlNodeType.setIedType("IEDTYPE");
-        tlNodeType.getLnClass().add(DTO.LN_CLASS);
+        tlNodeType.getLnClass().add(DTO.HOLDER_LN_CLASS);
 
         TDO tdo = new TDO();
         tdo.setType("DO1");

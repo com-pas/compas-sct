@@ -4,11 +4,9 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
-import org.mockito.ArgumentMatchers;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
@@ -23,10 +21,10 @@ class IedDTOTest {
         IedDTO iedDTO = DTO.createIedDTO();
 
         assertAll("IedDTO",
-                () -> assertEquals(DTO.IED_NAME, iedDTO.getName()),
+                () -> assertEquals(DTO.HOLDER_IED_NAME, iedDTO.getName()),
                 () -> assertFalse(iedDTO.getLDevices().isEmpty())
         );
-        assertEquals(DTO.IED_NAME, new IedDTO(DTO.IED_NAME).getName());
+        assertEquals(DTO.HOLDER_IED_NAME, new IedDTO(DTO.HOLDER_IED_NAME).getName());
     }
 
     @Test
@@ -36,7 +34,7 @@ class IedDTOTest {
         MockedStatic<LDeviceDTO>  lDeviceDTOMockedStatic= Mockito.mockStatic(LDeviceDTO.class);
         Mockito.when(iedAdapter.getLDeviceAdapters()).thenReturn(List.of(lDeviceAdapter));
         lDeviceDTOMockedStatic.when(()-> LDeviceDTO.from(lDeviceAdapter,null)).thenReturn(new LDeviceDTO());
-        Mockito.when(iedAdapter.getName()).thenReturn(DTO.IED_NAME);
+        Mockito.when(iedAdapter.getName()).thenReturn(DTO.HOLDER_IED_NAME);
 
 
         IedDTO iedDTO = IedDTO.from(iedAdapter,null);
@@ -48,10 +46,10 @@ class IedDTOTest {
     void testAddLDevice(){
         IedDTO iedDTO = new IedDTO();
         assertTrue(iedDTO.getLDevices().isEmpty());
-        iedDTO.addLDevice(DTO.LD_INST, "LDName");
+        iedDTO.addLDevice(DTO.HOLDER_LD_INST, "LDName");
         assertFalse(iedDTO.getLDevices().isEmpty());
 
-        assertTrue(iedDTO.getLDeviceDTO(DTO.LD_INST).isPresent());
+        assertTrue(iedDTO.getLDeviceDTO(DTO.HOLDER_LD_INST).isPresent());
     }
 
 }

@@ -5,9 +5,11 @@
 package org.lfenergy.compas.sct.commons.scl.ied;
 
 
+import lombok.NonNull;
 import org.lfenergy.compas.scl2007b4.model.LN0;
 import org.lfenergy.compas.scl2007b4.model.TGSEControl;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
+import org.lfenergy.compas.scl2007b4.model.TReportControl;
 import org.lfenergy.compas.scl2007b4.model.TSampledValueControl;
 import org.lfenergy.compas.sct.commons.dto.GooseControlBlock;
 import org.lfenergy.compas.sct.commons.dto.SMVControlBlock;
@@ -53,32 +55,5 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
 
     public void addControlBlock(SMVControlBlock controlBlock) {
         currentElem.getSampledValueControl().add(controlBlock.createControlBlock());
-    }
-
-    /**
-     * Get all GSE control block that references a given Data Set
-     *
-     * @param dataSetRef Data set reference
-     * @return list of GSE control block
-     */
-    public List<TGSEControl> lookUpGseControlBlocks(String dataSetRef) {
-        return currentElem.getGSEControl()
-                .stream()
-                .filter(tgseControl -> Objects.equals(dataSetRef,tgseControl.getDatSet()))
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Get all SMV control block that references a given Data Set
-     *
-     * @param dataSetRef Data set reference
-     * @return list of SMV control block
-     */
-    public List<TSampledValueControl> lookUpSMVControlBlocks(String dataSetRef) {
-
-        return currentElem.getSampledValueControl()
-                .stream()
-                .filter(tSampledValueControl -> dataSetRef.equals(tSampledValueControl.getDatSet()))
-                .collect(Collectors.toList());
     }
 }

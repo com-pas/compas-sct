@@ -5,10 +5,13 @@
 package org.lfenergy.compas.service;
 
 import org.lfenergy.compas.scl2007b4.model.SCL;
+import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.sct.commons.dto.ConnectedApDTO;
+import org.lfenergy.compas.sct.commons.dto.ControlBlock;
 import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
+import org.lfenergy.compas.sct.commons.dto.ExtRefSourceInfo;
 import org.lfenergy.compas.sct.commons.dto.LNodeDTO;
 import org.lfenergy.compas.sct.commons.dto.SubNetworkDTO;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
@@ -116,5 +119,82 @@ public class SclManager {
                 .build();
 
         abstractLNAdapter.updateExtRefBinders(lNodeDTO.getExtRefs());
+    }
+
+
+    public List<ControlBlock<?>> getExtRefSourceInfo(SCL scd, ExtRefInfo extRefInfo) throws ScdException {
+
+
+        ExtRefSignalInfo signalInfo = extRefInfo.getSignalInfo();
+        if(!signalInfo.isValid()){
+            throw new IllegalArgumentException("Invalid or missing attributes in ExtRef signal info");
+        }
+        ExtRefBindingInfo bindingInfo = extRefInfo.getBindingInfo();
+        if(!bindingInfo.isValid()){
+            throw new IllegalArgumentException("Invalid or missing attributes in ExtRef binding info");
+        }
+
+        String iedName = extRefInfo.getHolderIedName();
+        if(bindingInfo.getIedName().equals(iedName)){
+            throw new IllegalArgumentException(String.format("Internal binding can't have control block"));
+        }
+
+        String ldInst = extRefInfo.getHolderLdInst();
+        String lnClass = extRefInfo.getHolderLnClass();
+        String lnInst = extRefInfo.getHolderLnInst();
+        // Check holder (IED,LD,LN) exists
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapter(iedName);
+        LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
+                .orElseThrow(
+                        () -> new ScdException(String.format("Unknown LDevice (%s) in IED (%s)", ldInst, iedName))
+                );
+        AbstractLNAdapter<?> lnAdapter = AbstractLNAdapter.builder()
+                .withLDeviceAdapter(lDeviceAdapter)
+                .withLnClass(lnClass)
+                .withLnInst(lnInst)
+                .build();
+
+        lnAdapter.checkExtRefInfoCoherence(extRefInfo);
+
+        // Get CBs
+        IEDAdapter srcIEDAdapter = sclRootAdapter.getIEDAdapter(bindingInfo.getIedName());
+        return srcIEDAdapter.getControlSetByBindingInfo(extRefInfo);
+    }
+
+    public TExtRef updateExtRefSource(SCL scd, ExtRefInfo extRefInfo) throws ScdException {
+        String iedName = extRefInfo.getHolderIedName();
+        String ldInst = extRefInfo.getHolderLdInst();
+        String lnClass = extRefInfo.getHolderLnClass();
+        String lnInst = extRefInfo.getHolderLnInst();
+
+        ExtRefSignalInfo signalInfo = extRefInfo.getSignalInfo();
+        if(signalInfo == null || !signalInfo.isValid()){
+            throw new IllegalArgumentException("Invalid or missing attributes in ExtRef signal info");
+        }
+        ExtRefBindingInfo bindingInfo = extRefInfo.getBindingInfo();
+        if(bindingInfo == null || !bindingInfo.isValid()){
+            throw new IllegalArgumentException("Invalid or missing attributes in ExtRef binding info");
+        }
+        if(bindingInfo.getIedName().equals(iedName)){
+            throw new IllegalArgumentException(String.format("Internal binding can't have control block"));
+        }
+        ExtRefSourceInfo sourceInfo = extRefInfo.getSourceInfo();
+        if(sourceInfo == null || !sourceInfo.isValid()){
+            throw new IllegalArgumentException("Invalid or missing attributes in ExtRef binding info");
+        }
+
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapter(iedName);
+        LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
+                .orElseThrow(
+                        () -> new ScdException(String.format("Unknown LDevice (%s) in IED (%s)", ldInst, iedName))
+                );
+        var anLNAdapter = AbstractLNAdapter.builder()
+                .withLDeviceAdapter(lDeviceAdapter)
+                .withLnClass(lnClass)
+                .withLnInst(lnInst)
+                .build();
+        return anLNAdapter.updateExtRefSource(extRefInfo);
     }
 }

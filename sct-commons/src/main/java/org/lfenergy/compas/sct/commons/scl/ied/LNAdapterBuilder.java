@@ -8,8 +8,8 @@ import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
 public class LNAdapterBuilder {
-    private String lnInst;
-    private String prefix;
+    private String lnInst = "";
+    private String prefix = "";
     private String lnClass = TLLN0Enum.LLN_0.value();
     private LDeviceAdapter lDeviceAdapter;
 
@@ -39,6 +39,10 @@ public class LNAdapterBuilder {
         }
         if(TLLN0Enum.LLN_0.value().equals(lnClass)){
             return lDeviceAdapter.getLN0Adapter();
+        }
+
+        if(lnClass == null || lnInst == null){ // none LLN0 must an lnInst!
+            throw new IllegalArgumentException("Missing lnClass and/or lnInst");
         }
         return lDeviceAdapter.getLNAdapter(lnClass, lnInst, prefix);
     }

@@ -18,11 +18,13 @@ import java.util.Objects;
 @Getter
 @Setter
 public class DataTypeName {
-    protected String name;
+    protected String name = "";
     protected String validationPattern = "";
     private List<String> structNames = new ArrayList<>();
 
-    public DataTypeName(@NonNull String dataName){
+    public DataTypeName(String dataName){
+        if(dataName == null) return;
+
         String[] tokens = dataName.split("\\.");
         name = tokens[0];
         if(tokens.length > 1){
