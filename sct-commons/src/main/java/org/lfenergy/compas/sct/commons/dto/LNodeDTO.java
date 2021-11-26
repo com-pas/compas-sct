@@ -57,12 +57,12 @@ public class LNodeDTO {
                     extRefList.stream()
                             .map(tExtRef -> {
                                 ExtRefInfo extRefInfo = new ExtRefInfo(tExtRef);
-                                extRefInfo.setLnClass(lNodeDTO.nodeClass);
-                                extRefInfo.setLnInst(lNodeDTO.inst);
-                                extRefInfo.setPrefix(lNodeDTO.prefix);
+                                extRefInfo.setHolderLnClass(lNodeDTO.nodeClass);
+                                extRefInfo.setHolderLnInst(lNodeDTO.inst);
+                                extRefInfo.setHolderPrefix(lNodeDTO.prefix);
                                 LDeviceAdapter lDeviceAdapter = (LDeviceAdapter)nodeAdapter.getParentAdapter();
-                                extRefInfo.setIedName(lDeviceAdapter.getParentAdapter().getName());
-                                extRefInfo.setLdInst(lDeviceAdapter.getInst());
+                                extRefInfo.setHolderIedName(lDeviceAdapter.getParentAdapter().getName());
+                                extRefInfo.setHolderLdInst(lDeviceAdapter.getInst());
                                 return extRefInfo;
                             })
                             .collect(Collectors.toList())

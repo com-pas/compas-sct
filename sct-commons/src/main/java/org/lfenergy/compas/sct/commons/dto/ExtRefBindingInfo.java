@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
+import org.lfenergy.compas.scl2007b4.model.TFCDA;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
 import org.lfenergy.compas.scl2007b4.model.TServiceType;
 
@@ -76,7 +77,7 @@ public class ExtRefBindingInfo {
 
     public boolean isValid() {
         final String validationRegex = DaTypeName.VALIDATION_REGEX;
-        String doRef = doName.toString();
+        String doRef = doName == null ? "" : doName.toString();
 
         Pattern pattern = Pattern.compile(validationRegex,Pattern.MULTILINE);
         Matcher matcher = pattern.matcher(doRef);
@@ -89,5 +90,39 @@ public class ExtRefBindingInfo {
                 !StringUtils.isBlank(ldInst) &&
                 !StringUtils.isBlank(lnClass) &&
                 (TLLN0Enum.LLN_0.value().equals(lnClass) || !StringUtils.isBlank(lnInst)) ;
+    }
+
+    public boolean isWrappedIn(TExtRef tExtRef){
+        return Objects.equals(iedName,tExtRef.getIedName()) &&
+                Objects.equals(ldInst,tExtRef.getLdInst()) &&
+                Objects.equals(prefix, tExtRef.getPrefix()) &&
+                Objects.equals(lnInst, tExtRef.getLnInst()) &&
+                tExtRef.getLnClass().contains(lnClass) &&
+                Objects.equals(serviceType, tExtRef.getServiceType());
+    }
+
+    public boolean isNull(){
+        return iedName == null &&
+                ldInst == null &&
+                prefix == null &&
+                lnInst == null &&
+                lnClass == null &&
+                doName == null &&
+                daName == null &&
+                serviceType == null;
+    }
+
+
+    @Override
+    public String toString() {
+        return "ExtRefBindingInfo{" +
+                "iedName='" + iedName + '\'' +
+                ", ldInst='" + ldInst + '\'' +
+                ", prefix='" + prefix + '\'' +
+                ", lnClass='" + lnClass + '\'' +
+                ", lnInst='" + lnInst + '\'' +
+                ", lnType='" + lnType + '\'' +
+                ", serviceType=" + serviceType.value() +
+                '}';
     }
 }

@@ -96,4 +96,16 @@ public class ExtRefSignalInfo{
 
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "ExtRefSignalInfo{" +
+                "desc='" + desc + '\'' +
+                ", pLN='" + pLN + '\'' +
+                ", pDO='" + pDO + '\'' +
+                ", pDA='" + pDA + '\'' +
+                ", intAddr='" + intAddr + '\'' +
+                ", pServT=" + pServT.value() +
+                '}';
+    }
 }

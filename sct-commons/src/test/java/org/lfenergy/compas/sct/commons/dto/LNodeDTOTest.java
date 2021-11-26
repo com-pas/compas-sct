@@ -26,19 +26,19 @@ class LNodeDTOTest {
     @Test
     void testConstructor(){
         LNodeDTO lNodeDTO = new LNodeDTO();
-        lNodeDTO.setNodeClass(DTO.LN_CLASS);
-        lNodeDTO.setInst(DTO.LN_INST);
-        lNodeDTO.setPrefix(DTO.PREFIX);
+        lNodeDTO.setNodeClass(DTO.HOLDER_LN_CLASS);
+        lNodeDTO.setInst(DTO.HOLDER_LN_INST);
+        lNodeDTO.setPrefix(DTO.HOLDER_LN_PREFIX);
         lNodeDTO.setNodeType(DTO.LN_TYPE);
         assertAll("LNODE",
                 ()-> assertTrue(lNodeDTO.getGooseControlBlocks().isEmpty()),
                 ()-> assertTrue(lNodeDTO.getResumedDataTemplates().isEmpty()),
                 ()-> assertTrue(lNodeDTO.getDatSets().isEmpty()),
                 ()-> assertTrue(lNodeDTO.getExtRefs().isEmpty()),
-                ()-> assertEquals(DTO.LN_INST,lNodeDTO.getInst()),
-                ()-> assertEquals(DTO.LN_CLASS,lNodeDTO.getNodeClass()),
+                ()-> assertEquals(DTO.HOLDER_LN_INST,lNodeDTO.getInst()),
+                ()-> assertEquals(DTO.HOLDER_LN_CLASS,lNodeDTO.getNodeClass()),
                 ()-> assertEquals(DTO.LN_TYPE,lNodeDTO.getNodeType()),
-                ()-> assertEquals(DTO.PREFIX,lNodeDTO.getPrefix())
+                ()-> assertEquals(DTO.HOLDER_LN_PREFIX,lNodeDTO.getPrefix())
         );
         lNodeDTO.addResumedDataTemplate(new ResumedDataTemplate());
         lNodeDTO.addExtRefInfo(new ExtRefInfo());
@@ -61,16 +61,16 @@ class LNodeDTOTest {
     public void testFrom(){
         IEDAdapter iedAdapter = Mockito.mock(IEDAdapter.class);
         LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
-        Mockito.when(iedAdapter.getName()).thenReturn(DTO.IED_NAME);
-        Mockito.when(lDeviceAdapter.getInst()).thenReturn(DTO.LD_INST);
+        Mockito.when(iedAdapter.getName()).thenReturn(DTO.HOLDER_IED_NAME);
+        Mockito.when(lDeviceAdapter.getInst()).thenReturn(DTO.HOLDER_LD_INST);
         Mockito.when(lDeviceAdapter.getParentAdapter()).thenReturn(iedAdapter);
 
         LNAdapter lnAdapter = Mockito.mock(LNAdapter.class);
         Mockito.when(lnAdapter.getParentAdapter()).thenReturn(lDeviceAdapter);
-        Mockito.when(lnAdapter.getLNClass()).thenReturn(DTO.LN_CLASS);
-        Mockito.when(lnAdapter.getLNInst()).thenReturn(DTO.LN_INST);
+        Mockito.when(lnAdapter.getLNClass()).thenReturn(DTO.HOLDER_LN_CLASS);
+        Mockito.when(lnAdapter.getLNInst()).thenReturn(DTO.HOLDER_LN_INST);
         Mockito.when(lnAdapter.getLnType()).thenReturn(DTO.LN_TYPE);
-        Mockito.when(lnAdapter.getPrefix()).thenReturn(DTO.PREFIX);
+        Mockito.when(lnAdapter.getPrefix()).thenReturn(DTO.HOLDER_LN_PREFIX);
 
         TExtRef extRef = DTO.createExtRef();
         Mockito.when(lnAdapter.getExtRefs(null)).thenReturn(List.of(extRef));
@@ -79,29 +79,29 @@ class LNodeDTOTest {
                 new LogicalNodeOptions(true,false,false,false));
         assertNotNull(lNodeDTO);
         assertAll("LNODE",
-                ()-> assertEquals(DTO.LN_INST,lNodeDTO.getInst()),
-                ()-> assertEquals(DTO.LN_CLASS,lNodeDTO.getNodeClass()),
+                ()-> assertEquals(DTO.HOLDER_LN_INST,lNodeDTO.getInst()),
+                ()-> assertEquals(DTO.HOLDER_LN_CLASS,lNodeDTO.getNodeClass()),
                 ()-> assertEquals(DTO.LN_TYPE,lNodeDTO.getNodeType()),
-                ()-> assertEquals(DTO.PREFIX,lNodeDTO.getPrefix()),
+                ()-> assertEquals(DTO.HOLDER_LN_PREFIX,lNodeDTO.getPrefix()),
                 () -> assertEquals(1,lNodeDTO.getExtRefs().size())
         );
         ExtRefInfo extRefInfo = lNodeDTO.getExtRefs().iterator().next();
 
-        assertEquals(DTO.IED_NAME,extRefInfo.getIedName());
-        assertEquals(DTO.LD_INST,extRefInfo.getLdInst());
-        assertEquals(DTO.LN_CLASS,extRefInfo.getLnClass());
-        assertEquals(DTO.LN_INST,extRefInfo.getLnInst());
-        assertEquals(DTO.PREFIX,extRefInfo.getPrefix());
+        assertEquals(DTO.HOLDER_IED_NAME,extRefInfo.getHolderIedName());
+        assertEquals(DTO.HOLDER_LD_INST,extRefInfo.getHolderLdInst());
+        assertEquals(DTO.HOLDER_LN_CLASS,extRefInfo.getHolderLnClass());
+        assertEquals(DTO.HOLDER_LN_INST,extRefInfo.getHolderLnInst());
+        assertEquals(DTO.HOLDER_LN_PREFIX,extRefInfo.getHolderPrefix());
 
     }
 
     @Test
     public void testExtractExtRefInfo(){
         LNAdapter lnAdapter = Mockito.mock(LNAdapter.class);
-        Mockito.when(lnAdapter.getLNClass()).thenReturn(DTO.LN_CLASS);
-        Mockito.when(lnAdapter.getLNInst()).thenReturn(DTO.LN_INST);
+        Mockito.when(lnAdapter.getLNClass()).thenReturn(DTO.HOLDER_LN_CLASS);
+        Mockito.when(lnAdapter.getLNInst()).thenReturn(DTO.HOLDER_LN_INST);
         Mockito.when(lnAdapter.getLnType()).thenReturn(DTO.LN_TYPE);
-        Mockito.when(lnAdapter.getPrefix()).thenReturn(DTO.PREFIX);
+        Mockito.when(lnAdapter.getPrefix()).thenReturn(DTO.HOLDER_LN_PREFIX);
         Mockito.when(lnAdapter.hasInputs()).thenReturn(true);
 
 
@@ -112,10 +112,10 @@ class LNodeDTOTest {
         LNodeDTO lNodeDTO = LNodeDTO.extractExtRefInfo(lnAdapter);
         assertNotNull(lNodeDTO);
         assertAll("LNODE",
-                ()-> assertEquals(DTO.LN_INST,lNodeDTO.getInst()),
-                ()-> assertEquals(DTO.LN_CLASS,lNodeDTO.getNodeClass()),
+                ()-> assertEquals(DTO.HOLDER_LN_INST,lNodeDTO.getInst()),
+                ()-> assertEquals(DTO.HOLDER_LN_CLASS,lNodeDTO.getNodeClass()),
                 ()-> assertEquals(DTO.LN_TYPE,lNodeDTO.getNodeType()),
-                ()-> assertEquals(DTO.PREFIX,lNodeDTO.getPrefix()),
+                ()-> assertEquals(DTO.HOLDER_LN_PREFIX,lNodeDTO.getPrefix()),
                 ()-> assertEquals(1,lNodeDTO.getExtRefs().size())
         );
     }

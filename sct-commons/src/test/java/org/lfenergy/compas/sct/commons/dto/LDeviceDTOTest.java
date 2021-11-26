@@ -30,7 +30,7 @@ class LDeviceDTOTest {
         LDeviceDTO lDeviceDTO = DTO.createLdDTO();
 
         assertAll("LD_DTO",
-                () -> assertEquals(DTO.LD_INST, lDeviceDTO.getLdInst()),
+                () -> assertEquals(DTO.HOLDER_LD_INST, lDeviceDTO.getLdInst()),
                 () -> assertEquals(DTO.LD_NAME, lDeviceDTO.getLdName()),
                 () -> assertFalse(lDeviceDTO.getLNodes().isEmpty())
         );
@@ -52,7 +52,7 @@ class LDeviceDTOTest {
         Mockito.when(lDeviceAdapter.getLN0Adapter()).thenReturn(ln0Adapter);
         lNodeDTOMockedStatic.when(()-> LNodeDTO.from(ln0Adapter,null)).thenReturn(new LNodeDTO());
         lNodeDTOMockedStatic.when(()-> LNodeDTO.from(lnAdapter,null)).thenReturn(new LNodeDTO());
-        Mockito.when(lDeviceAdapter.getInst()).thenReturn(DTO.LD_INST);
+        Mockito.when(lDeviceAdapter.getInst()).thenReturn(DTO.HOLDER_LD_INST);
         Mockito.when(lDeviceAdapter.getLdName()).thenReturn(DTO.LD_NAME);
 
         LDeviceDTO lDeviceDTO = LDeviceDTO.from(lDeviceAdapter,null);
@@ -65,7 +65,7 @@ class LDeviceDTOTest {
     void testAddLNOde(){
         LDeviceDTO lDeviceDTO = new LDeviceDTO();
         assertTrue(lDeviceDTO.getLNodes().isEmpty());
-        lDeviceDTO.addLNode(DTO.LN_CLASS,DTO.LN_INST,DTO.PREFIX,DTO.LN_TYPE);
+        lDeviceDTO.addLNode(DTO.HOLDER_LN_CLASS,DTO.HOLDER_LN_INST,DTO.HOLDER_LN_PREFIX,DTO.LN_TYPE);
         assertFalse(lDeviceDTO.getLNodes().isEmpty());
     }
 }

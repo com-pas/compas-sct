@@ -6,6 +6,7 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 
 
 import lombok.extern.slf4j.Slf4j;
+import org.lfenergy.compas.scl2007b4.model.TDataSet;
 import org.lfenergy.compas.scl2007b4.model.TLDevice;
 import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
