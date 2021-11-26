@@ -4,24 +4,21 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
+import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LNAdapter;
+import org.lfenergy.compas.sct.commons.testhelpers.marshaller.SclTestMarshaller;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class LNodeDTOTest {
-    @BeforeEach
-    public void setUp(){
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     void testConstructor(){

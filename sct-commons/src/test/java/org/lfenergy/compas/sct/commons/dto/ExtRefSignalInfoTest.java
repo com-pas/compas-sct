@@ -4,18 +4,19 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.scl2007b4.model.TServiceType;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Slf4j
 class ExtRefSignalInfoTest {
     @Test
     void testConstruction(){
         ExtRefSignalInfo signalInfo = DTO.createExtRefSignalInfo();
-
-
+        log.info("Signal : {}",signalInfo);
         assertEquals(DTO.DESC,signalInfo.getDesc());
         assertEquals(DTO.P_DA,signalInfo.getPDA());
         assertEquals(DTO.P_DO,signalInfo.getPDO());
