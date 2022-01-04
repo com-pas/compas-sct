@@ -17,10 +17,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class BDAAdapterTest extends AbstractDTTLevel<DATypeAdapter,TBDA> {
 
     @Test
-    void testAmChildElementRef() throws ScdException {
+    void testAmChildElementRef()  {
         init();
         assertDoesNotThrow(
-                () -> new BDAAdapter(sclElementAdapter,sclElement)
+                () -> new DATypeAdapter.BDAAdapter(sclElementAdapter,sclElement)
         );
     }
 
@@ -40,13 +40,16 @@ class BDAAdapterTest extends AbstractDTTLevel<DATypeAdapter,TBDA> {
     @Test
     void tesHasSameContentAs() {
         init();
-        TBDA tbda = creatBDA();
+        TBDA tbda = createBDA();
         sclElementAdapter.getCurrentElem().getBDA().add(tbda);
-        BDAAdapter bdaAdapter = assertDoesNotThrow(
-                () -> new BDAAdapter(sclElementAdapter,tbda)
+        DATypeAdapter.BDAAdapter bdaAdapter = assertDoesNotThrow(
+                () -> new DATypeAdapter.BDAAdapter(sclElementAdapter,tbda)
         );
+        assertEquals("ENUM_BDA1", bdaAdapter.getType());
+        assertEquals(TPredefinedBasicTypeEnum.ENUM, bdaAdapter.getBType());
+        assertEquals("BDA1", bdaAdapter.getName());
 
-        TBDA tbda1 = creatBDA();
+        TBDA tbda1 = createBDA();
         tbda1.getVal().get(0).setValue("VAL_CHANGED");
         assertFalse(bdaAdapter.hasSameContentAs(tbda1));
 
@@ -63,7 +66,7 @@ class BDAAdapterTest extends AbstractDTTLevel<DATypeAdapter,TBDA> {
         assertFalse(bdaAdapter.hasSameContentAs(tbda1));
     }
 
-    private TBDA creatBDA(){
+    private TBDA createBDA(){
         TBDA tbda = new TBDA();
         tbda.setName("BDA1");
         tbda.setBType(TPredefinedBasicTypeEnum.ENUM);

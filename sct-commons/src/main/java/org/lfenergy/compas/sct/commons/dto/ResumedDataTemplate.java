@@ -9,7 +9,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.lfenergy.compas.scl2007b4.model.TFCEnum;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
+import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedCDCEnum;
+import org.lfenergy.compas.scl2007b4.model.TVal;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -23,10 +25,8 @@ public class ResumedDataTemplate {
     private String lnType;
     private String lnClass;
     private String lnInst;
-    private DoTypeName doName;
-    private DaTypeName daName;
-    private Map<Long,String> daiValues = new HashMap<>();
-    private boolean valImport = false;
+    private DoTypeName doName = new DoTypeName("");
+    private DaTypeName daName = new DaTypeName("");
 
     public static ResumedDataTemplate copyFrom(ResumedDataTemplate dtt){
         ResumedDataTemplate resumedDataTemplate = new ResumedDataTemplate();
@@ -34,30 +34,14 @@ public class ResumedDataTemplate {
         resumedDataTemplate.lnClass = dtt.lnClass;
         resumedDataTemplate.lnInst = dtt.lnInst;
         resumedDataTemplate.lnType = dtt.lnType;
-        resumedDataTemplate.doName = new DoTypeName(dtt.getDoName().toString());
-        resumedDataTemplate.doName.setCdc(dtt.getDoName().getCdc());
-        resumedDataTemplate.daName = new DaTypeName(dtt.getDaName().toString());
-        resumedDataTemplate.daName.setFc(dtt.getDaName().getFc());
-        resumedDataTemplate.daName.setType(dtt.daName.getType());
-        resumedDataTemplate.daName.setBType(dtt.daName.getBType());
-        resumedDataTemplate.daiValues = dtt.getDaiValues().entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        resumedDataTemplate.valImport = dtt.valImport;
+        resumedDataTemplate.doName = DoTypeName.from(dtt.getDoName());
+        resumedDataTemplate.daName = DaTypeName.from(dtt.getDaName());
 
         return resumedDataTemplate;
     }
 
-
     public boolean isUpdatable(){
-        TFCEnum fc = daName.getFc();
-        return valImport &&
-            (fc == TFCEnum.CF ||
-                fc == TFCEnum.DC ||
-                fc == TFCEnum.SG ||
-                fc == TFCEnum.SP ||
-                fc == TFCEnum.ST ||
-                fc == TFCEnum.SE
-            );
+       return daName.isDefined() ? daName.isUpdatable() : false;
     }
 
     public String getObjRef(String iedName, String ldInst){
@@ -82,33 +66,125 @@ public class ResumedDataTemplate {
     }
 
     public String getDoRef(){
-        return doName.toString();
+        return isDoNameDefined() ? doName.toString() : "";
     }
 
     public String getDaRef(){
-        return daName.toString();
+        return isDaNameDefined() ? daName.toString() : "";
     }
 
     public List<String> getDaRefList(){
         ArrayList<String> daRefList = new ArrayList<>();
-        daRefList.add(daName.getName());
-        daRefList.addAll(daName.getStructNames());
+        if(isDaNameDefined()) {
+            daRefList.add(daName.getName());
+            daRefList.addAll(daName.getStructNames());
+        }
         return daRefList;
     }
 
-    public void setDoName(DoTypeName doName){
-        this.doName = doName;
+    public TFCEnum getFc(){
+        return daName.isDefined() ? daName.getFc() : null;
     }
 
+    public void setFc(TFCEnum fc){
+        if(isDaNameDefined()){
+            daName.setFc(fc);
+        } else {
+            throw new IllegalArgumentException("Cannot set functional constrain for undefined DA");
+        }
+    }
+
+    public TPredefinedCDCEnum getCdc(){
+        return daName.isDefined() ? doName.getCdc() : null;
+    }
+
+    public void setCdc(TPredefinedCDCEnum cdc){
+        if(isDoNameDefined()){
+            doName.setCdc(cdc);
+        } else {
+            throw new IllegalArgumentException("Cannot set CDC for undefined DOType");
+        }
+    }
+
+    public List<String> getSdoNames(){
+        if(!isDoNameDefined()) return new ArrayList<>();
+        return List.of(doName.getStructNames().toArray(new String[0]));
+    }
+
+    public List<String> getBdaNames(){
+        if(!isDaNameDefined()) return new ArrayList<>();
+        return List.of(daName.getStructNames().toArray(new String[0]));
+    }
+
+    public <T extends DataTypeName> void addStructName(String structName, Class<T> cls){
+        if(cls.equals(DaTypeName.class) && isDaNameDefined()) {
+            daName.addStructName(structName);
+        } else if(cls.equals(DoTypeName.class) && isDoNameDefined()) {
+            doName.addStructName(structName);
+        }  else {
+            throw new IllegalArgumentException("Cannot add Struct name for undefined data type");
+        }
+    }
+
+    public boolean isDoNameDefined() {
+        return doName != null && doName.isDefined();
+    }
+
+    public boolean isDaNameDefined() {
+        return daName != null && daName.isDefined();
+    }
+
+    public TPredefinedBasicTypeEnum getBType(){
+        return daName != null ? daName.getBType() : null;
+    }
+
+    public void setType(String type){
+        if(isDaNameDefined()){
+            daName.setType(type);
+        } else {
+            throw new IllegalArgumentException("Cannot define type for undefined BDA");
+        }
+    }
+
+    public String getType(){
+        return daName != null ? daName.getType() : null;
+    }
+
+    public void setBType(String bType){
+        if(isDaNameDefined()){
+            daName.setBType(TPredefinedBasicTypeEnum.fromValue(bType));
+        } else {
+            throw new IllegalArgumentException("Cannot define Basic type for undefined DA or BDA");
+        }
+    }
+
+    public void setDoName(DoTypeName doName){
+        this.doName = DoTypeName.from(doName);
+    }
     public void setDoName(String doName){
         this.doName = new DoTypeName(doName);
     }
 
     public void setDaName(DaTypeName daName){
-        this.daName = daName;
+        this.daName = DaTypeName.from(daName);
     }
-
     public void setDaName(String daName){
         this.daName = new DaTypeName(daName);
+    }
+
+    public void setDaiValues(List<TVal> values) {
+        if(isDaNameDefined()){
+            daName.setDaiValues(values);
+        }
+    }
+
+    public void setValImport(boolean valImport) {
+        if(isDaNameDefined()){
+            daName.setValImport(valImport);
+        }
+    }
+
+    public boolean isValImport(){
+        return daName.isValImport();
     }
 }

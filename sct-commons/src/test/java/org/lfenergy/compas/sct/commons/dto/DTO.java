@@ -163,12 +163,11 @@ public class DTO {
 
         rDTT.setDoName("do.sdo1.sdo2");
         rDTT.setDaName("da.bda1.bda2");
-        rDTT.getDoName().setCdc(TPredefinedCDCEnum.fromValue(CDC));
-        rDTT.getDaName().setFc(TFCEnum.fromValue(FC));
-        rDTT.getDaName().setBType("bType");
-        rDTT.getDaName().setType("type");
+        rDTT.setCdc(TPredefinedCDCEnum.fromValue(CDC));
+        rDTT.setFc(TFCEnum.fromValue(FC));
+        rDTT.setBType("Check");
+        rDTT.setType("type");
         rDTT.setValImport(true);
-        rDTT.getDaiValues().put(1L,"toto");
 
         return rDTT;
     }

@@ -5,22 +5,26 @@
 package org.lfenergy.compas.sct.commons.scl.dtt;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.DoTypeName;
+import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
-import org.lfenergy.compas.sct.commons.Utils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Queue;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Slf4j
-public class DOTypeAdapter
-        extends SclElementAdapter<DataTypeTemplateAdapter, TDOType>
-        implements IDTTComparable<TDOType> {
+public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
 
     public DOTypeAdapter(DataTypeTemplateAdapter parentAdapter, TDOType currentElem) {
         super(parentAdapter, currentElem);
@@ -30,6 +34,7 @@ public class DOTypeAdapter
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getDOType().contains(currentElem);
     }
+
 
     public boolean containsDAWithDAName(String da){
         return currentElem.getSDOOrDA()
@@ -49,6 +54,55 @@ public class DOTypeAdapter
                         tda -> tda.getBType().equals(TPredefinedBasicTypeEnum.ENUM) &&
                                 tda.getType().equals(enumTypeId)
                 );
+    }
+
+    Pair<String,DOTypeAdapter> findPathDoType2DA(String daName) throws ScdException {
+        if(containsDAWithDAName(daName)){
+            // Attention : Do this check before calling this function
+            // It is not interesting to no have the DO/SDO that references this DoType
+            return Pair.of("",this);
+        }
+        DOTypeAdapter doTypeAdapter = this;
+        List<TSDO> sdoTypes = doTypeAdapter.getSDOs();
+
+        Queue<TSDO> doTypeIdQueue = new LinkedList<>();
+        doTypeIdQueue.addAll(sdoTypes);
+        TSDO currSDO;
+        while( (currSDO = doTypeIdQueue.poll()) != null){
+            doTypeAdapter = parentAdapter.getDOTypeAdapterById(currSDO.getType()).orElse(null);
+            if(doTypeAdapter != null && doTypeAdapter.containsDAWithDAName(daName)){
+                doTypeIdQueue.clear();
+                break;
+            }
+            if(doTypeAdapter != null) {
+                // add all SDO
+                doTypeIdQueue.addAll(doTypeAdapter.getSDOs());
+            }
+        }
+        if(currSDO == null || doTypeAdapter == null){
+            throw new ScdException(
+                    String.format("No coherence or path between DOType(%s) and DA(%s)", currentElem.getId(),daName)
+            );
+        }
+        return Pair.of(currSDO.getName(),doTypeAdapter);
+    }
+
+
+    Pair<String,DOTypeAdapter> findPathSDO2DA(String sdoName, String daName) throws ScdException {
+        String errMsg = String.format("No coherence or path between DO/SDO(%s) and DA(%s)", sdoName,daName);
+        Optional<TSDO> opSdo = getSDOByName(sdoName);
+        if(opSdo.isEmpty()) {
+            throw new ScdException(errMsg);
+        }
+
+        DOTypeAdapter doTypeAdapter = parentAdapter.getDOTypeAdapterById(opSdo.get().getType()).orElse(null);
+        if(doTypeAdapter == null) {
+            throw new ScdException(errMsg);
+        }
+        if(doTypeAdapter.containsDAWithDAName(daName)){
+            return Pair.of(opSdo.get().getName(),doTypeAdapter);
+        }
+        return doTypeAdapter.findPathDoType2DA(daName);
     }
 
     public boolean containsDAStructWithDATypeId(String daTypeId) {
@@ -90,7 +144,6 @@ public class DOTypeAdapter
             if(!hasSameContent) return false;
         }
         return true;
-
     }
 
     protected boolean hasSameContent(TSDO thisSdo, TSDO inSdo) {
@@ -101,57 +154,8 @@ public class DOTypeAdapter
     }
 
     protected boolean hasSameContent(TDA thisTDA, TDA inTDA) {
-        final String countField = "count";
-        if(!Objects.equals(thisTDA.getName(),inTDA.getName())
-                || !Objects.equals(thisTDA.getBType(),inTDA.getBType())
-                || !Objects.equals(thisTDA.getType(),inTDA.getType())
-                || !Objects.equals(thisTDA.getFc(),inTDA.getFc())
-                || !Objects.equals(thisTDA.getSAddr(), inTDA.getSAddr())
-                || !Objects.equals(thisTDA.getValKind(), inTDA.getValKind())
-                || thisTDA.isDchg() != inTDA.isDchg()
-                || thisTDA.isDupd() != inTDA.isDupd()
-                || thisTDA.isQchg() != inTDA.isQchg()
-                || thisTDA.isValImport() != inTDA.isValImport()){
-            return false;
-        }
-        if(!Objects.equals(thisTDA.getCount(),inTDA.getCount())){
-            if(thisTDA.getCount().isEmpty()){
-                Utils.setField(thisTDA,countField,null);
-            }
-            if(inTDA.getCount().isEmpty()){
-                Utils.setField(inTDA,countField,null);
-            }
-            return false ;
-        } else if(thisTDA.getCount().isEmpty()){
-            Utils.setField(thisTDA,countField,null);
-            Utils.setField(inTDA,countField,null);
-        }
-
-        if((thisTDA.getBType() == TPredefinedBasicTypeEnum.ENUM ||
-                thisTDA.getBType() == TPredefinedBasicTypeEnum.STRUCT)
-                && !Objects.equals(thisTDA.getType(),inTDA.getType())) {
-            return false;
-        }
-
-        for(TVal prdVal : inTDA.getVal()){
-            boolean hasSameVal = thisTDA.getVal().stream()
-                    .anyMatch(rcvVal -> rcvVal.getValue().equals(prdVal.getValue()) &&
-                            Objects.equals(rcvVal.getSGroup(), prdVal.getSGroup()));
-            if(!hasSameVal) {
-                return false;
-            }
-        }
-
-        for(TProtNs prdProtNs : inTDA.getProtNs()){
-            boolean hasSameVal = thisTDA.getProtNs().stream()
-                    .anyMatch(rcvProtNs -> rcvProtNs.getValue().equals(prdProtNs.getValue()) &&
-                            Objects.equals(rcvProtNs.getType(), prdProtNs.getType()));
-            if(!hasSameVal) {
-                return false;
-            }
-        }
-
-        return true;
+        DAAdapter daAdapter = new DAAdapter(this,thisTDA);
+        return daAdapter.hasSameContentAs(inTDA);
     }
 
     public boolean containsSDOWithDOTypeId(String doTypeId) {
@@ -164,47 +168,140 @@ public class DOTypeAdapter
         return sdoList.stream().anyMatch(sdo -> sdo.getType().equals(doTypeId));
     }
 
-    public void checkStructuredData(DoTypeName doName, int idx) throws ScdException {
-        if(doName.getStructNames().isEmpty() ||
-                idx >= doName.getStructNames().size()) {
-            return;
+    public Optional<Pair<String,DOTypeAdapter>> checkAndCompleteStructData(DoTypeName doTypeName) throws ScdException {
+        int sz = doTypeName.getStructNames().size();
+        if(sz == 0){
+            return Optional.empty();
         }
 
-        String extSDOName = doName.getStructNames().get(idx);
-        String sdoId = currentElem.getSDOOrDA()
-                .stream()
-                .filter(tUnNaming -> tUnNaming.getClass().equals(TSDO.class))
-                .map(TSDO.class::cast)
-                .filter(tsdo -> extSDOName.equals(tsdo.getName()))
-                .map(TSDO::getType)
-                .findFirst()
-                .orElseThrow(
-                        () -> new ScdException("Unknown doName.sdoName :" + doName)
-                );
-        DOTypeAdapter doTypeAdapter = parentAdapter.getDOTypeAdapterById(sdoId)
-                .orElseThrow(
-                        () -> new IllegalArgumentException(
-                                String.format("%s: No referenced to SDO(%s)", doName, extSDOName)
-                        )
-                );
-        doName.setCdc(currentElem.getCdc()); // override CDC
-        doTypeAdapter.checkStructuredData(doName, idx+1);
+        DOTypeAdapter doTypeAdapter = this;
+        for(int i = 0; i < sz; ++i){
+            String sdoName = doTypeName.getStructNames().get(i);
+            doTypeAdapter = doTypeAdapter.getDOTypeAdapterBySdoName(sdoName)
+                    .orElseThrow(
+                            () -> new ScdException(
+                                    String.format(
+                                            "Invalid SDO(%s) in the SDO's chain (%s)", sdoName,doTypeName
+                                    )
+                            )
+                    );
+            doTypeName.setCdc(doTypeAdapter.getCdc());
+        }
+        return Optional.of(Pair.of(doTypeName.getStructNames().get(sz-1),doTypeAdapter));
     }
 
-    public Optional<TSDO> getSDObyName(String lastSdoName) {
+    public Optional<TSDO> getSDOByName(String sdoName) {
+        for(TUnNaming tUnNaming : currentElem.getSDOOrDA()){
+            if(tUnNaming.getClass() == TSDO.class && ((TSDO)tUnNaming).getName().equals(sdoName)){
+                return Optional.of((TSDO)tUnNaming);
+            }
+        }
+        return Optional.empty();
+    }
+
+    public Optional<TDA> getDAByName(String name) {
+        for(TUnNaming tUnNaming : currentElem.getSDOOrDA()){
+            if(tUnNaming.getClass() == TDA.class && ((TDA)tUnNaming).getName().equals(name)){
+                return Optional.of((TDA)tUnNaming);
+            }
+        }
+        return Optional.empty();
+    }
+
+    public TPredefinedCDCEnum getCdc() {
+        return currentElem.getCdc();
+    }
+
+    /**
+     * return a list of Resumed Data Type Templates beginning from this DoType (Do or SDO).
+     * @apiNote This method doesn't check relationship between DO/SDO and DA. Check should be done by caller
+     * @param rootRDTT reference Resumed Data Type Template used to build the list
+     * @param visitedSdo a cache to stored visited SDO
+     * @param filter filter for DO/SDO and DA/BDA
+     * @return list of Resumed Data Type Templates beginning from this DoType (Do or SDO)
+     */
+    public List<ResumedDataTemplate> getResumedDTTs(ResumedDataTemplate rootRDTT,
+                                    Set<String> visitedSdo, ResumedDataTemplate filter) {
+
+        List<ResumedDataTemplate> rDtts = new ArrayList<>();
+        for(TUnNaming tUnNaming: currentElem.getSDOOrDA()){
+            if(tUnNaming.getClass() == TDA.class){
+                TDA tda = (TDA)tUnNaming;
+                if(filter.isDaNameDefined() &&
+                        !filter.getDaName().getName().equals(tda.getName()) ){
+                    // filter out
+                    continue;
+                }
+
+                rootRDTT.setDaName(tda.getName());
+                rootRDTT.getDaName().setFc(tda.getFc());
+                rootRDTT.getDaName().setBType(tda.getBType());
+                if(tda.getBType() == TPredefinedBasicTypeEnum.STRUCT){
+                    DATypeAdapter daTypeAdapter = parentAdapter.getDATypeAdapterById(tda.getType()).orElse(null);
+                    if(daTypeAdapter != null){
+                        // get list of Resumed Data Type Templates beginning from this DAType
+                        List<ResumedDataTemplate> resumedDataTemplateList = daTypeAdapter.getResumedDTTs(
+                                rootRDTT,new HashSet<>(), filter
+                        );
+                        rDtts.addAll(resumedDataTemplateList);
+                    }
+                } else {
+                    ResumedDataTemplate resumedDataTemplate = ResumedDataTemplate.copyFrom(rootRDTT);
+                    resumedDataTemplate.getDaName().setType(tda.getType());
+                    resumedDataTemplate.getDaName().setValImport(tda.isValImport());
+                    resumedDataTemplate.setDaiValues(tda.getVal());
+                    rDtts.add(resumedDataTemplate);
+                }
+            } else {
+                TSDO tsdo = (TSDO)tUnNaming;
+                if((filter != null &&
+                        !filter.getSdoNames().isEmpty() &&
+                        !filter.getSdoNames().contains(tsdo.getName())) ||
+                        visitedSdo.contains(tsdo.getType())){
+                    continue;
+                }
+                ResumedDataTemplate rDtt = ResumedDataTemplate.copyFrom(rootRDTT);
+
+                DOTypeAdapter doTypeAdapter = parentAdapter.getDOTypeAdapterById(tsdo.getType()).orElse(null);
+                visitedSdo.add(tsdo.getType());
+                rDtt.addStructName(tsdo.getName(),DoTypeName.class);
+                if(doTypeAdapter != null){
+                    // get list of Resumed Data Type Templates beginning from this SDO
+                    List<ResumedDataTemplate> localRDtts = doTypeAdapter.getResumedDTTs(rDtt,visitedSdo, filter);
+                    rDtts.addAll(localRDtts);
+                }
+            }
+        }
+        return rDtts;
+    }
+
+
+    public Optional<DOTypeAdapter> getDOTypeAdapterBySdoName(String name) {
+        Optional<TSDO> opSdo = getSDOByName(name);
+        if(!opSdo.isPresent()){
+            return Optional.empty();
+        }
+       return parentAdapter.getDOTypeAdapterById(opSdo.get().getType());
+    }
+
+    public Optional<DAAdapter> getDAAdapterByName(String name){
+        for(TUnNaming tUnNaming : currentElem.getSDOOrDA()){
+            if(tUnNaming.getClass() == TDA.class && ((TDA)tUnNaming).getName().equals(name)){
+                return Optional.of(new DAAdapter(this,(TDA)tUnNaming));
+            }
+        }
+        return  Optional.empty();
+    }
+
+    @Override
+    public DataTypeTemplateAdapter getDataTypeTemplateAdapter() {
+        return parentAdapter;
+    }
+    public List<TSDO> getSDOs() {
         return currentElem.getSDOOrDA()
                 .stream()
                 .filter(tUnNaming -> tUnNaming.getClass().equals(TSDO.class))
                 .map(TSDO.class::cast)
-                .filter(tsdo -> Objects.equals(lastSdoName,tsdo.getName()))
-                .findFirst();
-    }
-
-    public Optional<TDA> getDAByDaName(String extDaName) {
-        return currentElem.getSDOOrDA().stream()
-                .filter(tUnNaming -> tUnNaming.getClass().equals(TDA.class))
-                .map(TDA.class::cast)
-                .filter(tda -> extDaName.equals(tda.getName()))
-                .findFirst();
+                .collect(Collectors.toList());
     }
 }

@@ -143,4 +143,15 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
                 .map(tied -> new IEDAdapter(this,tied))
                 .collect(Collectors.toList());
     }
+
+    public IEDAdapter checkObjRef(String val) throws ScdException {
+        ObjectReference objRef = new ObjectReference(val);
+        for(TIED tied : currentElem.getIED()){
+            IEDAdapter iedAdapter = new IEDAdapter(this,tied);
+            if(iedAdapter.matches(objRef)){
+                return iedAdapter;
+            }
+        }
+        throw new ScdException("Invalid ObjRef: " + val);
+    }
 }

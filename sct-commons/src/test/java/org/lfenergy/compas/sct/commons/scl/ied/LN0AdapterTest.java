@@ -6,10 +6,13 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.LN0;
+import org.lfenergy.compas.scl2007b4.model.SCL;
+import org.lfenergy.compas.scl2007b4.model.TDOI;
 import org.lfenergy.compas.scl2007b4.model.TDataSet;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.scl2007b4.model.TFCDA;
 import org.lfenergy.compas.scl2007b4.model.TGSEControl;
+import org.lfenergy.compas.scl2007b4.model.TIED;
 import org.lfenergy.compas.scl2007b4.model.TInputs;
 import org.lfenergy.compas.scl2007b4.model.TLDevice;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
@@ -18,13 +21,16 @@ import org.lfenergy.compas.scl2007b4.model.TSampledValueControl;
 import org.lfenergy.compas.scl2007b4.model.TServiceType;
 import org.lfenergy.compas.sct.commons.dto.ControlBlock;
 import org.lfenergy.compas.sct.commons.dto.DTO;
-import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
+import org.lfenergy.compas.sct.commons.dto.DaTypeName;
+import org.lfenergy.compas.sct.commons.dto.DoTypeName;
 import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.dto.GooseControlBlock;
 import org.lfenergy.compas.sct.commons.dto.ReportControlBlock;
 import org.lfenergy.compas.sct.commons.dto.SMVControlBlock;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.testhelpers.marshaller.SclTestMarshaller;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
@@ -33,6 +39,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class LN0AdapterTest {
+
+    private static final String SCD_IED_U_TEST = "/ied-test-schema-conf/ied_unit_test.xml";
 
     @Test
     void testAmChildElementRef() throws ScdException {
@@ -238,5 +246,56 @@ class LN0AdapterTest {
         List<ControlBlock<?>> controlBlocks =  ln0Adapter.getControlSetByExtRefInfo(extRefBindingInfo);
         assertFalse(controlBlocks.isEmpty());
         assertEquals(TServiceType.REPORT,controlBlocks.get(0).getServiceType());
+    }
+
+    @Test
+    void testGetDOIAdapters(){
+        LN0 ln0 = new LN0();
+        LN0Adapter ln0Adapter = new LN0Adapter(null,ln0);
+
+        TDOI tdoi = new TDOI();
+        tdoi.setName("Do");
+        ln0.getDOI().add(tdoi);
+        assertFalse(ln0Adapter.getDOIAdapters().isEmpty());
+        assertEquals("Do", ln0Adapter.getDOIAdapters().get(0).getCurrentElem().getName());
+    }
+
+    @Test
+    void testGetDOIAdapterByName(){
+        IEDAdapter iedAdapter = Mockito.mock(IEDAdapter.class);
+        TIED tied = new TIED();
+        Mockito.when(iedAdapter.getCurrentElem()).thenReturn(tied);
+        Mockito.when(iedAdapter.getName()).thenReturn("IED_NAME");
+        LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
+        TLDevice tlDevice = new TLDevice();
+        Mockito.when(lDeviceAdapter.amChildElementRef()).thenReturn(true);
+        Mockito.when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
+        Mockito.when(lDeviceAdapter.getParentAdapter()).thenReturn(iedAdapter);
+
+        LN0 ln0 = new LN0();
+        tlDevice.setLN0(ln0);
+        LN0Adapter ln0Adapter = new LN0Adapter(lDeviceAdapter,ln0);
+
+        TDOI tdoi = new TDOI();
+        tdoi.setName("Do");
+        ln0.getDOI().add(tdoi);
+        assertDoesNotThrow(() -> ln0Adapter.getDOIAdapterByName("Do"));
+        assertThrows(ScdException.class, () -> ln0Adapter.getDOIAdapterByName("Dod"));
+    }
+
+    @Test
+    void testFindMatch() throws Exception {
+        SCL scd = SclTestMarshaller.getSCLFromFile(SCD_IED_U_TEST);
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapter("IED_NAME"));
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS1").get());
+        LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
+        DoTypeName doTypeName = new DoTypeName("Do.sdo1.d");
+        DaTypeName daTypeName = new DaTypeName("antRef.bda1.bda2.bda3");
+        AbstractDAIAdapter<?> daiAdapter = assertDoesNotThrow(() -> ln0Adapter.findMatch(doTypeName,daTypeName).get());
+        assertEquals("bda3",daiAdapter.getCurrentElem().getName());
+
+        DoTypeName doTypeName2 = new DoTypeName("Do.sdo1");
+        assertFalse(ln0Adapter.findMatch(doTypeName2,daTypeName).isPresent());
     }
 }

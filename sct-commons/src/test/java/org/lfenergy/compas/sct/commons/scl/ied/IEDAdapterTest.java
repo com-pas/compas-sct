@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class IEDAdapterTest {
 
-    public static final String SCD_IED_U_TEST = "/ied-test-schema-conf/ied_unit_test.xml";
+    private static final String SCD_IED_U_TEST = "/ied-test-schema-conf/ied_unit_test.xml";
 
 
     @Test
@@ -129,5 +129,16 @@ public class IEDAdapterTest {
 
         assertFalse(controlBlocks.isEmpty());
         assertEquals(ReportControlBlock.class,controlBlocks.get(0).getClass());
+    }
+
+    @Test
+    void TestIsSettingConfig() throws Exception {
+        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapter("IED_NAME"));
+
+        assertTrue(iAdapter.isSettingConfig("LD_INS1"));
+
+        assertThrows(IllegalArgumentException.class,() -> iAdapter.isSettingConfig("UnknownLD"));
     }
 }

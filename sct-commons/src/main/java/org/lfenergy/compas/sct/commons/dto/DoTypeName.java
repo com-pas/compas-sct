@@ -8,7 +8,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedCDCEnum;
 
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -26,6 +28,14 @@ public class DoTypeName extends DataTypeName {
         validationPattern = VALIDATION_REGEX;
     }
 
+    public static DoTypeName from(DoTypeName dataName){
+        DoTypeName doTypeName = new DoTypeName(dataName.toString());
+        if(doTypeName.isDefined()) {
+            doTypeName.setCdc(dataName.getCdc());
+        }
+        return doTypeName;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -40,4 +50,9 @@ public class DoTypeName extends DataTypeName {
         return Objects.hash(super.hashCode(), cdc);
     }
 
+    public void merge(DoTypeName doName) {
+        if(!isDefined()) return;
+        if(cdc == null)
+            cdc = doName.getCdc();
+    }
 }

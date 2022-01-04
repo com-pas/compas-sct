@@ -8,10 +8,13 @@ import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TDataSet;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
+import org.lfenergy.compas.scl2007b4.model.TFCEnum;
 import org.lfenergy.compas.scl2007b4.model.TInputs;
 import org.lfenergy.compas.scl2007b4.model.TLDevice;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
 import org.lfenergy.compas.scl2007b4.model.TLN;
+import org.lfenergy.compas.scl2007b4.model.TVal;
+import org.lfenergy.compas.sct.commons.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.dto.DTO;
 import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
@@ -19,8 +22,10 @@ import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSourceInfo;
 import org.lfenergy.compas.sct.commons.dto.ReportControlBlock;
 
+import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.scl.dtt.AbstractDTTLevel;
 import org.lfenergy.compas.sct.commons.testhelpers.marshaller.SclTestMarshaller;
 import org.mockito.Mockito;
 
@@ -135,10 +140,6 @@ class LNAdapterTest {
 
     }
 
-    @Test
-    void updateExtRefSource() {
-
-    }
 
     @Test
     void checkExtRefInfoCoherence() throws Exception {
@@ -227,6 +228,54 @@ class LNAdapterTest {
         assertEquals(extRefInfo.getSourceInfo().getSrcCBName(), extRef.getSrcCBName());
         assertEquals(extRefInfo.getSourceInfo().getSrcLDInst(), extRef.getSrcLDInst());
         assertTrue(extRef.getLnClass().contains(extRefInfo.getSourceInfo().getSrcLNClass()) );
+
+    }
+
+    @Test
+    void testAddDOI(){
+        TLN tln = new TLN();
+        tln.getLnClass().add(DTO.HOLDER_LN_CLASS);
+        tln.setPrefix(DTO.HOLDER_LN_PREFIX);
+        tln.setInst(DTO.HOLDER_LN_INST);
+        LNAdapter lnAdapter = new LNAdapter(null,tln);
+
+        DOIAdapter doiAdapter = lnAdapter.addDOI("Do");
+        assertEquals("Do",doiAdapter.getCurrentElem().getName());
+    }
+
+    @Test
+    void testUpdate() throws Exception {
+        ResumedDataTemplate rDtt = new ResumedDataTemplate();
+        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapter("IED_NAME"));
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.getLDeviceAdapterByLdInst("LD_INS1").get());
+        AbstractLNAdapter<?> lnAdapter = AbstractLNAdapter.builder()
+                .withLDeviceAdapter(lDeviceAdapter)
+                .withLnClass(TLLN0Enum.LLN_0.value())
+                .build();
+
+        assertThrows(ScdException.class, () -> lnAdapter.updateDAI(rDtt));
+        rDtt.setDoName("Do.sdo1.d");
+        assertThrows(ScdException.class, () -> lnAdapter.updateDAI(rDtt));
+        rDtt.setDaName("antRef.bda1.bda2.bda3");
+        TVal tVal = new TVal();
+        tVal.setValue("newValue");
+        rDtt.setDaiValues(List.of(tVal));
+        assertDoesNotThrow(() -> lnAdapter.updateDAI(rDtt));
+        MarshallerWrapper marshallerWrapper = AbstractDTTLevel.createWrapper();
+
+        lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.getLDeviceAdapterByLdInst("LD_INS2").get());
+        AbstractLNAdapter<?> lnAdapter2 = AbstractLNAdapter.builder()
+                .withLDeviceAdapter(lDeviceAdapter)
+                .withLnClass(TLLN0Enum.LLN_0.value())
+                .build();
+        rDtt.setValImport(true);
+        rDtt.setFc(TFCEnum.SE);
+        assertTrue(rDtt.isUpdatable());
+        assertDoesNotThrow(() -> lnAdapter2.updateDAI(rDtt));
+
+        System.out.println(marshallerWrapper.marshall(scd));
 
     }
 

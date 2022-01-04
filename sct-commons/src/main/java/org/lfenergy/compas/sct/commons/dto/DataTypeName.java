@@ -7,20 +7,26 @@ package org.lfenergy.compas.sct.commons.dto;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @Getter
 @Setter
+@Slf4j
 public class DataTypeName {
-    protected String name = "";
+    protected String name = ""; // dataName or DataAttributeName
     protected String validationPattern = "";
-    private List<String> structNames = new ArrayList<>();
+    private List<String> structNames = new ArrayList<>(); // [.DataName[…]] or [.DAComponentName[ ….]]
 
     public DataTypeName(String dataName){
         if(dataName == null) return;
@@ -30,18 +36,22 @@ public class DataTypeName {
         if(tokens.length > 1){
             int idx = dataName.indexOf(".");
             tokens = dataName.substring(idx + 1).split("\\.");
-            structNames = Arrays.asList(Arrays.copyOf(tokens,tokens.length));
+            structNames = Stream.of(tokens).collect(Collectors.toList());
         }
+    }
+
+    public static DataTypeName from(DataTypeName dataName){
+        return new DataTypeName(dataName.toString());
+    }
+
+    public boolean isDefined(){
+        return !StringUtils.isBlank(name);
     }
 
     public DataTypeName(String name, @NonNull String names){
         this.name = name;
         String[] tokens = names.split("\\.");
-        structNames = Arrays.asList(Arrays.copyOf(tokens,tokens.length));
-    }
-
-    public void setStructNames(List<String> ss){
-        structNames = List.copyOf(ss);
+        structNames = Stream.of(tokens).collect(Collectors.toList());
     }
 
     @Override
@@ -68,5 +78,14 @@ public class DataTypeName {
     @Override
     public int hashCode() {
         return Objects.hash(name, structNames);
+    }
+
+    public void addStructName(String structName) {
+        structNames.add(structName);
+    }
+
+    public String getLastName() {
+        int sz = structNames.size();
+        return sz == 0 ? name : structNames.get(sz - 1);
     }
 }

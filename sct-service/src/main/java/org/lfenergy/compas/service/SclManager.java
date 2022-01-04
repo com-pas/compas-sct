@@ -6,6 +6,7 @@ package org.lfenergy.compas.service;
 
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
+import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
 import org.lfenergy.compas.sct.commons.dto.ConnectedApDTO;
 import org.lfenergy.compas.sct.commons.dto.ControlBlock;
 import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
@@ -13,17 +14,22 @@ import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSourceInfo;
 import org.lfenergy.compas.sct.commons.dto.LNodeDTO;
+import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.dto.SubNetworkDTO;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.com.CommunicationAdapter;
+import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
+import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -197,4 +203,68 @@ public class SclManager {
                 .build();
         return anLNAdapter.updateExtRefSource(extRefInfo);
     }
+
+    public Set<LNodeDTO> getDAI(SCL scd, String iedName, String ldInst,
+                                ResumedDataTemplate rDtt, boolean updatable) throws ScdException {
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iedAdapter = new IEDAdapter(sclRootAdapter,iedName);
+        LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
+                .orElseThrow(
+                        () -> new ScdException(String.format("Unknown LDevice (%s) in IED (%s)", ldInst, iedName))
+                );
+
+        Set<ResumedDataTemplate> resumedDataTemplateSet = lDeviceAdapter.getDAI(rDtt, updatable);
+
+        Set<LNodeDTO> nodeDTOS = new HashSet<>();
+        for(ResumedDataTemplate resumedDTT: resumedDataTemplateSet){
+            LNodeDTO lNodeDTO = nodeDTOS.stream()
+                    .filter(nodeDTO ->
+                            Objects.equals(nodeDTO.getInst(),resumedDTT.getLnInst()) &&
+                                    Objects.equals(nodeDTO.getNodeClass(),resumedDTT.getLnClass()) &&
+                                    Objects.equals(nodeDTO.getNodeType(),resumedDTT.getLnType()) )
+                    .findFirst()
+                    .orElse(null);
+            if(lNodeDTO == null){
+                lNodeDTO = new LNodeDTO(resumedDTT.getLnInst(),resumedDTT.getLnClass(),
+                        resumedDTT.getPrefix(),resumedDTT.getLnType());
+                nodeDTOS.add(lNodeDTO);
+            }
+            lNodeDTO.addResumedDataTemplate(resumedDTT);
+        }
+        return nodeDTOS;
+    }
+
+    public void updateDAI(SCL scd, String iedName, String ldInst, ResumedDataTemplate rDtt) throws ScdException {
+
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        //check(rtt)
+        DataTypeTemplateAdapter dttAdapter = sclRootAdapter.getDataTypeTemplateAdapter();
+        LNodeTypeAdapter lNodeTypeAdapter = dttAdapter.getLNodeTypeAdapterById(rDtt.getLnType())
+                .orElseThrow(() -> new ScdException("Unknown LNodeType : " + rDtt.getLnType()));
+        lNodeTypeAdapter.check(rDtt.getDoName(),rDtt.getDaName());
+
+        Long sGroup = rDtt.getDaName().getDaiValues().keySet().stream().findFirst().orElse(-1L);
+        String val = sGroup < 0 ? null : rDtt.getDaName().getDaiValues().get(sGroup);
+        if(TPredefinedBasicTypeEnum.OBJ_REF.value().equals(rDtt.getBType())){
+            sclRootAdapter.checkObjRef(val);
+        }
+
+        IEDAdapter iedAdapter = new IEDAdapter(sclRootAdapter,iedName);
+        //
+        LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
+                .orElseThrow(
+                        () -> new ScdException(String.format("Unknown LDevice (%s) in IED (%s)", ldInst, iedName))
+                );
+
+        ///
+        AbstractLNAdapter<?> lnAdapter = AbstractLNAdapter.builder()
+                .withLDeviceAdapter(lDeviceAdapter)
+                .withLnClass(rDtt.getLnClass())
+                .withLnInst(rDtt.getLnInst())
+                .withLnPrefix(rDtt.getPrefix())
+                .build();
+        //
+        lnAdapter.updateDAI(rDtt);
+    }
+
 }
