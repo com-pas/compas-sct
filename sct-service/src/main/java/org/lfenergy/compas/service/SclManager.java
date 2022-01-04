@@ -245,7 +245,7 @@ public class SclManager {
 
         Long sGroup = rDtt.getDaName().getDaiValues().keySet().stream().findFirst().orElse(-1L);
         String val = sGroup < 0 ? null : rDtt.getDaName().getDaiValues().get(sGroup);
-        if(TPredefinedBasicTypeEnum.OBJ_REF.value().equals(rDtt.getBType())){
+        if(TPredefinedBasicTypeEnum.OBJ_REF == rDtt.getBType()){
             sclRootAdapter.checkObjRef(val);
         }
 
