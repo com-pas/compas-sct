@@ -4,8 +4,10 @@
 
 package org.lfenergy.compas.sct.commons.scl.com;
 
+import lombok.NonNull;
 import org.lfenergy.compas.scl2007b4.model.TConnectedAP;
 import org.lfenergy.compas.scl2007b4.model.TSubNetwork;
+import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 
 import java.util.List;
@@ -14,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class SubNetworkAdapter extends SclElementAdapter<CommunicationAdapter, TSubNetwork> {
 
-    public SubNetworkAdapter(CommunicationAdapter parentAdapter, TSubNetwork currentElem) {
+    public SubNetworkAdapter(CommunicationAdapter parentAdapter, @NonNull TSubNetwork currentElem) {
         super(parentAdapter, currentElem);
     }
 
@@ -23,7 +25,14 @@ public class SubNetworkAdapter extends SclElementAdapter<CommunicationAdapter, T
         return parentAdapter.getCurrentElem().getSubNetwork().contains(currentElem);
     }
 
-    public ConnectedAPAdapter addConnectedAP(String iedName, String apName) {
+    /**
+     * Create a Connected Access Point for this subnetwork.
+     * Note : this method doesn't check the validity on neither the IED name nor the access point name.
+     * @param iedName
+     * @param apName
+     * @return
+     */
+    public ConnectedAPAdapter addConnectedAP(@NonNull String iedName, @NonNull String apName) {
         TConnectedAP tConnectedAP = currentElem.getConnectedAP().stream()
                 .filter(cap -> Objects.equals(cap.getApName(),apName) &&
                         Objects.equals(cap.getIedName(),iedName))
@@ -52,5 +61,20 @@ public class SubNetworkAdapter extends SclElementAdapter<CommunicationAdapter, T
                 .stream()
                 .map(ap -> new ConnectedAPAdapter(this,ap))
                 .collect(Collectors.toList());
+    }
+
+    public ConnectedAPAdapter getConnectedAPAdapter(String iedName, String apName) throws ScdException {
+        return currentElem.getConnectedAP()
+                .stream()
+                .filter(ap -> ap.getIedName().equals(iedName) && ap.getApName().equals(apName))
+                .map(ap -> new ConnectedAPAdapter(this,ap))
+                .findFirst()
+                .orElseThrow(
+                    () -> new ScdException(
+                        String.format(
+                            "Unknown connected AP (%s,%s) for subnetwork %s", iedName, apName, getName()
+                        )
+                    )
+                );
     }
 }

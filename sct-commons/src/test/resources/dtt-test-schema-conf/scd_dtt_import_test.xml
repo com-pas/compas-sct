@@ -20,10 +20,10 @@
             <SDO name="res" type="DO4"/>
             <DA fc="CF" dchg="true" name="angRef" bType="Enum" type="PhaseAngleReferenceKind"/>
         </DOType>
-        <DOType cdc="WYE" id="DO3">
+        <DOType cdc="DPS" id="DO3">
             <DA fc="ST" name="origin" bType="Struct" type="DA1"/>
         </DOType>
-        <DOType cdc="WYE" id="DO4">
+        <DOType cdc="SPS" id="DO4">
             <DA fc="CF" dchg="true" name="d" bType="VisString255" valKind="RO"/>
         </DOType>
         <DAType id="DA1">
@@ -33,7 +33,7 @@
             <ProtNs>IEC 61850-8-1:2003</ProtNs>
         </DAType>
         <DAType id="DA2">
-            <BDA name="ctlVal" bType="Enum" type="RecCycModKind"/>
+            <BDA name="ctlVal" bType="Enum" type="RecCycModKind" valImport="true"/>
         </DAType>
         <EnumType id="RecCycModKind">
             <EnumVal ord="1">Completed</EnumVal>

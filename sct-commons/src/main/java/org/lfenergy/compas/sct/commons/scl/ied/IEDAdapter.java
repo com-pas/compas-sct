@@ -5,7 +5,9 @@
 package org.lfenergy.compas.sct.commons.scl.ied;
 
 import lombok.extern.slf4j.Slf4j;
+import org.lfenergy.compas.scl2007b4.model.TAccessPoint;
 import org.lfenergy.compas.scl2007b4.model.TIED;
+import org.lfenergy.compas.scl2007b4.model.TLDevice;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
 import org.lfenergy.compas.scl2007b4.model.TServices;
 import org.lfenergy.compas.sct.commons.Utils;
@@ -13,6 +15,7 @@ import org.lfenergy.compas.sct.commons.dto.ControlBlock;
 import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
+import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
@@ -102,6 +105,31 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
         return currentElem.getName();
     }
 
+    public boolean matches(ObjectReference objRef){
+        if(!objRef.getLdName().startsWith(getName())) {
+            return false;
+        }
+        Optional<TLDevice> opLD = currentElem.getAccessPoint()
+                .stream()
+                .filter(tAccessPoint -> tAccessPoint.getServer() != null)
+                .map(tAccessPoint -> tAccessPoint.getServer().getLDevice())
+                .flatMap(Collection::stream)
+                .filter(tlDevice -> objRef.getLdName().equals(getName() + tlDevice.getInst()))
+                .findFirst();
+        if(opLD.isEmpty()) {
+            return false;
+        }
+        LDeviceAdapter lDeviceAdapter = new LDeviceAdapter(this,opLD.get());
+        if(TLLN0Enum.LLN_0.value().equals(objRef.getLNodeName())) {
+            return lDeviceAdapter.getLN0Adapter().matches(objRef);
+        }
+
+        return lDeviceAdapter.getLNAdapters()
+                .stream()
+                .anyMatch(lnAdapter -> objRef.getLNodeName().equals(lnAdapter.getLNodeName())
+                        && lnAdapter.matches(objRef));
+    }
+
     public boolean findAccessPointByName(String apName) {
         return currentElem.getAccessPoint()
                 .stream()
@@ -155,5 +183,24 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
                 .collect(Collectors.toList());
         log.debug(Utils.leaving(startTime));
         return cbs;
+    }
+
+    public boolean isSettingConfig(String ldInst)  {
+        TAccessPoint accessPoint = currentElem.getAccessPoint().stream()
+                .filter(tAccessPoint ->
+                        (tAccessPoint.getServer() != null) &&
+                                tAccessPoint.getServer().getLDevice().stream()
+                                        .anyMatch(tlDevice -> tlDevice.getInst().equals(ldInst))
+
+                )
+                .findFirst()
+                .orElseThrow(
+                        () -> new IllegalArgumentException(
+                                String.format("LD (%s) is unknown in %s", ldInst, getName())
+                        )
+                );
+
+        TServices srv = accessPoint.getServices();
+        return srv != null && srv.getSettingGroups() != null && srv.getSettingGroups().getConfSG() != null;
     }
 }

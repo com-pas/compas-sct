@@ -28,6 +28,14 @@ public class SclRootAdapterTest {
 
         assertThrows(ScdException.class,
                 () ->  sclRootAdapter.get().addHeader("hID1","hVersion1","hRevision1"));
+
+        assertTrue(sclRootAdapter.get().amChildElementRef());
+        assertEquals(SclRootAdapter.RELEASE,sclRootAdapter.get().getSclRelease());
+        assertEquals(SclRootAdapter.VERSION,sclRootAdapter.get().getSclVersion());
+        assertEquals(SclRootAdapter.REVISION,sclRootAdapter.get().getSclRevision());
+
+
+        assertThrows(IllegalArgumentException.class, () -> new SclRootAdapter(new SCL()));
     }
 
     @Test
@@ -38,11 +46,14 @@ public class SclRootAdapterTest {
         SCL icd2 = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/icd2_to_add_test.xml");
 
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        assertThrows(ScdException.class, () -> sclRootAdapter.addIED(new SCL(), "IED_NAME1"));
         assertDoesNotThrow(() -> sclRootAdapter.addIED(icd1, "IED_NAME1"));
         assertThrows(ScdException.class, () -> sclRootAdapter.addIED(icd1, "IED_NAME1"));
         assertDoesNotThrow(() -> sclRootAdapter.addIED(icd2, "IED_NAME2"));
 
         MarshallerWrapper marshallerWrapper = SclTestMarshaller.createWrapper();
         System.out.println(marshallerWrapper.marshall(sclRootAdapter.getCurrentElem()));
+
+
     }
 }

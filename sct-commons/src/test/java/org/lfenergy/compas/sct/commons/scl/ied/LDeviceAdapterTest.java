@@ -12,6 +12,7 @@ import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.dto.LDeviceDTO;
 import org.lfenergy.compas.sct.commons.dto.LNodeDTO;
+import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.marshaller.SclTestMarshaller;
@@ -70,5 +71,28 @@ class LDeviceAdapterTest {
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2").get());
         List<ExtRefInfo> extRefInfoList = assertDoesNotThrow(()-> lDeviceAdapter.getExtRefInfo());
         assertEquals(2,extRefInfoList.size());
+    }
+
+    @Test
+    void TestGetDAI() throws Exception {
+        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapter("IED_NAME"));
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS1").get());
+        var rDtts = lDeviceAdapter.getDAI(new ResumedDataTemplate(),true);
+        assertEquals(3,rDtts.size());
+
+
+
+        ResumedDataTemplate filter = new ResumedDataTemplate();
+        filter.setLnClass(TLLN0Enum.LLN_0.value());
+        rDtts = lDeviceAdapter.getDAI(filter,true);
+        assertEquals(3,rDtts.size());
+
+        lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2").get());
+        filter.setLnClass("ANCR");
+        filter.setLnInst("1");
+        rDtts = lDeviceAdapter.getDAI(filter,true);
+        assertEquals(1,rDtts.size());
     }
 }

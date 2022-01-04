@@ -7,12 +7,9 @@ package org.lfenergy.compas.sct.commons.scl.dtt;
 import lombok.extern.slf4j.Slf4j;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
-import org.lfenergy.compas.sct.commons.dto.DataTypeName;
 import org.lfenergy.compas.sct.commons.dto.DoTypeName;
 import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
-import org.lfenergy.compas.sct.commons.dto.FCDAInfo;
-import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
@@ -35,15 +32,17 @@ public class DataTypeTemplateAdapter extends SclElementAdapter<SclRootAdapter, T
     }
 
     public Optional<LNodeTypeAdapter> getLNodeTypeAdapterById(String id) {
-        return currentElem.getLNodeType()
-                .stream()
-                .filter(lNodeType -> lNodeType.getId().equals(id))
-                .map(l -> new LNodeTypeAdapter(this,l))
-                .findFirst();
+        for(TLNodeType tlNodeType : currentElem.getLNodeType()){
+            if(tlNodeType.getId().equals(id)) {
+                return Optional.of(new LNodeTypeAdapter(this, tlNodeType));
+            }
+        }
+       return Optional.empty();
 
     }
 
     public List<LNodeTypeAdapter> getLNodeTypeAdapters(){
+
         return currentElem.getLNodeType()
                 .stream()
                 .map(tlNodeType -> new LNodeTypeAdapter(this,tlNodeType))
@@ -51,11 +50,12 @@ public class DataTypeTemplateAdapter extends SclElementAdapter<SclRootAdapter, T
     }
 
     public Optional<DOTypeAdapter> getDOTypeAdapterById(String id)  {
-        return currentElem.getDOType()
-                .stream()
-                .filter(t -> t.getId().equals(id))
-                .map(t -> new DOTypeAdapter(this,t))
-                .findFirst();
+        for(TDOType tdoType : currentElem.getDOType()){
+            if(tdoType.getId().equals(id)) {
+                return Optional.of(new DOTypeAdapter(this, tdoType));
+            }
+        }
+        return Optional.empty();
     }
 
     public List<DOTypeAdapter> getDOTypeAdapters(){
@@ -66,11 +66,12 @@ public class DataTypeTemplateAdapter extends SclElementAdapter<SclRootAdapter, T
     }
 
     public Optional<DATypeAdapter> getDATypeAdapterById(String id) {
-        return currentElem.getDAType()
-                .stream()
-                .filter(t -> t.getId().equals(id))
-                .map(t -> new DATypeAdapter(this,t))
-                .findFirst();
+        for(TDAType tdaType : currentElem.getDAType()){
+            if(tdaType.getId().equals(id)) {
+                return Optional.of(new DATypeAdapter(this,tdaType));
+            }
+        }
+        return Optional.empty();
     }
 
     public List<DATypeAdapter> getDATypeAdapters(){
@@ -81,11 +82,12 @@ public class DataTypeTemplateAdapter extends SclElementAdapter<SclRootAdapter, T
     }
 
     public Optional<EnumTypeAdapter> getEnumTypeAdapterById(String id)  {
-        return currentElem.getEnumType()
-                .stream()
-                .filter(enumType -> enumType.getId().equals(id))
-                .map(enumType -> new EnumTypeAdapter(this,enumType))
-                .findFirst();
+        for(TEnumType tEnumType : currentElem.getEnumType()){
+            if(tEnumType.getId().equals(id)) {
+                return Optional.of(new EnumTypeAdapter(this, tEnumType));
+            }
+        }
+        return Optional.empty();
     }
     public List<EnumTypeAdapter> getEnumTypeAdapters(){
         return currentElem.getEnumType()
@@ -138,7 +140,7 @@ public class DataTypeTemplateAdapter extends SclElementAdapter<SclRootAdapter, T
             var bdas = daTypeAdapters.stream()
                     .map(DATypeAdapter::getBdaAdapters)
                     .flatMap(Collection::stream)
-                    .map(BDAAdapter::getCurrentElem)
+                    .map(DATypeAdapter.BDAAdapter::getCurrentElem)
                     .filter(bda -> TPredefinedBasicTypeEnum.ENUM == bda.getBType()
                             && Objects.equals(bda.getType(),oldId))
                     .collect(Collectors.toList());
@@ -288,7 +290,7 @@ public class DataTypeTemplateAdapter extends SclElementAdapter<SclRootAdapter, T
             var tbdas = daTypeAdapters.stream()
                     .map(DATypeAdapter::getBdaAdapters)
                     .flatMap(Collection::stream)
-                    .map(BDAAdapter::getCurrentElem)
+                    .map(DATypeAdapter.BDAAdapter::getCurrentElem)
                     .filter(bda -> TPredefinedBasicTypeEnum.STRUCT == bda.getBType()
                             && Objects.equals(bda.getType(),oldId))
                     .collect(Collectors.toList());
@@ -388,16 +390,6 @@ public class DataTypeTemplateAdapter extends SclElementAdapter<SclRootAdapter, T
         return str.length() <= MAX_LENGTH ? str : str.substring(0,MAX_LENGTH);
     }
 
-    /**
-     * Check if the LNType and FCDA info correspond to a Data Type Template
-     * @param lnType LNodeType identifier
-     * @param fcda FCDA information from a DataSet
-     * @throws ScdException exception is raised otherwise
-     */
-    public void check(String lnType, FCDAInfo fcda) throws ScdException {
-        // to be written soon
-    }
-
     public ExtRefBindingInfo getBinderResumedDTT(String lnType, ExtRefSignalInfo signalInfo) throws ScdException {
 
         ExtRefBindingInfo binder = new ExtRefBindingInfo();
@@ -419,17 +411,18 @@ public class DataTypeTemplateAdapter extends SclElementAdapter<SclRootAdapter, T
         // DoType check
         DoTypeName doName = new DoTypeName(signalInfo.getPDO());
         String extDoName = doName.getName();
-        String doTypeId = lNodeTypeAdapter.getD0TypeId(extDoName)
+        String doTypeId = lNodeTypeAdapter.getDOTypeId(extDoName)
                 .orElseThrow(() ->new ScdException("Unknown doName :" + signalInfo.getPDO()));
 
         DOTypeAdapter doTypeAdapter = getDOTypeAdapterById(doTypeId)
-                .orElseThrow(
-                        () -> new IllegalArgumentException(
-                                String.format("%s: No referenced to DO id : %s", doName, doTypeId)
-                        )
-                );
+            .orElseThrow(
+                () -> new IllegalArgumentException(
+                    String.format("%s: No referenced to DO id : %s", doName, doTypeId)
+                )
+            );
 
-        doTypeAdapter.checkStructuredData(doName, 0);
+        //doTypeAdapter.completeStructuredData(doName);
+        doTypeAdapter.checkAndCompleteStructData(doName);
         binder.setDoName(doName);
 
         if(signalInfo.getPDA() == null){
@@ -439,23 +432,28 @@ public class DataTypeTemplateAdapter extends SclElementAdapter<SclRootAdapter, T
         // DaType check
         DaTypeName daName = new DaTypeName(signalInfo.getPDA());
         String extDaName = daName.getName();
-        String lastSdoName = doName.getStructNames().get(doName.getStructNames().size() - 1);
-        String leafSdoId = checkSdoAndDaLink(lastSdoName,extDaName)
-                .orElseThrow(() -> new ScdException("Invalid ExtRef signal: no coherence between pDO and pDA"));
-        DOTypeAdapter lastDoTypeAdapter = getDOTypeAdapterById(leafSdoId)
-                .orElseThrow(() -> new ScdException("%s: Unknown SDO (%s)"));
-        TDA da = lastDoTypeAdapter.getDAByDaName(extDaName)
+        DOTypeAdapter lastDoTypeAdapter = doTypeAdapter;
+        if(!doTypeAdapter.containsDAWithDAName(extDaName)){
+            var pair = doTypeAdapter.findPathDoType2DA(extDaName);
+            lastDoTypeAdapter = pair.getValue();
+        }
+
+        TDA da = lastDoTypeAdapter.getDAByName(extDaName)
                 .orElseThrow(
                         ()-> new ScdException(
                                 String.format("%s: Unknown DA (%s) in DOType (%s) ", doName, extDaName, doTypeId)
                         )
                 );
-        if(da.getBType() != TPredefinedBasicTypeEnum.STRUCT && !daName.getStructNames().isEmpty() ||
-                da.getBType() == TPredefinedBasicTypeEnum.STRUCT && daName.getStructNames().isEmpty()){
-            throw new ScdException("Invalid ExtRef signal: no coherence between pDO and pDA");
+        if(da.getBType() != TPredefinedBasicTypeEnum.STRUCT && !daName.getStructNames().isEmpty() ){
+            throw new ScdException(
+                    String.format(
+                            "Invalid ExtRef signal: no coherence between pDO(%s) and pDA(%s)",
+                        signalInfo.getPDO(),signalInfo.getPDA()
+                    )
+            );
         }
 
-        if(da.getBType() == TPredefinedBasicTypeEnum.STRUCT){
+        if(da.getBType() == TPredefinedBasicTypeEnum.STRUCT && !daName.getStructNames().isEmpty()){
             String daTypeId = da.getType();
             DATypeAdapter daTypeAdapter = getDATypeAdapterById(daTypeId)
                     .orElseThrow(
@@ -463,52 +461,10 @@ public class DataTypeTemplateAdapter extends SclElementAdapter<SclRootAdapter, T
                                     String.format("%s: Unknown DA (%s), or no reference to its type", daName, extDaName)
                             )
                     );
-
-            daTypeAdapter.checkStructuredData(daName, 0);
+            daTypeAdapter.check(daName);
             daName.setFc(da.getFc());
             binder.setDaName(daName);
         }
         return binder;
-    }
-
-    /**
-     * Check whether an SDO name refers recursively to a DOType that contains DA with a given name.
-     * @param lastSdoName SDO ANme
-     * @param daName DA name
-     * @return DOType ID that contains a DA with given name, null otherwise
-     * @throws ScdException SDO name is unknown in the entire DataTypeTemplate
-     */
-    public Optional<String> checkSdoAndDaLink(String lastSdoName, String daName) throws ScdException {
-
-        List<DOTypeAdapter> doTypeAdapters = getDOTypeAdapters();
-        TSDO sdo = doTypeAdapters.stream()
-                .filter(doTypeAdapter -> doTypeAdapter.getSDObyName(lastSdoName).isPresent())
-                .map(doTypeAdapter -> doTypeAdapter.getSDObyName(lastSdoName).get())
-                .findFirst()
-                .orElseThrow(
-                        () -> new ScdException(String.format("Unknown SDO(%s) in DataTypeTemplate",lastSdoName))
-                );
-
-        Queue<String> doTypeIdQueue = new PriorityQueue<>();
-        doTypeIdQueue.add(sdo.getType());
-        String currDOTypeId;
-        while( (currDOTypeId = doTypeIdQueue.poll()) != null){
-            DOTypeAdapter doTypeAdapter = getDOTypeAdapterById(currDOTypeId).orElseThrow();
-            if(doTypeAdapter.containsDAWithDAName(daName)){
-                doTypeIdQueue.clear();
-                break;
-            }
-            // add all SDO
-            doTypeIdQueue.addAll(
-                    doTypeAdapter.getCurrentElem()
-                            .getSDOOrDA()
-                            .stream()
-                            .filter(tUnNaming -> tUnNaming.getClass().equals(TSDO.class))
-                            .map(TSDO.class::cast)
-                            .map(TSDO::getType)
-                            .collect(Collectors.toList())
-            );
-        }
-        return Optional.of(currDOTypeId);
     }
 }

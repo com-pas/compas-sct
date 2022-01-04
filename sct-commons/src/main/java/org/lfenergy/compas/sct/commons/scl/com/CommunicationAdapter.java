@@ -34,11 +34,6 @@ public class CommunicationAdapter extends SclElementAdapter<SclRootAdapter, TCom
         return currentElem == parentAdapter.getCurrentElem().getCommunication();
     }
 
-    public SubNetworkAdapter getSubNetworkAdapters(String snName) throws ScdException {
-        return findSubnetworkByName(snName).orElseThrow(() -> new ScdException("Unknown Subnetwork : " + snName));
-    }
-
-
     public SubNetworkAdapter addSubnetwork(String snName, String snType,
                                            String iedName, String apName) throws ScdException {
 
@@ -46,7 +41,7 @@ public class CommunicationAdapter extends SclElementAdapter<SclRootAdapter, TCom
         if(!iedAdapter.findAccessPointByName(apName)){
             throw new ScdException("Unknown AccessPoint :" + apName + " in IED :" + iedName);
         }
-        Optional<SubNetworkAdapter> opSubNetworkAdapter = findSubnetworkByName(snName);
+        Optional<SubNetworkAdapter> opSubNetworkAdapter = getSubnetworkByName(snName);
         if(!opSubNetworkAdapter.isPresent()){ // create new subnetwork
             TSubNetwork subNetwork = new TSubNetwork();
             subNetwork.setName(snName);
@@ -60,7 +55,7 @@ public class CommunicationAdapter extends SclElementAdapter<SclRootAdapter, TCom
         return opSubNetworkAdapter.get();
     }
 
-    public Optional<SubNetworkAdapter> findSubnetworkByName(String snName) {
+    public Optional<SubNetworkAdapter> getSubnetworkByName(String snName) {
         return currentElem.getSubNetwork()
                 .stream()
                 .filter(tSubNetwork -> tSubNetwork.getName().equals(snName))

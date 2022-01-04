@@ -67,7 +67,17 @@ class CommunicationAdapterTest {
         tSubNetwork.setName("snName");
         communicationAdapter.getCurrentElem().getSubNetwork().add(tSubNetwork);
 
-        assertTrue(communicationAdapter.findSubnetworkByName("snName").isPresent());
-        assertFalse(communicationAdapter.findSubnetworkByName("snName_NO").isPresent());
+        assertTrue(communicationAdapter.getSubnetworkByName("snName").isPresent());
+        assertFalse(communicationAdapter.getSubnetworkByName("snName_NO").isPresent());
+    }
+
+    @Test
+    void testGetSubNetworkAdapters(){
+        CommunicationAdapter communicationAdapter = new CommunicationAdapter(null,new TCommunication());
+        assertTrue(communicationAdapter.getSubNetworkAdapters().isEmpty());
+        TSubNetwork tSubNetwork = new TSubNetwork();
+        tSubNetwork.setName("snName");
+        communicationAdapter.getCurrentElem().getSubNetwork().add(tSubNetwork);
+        assertFalse(communicationAdapter.getSubNetworkAdapters().isEmpty());
     }
 }

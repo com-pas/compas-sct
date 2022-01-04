@@ -21,6 +21,17 @@
                 <LDevice inst="LD_INST12"> <!-- binder for signal from LD_INST11/LLNO -->
                     <LN0 lnType="LN1" lnClass="LLN0" inst=""/>
                     <LN lnType="LN2" lnClass="ANCR" inst="1">
+                        <DOI name="Do21">
+                            <SDI name="sdo11">
+                                <SDI name="sdo12">
+                                    <SDI name="da11">
+                                        <SDI name="bda111">
+                                            <DAI name="bdapr" valImport="true"/>
+                                        </SDI>
+                                    </SDI>
+                                </SDI>
+                            </SDI>
+                        </DOI>
                         <Inputs>
                             <!-- Signal for external binding (in IED2LD_INST21/LLNO and IED3LD_INST32/PIOC)-->
                             <ExtRef intAddr="INT_ADDR12" pDO="Do12.sdo12" pDA="da12.bda121.bda122"/>
@@ -44,6 +55,7 @@
         </LNodeType>
         <DOType cdc="WYE" id="DO11">
             <SDO name="sdo11" type="DO12"/> <!-- internal binding -->
+            <DA name="da1" bType="Enum" fc="ST" type="RecCycModKind" valImport="true"/>
             <SDO name="sdo21" type="DO12"/> <!-- binder for external IED 2-->
             <SDO name="sdo31" type="DO12"/> <!-- binder for external IED 3-->
         </DOType>
@@ -63,12 +75,13 @@
             <BDA name="bda321" bType="Struct" type="DA12"/> <!-- binder for external IED 3-->
         </DAType>
         <DAType id="DA12">
+            <BDA name="bdapr" bType="VisString255"/>
             <BDA name="bda112" bType="Struct" type="DA13"/> <!-- internal binding -->
             <BDA name="bda222" bType="Struct" type="DA13"/> <!-- binder for external IED 2-->
             <BDA name="bda322" bType="Struct" type="DA13"/> <!-- binder for external IED 3-->
         </DAType>
         <DAType id="DA13">
-            <BDA name="bda113" bType="Enum" type="RecCycModKind"/> <!-- internal binding -->
+            <BDA name="bda113" bType="Enum" type="RecCycModKind" valImport="true"/> <!-- internal binding -->
             <BDA name="bda223" bType="Enum" type="RecCycModKind"/> <!-- binder for external IED 2-->
             <BDA name="bda323" bType="Enum" type="RecCycModKind"/> <!-- binder for external IED 3-->
         </DAType>

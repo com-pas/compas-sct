@@ -20,6 +20,7 @@ import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSourceInfo;
 import org.lfenergy.compas.sct.commons.dto.LNodeDTO;
+import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.dto.SubNetworkDTO;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
@@ -283,5 +284,28 @@ class SclManagerTest {
         signalInfo.setIntAddr(intAddr);
 
         return signalInfo;
+    }
+
+    @Test
+    void testGetDAI() throws Exception {
+        SCL scd = SclTestMarshaller.getSCLFromFile("/import-ieds/ied_1_test.xml");
+        SclManager sclManager = new SclManager();
+
+        Set<LNodeDTO> nodeDTOS = assertDoesNotThrow(
+                ()-> sclManager.getDAI(
+                        scd,"IED_NAME1","LD_INST12",new ResumedDataTemplate(),true
+                )
+        );
+        assertEquals(2,nodeDTOS.size());
+        LNodeDTO[] ArrayLNodeDTO = nodeDTOS.toArray(new LNodeDTO[0]);
+        assertFalse(ArrayLNodeDTO[0].getResumedDataTemplates().isEmpty());
+        assertFalse(ArrayLNodeDTO[1].getResumedDataTemplates().isEmpty());
+
+        assertThrows(
+                ScdException.class,
+                ()-> sclManager.getDAI(
+                        scd,"IED_NAME1","UNKNOWNLD",new ResumedDataTemplate(),true
+                )
+        );
     }
 }
