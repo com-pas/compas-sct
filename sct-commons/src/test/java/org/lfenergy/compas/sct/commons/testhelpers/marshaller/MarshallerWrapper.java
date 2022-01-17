@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.sct.commons;
+package org.lfenergy.compas.sct.commons.testhelpers.marshaller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.lfenergy.compas.core.commons.exception.CompasErrorCode;

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.service;
+package org.lfenergy.compas.sct.commons.scl;
 
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
@@ -17,7 +17,6 @@ import org.lfenergy.compas.sct.commons.dto.LNodeDTO;
 import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.dto.SubNetworkDTO;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.com.CommunicationAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
@@ -33,22 +32,22 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class SclManager {
+public class SclService {
 
 
-    public SclRootAdapter addHistoryItem(SCL scd, String who, String what, String why){
+    public static SclRootAdapter addHistoryItem(SCL scd, String who, String what, String why){
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         HeaderAdapter headerAdapter = sclRootAdapter.getHeaderAdapter();
         headerAdapter.addHistoryItem(who,what,why);
         return sclRootAdapter;
     }
 
-    public IEDAdapter addIED(SCL scd, String iedName, SCL icd) throws ScdException {
+    public static IEDAdapter addIED(SCL scd, String iedName, SCL icd) throws ScdException {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         return sclRootAdapter.addIED(icd,iedName);
     }
 
-    public CommunicationAdapter addSubnetworks(SCL scd, Set<SubNetworkDTO> subNetworks) throws ScdException {
+    public static CommunicationAdapter addSubnetworks(SCL scd, Set<SubNetworkDTO> subNetworks) throws ScdException {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         CommunicationAdapter communicationAdapter = sclRootAdapter.getCommunicationAdapter(true);
         for(SubNetworkDTO subNetworkDTO : subNetworks){
@@ -62,7 +61,7 @@ public class SclManager {
         return communicationAdapter;
     }
 
-    public List<SubNetworkDTO> getSubnetwork(SCL scd) throws ScdException {
+    public static List<SubNetworkDTO> getSubnetwork(SCL scd) throws ScdException {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         CommunicationAdapter communicationAdapter = sclRootAdapter.getCommunicationAdapter(false);
         return communicationAdapter.getSubNetworkAdapters()
@@ -71,7 +70,7 @@ public class SclManager {
                 .collect(Collectors.toList());
     }
 
-    public List<ExtRefInfo> getExtRefInfo(SCL scd, String iedName, String ldInst) throws ScdException {
+    public static List<ExtRefInfo> getExtRefInfo(SCL scd, String iedName, String ldInst) throws ScdException {
 
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapter(iedName);
@@ -83,7 +82,7 @@ public class SclManager {
     }
 
 
-    public List<ExtRefBindingInfo> getExtRefBinders(SCL scd, String iedName, String ldInst,
+    public static List<ExtRefBindingInfo> getExtRefBinders(SCL scd, String iedName, String ldInst,
                                    String lnClass, String lnInst, ExtRefSignalInfo signalInfo) throws ScdException {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapter(iedName);
@@ -109,7 +108,7 @@ public class SclManager {
         return potentialBinders;
     }
 
-    public void updateExtRefBinders(SCL scd, String iedName, String ldInst, LNodeDTO lNodeDTO) throws ScdException {
+    public static void updateExtRefBinders(SCL scd, String iedName, String ldInst, LNodeDTO lNodeDTO) throws ScdException {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = new IEDAdapter(sclRootAdapter,iedName);
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
@@ -128,7 +127,7 @@ public class SclManager {
     }
 
 
-    public List<ControlBlock<?>> getExtRefSourceInfo(SCL scd, ExtRefInfo extRefInfo) throws ScdException {
+    public static List<ControlBlock<?>> getExtRefSourceInfo(SCL scd, ExtRefInfo extRefInfo) throws ScdException {
 
 
         ExtRefSignalInfo signalInfo = extRefInfo.getSignalInfo();
@@ -168,7 +167,7 @@ public class SclManager {
         return srcIEDAdapter.getControlBlocksByBindingInfo(extRefInfo);
     }
 
-    public TExtRef updateExtRefSource(SCL scd, ExtRefInfo extRefInfo) throws ScdException {
+    public static TExtRef updateExtRefSource(SCL scd, ExtRefInfo extRefInfo) throws ScdException {
         String iedName = extRefInfo.getHolderIedName();
         String ldInst = extRefInfo.getHolderLdInst();
         String lnClass = extRefInfo.getHolderLnClass();
@@ -204,7 +203,7 @@ public class SclManager {
         return anLNAdapter.updateExtRefSource(extRefInfo);
     }
 
-    public Set<LNodeDTO> getDAI(SCL scd, String iedName, String ldInst,
+    public static Set<LNodeDTO> getDAI(SCL scd, String iedName, String ldInst,
                                 ResumedDataTemplate rDtt, boolean updatable) throws ScdException {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = new IEDAdapter(sclRootAdapter,iedName);
@@ -234,7 +233,7 @@ public class SclManager {
         return nodeDTOS;
     }
 
-    public void updateDAI(SCL scd, String iedName, String ldInst, ResumedDataTemplate rDtt) throws ScdException {
+    public static void updateDAI(SCL scd, String iedName, String ldInst, ResumedDataTemplate rDtt) throws ScdException {
 
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         //check(rtt)

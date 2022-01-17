@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2021 RTE FRANCE
 //
 // SPDX-License-Identifier: Apache-2.0
-package org.lfenergy.compas.sct.commons;
+package org.lfenergy.compas.sct.commons.testhelpers.marshaller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
