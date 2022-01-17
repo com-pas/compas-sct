@@ -57,9 +57,4 @@ public class ExtRefSourceInfo {
                 srcLNInst == null &&
                 srcPrefix == null;
     }
-
-    public boolean isValid() {
-
-        return true;
-    }
 }
