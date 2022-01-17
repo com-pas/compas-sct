@@ -180,8 +180,8 @@ public class SclManager {
             throw new IllegalArgumentException(String.format("Internal binding can't have control block"));
         }
         ExtRefSourceInfo sourceInfo = extRefInfo.getSourceInfo();
-        if(sourceInfo == null || !sourceInfo.isValid()){
-            throw new IllegalArgumentException("Invalid or missing attributes in ExtRef binding info");
+        if(sourceInfo == null ){
+            throw new IllegalArgumentException("Invalid or missing attributes in ExtRef source info");
         }
 
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
