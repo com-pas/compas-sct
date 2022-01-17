@@ -8,8 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.MarshallerWrapper;
-import org.lfenergy.compas.sct.commons.testhelpers.marshaller.SclTestMarshaller;
+import org.lfenergy.compas.sct.commons.testhelpers.marshaller.MarshallerWrapper;
+import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.concurrent.atomic.AtomicReference;
 

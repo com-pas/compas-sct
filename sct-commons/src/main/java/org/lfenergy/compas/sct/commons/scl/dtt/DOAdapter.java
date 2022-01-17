@@ -28,7 +28,6 @@ public class DOAdapter extends SclElementAdapter<LNodeTypeAdapter, TDO> implemen
         return getDataTypeTemplateAdapter().getDOTypeAdapterById(currentElem.getType());
     }
 
-
     public String getType() {
         return currentElem.getType();
     }

@@ -14,7 +14,7 @@ import org.lfenergy.compas.scl2007b4.model.TLDevice;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
 import org.lfenergy.compas.scl2007b4.model.TLN;
 import org.lfenergy.compas.scl2007b4.model.TVal;
-import org.lfenergy.compas.sct.commons.MarshallerWrapper;
+import org.lfenergy.compas.sct.commons.testhelpers.marshaller.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.dto.DTO;
 import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
@@ -26,7 +26,7 @@ import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.AbstractDTTLevel;
-import org.lfenergy.compas.sct.commons.testhelpers.marshaller.SclTestMarshaller;
+import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.mockito.Mockito;
 
 import java.util.List;

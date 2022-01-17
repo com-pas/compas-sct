@@ -2,13 +2,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.service;
+package org.lfenergy.compas.sct.data.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter;
+
 import org.lfenergy.compas.sct.data.model.IScd;
 import org.lfenergy.compas.sct.data.repository.CompasDataAccessException;
 import org.lfenergy.compas.sct.data.repository.IScdCrudRepository;
@@ -70,29 +68,6 @@ class SimpleScdServiceTest {
         Mockito.when(scdCrudRepository.save(ArgumentMatchers.any(IScd.class)))
                 .thenReturn(createSimpleScd(id));
         assertDoesNotThrow( () -> simpleScdService.updateElement(createSimpleScd(id)));
-    }
-
-    @Test
-    public void testInitScl(){
-        Mockito.when(scdCrudRepository.existsByHeaderId(ArgumentMatchers.any(UUID.class)))
-                .thenReturn(false);
-
-
-        UUID id = UUID.randomUUID();
-        SclRootAdapter sclRootAdapter = assertDoesNotThrow(
-                ()->simpleScdService.initScl(id,"hVersion","hRevision")
-        );
-        HeaderAdapter headerAdapter = sclRootAdapter.getHeaderAdapter();
-        assertEquals(id.toString(), headerAdapter.getHeaderId());
-        assertEquals("hVersion",headerAdapter.getHeaderVersion());
-        assertEquals("hRevision",headerAdapter.getHeaderRevision());
-
-        Mockito.when(scdCrudRepository.existsByHeaderId(ArgumentMatchers.any(UUID.class)))
-                .thenReturn(true);
-        assertThrows(
-                ScdException.class,
-                ()->simpleScdService.initScl(id,"hVersion","hRevision")
-        );
     }
 
     IScd<UUID> createSimpleScd(UUID id){

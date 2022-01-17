@@ -8,12 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
-import org.lfenergy.compas.sct.commons.testhelpers.marshaller.SclTestMarshaller;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-
-import java.util.List;
+import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -73,8 +73,6 @@
         <module>sct-commons</module>
         <module>sct-coverage</module>
         <module>sct-data</module>
-        <module>sct-data-pg</module>
-        <module>sct-service</module>
     </modules>
 
     <build>

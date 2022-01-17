@@ -34,11 +34,6 @@
         </dependency>
         <dependency>
             <groupId>org.lfenergy.compas</groupId>
-            <artifactId>sct-data-pg</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.lfenergy.compas</groupId>
             <artifactId>sct-service</artifactId>
             <version>${project.version}</version>
         </dependency>

@@ -2,10 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.service;
+package org.lfenergy.compas.sct.data.service;
 
-import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.data.model.IScd;
 import org.lfenergy.compas.sct.data.repository.CompasDataAccessException;
 import org.lfenergy.compas.sct.data.repository.IScdCrudRepository;
@@ -31,12 +29,5 @@ public class SimpleScdService<T extends IScd<UUID>> {
 
     public T updateElement(T elem) {
         return scdCrudRepository.update(elem);
-    }
-
-    public SclRootAdapter initScl(UUID hId, String hVersion, String hRevision) throws ScdException {
-        if(scdCrudRepository.existsByHeaderId(hId)){
-            throw new ScdException(String.format("SCL file with header ID [%s] exists already", hId.toString()));
-        }
-        return new SclRootAdapter(hId.toString(),hVersion,hRevision);
     }
 }
