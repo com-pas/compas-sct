@@ -6,20 +6,23 @@ package org.lfenergy.compas.sct.commons.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Setter;
+
+import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
 @NoArgsConstructor
 public class LogicalNodeOptions {
     private boolean withExtRef = false;
-    private boolean withResumedDtt = false;
+    //private boolean withResumedDtt = false;
     private boolean withCB = false;
     private boolean withDatSet = false;
 
-    public LogicalNodeOptions(boolean withExtRef, boolean withResumedDtt, boolean withCB, boolean withDatSet) {
+    public LogicalNodeOptions(boolean withExtRef/*, boolean withResumedDtt*/, boolean withCB, boolean withDatSet) {
         this.withExtRef = withExtRef;
-        this.withResumedDtt = withResumedDtt;
+        //this.withResumedDtt = withResumedDtt;
         this.withCB = withCB;
         this.withDatSet = withDatSet;
     }

@@ -16,23 +16,23 @@ class LogicalNodeOptionsTest {
         assertFalse(logicalNodeOptions.isWithExtRef());
         assertFalse(logicalNodeOptions.isWithCB());
         assertFalse(logicalNodeOptions.isWithDatSet());
-        assertFalse(logicalNodeOptions.isWithResumedDtt());
+        //assertFalse(logicalNodeOptions.isWithResumedDtt());
 
         logicalNodeOptions.setWithCB(true);
         logicalNodeOptions.setWithDatSet(false);
         logicalNodeOptions.setWithExtRef(false);
-        logicalNodeOptions.setWithResumedDtt(false);
+        //logicalNodeOptions.setWithResumedDtt(false);
 
         assertFalse(logicalNodeOptions.isWithExtRef());
         assertTrue(logicalNodeOptions.isWithCB());
         assertFalse(logicalNodeOptions.isWithDatSet());
-        assertFalse(logicalNodeOptions.isWithResumedDtt());
+        //assertFalse(logicalNodeOptions.isWithResumedDtt());
 
-        logicalNodeOptions = new LogicalNodeOptions(true,false,
+        logicalNodeOptions = new LogicalNodeOptions(true/*,false*/,
                 true,false);
         assertTrue(logicalNodeOptions.isWithExtRef());
         assertTrue(logicalNodeOptions.isWithCB());
         assertFalse(logicalNodeOptions.isWithDatSet());
-        assertFalse(logicalNodeOptions.isWithResumedDtt());
+        //assertFalse(logicalNodeOptions.isWithResumedDtt());
     }
 }

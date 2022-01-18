@@ -8,7 +8,7 @@ package org.lfenergy.compas.sct.commons.scl.dtt;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.testhelpers.marshaller.MarshallerWrapper;
+import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.dto.DTO;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.exception.ScdException;

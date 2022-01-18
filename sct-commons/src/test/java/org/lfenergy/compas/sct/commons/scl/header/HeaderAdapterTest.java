@@ -28,14 +28,20 @@ public class HeaderAdapterTest {
 
     @Test
     public void testAddHistoryItem() throws ScdException {
-        SclRootAdapter sclRootAdapter =
-                new SclRootAdapter("hID","hVersion","hRevision");
+        SclRootAdapter sclRootAdapter =  new SclRootAdapter(
+                "hID","hVersion","hRevision"
+        );
+
         HeaderAdapter hAdapter = sclRootAdapter.getHeaderAdapter();
+        assertEquals("hID", hAdapter.getHeaderId());
+        assertEquals("hVersion", hAdapter.getHeaderVersion());
+        assertEquals("hRevision", hAdapter.getHeaderRevision());
+
         hAdapter.addHistoryItem("who","what","why");
 
         assertNotNull(hAdapter.getCurrentElem().getHistory());
-        Assertions.assertFalse(hAdapter.getCurrentElem().getHistory().getHitem().isEmpty());
-        THitem tHitem = hAdapter.getCurrentElem().getHistory().getHitem().get(0);
+        Assertions.assertFalse(hAdapter.getHistoryItems().isEmpty());
+        THitem tHitem = hAdapter.getHistoryItems().get(0);
         assertAll("HISTORY",
                 () -> assertEquals("who", tHitem.getWho()),
                 () -> assertEquals("what", tHitem.getWhat()),
@@ -43,5 +49,10 @@ public class HeaderAdapterTest {
                 () -> Assertions.assertEquals(hAdapter.getCurrentElem().getRevision(), tHitem.getRevision()),
                 () -> Assertions.assertEquals(hAdapter.getCurrentElem().getVersion(), tHitem.getVersion())
         );
+
+        hAdapter.updateRevision("newRevision");
+        hAdapter.updateVersion("newVersion");
+        assertEquals("newVersion", hAdapter.getHeaderVersion());
+        assertEquals("newRevision", hAdapter.getHeaderRevision());
     }
 }

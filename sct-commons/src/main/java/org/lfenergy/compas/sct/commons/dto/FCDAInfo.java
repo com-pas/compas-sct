@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,6 +17,8 @@ import org.lfenergy.compas.scl2007b4.model.TFCEnum;
 @NoArgsConstructor
 public class FCDAInfo {
 
+    private String dataSet;
+
     private TFCEnum fc;
     private String ldInst;
     private String prefix;
@@ -25,7 +28,8 @@ public class FCDAInfo {
     private DataTypeName daName; //daName.[...bdaNames]
     private Long ix;
 
-    public FCDAInfo(TFCDA tfcda) {
+    public FCDAInfo(String dataSet, TFCDA tfcda) {
+        this.dataSet = dataSet;
         fc = tfcda.getFc();
         ldInst = tfcda.getLdInst();
         prefix = tfcda.getPrefix();
@@ -38,6 +42,8 @@ public class FCDAInfo {
         ix = tfcda.getIx();
     }
 
+
+    @JsonIgnore
     public TFCDA getFCDA(){
         TFCDA tfcda = new TFCDA();
         tfcda.setFc(fc);

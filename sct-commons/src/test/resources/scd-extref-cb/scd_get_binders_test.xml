@@ -19,7 +19,6 @@
                 <LDevice inst="LD_INST12" ldName="IED_NAME1LD_INST12">
                     <LN0 lnClass="LLN0" inst="" lnType="LN1"/>
                     <LN lnClass="ANCR" inst="1" lnType="LN2">
-                        <DOI name=""></DOI>
                         <Inputs>
                             <ExtRef intAddr="INT_ADDR12" pDO="Do12.sdo12" pDA="da12.bda121.bda122"/>
                         </Inputs>

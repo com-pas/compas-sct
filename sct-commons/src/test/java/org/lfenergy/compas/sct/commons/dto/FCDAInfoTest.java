@@ -25,7 +25,7 @@ class FCDAInfoTest {
         tfcda.setPrefix("pre");
         tfcda.setIx(1L);
 
-        FCDAInfo fcdaInfo = new FCDAInfo(tfcda);
+        FCDAInfo fcdaInfo = new FCDAInfo("dataSet",tfcda);
         assertEquals("daName",fcdaInfo.getDaName().getName());
         assertEquals("doName",fcdaInfo.getDoName().getName());
         assertEquals(tfcda.getDaName(),fcdaInfo.getDaName().toString());

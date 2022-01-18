@@ -4,7 +4,9 @@
 
 package org.lfenergy.compas.sct.commons.scl.ied;
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.TAccessPoint;
 import org.lfenergy.compas.scl2007b4.model.TIED;
 import org.lfenergy.compas.scl2007b4.model.TLDevice;
@@ -136,7 +138,7 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
                 .anyMatch(tAccessPoint -> tAccessPoint.getName().equals(apName));
     }
 
-    public List<ExtRefBindingInfo> getExtRefBinders(ExtRefSignalInfo signalInfo) throws ScdException {
+    public List<ExtRefBindingInfo> getExtRefBinders(@NonNull ExtRefSignalInfo signalInfo) throws ScdException {
         if(!signalInfo.isValid()){
             throw new ScdException("Invalid ExtRef signal (pDO,pDA or intAddr))");
         }
@@ -146,43 +148,6 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
             potentialBinders.addAll(lDeviceAdapter.getExtRefBinders(signalInfo));
         }
         return potentialBinders;
-    }
-
-    public List<ControlBlock<?>> getControlBlocksByBindingInfo(ExtRefInfo extRefInfo) {
-        log.debug(Utils.entering());
-        long startTime = System.nanoTime();
-        if(extRefInfo.getBindingInfo() == null) {
-            throw new IllegalArgumentException("ExtRef binding information are missing");
-        }
-        var cbs = getLDeviceAdapters()
-                .stream()
-                .map(lDeviceAdapter -> {
-                    List<AbstractLNAdapter<?>> lnAdapters = new ArrayList<>();
-                    if(extRefInfo.getBindingInfo().getLnClass() == null){
-                        lnAdapters.add(lDeviceAdapter.getLN0Adapter());
-                        lnAdapters.addAll(lDeviceAdapter.getLNAdapters());
-                    } else if(TLLN0Enum.LLN_0.value().equals(extRefInfo.getBindingInfo().getLnClass())){
-                        lnAdapters.add(lDeviceAdapter.getLN0Adapter());
-                    } else {
-                        try {
-                            lnAdapters.add(
-                                    lDeviceAdapter.getLNAdapter(
-                                            extRefInfo.getBindingInfo().getLnClass(),
-                                            extRefInfo.getBindingInfo().getLnInst(),
-                                            extRefInfo.getBindingInfo().getPrefix())
-                            );
-                        } catch (ScdException e) {
-                            throw new IllegalArgumentException(e);
-                        }
-                    }
-                    return lnAdapters;
-                })
-                .flatMap(Collection::stream)
-                .map(lnAdapter -> lnAdapter.getControlSetByExtRefInfo(extRefInfo))
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
-        log.debug(Utils.leaving(startTime));
-        return cbs;
     }
 
     public boolean isSettingConfig(String ldInst)  {

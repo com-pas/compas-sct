@@ -14,6 +14,7 @@ import org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LNAdapter;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -60,20 +61,25 @@ public class LNodeDTO {
 
         if(options.isWithExtRef()) {
             List<TExtRef> extRefList =  nodeAdapter.getExtRefs(null);
+            LDeviceAdapter lDeviceAdapter = nodeAdapter.getParentAdapter();
+            String holderIedName = lDeviceAdapter.getParentAdapter().getName();
+            String holderLDInst = lDeviceAdapter.getInst();
             lNodeDTO.extRefs.addAll(
                     extRefList.stream()
-                            .map(tExtRef -> {
-                                ExtRefInfo extRefInfo = new ExtRefInfo(tExtRef);
-                                extRefInfo.setHolderLnClass(lNodeDTO.nodeClass);
-                                extRefInfo.setHolderLnInst(lNodeDTO.inst);
-                                extRefInfo.setHolderPrefix(lNodeDTO.prefix);
-                                LDeviceAdapter lDeviceAdapter = nodeAdapter.getParentAdapter();
-                                extRefInfo.setHolderIedName(lDeviceAdapter.getParentAdapter().getName());
-                                extRefInfo.setHolderLdInst(lDeviceAdapter.getInst());
-                                return extRefInfo;
-                            })
+                            .map(tExtRef ->
+                                ExtRefInfo.from(tExtRef,holderIedName,holderLDInst,lNodeDTO.nodeClass,
+                                        lNodeDTO.inst,lNodeDTO.prefix
+                                ))
                             .collect(Collectors.toList())
             );
+        }
+
+        if(options.isWithDatSet()) {
+            lNodeDTO.datSets = nodeAdapter.getDataSet();
+        }
+
+        if(options.isWithCB()) {
+            //TODO
         }
         log.info(Utils.leaving());
         return lNodeDTO;

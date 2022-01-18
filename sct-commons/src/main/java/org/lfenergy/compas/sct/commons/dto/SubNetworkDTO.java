@@ -5,6 +5,8 @@
 package org.lfenergy.compas.sct.commons.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -59,6 +61,7 @@ public class SubNetworkDTO {
     public void setType(String type) {
         this.type = SubnetworkType.fromValue(type);
     }
+
 
 
     public enum SubnetworkType {

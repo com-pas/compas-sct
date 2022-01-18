@@ -4,7 +4,9 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -23,9 +25,10 @@ import java.util.stream.Stream;
 @Getter
 @Setter
 @Slf4j
+@NoArgsConstructor
 public class DataTypeName {
     protected String name = ""; // dataName or DataAttributeName
-    protected String validationPattern = "";
+
     private List<String> structNames = new ArrayList<>(); // [.DataName[…]] or [.DAComponentName[ ….]]
 
     public DataTypeName(String dataName){
@@ -82,10 +85,5 @@ public class DataTypeName {
 
     public void addStructName(String structName) {
         structNames.add(structName);
-    }
-
-    public String getLastName() {
-        int sz = structNames.size();
-        return sz == 0 ? name : structNames.get(sz - 1);
     }
 }

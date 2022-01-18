@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.data.repository;
 
+
 import org.lfenergy.compas.sct.data.model.IScd;
 
 import java.util.Optional;
