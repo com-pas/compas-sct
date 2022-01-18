@@ -30,6 +30,8 @@ public class ReportControlBlock extends ControlBlock<ReportControlBlock> {
     private long bufTime = 0;
     private boolean indexed = true;
 
+
+
     public ReportControlBlock(TReportControl reportControl) {
         super();
         this.id = reportControl.getRptID();

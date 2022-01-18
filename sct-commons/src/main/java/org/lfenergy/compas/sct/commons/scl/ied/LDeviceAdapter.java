@@ -104,6 +104,9 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
                 ExtRefBindingInfo extRefBindingInfo = dttAdapter.getBinderResumedDTT(lnType,signalInfo);
                 extRefBindingInfo.setIedName(parentAdapter.getName());
                 extRefBindingInfo.setLdInst(currentElem.getInst());
+                extRefBindingInfo.setLnClass(lnAdapter.getLNClass());
+                extRefBindingInfo.setLnInst(lnAdapter.getLNInst());
+                extRefBindingInfo.setPrefix(lnAdapter.getPrefix());
 
                 potentialBinders.add(extRefBindingInfo);
             } catch (ScdException e) {

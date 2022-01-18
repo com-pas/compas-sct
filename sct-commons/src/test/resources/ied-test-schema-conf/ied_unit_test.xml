@@ -39,7 +39,7 @@
                     </LN0>
                     <LN lnType="LNO2" lnClass="ANCR" inst="1">
                         <Inputs>
-                            <ExtRef intAddr="INT_ADDR2" pDO="StrVal.sdo2" pDA="antRef.bda1.bda2.bda3" />
+                            <ExtRef  intAddr="INT_ADDR2" pDO="StrVal.sdo2" pDA="antRef.bda1.bda2.bda3" />
                         </Inputs>
                     </LN>
                 </LDevice>

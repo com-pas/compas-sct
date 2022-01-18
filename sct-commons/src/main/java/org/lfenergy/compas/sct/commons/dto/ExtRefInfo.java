@@ -21,21 +21,29 @@ import java.util.Objects;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ExtRefInfo {
-    private String holderIedName;
-    private String holderLdInst;
-    private String holderPrefix = "";
-    private String holderLnClass;
-    private String holderLnInst = "";
+public class ExtRefInfo extends LNodeMetaDataEmbedder{
 
     private ExtRefSignalInfo signalInfo;
     private ExtRefBindingInfo bindingInfo;
     private ExtRefSourceInfo sourceInfo;
 
     public ExtRefInfo(TExtRef tExtRef) {
+        super();
         bindingInfo = new ExtRefBindingInfo(tExtRef);
         sourceInfo = new ExtRefSourceInfo(tExtRef);
         signalInfo = new ExtRefSignalInfo(tExtRef);
+    }
+
+    public static ExtRefInfo from(TExtRef tExtRef, String iedName, String ldInst,
+                                  String lnClass, String lnInst, String prefix){
+        ExtRefInfo extRefInfo = new ExtRefInfo(tExtRef);
+        extRefInfo.setHolderLDInst(ldInst);
+        extRefInfo.setHolderIEDName(iedName);
+        extRefInfo.setHolderLnInst(lnInst);
+        extRefInfo.setHolderLnClass(lnClass);
+        extRefInfo.setHolderLnPrefix(prefix);
+
+        return extRefInfo;
     }
 
     public boolean matchFCDA(@NonNull TFCDA tfcda){

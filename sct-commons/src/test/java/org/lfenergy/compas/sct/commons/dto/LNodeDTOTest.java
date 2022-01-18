@@ -70,7 +70,7 @@ class LNodeDTOTest {
         Mockito.when(lnAdapter.getExtRefs(null)).thenReturn(List.of(extRef));
 
         LNodeDTO lNodeDTO = LNodeDTO.from(lnAdapter,
-                new LogicalNodeOptions(true,false,false,false));
+                new LogicalNodeOptions(true,false,false/*,false*/));
         assertNotNull(lNodeDTO);
         assertAll("LNODE",
                 ()-> assertEquals(DTO.HOLDER_LN_INST,lNodeDTO.getInst()),
@@ -81,11 +81,11 @@ class LNodeDTOTest {
         );
         ExtRefInfo extRefInfo = lNodeDTO.getExtRefs().iterator().next();
 
-        assertEquals(DTO.HOLDER_IED_NAME,extRefInfo.getHolderIedName());
-        assertEquals(DTO.HOLDER_LD_INST,extRefInfo.getHolderLdInst());
+        assertEquals(DTO.HOLDER_IED_NAME,extRefInfo.getHolderIEDName());
+        assertEquals(DTO.HOLDER_LD_INST,extRefInfo.getHolderLDInst());
         assertEquals(DTO.HOLDER_LN_CLASS,extRefInfo.getHolderLnClass());
         assertEquals(DTO.HOLDER_LN_INST,extRefInfo.getHolderLnInst());
-        assertEquals(DTO.HOLDER_LN_PREFIX,extRefInfo.getHolderPrefix());
+        assertEquals(DTO.HOLDER_LN_PREFIX,extRefInfo.getHolderLnPrefix());
 
     }
 

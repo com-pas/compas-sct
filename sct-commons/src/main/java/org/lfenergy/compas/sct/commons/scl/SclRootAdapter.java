@@ -126,6 +126,7 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
     }
 
     public IEDAdapter getIEDAdapter(String iedName) throws ScdException {
+        // <IED iedNAme></IED> ; Unmarshaller
         return new IEDAdapter(this,iedName);
     }
 

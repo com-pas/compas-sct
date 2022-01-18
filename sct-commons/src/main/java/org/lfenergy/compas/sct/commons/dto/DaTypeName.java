@@ -4,7 +4,9 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.lfenergy.compas.scl2007b4.model.TFCEnum;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class DaTypeName extends DataTypeName{
     public static final String VALIDATION_REGEX
             = "[a-zA-Z][a-zA-Z0-9]*(\\([0-9]+\\))?(\\.[a-zA-Z][a-zA-Z0-9]*(\\([0-9]+\\))?)*";
@@ -30,7 +33,6 @@ public class DaTypeName extends DataTypeName{
 
     public DaTypeName(String daName) {
         super(daName);
-        validationPattern = VALIDATION_REGEX;
     }
 
     public static DaTypeName from(DaTypeName dataName){
@@ -49,7 +51,6 @@ public class DaTypeName extends DataTypeName{
 
     public DaTypeName(String name, String names) {
         super(name, names);
-        validationPattern = VALIDATION_REGEX;
     }
 
     public boolean isValImport(){
@@ -70,6 +71,7 @@ public class DaTypeName extends DataTypeName{
                 );
     }
 
+    @JsonIgnore
     public void setDaiValues(List<TVal> vals) {
         if(vals.size() == 1){
             daiValues.put(0L,vals.get(0).getValue());

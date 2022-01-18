@@ -179,8 +179,11 @@ class LN0AdapterTest {
     @Test
     void testGetControlBlocks(){
         LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
+        IEDAdapter iedAdapter = Mockito.mock(IEDAdapter.class);
         TLDevice tlDevice = Mockito.mock(TLDevice.class);
         Mockito.when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
+        Mockito.when(lDeviceAdapter.getParentAdapter()).thenReturn(iedAdapter);
+        Mockito.when(iedAdapter.getName()).thenReturn("IED_NAME");
         LN0 ln0 = new LN0();
         Mockito.when(tlDevice.getLN0()).thenReturn(ln0);
         LN0Adapter ln0Adapter = assertDoesNotThrow( () -> new LN0Adapter(lDeviceAdapter,ln0));

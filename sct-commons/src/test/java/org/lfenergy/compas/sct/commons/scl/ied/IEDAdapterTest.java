@@ -101,37 +101,6 @@ public class IEDAdapterTest {
     }
 
     @Test
-    void testGetControlSetByBindingInfo() throws Exception {
-
-        SclRootAdapter sclRootAdapter = new SclRootAdapter("hID","hVersion","hRevision");
-        TIED tied = new TIED();
-        tied.setName(DTO.HOLDER_IED_NAME);
-
-        tied.setServices(new TServices());
-        sclRootAdapter.getCurrentElem().getIED().add(tied);
-        IEDAdapter iAdapter = Mockito.spy(sclRootAdapter.getIEDAdapter(DTO.HOLDER_IED_NAME));
-
-        LDeviceAdapter lDeviceAdapter =  Mockito.mock(LDeviceAdapter.class);
-        LN0Adapter ln0Adapter =  Mockito.mock(LN0Adapter.class);
-
-        Mockito.doReturn(List.of(lDeviceAdapter)).when(iAdapter).getLDeviceAdapters();
-
-        Mockito.when(lDeviceAdapter.getLN0Adapter()).thenReturn(ln0Adapter);
-        Mockito.when(lDeviceAdapter.getLNAdapters()).thenReturn(new ArrayList<>());
-
-
-        Mockito.when(ln0Adapter.getControlSetByExtRefInfo(ArgumentMatchers.any(ExtRefInfo.class)))
-                .thenReturn(List.of(new ReportControlBlock()));
-
-        ExtRefInfo extRefInfo = new ExtRefInfo();
-        extRefInfo.setBindingInfo(new ExtRefBindingInfo());
-        List<ControlBlock<?>> controlBlocks = iAdapter.getControlBlocksByBindingInfo(extRefInfo);
-
-        assertFalse(controlBlocks.isEmpty());
-        assertEquals(ReportControlBlock.class,controlBlocks.get(0).getClass());
-    }
-
-    @Test
     void TestIsSettingConfig() throws Exception {
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);

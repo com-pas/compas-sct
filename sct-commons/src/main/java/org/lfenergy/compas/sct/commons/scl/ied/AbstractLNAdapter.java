@@ -24,12 +24,14 @@ import org.lfenergy.compas.scl2007b4.model.TSampledValueControl;
 import org.lfenergy.compas.scl2007b4.model.TServiceType;
 import org.lfenergy.compas.sct.commons.dto.ControlBlock;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
+import org.lfenergy.compas.sct.commons.dto.DataSetInfo;
 import org.lfenergy.compas.sct.commons.dto.DoTypeName;
 import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSourceInfo;
 import org.lfenergy.compas.sct.commons.dto.GooseControlBlock;
+import org.lfenergy.compas.sct.commons.dto.LNodeMetaData;
 import org.lfenergy.compas.sct.commons.dto.ReportControlBlock;
 import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.dto.SMVControlBlock;
@@ -153,34 +155,28 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 .collect(Collectors.toList());
     }
 
-    public void updateExtRefBinders(Set<ExtRefInfo> extRefInfos) throws ScdException {
-        boolean missingData =  extRefInfos.stream()
-                .anyMatch(extRefInfo -> {
-                    ExtRefBindingInfo extRefBindingInfo = extRefInfo.getBindingInfo();
-                    return !extRefBindingInfo.isValid();
-                });
-        if(missingData){
+    public void updateExtRefBinders(ExtRefInfo extRefInfo) throws ScdException {
+
+        if(extRefInfo.getBindingInfo() == null || !extRefInfo.getBindingInfo().isValid()){
             throw  new ScdException("ExtRef mandatory binding data are missing");
         }
-        String iedName = parentAdapter.getParentAdapter().getName();
-        String ldInst = parentAdapter.getInst();
+        String iedName = extRefInfo.getHolderIEDName();
+        String ldInst = extRefInfo.getHolderLDInst();
 
-        for(ExtRefInfo extRefInfo : extRefInfos){
-            ExtRefSignalInfo signalInfo = extRefInfo.getSignalInfo();
-            List<TExtRef> tExtRefs = this.getExtRefs(signalInfo);
-            if(tExtRefs.isEmpty()){
-                String msg = String.format("Unknown ExtRef [pDO(%s),intAddr(%s)] in %s/%s.%s",
-                        signalInfo.getPDO(), signalInfo.getIntAddr(), iedName, ldInst,getLNClass());
-                throw new ScdException(msg);
-            }
-            if(tExtRefs.size() != 1){
-                log.warn("More the one desc for ExtRef [pDO({}),intAddr({})] in {}{}/{}",
-                        signalInfo.getPDO(), signalInfo.getIntAddr(), iedName, ldInst,getLNClass());
-            }
-            TExtRef extRef = tExtRefs.get(0);
-            // update ExtRef with binding info
-            updateExtRefBindingInfo(extRef, extRefInfo);
+        ExtRefSignalInfo signalInfo = extRefInfo.getSignalInfo();
+        List<TExtRef> tExtRefs = this.getExtRefs(signalInfo);
+        if(tExtRefs.isEmpty()){
+            String msg = String.format("Unknown ExtRef [pDO(%s),intAddr(%s)] in %s/%s.%s",
+                    signalInfo.getPDO(), signalInfo.getIntAddr(), iedName, ldInst,getLNClass());
+            throw new ScdException(msg);
         }
+        if(tExtRefs.size() != 1){
+            log.warn("More the one desc for ExtRef [pDO({}),intAddr({})] in {}{}/{}",
+                    signalInfo.getPDO(), signalInfo.getIntAddr(), iedName, ldInst,getLNClass());
+        }
+        TExtRef extRef = tExtRefs.get(0);
+        // update ExtRef with binding info
+        updateExtRefBindingInfo(extRef, extRefInfo);
     }
 
     protected void updateExtRefBindingInfo(TExtRef extRef, ExtRefInfo extRefInfo) {
@@ -199,9 +195,15 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
             }
             extRef.setServiceType(bindingInfo.getServiceType());
             extRef.setDaName(null);
-            if(bindingInfo.getDaName() != null && !StringUtils.isEmpty(bindingInfo.getDaName().toString())) {
+            if(bindingInfo.getDaName() != null && bindingInfo.getDaName().isDefined()) {
                 extRef.setDaName(bindingInfo.getDaName().toString());
             }
+
+            extRef.setDoName(null);
+            if(bindingInfo.getDoName() != null && bindingInfo.getDoName().isDefined()) {
+                extRef.setDoName(bindingInfo.getDoName().toString());
+            }
+
             extRef.setPrefix(bindingInfo.getPrefix());
             // invalid source info
             extRef.setServiceType(null);
@@ -243,12 +245,18 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         List<ControlBlock<?>> controlBlocks = new ArrayList<>();
         List<?> tControls;
 
+        LNodeMetaData metaData = LNodeMetaData.from(this);
+
         for(TDataSet tDataSet : tDataSets){
             if(isLN0() && (serviceType == null || serviceType == TServiceType.GOOSE)) {
                 tControls = this.lookUpControlBlocksByDataSetRef(tDataSet.getName(),TGSEControl.class);
                 controlBlocks.addAll(
                         tControls.stream()
-                        .map(tgseControl -> new GooseControlBlock((TGSEControl)tgseControl))
+                        .map(tgseControl -> {
+                            var g = new GooseControlBlock((TGSEControl)tgseControl);
+                            g.setMetaData(metaData);
+                            return g;
+                        })
                         .collect(Collectors.toList())
                 );
             }
@@ -258,7 +266,11 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 tControls = this.lookUpControlBlocksByDataSetRef(tDataSet.getName(),TSampledValueControl.class);
                 controlBlocks.addAll(
                         tControls.stream()
-                        .map(sampledValueControl -> new SMVControlBlock((TSampledValueControl) sampledValueControl))
+                        .map(sampledValueControl -> {
+                            var s = new SMVControlBlock((TSampledValueControl) sampledValueControl);
+                            s.setMetaData(metaData);
+                            return s;
+                        })
                         .collect(Collectors.toList())
                 );
             }
@@ -267,7 +279,11 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 tControls = this.lookUpControlBlocksByDataSetRef(tDataSet.getName(),TReportControl.class);
                 controlBlocks.addAll(
                         tControls.stream()
-                        .map(reportControl -> new ReportControlBlock((TReportControl) reportControl))
+                        .map(reportControl -> {
+                            var r = new ReportControlBlock((TReportControl) reportControl);
+                            r.setMetaData(metaData);
+                            return r;
+                        })
                         .collect(Collectors.toList())
                 );
             }
@@ -351,8 +367,8 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
             throw new IllegalArgumentException("Coherence checking needs at least a signal info");
         }
 
-        String holderIedName = extRefInfo.getHolderIedName(); // parent (IED) of parent (LD) can be used here
-        String holderLdInst = extRefInfo.getHolderLdInst(); // parent (LD) can be use here
+        String holderIedName = extRefInfo.getHolderIEDName(); // parent (IED) of parent (LD) can be used here
+        String holderLdInst = extRefInfo.getHolderLDInst(); // parent (LD) can be use here
         List<TExtRef> extRefs = getExtRefs(signalInfo);
         if(extRefs.isEmpty()){
             String msg = String.format("Unknown TExtRef with signal info [pDO(%s),intAddr(%s)] in %s%s/%s%s%s",
@@ -620,5 +636,10 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
     public boolean matches(ObjectReference objRef) {
 
         return  false;
+    }
+
+    public Set<DataSetInfo> getDataSet() {
+        return currentElem.getDataSet()
+                .stream().map(tDataSet -> DataSetInfo.from(tDataSet)).collect(Collectors.toSet());
     }
 }

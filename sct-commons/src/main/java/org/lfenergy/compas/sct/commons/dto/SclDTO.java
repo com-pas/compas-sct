@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,31 +17,54 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 public class SclDTO {
-    private UUID id;
-    private String version;
-    private String revision;
-    private short release;
-    private Header header;
+    protected UUID id;
+    protected String version = SclRootAdapter.VERSION;
+    protected String revision = SclRootAdapter.REVISION;
+    protected short release = SclRootAdapter.RELEASE;
+    protected HeaderDTO header;
+
+    public SclDTO(UUID id) {
+        this.id = id;
+    }
 
     public static SclDTO from(SclRootAdapter sclRootAdapter) {
         SclDTO sclDTO = new SclDTO();
         sclDTO.version = sclRootAdapter.getSclVersion();
         sclDTO.release = sclRootAdapter.getSclRelease();
         sclDTO.revision = sclRootAdapter.getSclRevision();
-        HeaderAdapter headerAdapter = sclRootAdapter.getHeaderAdapter();
-        sclDTO.header = new Header();
-        sclDTO.header.id = UUID.fromString(headerAdapter.getHeaderId());
-        sclDTO.header.revision = headerAdapter.getHeaderRevision();
-        sclDTO.header.version = headerAdapter.getHeaderVersion();
-
+        sclDTO.header = HeaderDTO.from(sclRootAdapter.getHeaderAdapter());
         return sclDTO;
     }
 
-    @Getter
-    @Setter
-    public static class Header {
-        private UUID id;
-        private String version;
-        private String revision;
+    @JsonIgnore
+    public String getWho() {
+        if(header != null && !header.getHistoryItems().isEmpty()){
+            return header.getHistoryItems().get(0).getWho();
+        }
+        return "";
+    }
+
+    @JsonIgnore
+    public String getWhat() {
+        if(header != null && !header.getHistoryItems().isEmpty()){
+            return header.getHistoryItems().get(0).getWhat();
+        }
+        return "";
+    }
+
+    @JsonIgnore
+    public String getWhy() {
+        if(header != null && !header.getHistoryItems().isEmpty()){
+            return header.getHistoryItems().get(0).getWhy();
+        }
+        return "";
+    }
+
+    @JsonIgnore
+    public String getWhen() {
+        if(header != null && !header.getHistoryItems().isEmpty()){
+            return header.getHistoryItems().get(0).getWhen();
+        }
+        return "";
     }
 }

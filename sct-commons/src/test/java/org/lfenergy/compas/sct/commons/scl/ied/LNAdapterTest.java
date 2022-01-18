@@ -14,7 +14,7 @@ import org.lfenergy.compas.scl2007b4.model.TLDevice;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
 import org.lfenergy.compas.scl2007b4.model.TLN;
 import org.lfenergy.compas.scl2007b4.model.TVal;
-import org.lfenergy.compas.sct.commons.testhelpers.marshaller.MarshallerWrapper;
+import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.dto.DTO;
 import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
@@ -124,14 +124,14 @@ class LNAdapterTest {
                 .build();
 
         ExtRefInfo info = DTO.createExtRefInfo();
-        assertThrows(ScdException.class, () -> lnAdapter.updateExtRefBinders(Set.of(info)));
+        assertThrows(ScdException.class, () -> lnAdapter.updateExtRefBinders(info));
 
         info.getSignalInfo().setPDO("StrVal.sdo2");
         info.getSignalInfo().setPDA("antRef.bda1.bda2.bda3");
         info.getSignalInfo().setIntAddr("INT_ADDR2");
         info.getSignalInfo().setDesc(null);
         info.getSignalInfo().setPServT(null);
-        assertDoesNotThrow(() -> lnAdapter.updateExtRefBinders(Set.of(info)));
+        assertDoesNotThrow(() -> lnAdapter.updateExtRefBinders(info));
         List<TExtRef> tExtRefs = lnAdapter.getExtRefs(null);
         assertEquals(1,tExtRefs.size());
         TExtRef extRef = tExtRefs.get(0);
