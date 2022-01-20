@@ -5,7 +5,9 @@
 package org.lfenergy.compas.sct.commons.dto;
 
 import org.junit.jupiter.api.Test;
+import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
+import org.lfenergy.compas.scl2007b4.model.TServiceType;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -66,5 +68,41 @@ class ExtRefBindingInfoTest {
         bindingInfo.setIedName("");
         assertFalse(bindingInfo.isValid());
 
+    }
+
+    @Test
+    void testIsWrappedIn(){
+        TExtRef extRef = DTO.createExtRef();
+        ExtRefBindingInfo bindingInfo = new ExtRefBindingInfo();
+        assertFalse(bindingInfo.isWrappedIn(extRef));
+
+        bindingInfo.setIedName(extRef.getIedName());
+        assertFalse(bindingInfo.isWrappedIn(extRef));
+
+        bindingInfo.setLdInst(extRef.getLdInst());
+        assertFalse(bindingInfo.isWrappedIn(extRef));
+
+        if(!extRef.getLnClass().isEmpty()) {
+            bindingInfo.setLnClass(extRef.getLnClass().get(0));
+            assertFalse(bindingInfo.isWrappedIn(extRef));
+
+            bindingInfo.setLnInst(extRef.getLnInst());
+            assertFalse(bindingInfo.isWrappedIn(extRef));
+
+            bindingInfo.setPrefix(extRef.getPrefix());
+            assertFalse(bindingInfo.isWrappedIn(extRef));
+        }
+
+        bindingInfo.setServiceType(extRef.getServiceType());
+        assertTrue(bindingInfo.isWrappedIn(extRef));
+    }
+
+    @Test
+    void testIsNull(){
+        ExtRefBindingInfo bindingInfo = new ExtRefBindingInfo();
+        assertTrue(bindingInfo.isNull());
+
+        bindingInfo.setServiceType(TServiceType.REPORT);
+        assertFalse(bindingInfo.isNull());
     }
 }

@@ -17,9 +17,9 @@ import java.util.Objects;
 @NoArgsConstructor
 public class ExtRefSourceInfo {
     private String srcLDInst;
-    private String srcPrefix;
+    private String srcPrefix = "";
     private String srcLNClass;
-    private String srcLNInst;
+    private String srcLNInst = "";
     private String srcCBName;
 
     public ExtRefSourceInfo(TExtRef tExtRef){
@@ -48,5 +48,13 @@ public class ExtRefSourceInfo {
     @Override
     public int hashCode() {
         return Objects.hash(srcLDInst, srcPrefix, srcLNClass, srcLNInst, srcCBName);
+    }
+
+    public boolean isNull(){
+        return srcCBName == null &&
+                srcLDInst == null &&
+                srcLNClass == null &&
+                srcLNInst == null &&
+                srcPrefix == null;
     }
 }

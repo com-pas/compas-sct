@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.TFCDA;
 import org.lfenergy.compas.scl2007b4.model.TFCEnum;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class FCDAInfoTest {
 
@@ -43,5 +43,11 @@ class FCDAInfoTest {
         assertEquals("daName",fcdaInfo1.getDaName().getName());
         assertEquals("doName",fcdaInfo1.getDoName().getName());
         assertEquals(tfcda.getDaName(),fcdaInfo1.getDaName().toString());
+
+        TFCDA tfcda1 = fcdaInfo1.getFCDA();
+
+        assertEquals(tfcda1.getFc(),fcdaInfo1.getFc());
+
+        assertTrue(fcdaInfo1.isValid());
     }
 }

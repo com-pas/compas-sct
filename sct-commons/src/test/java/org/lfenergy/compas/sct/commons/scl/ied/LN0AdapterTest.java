@@ -6,18 +6,26 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.LN0;
+import org.lfenergy.compas.scl2007b4.model.TDataSet;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
+import org.lfenergy.compas.scl2007b4.model.TFCDA;
 import org.lfenergy.compas.scl2007b4.model.TGSEControl;
 import org.lfenergy.compas.scl2007b4.model.TInputs;
 import org.lfenergy.compas.scl2007b4.model.TLDevice;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
+import org.lfenergy.compas.scl2007b4.model.TReportControl;
 import org.lfenergy.compas.scl2007b4.model.TSampledValueControl;
+import org.lfenergy.compas.scl2007b4.model.TServiceType;
+import org.lfenergy.compas.sct.commons.dto.ControlBlock;
 import org.lfenergy.compas.sct.commons.dto.DTO;
+import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
+import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.dto.GooseControlBlock;
 import org.lfenergy.compas.sct.commons.dto.ReportControlBlock;
 import org.lfenergy.compas.sct.commons.dto.SMVControlBlock;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import java.util.List;
@@ -75,14 +83,21 @@ class LN0AdapterTest {
         tgseControl.setDatSet(dataSetRef);
         ln0.getGSEControl().add(tgseControl);
 
-        assertFalse(ln0Adapter.lookUpGseControlBlocks(dataSetRef).isEmpty());
+        assertFalse(ln0Adapter.lookUpControlBlocksByDataSetRef(dataSetRef,TGSEControl.class).isEmpty());
 
         // SMV LookUp
         TSampledValueControl sampledValueControl = new TSampledValueControl();
         sampledValueControl.setDatSet(dataSetRef);
         ln0.getSampledValueControl().add(sampledValueControl);
 
-        assertFalse(ln0Adapter.lookUpSMVControlBlocks(dataSetRef).isEmpty());
+        assertFalse(ln0Adapter.lookUpControlBlocksByDataSetRef(dataSetRef,TSampledValueControl.class).isEmpty());
+
+        // SMV LookUp
+        TReportControl reportControl = new TReportControl();
+        reportControl.setDatSet(dataSetRef);
+        ln0.getReportControl().add(reportControl);
+
+        assertFalse(ln0Adapter.lookUpControlBlocksByDataSetRef(dataSetRef,TReportControl.class).isEmpty());
     }
 
     // AbstractLNAdapter class test
@@ -120,8 +135,108 @@ class LN0AdapterTest {
         extRefList = assertDoesNotThrow(()->ln0Adapter.getExtRefsBySignalInfo(signalInfo));
         assertFalse(extRefList.isEmpty());
 
-        signalInfo.setPDO("do.papa");
+        signalInfo.setPDO("Do.papa");
         extRefList = assertDoesNotThrow(()->ln0Adapter.getExtRefsBySignalInfo(signalInfo));
         assertTrue(extRefList.isEmpty());
+    }
+
+    @Test
+    void testGetDataSet(){
+        LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
+        TLDevice tlDevice = Mockito.mock(TLDevice.class);
+        Mockito.when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
+        LN0 ln0 = new LN0();
+        Mockito.when(tlDevice.getLN0()).thenReturn(ln0);
+        LN0Adapter ln0Adapter = assertDoesNotThrow( () -> new LN0Adapter(lDeviceAdapter,ln0));
+
+        TDataSet tDataSet = new TDataSet();
+        ln0.getDataSet().add(tDataSet);
+        List<TDataSet> tDataSets = ln0Adapter.getDataSet(null);
+        assertFalse(tDataSets.isEmpty());
+
+        ExtRefInfo extRefInfo = DTO.createExtRefInfo();
+        extRefInfo = Mockito.spy(extRefInfo);
+
+
+        TFCDA tfcda = new TFCDA();
+        tDataSet.getFCDA().add(tfcda);
+        tDataSets = ln0Adapter.getDataSet(extRefInfo);
+        assertTrue(tDataSets.isEmpty());
+
+        Mockito.doReturn(true).when(extRefInfo).matchFCDA(ArgumentMatchers.any(TFCDA.class));
+        tDataSets = ln0Adapter.getDataSet(extRefInfo);
+        assertFalse(tDataSets.isEmpty());
+    }
+
+    @Test
+    void testGetControlBlocks(){
+        LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
+        TLDevice tlDevice = Mockito.mock(TLDevice.class);
+        Mockito.when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
+        LN0 ln0 = new LN0();
+        Mockito.when(tlDevice.getLN0()).thenReturn(ln0);
+        LN0Adapter ln0Adapter = assertDoesNotThrow( () -> new LN0Adapter(lDeviceAdapter,ln0));
+
+
+
+        TDataSet tDataSet = new TDataSet();
+        tDataSet.setName(DTO.CB_DATASET_REF);
+
+        List<ControlBlock<?>> controlBlocks = ln0Adapter.getControlBlocks(List.of(tDataSet),null);
+        assertTrue(controlBlocks.isEmpty());
+
+        ln0Adapter = Mockito.spy(ln0Adapter);
+        Mockito.doReturn(List.of(new TGSEControl()))
+                .when(ln0Adapter)
+                .lookUpControlBlocksByDataSetRef(
+                        ArgumentMatchers.anyString(),ArgumentMatchers.eq(TGSEControl.class)
+                );
+
+        Mockito.doReturn(List.of(new TSampledValueControl()))
+                .when(ln0Adapter)
+                .lookUpControlBlocksByDataSetRef(
+                        ArgumentMatchers.anyString(),ArgumentMatchers.eq(TSampledValueControl.class)
+                );
+
+        Mockito.doReturn(List.of(new TReportControl()))
+                .when(ln0Adapter)
+                .lookUpControlBlocksByDataSetRef(
+                        ArgumentMatchers.anyString(),ArgumentMatchers.eq(TReportControl.class)
+                );
+        controlBlocks = ln0Adapter.getControlBlocks(List.of(tDataSet),TServiceType.REPORT);
+        assertEquals(1,controlBlocks.size());
+        controlBlocks = ln0Adapter.getControlBlocks(List.of(tDataSet),TServiceType.SMV);
+        assertEquals(1,controlBlocks.size());
+        controlBlocks = ln0Adapter.getControlBlocks(List.of(tDataSet),TServiceType.GOOSE);
+        assertEquals(1,controlBlocks.size());
+        controlBlocks = ln0Adapter.getControlBlocks(List.of(tDataSet),null);
+        assertEquals(3,controlBlocks.size());
+    }
+
+    @Test
+    void testGetControlSetByBindingInfo(){
+
+        LN0 ln0 = new LN0();
+        LN0Adapter ln0Adapter = Mockito.mock(LN0Adapter.class);
+        ln0Adapter = Mockito.spy(ln0Adapter);
+
+        Mockito.when(ln0Adapter.getCurrentElem()).thenReturn(ln0);
+
+        TInputs tInputs = new TInputs();
+        TExtRef extRef = DTO.createExtRef();
+        tInputs.getExtRef().add(extRef);
+        ln0.setInputs(tInputs);
+
+        ExtRefInfo extRefBindingInfo = DTO.createExtRefInfo();
+        Mockito.doReturn(List.of(new TDataSet()))
+                .when(ln0Adapter).getDataSet(ArgumentMatchers.any(ExtRefInfo.class));
+
+        Mockito.doReturn(List.of(new ReportControlBlock()))
+                .when(ln0Adapter).getControlBlocks(
+                    ArgumentMatchers.any(List.class),ArgumentMatchers.any(TServiceType.class));
+
+        List<ControlBlock<?>> controlBlocks =  ln0Adapter.getControlSetByExtRefInfo(extRefBindingInfo);
+        assertFalse(controlBlocks.isEmpty());
+        assertEquals(TServiceType.REPORT,controlBlocks.get(0).getServiceType());
     }
 }

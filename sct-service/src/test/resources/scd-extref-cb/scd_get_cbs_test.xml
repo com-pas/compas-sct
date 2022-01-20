@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- SPDX-FileCopyrightText: 2021 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+<SCL version="2007" revision="B" release="4" xmlns="http://www.iec.ch/61850/2003/SCL">
+    <Header id="hId" version="2007" revision="B" toolID="COMPAS"/>
+    <IED name="IED_NAME1">
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LD_INST11" ldName="IED_NAME1LD_INST11">
+                    <LN0 lnClass="LLN0" inst="" lnType="LNEX1">
+                        <Inputs>
+                            <ExtRef intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
+                        </Inputs>
+                    </LN0>
+                </LDevice>
+                <LDevice inst="LD_INST12" ldName="IED_NAME1LD_INST12">
+                    <LN0 lnClass="LLN0" inst="" lnType="LN11">
+                        <DataSet name="dataset121">
+                            <FCDA fc="ST"/>
+                        </DataSet>
+                        <GSEControl name="goose1" appID="g1" datSet="dataset121"/>
+                        <SampledValueControl name="smv1" smvID="s1" smpRate="1" nofASDU="1" datSet="dataset121">
+                            <SmvOpts/>
+                        </SampledValueControl>
+                    </LN0>
+                    <LN lnClass="ANCR" inst="1" lnType="LN12">
+                        <DataSet name="dataset122">
+                            <FCDA fc="ST"/>
+                        </DataSet>
+                        <ReportControl name="rpt1" confRev="1" datSet="dataset122" rptID="r1">
+                            <OptFields/>
+                        </ReportControl>
+                        <Inputs>
+                            <ExtRef intAddr="INT_ADDR12" pDO="Do12.sdo12" pDA="da12.bda121.bda122"/>
+                        </Inputs>
+                    </LN>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
+    <IED name="IED_NAME2">
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LD_INST21" ldName="IED_NAME2LD_INST21">
+                    <LN0 lnClass="LLN0" inst="" lnType="LNEX2">
+                        <Inputs>
+                            <ExtRef iedName="IED_NAME1" ldInst="LD_INST12" lnClass="LLN0"  intAddr="INT_ADDR21" pDO="Do21.sdo21" pDA="da21.bda211.bda212.bda213"/>
+                        </Inputs>
+                    </LN0>
+                </LDevice>
+                <LDevice inst="LD_INST22" ldName="IED_NAME2LD_INST22">
+                    <LN0 lnClass="LLN0" inst="" lnType="LN21"/>
+                    <LN lnClass="PIOC" inst="1" lnType="LN22">
+                        <Inputs>
+                            <ExtRef intAddr="INT_ADDR22" pDO="Do22.sdo22" pDA="da22.bda221.bda222"/>
+                        </Inputs>
+                    </LN>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
+    <DataTypeTemplates>
+        <LNodeType lnClass="LLN0" id="LNEX1">
+            <DO name="Do22" type="DO12"/>
+            <DO name="Do32" type="DO12"/>
+        </LNodeType>
+        <LNodeType lnClass="LLN0" id="LN11">
+            <DO name="Do11" type="DO11" transient="true"/>
+        </LNodeType>
+        <LNodeType lnClass="ANCR" id="LN12">
+            <DO name="Do21" type="DO11"/>
+            <DO name="Do31" type="DO11"/>
+        </LNodeType>
+        <LNodeType lnClass="LLN0" id="LNEX2">
+            <DO name="Do12" type="DO22"/>
+            <DO name="Do32" type="DO22"/>
+        </LNodeType>
+        <LNodeType lnClass="LLN0" id="LN21">
+            <DO name="Do21" type="DO21" transient="true"/>
+        </LNodeType>
+        <LNodeType lnClass="PIOC" id="LN22">
+            <DO name="Do11" type="DO21"/>
+            <DO name="Do31" type="DO21"/>
+        </LNodeType>
+        <DOType cdc="WYE" id="DO11">
+            <SDO name="sdo11" type="DO12"/>
+            <SDO name="sdo21" type="DO12"/>
+            <SDO name="sdo31" type="DO12"/>
+        </DOType>
+        <DOType cdc="WYE" id="DO12">
+            <SDO name="sdo12" type="DO13"/>
+            <SDO name="sdo22" type="DO13"/>
+            <SDO name="sdo32" type="DO13"/>
+        </DOType>
+        <DOType cdc="WYE" id="DO13">
+            <DA fc="ST" name="da11" bType="Struct" type="DA11"/>
+            <DA fc="ST" name="da22" bType="Struct" type="DA11"/>
+            <DA fc="ST" name="da32" bType="Struct" type="DA11"/>
+        </DOType>
+        <DOType cdc="WYE" id="DO21">
+            <SDO name="sdo21" type="DO22"/>
+            <SDO name="sdo11" type="DO22"/>
+            <SDO name="sdo31" type="DO22"/>
+        </DOType>
+        <DOType cdc="WYE" id="DO22">
+            <SDO name="sdo22" type="DO23"/>
+            <SDO name="sdo12" type="DO23"/>
+            <SDO name="sdo32" type="DO23"/>
+        </DOType>
+        <DOType cdc="WYE" id="DO23">
+            <DA fc="ST" name="da21" bType="Struct" type="DA21"/>
+            <DA fc="ST" name="da12" bType="Struct" type="DA21"/>
+            <DA fc="ST" name="da32" bType="Struct" type="DA21"/>
+        </DOType>
+        <DAType id="DA11">
+            <BDA name="bda111" bType="Struct" type="DA12"/>
+            <BDA name="bda221" bType="Struct" type="DA12"/>
+            <BDA name="bda321" bType="Struct" type="DA12"/>
+        </DAType>
+        <DAType id="DA12">
+            <BDA name="bda112" bType="Struct" type="DA13"/>
+            <BDA name="bda222" bType="Struct" type="DA13"/>
+            <BDA name="bda322" bType="Struct" type="DA13"/>
+        </DAType>
+        <DAType id="DA13">
+            <BDA name="bda113" bType="Enum" type="RecCycModKind"/>
+            <BDA name="bda223" bType="Enum" type="RecCycModKind"/>
+            <BDA name="bda323" bType="Enum" type="RecCycModKind"/>
+        </DAType>
+        <DAType id="DA21">
+            <BDA name="bda211" bType="Struct" type="DA22"/>
+            <BDA name="bda121" bType="Struct" type="DA22"/>
+            <BDA name="bda321" bType="Struct" type="DA22"/>
+        </DAType>
+        <DAType id="DA22">
+            <BDA name="bda212" bType="Struct" type="DA23"/>
+            <BDA name="bda122" bType="Struct" type="DA23"/>
+            <BDA name="bda322" bType="Struct" type="DA23"/>
+        </DAType>
+        <DAType id="DA23">
+            <BDA name="bda213" bType="Enum" type="RecCycModKind"/>
+            <BDA name="bda123" bType="Enum" type="RecCycModKind"/>
+            <BDA name="bda323" bType="Enum" type="RecCycModKind"/>
+        </DAType>
+        <EnumType id="RecCycModKind">
+            <EnumVal ord="1">Completed-diff</EnumVal>
+        </EnumType>
+    </DataTypeTemplates>
+</SCL>

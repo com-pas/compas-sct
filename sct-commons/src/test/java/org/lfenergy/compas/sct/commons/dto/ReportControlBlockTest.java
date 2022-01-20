@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -156,7 +157,7 @@ public class ReportControlBlockTest {
         );
 
         ReportControlBlock reportControlBlock = new ReportControlBlock(tReportControl);
-        assertAll("INIT",
+        assertAll("INIT : " + reportControlBlock,
                 () -> assertEquals(ID,reportControlBlock.getId()),
                 () -> assertEquals(DATASET_REF,reportControlBlock.getDataSetRef()),
                 () -> assertEquals(NAME,reportControlBlock.getName()),
@@ -168,16 +169,25 @@ public class ReportControlBlockTest {
     }
 
     @Test
+    void testCast(){
+        Object cb  = new ReportControlBlock();
+        ReportControlBlock rpt = new ReportControlBlock();
+        assertEquals(ReportControlBlock.class, rpt.cast(cb).getClass());
+        assertThrows(UnsupportedOperationException.class, () -> rpt.cast(new SMVControlBlock()).getClass());
+    }
+
+    @Test
     void testTClientLN2IEDName(){
         TClientLN clientLN = Mockito.mock(TClientLN.class);
-        Mockito.when(clientLN.getIedName()).thenReturn(DTO.IED_NAME);
+        Mockito.when(clientLN.getIedName()).thenReturn(DTO.HOLDER_IED_NAME);
         Mockito.when(clientLN.getApRef()).thenReturn("AP_REF");
-        Mockito.when(clientLN.getLdInst()).thenReturn(DTO.LD_INST);
-        Mockito.when(clientLN.getLnInst()).thenReturn(DTO.LN_INST);
-        Mockito.when(clientLN.getPrefix()).thenReturn(DTO.PREFIX);
-        Mockito.when(clientLN.getLnClass()).thenReturn(List.of(DTO.LN_CLASS));
+        Mockito.when(clientLN.getLdInst()).thenReturn(DTO.HOLDER_LD_INST);
+        Mockito.when(clientLN.getLnInst()).thenReturn(DTO.HOLDER_LN_INST);
+        Mockito.when(clientLN.getPrefix()).thenReturn(DTO.HOLDER_LN_PREFIX);
+        Mockito.when(clientLN.getLnClass()).thenReturn(List.of(DTO.HOLDER_LN_CLASS));
 
         TControlWithIEDName.IEDName iedName = ReportControlBlock.toIEDName(clientLN);
+        assertEquals(clientLN.getApRef(),iedName.getApRef());
     }
 
 
@@ -196,12 +206,12 @@ public class ReportControlBlockTest {
         reportControlBlock.setDesc(DESC);
 
         TControlWithIEDName.IEDName iedName = new TControlWithIEDName.IEDName();
-        iedName.setLdInst(DTO.LD_INST);
-        iedName.setLnInst(DTO.LN_INST);
-        iedName.setPrefix(DTO.PREFIX);
+        iedName.setLdInst(DTO.HOLDER_LD_INST);
+        iedName.setLnInst(DTO.HOLDER_LN_INST);
+        iedName.setPrefix(DTO.HOLDER_LN_PREFIX);
         iedName.setApRef("AP_REF");
-        iedName.getLnClass().add(DTO.LN_CLASS);
-        iedName.setValue(DTO.IED_NAME);
+        iedName.getLnClass().add(DTO.HOLDER_LN_CLASS);
+        iedName.setValue(DTO.HOLDER_IED_NAME);
         reportControlBlock.getIedNames().add(iedName);
         return reportControlBlock;
     }

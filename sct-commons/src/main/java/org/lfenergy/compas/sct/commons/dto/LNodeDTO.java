@@ -6,8 +6,10 @@ package org.lfenergy.compas.sct.commons.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.lfenergy.compas.scl2007b4.model.TAnyLN;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
+import org.lfenergy.compas.sct.commons.Utils;
 import org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LNAdapter;
@@ -18,6 +20,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 
+@Slf4j
 @Getter
 @NoArgsConstructor
 public class LNodeDTO {
@@ -40,7 +43,10 @@ public class LNodeDTO {
     }
 
     public static <T extends TAnyLN> LNodeDTO from(AbstractLNAdapter<T> nodeAdapter, LogicalNodeOptions options) {
+        log.info(Utils.entering());
         LNodeDTO lNodeDTO = new LNodeDTO();
+        if(nodeAdapter == null) return lNodeDTO;
+
         lNodeDTO.nodeType = nodeAdapter.getLnType();
         lNodeDTO.nodeClass = nodeAdapter.getLNClass();
         if(!nodeAdapter.getPrefix().isBlank()){
@@ -48,6 +54,7 @@ public class LNodeDTO {
         }
         lNodeDTO.inst = nodeAdapter.getLNInst();
         if(options == null) {
+            log.info(Utils.leaving());
             return lNodeDTO;
         }
 
@@ -57,37 +64,18 @@ public class LNodeDTO {
                     extRefList.stream()
                             .map(tExtRef -> {
                                 ExtRefInfo extRefInfo = new ExtRefInfo(tExtRef);
-                                extRefInfo.setLnClass(lNodeDTO.nodeClass);
-                                extRefInfo.setLnInst(lNodeDTO.inst);
-                                extRefInfo.setPrefix(lNodeDTO.prefix);
-                                LDeviceAdapter lDeviceAdapter = (LDeviceAdapter)nodeAdapter.getParentAdapter();
-                                extRefInfo.setIedName(lDeviceAdapter.getParentAdapter().getName());
-                                extRefInfo.setLdInst(lDeviceAdapter.getInst());
+                                extRefInfo.setHolderLnClass(lNodeDTO.nodeClass);
+                                extRefInfo.setHolderLnInst(lNodeDTO.inst);
+                                extRefInfo.setHolderPrefix(lNodeDTO.prefix);
+                                LDeviceAdapter lDeviceAdapter = nodeAdapter.getParentAdapter();
+                                extRefInfo.setHolderIedName(lDeviceAdapter.getParentAdapter().getName());
+                                extRefInfo.setHolderLdInst(lDeviceAdapter.getInst());
                                 return extRefInfo;
                             })
                             .collect(Collectors.toList())
             );
         }
-
-        /*
-        if(options.isWithResumedDtt()){
-            ResumedDataTemplate filter = new ResumedDataTemplate();
-            filter.setLnInst(nodeAdapter.getLNInst());
-            filter.setLnClass(nodeAdapter.getLNClass());
-            filter.setLnType(nodeAdapter.getLnType());
-            lNodeDTO.extractResumedDTT(nodeAdapter,filter);
-            nodeAdapter.toDTO(this, options.isWithExtRef(), options.isWithResumedDtt(), options.isWithCB(), options.isWithDatSet());
-        }
-
-
-        if(options.isWithCB()){
-            lNodeDTO.extractControlBlocks(nodeAdapter);
-        }
-
-        if(options.isWithDatSet()){
-
-        }*/
-
+        log.info(Utils.leaving());
         return lNodeDTO;
     }
 

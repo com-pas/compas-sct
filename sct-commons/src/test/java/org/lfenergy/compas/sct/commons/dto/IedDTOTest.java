@@ -4,11 +4,12 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.lfenergy.compas.scl2007b4.model.SCL;
+import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
-import org.mockito.ArgumentMatchers;
+import org.lfenergy.compas.sct.commons.testhelpers.marshaller.SclTestMarshaller;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
@@ -23,35 +24,30 @@ class IedDTOTest {
         IedDTO iedDTO = DTO.createIedDTO();
 
         assertAll("IedDTO",
-                () -> assertEquals(DTO.IED_NAME, iedDTO.getName()),
+                () -> assertEquals(DTO.HOLDER_IED_NAME, iedDTO.getName()),
                 () -> assertFalse(iedDTO.getLDevices().isEmpty())
         );
-        assertEquals(DTO.IED_NAME, new IedDTO(DTO.IED_NAME).getName());
+        assertEquals(DTO.HOLDER_IED_NAME, new IedDTO(DTO.HOLDER_IED_NAME).getName());
     }
 
     @Test
-    void testFrom(){
-        IEDAdapter iedAdapter = Mockito.mock(IEDAdapter.class);
-        LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
-        MockedStatic<LDeviceDTO>  lDeviceDTOMockedStatic= Mockito.mockStatic(LDeviceDTO.class);
-        Mockito.when(iedAdapter.getLDeviceAdapters()).thenReturn(List.of(lDeviceAdapter));
-        lDeviceDTOMockedStatic.when(()-> LDeviceDTO.from(lDeviceAdapter,null)).thenReturn(new LDeviceDTO());
-        Mockito.when(iedAdapter.getName()).thenReturn(DTO.IED_NAME);
+    void testFrom() throws Exception {
+        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapter("IED_NAME"));
 
-
-        IedDTO iedDTO = IedDTO.from(iedAdapter,null);
+        IedDTO iedDTO = IedDTO.from(iAdapter,null);
         assertFalse(iedDTO.getLDevices().isEmpty());
-        Mockito.reset(lDeviceAdapter);
     }
 
     @Test
     void testAddLDevice(){
         IedDTO iedDTO = new IedDTO();
         assertTrue(iedDTO.getLDevices().isEmpty());
-        iedDTO.addLDevice(DTO.LD_INST, "LDName");
+        iedDTO.addLDevice(DTO.HOLDER_LD_INST, "LDName");
         assertFalse(iedDTO.getLDevices().isEmpty());
 
-        assertTrue(iedDTO.getLDeviceDTO(DTO.LD_INST).isPresent());
+        assertTrue(iedDTO.getLDeviceDTO(DTO.HOLDER_LD_INST).isPresent());
     }
 
 }
