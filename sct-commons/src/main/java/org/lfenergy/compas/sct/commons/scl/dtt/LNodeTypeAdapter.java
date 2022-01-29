@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.scl.dtt;
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lfenergy.compas.scl2007b4.model.TDO;
@@ -87,11 +88,16 @@ public class LNodeTypeAdapter
                 .findFirst();
     }
 
-    public List<ResumedDataTemplate> getResumedDTTs(ResumedDataTemplate filter) throws ScdException {
+    public List<ResumedDataTemplate> getResumedDTTs(ResumedDataTemplate filter)  {
 
         List<ResumedDataTemplate> resumedDataTemplates = new ArrayList<>();
         if(filter.isDaNameDefined()) {
-            check(filter.getDoName(),filter.getDaName());
+            try {
+                check(filter.getDoName(),filter.getDaName());
+            } catch (ScdException e){
+                log.error(e.getMessage());
+                return resumedDataTemplates;
+            }
         }
         ResumedDataTemplate rootResumedRTT = new ResumedDataTemplate();
         rootResumedRTT.setLnType(currentElem.getId());
@@ -107,11 +113,13 @@ public class LNodeTypeAdapter
                 continue;
             }
 
-            rootResumedRTT.setDoName(tdo.getName());
+            rootResumedRTT.getDoName().setName(tdo.getName());
             DOTypeAdapter doTypeAdapter = parentAdapter.getDOTypeAdapterById(tdo.getType()).orElse(null);
             if(doTypeAdapter != null){
                 rootResumedRTT.getDoName().setCdc(doTypeAdapter.getCdc());
-                List<ResumedDataTemplate> rDTTList = doTypeAdapter.getResumedDTTs(rootResumedRTT,new HashSet<>(), filter);
+                List<ResumedDataTemplate> rDTTList = doTypeAdapter.getResumedDTTs(
+                        rootResumedRTT,new HashSet<>(), filter
+                );
                 resumedDataTemplates.addAll(rDTTList);
             } // else this should never happen or the scd won't be built in the first place and we'd never be here
             // may be use an assert here to enforce constrain
@@ -144,7 +152,8 @@ public class LNodeTypeAdapter
     }
 
 
-    public void check(DoTypeName doTypeName, DaTypeName daTypeName) throws ScdException {
+
+    public void check(@NonNull DoTypeName doTypeName, @NonNull DaTypeName daTypeName) throws ScdException {
         if(!doTypeName.isDefined() || !daTypeName.isDefined() ){
             throw new ScdException("Invalid Data: data attributes information are missing");
         }
@@ -174,9 +183,8 @@ public class LNodeTypeAdapter
             if(adapterPair.getRight().containsDAWithDAName(daTypeName.getName())){
                 lastDoTypeAdapter = adapterPair.getValue();
             } else {
-                adapterPair = adapterPair.getRight().findPathDoType2DA(lastSdo);
+                adapterPair = adapterPair.getRight().findPathDoType2DA(daTypeName.getName());
                 lastDoTypeAdapter = adapterPair.getValue();
-                lastSdo = adapterPair.getKey();
             }
         }
 
@@ -195,6 +203,7 @@ public class LNodeTypeAdapter
         if(daTypeName.getStructNames().isEmpty()){
             daAdapter.check(daTypeName);
         } else {
+            daTypeName.setFc(daAdapter.getCurrentElem().getFc());
             DATypeAdapter daTypeAdapter = parentAdapter.getDATypeAdapterById(daAdapter.getType()).orElseThrow(
                 () -> new ScdException(
                         String.format("Unknown DAType (%s) referenced by DA(%s)", daAdapter.getType(), daAdapter.getName())
@@ -202,5 +211,39 @@ public class LNodeTypeAdapter
             );
             daTypeAdapter.check(daTypeName);
         }
+    }
+
+
+    public List<ResumedDataTemplate> getResumedDTTByDaName(DaTypeName daTypeName) throws ScdException {
+        Optional<ResumedDataTemplate> opRDtt;
+        List<ResumedDataTemplate> rDtts = new ArrayList<>();
+        for(TDO tdo : currentElem.getDO()){
+            DOAdapter doAdapter = new DOAdapter(this,tdo);
+            DOTypeAdapter doTypeAdapter = doAdapter.getDoTypeAdapter().orElseThrow();
+            ResumedDataTemplate rDtt = new ResumedDataTemplate();
+            rDtt.setLnType(currentElem.getId());
+            rDtt.getDoName().setName(doAdapter.getCurrentElem().getName());
+
+            opRDtt = doTypeAdapter.getResumedDTTByDaName(daTypeName, rDtt);
+            if(opRDtt.isPresent()){
+                rDtts.add(opRDtt.get());
+            }
+        }
+        return rDtts;
+    }
+
+    public List<ResumedDataTemplate> getResumedDTTByDoName(DoTypeName doTypeName) throws ScdException {
+
+
+        DOAdapter doAdapter = getDOAdapterByName(doTypeName.getName()).orElseThrow();
+        ResumedDataTemplate rDtt = new ResumedDataTemplate();
+        rDtt.getDoName().setName(doTypeName.getName());
+        DOTypeAdapter doTypeAdapter = doAdapter.getDoTypeAdapter().orElseThrow();
+        return doTypeAdapter.getResumedDTTByDoName(doTypeName,0,rDtt);
+
+    }
+
+    public String getId() {
+        return currentElem.getId();
     }
 }

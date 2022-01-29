@@ -99,7 +99,7 @@ public class ReportControlBlockTest {
         LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
         LNAdapter lnAdapter = Mockito.mock(LNAdapter.class);
 
-        Mockito.when(sclRootAdapter.getIEDAdapter(ArgumentMatchers.anyString())).thenReturn(iedAdapter);
+        Mockito.when(sclRootAdapter.getIEDAdapterByName(ArgumentMatchers.anyString())).thenReturn(iedAdapter);
         Mockito.when(iedAdapter.getLDeviceAdapterByLdInst(ArgumentMatchers.anyString()))
                 .thenReturn(Optional.of(lDeviceAdapter));
         Mockito.when(

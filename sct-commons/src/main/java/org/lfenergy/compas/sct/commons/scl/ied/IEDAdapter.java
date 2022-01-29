@@ -11,9 +11,11 @@ import org.lfenergy.compas.scl2007b4.model.TAccessPoint;
 import org.lfenergy.compas.scl2007b4.model.TIED;
 import org.lfenergy.compas.scl2007b4.model.TLDevice;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
+import org.lfenergy.compas.scl2007b4.model.TServiceSettingsEnum;
 import org.lfenergy.compas.scl2007b4.model.TServices;
 import org.lfenergy.compas.sct.commons.Utils;
 import org.lfenergy.compas.sct.commons.dto.ControlBlock;
+import org.lfenergy.compas.sct.commons.dto.DataSetInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
@@ -167,5 +169,55 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
 
         TServices srv = accessPoint.getServices();
         return srv != null && srv.getSettingGroups() != null && srv.getSettingGroups().getConfSG() != null;
+    }
+
+    public void createDataSet(DataSetInfo dataSetInfo) throws ScdException {
+        if(!hasDataSetCreationCapability()){
+            throw new ScdException("The capability of IED is not allowing DataSet creation");
+        }
+
+        LDeviceAdapter lDeviceAdapter = getLDeviceAdapterByLdInst(dataSetInfo.getHolderLDInst())
+            .orElseThrow(
+                () -> new ScdException(
+                    String.format(
+                        "Unknow LDevice(%s) in IED(%s)",dataSetInfo.getHolderLDInst(),currentElem.getName()                                )
+                )
+            );
+        AbstractLNAdapter<?> lNodeAdapter = AbstractLNAdapter.builder()
+                .withLDeviceAdapter(lDeviceAdapter)
+                .withLnClass(dataSetInfo.getHolderLnClass())
+                .withLnInst(dataSetInfo.getHolderLnInst())
+                .withLnPrefix(dataSetInfo.getHolderLnPrefix())
+                .build();
+        lNodeAdapter.addDataSet(dataSetInfo);
+    }
+
+    protected boolean hasDataSetCreationCapability() {
+        if(currentElem.getServices() == null){
+            return false ;
+        }
+        boolean hasCapability = false;
+        if(currentElem.getServices().getLogSettings() != null){
+            hasCapability = hasCapability ||
+                    (TServiceSettingsEnum.CONF.equals(currentElem.getServices().getLogSettings().getDatSet()) ||
+                        TServiceSettingsEnum.DYN.equals(currentElem.getServices().getLogSettings().getDatSet()));
+        }
+        if(currentElem.getServices().getGSESettings() != null){
+            hasCapability = hasCapability ||
+                    (TServiceSettingsEnum.CONF.equals(currentElem.getServices().getGSESettings().getDatSet()) ||
+                        TServiceSettingsEnum.DYN.equals(currentElem.getServices().getGSESettings().getDatSet()));
+
+        }
+        if(currentElem.getServices().getReportSettings() != null){
+            hasCapability = hasCapability ||
+                    (TServiceSettingsEnum.CONF.equals(currentElem.getServices().getReportSettings().getDatSet()) ||
+                            TServiceSettingsEnum.DYN.equals(currentElem.getServices().getReportSettings().getDatSet()));
+        }
+        if(currentElem.getServices().getSMVSettings() != null){
+            hasCapability = hasCapability ||
+                    (TServiceSettingsEnum.CONF.equals(currentElem.getServices().getSMVSettings().getDatSet()) ||
+                            TServiceSettingsEnum.DYN.equals(currentElem.getServices().getSMVSettings().getDatSet()));
+        }
+        return hasCapability ;
     }
 }

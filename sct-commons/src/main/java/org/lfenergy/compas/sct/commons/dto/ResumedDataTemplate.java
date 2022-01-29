@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,7 +15,6 @@ import org.lfenergy.compas.scl2007b4.model.TPredefinedCDCEnum;
 import org.lfenergy.compas.scl2007b4.model.TVal;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Setter
 @Getter
@@ -44,6 +44,7 @@ public class ResumedDataTemplate {
        return daName.isDefined() ? daName.isUpdatable() : false;
     }
 
+    @JsonIgnore
     public String getObjRef(String iedName, String ldInst){
         StringBuilder stringBuilder = new StringBuilder();
         //LDName
@@ -65,27 +66,26 @@ public class ResumedDataTemplate {
         return stringBuilder.toString();
     }
 
+    @JsonIgnore
+    public String getDataAttributes(){
+        return getDoRef() + "." + getDaRef();
+    }
+    @JsonIgnore
     public String getDoRef(){
         return isDoNameDefined() ? doName.toString() : "";
     }
 
+    @JsonIgnore
     public String getDaRef(){
         return isDaNameDefined() ? daName.toString() : "";
     }
 
-    public List<String> getDaRefList(){
-        ArrayList<String> daRefList = new ArrayList<>();
-        if(isDaNameDefined()) {
-            daRefList.add(daName.getName());
-            daRefList.addAll(daName.getStructNames());
-        }
-        return daRefList;
-    }
-
+    @JsonIgnore
     public TFCEnum getFc(){
         return daName.isDefined() ? daName.getFc() : null;
     }
 
+    @JsonIgnore
     public void setFc(TFCEnum fc){
         if(isDaNameDefined()){
             daName.setFc(fc);
@@ -94,10 +94,12 @@ public class ResumedDataTemplate {
         }
     }
 
+    @JsonIgnore
     public TPredefinedCDCEnum getCdc(){
         return daName.isDefined() ? doName.getCdc() : null;
     }
 
+    @JsonIgnore
     public void setCdc(TPredefinedCDCEnum cdc){
         if(isDoNameDefined()){
             doName.setCdc(cdc);
@@ -106,11 +108,13 @@ public class ResumedDataTemplate {
         }
     }
 
+    @JsonIgnore
     public List<String> getSdoNames(){
         if(!isDoNameDefined()) return new ArrayList<>();
         return List.of(doName.getStructNames().toArray(new String[0]));
     }
 
+    @JsonIgnore
     public List<String> getBdaNames(){
         if(!isDaNameDefined()) return new ArrayList<>();
         return List.of(daName.getStructNames().toArray(new String[0]));
@@ -134,10 +138,12 @@ public class ResumedDataTemplate {
         return daName != null && daName.isDefined();
     }
 
+    @JsonIgnore
     public TPredefinedBasicTypeEnum getBType(){
         return daName != null ? daName.getBType() : null;
     }
 
+    @JsonIgnore
     public void setType(String type){
         if(isDaNameDefined()){
             daName.setType(type);
@@ -146,10 +152,11 @@ public class ResumedDataTemplate {
         }
     }
 
+    @JsonIgnore
     public String getType(){
         return daName != null ? daName.getType() : null;
     }
-
+    @JsonIgnore
     public void setBType(String bType){
         if(isDaNameDefined()){
             daName.setBType(TPredefinedBasicTypeEnum.fromValue(bType));
@@ -159,30 +166,30 @@ public class ResumedDataTemplate {
     }
 
     public void setDoName(DoTypeName doName){
-        this.doName = DoTypeName.from(doName);
-    }
-    public void setDoName(String doName){
-        this.doName = new DoTypeName(doName);
-    }
-
-    public void setDaName(DaTypeName daName){
-        this.daName = DaTypeName.from(daName);
-    }
-    public void setDaName(String daName){
-        this.daName = new DaTypeName(daName);
-    }
-
-    public void setDaiValues(List<TVal> values) {
-        if(isDaNameDefined()){
-            daName.setDaiValues(values);
+        if(doName != null) {
+            this.doName = DoTypeName.from(doName);
         }
     }
 
+    public void setDaName(DaTypeName daName){
+        if(daName != null) {
+            this.daName = DaTypeName.from(daName);
+        }
+    }
+
+    @JsonIgnore
+    public void setDaiValues(List<TVal> values) {
+        if(isDaNameDefined()){
+            daName.addDaiValues(values);
+        }
+    }
+    @JsonIgnore
     public void setValImport(boolean valImport) {
         if(isDaNameDefined()){
             daName.setValImport(valImport);
         }
     }
+
 
     public boolean isValImport(){
         return daName.isValImport();

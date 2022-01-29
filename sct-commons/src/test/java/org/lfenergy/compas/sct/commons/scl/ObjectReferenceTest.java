@@ -15,13 +15,12 @@ class ObjectReferenceTest {
         assertEquals("PR_LN_INST",objRef.getLNodeName());
         assertEquals("doi.sdoi.sdai.bdai.bda",objRef.getDataAttributes());
 
-        ref = "IED_NAME_LD_NAMEPR_LN_INST.doi.sdoi.sdai.bdai.bda";
-        ObjectReference objRef1 = new ObjectReference(ref);
-        assertThrows(IllegalArgumentException.class, () -> objRef1.init());
+        String ref0 = "IED_NAME_LD_NAMEPR_LN_INST.doi.sdoi.sdai.bdai.bda";
+        assertThrows(IllegalArgumentException.class, () ->new ObjectReference(ref0));
 
-        ref = "IED_NAME_LD_NAME/PR_LN_INST";
-        ObjectReference objRef2 = new ObjectReference(ref);
-        assertThrows(IllegalArgumentException.class, () -> objRef2.init());
+
+        String ref1 = "IED_NAME_LD_NAME/PR_LN_INST";
+        assertThrows(IllegalArgumentException.class, () ->new ObjectReference(ref1));
     }
 
 }

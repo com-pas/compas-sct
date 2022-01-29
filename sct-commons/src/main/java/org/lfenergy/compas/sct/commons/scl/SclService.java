@@ -5,9 +5,12 @@
 package org.lfenergy.compas.sct.commons.scl;
 
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
+import org.lfenergy.compas.scl2007b4.model.TPredefinedCDCEnum;
 import org.lfenergy.compas.sct.commons.Utils;
 import org.lfenergy.compas.sct.commons.dto.ConnectedApDTO;
 import org.lfenergy.compas.sct.commons.dto.ControlBlock;
@@ -16,30 +19,27 @@ import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSourceInfo;
 import org.lfenergy.compas.sct.commons.dto.HeaderDTO;
-import org.lfenergy.compas.sct.commons.dto.IedDTO;
-import org.lfenergy.compas.sct.commons.dto.LNodeDTO;
-import org.lfenergy.compas.sct.commons.dto.LogicalNodeOptions;
 import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
-import org.lfenergy.compas.sct.commons.dto.SclDTO;
 import org.lfenergy.compas.sct.commons.dto.SubNetworkDTO;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.com.CommunicationAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
+import org.lfenergy.compas.sct.commons.scl.dtt.EnumTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter;
+import org.lfenergy.compas.sct.commons.scl.ied.DAITracker;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class SclService {
 
     public static SclRootAdapter initScl(String hVersion, String hRevision) throws ScdException {
@@ -119,7 +119,7 @@ public class SclService {
     public static List<ExtRefInfo> getExtRefInfo(SCL scd, String iedName, String ldInst) throws ScdException {
 
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapter(iedName);
+        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
                 .orElseThrow(
                         () -> new ScdException(String.format("Unknown LDevice (%s) in IED (%s)", ldInst, iedName))
@@ -131,7 +131,7 @@ public class SclService {
     public static List<ExtRefBindingInfo> getExtRefBinders(SCL scd, String iedName, String ldInst,
                                    String lnClass, String lnInst, String prefix, ExtRefSignalInfo signalInfo) throws ScdException {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapter(iedName);
+        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
                 .orElseThrow(
                         () -> new ScdException(String.format("Unknown LDevice (%s) in IED (%s)", ldInst, iedName))
@@ -162,7 +162,7 @@ public class SclService {
         String iedName = extRefInfo.getHolderIEDName();
         String ldInst = extRefInfo.getHolderLDInst();
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapter(iedName);
+        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
                 .orElseThrow(
                     () -> new ScdException(
@@ -206,7 +206,7 @@ public class SclService {
         String prefix = extRefInfo.getHolderLnPrefix();
         // Check holder (IED,LD,LN) exists
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapter(iedName);
+        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
                 .orElseThrow(
                         () -> new ScdException(String.format("Unknown LDevice (%s) in IED (%s)", ldInst, iedName))
@@ -221,7 +221,7 @@ public class SclService {
         lnAdapter.checkExtRefInfoCoherence(extRefInfo);
 
         // Get CBs
-        IEDAdapter srcIEDAdapter = sclRootAdapter.getIEDAdapter(bindingInfo.getIedName());
+        IEDAdapter srcIEDAdapter = sclRootAdapter.getIEDAdapterByName(bindingInfo.getIedName());
         LDeviceAdapter srcLDeviceAdapter = srcIEDAdapter.getLDeviceAdapterByLdInst(extRefInfo.getBindingInfo().getLdInst())
                 .orElseThrow();
 
@@ -258,7 +258,7 @@ public class SclService {
         }
 
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapter(iedName);
+        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
                 .orElseThrow(
                         () -> new ScdException(String.format("Unknown LDevice (%s) in IED (%s)", ldInst, iedName))
@@ -272,7 +272,7 @@ public class SclService {
         return anLNAdapter.updateExtRefSource(extRefInfo);
     }
 
-    public static Set<LNodeDTO> getDAI(SCL scd, String iedName, String ldInst,
+    public static Set<ResumedDataTemplate> getDAI(SCL scd, String iedName, String ldInst,
                                 ResumedDataTemplate rDtt, boolean updatable) throws ScdException {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = new IEDAdapter(sclRootAdapter,iedName);
@@ -281,57 +281,54 @@ public class SclService {
                         () -> new ScdException(String.format("Unknown LDevice (%s) in IED (%s)", ldInst, iedName))
                 );
 
-        Set<ResumedDataTemplate> resumedDataTemplateSet = lDeviceAdapter.getDAI(rDtt, updatable);
+        return lDeviceAdapter.getDAI(rDtt, updatable);
 
-        Set<LNodeDTO> nodeDTOS = new HashSet<>();
-        for(ResumedDataTemplate resumedDTT: resumedDataTemplateSet){
-            LNodeDTO lNodeDTO = nodeDTOS.stream()
-                    .filter(nodeDTO ->
-                            Objects.equals(nodeDTO.getInst(),resumedDTT.getLnInst()) &&
-                                    Objects.equals(nodeDTO.getNodeClass(),resumedDTT.getLnClass()) &&
-                                    Objects.equals(nodeDTO.getNodeType(),resumedDTT.getLnType()) )
-                    .findFirst()
-                    .orElse(null);
-            if(lNodeDTO == null){
-                lNodeDTO = new LNodeDTO(resumedDTT.getLnInst(),resumedDTT.getLnClass(),
-                        resumedDTT.getPrefix(),resumedDTT.getLnType());
-                nodeDTOS.add(lNodeDTO);
-            }
-            lNodeDTO.addResumedDataTemplate(resumedDTT);
-        }
-        return nodeDTOS;
     }
 
     public static void updateDAI(SCL scd, String iedName, String ldInst, ResumedDataTemplate rDtt) throws ScdException {
-
+        long startTime = System.nanoTime();
+        log.info(Utils.entering());
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        //check(rtt)
         DataTypeTemplateAdapter dttAdapter = sclRootAdapter.getDataTypeTemplateAdapter();
         LNodeTypeAdapter lNodeTypeAdapter = dttAdapter.getLNodeTypeAdapterById(rDtt.getLnType())
                 .orElseThrow(() -> new ScdException("Unknown LNodeType : " + rDtt.getLnType()));
         lNodeTypeAdapter.check(rDtt.getDoName(),rDtt.getDaName());
 
-        Long sGroup = rDtt.getDaName().getDaiValues().keySet().stream().findFirst().orElse(-1L);
-        String val = sGroup < 0 ? null : rDtt.getDaName().getDaiValues().get(sGroup);
         if(TPredefinedBasicTypeEnum.OBJ_REF == rDtt.getBType()){
+            Long sGroup = rDtt.getDaName().getDaiValues().keySet().stream().findFirst().orElse(-1L);
+            String val = sGroup < 0 ? null : rDtt.getDaName().getDaiValues().get(sGroup);
             sclRootAdapter.checkObjRef(val);
         }
 
-        IEDAdapter iedAdapter = new IEDAdapter(sclRootAdapter,iedName);
-        //
+        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
                 .orElseThrow(
                         () -> new ScdException(String.format("Unknown LDevice (%s) in IED (%s)", ldInst, iedName))
                 );
 
-        ///
+
         AbstractLNAdapter<?> lnAdapter = AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
                 .withLnClass(rDtt.getLnClass())
                 .withLnInst(rDtt.getLnInst())
                 .withLnPrefix(rDtt.getPrefix())
                 .build();
-        //
+
+        if(TPredefinedCDCEnum.ING == rDtt.getCdc() || TPredefinedCDCEnum.ASG == rDtt.getCdc() ){
+            DAITracker daiTracker = new DAITracker(lnAdapter,rDtt.getDoName(),rDtt.getDaName());
+            daiTracker.validateBoundedDAI();
+        }
         lnAdapter.updateDAI(rDtt);
+        log.info(Utils.leaving(startTime));
+    }
+
+    public static Set<Pair<Integer, String>> getEnumTypeElements(SCL scd, String idEnum) throws ScdException {
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        DataTypeTemplateAdapter dataTypeTemplateAdapter =  sclRootAdapter.getDataTypeTemplateAdapter();
+        EnumTypeAdapter enumTypeAdapter = dataTypeTemplateAdapter.getEnumTypeAdapterById(idEnum)
+                .orElseThrow(() -> new ScdException("Unknown EnumType Id: " +  idEnum));
+        return enumTypeAdapter.getCurrentElem().getEnumVal().stream()
+                .map(tEnumVal -> Pair.of(tEnumVal.getOrd(),tEnumVal.getValue()))
+                .collect(Collectors.toSet());
     }
 }

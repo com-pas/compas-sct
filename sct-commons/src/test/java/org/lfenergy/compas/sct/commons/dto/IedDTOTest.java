@@ -29,7 +29,7 @@ class IedDTOTest {
     void testFrom() throws Exception {
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapter("IED_NAME"));
+        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
 
         IedDTO iedDTO = IedDTO.from(iAdapter,null);
         assertFalse(iedDTO.getLDevices().isEmpty());

@@ -10,11 +10,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.lfenergy.compas.scl2007b4.model.TAnyLN;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.sct.commons.Utils;
+import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
+import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LNAdapter;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -75,7 +78,27 @@ public class LNodeDTO {
         }
 
         if(options.isWithDatSet()) {
-            lNodeDTO.datSets = nodeAdapter.getDataSet();
+            lNodeDTO.datSets = DataSetInfo.getDataSets(nodeAdapter);
+        }
+
+        if(options.isWithResumedDtt()) {
+            DataTypeTemplateAdapter dttAdapter = nodeAdapter.getDataTypeTemplateAdapter();
+            LNodeTypeAdapter lNodeTypeAdapter = dttAdapter.getLNodeTypeAdapterById(nodeAdapter.getLnType())
+                    .orElseThrow(
+                            () -> new IllegalArgumentException(
+                                    String.format(
+                                            "Corrupted SCD file: reference to unknown lnType(%s)",
+                                            nodeAdapter.getLnType()
+                                    )
+                            )
+                    );
+            ResumedDataTemplate filter = new ResumedDataTemplate();
+            filter.setLnInst(nodeAdapter.getLNInst());
+            filter.setLnClass(nodeAdapter.getLNClass());
+            filter.setPrefix(nodeAdapter.getPrefix());
+            filter.setLnType(nodeAdapter.getLnType());
+            List<ResumedDataTemplate> resumedDataTemplateList = lNodeTypeAdapter.getResumedDTTs(filter);
+            lNodeDTO.addAllResumedDataTemplate(resumedDataTemplateList);
         }
 
         if(options.isWithCB()) {

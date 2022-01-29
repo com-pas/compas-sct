@@ -32,8 +32,8 @@ public abstract class AbstractDAIAdapter<P extends SclElementAdapter> extends Sc
     public void setValImport(boolean b){
         currentElem.setValImport(b);
     }
-    public boolean isValImport(){
-        return currentElem.isValImport() != null && currentElem.isValImport().booleanValue();
+    public Boolean isValImport(){
+        return currentElem.isValImport();
     }
 
     public AbstractDAIAdapter update(Map<Long, String> daiValues) throws ScdException {
@@ -52,9 +52,9 @@ public abstract class AbstractDAIAdapter<P extends SclElementAdapter> extends Sc
     }
 
     public void update(Long sGroup, String val) throws ScdException {
-        if(!isValImport()){
+        if(currentElem.isValImport() != null && !currentElem.isValImport().booleanValue()){
             String msg = String.format(
-                    "DAI(%s) cannot be updated : valImport(%b)",currentElem.getName(), isValImport()
+                    "DAI(%s) cannot be updated : valImport(false)",currentElem.getName()
             );
             throw new ScdException(msg);
         }

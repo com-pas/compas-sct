@@ -24,8 +24,8 @@ public class FCDAInfo {
     private String prefix;
     private String lnClass;
     private String lnInst;
-    private DataTypeName doName; //doName.[...sdoNames]
-    private DataTypeName daName; //daName.[...bdaNames]
+    private DoTypeName doName; //doName.[...sdoNames]
+    private DaTypeName daName; //daName.[...bdaNames]
     private Long ix;
 
     public FCDAInfo(String dataSet, TFCDA tfcda) {
@@ -37,8 +37,8 @@ public class FCDAInfo {
             this.lnClass = tfcda.getLnClass().get(0);
         }
         lnInst = tfcda.getLnInst();
-        doName = new DataTypeName(tfcda.getDoName());
-        daName = new DataTypeName(tfcda.getDaName());
+        doName = new DoTypeName(tfcda.getDoName());
+        daName = new DaTypeName(tfcda.getDaName());
         ix = tfcda.getIx();
     }
 
@@ -49,21 +49,26 @@ public class FCDAInfo {
         tfcda.setFc(fc);
         tfcda.setLdInst(ldInst);
         tfcda.getLnClass().add(lnClass);
+
         if(!StringUtils.isBlank(lnInst)){
             tfcda.setLnInst(lnInst);
         }
-        tfcda.setDoName(doName.toString());
-        if(daName != null){
+
+        if(doName != null && doName.isDefined()){
+            tfcda.setDaName(doName.toString());
+        }
+
+        if(daName != null && daName.isDefined()){
             tfcda.setDaName(daName.toString());
         }
+
         if(ix != null){
             tfcda.setIx(ix);
         }
-
         return tfcda;
     }
 
     public boolean isValid() {
-        return doName != null && !StringUtils.isBlank(doName.toString());
+        return doName != null && doName.isDefined();
     }
 }

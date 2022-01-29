@@ -35,8 +35,7 @@ public class ResumedDataTemplateTest {
                 () -> assertArrayEquals(rDtt_b.getBdaNames().toArray(new String[0]),
                         rDtt.getBdaNames().toArray(new String[0])),
                 () -> assertEquals(rDtt_b.getType(), rDtt.getType()),
-                () -> assertTrue(rDtt.isValImport()),
-                () -> assertArrayEquals(rDtt.getDaRefList().toArray(new String[0]), new String[]{"da","bda1","bda2"})
+                () -> assertTrue(rDtt.isValImport())
         );
         ResumedDataTemplate rDtt_t = new ResumedDataTemplate();
         assertNull(rDtt_t.getFc());

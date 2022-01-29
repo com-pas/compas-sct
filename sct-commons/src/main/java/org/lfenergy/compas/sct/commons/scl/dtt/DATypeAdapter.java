@@ -13,12 +13,9 @@ import org.lfenergy.compas.scl2007b4.model.TDAType;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
 import org.lfenergy.compas.scl2007b4.model.TProtNs;
 
-import org.lfenergy.compas.scl2007b4.model.TVal;
-import org.lfenergy.compas.sct.commons.Utils;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +29,82 @@ public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
 
     public DATypeAdapter(DataTypeTemplateAdapter parentAdapter, TDAType currentElem) {
         super(parentAdapter, currentElem);
+    }
+
+    public List<ResumedDataTemplate> completeResumedDTT(ResumedDataTemplate rDtt) {
+        List<ResumedDataTemplate> result = new ArrayList<>();
+        for(BDAAdapter bdaAdapter : getBdaAdapters()){
+            ResumedDataTemplate copyRDtt = ResumedDataTemplate.copyFrom(rDtt);
+            copyRDtt.getDaName().addStructName(bdaAdapter.getName());
+            copyRDtt.getDaName().setType(bdaAdapter.getType());
+            copyRDtt.getDaName().setBType(bdaAdapter.getBType());
+            copyRDtt.getDaName().setValImport(bdaAdapter.isValImport());
+            if(bdaAdapter.isTail()){
+                copyRDtt.getDaName().addDaiValues(bdaAdapter.getCurrentElem().getVal());
+            } else {
+                DATypeAdapter daTypeAdapter = bdaAdapter.getDATypeAdapter()
+                        .orElseThrow(
+                                () -> new AssertionError(
+                                        String.format(
+                                                "BDA(%s) references unknown DAType id(%s)",
+                                                bdaAdapter.getName(),bdaAdapter.getType()
+                                        )
+                                )
+                        );
+                result.addAll(daTypeAdapter.completeResumedDTT(copyRDtt));
+            }
+            result.add(copyRDtt);
+        }
+
+        return result;
+    }
+
+    /**
+     * complete the input resumed data type template from DataTypeTemplate filtered out by the given DaTypeName
+     * @param daTypeName the Data attributes, eventually with BDAs
+     * @param idx index of the BDAs list in the given DaTypeName
+     * @param rDtt Resumed Data Template to complete
+     * @return completed Resumed Data Template or null if the filter constrains are not met
+     * @throws ScdException if last BDA is of type STRUCT or intermediate BDA is not of type STRUCT
+     */
+    public Optional<ResumedDataTemplate> getResumedDTTByDaName(DaTypeName daTypeName,int idx,ResumedDataTemplate rDtt) throws ScdException {
+        int sz= daTypeName.getStructNames().size();
+        String strBDAs = StringUtils.join(daTypeName.getStructNames());
+        if(sz - idx <= 0)  {
+            return Optional.of(rDtt);
+        };
+        DaTypeName typeName = rDtt.getDaName();
+        DATypeAdapter daTypeAdapter = this;
+
+        String bdaName = daTypeName.getStructNames().get(idx);
+        BDAAdapter bdaAdapter = getBdaAdapterByName(bdaName).orElse(null);
+
+        if(bdaAdapter == null) {
+            return Optional.empty();
+        }
+        typeName.setValImport(bdaAdapter.isValImport());
+        typeName.setType(bdaAdapter.getType());
+        typeName.setBType(bdaAdapter.getBType());
+        typeName.getStructNames().add(bdaName);
+        if( idx == sz - 1 ){
+            if(!bdaAdapter.isTail()) {
+                throw new ScdException(
+                        String.format("Last BDA(%s) in '%s' cannot be of type STRUCT", bdaName, strBDAs)
+                );
+            }
+            return Optional.of(rDtt);
+        }
+        daTypeAdapter = daTypeAdapter.getDATypeAdapterByBdaName(bdaName)
+                .orElseThrow(
+                        () -> new ScdException(String.format("Invalid BDA(%s) in '%s'",bdaName,strBDAs  ))
+                );
+
+        Optional<ResumedDataTemplate> opRDtt = daTypeAdapter.getResumedDTTByDaName(daTypeName,idx+1,rDtt);
+        if(opRDtt.isPresent()){
+            return opRDtt;
+        }
+
+        return Optional.empty();
     }
 
 
@@ -143,7 +216,7 @@ public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
         List<ResumedDataTemplate> resumedDataTemplates = new ArrayList<>();
 
         for(TBDA bda : currentElem.getBDA()){
-            if(filter.isDaNameDefined() &&
+            if(filter != null && filter.isDaNameDefined() &&
                     !filter.getBdaNames().contains(bda.getName())){
                 continue;
             }
@@ -167,6 +240,7 @@ public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
                 resumedDataTemplate.addStructName(bda.getName(),DaTypeName.class);
                 resumedDataTemplate.setType(bda.getType());
                 resumedDataTemplate.getDaName().setValImport(bda.isValImport());
+                resumedDataTemplate.getDaName().addDaiValues(bda.getVal());
                 resumedDataTemplates.add(resumedDataTemplate);
             }
         }
@@ -195,6 +269,8 @@ public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
         }
         return Optional.empty();
     }
+
+
 
     @Getter
     public static class BDAAdapter extends AbstractDataAttributeAdapter<DATypeAdapter, TBDA>{

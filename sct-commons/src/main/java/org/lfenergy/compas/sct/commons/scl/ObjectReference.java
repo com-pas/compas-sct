@@ -22,10 +22,10 @@ public class ObjectReference {
 
     public ObjectReference(String reference) {
         this.reference = reference;
+        init();
     }
 
-    @PostConstruct
-    public void init(){
+    public final void init(){
         String refCopy = reference;
         String[] objRefPart = reference.split("[/]");
         if(objRefPart.length != 2 || StringUtils.isBlank(objRefPart[0]) || StringUtils.isBlank(objRefPart[1])){

@@ -73,7 +73,7 @@ public abstract class ControlBlock<T extends ControlBlock> extends LNodeMetaData
 
     public void validateDestination(SclRootAdapter sclRootAdapter) throws ScdException {
         for(TControlWithIEDName.IEDName iedName : iedNames){
-            IEDAdapter iedAdapter =sclRootAdapter.getIEDAdapter(iedName.getValue());
+            IEDAdapter iedAdapter =sclRootAdapter.getIEDAdapterByName(iedName.getValue());
             LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(iedName.getLdInst())
                     .orElseThrow(
                             () -> new ScdException(

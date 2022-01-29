@@ -25,22 +25,26 @@ public interface IDataParentAdapter extends IDataAdapter {
     default Pair<? extends IDataAdapter,Integer> findDeepestMatch(List<String> sNames, int fromIndex, boolean isBdaNames){
         int index = -1;
         int sz = sNames.size();
-        IDataAdapter sdiAdapter = null;
+        IDataAdapter diAdapter = null;
         IDataAdapter currSdiAdapter = this;
         for(int currIndex = fromIndex; currIndex < sz; currIndex++){
             try {
                 if(currIndex == sz-1 && isBdaNames){
-                    currSdiAdapter = ((IDataParentAdapter) currSdiAdapter).getDataAdapterByName(sNames.get(currIndex));
+                    currSdiAdapter = ((IDataParentAdapter) currSdiAdapter).getDataAdapterByName(
+                            sNames.get(currIndex)
+                    );
                 } else {
-                    currSdiAdapter = ((IDataParentAdapter) currSdiAdapter).getStructuredDataAdapterByName(sNames.get(currIndex));
+                    currSdiAdapter = ((IDataParentAdapter) currSdiAdapter).getStructuredDataAdapterByName(
+                            sNames.get(currIndex)
+                    );
                 }
-                sdiAdapter = currSdiAdapter;
+                diAdapter = currSdiAdapter;
                 index = currIndex;
             } catch (ScdException e) {
                 // partial match was found if index >= 0 or unknown data object names
                 break;
             }
         }
-        return Pair.of(sdiAdapter,index);
+        return Pair.of(diAdapter,index);
     }
 }

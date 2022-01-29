@@ -6,7 +6,6 @@ package org.lfenergy.compas.sct.commons.scl.dtt;
 
 import lombok.Getter;
 import org.lfenergy.compas.scl2007b4.model.TAbstractDataAttribute;
-import org.lfenergy.compas.scl2007b4.model.TBDA;
 import org.lfenergy.compas.scl2007b4.model.TDA;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
 import org.lfenergy.compas.scl2007b4.model.TProtNs;
@@ -132,7 +131,17 @@ public abstract class AbstractDataAttributeAdapter<P extends SclElementAdapter,T
                 );
             }
             daTypeName.setType(getType());
-            daTypeName.setBType(TPredefinedBasicTypeEnum.ENUM);
         }
+        daTypeName.setBType(getBType());
+        if(daTypeName.getDaiValues().isEmpty()) {
+            daTypeName.addDaiValues(currentElem.getVal());
+        }
+        daTypeName.setValImport(currentElem.isValImport());
+    }
+
+
+
+    public boolean isValImport() {
+        return currentElem.isValImport();
     }
 }

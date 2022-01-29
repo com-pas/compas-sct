@@ -153,8 +153,8 @@ public class DTO {
 
         rDTT.setLnType(LN_TYPE);
         rDTT.setLnClass(TLLN0Enum.LLN_0.value());
-        rDTT.setDoName(DO_NAME);
-        rDTT.setDaName(DA_NAME);
+        rDTT.setDoName(new DoTypeName(DO_NAME));
+        rDTT.setDaName(new DaTypeName(DA_NAME));
         rDTT.getDoName().setCdc(TPredefinedCDCEnum.fromValue(CDC));
         rDTT.getDaName().setFc(TFCEnum.fromValue(FC));
 
@@ -169,8 +169,8 @@ public class DTO {
         rDTT.setLnInst(lnInst);
         rDTT.setPrefix(prefix);
 
-        rDTT.setDoName("do.sdo1.sdo2");
-        rDTT.setDaName("da.bda1.bda2");
+        rDTT.setDoName(new DoTypeName("do.sdo1.sdo2"));
+        rDTT.setDaName(new DaTypeName("da.bda1.bda2"));
         rDTT.setCdc(TPredefinedCDCEnum.fromValue(CDC));
         rDTT.setFc(TFCEnum.fromValue(FC));
         rDTT.setBType("Check");
