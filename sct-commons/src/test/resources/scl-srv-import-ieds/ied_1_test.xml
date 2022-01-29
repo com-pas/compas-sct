@@ -26,7 +26,9 @@
                                 <SDI name="sdo12">
                                     <SDI name="da11">
                                         <SDI name="bda111">
-                                            <DAI name="bdapr" valImport="true"/>
+                                            <DAI name="bdapr" valImport="true">
+                                                <Val>myVal</Val>
+                                            </DAI>
                                         </SDI>
                                     </SDI>
                                 </SDI>

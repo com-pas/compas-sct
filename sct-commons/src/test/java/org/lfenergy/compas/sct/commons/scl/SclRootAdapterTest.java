@@ -34,7 +34,6 @@ public class SclRootAdapterTest {
         assertEquals(SclRootAdapter.VERSION,sclRootAdapter.get().getSclVersion());
         assertEquals(SclRootAdapter.REVISION,sclRootAdapter.get().getSclRevision());
 
-
         assertThrows(IllegalArgumentException.class, () -> new SclRootAdapter(new SCL()));
     }
 
@@ -53,7 +52,6 @@ public class SclRootAdapterTest {
 
         MarshallerWrapper marshallerWrapper = SclTestMarshaller.createWrapper();
         System.out.println(marshallerWrapper.marshall(sclRootAdapter.getCurrentElem()));
-
 
     }
 }

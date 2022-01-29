@@ -7,6 +7,8 @@ package org.lfenergy.compas.sct.commons;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 @Slf4j
 public class Utils {
@@ -43,9 +45,8 @@ public class Utils {
         try {
             return (new Throwable()).getStackTrace()[2].getMethodName();
         } catch (Exception e){
-            // do nothing
+            return "-";
         }
-        return "-";
     }
 
     public static String leaving(){

@@ -37,7 +37,7 @@ public class CommunicationAdapter extends SclElementAdapter<SclRootAdapter, TCom
     public SubNetworkAdapter addSubnetwork(String snName, String snType,
                                            String iedName, String apName) throws ScdException {
 
-        IEDAdapter iedAdapter = parentAdapter.getIEDAdapter(iedName);
+        IEDAdapter iedAdapter = parentAdapter.getIEDAdapterByName(iedName);
         if(!iedAdapter.findAccessPointByName(apName)){
             throw new ScdException("Unknown AccessPoint :" + apName + " in IED :" + iedName);
         }

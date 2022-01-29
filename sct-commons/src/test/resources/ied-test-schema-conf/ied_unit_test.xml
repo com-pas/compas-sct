@@ -33,15 +33,29 @@
                 </LDevice>
                 <LDevice inst="LD_INS2">
                     <LN0 lnType="LNO1" lnClass="LLN0" inst="">
+
                         <Inputs>
                             <ExtRef intAddr="INT_ADDR1" pDO="Do1.sdo1" pDA="da"/>
                         </Inputs>
                     </LN0>
                     <LN lnType="LNO2" lnClass="ANCR" inst="1">
+                        <DataSet name="dataSet">
+                            <FCDA fc="ST"/>
+                        </DataSet>
+                        <DOI name="StrVal"/>
                         <Inputs>
                             <ExtRef  intAddr="INT_ADDR2" pDO="StrVal.sdo2" pDA="antRef.bda1.bda2.bda3" />
                         </Inputs>
                     </LN>
+                </LDevice>
+                <LDevice inst="LD_INS3">
+                    <LN0 lnType="LNO1" lnClass="LLN0" inst="">
+                        <DOI name="Do">
+                            <DAI name="da2">
+                                <Val>myVal</Val>
+                            </DAI>
+                        </DOI>
+                    </LN0>
                 </LDevice>
             </Server>
             <Services>
@@ -71,6 +85,7 @@
         </DOType>
         <DOType cdc="WYE" id="DO3">
             <DA fc="ST" name="da1" bType="Struct" type="DA1"/>
+            <DA fc="ST" name="antRef" bType="Struct" type="DA1"/>
         </DOType>
         <DOType cdc="WYE" id="DO4">
             <SDO name="d" type="DO3"/>
@@ -110,7 +125,8 @@
             </BDA>
         </DAType>
         <EnumType id="RecCycModKind">
-            <EnumVal ord="1">Completed-diff</EnumVal>
+            <EnumVal ord="0">Completed-diff</EnumVal>
+            <EnumVal ord="1">newValue</EnumVal>
         </EnumType>
         <EnumType id="PhaseAngleReferenceKind">
             <EnumVal ord="0">Va</EnumVal>

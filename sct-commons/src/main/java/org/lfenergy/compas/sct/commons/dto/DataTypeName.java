@@ -86,4 +86,18 @@ public class DataTypeName {
     public void addStructName(String structName) {
         structNames.add(structName);
     }
+
+    @JsonIgnore
+    public String getLast(){
+        int sz = structNames.size();
+        return sz == 0 ? name : structNames.get(sz -1);
+    }
+
+    public void addName(String name) {
+        if(isDefined()){
+            structNames.add(name);
+        } else {
+            this.name = name;
+        }
+    }
 }

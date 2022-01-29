@@ -149,7 +149,7 @@ class LN0AdapterTest {
     }
 
     @Test
-    void testGetDataSet(){
+    void testGetDataSetWith(){
         LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
         TLDevice tlDevice = Mockito.mock(TLDevice.class);
         Mockito.when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
@@ -290,15 +290,18 @@ class LN0AdapterTest {
     void testFindMatch() throws Exception {
         SCL scd = SclTestMarshaller.getSCLFromFile(SCD_IED_U_TEST);
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapter("IED_NAME"));
+        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS1").get());
         LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
         DoTypeName doTypeName = new DoTypeName("Do.sdo1.d");
         DaTypeName daTypeName = new DaTypeName("antRef.bda1.bda2.bda3");
         AbstractDAIAdapter<?> daiAdapter = assertDoesNotThrow(() -> ln0Adapter.findMatch(doTypeName,daTypeName).get());
         assertEquals("bda3",daiAdapter.getCurrentElem().getName());
+        assertEquals("Completed-diff",daiAdapter.getCurrentElem().getVal().get(0).getValue());
 
         DoTypeName doTypeName2 = new DoTypeName("Do.sdo1");
         assertFalse(ln0Adapter.findMatch(doTypeName2,daTypeName).isPresent());
     }
+
+
 }

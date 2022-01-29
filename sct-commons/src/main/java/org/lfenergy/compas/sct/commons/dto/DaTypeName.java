@@ -5,6 +5,9 @@
 package org.lfenergy.compas.sct.commons.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,7 +31,6 @@ public class DaTypeName extends DataTypeName{
     private String type;
     private TPredefinedBasicTypeEnum bType;
     private boolean valImport;
-    private boolean initValImport; // valImport from DataTypeTemplate
     private Map<Long,String> daiValues = new HashMap<>();
 
     public DaTypeName(String daName) {
@@ -54,10 +56,7 @@ public class DaTypeName extends DataTypeName{
     }
 
     public boolean isValImport(){
-        if(!valImport){
-            return initValImport;
-        }
-        return true;
+        return valImport;
     }
 
     public boolean isUpdatable(){
@@ -71,12 +70,28 @@ public class DaTypeName extends DataTypeName{
                 );
     }
 
-    @JsonIgnore
-    public void setDaiValues(List<TVal> vals) {
+    public void addDaiValues(List<TVal> vals) {
         if(vals.size() == 1){
             daiValues.put(0L,vals.get(0).getValue());
+        } else {
+            vals.forEach(tVal -> daiValues.put(tVal.getSGroup(), tVal.getValue()));
         }
-        vals.forEach(tVal -> daiValues.put(tVal.getSGroup(),tVal.getValue()));
+    }
+
+    public void addDaiValue(TVal val) {
+        if(val.getSGroup() == null){
+            daiValues.put(0L,val.getValue());
+        } else {
+            daiValues.put(val.getSGroup(), val.getValue());
+        }
+    }
+
+    public void addDaiValue(Long sg, String val) {
+        if(sg == null){
+            daiValues.put(0L,val);
+        } else {
+            daiValues.put(sg, val);
+        }
     }
 
     @Override

@@ -1,14 +1,12 @@
 // SPDX-FileCopyrightText: 2021 RTE FRANCE
 //
 // SPDX-License-Identifier: Apache-2.0
-
 package org.lfenergy.compas.sct.commons.scl.ied;
 
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.lfenergy.compas.scl2007b4.model.LN0;
 import org.lfenergy.compas.scl2007b4.model.TAnyLN;
 import org.lfenergy.compas.scl2007b4.model.TControl;
@@ -22,6 +20,7 @@ import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
 import org.lfenergy.compas.scl2007b4.model.TReportControl;
 import org.lfenergy.compas.scl2007b4.model.TSampledValueControl;
 import org.lfenergy.compas.scl2007b4.model.TServiceType;
+import org.lfenergy.compas.scl2007b4.model.TVal;
 import org.lfenergy.compas.sct.commons.dto.ControlBlock;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.dto.DataSetInfo;
@@ -44,7 +43,9 @@ import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -206,7 +207,6 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
 
             extRef.setPrefix(bindingInfo.getPrefix());
             // invalid source info
-            extRef.setServiceType(null);
             extRef.setSrcCBName(null);
             extRef.setSrcLDInst(null);
             extRef.setSrcPrefix(null);
@@ -314,7 +314,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
 
     }
 
-    protected List<TDataSet> getDataSet(ExtRefInfo filter){
+    public List<TDataSet> getDataSet(ExtRefInfo filter){
         if (filter == null || filter.getSignalInfo() == null || filter.getBindingInfo() == null) {
             return currentElem.getDataSet();
         }
@@ -397,7 +397,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         IEDAdapter binderIEDAdapter;
         if(!binderIedName.equals( parentAdapter.getParentAdapter().getName())){ // external binding
             SclRootAdapter sclRootAdapter = parentAdapter.getParentAdapter().getParentAdapter();
-            binderIEDAdapter = sclRootAdapter.getIEDAdapter(binderIedName);
+            binderIEDAdapter = sclRootAdapter.getIEDAdapterByName(binderIedName);
         } else {
             binderIEDAdapter = parentAdapter.getParentAdapter();
         }
@@ -468,9 +468,11 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         Optional<?> opDaiAdapter = findMatch(rDtt.getDoName(), rDtt.getDaName());
         if(opDaiAdapter.isPresent()) {
             AbstractDAIAdapter<?> daiAdapter = (AbstractDAIAdapter<?>) opDaiAdapter.get();
-            rDtt.setValImport( daiAdapter.isValImport());
-            if (updatable && daiAdapter.isValImport()) {
-
+            if(daiAdapter.isValImport() != null) {
+                rDtt.setValImport(daiAdapter.isValImport());
+            }
+            rDtt.setDaiValues(daiAdapter.getCurrentElem().getVal());
+            if (updatable && (daiAdapter.isValImport() == null || daiAdapter.isValImport())) {
                 boolean isSg = daiAdapter.getCurrentElem().getVal().stream()
                         .anyMatch(tVal -> tVal.getSGroup() != null && tVal.getSGroup().intValue() > 0);
 
@@ -494,43 +496,15 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      * @return Optional of DAIAdapter for the matched DAI
      */
     protected Optional<? extends AbstractDAIAdapter> findMatch(DoTypeName doTypeName, DaTypeName daTypeName){
-        try {
-            IDataParentAdapter doiAdapter = getDOIAdapterByName(doTypeName.getName()); // instance of DO
-            Pair<? extends IDataAdapter, Integer> matchResult;
-            IDataParentAdapter lastSdoAdapter = doiAdapter;
-            if(!doTypeName.getStructNames().isEmpty()) {
-                matchResult = doiAdapter.findDeepestMatch(
-                        doTypeName.getStructNames(), 0, false
-                );
-                if (matchResult.getRight() < doTypeName.getStructNames().size() - 1) {
-                    return Optional.empty();
-                }
-                lastSdoAdapter = (IDataParentAdapter) matchResult.getLeft(); //instance of tha last SDO in the chain
-            }
-
-            AbstractDAIAdapter<?> daiAdapter;
-            if (!daTypeName.getStructNames().isEmpty()) {
-                SDIAdapter firstDAIAdapter = lastSdoAdapter.getStructuredDataAdapterByName(daTypeName.getName());
-                matchResult = firstDAIAdapter.findDeepestMatch(
-                        daTypeName.getStructNames(), 0, true
-                );
-
-                if ( matchResult.getRight() < daTypeName.getStructNames().size() - 1) {
-                    return Optional.empty();
-                }
-                daiAdapter = (AbstractDAIAdapter) matchResult.getLeft(); //instance of the last BDA with primitive type
-            } else {
-                daiAdapter = lastSdoAdapter.getDataAdapterByName(daTypeName.getName());
-            }
-
-            return Optional.of(daiAdapter);
-        } catch (ScdException e) {
-            log.warn("Exception :" + e.getMessage());
+        DAITracker daiTracker = new DAITracker(this,doTypeName,daTypeName);
+        DAITracker.MatchResult matchResult = daiTracker.Search();
+        if(matchResult != DAITracker.MatchResult.FULL_MATCH){
             return Optional.empty();
         }
+        return Optional.of((AbstractDAIAdapter) daiTracker.getBdaiOrDaiAdapter());
     }
 
-    public void updateDAI(ResumedDataTemplate rDtt) throws ScdException {
+    public void updateDAI(@NonNull ResumedDataTemplate rDtt) throws ScdException {
 
         if(!rDtt.isDoNameDefined() || !rDtt.isDaNameDefined()){
             throw new ScdException("Cannot update undefined DAI");
@@ -538,78 +512,63 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         DoTypeName doTypeName = rDtt.getDoName();
         DaTypeName daTypeName = rDtt.getDaName();
 
-        DOIAdapter doiAdapter;
-        try {
-            doiAdapter = getDOIAdapterByName(doTypeName.getName()); // instance of DO
-        } catch (ScdException e) {
-            doiAdapter = addDOI(doTypeName.getName());
-        }
-
-        IDataParentAdapter doiOrSDoiAdapter = doiAdapter;;
-        if(!doTypeName.getStructNames().isEmpty()) {
-            Pair<? extends IDataAdapter, Integer> matchResult =  doiAdapter.findDeepestMatch(
-                    doTypeName.getStructNames(), 0, false
-            );
-            int doiOrSdoiIndex = matchResult.getRight();
-            if(doiOrSdoiIndex < 0){
-                // do.sdo[.sdo[...]] doesn't exist
-                doiOrSdoiIndex = 0;
-            } else if(doiOrSdoiIndex == doTypeName.getStructNames().size() - 1){
-                doiOrSdoiIndex++; //element exists already
-                doiOrSDoiAdapter = (IDataParentAdapter) matchResult.getLeft();
-            }
-            for(int i = doiOrSdoiIndex; i < doTypeName.getStructNames().size(); i++){
-                // only first partial elements exists in do.sdo[.sdo[...]]
-                // create underlying and remaining elements
-                doiOrSDoiAdapter = doiOrSDoiAdapter.addSDOI(doTypeName.getStructNames().get(i));
+        DAITracker daiTracker = new DAITracker(this,doTypeName,daTypeName);
+        DAITracker.MatchResult matchResult = daiTracker.Search();
+        AbstractDAIAdapter<?> daiAdapter = null;
+        IDataParentAdapter doiOrSdoiAdapter;
+        if(matchResult == DAITracker.MatchResult.FULL_MATCH){
+            // update
+            daiAdapter = (AbstractDAIAdapter) daiTracker.getBdaiOrDaiAdapter();
+            if((daiAdapter.isValImport() != null && daiAdapter.isValImport().booleanValue()) ||
+                    (daiAdapter.isValImport() == null && rDtt.isUpdatable()) ) {
+                daiAdapter.update(daTypeName.getDaiValues());
+                return;
+            } else{
+                throw new ScdException(String.format("DAI (%s -%s) cannot be updated",doTypeName,daTypeName));
             }
         }
-        boolean hasBDAs = !daTypeName.getStructNames().isEmpty();
 
-        IDataAdapter daiOrBDaiAdapter;
-        if(!hasBDAs){
-            try {
-                daiOrBDaiAdapter = doiOrSDoiAdapter.getDataAdapterByName(daTypeName.getName()); // instance of DA
-            } catch (ScdException e) {
-                daiOrBDaiAdapter = doiOrSDoiAdapter.addDAI(daTypeName.getName(),rDtt.isUpdatable());
+        if(rDtt.isUpdatable()) {
+            doiOrSdoiAdapter = daiTracker.getDoiOrSdoiAdapter();
+            int idx = daiTracker.getIndexDoType();
+            int doSz = doTypeName.getStructNames().size();
+            if (matchResult == DAITracker.MatchResult.FAILED) {
+                doiOrSdoiAdapter = addDOI(doTypeName.getName());
+                idx = 0;
+            } else if (idx == -1) {
+                idx = 0;
+            } else if (idx == doSz - 1) {
+                idx = doSz;
             }
-        } else {
-            IDataParentAdapter rootBDAIAdapter;
-            try {
-                // instance of Struct DA
-                rootBDAIAdapter = doiOrSDoiAdapter.getStructuredDataAdapterByName(daTypeName.getName());
-            } catch (ScdException e) {
-                rootBDAIAdapter = doiOrSDoiAdapter.addSDOI(daTypeName.getName());
+            for (int i = idx; i < doSz; ++i) {
+                String sdoName = doTypeName.getStructNames().get(i);
+                doiOrSdoiAdapter = doiOrSdoiAdapter.addSDOI(sdoName);
             }
 
-            daiOrBDaiAdapter = rootBDAIAdapter;
-            Pair<? extends IDataAdapter, Integer> matchResult =  rootBDAIAdapter.findDeepestMatch(
-                    daTypeName.getStructNames(), 0, true
-            );
-            int daiOrBdaiIndex = matchResult.getRight();
-            if(daiOrBdaiIndex < 0){
-                // da.bda[.bda[...]] doesn't exist
-                daiOrBdaiIndex = 0;
-            } else if(daiOrBdaiIndex == daTypeName.getStructNames().size() - 1){
-                daiOrBdaiIndex++; //element exists already
-                daiOrBDaiAdapter = matchResult.getLeft();
+            IDataAdapter daiOrBdaiAdapter = daiTracker.getDoiOrSdoiAdapter();
+            idx = daiTracker.getIndexDaType();
+            int daSz = daTypeName.getStructNames().size();
+            if(idx <= -1 ){
+                idx = 0;
+            } else if(idx == daSz - 1){
+                idx = daSz;
             }
-            for(int i = daiOrBdaiIndex; i < daTypeName.getStructNames().size(); i++){
-                // only first partial elements exists in da.bda[.bda[...]]
-                // create underlying and remaining elements
-                if(i != daTypeName.getStructNames().size() - 1) {
-                    daiOrBDaiAdapter = ((IDataParentAdapter) daiOrBDaiAdapter).addSDOI(
-                            daTypeName.getStructNames().get(i)
-                    );
+            for(int i = idx; i < daSz; ++i){
+                String bdaName = daTypeName.getStructNames().get(i);
+                if(idx == 0){
+                    daiOrBdaiAdapter = doiOrSdoiAdapter.addSDOI(daTypeName.getName());
+                } else if(i == daSz -1){
+                    daiAdapter = ((IDataParentAdapter)daiOrBdaiAdapter).addDAI(bdaName, rDtt.isUpdatable());
                 } else {
-                    daiOrBDaiAdapter = ((IDataParentAdapter) daiOrBDaiAdapter).addDAI(
-                            daTypeName.getStructNames().get(i), rDtt.isUpdatable()
-                    );
+                    daiOrBdaiAdapter = ((IDataParentAdapter)daiOrBdaiAdapter).addSDOI(bdaName);
                 }
             }
+            if(daiAdapter == null){
+               daiAdapter = doiOrSdoiAdapter.addDAI(daTypeName.getName(),rDtt.isUpdatable());
+            }
+
+            daiAdapter.update(daTypeName.getDaiValues());
         }
-        // update DAI
-        ((AbstractDAIAdapter)daiOrBDaiAdapter).update(rDtt.getDaName().getDaiValues());
     }
 
     protected DOIAdapter addDOI(String name) {
@@ -634,12 +593,61 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
     }
 
     public boolean matches(ObjectReference objRef) {
+        String dataAttribute = objRef.getDataAttributes();
+        SclRootAdapter sclRootAdapter = parentAdapter.getParentAdapter().getParentAdapter();
+        DataTypeTemplateAdapter dttAdapter = sclRootAdapter.getDataTypeTemplateAdapter();
+        LNodeTypeAdapter lNodeTypeAdapter = dttAdapter.getLNodeTypeAdapterById(getLnType())
+                .orElseThrow(
+                        () -> new AssertionError(
+                                String.format("Corrupted  SCD file: Reference to unknown LNodeType(%s)", getLnType())
+                        )
+                );
+        ResumedDataTemplate filter = new ResumedDataTemplate();
+        filter.setLnInst(getLNInst());
+        filter.setLnClass(getLNClass());
+        filter.setLnType(currentElem.getLnType());
+        List<ResumedDataTemplate> rDtts = lNodeTypeAdapter.getResumedDTTs(filter);
 
-        return  false;
+        return matchesDataAttributes(dataAttribute) ||
+                rDtts.stream().anyMatch(rDtt -> rDtt.getDataAttributes().startsWith(dataAttribute));
+    }
+
+    protected  boolean matchesDataAttributes(String dataAttribute){
+        return  currentElem.getDataSet().stream().anyMatch(tDataSet -> tDataSet.getName().equals(dataAttribute)) ||
+                currentElem.getReportControl().stream().anyMatch(rptCtl -> rptCtl.getName().equals(dataAttribute));
     }
 
     public Set<DataSetInfo> getDataSet() {
         return currentElem.getDataSet()
                 .stream().map(tDataSet -> DataSetInfo.from(tDataSet)).collect(Collectors.toSet());
+    }
+
+    public void addDataSet(DataSetInfo dataSetInfo) {
+    }
+
+    public DataTypeTemplateAdapter getDataTypeTemplateAdapter() {
+        return parentAdapter.getParentAdapter().getParentAdapter().getDataTypeTemplateAdapter();
+    }
+
+    public Map<Long, String> getDAIValues(ResumedDataTemplate rDtt) {
+        DAITracker daiTracker = new DAITracker(this,rDtt.getDoName(),rDtt.getDaName());
+        DAITracker.MatchResult matchResult = daiTracker.Search();
+        if(matchResult != DAITracker.MatchResult.FULL_MATCH){
+            return new HashMap<>();
+        }
+        List<TVal> tVals;
+        IDataAdapter daiAdapter = daiTracker.getBdaiOrDaiAdapter();
+        if(daiAdapter.getClass().equals(SDIAdapter.DAIAdapter.class)){
+            tVals =  ((RootSDIAdapter.DAIAdapter)daiAdapter).getCurrentElem().getVal();
+        } else if(daiAdapter.getClass().equals(RootSDIAdapter.DAIAdapter.class)){
+            tVals =  ((RootSDIAdapter.DAIAdapter)daiAdapter).getCurrentElem().getVal();
+        } else {
+            tVals =  ((DOIAdapter.DAIAdapter)daiAdapter).getCurrentElem().getVal();
+        }
+
+        Map<Long,String> res = new HashMap<>();
+        tVals.forEach( tVal -> res.put(tVal.getSGroup(),tVal.getValue()));
+
+        return res;
     }
 }

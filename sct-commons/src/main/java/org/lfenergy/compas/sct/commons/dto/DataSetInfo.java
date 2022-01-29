@@ -6,11 +6,15 @@ package org.lfenergy.compas.sct.commons.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.lfenergy.compas.scl2007b4.model.TAnyLN;
 import org.lfenergy.compas.scl2007b4.model.TDataSet;
+import org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Getter
@@ -35,6 +39,11 @@ public class DataSetInfo extends LNodeMetaDataEmbedder{
         return dataSetInfo;
     }
 
+    public static Set<DataSetInfo> getDataSets(AbstractLNAdapter<? extends TAnyLN> lnAdapter){
+        return lnAdapter.getDataSet(null)
+                .stream().map(tDataSet -> DataSetInfo.from(tDataSet)).collect(Collectors.toSet());
+    }
+
     public void addFCDAInfo(FCDAInfo fcdaInfo){
         fcdaInfos.add(fcdaInfo);
     }
@@ -45,5 +54,12 @@ public class DataSetInfo extends LNodeMetaDataEmbedder{
 
     public void setName(String name){
         this.name = name;
+    }
+
+    public boolean isValid(){
+        if(name.length() > 32 || fcdaInfos.isEmpty()){
+            return false;
+        }
+        return fcdaInfos.stream().allMatch(fcdaInfo -> fcdaInfo.isValid());
     }
 }

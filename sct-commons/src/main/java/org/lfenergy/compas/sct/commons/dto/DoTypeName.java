@@ -23,7 +23,6 @@ public class DoTypeName extends DataTypeName {
     public DoTypeName(String doName) {
         super(doName);
     }
-
     public DoTypeName(String ppDoName, String sdoNames) {
         super(ppDoName, sdoNames);
     }

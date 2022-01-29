@@ -98,7 +98,7 @@ public class ExtRefBindingInfo {
                 Objects.equals(prefix, tExtRef.getPrefix()) &&
                 Objects.equals(lnInst, tExtRef.getLnInst()) &&
                 tExtRef.getLnClass().contains(lnClass) &&
-                Objects.equals(serviceType, tExtRef.getServiceType());
+                (tExtRef.getServiceType() == null || Objects.equals(serviceType, tExtRef.getServiceType()));
     }
 
     public boolean isNull(){

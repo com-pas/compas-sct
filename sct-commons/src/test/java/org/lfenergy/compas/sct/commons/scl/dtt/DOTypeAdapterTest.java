@@ -9,6 +9,7 @@ import org.lfenergy.compas.scl2007b4.model.TDA;
 import org.lfenergy.compas.scl2007b4.model.TDOType;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedCDCEnum;
+import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.dto.DoTypeName;
 import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
@@ -101,16 +102,16 @@ class DOTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter, TDOTyp
         DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
         DOTypeAdapter doTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getDOTypeAdapterById("DO2").get());
         ResumedDataTemplate rootRDtt = new ResumedDataTemplate();
-        rootRDtt.setDoName("Op");
+        rootRDtt.setDoName(new DoTypeName("Op"));
         ResumedDataTemplate filter = new ResumedDataTemplate();
-        filter.setDoName("Op.res");
+        filter.setDoName(new DoTypeName("Op.res"));
         var rDtts = doTypeAdapter.getResumedDTTs(
                 rootRDtt, new HashSet<>(), filter
         );
         assertEquals(2,rDtts.size());
 
-        filter.setDoName("Op.res");
-        filter.setDaName("d");
+        filter.setDoName(new DoTypeName("Op.res"));
+        filter.setDaName(new DaTypeName("d"));
         rDtts = doTypeAdapter.getResumedDTTs(
                 rootRDtt, new HashSet<>(), filter
         );
@@ -132,5 +133,19 @@ class DOTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter, TDOTyp
         assertEquals("d",pair.getKey());
         DOTypeAdapter lastDoTypeAdapter = pair.getValue();
         assertEquals("DO3",lastDoTypeAdapter.getCurrentElem().getId());
+    }
+
+    @Test
+    void getResumedDTTByDaName() throws Exception {
+        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(
+                AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID
+        );
+        DaTypeName daTypeName = new DaTypeName("antRef","origin.ctlVal");
+        ResumedDataTemplate rDtt = new ResumedDataTemplate();
+        rDtt.setDoName(new DoTypeName("Op"));
+        DOTypeAdapter doTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getDOTypeAdapterById("DO2").get());
+        assertDoesNotThrow(() -> doTypeAdapter.getResumedDTTByDaName(daTypeName,rDtt));
+        assertEquals("Op.origin",rDtt.getDoName().toString());
+        assertEquals("antRef.origin.ctlVal",rDtt.getDaName().toString());
     }
 }

@@ -70,7 +70,7 @@ class LNodeDTOTest {
         Mockito.when(lnAdapter.getExtRefs(null)).thenReturn(List.of(extRef));
 
         LNodeDTO lNodeDTO = LNodeDTO.from(lnAdapter,
-                new LogicalNodeOptions(true,false,false/*,false*/));
+                new LogicalNodeOptions(true,false,false,false));
         assertNotNull(lNodeDTO);
         assertAll("LNODE",
                 ()-> assertEquals(DTO.HOLDER_LN_INST,lNodeDTO.getInst()),

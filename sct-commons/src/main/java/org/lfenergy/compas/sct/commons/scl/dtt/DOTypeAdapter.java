@@ -5,9 +5,9 @@
 package org.lfenergy.compas.sct.commons.scl.dtt;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.dto.DoTypeName;
 import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
@@ -28,6 +28,103 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
 
     public DOTypeAdapter(DataTypeTemplateAdapter parentAdapter, TDOType currentElem) {
         super(parentAdapter, currentElem);
+    }
+
+    public List<ResumedDataTemplate> getResumedDTTByDoName(DoTypeName doTypeName, int idx, ResumedDataTemplate rDtt) {
+
+        int sz = doTypeName.getStructNames().size();
+        if(!doTypeName.isDefined()) {
+            return new ArrayList<>();
+        }
+        List<ResumedDataTemplate> result = new ArrayList<>();
+        if(sz - idx > 0){
+            String sdoName = doTypeName.getStructNames().get(idx);
+            TSDO tsdo = getSDOByName(sdoName).orElse(null);
+            if(tsdo == null) {
+                return new ArrayList<>();
+            }
+            ResumedDataTemplate copyRDtt = ResumedDataTemplate.copyFrom(rDtt);
+            copyRDtt.getDoName().setCdc(getCdc());
+            copyRDtt.getDoName().addStructName(sdoName);
+            DOTypeAdapter doTypeAdapter = getDataTypeTemplateAdapter().getDOTypeAdapterById(tsdo.getType())
+                    .orElseThrow();
+            result.addAll( doTypeAdapter.getResumedDTTByDoName(doTypeName,idx+1,copyRDtt));
+
+        } else {
+            for(TDA tda : getSdoOrDAs(TDA.class)){
+                ResumedDataTemplate copyRDtt = ResumedDataTemplate.copyFrom(rDtt);
+                DAAdapter daAdapter = new DAAdapter(this,tda);
+                copyRDtt.getDaName().setName(daAdapter.getName());
+                copyRDtt.getDaName().setType(daAdapter.getType());
+                copyRDtt.getDaName().setBType(daAdapter.getBType());
+                copyRDtt.getDaName().setValImport(daAdapter.isValImport());
+                if(!daAdapter.isTail()){
+                    DATypeAdapter daTypeAdapter = daAdapter.getDATypeAdapter()
+                            .orElseThrow(
+                                    () -> new  AssertionError(
+                                            String.format(
+                                                    "TDA(%s) references unknown DAType id(%s)",
+                                                    tda.getName(), tda.getType()
+                                            )
+                                    )
+                            );
+                    result.addAll( daTypeAdapter.completeResumedDTT(copyRDtt));
+                } else {
+                    copyRDtt.getDaName().addDaiValues(tda.getVal());
+                    result.add(copyRDtt);
+                }
+            }
+        }
+        return result;
+    }
+
+    public Optional<ResumedDataTemplate> getResumedDTTByDaName(DaTypeName daTypeName,
+                                                               ResumedDataTemplate rDtt) throws ScdException {
+        if(!rDtt.getDoName().isDefined()) {
+            return Optional.empty();
+        }
+        DoTypeName doTypeName = rDtt.getDoName();
+
+        for(TUnNaming tUnNaming : currentElem.getSDOOrDA()){
+            if(tUnNaming.getClass().equals(TSDO.class)) {
+                TSDO sdo = (TSDO) tUnNaming;
+                DOTypeAdapter doTypeAdapter = getDOTypeAdapterBySdoName(sdo.getName()).orElseThrow();
+                doTypeName.addStructName(sdo.getName());
+                doTypeName.setCdc(getCdc());
+                Optional<ResumedDataTemplate> opRDtt = doTypeAdapter.getResumedDTTByDaName(daTypeName,rDtt);
+                if (opRDtt.isPresent()) {
+                    return opRDtt;
+                }
+            } else {
+                TDA tda = (TDA)tUnNaming;
+                rDtt.getDaName().setValImport(tda.isValImport());
+                rDtt.getDaName().setFc(tda.getFc());
+                rDtt.getDaName().setType(tda.getType());
+                rDtt.getDaName().setBType(tda.getBType());
+                rDtt.getDaName().setName(tda.getName());
+                rDtt.setDaiValues(tda.getVal());
+                if(tda.getBType() != TPredefinedBasicTypeEnum.STRUCT &&
+                        tda.getName().equals(daTypeName.getName()) &&
+                        daTypeName.getStructNames().isEmpty()  ){
+                    return Optional.of(rDtt);
+                }
+
+                if(tda.getBType() == TPredefinedBasicTypeEnum.STRUCT &&
+                        tda.getName().equals(daTypeName.getName()) &&
+                        !daTypeName.getStructNames().isEmpty() ){
+                    DAAdapter daAdapter = getDAAdapterByName(tda.getName())
+                            .orElseThrow(() -> new AssertionError(""));
+
+                    DATypeAdapter daTypeAdapter = daAdapter.getDATypeAdapter()
+                            .orElseThrow(() -> new AssertionError(""));
+                    Optional<ResumedDataTemplate> opRDtt = daTypeAdapter.getResumedDTTByDaName(daTypeName,0,rDtt);
+                    if (opRDtt.isPresent()) {
+                        return opRDtt;
+                    }
+                }
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -56,6 +153,13 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
                 );
     }
 
+    /**
+     * Find path from a DoType to DA (defined by name)
+     * @param daName DA for which to find a path
+     * @return pair of DO/SDO and DoType. DO/SDO references the DOType
+     * @throws ScdException when inconsistency are found in th SCL's
+     *                     DataTypeTemplate (unknown reference for example). Which should normally not happens.
+     */
     Pair<String,DOTypeAdapter> findPathDoType2DA(String daName) throws ScdException {
         if(containsDAWithDAName(daName)){
             // Attention : Do this check before calling this function
@@ -63,7 +167,7 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
             return Pair.of("",this);
         }
         DOTypeAdapter doTypeAdapter = this;
-        List<TSDO> sdoTypes = doTypeAdapter.getSDOs();
+        List<TSDO> sdoTypes = doTypeAdapter.getSdoOrDAs(TSDO.class);
 
         Queue<TSDO> doTypeIdQueue = new LinkedList<>();
         doTypeIdQueue.addAll(sdoTypes);
@@ -76,7 +180,7 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
             }
             if(doTypeAdapter != null) {
                 // add all SDO
-                doTypeIdQueue.addAll(doTypeAdapter.getSDOs());
+                doTypeIdQueue.addAll(doTypeAdapter.getSdoOrDAs(TSDO.class));
             }
         }
         if(currSDO == null || doTypeAdapter == null){
@@ -233,7 +337,7 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
                     continue;
                 }
 
-                rootRDTT.setDaName(tda.getName());
+                rootRDTT.getDaName().setName(tda.getName());
                 rootRDTT.getDaName().setFc(tda.getFc());
                 rootRDTT.getDaName().setBType(tda.getBType());
                 if(tda.getBType() == TPredefinedBasicTypeEnum.STRUCT){
@@ -297,11 +401,13 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
     public DataTypeTemplateAdapter getDataTypeTemplateAdapter() {
         return parentAdapter;
     }
-    public List<TSDO> getSDOs() {
+    public <T extends TUnNaming> List<T > getSdoOrDAs(Class<T> cls) {
         return currentElem.getSDOOrDA()
                 .stream()
-                .filter(tUnNaming -> tUnNaming.getClass().equals(TSDO.class))
-                .map(TSDO.class::cast)
+                .filter(tUnNaming -> tUnNaming.getClass().equals(cls))
+                .map(cls::cast)
                 .collect(Collectors.toList());
     }
+
+
 }

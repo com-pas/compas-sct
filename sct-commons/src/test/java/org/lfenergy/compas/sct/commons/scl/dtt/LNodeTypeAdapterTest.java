@@ -125,20 +125,20 @@ class LNodeTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TLNo
         DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
         LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getLNodeTypeAdapterById("LN1").get());
         ResumedDataTemplate rootRDtt = new ResumedDataTemplate();
-        rootRDtt.setDoName("Op");
+        rootRDtt.setDoName(new DoTypeName("Op"));
         ResumedDataTemplate filter = new ResumedDataTemplate();
-        filter.setDoName("Op.res");
+        filter.setDoName(new DoTypeName("Op.res"));
         var rDtts = lNodeTypeAdapter.getResumedDTTs(filter);
         assertEquals(2,rDtts.size());
 
-        filter.setDoName("Op.res");
-        filter.setDaName("d");
+        filter.setDoName(new DoTypeName("Op.res"));
+        filter.setDaName(new DaTypeName("d"));
         rDtts = lNodeTypeAdapter.getResumedDTTs(filter);
         assertEquals(1,rDtts.size());
 
-        filter.setDoName("Op.res");
-        filter.setDaName("antRef");
-        assertThrows(ScdException.class, () -> lNodeTypeAdapter.getResumedDTTs(filter));
+        filter.setDoName(new DoTypeName("Op.res"));
+        filter.setDaName(new DaTypeName("antRef"));
+        assertTrue(lNodeTypeAdapter.getResumedDTTs(filter).isEmpty());
     }
 
     @Test
@@ -173,7 +173,13 @@ class LNodeTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TLNo
     }
 
     @Test
-    void testFindPathFromDo2DA() {
+    void getResumedDTTByDaName() throws Exception {
+        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(
+                AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID
+        );
+        DaTypeName daTypeName = new DaTypeName("antRef","origin.ctlVal");
+        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("LN1").get());
+        List<ResumedDataTemplate> rDtts = assertDoesNotThrow(()-> lNodeTypeAdapter.getResumedDTTByDaName(daTypeName));
+        assertEquals(2,rDtts.size());
     }
-
 }

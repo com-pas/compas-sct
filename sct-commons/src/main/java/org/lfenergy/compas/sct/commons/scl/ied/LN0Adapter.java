@@ -56,4 +56,11 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
     public void addControlBlock(SMVControlBlock controlBlock) {
         currentElem.getSampledValueControl().add(controlBlock.createControlBlock());
     }
+
+    @Override
+    protected  boolean matchesDataAttributes(String dataAttribute){
+        return  super.matchesDataAttributes(dataAttribute) ||
+                currentElem.getSampledValueControl().stream().anyMatch(smp -> smp.getName().equals(dataAttribute)) ||
+                currentElem.getGSEControl().stream().anyMatch(gse -> gse.getName().equals(dataAttribute));
+    }
 }

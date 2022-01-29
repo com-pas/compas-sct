@@ -57,7 +57,7 @@ class DOIAdapterTest {
         final String TOTO = "toto";
         DOIAdapter.DAIAdapter daiAdapter = initInnerDAIAdapter("Do","angRef");
 
-        assertFalse(daiAdapter.isValImport());
+        assertNull(daiAdapter.isValImport());
         daiAdapter.setValImport(true);
         assertTrue(daiAdapter.isValImport());
 
@@ -97,6 +97,7 @@ class DOIAdapterTest {
     void testInnerDAIAdapterTestUpdate(){
         final String TOTO = "toto";
         DOIAdapter.DAIAdapter daiAdapter = initInnerDAIAdapter("Do","da");
+        daiAdapter.setValImport(false);
         assertThrows(ScdException.class,() -> daiAdapter.update(0L,TOTO) );
         daiAdapter.setValImport(true);
         assertDoesNotThrow(() -> daiAdapter.update(0L,TOTO));
@@ -113,7 +114,7 @@ class DOIAdapterTest {
     void testFindDeepestMatch() throws Exception {
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapter("IED_NAME"));
+        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS1").get());
         LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
         DOIAdapter doiAdapter = assertDoesNotThrow(()-> ln0Adapter.getDOIAdapterByName("Do"));
