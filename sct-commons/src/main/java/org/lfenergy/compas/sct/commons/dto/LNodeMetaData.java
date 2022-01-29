@@ -30,10 +30,9 @@ public class LNodeMetaData {
         LDeviceAdapter lDeviceAdapter = tAbstractLNAdapter.getParentAdapter();
         if(lDeviceAdapter != null){
             metaData.ldInst = lDeviceAdapter.getInst();
-        }
-
-        if(lDeviceAdapter.getParentAdapter() != null){
-            metaData.iedName = lDeviceAdapter.getParentAdapter().getName();
+            if(lDeviceAdapter.getParentAdapter() != null){
+                metaData.iedName = lDeviceAdapter.getParentAdapter().getName();
+            }
         }
         return metaData;
     }
