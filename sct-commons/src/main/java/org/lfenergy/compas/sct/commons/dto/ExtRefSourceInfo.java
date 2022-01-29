@@ -4,8 +4,6 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -64,4 +62,5 @@ public class ExtRefSourceInfo {
     public boolean isValid() {
         return !StringUtils.isBlank(srcCBName);
     }
+
 }
