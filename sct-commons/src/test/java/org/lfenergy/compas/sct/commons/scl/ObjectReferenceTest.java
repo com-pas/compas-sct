@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 RTE FRANCE
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package org.lfenergy.compas.sct.commons.scl;
 
 import org.junit.jupiter.api.Test;
