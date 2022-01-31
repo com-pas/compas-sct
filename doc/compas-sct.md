@@ -38,21 +38,36 @@ abstraction defined below :
         protected P parentAdapter;
         protected T currentElem;
     
-        public SclElementAdapter(P parentAdapter) {
+        protected SclElementAdapter(P parentAdapter) {
             this.parentAdapter = parentAdapter;
         }
     
-        public SclElementAdapter(P parentAdapter, T currentElem) {
+        protected SclElementAdapter(P parentAdapter, T currentElem) {
+            if(currentElem == null){
+                throw new IllegalArgumentException("The SCL element to adapt must be defined");
+            }
             this.parentAdapter = parentAdapter;
+            this.customInit();
             setCurrentElem(currentElem);
         }
     
-        public final void setCurrentElem(T currentElem){
-            Assert.isTrue(amChildElementRef(currentElem),"No relation between SCL parent and child elements");
-            this.currentElem = currentElem;
+    
+        protected boolean amRootElement(){
+            return parentAdapter == null;
         }
     
-        protected abstract boolean amChildElementRef(T sclElement);
+        protected void customInit() {
+            // do nothing
+        }
+        public final void setCurrentElem(T currentElem){
+            this.currentElem = currentElem;
+            if(!amRootElement() && !amChildElementRef()){
+                throw new IllegalArgumentException("No relation between SCL parent element and child");
+            }
+        }
+    
+        protected abstract boolean amChildElementRef();
+    
     }
 
 The root element adapter (entry point) is special as it does not have any parent adapter, hence, its method `amChildElementRef(T)` 
@@ -120,28 +135,31 @@ one can implement the connector to have the below output (with the constraint of
 
 ## SCT APPLICATION
 **TODO**
+> In progress
 
 ### Tips for memory consumption's optimization
-For large SCL file, it will not be a good idea to load the whole file in memory. JAXB is capable of processing XML file by chunks. 
+For large SCL file, it is not a good idea to load the whole file in memory. JAXB is capable of processing XML file by chunks. 
 The need to load the whole SCL file relies on the fact that XML validation processes needs the entire file content.
-To go through that processes we  must take advantage on the XSD and build minimal SCL file from the large one.
-The most "important" tags in the SCL file : Header, Substation, Communication, IED and DataTypeTemplate. By looking closely in the XSD file, one can realize
+To go through that process we must take advantage of the XSD constraints and build minimal SCL file from the large one.
+The most "important" tags in the SCL file are: Header, Substation, Communication, IED and DataTypeTemplate. By looking closely in the XSD file, one can realize
 the below dependencies' logic :
+* Substation is grammatically independent
 * IED depends on DataTypeTemplate
-* Communication depends on IED (IED name, Access Point)
+* Communication depends on IED (IED name, Access Point, ...)
  
 Hence, with this in mind, one can reconstruct a minimal SCL file by focusing on the chunk of interest then realize creation/update operations
 on the file and validate it against the XSD file.
 
 For example: Updating IED
 
-From SCD header's information, create a minimal SCD file
+From SCD header's information, create a minimal valid SCD file
 ```
 <SCL version="2007" revision="B" release="4" xmlns="http://www.iec.ch/61850/2003/SCL">
     <Header id="hId" version="2007" revision="B" toolID="COMPAS"/>
 </SCL>
 ```
-As IED depends on DataTypeTemplate, extract the IED chunk and the whole DataTypeTemplate chunk
+As IED depends on DataTypeTemplate, extract the IED chunk with the whole DataTypeTemplate chunk from the large file and 
+import it in the temporary SCD file
 ```
 <SCL version="2007" revision="B" release="4" xmlns="http://www.iec.ch/61850/2003/SCL">
     <Header id="hId" version="2007" revision="B" toolID="COMPAS"/>
@@ -151,5 +169,28 @@ As IED depends on DataTypeTemplate, extract the IED chunk and the whole DataType
     <DataTypeTemplate>....</DataTypeTemplate>
 </SCL>
 ```
-Operations can be realized and validated on this minimal file (Which has the same structure as ICD file).
+Operations can now be realized and validated on this minimal file (which has the same structure as an ICD file). 
+Any validation on the minimal file guaranties a valid integration of those chunks into the large file.
+
+> **WARNING:** This concern only update/creation operations on SCL file.
+
+Operations on the tag Substation are not complicated (those are similar to SSD files). 
+
+For Communication tag, a minimal valid IED tag with child tag Access point can suffice. If the IED's logical nodes 
+are concerned in the process, one should think of bringing along the DataTypeTemplate chunk.
+
+```
+<SCL xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4">
+    <Header id="cccc"></Header>
+    <Communication>
+        <SubNetwork name="tt">
+            <ConnectedAP iedName="IED" apName="AP"></ConnectedAP>
+        </SubNetwork>
+    </Communication>
+    <IED name="IED"> <!-- minimal valid IED to avoid using DataTypeTemplate-->
+        <AccessPoint name="AP"></AccessPoint>
+    </IED>
+</SCL>
+```
+Combination like this can heavily optimize memory consumption while manipulating large SCD file. 
 
