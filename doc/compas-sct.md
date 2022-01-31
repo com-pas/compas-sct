@@ -17,7 +17,6 @@ The below package diagram shows different part of the tool architecture.
 Hence, we can distinguish four major parts:
 
 * **[sct-commons](#SCT-COMMONS)** : a library that contents shared functionalities for the bound SCL object.
-* **[sct-service](#SCT-SERVICE)** : It computes all needed operations and uses sct-data for database access.
 * **[sct-data](#SCT-DATA)** : It holds data models and database connectivity services.
 * **[sct-app](#SCT-APPLICATION)** : *TODO*.
 
@@ -82,12 +81,21 @@ should always return `true`:
         [...]
     }
 
-
-
 ## SCT DATA
 Data models and connectivity to database are defined here. Data access layer is an abstract layer that defined connectivity
 interfaces. This layer manages a database with single table (SQL-Like database) or single collection (NoSQL-Like database).
-The concrete data access layers are implemented in specific packages
+The concrete data access layers are implemented in specific packages. A data model can implement the following interface
+
+```
+public interface IScd <ID> {
+    ID getId();
+    byte[] getRawXml();
+    ID getHeaderId();
+    String getHeaderRevision();
+    String getHeaderVersion();
+    String filename();
+}
+```
 
 * ### SQL-Like Database
 An implementation of the sct-data connectivity interface with custom data models. This allows the application to work with sql-like database.
@@ -95,10 +103,53 @@ The libraries ares use for SQL-Like databases, those that support XML type (Post
 
 * ### NoSQL-Like Database
 Like SQL-like part, this package contains the sct-data connector interfaces implementation for NoSQL-Like databases (BaseX, existDB, etc ) 
-that support XML processing
+that support XML processing. 
 
-## SCT SERVICE
-This module implements all needed specification as functions (methods in Java). As shown in package diagram, 
-it interacts with sct-data (database access) and sct-commons (delegate SCL manipulation).
+This can also be a local repository connector (file system). For example, with meta-data headerID, headerVersion, headerRevision and filename
+one can implement the connector to have the below output (with the constraint of having a single file in /pathTo/headerId/headerVersion/headerRevision):
+
+```
+    myRepo
+    ├───<headerID>
+    │   ├───<headerVersion1>
+    │   │   └───<headerRevision1>
+    │   │   |   ├───<fileName1.scd>
+    │   │   └───<headerRevision2>
+    │   │       ├───<fileName2.scd>
+```
+
 ## SCT APPLICATION
 **TODO**
+
+### Tips for memory consumption's optimization
+For large SCL file, it will not be a good idea to load the whole file in memory. JAXB is capable of processing XML file by chunks. 
+The need to load the whole SCL file relies on the fact that XML validation processes needs the entire file content.
+To go through that processes we  must take advantage on the XSD and build minimal SCL file from the large one.
+The most "important" tags in the SCL file : Header, Substation, Communication, IED and DataTypeTemplate. By looking closely in the XSD file, one can realize
+the below dependencies' logic :
+* IED depends on DataTypeTemplate
+* Communication depends on IED (IED name, Access Point)
+ 
+Hence, with this in mind, one can reconstruct a minimal SCL file by focusing on the chunk of interest then realize creation/update operations
+on the file and validate it against the XSD file.
+
+For example: Updating IED
+
+From SCD header's information, create a minimal SCD file
+```
+<SCL version="2007" revision="B" release="4" xmlns="http://www.iec.ch/61850/2003/SCL">
+    <Header id="hId" version="2007" revision="B" toolID="COMPAS"/>
+</SCL>
+```
+As IED depends on DataTypeTemplate, extract the IED chunk and the whole DataTypeTemplate chunk
+```
+<SCL version="2007" revision="B" release="4" xmlns="http://www.iec.ch/61850/2003/SCL">
+    <Header id="hId" version="2007" revision="B" toolID="COMPAS"/>
+    <IED name="IED_NAME">
+      <AccessPoint>....</AccessPoint>
+    </IED>
+    <DataTypeTemplate>....</DataTypeTemplate>
+</SCL>
+```
+Operations can be realized and validated on this minimal file (Which has the same structure as ICD file).
+
