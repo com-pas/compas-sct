@@ -58,7 +58,7 @@ public class HeaderAdapter extends SclElementAdapter<SclRootAdapter, THeader> {
         return currentElem.getVersion();
     }
 
-    public List<? extends THitem> getHistoryItems() {
+    public List<THitem> getHistoryItems() {
         if(currentElem.getHistory() == null) return new ArrayList<>();
         return currentElem.getHistory().getHitem();
     }

@@ -7,13 +7,9 @@ package org.lfenergy.compas.sct.commons.scl.dtt;
 
 import org.lfenergy.compas.scl2007b4.model.TEnumType;
 import org.lfenergy.compas.scl2007b4.model.TEnumVal;
-import org.lfenergy.compas.sct.commons.dto.DaTypeName;
-import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
-import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.Objects;;
 
 public class EnumTypeAdapter extends AbstractDataTypeAdapter<TEnumType>{
 

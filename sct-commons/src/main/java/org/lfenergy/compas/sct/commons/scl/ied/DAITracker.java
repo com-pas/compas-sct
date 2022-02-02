@@ -12,7 +12,6 @@ import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.dto.DoTypeName;
 import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.SclService;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
 
@@ -38,7 +37,7 @@ public class DAITracker {
         this.daTypeName = daTypeName;
     }
 
-    public MatchResult Search() {
+    public MatchResult search() {
 
         Pair<? extends IDataAdapter,Integer> matchResult;
         String doiName = doTypeName.getName();

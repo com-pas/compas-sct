@@ -92,4 +92,13 @@ public class ReportControlBlock extends ControlBlock<ReportControlBlock> {
 
         return reportControl;
     }
+
+    @Override
+    public void validateCB() throws ScdException {
+        super.validateCB();
+
+        if(dataSetRef != null && dataSetRef.isBlank()){
+            throw new ScdException("A required field is missing: datSet");
+        }
+    }
 }

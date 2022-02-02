@@ -194,7 +194,7 @@ public class ReportControlBlockTest {
         ReportControlBlock reportControlBlock = new ReportControlBlock();
         reportControlBlock.setId(ID);
         reportControlBlock.setDataSetRef(DATASET_REF);
-        reportControlBlock.setConfRev(1);
+        reportControlBlock.setConfRev(1L);
         reportControlBlock.setName(NAME);
         reportControlBlock.setBuffered(true);
         reportControlBlock.setIndexed(true);

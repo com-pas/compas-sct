@@ -7,13 +7,17 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.DTO;
+import org.lfenergy.compas.sct.commons.dto.DataSetInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
+import org.lfenergy.compas.sct.commons.dto.ReportControlBlock;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -121,8 +125,36 @@ public class IEDAdapterTest {
 
 
     @Test
-    void testCreateDataSet()  {
+    void testCreateDataSet() throws Exception {
+        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
 
+        assertThrows(ScdException.class, () -> iAdapter.createDataSet(new DataSetInfo()));
+
+        TServices tServices = new TServices();
+        iAdapter.getCurrentElem().setServices(tServices);
+        assertFalse(iAdapter.hasDataSetCreationCapability());
+
+        TLogSettings tLogSettings = new TLogSettings();
+        tServices.setLogSettings(tLogSettings);
+        tLogSettings.setDatSet(TServiceSettingsEnum.CONF);
+        assertTrue(iAdapter.hasDataSetCreationCapability());
+
+        TDataSet tDataSet = new TDataSet();
+        tDataSet.setName("dataset");
+        TFCDA tfcda = new TFCDA();
+        tfcda.setFc(TFCEnum.ST);
+        tDataSet.getFCDA().add(tfcda);
+        DataSetInfo dataSetInfo = DataSetInfo.from(tDataSet);
+        dataSetInfo.setHolderIEDName("IED_NAME");
+        assertThrows(ScdException.class, () -> iAdapter.createDataSet(dataSetInfo));
+        dataSetInfo.setHolderLDInst("LD_INS2");
+        dataSetInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
+        assertDoesNotThrow(() -> iAdapter.createDataSet(dataSetInfo));
+
+        MarshallerWrapper marshallerWrapper = SclTestMarshaller.createWrapper();
+        System.out.println(marshallerWrapper.marshall(scd));
     }
 
     @Test
@@ -177,5 +209,21 @@ public class IEDAdapterTest {
         tsmvSettings.setDatSet(TServiceSettingsEnum.FIX);
         assertFalse(iAdapter.hasDataSetCreationCapability());
 
+    }
+
+    @Test
+    void createControlBlock() throws Exception {
+
+        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
+
+        ReportControlBlock controlBlock = new ReportControlBlock();
+        controlBlock.setName("rpt");
+        controlBlock.setConfRev(2L);
+
+        controlBlock.setHolderIEDName("IED_NAME");
+        controlBlock.setHolderIEDName("IED_NAME");
+        controlBlock.setHolderIEDName("IED_NAME");
     }
 }

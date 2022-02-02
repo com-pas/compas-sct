@@ -16,6 +16,7 @@ import org.lfenergy.compas.scl2007b4.model.TIED;
 import org.lfenergy.compas.scl2007b4.model.TInputs;
 import org.lfenergy.compas.scl2007b4.model.TLDevice;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
+import org.lfenergy.compas.scl2007b4.model.TLN;
 import org.lfenergy.compas.scl2007b4.model.TReportControl;
 import org.lfenergy.compas.scl2007b4.model.TSampledValueControl;
 import org.lfenergy.compas.scl2007b4.model.TServiceType;
@@ -34,6 +35,7 @@ import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -303,5 +305,33 @@ class LN0AdapterTest {
         assertFalse(ln0Adapter.findMatch(doTypeName2,daTypeName).isPresent());
     }
 
+    @Test
+    void testHasControlBlockAndAddControlBlock() {
+        LN0 tln = new LN0();
+        tln.getLnClass().add(TLLN0Enum.LLN_0.value());
+        LN0Adapter lnAdapter = new LN0Adapter(null,tln);
 
+        ReportControlBlock controlBlock = new ReportControlBlock();
+        controlBlock.setName("rpt");
+        controlBlock.setConfRev(2L);
+        assertDoesNotThrow(()->lnAdapter.addControlBlock(controlBlock));
+        assertTrue(lnAdapter.hasControlBlock(controlBlock));
+
+        GooseControlBlock gooseControlBlock = new GooseControlBlock();
+        gooseControlBlock.setName("gse");
+        gooseControlBlock.setId("g1");
+        assertDoesNotThrow(()->lnAdapter.addControlBlock(gooseControlBlock));
+        assertTrue(lnAdapter.hasControlBlock(gooseControlBlock));
+
+        SMVControlBlock smvControlBlock = new SMVControlBlock();
+        smvControlBlock.setName("smv");
+        smvControlBlock.setId("s1");
+        assertDoesNotThrow(()->lnAdapter.addControlBlock(smvControlBlock));
+        assertTrue(lnAdapter.hasControlBlock(smvControlBlock));
+
+        ControlBlock<?> controlBlock1 = Mockito.mock(ReportControlBlock.class);
+        Mockito.when(controlBlock1.getServiceType()).thenReturn(TServiceType.POLL);
+        assertThrows(ScdException.class,()->lnAdapter.addControlBlock(controlBlock1));
+
+    }
 }
