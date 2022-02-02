@@ -4,19 +4,13 @@
 
 package org.lfenergy.compas.sct.commons.scl.ied;
 
-import lombok.NonNull;
-import org.apache.commons.lang3.tuple.Pair;
 import org.lfenergy.compas.scl2007b4.model.TAnyLN;
 import org.lfenergy.compas.scl2007b4.model.TDAI;
 import org.lfenergy.compas.scl2007b4.model.TDOI;
 import org.lfenergy.compas.scl2007b4.model.TSDI;
-import org.lfenergy.compas.sct.commons.dto.DoTypeName;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
-import org.yaml.snakeyaml.events.Event;
 
-import java.util.List;
-import java.util.Optional;
 
 public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TAnyLN>, TDOI> implements IDataParentAdapter {
 
@@ -78,7 +72,7 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
         return new RootSDIAdapter(this,tsdi);
     }
 
-    static public class DAIAdapter extends AbstractDAIAdapter<DOIAdapter> {
+    public static class DAIAdapter extends AbstractDAIAdapter<DOIAdapter> {
 
         protected DAIAdapter(DOIAdapter parentAdapter, TDAI currentElem) {
             super(parentAdapter, currentElem);

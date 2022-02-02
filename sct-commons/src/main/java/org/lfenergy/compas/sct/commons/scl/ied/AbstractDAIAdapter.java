@@ -10,7 +10,6 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -36,7 +35,7 @@ public abstract class AbstractDAIAdapter<P extends SclElementAdapter> extends Sc
         return currentElem.isValImport();
     }
 
-    public AbstractDAIAdapter update(Map<Long, String> daiValues) throws ScdException {
+    public AbstractDAIAdapter<? extends SclElementAdapter> update(Map<Long, String> daiValues) throws ScdException {
         if(daiValues.size() > 1 && daiValues.containsKey(0L)){
             update(0L, daiValues.get(0L)); // to be refined (with COMPAS TEAMS)
         } else {
@@ -45,10 +44,6 @@ public abstract class AbstractDAIAdapter<P extends SclElementAdapter> extends Sc
             }
         }
         return this;
-    }
-
-    public boolean matches(ObjectReference dataAttributes){
-        return false;
     }
 
     public void update(Long sGroup, String val) throws ScdException {

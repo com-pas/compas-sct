@@ -14,9 +14,13 @@ import org.lfenergy.compas.scl2007b4.model.TInputs;
 import org.lfenergy.compas.scl2007b4.model.TLDevice;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
 import org.lfenergy.compas.scl2007b4.model.TLN;
+import org.lfenergy.compas.scl2007b4.model.TServiceType;
 import org.lfenergy.compas.scl2007b4.model.TVal;
+import org.lfenergy.compas.sct.commons.dto.ControlBlock;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.dto.DoTypeName;
+import org.lfenergy.compas.sct.commons.dto.GooseControlBlock;
+import org.lfenergy.compas.sct.commons.dto.SMVControlBlock;
 import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.dto.DTO;
 import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
@@ -55,7 +59,7 @@ class LNAdapterTest {
         assertEquals(DTO.HOLDER_LN_PREFIX,lnAdapter.getPrefix());
         assertTrue(lnAdapter.getCurrentElem().getReportControl().isEmpty());
 
-        lnAdapter.addControlBlock(new ReportControlBlock());
+        assertDoesNotThrow(() -> lnAdapter.addControlBlock(new ReportControlBlock()));
         assertFalse(lnAdapter.getCurrentElem().getReportControl().isEmpty());
 
         assertThrows(IllegalArgumentException.class,  () -> new LNAdapter(lnAdapter.getParentAdapter(),new TLN()));
@@ -320,4 +324,7 @@ class LNAdapterTest {
         Mockito.when(tlDevice.getLN()).thenReturn(List.of(tln));
         return assertDoesNotThrow( () -> new LNAdapter(lDeviceAdapter,tln));
     }
+
+
+
 }

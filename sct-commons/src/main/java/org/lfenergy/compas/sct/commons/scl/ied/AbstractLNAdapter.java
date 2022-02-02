@@ -29,6 +29,7 @@ import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSourceInfo;
+import org.lfenergy.compas.sct.commons.dto.FCDAInfo;
 import org.lfenergy.compas.sct.commons.dto.GooseControlBlock;
 import org.lfenergy.compas.sct.commons.dto.LNodeMetaData;
 import org.lfenergy.compas.sct.commons.dto.ReportControlBlock;
@@ -69,8 +70,26 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
     public abstract String getLNInst();
     public abstract String getPrefix();
 
-    protected void addControlBlock(ReportControlBlock controlBlock) {
-        currentElem.getReportControl().add(controlBlock.createControlBlock());
+    protected void addControlBlock(ControlBlock<?> controlBlock) throws ScdException {
+
+        switch (controlBlock.getServiceType() ) {
+            case REPORT:
+                currentElem.getReportControl().add(controlBlock.createControlBlock());
+                break;
+            case GOOSE:
+                if(isLN0()) {
+                    ((LN0)currentElem).getGSEControl().add(controlBlock.createControlBlock());
+                }
+                break;
+            case SMV:
+                if(isLN0()) {
+                    ((LN0)currentElem).getSampledValueControl().add(controlBlock.createControlBlock());
+                }
+                break;
+            default:
+                throw new ScdException("Unknown control block type : " + controlBlock.getServiceType());
+
+        }
     }
 
     public Optional<TDataSet> findDataSetByRef(String dataSetRef)  {
@@ -314,6 +333,23 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
 
     }
 
+    public boolean hasControlBlock(ControlBlock<? extends ControlBlock> controlBlock) {
+
+        switch (controlBlock.getServiceType()){
+            case REPORT:
+                return currentElem.getReportControl().stream()
+                        .anyMatch(control -> control.getName().equals(controlBlock.getName()));
+            case GOOSE:
+                return isLN0() && ((LN0)currentElem).getGSEControl().stream()
+                        .anyMatch(control -> control.getName().equals(controlBlock.getName()));
+            case SMV:
+                return isLN0() && ((LN0)currentElem).getSampledValueControl().stream()
+                        .anyMatch(reportControl -> reportControl.getName().equals(controlBlock.getName()));
+            default:
+                return false;
+        }
+    }
+
     public List<TDataSet> getDataSet(ExtRefInfo filter){
         if (filter == null || filter.getSignalInfo() == null || filter.getBindingInfo() == null) {
             return currentElem.getDataSet();
@@ -497,7 +533,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      */
     protected Optional<? extends AbstractDAIAdapter> findMatch(DoTypeName doTypeName, DaTypeName daTypeName){
         DAITracker daiTracker = new DAITracker(this,doTypeName,daTypeName);
-        DAITracker.MatchResult matchResult = daiTracker.Search();
+        DAITracker.MatchResult matchResult = daiTracker.search();
         if(matchResult != DAITracker.MatchResult.FULL_MATCH){
             return Optional.empty();
         }
@@ -513,7 +549,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         DaTypeName daTypeName = rDtt.getDaName();
 
         DAITracker daiTracker = new DAITracker(this,doTypeName,daTypeName);
-        DAITracker.MatchResult matchResult = daiTracker.Search();
+        DAITracker.MatchResult matchResult = daiTracker.search();
         AbstractDAIAdapter<?> daiAdapter = null;
         IDataParentAdapter doiOrSdoiAdapter;
         if(matchResult == DAITracker.MatchResult.FULL_MATCH){
@@ -617,12 +653,22 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 currentElem.getReportControl().stream().anyMatch(rptCtl -> rptCtl.getName().equals(dataAttribute));
     }
 
-    public Set<DataSetInfo> getDataSet() {
+    public Optional<DataSetInfo> getDataSetByRef(String dataSetRef) {
         return currentElem.getDataSet()
-                .stream().map(tDataSet -> DataSetInfo.from(tDataSet)).collect(Collectors.toSet());
+                .stream()
+                .filter(tDataSet -> tDataSet.getName().equals(dataSetRef))
+                .map(DataSetInfo::from)
+                .findFirst();
     }
 
     public void addDataSet(DataSetInfo dataSetInfo) {
+        TDataSet tDataSet = new TDataSet();
+        tDataSet.setName(dataSetInfo.getName());
+        tDataSet.getFCDA().addAll(
+                dataSetInfo.getFCDAInfos().stream().map(fcdaInfo -> fcdaInfo.getFCDA()).collect(Collectors.toList())
+        );
+        currentElem.getDataSet().add(tDataSet);
+
     }
 
     public DataTypeTemplateAdapter getDataTypeTemplateAdapter() {
@@ -631,7 +677,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
 
     public Map<Long, String> getDAIValues(ResumedDataTemplate rDtt) {
         DAITracker daiTracker = new DAITracker(this,rDtt.getDoName(),rDtt.getDaName());
-        DAITracker.MatchResult matchResult = daiTracker.Search();
+        DAITracker.MatchResult matchResult = daiTracker.search();
         if(matchResult != DAITracker.MatchResult.FULL_MATCH){
             return new HashMap<>();
         }

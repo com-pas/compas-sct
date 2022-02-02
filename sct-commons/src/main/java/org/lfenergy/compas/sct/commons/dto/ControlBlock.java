@@ -34,7 +34,7 @@ public abstract class ControlBlock<T extends ControlBlock> extends LNodeMetaData
     protected String name;
     protected String dataSetRef;
     protected String desc;
-    protected long confRev;
+    protected Long confRev;
     protected List<TControlWithIEDName.IEDName> iedNames = new ArrayList<>();
     protected TPredefinedTypeOfSecurityEnum securityEnable = TPredefinedTypeOfSecurityEnum.NONE;
 
@@ -53,15 +53,11 @@ public abstract class ControlBlock<T extends ControlBlock> extends LNodeMetaData
     public void validateCB() throws ScdException {
 
         if(id == null || id.isBlank()){
-            throw new ScdException("Control block ID is missing");
+            throw new ScdException("A required field is missing: ID ");
         }
 
         if(name == null || name.isBlank()){
-            throw new ScdException("Control block Name is missing");
-        }
-
-        if(dataSetRef != null && dataSetRef.isBlank()){
-            throw new ScdException("Control block datSet is missing");
+            throw new ScdException("A required field is missing:  name");
         }
 
         if(iedNames.stream().anyMatch( iedName -> iedName == null ||
@@ -78,12 +74,17 @@ public abstract class ControlBlock<T extends ControlBlock> extends LNodeMetaData
                     .orElseThrow(
                             () -> new ScdException(
                                     String.format(
-                                            "Unknown LDevice [%s] in IED [%s]", iedName.getLdInst(),iedName.getValue()
+                                            "Control block destination: Unknown LDevice [%s] in IED [%s]",
+                                            iedName.getLdInst(),iedName.getValue()
                                     )
                             )
                     );
             if(!iedName.getLnClass().isEmpty()) {
-                lDeviceAdapter.getLNAdapter(iedName.getLnClass().get(0),iedName.getLnInst(), iedName.getPrefix());
+                try {
+                    lDeviceAdapter.getLNAdapter(iedName.getLnClass().get(0), iedName.getLnInst(), iedName.getPrefix());
+                } catch (ScdException e){
+                    throw new ScdException("Control block destination: " + e.getMessage());
+                }
             } else {
                Utils.setField(iedName,"lnClass",null);
             }

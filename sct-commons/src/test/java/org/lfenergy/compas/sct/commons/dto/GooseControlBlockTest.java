@@ -107,7 +107,7 @@ public class GooseControlBlockTest {
 
         gooseControlBlock.setId(ID);
         gooseControlBlock.setDataSetRef(DATASET_REF);
-        gooseControlBlock.setConfRev(1);
+        gooseControlBlock.setConfRev(1L);
         gooseControlBlock.setName(NAME);
 
         gooseControlBlock.setFixedOffs(false);

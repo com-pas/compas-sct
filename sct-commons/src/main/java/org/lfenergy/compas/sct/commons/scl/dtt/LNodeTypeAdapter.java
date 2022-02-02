@@ -88,7 +88,7 @@ public class LNodeTypeAdapter
                 .findFirst();
     }
 
-    public List<ResumedDataTemplate> getResumedDTTs(ResumedDataTemplate filter)  {
+    public List<ResumedDataTemplate> getResumedDTTs(@NonNull ResumedDataTemplate filter)  {
 
         List<ResumedDataTemplate> resumedDataTemplates = new ArrayList<>();
         if(filter.isDaNameDefined()) {
@@ -101,14 +101,12 @@ public class LNodeTypeAdapter
         }
         ResumedDataTemplate rootResumedRTT = new ResumedDataTemplate();
         rootResumedRTT.setLnType(currentElem.getId());
-        if(filter != null) {
-            rootResumedRTT.setLnClass(filter.getLnClass());
-            rootResumedRTT.setLnInst(filter.getLnInst());
-            rootResumedRTT.setPrefix(filter.getPrefix());
-        }
+        rootResumedRTT.setLnClass(filter.getLnClass());
+        rootResumedRTT.setLnInst(filter.getLnInst());
+        rootResumedRTT.setPrefix(filter.getPrefix());
 
         for(TDO tdo : currentElem.getDO()){
-            if(filter != null && filter.isDoNameDefined() &&
+            if(filter.isDoNameDefined() &&
                     !filter.getDoName().getName().equals(tdo.getName())){
                 continue;
             }
@@ -173,13 +171,10 @@ public class LNodeTypeAdapter
 
         // check coherence between Data Object and Data Attributes information
         DOTypeAdapter lastDoTypeAdapter;
-        String lastSdo;
         if(adapterPair == null){
             adapterPair = findPathFromDo2DA(doTypeName.getName(),daTypeName.getName());
             lastDoTypeAdapter = adapterPair.getValue();
-            lastSdo = adapterPair.getKey();
         } else {
-            lastSdo = adapterPair.getKey();
             if(adapterPair.getRight().containsDAWithDAName(daTypeName.getName())){
                 lastDoTypeAdapter = adapterPair.getValue();
             } else {
@@ -232,7 +227,7 @@ public class LNodeTypeAdapter
         return rDtts;
     }
 
-    public List<ResumedDataTemplate> getResumedDTTByDoName(DoTypeName doTypeName) throws ScdException {
+    public List<ResumedDataTemplate> getResumedDTTByDoName(DoTypeName doTypeName) {
 
 
         DOAdapter doAdapter = getDOAdapterByName(doTypeName.getName()).orElseThrow();

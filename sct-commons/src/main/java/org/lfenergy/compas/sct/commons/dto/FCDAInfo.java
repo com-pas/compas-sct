@@ -46,12 +46,16 @@ public class FCDAInfo {
     @JsonIgnore
     public TFCDA getFCDA(){
         TFCDA tfcda = new TFCDA();
-        tfcda.setFc(fc);
         tfcda.setLdInst(ldInst);
-        tfcda.getLnClass().add(lnClass);
-
-        if(!StringUtils.isBlank(lnInst)){
-            tfcda.setLnInst(lnInst);
+        tfcda.setFc(fc);
+        if(!StringUtils.isBlank(lnClass)){
+            tfcda.getLnClass().add(lnClass);
+            if(!StringUtils.isBlank(lnInst)){
+                tfcda.setLnInst(lnInst);
+            }
+            if(!StringUtils.isBlank(prefix)){
+                tfcda.setPrefix(prefix);
+            }
         }
 
         if(doName != null && doName.isDefined()){

@@ -64,7 +64,7 @@ class DAITrackerTest {
 
         DAITracker daiTracker = new DAITracker(lnAdapter,doTypeName,daTypeName);
 
-        DAITracker.MatchResult matchResult = daiTracker.Search();
+        DAITracker.MatchResult matchResult = daiTracker.search();
         assertEquals(DAITracker.MatchResult.FULL_MATCH,matchResult);
 
         lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.getLDeviceAdapterByLdInst("LD_INS2").get());
@@ -74,7 +74,7 @@ class DAITrackerTest {
                 .build();
 
         daiTracker = new DAITracker(lnAdapter,doTypeName,daTypeName);
-        matchResult = daiTracker.Search();
+        matchResult = daiTracker.search();
         assertEquals(DAITracker.MatchResult.FAILED,matchResult);
 
         lnAdapter = AbstractLNAdapter.builder()
@@ -85,7 +85,7 @@ class DAITrackerTest {
 
         doTypeName = new DoTypeName("StrVal");
         daiTracker = new DAITracker(lnAdapter,doTypeName,daTypeName);
-        matchResult = daiTracker.Search();
+        matchResult = daiTracker.search();
         assertEquals(DAITracker.MatchResult.PARTIAL_MATCH,matchResult);
 
         lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.getLDeviceAdapterByLdInst("LD_INS3").get());
@@ -96,13 +96,13 @@ class DAITrackerTest {
 
         doTypeName = new DoTypeName("Do.sdo1.d");
         daiTracker = new DAITracker(lnAdapter,doTypeName,daTypeName);
-        matchResult = daiTracker.Search();
+        matchResult = daiTracker.search();
         assertEquals(DAITracker.MatchResult.PARTIAL_MATCH,matchResult);
 
         doTypeName = new DoTypeName("Do");
         daTypeName = new DaTypeName("da3");
         daiTracker = new DAITracker(lnAdapter,doTypeName,daTypeName);
-        matchResult = daiTracker.Search();
+        matchResult = daiTracker.search();
         assertEquals(DAITracker.MatchResult.PARTIAL_MATCH,matchResult);
 
 
@@ -110,7 +110,7 @@ class DAITrackerTest {
         doTypeName = new DoTypeName("Do");
         daTypeName = new DaTypeName("da2");
         daiTracker = new DAITracker(lnAdapter,doTypeName,daTypeName);
-        matchResult = daiTracker.Search();
+        matchResult = daiTracker.search();
         assertEquals(DAITracker.MatchResult.FULL_MATCH,matchResult);
     }
 

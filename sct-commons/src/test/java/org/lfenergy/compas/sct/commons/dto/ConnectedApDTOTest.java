@@ -4,12 +4,10 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
-import org.junit.jupiter.api.BeforeEach;
+
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.sct.commons.scl.com.ConnectedAPAdapter;
-import org.mockito.InjectMocks;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 
 import static org.junit.jupiter.api.Assertions.*;
 
