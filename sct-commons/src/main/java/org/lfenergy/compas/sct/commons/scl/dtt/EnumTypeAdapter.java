@@ -9,7 +9,7 @@ import org.lfenergy.compas.scl2007b4.model.TEnumType;
 import org.lfenergy.compas.scl2007b4.model.TEnumVal;
 
 import java.util.List;
-import java.util.Objects;;
+import java.util.Objects;
 
 public class EnumTypeAdapter extends AbstractDataTypeAdapter<TEnumType>{
 

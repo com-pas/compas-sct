@@ -10,7 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 
 @Getter
 public class ObjectReference {
-    private final String MALFORMED_OBJ_REF = "Malformed ObjRef : %s" ;
+    private static final String MALFORMED_OBJ_REF = "Malformed ObjRef : %s" ;
 
     private final String reference;
     //IEDName.LDInst

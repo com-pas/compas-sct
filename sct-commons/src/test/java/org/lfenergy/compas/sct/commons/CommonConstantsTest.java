@@ -11,8 +11,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CommonConstantsTest {
     @Test
-    public void testShouldReturnNOKWhenConstructClassCauseForbidden() {
-        assertThrows(UnsupportedOperationException.class, () -> new CommonConstants());
+    void testShouldReturnNOKWhenConstructClassCauseForbidden() {
+        assertThrows(UnsupportedOperationException.class, CommonConstants::new);
     }
 
 }

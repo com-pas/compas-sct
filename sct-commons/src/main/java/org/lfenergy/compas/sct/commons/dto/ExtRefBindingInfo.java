@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
-import org.lfenergy.compas.scl2007b4.model.TFCDA;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
 import org.lfenergy.compas.scl2007b4.model.TServiceType;
 

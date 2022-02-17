@@ -7,8 +7,6 @@ package org.lfenergy.compas.sct.commons;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
-import java.util.Locale;
-import java.util.ResourceBundle;
 
 @Slf4j
 public class Utils {
@@ -18,27 +16,23 @@ public class Utils {
     }
 
     public static String entering(){
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(">>> ");
-        stringBuilder.append("Entering: ");
-        stringBuilder.append("-::");
-        stringBuilder.append(getMethodName());
-        return stringBuilder.toString();
+        return ">>> " +
+                "Entering: " +
+                "-::" +
+                getMethodName();
     }
 
     public static String leaving(Long startTime){
         if(startTime == null || startTime <= 0){
             return leaving();
         }
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("<<< ");
-        stringBuilder.append("Leaving: ");
-        stringBuilder.append("-::");
-        stringBuilder.append(getMethodName());
-        stringBuilder.append(" - Timer duration: ");
-        stringBuilder.append((System.nanoTime() - startTime)/Math.pow(10,9));
-        stringBuilder.append(" sec.");
-        return stringBuilder.toString();
+        return "<<< " +
+                "Leaving: " +
+                "-::" +
+                getMethodName() +
+                " - Timer duration: " +
+                (System.nanoTime() - startTime) / Math.pow(10, 9) +
+                " sec.";
     }
 
     public static String getMethodName() {
@@ -50,12 +44,10 @@ public class Utils {
     }
 
     public static String leaving(){
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("<<< ");
-        stringBuilder.append("Leaving: ");
-        stringBuilder.append("::");
-        stringBuilder.append(getMethodName());
-        return stringBuilder.toString();
+        return "<<< " +
+                "Leaving: " +
+                "::" +
+                getMethodName();
     }
 
     /**
@@ -67,6 +59,7 @@ public class Utils {
             try {
                 field = clazz.getDeclaredField(name);
             } catch (Exception e) {
+                log.error("Cannot find field name {}", name, e);
             }
             clazz = clazz.getSuperclass();
         }

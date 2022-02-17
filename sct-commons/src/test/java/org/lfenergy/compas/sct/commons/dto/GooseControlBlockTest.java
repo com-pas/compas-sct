@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class GooseControlBlockTest {
+class GooseControlBlockTest {
     private static final String ID = UUID.randomUUID().toString();
     private static final String DATASET_REF = "DATASET_REF";
     private static final String NAME = "NAME";

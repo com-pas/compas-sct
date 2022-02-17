@@ -18,12 +18,8 @@ import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.Set;
 
-
-
 @Slf4j
-public class LDeviceDTOTest {
-
-
+class LDeviceDTOTest {
 
     @Test
     void testConstruction(){

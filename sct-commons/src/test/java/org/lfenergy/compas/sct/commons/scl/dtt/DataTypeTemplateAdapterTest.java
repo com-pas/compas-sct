@@ -32,10 +32,11 @@ class DataTypeTemplateAdapterTest {
         } catch (ScdException e) {
             e.printStackTrace();
         }
+        assert sclRootAdapter != null;
         sclRootAdapter.getCurrentElem().setDataTypeTemplates(new TDataTypeTemplates());
         SclRootAdapter finalSclRootAdapter = sclRootAdapter;
         dataTypeTemplateAdapter = assertDoesNotThrow(
-                () -> finalSclRootAdapter.getDataTypeTemplateAdapter()
+                finalSclRootAdapter::getDataTypeTemplateAdapter
         );
     }
 
@@ -48,7 +49,7 @@ class DataTypeTemplateAdapterTest {
         SclRootAdapter sclRootAdapter = dataTypeTemplateAdapter.getParentAdapter();
         assertThrows(
                 IllegalArgumentException.class,
-                () ->new DataTypeTemplateAdapter(sclRootAdapter,new TDataTypeTemplates())
+                () ->new DataTypeTemplateAdapter(sclRootAdapter, new TDataTypeTemplates())
         );
     }
 

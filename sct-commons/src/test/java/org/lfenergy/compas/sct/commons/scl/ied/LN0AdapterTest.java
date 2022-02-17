@@ -76,7 +76,8 @@ class LN0AdapterTest {
         assertFalse(ln0Adapter.getCurrentElem().getSampledValueControl().isEmpty());
         assertFalse(ln0Adapter.getCurrentElem().getReportControl().isEmpty());
 
-        assertThrows(IllegalArgumentException.class,  () -> new LN0Adapter(lDeviceAdapter,new LN0()));
+        LN0 ln01 = new LN0();
+        assertThrows(IllegalArgumentException.class,  () -> new LN0Adapter(lDeviceAdapter, ln01));
     }
 
     @Test

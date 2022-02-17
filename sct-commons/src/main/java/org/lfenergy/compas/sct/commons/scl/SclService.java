@@ -42,6 +42,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SclService {
 
+    public static final String UNKNOWN_LDEVICE_S_IN_IED_S = "Unknown LDevice (%s) in IED (%s)";
+    public static final String INVALID_OR_MISSING_ATTRIBUTES_IN_EXT_REF_BINDING_INFO = "Invalid or missing attributes in ExtRef binding info";
+
+    private SclService(){ throw new IllegalStateException("SclService class"); }
+
     public static SclRootAdapter initScl(String hVersion, String hRevision) throws ScdException {
         UUID hId = UUID.randomUUID();
         return new SclRootAdapter(hId.toString(),hVersion,hRevision);
@@ -112,7 +117,7 @@ public class SclService {
         CommunicationAdapter communicationAdapter = sclRootAdapter.getCommunicationAdapter(false);
         return communicationAdapter.getSubNetworkAdapters()
                 .stream()
-                .map(subNetworkAdapter -> SubNetworkDTO.from(subNetworkAdapter))
+                .map(SubNetworkDTO::from)
                 .collect(Collectors.toList());
     }
 
@@ -122,7 +127,7 @@ public class SclService {
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
                 .orElseThrow(
-                        () -> new ScdException(String.format("Unknown LDevice (%s) in IED (%s)", ldInst, iedName))
+                        () -> new ScdException(String.format(UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName))
                 );
         return lDeviceAdapter.getExtRefInfo();
     }
@@ -134,9 +139,9 @@ public class SclService {
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
                 .orElseThrow(
-                        () -> new ScdException(String.format("Unknown LDevice (%s) in IED (%s)", ldInst, iedName))
+                        () -> new ScdException(String.format(UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName))
                 );
-        AbstractLNAdapter abstractLNAdapter = AbstractLNAdapter.builder()
+        AbstractLNAdapter<?> abstractLNAdapter = AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
                 .withLnClass(lnClass)
                 .withLnInst(lnInst)
@@ -167,12 +172,12 @@ public class SclService {
                 .orElseThrow(
                     () -> new ScdException(
                             String.format(
-                                    "Unknown LDevice (%s) in IED (%s)", ldInst, iedName
+                                    UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName
                             )
                     )
                 );
 
-        AbstractLNAdapter abstractLNAdapter = AbstractLNAdapter.builder()
+        AbstractLNAdapter<?> abstractLNAdapter = AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
                 .withLnClass(extRefInfo.getHolderLnClass())
                 .withLnInst(extRefInfo.getHolderLnInst())
@@ -192,12 +197,12 @@ public class SclService {
         }
         ExtRefBindingInfo bindingInfo = extRefInfo.getBindingInfo();
         if(!bindingInfo.isValid()){
-            throw new ScdException("Invalid or missing attributes in ExtRef binding info");
+            throw new ScdException(INVALID_OR_MISSING_ATTRIBUTES_IN_EXT_REF_BINDING_INFO);
         }
 
         String iedName = extRefInfo.getHolderIEDName();
         if(bindingInfo.getIedName().equals(iedName)){
-            throw new ScdException(String.format("Internal binding can't have control block"));
+            throw new ScdException("Internal binding can't have control block");
         }
 
         String ldInst = extRefInfo.getHolderLDInst();
@@ -209,16 +214,16 @@ public class SclService {
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
                 .orElseThrow(
-                        () -> new ScdException(String.format("Unknown LDevice (%s) in IED (%s)", ldInst, iedName))
+                        () -> new ScdException(String.format(UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName))
                 );
-        AbstractLNAdapter<?> lnAdapter = AbstractLNAdapter.builder()
+        AbstractLNAdapter<?> abstractLNAdapter = AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
                 .withLnClass(lnClass)
                 .withLnInst(lnInst)
                 .withLnPrefix(prefix)
                 .build();
 
-        lnAdapter.checkExtRefInfoCoherence(extRefInfo);
+        abstractLNAdapter.checkExtRefInfoCoherence(extRefInfo);
 
         // Get CBs
         IEDAdapter srcIEDAdapter = sclRootAdapter.getIEDAdapterByName(bindingInfo.getIedName());
@@ -247,21 +252,21 @@ public class SclService {
         }
         ExtRefBindingInfo bindingInfo = extRefInfo.getBindingInfo();
         if(bindingInfo == null || !bindingInfo.isValid()){
-            throw new ScdException("Invalid or missing attributes in ExtRef binding info");
+            throw new ScdException(INVALID_OR_MISSING_ATTRIBUTES_IN_EXT_REF_BINDING_INFO);
         }
         if(bindingInfo.getIedName().equals(iedName)){
-            throw new ScdException(String.format("Internal binding can't have control block"));
+            throw new ScdException("Internal binding can't have control block");
         }
         ExtRefSourceInfo sourceInfo = extRefInfo.getSourceInfo();
         if(sourceInfo == null || !sourceInfo.isValid()){
-            throw new ScdException("Invalid or missing attributes in ExtRef binding info");
+            throw new ScdException(INVALID_OR_MISSING_ATTRIBUTES_IN_EXT_REF_BINDING_INFO);
         }
 
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
                 .orElseThrow(
-                        () -> new ScdException(String.format("Unknown LDevice (%s) in IED (%s)", ldInst, iedName))
+                        () -> new ScdException(String.format(UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName))
                 );
         var anLNAdapter = AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
@@ -278,7 +283,7 @@ public class SclService {
         IEDAdapter iedAdapter = new IEDAdapter(sclRootAdapter,iedName);
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
                 .orElseThrow(
-                        () -> new ScdException(String.format("Unknown LDevice (%s) in IED (%s)", ldInst, iedName))
+                        () -> new ScdException(String.format(UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName))
                 );
 
         return lDeviceAdapter.getDAI(rDtt, updatable);
@@ -303,7 +308,7 @@ public class SclService {
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
                 .orElseThrow(
-                        () -> new ScdException(String.format("Unknown LDevice (%s) in IED (%s)", ldInst, iedName))
+                        () -> new ScdException(String.format(UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName))
                 );
 
 

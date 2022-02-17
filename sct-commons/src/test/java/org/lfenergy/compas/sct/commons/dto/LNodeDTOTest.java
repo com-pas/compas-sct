@@ -52,7 +52,7 @@ class LNodeDTOTest {
     }
 
     @Test
-    public void testFrom(){
+    void testFrom(){
         IEDAdapter iedAdapter = Mockito.mock(IEDAdapter.class);
         LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
         Mockito.when(iedAdapter.getName()).thenReturn(DTO.HOLDER_IED_NAME);
@@ -90,7 +90,7 @@ class LNodeDTOTest {
     }
 
     @Test
-    public void testExtractExtRefInfo(){
+    void testExtractExtRefInfo(){
         LNAdapter lnAdapter = Mockito.mock(LNAdapter.class);
         Mockito.when(lnAdapter.getLNClass()).thenReturn(DTO.HOLDER_LN_CLASS);
         Mockito.when(lnAdapter.getLNInst()).thenReturn(DTO.HOLDER_LN_INST);

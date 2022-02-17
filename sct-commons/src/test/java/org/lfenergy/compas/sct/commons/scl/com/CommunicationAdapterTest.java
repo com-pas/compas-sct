@@ -14,15 +14,16 @@ import static org.junit.jupiter.api.Assertions.*;
 class CommunicationAdapterTest {
 
     @Test
-    public void testAmChildElementRef() throws ScdException {
+    void testAmChildElementRef() throws ScdException {
         SclRootAdapter sclRootAdapter = new SclRootAdapter("hID","hVersion","hRevision");
         sclRootAdapter.getCurrentElem().setCommunication(new TCommunication());
         CommunicationAdapter cAdapter = sclRootAdapter.getCommunicationAdapter(true);
         assertTrue(cAdapter.amChildElementRef());
 
         CommunicationAdapter finalCAdapter = new CommunicationAdapter(sclRootAdapter);
+        TCommunication tCommunication = new TCommunication();
         assertThrows(IllegalArgumentException.class,
-                () -> finalCAdapter.setCurrentElem(new TCommunication()));
+                () -> finalCAdapter.setCurrentElem(tCommunication));
     }
 
     @Test

@@ -11,10 +11,10 @@ import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SubstationAdapterTest {
+class SubstationAdapterTest {
 
     @Test
-    public void testAmChildElementRef() throws ScdException {
+    void testAmChildElementRef() throws ScdException {
         SclRootAdapter sclRootAdapter = new SclRootAdapter("hID","hVersion","hRevision");
         TSubstation tSubstation = new TSubstation();
         tSubstation.setName("SUBSTATION");
@@ -23,8 +23,9 @@ public class SubstationAdapterTest {
         assertTrue(ssAdapter.amChildElementRef());
 
         SubstationAdapter ssfAdapter = new SubstationAdapter(sclRootAdapter);
+        TSubstation tSubstation1 = new TSubstation();
         assertThrows(IllegalArgumentException.class,
-                () ->ssfAdapter.setCurrentElem(new TSubstation()));
+                () ->ssfAdapter.setCurrentElem(tSubstation1));
 
         assertThrows(ScdException.class,
                 () -> sclRootAdapter.getSubstationAdapter("SUBSTATION1"));

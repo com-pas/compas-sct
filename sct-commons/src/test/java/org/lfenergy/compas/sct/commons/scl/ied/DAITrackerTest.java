@@ -23,11 +23,13 @@ class DAITrackerTest {
     @Test
     void testInit(){
         LN0Adapter ln0Adapter = new LN0Adapter(null,new LN0());
-        DAITracker daiTracker = new DAITracker(ln0Adapter,new DoTypeName(),new DaTypeName());
+        DoTypeName doTypeName = new DoTypeName();
+        DaTypeName daTypeName = new DaTypeName();
+        DAITracker daiTracker = new DAITracker(ln0Adapter, doTypeName, daTypeName);
         assertEquals(-2, daiTracker.getIndexDoType());
         assertEquals(-2, daiTracker.getIndexDaType());
-        assertEquals(null, daiTracker.getBdaiOrDaiAdapter());
-        assertEquals(null, daiTracker.getDoiOrSdoiAdapter());
+        assertNull(daiTracker.getBdaiOrDaiAdapter());
+        assertNull(daiTracker.getDoiOrSdoiAdapter());
 
         assertNotNull(daiTracker.getLnAdapter());
         assertNotNull(daiTracker.getDaTypeName());
@@ -35,16 +37,16 @@ class DAITrackerTest {
 
         assertThrows(
                 NullPointerException.class,
-                () -> new DAITracker(null,new DoTypeName(),new DaTypeName())
+                () -> new DAITracker(null, doTypeName, daTypeName)
         );
 
         assertThrows(
                 NullPointerException.class,
-                () -> new DAITracker(new LN0Adapter(null,new LN0()),null,new DaTypeName())
+                () -> new DAITracker(ln0Adapter,null, daTypeName)
         );
         assertThrows(
                 NullPointerException.class,
-                () -> new DAITracker(new LN0Adapter(null,new LN0()),new DoTypeName(),null)
+                () -> new DAITracker(ln0Adapter, doTypeName,null)
         );
     }
 
@@ -67,7 +69,7 @@ class DAITrackerTest {
         DAITracker.MatchResult matchResult = daiTracker.search();
         assertEquals(DAITracker.MatchResult.FULL_MATCH,matchResult);
 
-        lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.getLDeviceAdapterByLdInst("LD_INS2").get());
+        lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.getLDeviceAdapterByLdInst("LD_INS2").isPresent() ? iAdapter.getLDeviceAdapterByLdInst("LD_INS2").get() : null);
         lnAdapter = AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
                 .withLnClass(TLLN0Enum.LLN_0.value())
@@ -88,7 +90,7 @@ class DAITrackerTest {
         matchResult = daiTracker.search();
         assertEquals(DAITracker.MatchResult.PARTIAL_MATCH,matchResult);
 
-        lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.getLDeviceAdapterByLdInst("LD_INS3").get());
+        lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.getLDeviceAdapterByLdInst("LD_INS3").isPresent() ? iAdapter.getLDeviceAdapterByLdInst("LD_INS3").get() : null);
         lnAdapter = AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
                 .withLnClass(TLLN0Enum.LLN_0.value())
@@ -131,7 +133,7 @@ class DAITrackerTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/scd_with_dai_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.getLDeviceAdapterByLdInst("LDSUIED").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.getLDeviceAdapterByLdInst("LDSUIED").isPresent() ? iAdapter.getLDeviceAdapterByLdInst("LDSUIED").get() : null);
         AbstractLNAdapter<?> lnAdapter = AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
                 .withLnClass(TLLN0Enum.LLN_0.value())
@@ -141,19 +143,19 @@ class DAITrackerTest {
         DaTypeName daTypeName = new DaTypeName("setMag.f");
 
         DAITracker daiTracker = new DAITracker(lnAdapter,doTypeName,daTypeName);
-        assertDoesNotThrow(() -> daiTracker.validateBoundedDAI());
+        assertDoesNotThrow(daiTracker::validateBoundedDAI);
 
         doTypeName.setCdc(TPredefinedCDCEnum.ING);
-        assertThrows(ScdException.class, () -> daiTracker.validateBoundedDAI());
+        assertThrows(ScdException.class, daiTracker::validateBoundedDAI);
 
         daTypeName.addDaiValue(0L,"80.78");
-        assertDoesNotThrow(() -> daiTracker.validateBoundedDAI());
+        assertDoesNotThrow(daiTracker::validateBoundedDAI);
 
         daTypeName.addDaiValue(0L,"45.9");
-        assertThrows(ScdException.class, () -> daiTracker.validateBoundedDAI());
+        assertThrows(ScdException.class, daiTracker::validateBoundedDAI);
 
         daTypeName.addDaiValue(0L,"1000");
-        assertThrows(ScdException.class, () -> daiTracker.validateBoundedDAI());
+        assertThrows(ScdException.class, daiTracker::validateBoundedDAI);
     }
 
     @Test

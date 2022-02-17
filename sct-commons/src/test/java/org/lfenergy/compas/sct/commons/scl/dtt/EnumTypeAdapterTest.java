@@ -13,7 +13,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class EnumTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TEnumType> {
+class EnumTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TEnumType> {
 
     @Override
     protected void completeInit() {
@@ -25,7 +25,7 @@ public class EnumTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapte
     }
 
     @Test
-    public void testAmChildElement(){
+    void testAmChildElement(){
         init();
         assertDoesNotThrow(
                 () -> new EnumTypeAdapter(sclElementAdapter,sclElement)
@@ -33,7 +33,7 @@ public class EnumTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapte
     }
 
     @Test
-    public void testHasSameContentAs(){
+    void testHasSameContentAs(){
         init();
         EnumTypeAdapter enumTypeAdapter = assertDoesNotThrow(
                 () -> new EnumTypeAdapter(sclElementAdapter,sclElement)

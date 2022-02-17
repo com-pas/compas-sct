@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class ReportControlBlockTest {
+class ReportControlBlockTest {
 
     private static final String ID = UUID.randomUUID().toString();
     private static final String DATASET_REF = "DATASET_REF";
@@ -58,36 +58,36 @@ public class ReportControlBlockTest {
     @Test
     void testValidateCB() {
         ReportControlBlock reportControlBlock = create();
-        assertDoesNotThrow(() -> reportControlBlock.validateCB());
+        assertDoesNotThrow(reportControlBlock::validateCB);
 
         reportControlBlock.setDataSetRef(null);
-        assertDoesNotThrow(() ->reportControlBlock.validateCB());
+        assertDoesNotThrow(reportControlBlock::validateCB);
 
         assertFalse(reportControlBlock.getIedNames().isEmpty());
         reportControlBlock.getIedNames().get(0).setValue(null);
-        assertThrows(ScdException.class, () -> reportControlBlock.validateCB());
+        assertThrows(ScdException.class, reportControlBlock::validateCB);
 
         reportControlBlock.getIedNames().get(0).setValue("");
-        assertThrows(ScdException.class, () -> reportControlBlock.validateCB());
+        assertThrows(ScdException.class, reportControlBlock::validateCB);
 
         reportControlBlock.getIedNames().get(0).setLdInst("");
-        assertThrows(ScdException.class, () -> reportControlBlock.validateCB());
+        assertThrows(ScdException.class, reportControlBlock::validateCB);
 
         reportControlBlock.setDataSetRef("");
-        assertThrows(ScdException.class, () -> reportControlBlock.validateCB());
+        assertThrows(ScdException.class, reportControlBlock::validateCB);
 
         reportControlBlock.setName(null);
-        assertThrows(ScdException.class, () -> reportControlBlock.validateCB());
+        assertThrows(ScdException.class, reportControlBlock::validateCB);
 
         reportControlBlock.setName("");
-        assertThrows(ScdException.class, () -> reportControlBlock.validateCB());
+        assertThrows(ScdException.class, reportControlBlock::validateCB);
 
 
         reportControlBlock.setId(null);
-        assertThrows(ScdException.class, () -> reportControlBlock.validateCB());
+        assertThrows(ScdException.class, reportControlBlock::validateCB);
 
         reportControlBlock.setId("");
-        assertThrows(ScdException.class, () -> reportControlBlock.validateCB());
+        assertThrows(ScdException.class, reportControlBlock::validateCB);
 
 
     }

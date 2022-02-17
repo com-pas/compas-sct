@@ -72,7 +72,7 @@ class DATypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TDAType
     }
 
     @Test
-    public void testContainsStructBdaWithDATypeId() {
+    void testContainsStructBdaWithDATypeId() {
         init();
         TBDA tbda = new TBDA();
         tbda.setType("ID_BDA");
