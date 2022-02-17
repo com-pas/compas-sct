@@ -22,6 +22,6 @@ class ExtRefSourceInfoTest {
         assertEquals(sourceInfo,bindingInfo_bis);
         assertNotEquals(null, sourceInfo);
         assertNotEquals(sourceInfo, bindingInfo_qt);
-        assertNotEquals(sourceInfo, new ExtRefSignalInfo());
+        assertNotEquals(sourceInfo, new ExtRefSourceInfo());
     }
 }
