@@ -7,7 +7,6 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 import org.lfenergy.compas.scl2007b4.model.TDAI;
 import org.lfenergy.compas.scl2007b4.model.TVal;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 
 import java.util.Map;
@@ -47,7 +46,7 @@ public abstract class AbstractDAIAdapter<P extends SclElementAdapter> extends Sc
     }
 
     public void update(Long sGroup, String val) throws ScdException {
-        if(currentElem.isValImport() != null && !currentElem.isValImport().booleanValue()){
+        if(currentElem.isValImport() != null && !currentElem.isValImport()){
             String msg = String.format(
                     "DAI(%s) cannot be updated : valImport(false)",currentElem.getName()
             );

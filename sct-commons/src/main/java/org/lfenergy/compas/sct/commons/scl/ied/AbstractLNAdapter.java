@@ -359,7 +359,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 .stream()
                 .filter(tDataSet -> tDataSet.getFCDA()
                         .stream()
-                        .anyMatch(tfcda -> filter.matchFCDA(tfcda))
+                        .anyMatch(filter::matchFCDA)
                 )
                 .collect(Collectors.toList());
     }
@@ -420,7 +420,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         }
 
         if(!bindingInfo.isWrappedIn(extRef)){
-            String msg = String.format("No relation between binding info and the matched TExtRef");
+            String msg = "No relation between binding info and the matched TExtRef";
             log.error(msg);
             throw new ScdException(msg);
         }
@@ -555,7 +555,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         if(matchResult == DAITracker.MatchResult.FULL_MATCH){
             // update
             daiAdapter = (AbstractDAIAdapter) daiTracker.getBdaiOrDaiAdapter();
-            if((daiAdapter.isValImport() != null && daiAdapter.isValImport().booleanValue()) ||
+            if((daiAdapter.isValImport() != null && daiAdapter.isValImport()) ||
                     (daiAdapter.isValImport() == null && rDtt.isUpdatable()) ) {
                 daiAdapter.update(daTypeName.getDaiValues());
                 return;
@@ -581,7 +581,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 doiOrSdoiAdapter = doiOrSdoiAdapter.addSDOI(sdoName);
             }
 
-            IDataAdapter daiOrBdaiAdapter = daiTracker.getDoiOrSdoiAdapter();
+            IDataParentAdapter daiOrBdaiAdapter = daiTracker.getDoiOrSdoiAdapter();
             idx = daiTracker.getIndexDaType();
             int daSz = daTypeName.getStructNames().size();
             if(idx <= -1 ){
@@ -594,9 +594,9 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 if(idx == 0){
                     daiOrBdaiAdapter = doiOrSdoiAdapter.addSDOI(daTypeName.getName());
                 } else if(i == daSz -1){
-                    daiAdapter = ((IDataParentAdapter)daiOrBdaiAdapter).addDAI(bdaName, rDtt.isUpdatable());
+                    daiAdapter = daiOrBdaiAdapter.addDAI(bdaName, rDtt.isUpdatable());
                 } else {
-                    daiOrBdaiAdapter = ((IDataParentAdapter)daiOrBdaiAdapter).addSDOI(bdaName);
+                    daiOrBdaiAdapter = daiOrBdaiAdapter.addSDOI(bdaName);
                 }
             }
             if(daiAdapter == null){
@@ -665,7 +665,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         TDataSet tDataSet = new TDataSet();
         tDataSet.setName(dataSetInfo.getName());
         tDataSet.getFCDA().addAll(
-                dataSetInfo.getFCDAInfos().stream().map(fcdaInfo -> fcdaInfo.getFCDA()).collect(Collectors.toList())
+                dataSetInfo.getFCDAInfos().stream().map(FCDAInfo::getFCDA).collect(Collectors.toList())
         );
         currentElem.getDataSet().add(tDataSet);
 

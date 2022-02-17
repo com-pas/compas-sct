@@ -17,18 +17,17 @@ import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class IEDAdapterTest {
+class IEDAdapterTest {
 
     private static final String SCD_IED_U_TEST = "/ied-test-schema-conf/ied_unit_test.xml";
 
 
     @Test
-    public void testAmChildElementRef() throws ScdException {
+    void testAmChildElementRef() throws ScdException {
         SclRootAdapter sclRootAdapter = new SclRootAdapter("hID","hVersion","hRevision");
         TIED tied = new TIED();
         tied.setName(DTO.HOLDER_IED_NAME);
@@ -41,8 +40,9 @@ public class IEDAdapterTest {
         assertEquals(DTO.HOLDER_IED_NAME,iAdapter.getName());
 
         IEDAdapter fAdapter = new IEDAdapter(sclRootAdapter);
+        TIED tied1 = new TIED();
         assertThrows(IllegalArgumentException.class,
-                () ->fAdapter.setCurrentElem(new TIED()));
+                () ->fAdapter.setCurrentElem(tied1));
 
         assertThrows(ScdException.class,
                 () -> sclRootAdapter.getIEDAdapterByName(DTO.HOLDER_IED_NAME + "1"));

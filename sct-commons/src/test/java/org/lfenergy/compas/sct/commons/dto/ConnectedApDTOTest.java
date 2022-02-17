@@ -11,10 +11,10 @@ import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ConnectedApDTOTest {
+class ConnectedApDTOTest {
 
     @Test
-    public void testConstruction(){
+    void testConstruction(){
         ConnectedAPAdapter connectedAPAdapter = Mockito.mock(ConnectedAPAdapter.class);
 
         Mockito.when(connectedAPAdapter.getApName()).thenReturn(DTO.AP_NAME);

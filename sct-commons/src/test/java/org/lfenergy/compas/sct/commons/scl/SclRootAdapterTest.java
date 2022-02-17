@@ -16,11 +16,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
-public class SclRootAdapterTest {
+class SclRootAdapterTest {
 
 
     @Test
-    public void testConstruction() {
+    void testConstruction() {
         AtomicReference<SclRootAdapter> sclRootAdapter = new AtomicReference<>();
         assertDoesNotThrow(() ->
                 sclRootAdapter.set(new SclRootAdapter("hID", "hVersion", "hRevision"))

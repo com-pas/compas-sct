@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class IedDTOTest {
 
     @Test
-    public void testConstruction(){
+    void testConstruction(){
         IedDTO iedDTO = DTO.createIedDTO();
 
         assertAll("IedDTO",

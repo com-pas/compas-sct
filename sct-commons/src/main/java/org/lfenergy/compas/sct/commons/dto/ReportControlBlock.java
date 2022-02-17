@@ -48,7 +48,7 @@ public class ReportControlBlock extends ControlBlock<ReportControlBlock> {
         if(rptEnabled != null) {
             iedNames = rptEnabled.getClientLN()
                     .stream()
-                    .map(clientLN -> toIEDName(clientLN))
+                    .map(ControlBlock::toIEDName)
                     .collect(Collectors.toList());
         }
     }

@@ -41,7 +41,7 @@ public class DataSetInfo extends LNodeMetaDataEmbedder{
 
     public static Set<DataSetInfo> getDataSets(AbstractLNAdapter<? extends TAnyLN> lnAdapter){
         return lnAdapter.getDataSet(null)
-                .stream().map(tDataSet -> DataSetInfo.from(tDataSet)).collect(Collectors.toSet());
+                .stream().map(DataSetInfo::from).collect(Collectors.toSet());
     }
 
     public void addFCDAInfo(FCDAInfo fcdaInfo){
@@ -60,6 +60,6 @@ public class DataSetInfo extends LNodeMetaDataEmbedder{
         if(name.length() > 32 || fcdaInfos.isEmpty()){
             return false;
         }
-        return fcdaInfos.stream().allMatch(fcdaInfo -> fcdaInfo.isValid());
+        return fcdaInfos.stream().allMatch(FCDAInfo::isValid);
     }
 }

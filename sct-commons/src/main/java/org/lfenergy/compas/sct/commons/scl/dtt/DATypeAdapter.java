@@ -72,7 +72,7 @@ public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
         String strBDAs = StringUtils.join(daTypeName.getStructNames());
         if(sz - idx <= 0)  {
             return Optional.of(rDtt);
-        };
+        }
         DaTypeName typeName = rDtt.getDaName();
         DATypeAdapter daTypeAdapter = this;
 

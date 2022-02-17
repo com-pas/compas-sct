@@ -32,7 +32,7 @@ class DOTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter, TDOTyp
     }
 
     @Test
-    public void testAmChildElementRef() {
+    void testAmChildElementRef() {
         init();
         assertDoesNotThrow(
                 () -> new DOTypeAdapter(sclElementAdapter, sclElement)
@@ -40,7 +40,7 @@ class DOTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter, TDOTyp
     }
 
     @Test
-    public void testContainsDAWithEnumTypeId() {
+    void testContainsDAWithEnumTypeId() {
         init();
         TDA tda = new TDA();
         tda.setType("ID_BDA");
@@ -56,7 +56,7 @@ class DOTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter, TDOTyp
     }
 
     @Test
-    public void testContainsDAStructWithDATypeId() {
+    void testContainsDAStructWithDATypeId() {
         init();
         TDA tda = new TDA();
         tda.setType("ID_BDA");

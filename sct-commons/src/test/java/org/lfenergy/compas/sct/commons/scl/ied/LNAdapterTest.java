@@ -62,7 +62,7 @@ class LNAdapterTest {
         assertDoesNotThrow(() -> lnAdapter.addControlBlock(new ReportControlBlock()));
         assertFalse(lnAdapter.getCurrentElem().getReportControl().isEmpty());
 
-        assertThrows(IllegalArgumentException.class,  () -> new LNAdapter(lnAdapter.getParentAdapter(),new TLN()));
+        assertThrows(IllegalArgumentException.class,  () -> new LNAdapter(lnAdapter.getParentAdapter(), new TLN()));
     }
 
     @Test

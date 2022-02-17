@@ -12,10 +12,10 @@ import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class HeaderAdapterTest {
+class HeaderAdapterTest {
 
     @Test
-    public void testAmChildElementRef() throws ScdException {
+    void testAmChildElementRef() throws ScdException {
         SclRootAdapter sclRootAdapter =
                 new SclRootAdapter("hID","hVersion","hRevision");
         sclRootAdapter.getCurrentElem().setHeader(new THeader());
@@ -27,7 +27,7 @@ public class HeaderAdapterTest {
     }
 
     @Test
-    public void testAddHistoryItem() throws ScdException {
+    void testAddHistoryItem() throws ScdException {
         SclRootAdapter sclRootAdapter =  new SclRootAdapter(
                 "hID","hVersion","hRevision"
         );

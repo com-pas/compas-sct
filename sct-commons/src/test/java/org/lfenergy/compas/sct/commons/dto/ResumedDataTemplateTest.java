@@ -9,17 +9,17 @@ import org.lfenergy.compas.scl2007b4.model.TFCEnum;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedCDCEnum;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ResumedDataTemplateTest {
+class ResumedDataTemplateTest {
 
     @Test
-    public void testGetObjRef(){
+    void testGetObjRef(){
         String expected = "IEDLDTM/prelnclass1.do.sdo1.sdo2.da.bda1.bda2";
         ResumedDataTemplate resumedDataTemplate = DTO.createRTT("pre","lnclass","1");
         String objRef = resumedDataTemplate.getObjRef("IED","LDTM");
         assertEquals(expected,objRef);
     }
     @Test
-    public void testCopyFrom() {
+    void testCopyFrom() {
         ResumedDataTemplate rDtt = DTO.createRTT("pre","lnclass","1");
         ResumedDataTemplate rDtt_b = ResumedDataTemplate.copyFrom(rDtt);
 
@@ -51,7 +51,7 @@ public class ResumedDataTemplateTest {
     }
 
     @Test
-    public void testIsUpdatable(){
+    void testIsUpdatable(){
         ResumedDataTemplate rDtt = DTO.createRTT("pre","lnclass","1");
         assertTrue(rDtt.isUpdatable());
 

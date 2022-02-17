@@ -41,7 +41,7 @@ public class ResumedDataTemplate {
     }
 
     public boolean isUpdatable(){
-       return daName.isDefined() ? daName.isUpdatable() : false;
+       return daName.isDefined() && daName.isUpdatable();
     }
 
     @JsonIgnore

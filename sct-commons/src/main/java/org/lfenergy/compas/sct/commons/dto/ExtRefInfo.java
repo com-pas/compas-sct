@@ -47,38 +47,39 @@ public class ExtRefInfo extends LNodeMetaDataEmbedder{
     }
 
     public boolean matchFCDA(@NonNull TFCDA tfcda){
+        boolean returnValue = true;
         if(AbstractLNAdapter.isNull(tfcda)) {
-            return false;
+            returnValue = false;
         }
 
         if(tfcda.getLdInst() != null &&
                 (bindingInfo == null || !tfcda.getLdInst().equals(bindingInfo.getLdInst()))){
-            return false;
+            returnValue = false;
         }
         if (!tfcda.getLnClass().isEmpty() &&
                 ( bindingInfo == null || !tfcda.getLnClass().contains(bindingInfo.getLnClass())) ){
-            return false;
+            returnValue = false;
         }
 
         boolean isLN0 = tfcda.getLnClass().contains(TLLN0Enum.LLN_0.value());
         if (!isLN0 && tfcda.getLnInst() != null &&
                 (bindingInfo == null || !tfcda.getLnInst().equals(bindingInfo.getLnInst()))) {
-            return false;
+            returnValue = false;
         }
         if (!isLN0 && !StringUtils.isBlank(tfcda.getPrefix()) &&
                 (bindingInfo == null || !tfcda.getPrefix().equals(bindingInfo.getPrefix()))) {
-            return false;
+            returnValue = false;
         }
 
         if(!StringUtils.isBlank(tfcda.getDoName()) &&
                 (signalInfo == null || !Objects.equals(signalInfo.getPDO(),tfcda.getDoName())) ){
-            return false;
+            returnValue = false;
         }
 
         if(!StringUtils.isBlank(tfcda.getDaName()) &&
                 (signalInfo == null || !Objects.equals(signalInfo.getPDA(),tfcda.getDaName())) ){
-            return false;
+            returnValue = false;
         }
-        return true;
+        return returnValue;
     }
 }

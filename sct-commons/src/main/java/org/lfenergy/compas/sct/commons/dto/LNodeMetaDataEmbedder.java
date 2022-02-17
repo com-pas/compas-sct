@@ -4,7 +4,6 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 
 

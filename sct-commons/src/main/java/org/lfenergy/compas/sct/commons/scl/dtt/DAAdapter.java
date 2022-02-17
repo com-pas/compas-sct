@@ -6,7 +6,6 @@ package org.lfenergy.compas.sct.commons.scl.dtt;
 
 import lombok.Getter;
 import org.lfenergy.compas.scl2007b4.model.TDA;
-import org.lfenergy.compas.scl2007b4.model.TFCEnum;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 

@@ -9,7 +9,6 @@ import org.lfenergy.compas.scl2007b4.model.TSDI;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 
-import java.util.List;
 import java.util.Objects;
 
 public class SDIAdapter extends SclElementAdapter<SclElementAdapter, TSDI> implements IDataParentAdapter {
@@ -76,7 +75,7 @@ public class SDIAdapter extends SclElementAdapter<SclElementAdapter, TSDI> imple
         return new SDIAdapter(this,tsdi);
     }
 
-    static public class DAIAdapter extends AbstractDAIAdapter<SDIAdapter> {
+    public static class DAIAdapter extends AbstractDAIAdapter<SDIAdapter> {
 
         protected DAIAdapter(SDIAdapter parentAdapter, TDAI currentElem) {
             super(parentAdapter, currentElem);
