@@ -7,14 +7,11 @@ package org.lfenergy.compas.sct.commons.scl.dtt;
 
 import org.lfenergy.compas.scl2007b4.model.TEnumType;
 import org.lfenergy.compas.scl2007b4.model.TEnumVal;
-import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 
 import java.util.List;
 import java.util.Objects;
 
-public class EnumTypeAdapter
-        extends SclElementAdapter<DataTypeTemplateAdapter, TEnumType>
-        implements IDTTComparable<TEnumType>{
+public class EnumTypeAdapter extends AbstractDataTypeAdapter<TEnumType>{
 
     public EnumTypeAdapter(DataTypeTemplateAdapter parentAdapter, TEnumType currentElem) {
         super(parentAdapter, currentElem);
@@ -45,5 +42,14 @@ public class EnumTypeAdapter
             }
         }
         return true;
+    }
+
+    public boolean hasValue(String val) {
+        return currentElem.getEnumVal().stream().anyMatch(tEnumVal -> tEnumVal.getValue().equals(val));
+    }
+
+    @Override
+    public DataTypeTemplateAdapter getDataTypeTemplateAdapter() {
+        return parentAdapter;
     }
 }

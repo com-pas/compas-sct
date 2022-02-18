@@ -22,7 +22,7 @@ class ExtRefBindingInfoTest {
 
         assertEquals(bindingInfo,bindingInfo_ter);
         assertEquals(bindingInfo,bindingInfo_bis);
-        assertNotEquals(bindingInfo, null);
+        assertNotEquals(null, bindingInfo);
         assertNotEquals(bindingInfo, bindingInfo_qt);
         bindingInfo_qt.setDaName(bindingInfo.getDaName());
         assertNotEquals(bindingInfo, bindingInfo_qt);

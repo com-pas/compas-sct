@@ -9,11 +9,15 @@ import org.lfenergy.compas.scl2007b4.model.TBDA;
 import org.lfenergy.compas.scl2007b4.model.TDAType;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
+import org.lfenergy.compas.sct.commons.dto.DoTypeName;
+import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -48,7 +52,7 @@ class DATypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TDAType
                 () -> new DATypeAdapter(sclElementAdapter, sclElement)
         );
         assertFalse(daTypeAdapter.getBdaAdapters().isEmpty());
-        assertEquals(daTypeAdapter.getBdaAdapters().get(0).getClass(),BDAAdapter.class);
+        assertEquals(daTypeAdapter.getBdaAdapters().get(0).getClass(), DATypeAdapter.BDAAdapter.class);
     }
 
     @Test
@@ -68,7 +72,7 @@ class DATypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TDAType
     }
 
     @Test
-    public void testContainsStructBdaWithDATypeId() {
+    void testContainsStructBdaWithDATypeId() {
         init();
         TBDA tbda = new TBDA();
         tbda.setType("ID_BDA");
@@ -101,13 +105,43 @@ class DATypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TDAType
         DATypeAdapter daTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getDATypeAdapterById("DA1").get());
         DaTypeName daTypeName = new DaTypeName("origin","origin.ctlVal");
 
-        daTypeAdapter.checkStructuredData(daTypeName,0);
-        assertEquals(TPredefinedBasicTypeEnum.ENUM.value(),daTypeName.getBType());
+        daTypeAdapter.check(daTypeName);
+        assertEquals(TPredefinedBasicTypeEnum.ENUM,daTypeName.getBType());
         assertEquals("RecCycModKind",daTypeName.getType());
-        daTypeName.setStructNames(List.of("origin"));
-        assertThrows(ScdException.class, () -> daTypeAdapter.checkStructuredData(daTypeName,0));
+        DaTypeName daTypeName1 = new DaTypeName("origin","origin");
+        assertThrows(ScdException.class, () -> daTypeAdapter.check(daTypeName1));
 
         DaTypeName daTypeName2 = new DaTypeName("d","check.ctlVal");
-        assertThrows(ScdException.class, () -> daTypeAdapter.checkStructuredData(daTypeName2,0));
+        assertThrows(ScdException.class, () -> daTypeAdapter.check(daTypeName2));
+    }
+
+    @Test
+    void testGetResumedRTTs() throws Exception {
+        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
+        DATypeAdapter daTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getDATypeAdapterById("DA1").get());
+        ResumedDataTemplate rootRDtt = new ResumedDataTemplate();
+        rootRDtt.getDaName().setName("origin");
+        rootRDtt.getDoName().setName("StrVal");
+        var rDtts = daTypeAdapter.getResumedDTTs(
+                rootRDtt, new HashSet<>(), new ResumedDataTemplate()
+        );
+        assertEquals(2,rDtts.size());
+
+    }
+
+    @Test
+    void getResumedDTTByDaName() throws Exception {
+
+        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(
+                AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID
+        );
+        DaTypeName daTypeName = new DaTypeName("antRef","origin.ctlVal");
+        DoTypeName doTypeName = new DoTypeName("Op.origin");
+        ResumedDataTemplate rDtt = new ResumedDataTemplate();
+        rDtt.setDoName(doTypeName);
+        rDtt.getDaName().setName("antRef");
+        assertTrue(rDtt.getBdaNames().isEmpty());
+        DATypeAdapter daTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getDATypeAdapterById("DA1").get());
+        assertDoesNotThrow(() -> daTypeAdapter.getResumedDTTByDaName(daTypeName,0,rDtt).get());
     }
 }

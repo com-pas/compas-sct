@@ -4,10 +4,10 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
 
 import java.util.Objects;
@@ -31,6 +31,7 @@ public class ExtRefSourceInfo {
         }
         srcCBName = tExtRef.getSrcCBName();
     }
+
 
     @Override
     public boolean equals(Object o) {
@@ -57,4 +58,9 @@ public class ExtRefSourceInfo {
                 srcLNInst == null &&
                 srcPrefix == null;
     }
+
+    public boolean isValid() {
+        return !StringUtils.isBlank(srcCBName);
+    }
+
 }

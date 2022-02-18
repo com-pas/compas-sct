@@ -12,7 +12,7 @@
         </layout>
     </appender>
 
-    <logger name="org.lfenergy.compas.sct.commons" level="debug" additivity="false">
+    <logger name="org.lfenergy.compas.sct.commons" level="trace" additivity="false">
         <appender-ref ref="CONSOLE"/>
     </logger>
 

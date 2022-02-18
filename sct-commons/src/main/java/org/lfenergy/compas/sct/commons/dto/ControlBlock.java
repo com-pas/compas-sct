@@ -22,29 +22,21 @@ import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 
 @Getter
 @Setter
 @NoArgsConstructor
-public abstract class ControlBlock<T extends ControlBlock> {
+public abstract class ControlBlock<T extends ControlBlock> extends LNodeMetaDataEmbedder {
 
     protected String id; /// appID or smvID
     protected String name;
     protected String dataSetRef;
     protected String desc;
-    protected long confRev;
+    protected Long confRev;
     protected List<TControlWithIEDName.IEDName> iedNames = new ArrayList<>();
     protected TPredefinedTypeOfSecurityEnum securityEnable = TPredefinedTypeOfSecurityEnum.NONE;
-    // summarized info about the LN holding this CB
-    protected String iedName;
-    protected String ldInst;
-    protected String prefix;
-    protected String lnClass;
-    protected String lnInst;
-
 
     protected abstract Class<T> getClassType();
     public abstract TServiceType getServiceType();
@@ -61,15 +53,11 @@ public abstract class ControlBlock<T extends ControlBlock> {
     public void validateCB() throws ScdException {
 
         if(id == null || id.isBlank()){
-            throw new ScdException("Control block ID is missing");
+            throw new ScdException("A required field is missing: ID ");
         }
 
         if(name == null || name.isBlank()){
-            throw new ScdException("Control block Name is missing");
-        }
-
-        if(dataSetRef != null && dataSetRef.isBlank()){
-            throw new ScdException("Control block datSet is missing");
+            throw new ScdException("A required field is missing:  name");
         }
 
         if(iedNames.stream().anyMatch( iedName -> iedName == null ||
@@ -81,17 +69,22 @@ public abstract class ControlBlock<T extends ControlBlock> {
 
     public void validateDestination(SclRootAdapter sclRootAdapter) throws ScdException {
         for(TControlWithIEDName.IEDName iedName : iedNames){
-            IEDAdapter iedAdapter =sclRootAdapter.getIEDAdapter(iedName.getValue());
+            IEDAdapter iedAdapter =sclRootAdapter.getIEDAdapterByName(iedName.getValue());
             LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(iedName.getLdInst())
                     .orElseThrow(
                             () -> new ScdException(
                                     String.format(
-                                            "Unknown LDevice [%s] in IED [%s]", iedName.getLdInst(),iedName.getValue()
+                                            "Control block destination: Unknown LDevice [%s] in IED [%s]",
+                                            iedName.getLdInst(),iedName.getValue()
                                     )
                             )
                     );
             if(!iedName.getLnClass().isEmpty()) {
-                lDeviceAdapter.getLNAdapter(iedName.getLnClass().get(0),iedName.getLnInst(), iedName.getPrefix());
+                try {
+                    lDeviceAdapter.getLNAdapter(iedName.getLnClass().get(0), iedName.getLnInst(), iedName.getPrefix());
+                } catch (ScdException e){
+                    throw new ScdException("Control block destination: " + e.getMessage());
+                }
             } else {
                Utils.setField(iedName,"lnClass",null);
             }

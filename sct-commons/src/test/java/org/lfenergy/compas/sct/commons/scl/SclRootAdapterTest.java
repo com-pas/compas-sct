@@ -8,19 +8,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.MarshallerWrapper;
-import org.lfenergy.compas.sct.commons.testhelpers.marshaller.SclTestMarshaller;
+import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
+import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
-public class SclRootAdapterTest {
+class SclRootAdapterTest {
 
 
     @Test
-    public void testConstruction() {
+    void testConstruction() {
         AtomicReference<SclRootAdapter> sclRootAdapter = new AtomicReference<>();
         assertDoesNotThrow(() ->
                 sclRootAdapter.set(new SclRootAdapter("hID", "hVersion", "hRevision"))
@@ -28,6 +28,13 @@ public class SclRootAdapterTest {
 
         assertThrows(ScdException.class,
                 () ->  sclRootAdapter.get().addHeader("hID1","hVersion1","hRevision1"));
+
+        assertTrue(sclRootAdapter.get().amChildElementRef());
+        assertEquals(SclRootAdapter.RELEASE,sclRootAdapter.get().getSclRelease());
+        assertEquals(SclRootAdapter.VERSION,sclRootAdapter.get().getSclVersion());
+        assertEquals(SclRootAdapter.REVISION,sclRootAdapter.get().getSclRevision());
+
+        assertThrows(IllegalArgumentException.class, () -> new SclRootAdapter(new SCL()));
     }
 
     @Test
@@ -38,11 +45,13 @@ public class SclRootAdapterTest {
         SCL icd2 = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/icd2_to_add_test.xml");
 
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        assertThrows(ScdException.class, () -> sclRootAdapter.addIED(new SCL(), "IED_NAME1"));
         assertDoesNotThrow(() -> sclRootAdapter.addIED(icd1, "IED_NAME1"));
         assertThrows(ScdException.class, () -> sclRootAdapter.addIED(icd1, "IED_NAME1"));
         assertDoesNotThrow(() -> sclRootAdapter.addIED(icd2, "IED_NAME2"));
 
         MarshallerWrapper marshallerWrapper = SclTestMarshaller.createWrapper();
         System.out.println(marshallerWrapper.marshall(sclRootAdapter.getCurrentElem()));
+
     }
 }

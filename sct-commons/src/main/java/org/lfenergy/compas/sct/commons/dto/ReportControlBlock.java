@@ -30,6 +30,8 @@ public class ReportControlBlock extends ControlBlock<ReportControlBlock> {
     private long bufTime = 0;
     private boolean indexed = true;
 
+
+
     public ReportControlBlock(TReportControl reportControl) {
         super();
         this.id = reportControl.getRptID();
@@ -46,7 +48,7 @@ public class ReportControlBlock extends ControlBlock<ReportControlBlock> {
         if(rptEnabled != null) {
             iedNames = rptEnabled.getClientLN()
                     .stream()
-                    .map(clientLN -> toIEDName(clientLN))
+                    .map(ControlBlock::toIEDName)
                     .collect(Collectors.toList());
         }
     }
@@ -89,5 +91,14 @@ public class ReportControlBlock extends ControlBlock<ReportControlBlock> {
         reportControl.setRptEnabled(rptEnabled);
 
         return reportControl;
+    }
+
+    @Override
+    public void validateCB() throws ScdException {
+        super.validateCB();
+
+        if(dataSetRef != null && dataSetRef.isBlank()){
+            throw new ScdException("A required field is missing: datSet");
+        }
     }
 }

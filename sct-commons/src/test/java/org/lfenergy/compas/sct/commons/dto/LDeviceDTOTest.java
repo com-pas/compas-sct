@@ -7,23 +7,19 @@ package org.lfenergy.compas.sct.commons.dto;
 
 import lombok.extern.slf4j.Slf4j;
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.Disabled;
+
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
-import org.lfenergy.compas.sct.commons.testhelpers.marshaller.SclTestMarshaller;
+import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 
 import java.util.Set;
 
-
-
 @Slf4j
-public class LDeviceDTOTest {
-
-
+class LDeviceDTOTest {
 
     @Test
     void testConstruction(){
@@ -54,7 +50,7 @@ public class LDeviceDTOTest {
     void testFromLDAdapter() throws Exception {
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapter("IED_NAME"));
+        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS1").get());
 
         LDeviceDTO lDeviceDTO = LDeviceDTO.from(lDeviceAdapter,null);

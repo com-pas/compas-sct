@@ -20,8 +20,8 @@ class ExtRefSourceInfoTest {
         assertEquals(sourceInfo,bindingInfo_ter);
         assertEquals(sourceInfo.hashCode(),bindingInfo_ter.hashCode());
         assertEquals(sourceInfo,bindingInfo_bis);
-        assertNotEquals(sourceInfo, null);
+        assertNotEquals(null, sourceInfo);
         assertNotEquals(sourceInfo, bindingInfo_qt);
-        assertFalse(sourceInfo.equals(new ExtRefSignalInfo()));
+        assertNotEquals(sourceInfo, new ExtRefSourceInfo());
     }
 }

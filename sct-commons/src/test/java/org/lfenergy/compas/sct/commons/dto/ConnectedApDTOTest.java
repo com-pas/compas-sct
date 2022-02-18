@@ -4,19 +4,17 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
+
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.sct.commons.scl.com.ConnectedAPAdapter;
-import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ConnectedApDTOTest {
 
-    @InjectMocks    private ConnectedApDTO connectedApDTO;
-
     @Test
-    public void testConstruction(){
+    void testConstruction(){
         ConnectedAPAdapter connectedAPAdapter = Mockito.mock(ConnectedAPAdapter.class);
 
         Mockito.when(connectedAPAdapter.getApName()).thenReturn(DTO.AP_NAME);

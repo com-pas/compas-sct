@@ -5,18 +5,8 @@
 package org.lfenergy.compas.sct.commons.scl.ied;
 
 
-import lombok.NonNull;
 import org.lfenergy.compas.scl2007b4.model.LN0;
-import org.lfenergy.compas.scl2007b4.model.TGSEControl;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
-import org.lfenergy.compas.scl2007b4.model.TReportControl;
-import org.lfenergy.compas.scl2007b4.model.TSampledValueControl;
-import org.lfenergy.compas.sct.commons.dto.GooseControlBlock;
-import org.lfenergy.compas.sct.commons.dto.SMVControlBlock;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class LN0Adapter extends AbstractLNAdapter<LN0> {
 
@@ -49,11 +39,11 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
         return "";
     }
 
-    public void addControlBlock(GooseControlBlock controlBlock) {
-        currentElem.getGSEControl().add(controlBlock.createControlBlock());
-    }
 
-    public void addControlBlock(SMVControlBlock controlBlock) {
-        currentElem.getSampledValueControl().add(controlBlock.createControlBlock());
+    @Override
+    protected  boolean matchesDataAttributes(String dataAttribute){
+        return  super.matchesDataAttributes(dataAttribute) ||
+                currentElem.getSampledValueControl().stream().anyMatch(smp -> smp.getName().equals(dataAttribute)) ||
+                currentElem.getGSEControl().stream().anyMatch(gse -> gse.getName().equals(dataAttribute));
     }
 }

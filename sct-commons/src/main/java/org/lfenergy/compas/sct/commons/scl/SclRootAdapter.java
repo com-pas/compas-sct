@@ -105,7 +105,7 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
         prvIEDAdapter.updateLDeviceNodesType(pairOldNewId);
         //add IED
         currentElem.getIED().add(prvIEDAdapter.currentElem);
-        return getIEDAdapter(iedName);
+        return getIEDAdapterByName(iedName);
     }
 
     private boolean hasIED(String iedName) {
@@ -125,7 +125,8 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
         return new DataTypeTemplateAdapter(this, currentElem.getDataTypeTemplates());
     }
 
-    public IEDAdapter getIEDAdapter(String iedName) throws ScdException {
+    public IEDAdapter getIEDAdapterByName(String iedName) throws ScdException {
+        // <IED iedNAme></IED> ; Unmarshaller
         return new IEDAdapter(this,iedName);
     }
 
@@ -142,5 +143,16 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
         return currentElem.getIED().stream()
                 .map(tied -> new IEDAdapter(this,tied))
                 .collect(Collectors.toList());
+    }
+
+    public IEDAdapter checkObjRef(String val) throws ScdException {
+        ObjectReference objRef = new ObjectReference(val);
+        for(TIED tied : currentElem.getIED()){
+            IEDAdapter iedAdapter = new IEDAdapter(this,tied);
+            if(iedAdapter.matches(objRef)){
+                return iedAdapter;
+            }
+        }
+        throw new ScdException("Invalid ObjRef: " + val);
     }
 }

@@ -10,6 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.lfenergy.compas.scl2007b4.model.TAnyLN;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.sct.commons.Utils;
+import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
+import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LNAdapter;
@@ -60,20 +64,45 @@ public class LNodeDTO {
 
         if(options.isWithExtRef()) {
             List<TExtRef> extRefList =  nodeAdapter.getExtRefs(null);
+            LDeviceAdapter lDeviceAdapter = nodeAdapter.getParentAdapter();
+            String holderIedName = lDeviceAdapter.getParentAdapter().getName();
+            String holderLDInst = lDeviceAdapter.getInst();
             lNodeDTO.extRefs.addAll(
                     extRefList.stream()
-                            .map(tExtRef -> {
-                                ExtRefInfo extRefInfo = new ExtRefInfo(tExtRef);
-                                extRefInfo.setHolderLnClass(lNodeDTO.nodeClass);
-                                extRefInfo.setHolderLnInst(lNodeDTO.inst);
-                                extRefInfo.setHolderPrefix(lNodeDTO.prefix);
-                                LDeviceAdapter lDeviceAdapter = nodeAdapter.getParentAdapter();
-                                extRefInfo.setHolderIedName(lDeviceAdapter.getParentAdapter().getName());
-                                extRefInfo.setHolderLdInst(lDeviceAdapter.getInst());
-                                return extRefInfo;
-                            })
+                            .map(tExtRef ->
+                                ExtRefInfo.from(tExtRef,holderIedName,holderLDInst,lNodeDTO.nodeClass,
+                                        lNodeDTO.inst,lNodeDTO.prefix
+                                ))
                             .collect(Collectors.toList())
             );
+        }
+
+        if(options.isWithDatSet()) {
+            lNodeDTO.datSets = DataSetInfo.getDataSets(nodeAdapter);
+        }
+
+        if(options.isWithResumedDtt()) {
+            DataTypeTemplateAdapter dttAdapter = nodeAdapter.getDataTypeTemplateAdapter();
+            LNodeTypeAdapter lNodeTypeAdapter = dttAdapter.getLNodeTypeAdapterById(nodeAdapter.getLnType())
+                    .orElseThrow(
+                            () -> new IllegalArgumentException(
+                                    String.format(
+                                            "Corrupted SCD file: reference to unknown lnType(%s)",
+                                            nodeAdapter.getLnType()
+                                    )
+                            )
+                    );
+            ResumedDataTemplate filter = new ResumedDataTemplate();
+            filter.setLnInst(nodeAdapter.getLNInst());
+            filter.setLnClass(nodeAdapter.getLNClass());
+            filter.setPrefix(nodeAdapter.getPrefix());
+            filter.setLnType(nodeAdapter.getLnType());
+            List<ResumedDataTemplate> resumedDataTemplateList = lNodeTypeAdapter.getResumedDTTs(filter);
+            lNodeDTO.addAllResumedDataTemplate(resumedDataTemplateList);
+        }
+
+        if(options.isWithCB()) {
+            //TODO
         }
         log.info(Utils.leaving());
         return lNodeDTO;

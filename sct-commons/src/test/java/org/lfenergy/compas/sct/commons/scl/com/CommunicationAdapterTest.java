@@ -14,15 +14,16 @@ import static org.junit.jupiter.api.Assertions.*;
 class CommunicationAdapterTest {
 
     @Test
-    public void testAmChildElementRef() throws ScdException {
+    void testAmChildElementRef() throws ScdException {
         SclRootAdapter sclRootAdapter = new SclRootAdapter("hID","hVersion","hRevision");
         sclRootAdapter.getCurrentElem().setCommunication(new TCommunication());
         CommunicationAdapter cAdapter = sclRootAdapter.getCommunicationAdapter(true);
         assertTrue(cAdapter.amChildElementRef());
 
         CommunicationAdapter finalCAdapter = new CommunicationAdapter(sclRootAdapter);
+        TCommunication tCommunication = new TCommunication();
         assertThrows(IllegalArgumentException.class,
-                () -> finalCAdapter.setCurrentElem(new TCommunication()));
+                () -> finalCAdapter.setCurrentElem(tCommunication));
     }
 
     @Test
@@ -67,7 +68,17 @@ class CommunicationAdapterTest {
         tSubNetwork.setName("snName");
         communicationAdapter.getCurrentElem().getSubNetwork().add(tSubNetwork);
 
-        assertTrue(communicationAdapter.findSubnetworkByName("snName").isPresent());
-        assertFalse(communicationAdapter.findSubnetworkByName("snName_NO").isPresent());
+        assertTrue(communicationAdapter.getSubnetworkByName("snName").isPresent());
+        assertFalse(communicationAdapter.getSubnetworkByName("snName_NO").isPresent());
+    }
+
+    @Test
+    void testGetSubNetworkAdapters(){
+        CommunicationAdapter communicationAdapter = new CommunicationAdapter(null,new TCommunication());
+        assertTrue(communicationAdapter.getSubNetworkAdapters().isEmpty());
+        TSubNetwork tSubNetwork = new TSubNetwork();
+        tSubNetwork.setName("snName");
+        communicationAdapter.getCurrentElem().getSubNetwork().add(tSubNetwork);
+        assertFalse(communicationAdapter.getSubNetworkAdapters().isEmpty());
     }
 }

@@ -8,10 +8,8 @@ package org.lfenergy.compas.sct.commons.scl.dtt;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.MarshallerWrapper;
+import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.dto.DTO;
-import org.lfenergy.compas.sct.commons.dto.DaTypeName;
-import org.lfenergy.compas.sct.commons.dto.DoTypeName;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
@@ -34,10 +32,11 @@ class DataTypeTemplateAdapterTest {
         } catch (ScdException e) {
             e.printStackTrace();
         }
+        assert sclRootAdapter != null;
         sclRootAdapter.getCurrentElem().setDataTypeTemplates(new TDataTypeTemplates());
         SclRootAdapter finalSclRootAdapter = sclRootAdapter;
         dataTypeTemplateAdapter = assertDoesNotThrow(
-                () -> finalSclRootAdapter.getDataTypeTemplateAdapter()
+                finalSclRootAdapter::getDataTypeTemplateAdapter
         );
     }
 
@@ -50,7 +49,7 @@ class DataTypeTemplateAdapterTest {
         SclRootAdapter sclRootAdapter = dataTypeTemplateAdapter.getParentAdapter();
         assertThrows(
                 IllegalArgumentException.class,
-                () ->new DataTypeTemplateAdapter(sclRootAdapter,new TDataTypeTemplates())
+                () ->new DataTypeTemplateAdapter(sclRootAdapter, new TDataTypeTemplates())
         );
     }
 
@@ -347,10 +346,18 @@ class DataTypeTemplateAdapterTest {
 
         ExtRefSignalInfo signalInfo = DTO.createExtRefSignalInfo();
         signalInfo.setPDO("Op.origin");
-        signalInfo.setPDA("origin");
+        signalInfo.setPDA("antRef");
 
         assertDoesNotThrow(() -> dttAdapter.getBinderResumedDTT("LN1",signalInfo));
 
     }
 
+    /*@Test
+    void testCheckSdoAndDaLink() throws Exception {
+        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
+
+        assertDoesNotThrow(() -> dttAdapter.checkDoAndDaLink("origin","origin"));
+        assertThrows(ScdException.class, () -> dttAdapter.checkDoAndDaLink("f","origin"));
+        assertTrue( dttAdapter.checkDoAndDaLink("origin","d").isEmpty());
+    }*/
 }

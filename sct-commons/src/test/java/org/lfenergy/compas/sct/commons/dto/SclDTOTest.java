@@ -31,11 +31,12 @@ class SclDTOTest {
 
 
         SclDTO sclDTO  = SclDTO.from(sclRootAdapter);
+        SclDTO finalSclDTO = sclDTO;
         assertAll("SCL_DTO",
-                () -> assertNotNull(sclDTO.getHeader()),
-                () -> assertEquals(id, sclDTO.getHeader().getId()),
-                () -> assertEquals("hVersion",sclDTO.getHeader().getVersion()),
-                () -> assertEquals("hRevision",sclDTO.getHeader().getRevision())
+                () -> assertNotNull(finalSclDTO.getHeader()),
+                () -> assertEquals(id, finalSclDTO.getHeader().getId()),
+                () -> assertEquals("hVersion",finalSclDTO.getHeader().getVersion()),
+                () -> assertEquals("hRevision",finalSclDTO.getHeader().getRevision())
         );
         SclDTO sclDTO1 = new SclDTO();
         sclDTO1.setHeader(sclDTO.getHeader());
@@ -49,6 +50,17 @@ class SclDTOTest {
                 () -> assertEquals("hVersion",sclDTO1.getHeader().getVersion()),
                 () -> assertEquals("hRevision",sclDTO1.getHeader().getRevision())
         );
-    }
 
+        sclDTO = new SclDTO(id);
+        assertEquals("",sclDTO.getWho());
+        assertEquals("",sclDTO.getWhen());
+        assertEquals("",sclDTO.getWhat());
+        assertEquals("",sclDTO.getWhy());
+        sclDTO.setHeader(DTO.createHeaderDTO(UUID.randomUUID()));
+
+        assertEquals("who",sclDTO.getWho());
+        assertEquals(DTO.NOW_STR,sclDTO.getWhen());
+        assertEquals("what",sclDTO.getWhat());
+        assertEquals("why",sclDTO.getWhy());
+    }
 }

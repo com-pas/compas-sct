@@ -7,24 +7,62 @@
 
     <IED name="IED_NAME">
         <AccessPoint name="AP_NAME">
+
             <Server>
                 <Authentication/>
                 <LDevice inst="LD_INS1">
-                    <LN0 lnType="LNO1" lnClass="LLN0" inst=""></LN0>
+                    <LN0 lnType="LNO1" lnClass="LLN0" inst="">
+                        <DOI name="Do">
+                            <SDI name="sdo1"> <!-- a RootSDO -->
+                                <SDI name="d">
+                                    <SDI name="antRef"> <!-- this is a DA -->
+                                        <SDI name="bda1">
+                                            <SDI name="bda2">
+                                                <DAI name="bda3" valImport="true"> <!-- [Do.sdo1.d] && [antRef.bda1.bda2.bda3] -->
+                                                    <Val>Completed-diff</Val>
+                                                </DAI>
+                                            </SDI>
+                                        </SDI>
+                                    </SDI>
+                                </SDI>
+                                <!-- <DAI name="da1" valImport="true"></DAI> --> <!-- [Do.sdo1] && [da1] AIE AIE AIE -->
+                            </SDI>
+                            <DAI name="da2" valImport="true"></DAI> <!-- a RootDAI -->
+                        </DOI>
+                    </LN0>
                 </LDevice>
                 <LDevice inst="LD_INS2">
                     <LN0 lnType="LNO1" lnClass="LLN0" inst="">
+
                         <Inputs>
                             <ExtRef intAddr="INT_ADDR1" pDO="Do1.sdo1" pDA="da"/>
                         </Inputs>
                     </LN0>
                     <LN lnType="LNO2" lnClass="ANCR" inst="1">
+                        <DataSet name="dataSet">
+                            <FCDA fc="ST"/>
+                        </DataSet>
+                        <DOI name="StrVal"/>
                         <Inputs>
-                            <ExtRef intAddr="INT_ADDR2" pDO="StrVal.sdo2" pDA="antRef.bda1.bda2.bda3" />
+                            <ExtRef  intAddr="INT_ADDR2" pDO="StrVal.sdo2" pDA="antRef.bda1.bda2.bda3" />
                         </Inputs>
                     </LN>
                 </LDevice>
+                <LDevice inst="LD_INS3">
+                    <LN0 lnType="LNO1" lnClass="LLN0" inst="">
+                        <DOI name="Do">
+                            <DAI name="da2">
+                                <Val>myVal</Val>
+                            </DAI>
+                        </DOI>
+                    </LN0>
+                </LDevice>
             </Server>
+            <Services>
+                <SettingGroups>
+                    <ConfSG/>
+                </SettingGroups>
+            </Services>
         </AccessPoint>
     </IED>
     <DataTypeTemplates>
@@ -35,7 +73,7 @@
             <DO name="StrVal" type="DO3"/>
         </LNodeType>
         <DOType cdc="WYE" id="DO1">
-            <DA fc="DC" name="dataNs" bType="VisString255" count="0">
+            <DA fc="DC" name="dataNs" bType="VisString255">
                 <Val>IEC 61850-7-3:2007B</Val>
                 <ProtNs>IEC 61850-8-1:2003</ProtNs>
             </DA>
@@ -43,14 +81,29 @@
         </DOType>
         <DOType cdc="WYE" id="DO2">
             <SDO name="sdo1" type="DO4"/>
-            <DA fc="CF" dchg="true" name="angRef" bType="Enum" type="PhaseAngleReferenceKind"/>
+            <DA fc="CF" dchg="true" name="da2" bType="Enum" type="PhaseAngleReferenceKind"/>
         </DOType>
         <DOType cdc="WYE" id="DO3">
+            <DA fc="ST" name="da1" bType="Struct" type="DA1"/>
             <DA fc="ST" name="antRef" bType="Struct" type="DA1"/>
         </DOType>
         <DOType cdc="WYE" id="DO4">
             <SDO name="d" type="DO3"/>
             <DA fc="CF" name="da" bType="Struct" type="DA1"/>
+        </DOType>
+        <DOType cdc="ING" id="DO5">
+            <DA fc="SP" dchg="true" name="setVal" bType="INT32" desc="0" valImport="true"/>
+            <DA fc="CF" dchg="true" name="minVal" bType="INT32" desc="1"/>
+            <DA fc="CF" dchg="true" name="maxVal" bType="INT32" desc="2"/>
+            <DA fc="CF" dchg="true" name="stepSize" bType="INT32U" desc="3"/>
+            <DA fc="CF" dchg="true" name="units" bType="Struct" type="DA2" desc="4"/>
+        </DOType>
+        <DOType cdc="ASG" id="DO6">
+            <DA fc="SP" dchg="true" name="setVal" bType="INT32" desc="0" valImport="true"/>
+            <DA fc="CF" dchg="true" name="minVal" bType="INT32" desc="1"/>
+            <DA fc="CF" dchg="true" name="maxVal" bType="INT32" desc="2"/>
+            <DA fc="CF" dchg="true" name="stepSize" bType="INT32U" desc="3"/>
+            <DA fc="CF" dchg="true" name="units" bType="Struct" type="DA4"/>
         </DOType>
         <DAType id="DA1">
             <Private type="C1">C</Private>
@@ -61,10 +114,19 @@
             <BDA name="bda2" bType="Struct" type="DA3"/>
         </DAType>
         <DAType id="DA3">
-            <BDA name="bda3" bType="Enum" type="RecCycModKind"/>
+            <BDA name="bda3" bType="Enum" type="RecCycModKind" valImport="true"/>
+        </DAType>
+        <DAType id="DA4">
+            <BDA name="SIUnit" bType="VisString255">
+                <Val>s</Val>
+            </BDA>
+            <BDA name="multiplier" bType="VisString255">
+                <Val>m</Val>
+            </BDA>
         </DAType>
         <EnumType id="RecCycModKind">
-            <EnumVal ord="1">Completed-diff</EnumVal>
+            <EnumVal ord="0">Completed-diff</EnumVal>
+            <EnumVal ord="1">newValue</EnumVal>
         </EnumType>
         <EnumType id="PhaseAngleReferenceKind">
             <EnumVal ord="0">Va</EnumVal>

@@ -6,20 +6,25 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.TDataSet;
 import org.lfenergy.compas.scl2007b4.model.TLDevice;
+import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
 import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.dto.LNodeDTO;
 import org.lfenergy.compas.sct.commons.dto.LogicalNodeOptions;
+import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -99,6 +104,9 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
                 ExtRefBindingInfo extRefBindingInfo = dttAdapter.getBinderResumedDTT(lnType,signalInfo);
                 extRefBindingInfo.setIedName(parentAdapter.getName());
                 extRefBindingInfo.setLdInst(currentElem.getInst());
+                extRefBindingInfo.setLnClass(lnAdapter.getLNClass());
+                extRefBindingInfo.setLnInst(lnAdapter.getLNInst());
+                extRefBindingInfo.setPrefix(lnAdapter.getPrefix());
 
                 potentialBinders.add(extRefBindingInfo);
             } catch (ScdException e) {
@@ -120,5 +128,33 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
             extRefInfos.addAll(lNodeDTO.getExtRefs());
         }
         return extRefInfos;
+    }
+
+    public Set<ResumedDataTemplate> getDAI(ResumedDataTemplate rDtt, boolean updatable) throws ScdException {
+        List<AbstractLNAdapter<?>> lnAdapters = new ArrayList<>();
+        if(StringUtils.isBlank(rDtt.getLnClass())){
+            lnAdapters.add(getLN0Adapter());
+            lnAdapters.addAll(getLNAdapters());
+        } else if(rDtt.getLnClass().equals(TLLN0Enum.LLN_0.value())){
+            lnAdapters.add(getLN0Adapter());
+        } else {
+            lnAdapters.add(getLNAdapter(rDtt.getLnClass(),rDtt.getLnInst(),rDtt.getPrefix()));
+        }
+
+        Set<ResumedDataTemplate> resumedDataTemplateSet =  new HashSet<>();
+        List<ResumedDataTemplate> resumedDataTemplateList;
+        ResumedDataTemplate filter;
+        for(AbstractLNAdapter<?> lnAdapter : lnAdapters){
+
+            filter = ResumedDataTemplate.copyFrom(rDtt);
+            filter.setLnClass(lnAdapter.getLNClass());
+            filter.setLnInst(lnAdapter.getLNInst());
+            filter.setPrefix(lnAdapter.getPrefix());
+            filter.setLnType(lnAdapter.getLnType());
+            resumedDataTemplateList = lnAdapter.getDAI(filter, updatable);
+            resumedDataTemplateSet.addAll(resumedDataTemplateList);
+        }
+        return resumedDataTemplateSet;
+
     }
 }

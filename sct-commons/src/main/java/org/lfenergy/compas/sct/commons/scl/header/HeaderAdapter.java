@@ -11,7 +11,9 @@ import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class HeaderAdapter extends SclElementAdapter<SclRootAdapter, THeader> {
     public static final String DEFAULT_TOOL_ID = "COMPAS";
@@ -54,5 +56,18 @@ public class HeaderAdapter extends SclElementAdapter<SclRootAdapter, THeader> {
 
     public String getHeaderVersion() {
         return currentElem.getVersion();
+    }
+
+    public List<THitem> getHistoryItems() {
+        if(currentElem.getHistory() == null) return new ArrayList<>();
+        return currentElem.getHistory().getHitem();
+    }
+
+    public void updateVersion(String hVersion) {
+        currentElem.setVersion(hVersion);
+    }
+
+    public void updateRevision(String hRevision) {
+        currentElem.setRevision(hRevision);
     }
 }

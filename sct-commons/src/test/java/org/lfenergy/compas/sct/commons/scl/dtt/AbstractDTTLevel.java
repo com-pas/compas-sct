@@ -7,7 +7,7 @@ package org.lfenergy.compas.sct.commons.scl.dtt;
 import org.apache.commons.io.IOUtils;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TDataTypeTemplates;
-import org.lfenergy.compas.sct.commons.MarshallerWrapper;
+import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.mockito.Mockito;

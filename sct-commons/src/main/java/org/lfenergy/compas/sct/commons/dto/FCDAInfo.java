@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,16 +17,19 @@ import org.lfenergy.compas.scl2007b4.model.TFCEnum;
 @NoArgsConstructor
 public class FCDAInfo {
 
+    private String dataSet;
+
     private TFCEnum fc;
     private String ldInst;
     private String prefix;
     private String lnClass;
     private String lnInst;
-    private DataTypeName doName; //doName.[...sdoNames]
-    private DataTypeName daName; //daName.[...bdaNames]
+    private DoTypeName doName; //doName.[...sdoNames]
+    private DaTypeName daName; //daName.[...bdaNames]
     private Long ix;
 
-    public FCDAInfo(TFCDA tfcda) {
+    public FCDAInfo(String dataSet, TFCDA tfcda) {
+        this.dataSet = dataSet;
         fc = tfcda.getFc();
         ldInst = tfcda.getLdInst();
         prefix = tfcda.getPrefix();
@@ -33,31 +37,42 @@ public class FCDAInfo {
             this.lnClass = tfcda.getLnClass().get(0);
         }
         lnInst = tfcda.getLnInst();
-        doName = new DataTypeName(tfcda.getDoName());
-        daName = new DataTypeName(tfcda.getDaName());
+        doName = new DoTypeName(tfcda.getDoName());
+        daName = new DaTypeName(tfcda.getDaName());
         ix = tfcda.getIx();
     }
 
+
+    @JsonIgnore
     public TFCDA getFCDA(){
         TFCDA tfcda = new TFCDA();
-        tfcda.setFc(fc);
         tfcda.setLdInst(ldInst);
-        tfcda.getLnClass().add(lnClass);
-        if(!StringUtils.isBlank(lnInst)){
-            tfcda.setLnInst(lnInst);
+        tfcda.setFc(fc);
+        if(!StringUtils.isBlank(lnClass)){
+            tfcda.getLnClass().add(lnClass);
+            if(!StringUtils.isBlank(lnInst)){
+                tfcda.setLnInst(lnInst);
+            }
+            if(!StringUtils.isBlank(prefix)){
+                tfcda.setPrefix(prefix);
+            }
         }
-        tfcda.setDoName(doName.toString());
-        if(daName != null){
+
+        if(doName != null && doName.isDefined()){
+            tfcda.setDaName(doName.toString());
+        }
+
+        if(daName != null && daName.isDefined()){
             tfcda.setDaName(daName.toString());
         }
+
         if(ix != null){
             tfcda.setIx(ix);
         }
-
         return tfcda;
     }
 
     public boolean isValid() {
-        return doName != null && !StringUtils.isBlank(doName.toString());
+        return doName != null && doName.isDefined();
     }
 }

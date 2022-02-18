@@ -5,13 +5,10 @@
 package org.lfenergy.compas.sct.commons.dto;
 
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
-import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LNAdapter;
-import org.lfenergy.compas.sct.commons.testhelpers.marshaller.SclTestMarshaller;
 import org.mockito.Mockito;
 
 import java.util.List;
@@ -55,7 +52,7 @@ class LNodeDTOTest {
     }
 
     @Test
-    public void testFrom(){
+    void testFrom(){
         IEDAdapter iedAdapter = Mockito.mock(IEDAdapter.class);
         LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
         Mockito.when(iedAdapter.getName()).thenReturn(DTO.HOLDER_IED_NAME);
@@ -84,16 +81,16 @@ class LNodeDTOTest {
         );
         ExtRefInfo extRefInfo = lNodeDTO.getExtRefs().iterator().next();
 
-        assertEquals(DTO.HOLDER_IED_NAME,extRefInfo.getHolderIedName());
-        assertEquals(DTO.HOLDER_LD_INST,extRefInfo.getHolderLdInst());
+        assertEquals(DTO.HOLDER_IED_NAME,extRefInfo.getHolderIEDName());
+        assertEquals(DTO.HOLDER_LD_INST,extRefInfo.getHolderLDInst());
         assertEquals(DTO.HOLDER_LN_CLASS,extRefInfo.getHolderLnClass());
         assertEquals(DTO.HOLDER_LN_INST,extRefInfo.getHolderLnInst());
-        assertEquals(DTO.HOLDER_LN_PREFIX,extRefInfo.getHolderPrefix());
+        assertEquals(DTO.HOLDER_LN_PREFIX,extRefInfo.getHolderLnPrefix());
 
     }
 
     @Test
-    public void testExtractExtRefInfo(){
+    void testExtractExtRefInfo(){
         LNAdapter lnAdapter = Mockito.mock(LNAdapter.class);
         Mockito.when(lnAdapter.getLNClass()).thenReturn(DTO.HOLDER_LN_CLASS);
         Mockito.when(lnAdapter.getLNInst()).thenReturn(DTO.HOLDER_LN_INST);

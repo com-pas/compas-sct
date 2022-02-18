@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
-import org.lfenergy.compas.scl2007b4.model.TFCDA;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
 import org.lfenergy.compas.scl2007b4.model.TServiceType;
 
@@ -98,7 +97,7 @@ public class ExtRefBindingInfo {
                 Objects.equals(prefix, tExtRef.getPrefix()) &&
                 Objects.equals(lnInst, tExtRef.getLnInst()) &&
                 tExtRef.getLnClass().contains(lnClass) &&
-                Objects.equals(serviceType, tExtRef.getServiceType());
+                (tExtRef.getServiceType() == null || Objects.equals(serviceType, tExtRef.getServiceType()));
     }
 
     public boolean isNull(){

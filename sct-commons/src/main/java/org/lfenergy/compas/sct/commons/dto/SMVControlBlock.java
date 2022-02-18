@@ -27,8 +27,8 @@ public class SMVControlBlock extends ControlBlock<SMVControlBlock>{
     private TSampledValueControl.SmvOpts smvOpts;
     private TProtocol protocol;
     private boolean multicast = true;
-    private long smpRate;
-    private long nofASDU;
+    private Long smpRate;
+    private Long nofASDU;
     private TSmpMod smpMod = TSmpMod.SMP_PER_PERIOD;
 
 
@@ -79,6 +79,22 @@ public class SMVControlBlock extends ControlBlock<SMVControlBlock>{
     }
 
     @Override
+    public void validateCB() throws ScdException {
+        super.validateCB();
+
+        if(dataSetRef != null && dataSetRef.isBlank()){
+            throw new ScdException("A required field is missing: datSet");
+        }
+        if(smpRate == null){
+            throw new ScdException("A required field is missing: smpRate");
+        }
+
+        if(nofASDU == null){
+            throw new ScdException("A required field is missing: nofASDU ");
+        }
+    }
+
+    @Override
     public TSampledValueControl createControlBlock() {
 
         TSampledValueControl sampledValueControl = new TSampledValueControl();
@@ -95,8 +111,13 @@ public class SMVControlBlock extends ControlBlock<SMVControlBlock>{
         if(smpMod != null) {
             sampledValueControl.setSmpMod(smpMod);
         }
-        sampledValueControl.setSmpRate(smpRate);
-        sampledValueControl.setNofASDU(nofASDU);
+        if(smpRate != null) {
+            sampledValueControl.setSmpRate(smpRate);
+        }
+
+        if(nofASDU != null) {
+            sampledValueControl.setNofASDU(nofASDU);
+        }
         if(protocol != null) {
             sampledValueControl.setProtocol(protocol);
         }

@@ -6,7 +6,7 @@ package org.lfenergy.compas.sct.commons.testhelpers.marshaller;
 
 import org.apache.commons.io.IOUtils;
 import org.lfenergy.compas.scl2007b4.model.SCL;
-import org.lfenergy.compas.sct.commons.MarshallerWrapper;
+import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 
 public class SclTestMarshaller {
 

@@ -4,15 +4,20 @@
 
 package org.lfenergy.compas.sct.commons.scl.ied;
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.lfenergy.compas.scl2007b4.model.TAccessPoint;
 import org.lfenergy.compas.scl2007b4.model.TIED;
+import org.lfenergy.compas.scl2007b4.model.TLDevice;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
+import org.lfenergy.compas.scl2007b4.model.TServiceSettingsEnum;
+import org.lfenergy.compas.scl2007b4.model.TServiceSettingsNoDynEnum;
 import org.lfenergy.compas.scl2007b4.model.TServices;
-import org.lfenergy.compas.sct.commons.Utils;
 import org.lfenergy.compas.sct.commons.dto.ControlBlock;
+import org.lfenergy.compas.sct.commons.dto.DataSetInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
-import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
+import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
@@ -21,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -70,7 +76,7 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
                 .filter(tAccessPoint -> tAccessPoint.getServer() != null)
                 .map(tAccessPoint -> tAccessPoint.getServer().getLDevice())
                 .flatMap(Collection::stream)
-                .filter(tlDevice -> ldInst.equals(tlDevice.getInst()))
+                .filter(tlDevice -> Objects.equals(ldInst,tlDevice.getInst()))
                 .map(tlDevice -> new LDeviceAdapter(this,tlDevice))
                 .findFirst();
     }
@@ -102,13 +108,38 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
         return currentElem.getName();
     }
 
+    public boolean matches(ObjectReference objRef){
+        if(!objRef.getLdName().startsWith(getName())) {
+            return false;
+        }
+        Optional<TLDevice> opLD = currentElem.getAccessPoint()
+                .stream()
+                .filter(tAccessPoint -> tAccessPoint.getServer() != null)
+                .map(tAccessPoint -> tAccessPoint.getServer().getLDevice())
+                .flatMap(Collection::stream)
+                .filter(tlDevice -> objRef.getLdName().equals(getName() + tlDevice.getInst()))
+                .findFirst();
+        if(opLD.isEmpty()) {
+            return false;
+        }
+        LDeviceAdapter lDeviceAdapter = new LDeviceAdapter(this,opLD.get());
+        if(TLLN0Enum.LLN_0.value().equals(objRef.getLNodeName())) {
+            return lDeviceAdapter.getLN0Adapter().matches(objRef);
+        }
+
+        return lDeviceAdapter.getLNAdapters()
+                .stream()
+                .anyMatch(lnAdapter -> objRef.getLNodeName().equals(lnAdapter.getLNodeName())
+                        && lnAdapter.matches(objRef));
+    }
+
     public boolean findAccessPointByName(String apName) {
         return currentElem.getAccessPoint()
                 .stream()
                 .anyMatch(tAccessPoint -> tAccessPoint.getName().equals(apName));
     }
 
-    public List<ExtRefBindingInfo> getExtRefBinders(ExtRefSignalInfo signalInfo) throws ScdException {
+    public List<ExtRefBindingInfo> getExtRefBinders(@NonNull ExtRefSignalInfo signalInfo) throws ScdException {
         if(!signalInfo.isValid()){
             throw new ScdException("Invalid ExtRef signal (pDO,pDA or intAddr))");
         }
@@ -120,40 +151,118 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
         return potentialBinders;
     }
 
-    public List<ControlBlock<?>> getControlBlocksByBindingInfo(ExtRefInfo extRefInfo) {
-        log.debug(Utils.entering());
-        long startTime = System.nanoTime();
-        if(extRefInfo.getBindingInfo() == null) {
-            throw new IllegalArgumentException("ExtRef binding information are missing");
+    public boolean isSettingConfig(String ldInst)  {
+        TAccessPoint accessPoint = currentElem.getAccessPoint().stream()
+                .filter(tAccessPoint ->
+                        (tAccessPoint.getServer() != null) &&
+                                tAccessPoint.getServer().getLDevice().stream()
+                                        .anyMatch(tlDevice -> tlDevice.getInst().equals(ldInst))
+
+                )
+                .findFirst()
+                .orElseThrow(
+                        () -> new IllegalArgumentException(
+                                String.format("LD (%s) is unknown in %s", ldInst, getName())
+                        )
+                );
+
+        TServices srv = accessPoint.getServices();
+        return srv != null && srv.getSettingGroups() != null && srv.getSettingGroups().getConfSG() != null;
+    }
+
+    public void createDataSet(DataSetInfo dataSetInfo) throws ScdException {
+        if(!hasDataSetCreationCapability()){
+            throw new ScdException("The capability of IED is not allowing DataSet creation");
         }
-        var cbs = getLDeviceAdapters()
-                .stream()
-                .map(lDeviceAdapter -> {
-                    List<AbstractLNAdapter<?>> lnAdapters = new ArrayList<>();
-                    if(extRefInfo.getBindingInfo().getLnClass() == null){
-                        lnAdapters.add(lDeviceAdapter.getLN0Adapter());
-                        lnAdapters.addAll(lDeviceAdapter.getLNAdapters());
-                    } else if(TLLN0Enum.LLN_0.value().equals(extRefInfo.getBindingInfo().getLnClass())){
-                        lnAdapters.add(lDeviceAdapter.getLN0Adapter());
-                    } else {
-                        try {
-                            lnAdapters.add(
-                                    lDeviceAdapter.getLNAdapter(
-                                            extRefInfo.getBindingInfo().getLnClass(),
-                                            extRefInfo.getBindingInfo().getLnInst(),
-                                            extRefInfo.getBindingInfo().getPrefix())
-                            );
-                        } catch (ScdException e) {
-                            throw new IllegalArgumentException(e);
-                        }
-                    }
-                    return lnAdapters;
-                })
-                .flatMap(Collection::stream)
-                .map(lnAdapter -> lnAdapter.getControlSetByExtRefInfo(extRefInfo))
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
-        log.debug(Utils.leaving(startTime));
-        return cbs;
+
+        LDeviceAdapter lDeviceAdapter = getLDeviceAdapterByLdInst(dataSetInfo.getHolderLDInst())
+            .orElseThrow(
+                () -> new ScdException(
+                    String.format(
+                        "Unknow LDevice(%s) in IED(%s)",dataSetInfo.getHolderLDInst(),currentElem.getName()                                )
+                )
+            );
+        AbstractLNAdapter<?> lNodeAdapter = AbstractLNAdapter.builder()
+                .withLDeviceAdapter(lDeviceAdapter)
+                .withLnClass(dataSetInfo.getHolderLnClass())
+                .withLnInst(dataSetInfo.getHolderLnInst())
+                .withLnPrefix(dataSetInfo.getHolderLnPrefix())
+                .build();
+        lNodeAdapter.addDataSet(dataSetInfo);
+    }
+
+    protected boolean hasDataSetCreationCapability() {
+        if(currentElem.getServices() == null){
+            return false ;
+        }
+        boolean hasCapability = false;
+        if(currentElem.getServices().getLogSettings() != null){
+            hasCapability = (TServiceSettingsEnum.CONF.equals(currentElem.getServices().getLogSettings().getDatSet()) ||
+                        TServiceSettingsEnum.DYN.equals(currentElem.getServices().getLogSettings().getDatSet()));
+        }
+        if(currentElem.getServices().getGSESettings() != null){
+            hasCapability = hasCapability ||
+                    (TServiceSettingsEnum.CONF.equals(currentElem.getServices().getGSESettings().getDatSet()) ||
+                        TServiceSettingsEnum.DYN.equals(currentElem.getServices().getGSESettings().getDatSet()));
+
+        }
+        if(currentElem.getServices().getReportSettings() != null){
+            hasCapability = hasCapability ||
+                    (TServiceSettingsEnum.CONF.equals(currentElem.getServices().getReportSettings().getDatSet()) ||
+                            TServiceSettingsEnum.DYN.equals(currentElem.getServices().getReportSettings().getDatSet()));
+        }
+        if(currentElem.getServices().getSMVSettings() != null){
+            hasCapability = hasCapability ||
+                    (TServiceSettingsEnum.CONF.equals(currentElem.getServices().getSMVSettings().getDatSet()) ||
+                            TServiceSettingsEnum.DYN.equals(currentElem.getServices().getSMVSettings().getDatSet()));
+        }
+        return hasCapability ;
+    }
+
+    public ControlBlock<? extends ControlBlock> createControlBlock(ControlBlock<? extends ControlBlock> controlBlock)
+            throws ScdException {
+
+        TServices tServices = currentElem.getServices();
+        TServiceSettingsNoDynEnum cbNameAtt = controlBlock.getControlBlockServiceSetting(tServices);
+
+        if(cbNameAtt != TServiceSettingsNoDynEnum.CONF ){
+            throw new ScdException("The IED doesn't support ControlBlock's creation or modification");
+        }
+
+
+
+        controlBlock.validateCB();
+        controlBlock.validateSecurityEnabledValue(this);
+        controlBlock.validateDestination(this.parentAdapter);
+
+        LDeviceAdapter lDeviceAdapter =getLDeviceAdapterByLdInst(controlBlock.getHolderLDInst()).orElseThrow();
+        AbstractLNAdapter<?> lnAdapter =  AbstractLNAdapter.builder()
+                .withLDeviceAdapter(lDeviceAdapter)
+                .withLnClass(controlBlock.getHolderLnClass())
+                .withLnInst(controlBlock.getHolderLnInst())
+                .withLnPrefix(controlBlock.getHolderLnPrefix())
+                .build();
+
+        if(lnAdapter.hasControlBlock(controlBlock)){
+            throw new ScdException(
+                    String.format(
+                        "Control block %s already exist in LNode %s%s%s",
+                        controlBlock.getName(),lnAdapter.getPrefix(),lnAdapter.getLNClass(),lnAdapter.getLNInst()
+                    )
+            );
+        }
+
+        if(lnAdapter.getDataSetByRef(controlBlock.getDataSetRef()).isEmpty()){
+            throw new ScdException(
+                    String.format(
+                            "Control block %s references unknown dataSet in LNode %s%s%s",
+                            controlBlock.getName(),lnAdapter.getPrefix(),lnAdapter.getLNClass(),lnAdapter.getLNInst()
+                    )
+            );
+        }
+        lnAdapter.addControlBlock(controlBlock);
+
+        return controlBlock;
+
     }
 }

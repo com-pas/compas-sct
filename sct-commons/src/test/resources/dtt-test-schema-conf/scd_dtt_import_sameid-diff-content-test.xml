@@ -6,8 +6,8 @@
     <Header id="HeaderID" version="version" revision="Revision" toolID="toolID"/>
     <DataTypeTemplates>
         <LNodeType lnClass="PIOC" id="LN1">
-            <DO name="Op" type="DO2" transient="true"/>
             <DO name="StrVal" type="DO3"/>
+            <DO name="Op" type="DO2" transient="true"/>
         </LNodeType>
         <DOType cdc="WYE" id="DO1">
 

@@ -108,7 +108,7 @@ class SMVControlBlockTest {
         SMVControlBlock smvControlBlock = new SMVControlBlock();
         smvControlBlock.setId(ID);
         smvControlBlock.setDataSetRef(DATASET_REF);
-        smvControlBlock.setConfRev(1);
+        smvControlBlock.setConfRev(1L);
         smvControlBlock.setName(NAME);
         TSampledValueControl.SmvOpts smvOpts = new TSampledValueControl.SmvOpts();
 
