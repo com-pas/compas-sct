@@ -32,10 +32,10 @@ jobs:
           output_file: custom_maven_settings.xml
           servers: '[{ "id": "github-packages-compas", "username": "OWNER", "password": "${{ secrets.GITHUB_TOKEN }}" }]'
       - name: Set version with Maven
-        run: ./mvnw -B versions:set -DprocessAllModules=true -DnewVersion=${{ steps.extract_tagname.outputs.tagname }}
+        run: mvn -B versions:set -DprocessAllModules=true -DnewVersion=${{ steps.extract_tagname.outputs.tagname }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Deploy with Maven to GitHub Packages
-        run: ./mvnw -B -s custom_maven_settings.xml -Prelease clean deploy
+        run: mvn --batch-mode -s custom_maven_settings.xml clean deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
