@@ -1,0 +1,41 @@
+# SPDX-FileCopyrightText: 2022 RTE FRANCE
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name: Release Project
+
+on:
+  release:
+    types: [ released ]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v2
+      - name: Extract tag name
+        id: extract_tagname
+        shell: bash
+        # Extra the tagname form the git reference, value of GITHUB_REF will be something like refs/tags/<tag_name>.
+        run: echo "##[set-output name=tagname;]$(echo ${GITHUB_REF##*/})"
+      - name: Set up JDK 1.11
+        uses: actions/setup-java@v2.5.0
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+      - name: Create custom Maven Settings.xml
+        uses: whelk-io/maven-settings-xml-action@v20
+        with:
+          output_file: custom_maven_settings.xml
+          servers: '[{ "id": "github-packages-compas", "username": "OWNER", "password": "${{ secrets.GITHUB_TOKEN }}" }]'
+      - name: Set version with Maven
+        run: ./mvnw -B versions:set -DprocessAllModules=true -DnewVersion=${{ steps.extract_tagname.outputs.tagname }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Deploy with Maven to GitHub Packages
+        run: ./mvnw -B -s custom_maven_settings.xml -Prelease clean deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
