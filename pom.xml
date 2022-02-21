@@ -12,6 +12,14 @@
     <packaging>pom</packaging>
     <name>COMPAS-SCT</name>
 
+    <distributionManagement>
+        <repository>
+            <id>github-packages-compas</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/com-pas/compas-sct</url>
+        </repository>
+    </distributionManagement>
+
     <repositories>
         <repository>
             <id>github-packages-compas</id>
