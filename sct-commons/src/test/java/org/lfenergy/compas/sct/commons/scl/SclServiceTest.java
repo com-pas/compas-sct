@@ -32,6 +32,7 @@ import org.lfenergy.compas.sct.commons.scl.ied.LN0Adapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -314,7 +315,15 @@ class SclServiceTest {
     @Test
     void testInitScl(){
         assertDoesNotThrow(
-                () -> SclService.initScl("hVersion","hRevision")
+                () -> SclService.initScl(Optional.empty(), "hVersion","hRevision")
+        );
+    }
+
+    @Test
+    void testInitScl_With_hId_shouldNotThrowError(){
+        UUID hid = UUID.randomUUID();
+        assertDoesNotThrow(
+                () -> SclService.initScl(Optional.of(hid),"hVersion","hRevision")
         );
     }
 
@@ -322,7 +331,7 @@ class SclServiceTest {
     void testUpdateHeader() {
 
         SclRootAdapter sclRootAdapter = assertDoesNotThrow(
-                () -> SclService.initScl("hVersion","hRevision")
+                () -> SclService.initScl(Optional.empty(),"hVersion","hRevision")
         );
         UUID hId = UUID.fromString(sclRootAdapter.getHeaderAdapter().getHeaderId());
         HeaderDTO headerDTO = DTO.createHeaderDTO(hId);
