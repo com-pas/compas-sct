@@ -4,8 +4,11 @@
 
 package org.lfenergy.compas.sct.commons.scl.sstation;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.lfenergy.compas.scl2007b4.model.TBay;
 import org.lfenergy.compas.scl2007b4.model.TSubstation;
+import org.lfenergy.compas.scl2007b4.model.TVoltageLevel;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 
@@ -13,22 +16,42 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SubstationAdapterTest {
 
-    @Test
-    void testAmChildElementRef() throws ScdException {
-        SclRootAdapter sclRootAdapter = new SclRootAdapter("hID","hVersion","hRevision");
+    private SclRootAdapter sclRootAdapter;
+    private SubstationAdapter ssAdapter;
+
+    @BeforeEach
+    public void init() throws ScdException {
+        sclRootAdapter = new SclRootAdapter("hID","hVersion","hRevision");
         TSubstation tSubstation = new TSubstation();
         tSubstation.setName("SUBSTATION");
         sclRootAdapter.getCurrentElem().getSubstation().add(tSubstation);
-        SubstationAdapter ssAdapter = sclRootAdapter.getSubstationAdapter("SUBSTATION");
-        assertTrue(ssAdapter.amChildElementRef());
+        ssAdapter = sclRootAdapter.getSubstationAdapter("SUBSTATION");
+    }
 
+    @Test
+    void testAmChildElementRef()  {
+        assertTrue(ssAdapter.amChildElementRef());
+    }
+
+    @Test
+    void testSetCurrentElement()  {
         SubstationAdapter ssfAdapter = new SubstationAdapter(sclRootAdapter);
         TSubstation tSubstation1 = new TSubstation();
         assertThrows(IllegalArgumentException.class,
                 () ->ssfAdapter.setCurrentElem(tSubstation1));
+    }
 
+    @Test
+    void testGetSubstationAdapter()  {
         assertThrows(ScdException.class,
                 () -> sclRootAdapter.getSubstationAdapter("SUBSTATION1"));
+    }
 
+    @Test
+    void testGetVoltageLevelAdapter() {
+        TVoltageLevel tVoltageLevel = new TVoltageLevel();
+        tVoltageLevel.setName("VOLTAGE_LEVEL");
+        ssAdapter.getCurrentElem().getVoltageLevel().add(tVoltageLevel);
+        assertFalse(ssAdapter.getVoltageLevelAdapter("VOLTAGE_LEVEL1").isPresent());
     }
 }
