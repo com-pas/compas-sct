@@ -5,13 +5,7 @@
 package org.lfenergy.compas.sct.commons.scl;
 
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.scl2007b4.model.SCL;
-import org.lfenergy.compas.scl2007b4.model.TExtRef;
-import org.lfenergy.compas.scl2007b4.model.THeader;
-import org.lfenergy.compas.scl2007b4.model.THitem;
-import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
-import org.lfenergy.compas.scl2007b4.model.TServiceType;
-import org.lfenergy.compas.scl2007b4.model.TVal;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.DTO;
 import org.lfenergy.compas.sct.commons.dto.HeaderDTO;
 import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
@@ -35,13 +29,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class SclServiceTest {
 
@@ -362,5 +350,38 @@ class SclServiceTest {
                 ()-> SclService.getEnumTypeElements(scd,"RecCycModKind")
         );
         assertFalse(enumList.isEmpty());
+    }
+
+
+    @Test
+    void testAddSubstation_Scd_Without_Substation() throws Exception {
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/add_ied_test.xml");
+        SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
+
+        SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
+        SclRootAdapter ssdRootAdapter = new SclRootAdapter(ssd);
+
+        SclRootAdapter expectedScdAdapter = SclService.addSubstation(scd, ssd);
+
+        assertNotEquals(scdRootAdapter, expectedScdAdapter);
+        assertEquals(expectedScdAdapter.getCurrentElem().getSubstation(), ssdRootAdapter.getCurrentElem().getSubstation());
+
+    }
+
+    @Test
+    void testAddSubstation_Scd_With_Substation() throws Exception {
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/scd_with_substation.xml");
+        SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
+
+        SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
+        SclRootAdapter ssdRootAdapter = new SclRootAdapter(ssd);
+
+        SclRootAdapter expectedScdAdapter = SclService.addSubstation(scd, ssd);
+        TSubstation tSubstation = expectedScdAdapter.getCurrentElem().getSubstation().get(0);
+        TSubstation expectedTSubstation = ssdRootAdapter.getCurrentElem().getSubstation().get(0);
+
+        assertNotEquals(scdRootAdapter, expectedScdAdapter);
+        assertEquals(tSubstation.getName(), expectedTSubstation.getName());
+        assertEquals(tSubstation.getVoltageLevel().size(), expectedTSubstation.getVoltageLevel().size());
     }
 }

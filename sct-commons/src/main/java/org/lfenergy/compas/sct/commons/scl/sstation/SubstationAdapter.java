@@ -36,7 +36,7 @@ public class SubstationAdapter extends SclElementAdapter<SclRootAdapter, TSubsta
         return parentAdapter.getCurrentElem().getSubstation().contains(currentElem);
     }
 
-    Optional<VoltageLevelAdapter> getVoltageLevelAdapter(String vLevelName) {
+    public Optional<VoltageLevelAdapter> getVoltageLevelAdapter(String vLevelName) {
         return currentElem.getVoltageLevel()
                 .stream()
                 .filter(tVoltageLevel -> tVoltageLevel.getName().equals(vLevelName))
