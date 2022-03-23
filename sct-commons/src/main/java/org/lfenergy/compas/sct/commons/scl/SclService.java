@@ -7,10 +7,7 @@ package org.lfenergy.compas.sct.commons.scl;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import org.lfenergy.compas.scl2007b4.model.SCL;
-import org.lfenergy.compas.scl2007b4.model.TExtRef;
-import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
-import org.lfenergy.compas.scl2007b4.model.TPredefinedCDCEnum;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.Utils;
 import org.lfenergy.compas.sct.commons.dto.ConnectedApDTO;
 import org.lfenergy.compas.sct.commons.dto.ControlBlock;
@@ -31,6 +28,9 @@ import org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.DAITracker;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
+import org.lfenergy.compas.sct.commons.scl.sstation.BayAdapter;
+import org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter;
+import org.lfenergy.compas.sct.commons.scl.sstation.VoltageLevelAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -335,5 +335,53 @@ public class SclService {
         return enumTypeAdapter.getCurrentElem().getEnumVal().stream()
                 .map(tEnumVal -> Pair.of(tEnumVal.getOrd(),tEnumVal.getValue()))
                 .collect(Collectors.toSet());
+    }
+
+    public static SclRootAdapter addSubstation(@NonNull SCL scd, @NonNull SCL ssd) throws ScdException {
+        SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
+        SclRootAdapter ssdRootAdapter = new SclRootAdapter(ssd);
+        if(scdRootAdapter.getCurrentElem().getSubstation().size() > 1
+            || ssdRootAdapter.currentElem.getSubstation().size() != 1) {
+            throw new ScdException("SCD file must have one or zero Substation and " +
+                    "SCD file must have one Substation. The files are rejected.");
+        }
+        TSubstation ssdTSubstation = ssdRootAdapter.currentElem.getSubstation().get(0);
+        SubstationAdapter ssdSubstationAdapter = new SubstationAdapter(ssdRootAdapter, ssdTSubstation);
+
+        if(scdRootAdapter.getCurrentElem().getSubstation().isEmpty()) {
+            scdRootAdapter.getCurrentElem().getSubstation().add(ssdTSubstation);
+            return scdRootAdapter;
+        } else {
+            TSubstation scdTSubstation = scdRootAdapter.currentElem.getSubstation().get(0);
+            if(scdTSubstation.getName().equalsIgnoreCase(ssdTSubstation.getName())) {
+                SubstationAdapter scdSubstationAdapter = new SubstationAdapter(scdRootAdapter, scdTSubstation);
+                for(TVoltageLevel vl:ssdSubstationAdapter.getCurrentElem().getVoltageLevel()){
+                    updateVoltageLevel(ssdSubstationAdapter, scdSubstationAdapter, vl);
+                }
+            } else throw new ScdException("SCD file must have only one Substation and the Substation name from SSD file is" +
+                    " different from the one in SCD file. The files are rejected.");
+        }
+        return scdRootAdapter;
+    }
+
+    private static void updateVoltageLevel(SubstationAdapter ssdSubstationAdapter, SubstationAdapter scdSubstationAdapter, TVoltageLevel vl) {
+        VoltageLevelAdapter vlAdapter = new VoltageLevelAdapter(ssdSubstationAdapter, vl);
+        if(scdSubstationAdapter.getVoltageLevelAdapter(vlAdapter.getCurrentElem().getName()).isPresent()) {
+            VoltageLevelAdapter scdVoltageLevelAdapter = scdSubstationAdapter.getVoltageLevelAdapter(vl.getName()).get();
+            for (TBay tbay: vlAdapter.getCurrentElem().getBay()) {
+                updateBay(vlAdapter, scdVoltageLevelAdapter, tbay);
+            }
+        } else {
+            scdSubstationAdapter.getCurrentElem().getVoltageLevel().add(vlAdapter.currentElem);
+        }
+    }
+
+    private static void updateBay(VoltageLevelAdapter vlAdapter, VoltageLevelAdapter scdVoltageLevelAdapter, TBay tbay) {
+        BayAdapter bayAdapter = new BayAdapter(vlAdapter, tbay);
+        if(vlAdapter.getBayAdapter(bayAdapter.currentElem.getName()).isPresent()){
+           vlAdapter.getBayAdapter(bayAdapter.currentElem.getName());
+        } else {
+            scdVoltageLevelAdapter.getCurrentElem().getBay().add(tbay);
+        }
     }
 }

@@ -1,0 +1,44 @@
+<!-- SPDX-FileCopyrightText: 2021 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+<SCL xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4">
+    <Header id="HeaderID" version="version" revision="Revision" toolID="toolID"/>
+
+    <Substation name="PALLU">
+        <Private type="RTE-ExportSite">
+            <rte:ExportSite xmlns:rte="https://www.rte-france.com/" UUID="5f40a45f-abca-40c4-ab9d-e6752b67ac18" Label="PALLU" Indice="1"></rte:ExportSite>
+        </Private>
+        <PowerTransformer type="PTR" virtual="false" name="PALLU4CONS_TR411">
+            <TransformerWinding type="PTW" virtual="false" name="PALLU4CONS_TR411_1">
+                <Terminal name="b751dad9-2141-4096-b00d-09e3a51c1337" connectivityNode="PALLU/PALLUP41/4TR411/_3713cace-7dfe-5c78-ac16-48c18ad7443b" substationName="PALLU" voltageLevelName="PALLUP41" bayName="4TR411" cNodeName="_3713cace-7dfe-5c78-ac16-48c18ad7443b"></Terminal>
+            </TransformerWinding>
+            <TransformerWinding type="PTW" virtual="false" name="PALLU4CONS_TR411_2">
+                <Terminal name="4a4af7e9-f8dc-4447-832d-0959ff5f0fc5" connectivityNode="PALLU/PALLUP41/4TR412/_2224f46d-9c33-54f6-ac9d-96ac1f1acc88" substationName="PALLU" voltageLevelName="PALLUP41" bayName="4TR412" cNodeName="_2224f46d-9c33-54f6-ac9d-96ac1f1acc88"></Terminal>
+            </TransformerWinding>
+        </PowerTransformer>
+        <VoltageLevel nomFreq="50" numPhases="3" name="0">
+            <Voltage unit="V" multiplier="k">0</Voltage>
+            <Bay name="SITE1">
+                <Private type="COMPAS-Bay">
+                    <compas:Bay xmlns:compas="https://www.lfenergy.org/compas/extension/v1" BayCodif="TG00000001" UUID="9cd6f05b-1bbd-4ba3-86c5-41c99103e06d" Indice="1" MainLabel="SITE1" SecondLabel="PALLU-TGENE" NumBay="7" NumSection="N/A"></compas:Bay>
+                </Private>
+                <Private type="COMPAS-Criteria">
+                    <compas:Criteria xmlns:compas="https://www.lfenergy.org/compas/extension/v1" ObjectID="9cd6f05b-1bbd-4ba3-86c5-41c99103e06d" CriteriaAssociationID="CriteriaAssociationID"></compas:Criteria>
+                </Private>
+                <Private type="COMPAS-SystemVersion">
+                    <compas:SystemVersion xmlns:compas="https://www.lfenergy.org/compas/extension/v1" MainSystemVersion="01.00" MinorSystemVersion="009.001.001"></compas:SystemVersion>
+                </Private>
+                <Function name="PASSERELLE">
+                    <Private type="COMPAS-Function">
+                        <compas:Function xmlns:compas="https://www.lfenergy.org/compas/extension/v1" UUID="8f4cda3f-828c-4006-9b87-2af96b19304b" Label="PASSERELLE"></compas:Function>
+                    </Private>
+                    <Private type="COMPAS-Criteria">
+                        <compas:Criteria xmlns:compas="https://www.lfenergy.org/compas/extension/v1" ObjectID="8f4cda3f-828c-4006-9b87-2af96b19304b" CriteriaAssociationID="CriteriaAssociationID"></compas:Criteria>
+                    </Private>
+                </Function>
+            </Bay>
+        </VoltageLevel>
+    </Substation>
+
+</SCL>

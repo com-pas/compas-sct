@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2021 RTE FRANCE
+//
+// SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.sct.commons.scl.sstation;
 
 import org.lfenergy.compas.scl2007b4.model.TVoltageLevel;
@@ -30,7 +33,7 @@ public class VoltageLevelAdapter extends SclElementAdapter<SubstationAdapter, TV
         return parentAdapter.getCurrentElem().getVoltageLevel().contains(currentElem);
     }
 
-    Optional<BayAdapter> getBayAdapter(String bayName) {
+    public Optional<BayAdapter> getBayAdapter(String bayName) {
         return currentElem.getBay()
                 .stream()
                 .filter(tBay -> tBay.getName().equals(bayName))
