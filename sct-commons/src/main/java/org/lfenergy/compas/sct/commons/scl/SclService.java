@@ -346,17 +346,15 @@ public class SclService {
                     "SCD file must have one Substation. The files are rejected.");
         }
         TSubstation ssdTSubstation = ssdRootAdapter.currentElem.getSubstation().get(0);
-        SubstationAdapter ssdSubstationAdapter = new SubstationAdapter(ssdRootAdapter, ssdTSubstation);
-
         if(scdRootAdapter.getCurrentElem().getSubstation().isEmpty()) {
             scdRootAdapter.getCurrentElem().getSubstation().add(ssdTSubstation);
             return scdRootAdapter;
         } else {
             TSubstation scdTSubstation = scdRootAdapter.currentElem.getSubstation().get(0);
             if(scdTSubstation.getName().equalsIgnoreCase(ssdTSubstation.getName())) {
-                SubstationAdapter scdSubstationAdapter = new SubstationAdapter(scdRootAdapter, scdTSubstation);
-                for(TVoltageLevel vl:ssdSubstationAdapter.getCurrentElem().getVoltageLevel()){
-                    updateVoltageLevel(ssdSubstationAdapter, scdSubstationAdapter, vl);
+                SubstationAdapter scdSubstationAdapter = scdRootAdapter.getSubstationAdapter(scdTSubstation.getName());
+                for(TVoltageLevel tvl : ssdTSubstation.getVoltageLevel()){
+                    updateVoltageLevel(scdSubstationAdapter, tvl);
                 }
             } else throw new ScdException("SCD file must have only one Substation and the Substation name from SSD file is" +
                     " different from the one in SCD file. The files are rejected.");
@@ -364,24 +362,25 @@ public class SclService {
         return scdRootAdapter;
     }
 
-    private static void updateVoltageLevel(SubstationAdapter ssdSubstationAdapter, SubstationAdapter scdSubstationAdapter, TVoltageLevel vl) {
-        VoltageLevelAdapter vlAdapter = new VoltageLevelAdapter(ssdSubstationAdapter, vl);
-        if(scdSubstationAdapter.getVoltageLevelAdapter(vlAdapter.getCurrentElem().getName()).isPresent()) {
-            VoltageLevelAdapter scdVoltageLevelAdapter = scdSubstationAdapter.getVoltageLevelAdapter(vl.getName()).get();
-            for (TBay tbay: vlAdapter.getCurrentElem().getBay()) {
-                updateBay(vlAdapter, scdVoltageLevelAdapter, tbay);
+    private static void updateVoltageLevel(@NonNull SubstationAdapter scdSubstationAdapter, TVoltageLevel vl) throws ScdException {
+        if(scdSubstationAdapter.getVoltageLevelAdapter(vl.getName()).isPresent()) {
+            VoltageLevelAdapter scdVoltageLevelAdapter = scdSubstationAdapter.getVoltageLevelAdapter(vl.getName())
+                    .orElseThrow(() -> new ScdException("Unable to create VoltageLevelAdapter"));
+            for (TBay tbay: vl.getBay()) {
+                updateBay(scdVoltageLevelAdapter, tbay);
             }
         } else {
-            scdSubstationAdapter.getCurrentElem().getVoltageLevel().add(vlAdapter.currentElem);
+            scdSubstationAdapter.getCurrentElem().getVoltageLevel().add(vl);
         }
     }
 
-    private static void updateBay(VoltageLevelAdapter vlAdapter, VoltageLevelAdapter scdVoltageLevelAdapter, TBay tbay) {
-        BayAdapter bayAdapter = new BayAdapter(vlAdapter, tbay);
-        if(vlAdapter.getBayAdapter(bayAdapter.currentElem.getName()).isPresent()){
-           vlAdapter.getBayAdapter(bayAdapter.currentElem.getName());
+    private static void updateBay(@NonNull VoltageLevelAdapter scdVoltageLevelAdapter, TBay tBay) {
+        if(scdVoltageLevelAdapter.getBayAdapter(tBay.getName()).isPresent()){
+          scdVoltageLevelAdapter.getCurrentElem().getBay()
+                  .removeIf(t -> t.getName().equalsIgnoreCase(tBay.getName()));
+            scdVoltageLevelAdapter.getCurrentElem().getBay().add(tBay);
         } else {
-            scdVoltageLevelAdapter.getCurrentElem().getBay().add(tbay);
+            scdVoltageLevelAdapter.getCurrentElem().getBay().add(tBay);
         }
     }
 }

@@ -5,37 +5,33 @@
 <SCL xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4">
     <Header id="HeaderID" version="version" revision="Revision" toolID="toolID"/>
 
-    <Substation name="PALLU">
-        <Private type="RTE-ExportSite">
-            <rte:ExportSite xmlns:rte="https://www.rte-france.com/" UUID="5f40a45f-abca-40c4-ab9d-e6752b67ac18" Label="PALLU" Indice="1"></rte:ExportSite>
-        </Private>
-        <PowerTransformer type="PTR" virtual="false" name="PALLU4CONS_TR411">
-            <TransformerWinding type="PTW" virtual="false" name="PALLU4CONS_TR411_1">
-                <Terminal name="b751dad9-2141-4096-b00d-09e3a51c1337" connectivityNode="PALLU/PALLUP41/4TR411/_3713cace-7dfe-5c78-ac16-48c18ad7443b" substationName="PALLU" voltageLevelName="PALLUP41" bayName="4TR411" cNodeName="_3713cace-7dfe-5c78-ac16-48c18ad7443b"></Terminal>
-            </TransformerWinding>
-            <TransformerWinding type="PTW" virtual="false" name="PALLU4CONS_TR411_2">
-                <Terminal name="4a4af7e9-f8dc-4447-832d-0959ff5f0fc5" connectivityNode="PALLU/PALLUP41/4TR412/_2224f46d-9c33-54f6-ac9d-96ac1f1acc88" substationName="PALLU" voltageLevelName="PALLUP41" bayName="4TR412" cNodeName="_2224f46d-9c33-54f6-ac9d-96ac1f1acc88"></Terminal>
-            </TransformerWinding>
-        </PowerTransformer>
-        <VoltageLevel nomFreq="50" numPhases="3" name="0">
-            <Voltage unit="V" multiplier="k">0</Voltage>
-            <Bay name="SITE1">
+    <Substation name="SITE">
+        <VoltageLevel nomFreq="50" numPhases="3" name="4">
+            <Voltage unit="V" multiplier="k">90</Voltage>
+            <Bay name="BAY_2">
                 <Private type="COMPAS-Bay">
-                    <compas:Bay xmlns:compas="https://www.lfenergy.org/compas/extension/v1" BayCodif="TG00000001" UUID="9cd6f05b-1bbd-4ba3-86c5-41c99103e06d" Indice="1" MainLabel="SITE1" SecondLabel="PALLU-TGENE" NumBay="7" NumSection="N/A"></compas:Bay>
+                    <compas:Bay xmlns:compas="https://www.lfenergy.org/compas/extension/v1" BayCodif="CB00001101" UUID="4214a755-3420-42ed-ac2d-766c5149b58a" Indice="1" MainLabel="BAY2" SecondLabel="SITE-P41-SS1.12" NumBay="1" NumSection="N/A"></compas:Bay>
                 </Private>
                 <Private type="COMPAS-Criteria">
-                    <compas:Criteria xmlns:compas="https://www.lfenergy.org/compas/extension/v1" ObjectID="9cd6f05b-1bbd-4ba3-86c5-41c99103e06d" CriteriaAssociationID="CriteriaAssociationID"></compas:Criteria>
+                    <compas:Criteria xmlns:compas="https://www.lfenergy.org/compas/extension/v1" ObjectID="4214a755-3420-42ed-ac2d-766c5149b58a" CriteriaAssociationID="CriteriaAssociationID"></compas:Criteria>
                 </Private>
                 <Private type="COMPAS-SystemVersion">
-                    <compas:SystemVersion xmlns:compas="https://www.lfenergy.org/compas/extension/v1" MainSystemVersion="01.00" MinorSystemVersion="009.001.001"></compas:SystemVersion>
+                    <compas:SystemVersion xmlns:compas="https://www.lfenergy.org/compas/extension/v1" MainSystemVersion="01.00" MinorSystemVersion="004.001.001"></compas:SystemVersion>
                 </Private>
-                <Function name="PASSERELLE">
+                <Function name="FUNCTION_3">
                     <Private type="COMPAS-Function">
-                        <compas:Function xmlns:compas="https://www.lfenergy.org/compas/extension/v1" UUID="8f4cda3f-828c-4006-9b87-2af96b19304b" Label="PASSERELLE"></compas:Function>
+                        <compas:Function xmlns:compas="https://www.lfenergy.org/compas/extension/v1" UUID="386365c5-3e99-4499-b3c9-297fcf454f11" Label="FUNCTION_3"></compas:Function>
                     </Private>
                     <Private type="COMPAS-Criteria">
-                        <compas:Criteria xmlns:compas="https://www.lfenergy.org/compas/extension/v1" ObjectID="8f4cda3f-828c-4006-9b87-2af96b19304b" CriteriaAssociationID="CriteriaAssociationID"></compas:Criteria>
+                        <compas:Criteria xmlns:compas="https://www.lfenergy.org/compas/extension/v1" ObjectID="386365c5-3e99-4499-b3c9-297fcf454f11" CriteriaAssociationID="CriteriaAssociationID"></compas:Criteria>
                     </Private>
+                    <LNode iedName="None" ldInst="LDFUNCTION_3" lnClass="LLN0">
+                        <Private type="COMPAS-ICDHeader">
+                            <compas:ICDHeader xmlns:compas="https://www.lfenergy.org/compas/extension/v1" IEDType="BCU" IEDinstance="11" BayLabel="BAY2" iedName="SITEBAY2BCU44" ICDSystemVersionUUID="ed36220c-5577-4f0c-aaef-c6efa9f7d7c8" VendorName="RTE" IEDredundancy="Nominal" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="9aea4c6f-7ab8-4341-8d84-14c17d73a57d" headerVersion="01.00.00" headerRevision="01.00.00"></compas:ICDHeader>
+                        </Private>
+                    </LNode>
+                </Function>
+                <Function name="FUNCTION_4">
                 </Function>
             </Bay>
         </VoltageLevel>
