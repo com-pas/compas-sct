@@ -386,11 +386,11 @@ class SclServiceTest {
         SclRootAdapter ssdRootAdapter = new SclRootAdapter(ssd);
 
         SclRootAdapter expectedScdAdapter = SclService.addSubstation(scd, ssd);
-        TSubstation tSubstation = expectedScdAdapter.getCurrentElem().getSubstation().get(0);
-        TSubstation expectedTSubstation = ssdRootAdapter.getCurrentElem().getSubstation().get(0);
+        TSubstation expectedTSubstation = expectedScdAdapter.getCurrentElem().getSubstation().get(0);
+        TSubstation tSubstation = ssdRootAdapter.getCurrentElem().getSubstation().get(0);
 
         assertNotEquals(scdRootAdapter, expectedScdAdapter);
-        assertEquals(tSubstation.getName(), expectedTSubstation.getName());
-        assertEquals(tSubstation.getVoltageLevel().size(), expectedTSubstation.getVoltageLevel().size());
+        assertEquals(expectedTSubstation.getName(), tSubstation.getName());
+        assertEquals(expectedTSubstation.getVoltageLevel().size(), tSubstation.getVoltageLevel().size());
     }
 }
