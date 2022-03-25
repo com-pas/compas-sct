@@ -361,30 +361,42 @@ class SclServiceTest {
         assertFalse(enumList.isEmpty());
     }
 
+    @Test
+    void testAddSubstation_SSD_With_TWO_Substation() throws Exception {
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/add_ied_test.xml");
+        SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd_with_2_substations.xml");
+
+        assertThrows(ScdException.class,
+                () ->SclService.addSubstation(scd, ssd));
+    }
 
     @Test
-    void testAddSubstation_Scd_Without_Substation() throws Exception {
+    void testAddSubstation_SCD_Without_Substation() throws Exception {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/add_ied_test.xml");
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
-
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
         SclRootAdapter ssdRootAdapter = new SclRootAdapter(ssd);
-
         SclRootAdapter expectedScdAdapter = SclService.addSubstation(scd, ssd);
 
         assertNotEquals(scdRootAdapter, expectedScdAdapter);
         assertEquals(expectedScdAdapter.getCurrentElem().getSubstation(), ssdRootAdapter.getCurrentElem().getSubstation());
-
     }
 
     @Test
-    void testAddSubstation_Scd_With_Substation() throws Exception {
+    void testAddSubstation_SCD_With_Different_Substation_Name() throws Exception {
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/scd_with_substation_name_different.xml");
+        SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
+
+        assertThrows(ScdException.class,
+                () ->SclService.addSubstation(scd, ssd));
+    }
+
+    @Test
+    void testAddSubstation_SCD_With_Substation() throws Exception {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/scd_with_substation.xml");
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
-
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
         SclRootAdapter ssdRootAdapter = new SclRootAdapter(ssd);
-
         SclRootAdapter expectedScdAdapter = SclService.addSubstation(scd, ssd);
         TSubstation expectedTSubstation = expectedScdAdapter.getCurrentElem().getSubstation().get(0);
         TSubstation tSubstation = ssdRootAdapter.getCurrentElem().getSubstation().get(0);

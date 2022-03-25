@@ -12,12 +12,12 @@ import org.lfenergy.compas.scl2007b4.model.TVoltageLevel;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class BayAdapterTest {
 
     private BayAdapter bayAdapter;
+    private VoltageLevelAdapter vLevelAdapter;
 
     @BeforeEach
     public void init() throws ScdException {
@@ -30,7 +30,7 @@ class BayAdapterTest {
         TVoltageLevel tVoltageLevel = new TVoltageLevel();
         tVoltageLevel.setName("VOLTAGE_LEVEL");
         ssAdapter.getCurrentElem().getVoltageLevel().add(tVoltageLevel);
-        VoltageLevelAdapter vLevelAdapter = ssAdapter.getVoltageLevelAdapter("VOLTAGE_LEVEL").get();
+        vLevelAdapter = ssAdapter.getVoltageLevelAdapter("VOLTAGE_LEVEL").get();
         TBay tBay = new TBay();
         tBay.setName("BAY");
         vLevelAdapter.getCurrentElem().getBay().add(tBay);
@@ -41,6 +41,20 @@ class BayAdapterTest {
     @Test
     void testAmChildElementRef() {
         assertTrue(bayAdapter.amChildElementRef());
+    }
+
+    @Test
+    void testController() {
+        BayAdapter expectedBayAdapter = new BayAdapter(vLevelAdapter);
+        assertNotNull(expectedBayAdapter.getParentAdapter());
+        assertNull(expectedBayAdapter.getCurrentElem());
+        assertFalse(expectedBayAdapter.amChildElementRef());
+    }
+
+    @Test
+    void testControllerWithVoltageLevelName() {
+        assertThrows(ScdException.class,
+                () -> new BayAdapter(vLevelAdapter, "BAY_1"));
     }
 
     @Test

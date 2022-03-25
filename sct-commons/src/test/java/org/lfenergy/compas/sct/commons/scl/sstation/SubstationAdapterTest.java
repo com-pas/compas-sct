@@ -34,6 +34,14 @@ class SubstationAdapterTest {
     }
 
     @Test
+    void testController() {
+        SubstationAdapter expectedSubstationAdapter = new SubstationAdapter(sclRootAdapter, sclRootAdapter.getCurrentElem().getSubstation().get(0));
+        assertNotNull(expectedSubstationAdapter.getParentAdapter());
+        assertNotNull(expectedSubstationAdapter.getCurrentElem());
+        assertTrue(expectedSubstationAdapter.amChildElementRef());
+    }
+
+    @Test
     void testSetCurrentElement()  {
         SubstationAdapter ssfAdapter = new SubstationAdapter(sclRootAdapter);
         TSubstation tSubstation1 = new TSubstation();
