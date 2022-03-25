@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class VoltageLevelAdapterTest {
 
     private VoltageLevelAdapter vLevelAdapter;
+    private SubstationAdapter ssAdapter;
 
     @BeforeEach
     public void init() throws ScdException {
@@ -24,11 +25,26 @@ class VoltageLevelAdapterTest {
         TSubstation tSubstation = new TSubstation();
         tSubstation.setName("SUBSTATION");
         sclRootAdapter.getCurrentElem().getSubstation().add(tSubstation);
-        SubstationAdapter ssAdapter = sclRootAdapter.getSubstationAdapter("SUBSTATION");
+        ssAdapter = sclRootAdapter.getSubstationAdapter("SUBSTATION");
         TVoltageLevel tVoltageLevel = new TVoltageLevel();
         tVoltageLevel.setName("VOLTAGE_LEVEL");
         ssAdapter.getCurrentElem().getVoltageLevel().add(tVoltageLevel);
-        vLevelAdapter = ssAdapter.getVoltageLevelAdapter("VOLTAGE_LEVEL").get();
+        vLevelAdapter = ssAdapter.getVoltageLevelAdapter("VOLTAGE_LEVEL")
+                .orElse(new VoltageLevelAdapter(ssAdapter, "VOLTAGE_LEVEL"));
+    }
+
+    @Test
+    void testController() {
+        VoltageLevelAdapter expectedTVoltageLevel = new VoltageLevelAdapter(ssAdapter);
+        assertNotNull(expectedTVoltageLevel.getParentAdapter());
+        assertNull(expectedTVoltageLevel.getCurrentElem());
+        assertFalse(expectedTVoltageLevel.amChildElementRef());
+    }
+
+    @Test
+    void testControllerWithVoltageLevelName(){
+        assertThrows(ScdException.class,
+                () -> new VoltageLevelAdapter(ssAdapter, "VOLTAGE_LEVEL_1"));
     }
 
     @Test
@@ -37,7 +53,7 @@ class VoltageLevelAdapterTest {
     }
 
     @Test
-    void testSetCurrentElemInAdapter() throws ScdException {
+    void testSetCurrentElemInAdapter() {
         TVoltageLevel tVoltageLevel1 = new TVoltageLevel();
         assertThrows(IllegalArgumentException.class,
                 () ->vLevelAdapter.setCurrentElem(tVoltageLevel1));

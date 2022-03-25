@@ -1,0 +1,16 @@
+<!-- SPDX-FileCopyrightText: 2021 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+<SCL xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4">
+    <Header id="HeaderID" version="version" revision="Revision" toolID="toolID"/>
+
+    <Substation name="OTHER_SITE">
+        <VoltageLevel nomFreq="50" numPhases="3" name="4">
+            <Voltage unit="V" multiplier="k">90</Voltage>
+            <Bay name="BAY_2">
+            </Bay>
+        </VoltageLevel>
+    </Substation>
+
+</SCL>
