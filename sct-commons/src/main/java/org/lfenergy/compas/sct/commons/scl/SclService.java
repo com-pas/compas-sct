@@ -47,9 +47,9 @@ public class SclService {
 
     private SclService(){ throw new IllegalStateException("SclService class"); }
 
-    public static SclRootAdapter initScl(String hVersion, String hRevision) throws ScdException {
-        UUID hId = UUID.randomUUID();
-        return new SclRootAdapter(hId.toString(),hVersion,hRevision);
+    public static SclRootAdapter initScl(Optional<UUID> hId, String hVersion, String hRevision) throws ScdException {
+        UUID headerId = hId.orElseGet(UUID::randomUUID);
+        return new SclRootAdapter(headerId.toString(), hVersion, hRevision);
     }
 
     public static SclRootAdapter addHistoryItem(SCL scd, String who, String what, String why){
