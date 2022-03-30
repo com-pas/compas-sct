@@ -13,7 +13,7 @@
                     <compas:Bay xmlns:compas="https://www.lfenergy.org/compas/extension/v1" BayCodif="CB00001101" UUID="4214a755-3420-42ed-ac2d-766c5149b58a" Version="1" MainLabel="BAY2" SecondLabel="SITE-P41-SS1.12" NumBay="1" ZoneNumber="N/A"/>
                 </Private>
                 <Private type="COMPAS-Criteria">
-                    <compas:Criteria xmlns:compas="https://www.lfenergy.org/compas/extension/v1" ObjectID="4214a755-3420-42ed-ac2d-766c5149b58a" CriteriaAssociationID="CriteriaAssociationID"></compas:Criteria>
+                    <compas:Criteria xmlns:compas="https://www.lfenergy.org/compas/extension/v1" ObjectID="4214a755-3420-42ed-ac2d-766c5149b58a" CriteriaAssociationID="CriteriaAssociationID"/>
                 </Private>
                 <Private type="COMPAS-SystemVersion">
                     <compas:SystemVersion xmlns:compas="https://www.lfenergy.org/compas/extension/v1" MainSystemVersion="01.00" MinorSystemVersion="004.001.001"></compas:SystemVersion>
