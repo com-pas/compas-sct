@@ -2,35 +2,35 @@
 <!-- SPDX-FileCopyrightText: 2021 RTE FRANCE -->
 <!-- -->
 <!-- SPDX-License-Identifier: Apache-2.0 -->
-<SCL xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4">
+<SCL xmlns="http://www.iec.ch/61850/2003/SCL" xmlns:compas="https://www.lfenergy.org/compas/extension/v1" version="2007" revision="B" release="4">
 	<Private type="COMPAS-SclFileType">
-			<compas:SclFileType xmlns:compas="https://www.lfenergy.org/compas/extension/v1" Name="SSD"></compas:SclFileType>
+			<compas:SclFileType>SSD</compas:SclFileType>
 	</Private>
-	<Header id="HeaderId" version="HeaderVersion" revision="HeaderRevision"></Header>
+	<Header id="HeaderId" version="HeaderVersion" revision="HeaderRevision"/>
 	<Substation name="SITE">
 		<VoltageLevel nomFreq="50" numPhases="3" name="0">
 			<Voltage unit="V" multiplier="k">0</Voltage>
 			<Bay name="BAY_1">
 				<Private type="COMPAS-Bay">
-					<compas:Bay xmlns:compas="https://www.lfenergy.org/compas/extension/v1" BayCodif="TG00000001" UUID="9cd6f05b-1bbd-4ba3-86c5-41c99103e06d" Indice="1" MainLabel="SITE1" SecondLabel="SITE-TGENE" NumBay="7" NumSection="N/A"></compas:Bay>
+					<compas:Bay BayCodif="TG00000001" UUID="9cd6f05b-1bbd-4ba3-86c5-41c99103e06d" Version="1" MainLabel="SITE1" SecondLabel="SITE-TGENE" NumBay="7" ZoneNumber="N/A"/>
 				</Private>
 				<Private type="COMPAS-Criteria">
-					<compas:Criteria xmlns:compas="https://www.lfenergy.org/compas/extension/v1" ObjectID="9cd6f05b-1bbd-4ba3-86c5-41c99103e06d" CriteriaAssociationID="CriteriaAssociationID"></compas:Criteria>
+					<compas:Criteria ObjectID="9cd6f05b-1bbd-4ba3-86c5-41c99103e06d" CriteriaAssociationID="CriteriaAssociationID"/>
 				</Private>
 				<Function name="FUNCTION_1">
 					<Private type="COMPAS-Function">
-						<compas:Function xmlns:compas="https://www.lfenergy.org/compas/extension/v1" UUID="8f4cda3f-828c-4006-9b87-2af96b19304b" Label="FUNCTION_1"></compas:Function>
+						<compas:Function UUID="8f4cda3f-828c-4006-9b87-2af96b19304b" Label="FUNCTION_1"/>
 					</Private>
 					<LNode iedName="None" ldInst="LDGW" lnClass="LLN0">
 						<Private type="COMPAS-ICDHeader">
-							<compas:ICDHeader xmlns:compas="https://www.lfenergy.org/compas/extension/v1" IEDType="GTW" IEDinstance="3" BayLabel="SITE1" iedName="SITESITE1GTW0" ICDSystemVersionUUID="b4f8089e-4170-47f1-b6ad-dd1f50885518" VendorName="RTE" IEDredundancy="Nominal" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="f8dbc8c1-2db7-4652-a9d6-0b414bdeccfa" headerVersion="01.00.00" headerRevision="01.00.00"></compas:ICDHeader>
+							<compas:ICDHeader IEDType="GTW" IEDinstance="3" BayLabel="SITE1" IEDName="SITESITE1GTW0" ICDSystemVersionUUID="b4f8089e-4170-47f1-b6ad-dd1f50885518" VendorName="RTE" IEDredundancy="A" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="f8dbc8c1-2db7-4652-a9d6-0b414bdeccfa" headerVersion="01.00.00" headerRevision="01.00.00"/>
 						</Private>
 					</LNode>
 				</Function>
 				<Function name="FUNCTION_2">
 					<LNode iedName="None" ldInst="LDPDB" lnClass="LLN0">
 						<Private type="COMPAS-ICDHeader">
-							<compas:ICDHeader xmlns:compas="https://www.lfenergy.org/compas/extension/v1" IEDType="PDB" IEDinstance="4" BayLabel="SITE1" iedName="SITESITE1PDB0" ICDSystemVersionUUID="ad27d262-7c90-46df-b480-68088f9fe8a4" VendorName="RTE" IEDredundancy="Nominal" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="6b4d51eb-c391-4eef-b118-f516bc09f20c" headerVersion="01.00.00" headerRevision="01.00.00"></compas:ICDHeader>
+							<compas:ICDHeader IEDType="PDB" IEDinstance="4" BayLabel="SITE1" IEDName="SITESITE1PDB0" ICDSystemVersionUUID="ad27d262-7c90-46df-b480-68088f9fe8a4" VendorName="RTE" IEDredundancy="A" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="6b4d51eb-c391-4eef-b118-f516bc09f20c" headerVersion="01.00.00" headerRevision="01.00.00"/>
 						</Private>
 					</LNode>
 				</Function>
@@ -40,24 +40,24 @@
 			<Voltage unit="V" multiplier="k">90</Voltage>
 			<Bay name="BAY_2">
 				<Private type="COMPAS-Bay">
-					<compas:Bay xmlns:compas="https://www.lfenergy.org/compas/extension/v1" BayCodif="CB00001101" UUID="4214a755-3420-42ed-ac2d-766c5149b58a" Indice="1" MainLabel="BAY2" SecondLabel="SITE-P41-SS1.12" NumBay="1" NumSection="N/A"></compas:Bay>
+					<compas:Bay BayCodif="CB00001101" UUID="4214a755-3420-42ed-ac2d-766c5149b58a" Version="1" MainLabel="BAY2" SecondLabel="SITE-P41-SS1.12" NumBay="1" ZoneNumber="N/A"/>
 				</Private>
 				<Private type="COMPAS-Criteria">
-					<compas:Criteria xmlns:compas="https://www.lfenergy.org/compas/extension/v1" ObjectID="4214a755-3420-42ed-ac2d-766c5149b58a" CriteriaAssociationID="CriteriaAssociationID"></compas:Criteria>
+					<compas:Criteria ObjectID="4214a755-3420-42ed-ac2d-766c5149b58a" CriteriaAssociationID="CriteriaAssociationID"/>
 				</Private>
 				<Private type="COMPAS-SystemVersion">
-					<compas:SystemVersion xmlns:compas="https://www.lfenergy.org/compas/extension/v1" MainSystemVersion="01.00" MinorSystemVersion="004.001.001"></compas:SystemVersion>
+					<compas:SystemVersion MainSystemVersion="01.00" MinorSystemVersion="004.001.001"/>
 				</Private>
 				<Function name="FUNCTION_3">
 					<Private type="COMPAS-Function">
-						<compas:Function xmlns:compas="https://www.lfenergy.org/compas/extension/v1" UUID="386365c5-3e99-4499-b3c9-297fcf454f11" Label="FUNCTION_3"></compas:Function>
+						<compas:Function UUID="386365c5-3e99-4499-b3c9-297fcf454f11" Label="FUNCTION_3"/>
 					</Private>
 					<Private type="COMPAS-Criteria">
-						<compas:Criteria xmlns:compas="https://www.lfenergy.org/compas/extension/v1" ObjectID="386365c5-3e99-4499-b3c9-297fcf454f11" CriteriaAssociationID="CriteriaAssociationID"></compas:Criteria>
+						<compas:Criteria ObjectID="386365c5-3e99-4499-b3c9-297fcf454f11" CriteriaAssociationID="CriteriaAssociationID"/>
 					</Private>
 					<LNode iedName="None" ldInst="LDFUNCTION_3" lnClass="LLN0">
 						<Private type="COMPAS-ICDHeader">
-							<compas:ICDHeader xmlns:compas="https://www.lfenergy.org/compas/extension/v1" IEDType="BCU" IEDinstance="11" BayLabel="BAY2" iedName="SITEBAY2BCU44" ICDSystemVersionUUID="ed36220c-5577-4f0c-aaef-c6efa9f7d7c8" VendorName="RTE" IEDredundancy="Nominal" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="9aea4c6f-7ab8-4341-8d84-14c17d73a57d" headerVersion="01.00.00" headerRevision="01.00.00"></compas:ICDHeader>
+							<compas:ICDHeader IEDType="BCU" IEDinstance="11" BayLabel="BAY2" IEDName="SITEBAY2BCU44" ICDSystemVersionUUID="ed36220c-5577-4f0c-aaef-c6efa9f7d7c8" VendorName="RTE" IEDredundancy="A" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="9aea4c6f-7ab8-4341-8d84-14c17d73a57d" headerVersion="01.00.00" headerRevision="01.00.00"/>
 						</Private>
 					</LNode>
 				</Function>

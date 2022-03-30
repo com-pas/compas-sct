@@ -7,18 +7,5 @@
 			<compas:SclFileType>SSD</compas:SclFileType>
 	</Private>
 	<Header id="HeaderId" version="HeaderVersion" revision="HeaderRevision"/>
-	<Substation name="SITE">
-		<VoltageLevel nomFreq="50" numPhases="3" name="0">
-			<Voltage unit="V" multiplier="k">0</Voltage>
-			<Bay name="BAY_1">
-			</Bay>
-		</VoltageLevel>
-	</Substation>
-	<Substation name="SITE_BIS">
-		<VoltageLevel nomFreq="50" numPhases="3" name="0">
-			<Voltage unit="V" multiplier="k">0</Voltage>
-			<Bay name="BAY_1">
-			</Bay>
-		</VoltageLevel>
-	</Substation>
+
 </SCL>
