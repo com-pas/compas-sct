@@ -23,7 +23,7 @@
                         <compas:Function xmlns:compas="https://www.lfenergy.org/compas/extension/v1" UUID="386365c5-3e99-4499-b3c9-297fcf454f11" Label="FUNCTION_3"/>
                     </Private>
                     <Private type="COMPAS-Criteria">
-                        <compas:Criteria xmlns:compas="https://www.lfenergy.org/compas/extension/v1" ObjectID="386365c5-3e99-4499-b3c9-297fcf454f11" CriteriaAssociationID="CriteriaAssociationID"></compas:Criteria>
+                        <compas:Criteria xmlns:compas="https://www.lfenergy.org/compas/extension/v1" ObjectID="386365c5-3e99-4499-b3c9-297fcf454f11" CriteriaAssociationID="CriteriaAssociationID"/>
                     </Private>
                     <LNode iedName="None" ldInst="LDFUNCTION_3" lnClass="LLN0">
                         <Private type="COMPAS-ICDHeader">
