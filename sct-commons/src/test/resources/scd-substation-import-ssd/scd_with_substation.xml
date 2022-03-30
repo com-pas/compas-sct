@@ -10,7 +10,7 @@
             <Voltage unit="V" multiplier="k">90</Voltage>
             <Bay name="BAY_2">
                 <Private type="COMPAS-Bay">
-                    <compas:Bay xmlns:compas="https://www.lfenergy.org/compas/extension/v1" BayCodif="CB00001101" UUID="4214a755-3420-42ed-ac2d-766c5149b58a" Indice="1" MainLabel="BAY2" SecondLabel="SITE-P41-SS1.12" NumBay="1" NumSection="N/A"></compas:Bay>
+                    <compas:Bay xmlns:compas="https://www.lfenergy.org/compas/extension/v1" BayCodif="CB00001101" UUID="4214a755-3420-42ed-ac2d-766c5149b58a" Version="1" MainLabel="BAY2" SecondLabel="SITE-P41-SS1.12" NumBay="1" ZoneNumber="N/A"/>
                 </Private>
                 <Private type="COMPAS-Criteria">
                     <compas:Criteria xmlns:compas="https://www.lfenergy.org/compas/extension/v1" ObjectID="4214a755-3420-42ed-ac2d-766c5149b58a" CriteriaAssociationID="CriteriaAssociationID"></compas:Criteria>
