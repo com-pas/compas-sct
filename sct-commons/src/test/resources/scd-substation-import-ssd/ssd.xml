@@ -64,7 +64,7 @@
 			</Bay>
 			<Bay name="BAY_3">
 				<Private type="COMPAS-Bay">
-					<compas:Bay xmlns:compas="https://www.lfenergy.org/compas/extension/v1" BayCodif="RT00000001" UUID="319859a3-cdce-49ae-8b3a-d462ea7b4803" Indice="1" MainLabel="BAY3" SecondLabel="SITE-P41-Y41141" NumBay="3" NumSection="1"></compas:Bay>
+					<compas:Bay xmlns:compas="https://www.lfenergy.org/compas/extension/v1" BayCodif="RT00000001" UUID="319859a3-cdce-49ae-8b3a-d462ea7b4803" Version="1" MainLabel="BAY3" SecondLabel="SITE-P41-Y41141" NumBay="3" ZoneNumber="1"/>
 				</Private>
 			</Bay>
 		</VoltageLevel>
