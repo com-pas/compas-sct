@@ -16,7 +16,7 @@
                     <compas:Criteria xmlns:compas="https://www.lfenergy.org/compas/extension/v1" ObjectID="4214a755-3420-42ed-ac2d-766c5149b58a" CriteriaAssociationID="CriteriaAssociationID"/>
                 </Private>
                 <Private type="COMPAS-SystemVersion">
-                    <compas:SystemVersion xmlns:compas="https://www.lfenergy.org/compas/extension/v1" MainSystemVersion="01.00" MinorSystemVersion="004.001.001"></compas:SystemVersion>
+                    <compas:SystemVersion xmlns:compas="https://www.lfenergy.org/compas/extension/v1" MainSystemVersion="01.00" MinorSystemVersion="004.001.001"/>
                 </Private>
                 <Function name="FUNCTION_3">
                     <Private type="COMPAS-Function">
