@@ -7,6 +7,7 @@ package org.lfenergy.compas.sct.app;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.lfenergy.compas.scl2007b4.model.SCL;
+import org.lfenergy.compas.sct.commons.dto.HeaderDTO;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclService;
@@ -16,9 +17,15 @@ import java.util.Optional;
 @Slf4j
 public class SclAutomatisationService {
 
-    private SclAutomatisationService(){ throw new IllegalStateException("SclService class"); }
+    public SclAutomatisationService(){}
 
-    public static SclRootAdapter createSCD(@NonNull SCL ssd, String hVersion, String hRevision) throws ScdException {
-        return SclService.initScl(Optional.empty(),hVersion,hRevision);
+    public SclRootAdapter createSCD(@NonNull SCL ssd, @NonNull HeaderDTO headerDTO) throws ScdException {
+        SclRootAdapter scdAdapter = SclService.initScl(Optional.ofNullable(headerDTO.getId()),headerDTO.getVersion(),headerDTO.getRevision());
+        if(!headerDTO.getHistoryItems().isEmpty()) {
+            HeaderDTO.HistoryItem hItem = headerDTO.getHistoryItems().get(0);
+            SclService.addHistoryItem(scdAdapter.getCurrentElem(), hItem.getWho(), hItem.getWhat(), hItem.getWhy());
+        }
+        SclService.addSubstation(scdAdapter.getCurrentElem(), ssd);
+        return scdAdapter;
     }
 }

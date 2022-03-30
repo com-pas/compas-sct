@@ -34,6 +34,13 @@
             <artifactId>sct-data</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!--<dependency>
+            <groupId>org.lfenergy.compas</groupId>
+            <artifactId>sct-commons</artifactId>
+            <type>commons-tests-jar</type>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>-->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
