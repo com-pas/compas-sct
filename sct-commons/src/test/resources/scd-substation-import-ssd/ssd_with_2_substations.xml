@@ -2,7 +2,7 @@
 <!-- SPDX-FileCopyrightText: 2021 RTE FRANCE -->
 <!-- -->
 <!-- SPDX-License-Identifier: Apache-2.0 -->
-<SCL xmlns:IEC_60870_5_104="http://www.iec.ch/61850-80-1/2007/IEC_60870-5-104" xmlns="http://www.iec.ch/61850/2003/SCL" xmlns:eTr-IEC61850-90-2="http://www.iec.ch/61850-90-2/2015/SCL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rte="http://www.rte-france.com" version="2007" revision="B" release="4">
+<SCL xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4">
 	<Private type="COMPAS-SclFileType">
 			<compas:SclFileType xmlns:compas="https://www.lfenergy.org/compas/extension/v1">SSD</compas:SclFileType>
 	</Private>
