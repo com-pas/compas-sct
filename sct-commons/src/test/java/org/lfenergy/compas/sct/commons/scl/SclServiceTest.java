@@ -360,6 +360,14 @@ class SclServiceTest {
         );
         assertFalse(enumList.isEmpty());
     }
+    @Test
+    void testAddSubstation_SSD_Without_Substation() throws Exception {
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/add_ied_test.xml");
+        SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd_without_substations.xml");
+
+        assertThrows(ScdException.class,
+                () ->SclService.addSubstation(scd, ssd));
+    }
 
     @Test
     void testAddSubstation_SSD_With_TWO_Substation() throws Exception {
