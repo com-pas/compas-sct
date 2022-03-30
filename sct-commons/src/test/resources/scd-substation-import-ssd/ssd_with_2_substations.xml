@@ -6,7 +6,7 @@
 	<Private type="COMPAS-SclFileType">
 			<compas:SclFileType xmlns:compas="https://www.lfenergy.org/compas/extension/v1">SSD</compas:SclFileType>
 	</Private>
-	<Header id="HeaderId" version="HeaderVersion" revision="HeaderRevision"></Header>
+	<Header id="HeaderId" version="HeaderVersion" revision="HeaderRevision"/>
 	<Substation name="SITE">
 		<VoltageLevel nomFreq="50" numPhases="3" name="0">
 			<Voltage unit="V" multiplier="k">0</Voltage>
