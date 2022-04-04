@@ -9,6 +9,8 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 
+import java.util.Optional;
+
 public class SubstationAdapter extends SclElementAdapter<SclRootAdapter, TSubstation> {
 
     public SubstationAdapter(SclRootAdapter parentAdapter) {
@@ -32,5 +34,13 @@ public class SubstationAdapter extends SclElementAdapter<SclRootAdapter, TSubsta
     @Override
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getSubstation().contains(currentElem);
+    }
+
+    public Optional<VoltageLevelAdapter> getVoltageLevelAdapter(String vLevelName) {
+        return currentElem.getVoltageLevel()
+                .stream()
+                .filter(tVoltageLevel -> tVoltageLevel.getName().equals(vLevelName))
+                .map(tVoltageLevel -> new VoltageLevelAdapter(this, tVoltageLevel))
+                .findFirst();
     }
 }

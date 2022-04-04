@@ -5,6 +5,8 @@
 package org.lfenergy.compas.sct.app;
 
 import org.junit.jupiter.api.Test;
+import org.lfenergy.compas.scl2007b4.model.SCL;
+import org.lfenergy.compas.sct.app.testhelpers.SclTestMarshaller;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -12,8 +14,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class SclAutomatisationServiceTest {
 
     @Test
-    void createSCD() {
+    void createSCD() throws Exception {
+        SCL ssd = SclTestMarshaller.getSCLFromFile("/ssd-create-scd/ssd.xml");
         assertThrows(ScdException.class,
-                () ->  SclAutomatisationService.createSCD(null, "hVersion", "hRevision") );
+                () ->  SclAutomatisationService.createSCD(ssd, "hVersion", "hRevision") );
     }
 }

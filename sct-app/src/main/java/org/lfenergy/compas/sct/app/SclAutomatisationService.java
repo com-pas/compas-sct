@@ -19,6 +19,7 @@ public class SclAutomatisationService {
     private SclAutomatisationService(){ throw new IllegalStateException("SclService class"); }
 
     public static SclRootAdapter createSCD(@NonNull SCL ssd, String hVersion, String hRevision) throws ScdException {
-        return SclService.initScl(Optional.empty(),hVersion,hRevision);
+        SclRootAdapter scdAdapter = SclService.initScl(Optional.empty(),hVersion,hRevision);
+        return SclService.addSubstation(ssd, scdAdapter.getCurrentElem());
     }
 }
