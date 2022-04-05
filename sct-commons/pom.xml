@@ -166,6 +166,19 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!--<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>commons-tests-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>-->
+
         </plugins>
     </build>
 </project>

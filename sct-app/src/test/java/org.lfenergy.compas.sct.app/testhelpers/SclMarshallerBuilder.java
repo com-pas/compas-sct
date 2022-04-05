@@ -55,7 +55,7 @@ public class SclMarshallerBuilder {
             String classPathRes = filePath.substring(clsPathIndicator.length());
             return IOUtils.resourceToURL("/" + classPathRes);
         }
-        Path path = Paths.get(filePath).toAbsolutePath();
+        Path path = Paths.get(filePath).toRealPath().toAbsolutePath();
         if(!Files.exists(path)) {
             throw new  IOException(path + ": No such file or directory");
         }

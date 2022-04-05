@@ -7,6 +7,7 @@ package org.lfenergy.compas.sct.app.testhelpers;
 import org.apache.commons.io.IOUtils;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 
+
 public class SclTestMarshaller {
 
     public static SCL getSCLFromFile(String filename) throws Exception {
