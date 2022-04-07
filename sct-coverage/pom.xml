@@ -32,6 +32,11 @@
             <artifactId>sct-data</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.lfenergy.compas</groupId>
+            <artifactId>sct-app</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
