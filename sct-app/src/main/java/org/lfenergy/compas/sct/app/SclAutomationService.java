@@ -17,7 +17,7 @@ import java.util.Optional;
 @Slf4j
 public class SclAutomationService {
 
-    public SclAutomationService(){throw new IllegalStateException("SclAutomationService class"); }
+    private SclAutomationService(){throw new IllegalStateException("SclAutomationService class"); }
 
     public static SclRootAdapter createSCD(@NonNull SCL ssd, @NonNull HeaderDTO headerDTO) throws ScdException {
         SclRootAdapter scdAdapter = SclService.initScl(Optional.ofNullable(headerDTO.getId()),headerDTO.getVersion(),headerDTO.getRevision());
