@@ -15,9 +15,9 @@ import org.lfenergy.compas.sct.commons.scl.SclService;
 import java.util.Optional;
 
 @Slf4j
-public class SclAutomatisationService {
+public class SclAutomationService {
 
-    public SclAutomatisationService(){throw new IllegalStateException("SclAutomatisationService class"); }
+    public SclAutomationService(){throw new IllegalStateException("SclAutomationService class"); }
 
     public static SclRootAdapter createSCD(@NonNull SCL ssd, @NonNull HeaderDTO headerDTO) throws ScdException {
         SclRootAdapter scdAdapter = SclService.initScl(Optional.ofNullable(headerDTO.getId()),headerDTO.getVersion(),headerDTO.getRevision());
