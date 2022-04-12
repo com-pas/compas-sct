@@ -20,12 +20,13 @@ public class SclAutomationService {
     private SclAutomationService(){throw new IllegalStateException("SclAutomationService class"); }
 
     public static SclRootAdapter createSCD(@NonNull SCL ssd, @NonNull HeaderDTO headerDTO) throws ScdException {
-        SclRootAdapter scdAdapter = SclService.initScl(Optional.ofNullable(headerDTO.getId()),headerDTO.getVersion(),headerDTO.getRevision());
+        SclRootAdapter scdAdapter = SclService.initScl(Optional.ofNullable(headerDTO.getId()),
+                headerDTO.getVersion(),headerDTO.getRevision());
         if(!headerDTO.getHistoryItems().isEmpty()) {
-            HeaderDTO.HistoryItem hItem = headerDTO.getHistoryItems().get(0);
-            SclService.addHistoryItem(scdAdapter.getCurrentElem(), hItem.getWho(), hItem.getWhat(), hItem.getWhy());
+            headerDTO.getHistoryItems().forEach(hItem ->
+                    SclService.addHistoryItem(scdAdapter.getCurrentElem(), hItem.getWho(), hItem.getWhat(), hItem.getWhy()));
         }
-        SclService.addSubstation(scdAdapter.getCurrentElem(), ssd);
+             SclService.addSubstation(scdAdapter.getCurrentElem(), ssd);
         return scdAdapter;
     }
 }
