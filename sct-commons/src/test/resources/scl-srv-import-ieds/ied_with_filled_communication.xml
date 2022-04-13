@@ -1,0 +1,111 @@
+<!-- SPDX-FileCopyrightText: 2021 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+<SCL xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4">
+    <Header id="HeaderID" version="version" revision="Revision" toolID="toolID"/>
+    <Communication>
+        <SubNetwork name="PROCESS_NETWORK" type="8-MMS">
+            <ConnectedAP iedName="IED_NAME1" apName="AP_NAME">
+                <Address>
+                    <P type="IP">1.2.3.4</P>
+                </Address>
+                <GSE ldInst="LD_INST11" cbName="LD_INST11_GSE">
+                    <Address>
+                        <P type="APPID">11</P>
+                    </Address>
+                </GSE>
+                <PhysConn type="Connection">
+                    <P type="Plug">PL</P>
+                </PhysConn>
+            </ConnectedAP>
+        </SubNetwork>
+    </Communication>
+    <IED name="IED_NAME1">
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LD_INST11">
+                    <LN0 lnType="LNEX1" lnClass="LLN0" inst="">
+                        <Inputs>
+                            <!-- Signal for internal binding (in LD_INST12 - LLNO)-->
+                            <!-- Signal for external binding (in IED 2 LD_INST22 - PIOC)-->
+                            <!-- Signal for external binding (in IED 3 LD_INST32 - ARCO)-->
+                            <ExtRef intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
+                        </Inputs>
+                    </LN0>
+                </LDevice>
+                <LDevice inst="LD_INST12"> <!-- binder for signal from LD_INST11/LLNO -->
+                    <LN0 lnType="LN1" lnClass="LLN0" inst=""/>
+                    <LN lnType="LN2" lnClass="ANCR" inst="1">
+                        <DOI name="Do21">
+                            <SDI name="sdo11">
+                                <SDI name="sdo12">
+                                    <SDI name="da11">
+                                        <SDI name="bda111">
+                                            <DAI name="bdapr" valImport="true">
+                                                <Val>myVal</Val>
+                                            </DAI>
+                                        </SDI>
+                                    </SDI>
+                                </SDI>
+                            </SDI>
+                        </DOI>
+                        <Inputs>
+                            <!-- Signal for external binding (in IED2LD_INST21/LLNO and IED3LD_INST32/PIOC)-->
+                            <ExtRef intAddr="INT_ADDR12" pDO="Do12.sdo12" pDA="da12.bda121.bda122"/>
+                        </Inputs>
+                    </LN>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
+    <DataTypeTemplates>
+        <LNodeType id="LNEX1" lnClass="LLN0">
+            <DO name="Do22" type="DO12"/>
+            <DO name="Do32" type="DO12"/>
+        </LNodeType>
+        <LNodeType id="LN1" lnClass="LLN0">
+            <DO name="Do11" type="DO11" transient="true"/> <!-- internal binding -->
+        </LNodeType>
+        <LNodeType id="LN2" lnClass="ANCR">
+            <DO name="Do21" type="DO11"/> <!-- binder for external IED 2-->
+            <DO name="Do31" type="DO11"/> <!-- binder for external IED 3-->
+        </LNodeType>
+        <DOType cdc="WYE" id="DO11">
+            <SDO name="sdo11" type="DO12"/> <!-- internal binding -->
+            <DA name="da1" bType="Enum" fc="ST" type="RecCycModKind" valImport="true"/>
+            <SDO name="sdo21" type="DO12"/> <!-- binder for external IED 2-->
+            <SDO name="sdo31" type="DO12"/> <!-- binder for external IED 3-->
+        </DOType>
+        <DOType cdc="WYE" id="DO12">
+            <SDO name="sdo12" type="DO13"/><!-- internal binding -->
+            <SDO name="sdo22" type="DO13"/><!-- binder for external IED 2-->
+            <SDO name="sdo32" type="DO13"/><!-- binder for external IED 3-->
+        </DOType>
+        <DOType cdc="WYE" id="DO13">
+            <DA fc="ST" name="da11" bType="Struct" type="DA11"/> <!-- internal binding -->
+            <DA fc="ST" name="da22" bType="Struct" type="DA11"/> <!-- binder for external IED 2-->
+            <DA fc="ST" name="da32" bType="Struct" type="DA11"/> <!-- binder for external IED 3-->
+        </DOType>
+        <DAType id="DA11">
+            <BDA name="bda111" bType="Struct" type="DA12"/> <!-- internal binding -->
+            <BDA name="bda221" bType="Struct" type="DA12"/> <!-- binder for external IED 2-->
+            <BDA name="bda321" bType="Struct" type="DA12"/> <!-- binder for external IED 3-->
+        </DAType>
+        <DAType id="DA12">
+            <BDA name="bdapr" bType="VisString255"/>
+            <BDA name="bda112" bType="Struct" type="DA13"/> <!-- internal binding -->
+            <BDA name="bda222" bType="Struct" type="DA13"/> <!-- binder for external IED 2-->
+            <BDA name="bda322" bType="Struct" type="DA13"/> <!-- binder for external IED 3-->
+        </DAType>
+        <DAType id="DA13">
+            <BDA name="bda113" bType="Enum" type="RecCycModKind" valImport="true"/> <!-- internal binding -->
+            <BDA name="bda223" bType="Enum" type="RecCycModKind"/> <!-- binder for external IED 2-->
+            <BDA name="bda323" bType="Enum" type="RecCycModKind"/> <!-- binder for external IED 3-->
+        </DAType>
+        <EnumType id="RecCycModKind">
+            <EnumVal ord="1">Completed-diff</EnumVal>
+        </EnumType>
+    </DataTypeTemplates>
+</SCL>
