@@ -10,17 +10,14 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.lfenergy.compas.scl2007b4.model.TDO;
 import org.lfenergy.compas.scl2007b4.model.TLNodeType;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
+import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.dto.DoTypeName;
 import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 public class LNodeTypeAdapter
@@ -67,6 +64,11 @@ public class LNodeTypeAdapter
             }
         }
         return true;
+    }
+
+    @Override
+    protected void addPrivate(TPrivate tPrivate) {
+        currentElem.getPrivate().add(tPrivate);
     }
 
     public boolean containsDOWithDOTypeId(String doTypeId) {

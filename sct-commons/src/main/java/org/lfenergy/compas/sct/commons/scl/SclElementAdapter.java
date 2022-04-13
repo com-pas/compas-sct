@@ -5,7 +5,7 @@
 package org.lfenergy.compas.sct.commons.scl;
 
 import lombok.Getter;
-
+import org.lfenergy.compas.scl2007b4.model.TPrivate;
 
 
 @Getter
@@ -42,6 +42,8 @@ public abstract class SclElementAdapter<P extends SclElementAdapter, T> {
     }
 
     protected abstract boolean amChildElementRef();
+
+    protected abstract void addPrivate(TPrivate tPrivate);
 
 }
 

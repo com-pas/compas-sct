@@ -7,6 +7,7 @@ package org.lfenergy.compas.sct.commons.scl.sstation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.TBay;
+import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.scl2007b4.model.TSubstation;
 import org.lfenergy.compas.scl2007b4.model.TVoltageLevel;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
@@ -62,5 +63,15 @@ class BayAdapterTest {
         TBay tBay1 = new TBay();
         assertThrows(IllegalArgumentException.class,
                 () ->bayAdapter.setCurrentElem(tBay1));
+    }
+
+    @Test
+    void addPrivate() {
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType("Private Type");
+        tPrivate.setSource("Private Source");
+        assertTrue(bayAdapter.getCurrentElem().getPrivate().isEmpty());
+        bayAdapter.addPrivate(tPrivate);
+        assertEquals(1, bayAdapter.getCurrentElem().getPrivate().size());
     }
 }

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.TDA;
 import org.lfenergy.compas.scl2007b4.model.TDOType;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
+import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
@@ -62,5 +63,18 @@ class DAAdapterTest {
         assertDoesNotThrow(() -> daAdapter.check(daTypeName));
         daTypeName.getDaiValues().put(0L,"unknown");
         assertThrows(ScdException.class, () -> daAdapter.check(daTypeName));
+    }
+
+    @Test
+    void addPrivate() throws Exception {
+        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
+        DOTypeAdapter doTypeAdapter =  dttAdapter.getDOTypeAdapters().get(0);
+        DAAdapter daAdapter = assertDoesNotThrow(() -> doTypeAdapter.getDAAdapterByName("dataNs").get());
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType("Private Type");
+        tPrivate.setSource("Private Source");
+        assertTrue(daAdapter.getCurrentElem().getPrivate().isEmpty());
+        daAdapter.addPrivate(tPrivate);
+        assertEquals(1, daAdapter.getCurrentElem().getPrivate().size());
     }
 }
