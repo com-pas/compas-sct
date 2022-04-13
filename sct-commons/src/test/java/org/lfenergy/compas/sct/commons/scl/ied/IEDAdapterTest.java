@@ -226,4 +226,17 @@ class IEDAdapterTest {
         controlBlock.setHolderIEDName("IED_NAME");
         controlBlock.setHolderIEDName("IED_NAME");
     }
+
+    @Test
+    void addPrivate() throws Exception {
+        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType("Private Type");
+        tPrivate.setSource("Private Source");
+        assertTrue(iAdapter.getCurrentElem().getPrivate().isEmpty());
+        iAdapter.addPrivate(tPrivate);
+        assertEquals(1, iAdapter.getCurrentElem().getPrivate().size());
+    }
 }

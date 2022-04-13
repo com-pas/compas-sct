@@ -5,15 +5,12 @@
 package org.lfenergy.compas.sct.commons.scl.com;
 
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TCommunication;
 import org.lfenergy.compas.scl2007b4.model.TConnectedAP;
+import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.scl2007b4.model.TSubNetwork;
 import org.lfenergy.compas.sct.commons.dto.DTO;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import static org.mockito.ArgumentMatchers.anyString;
-import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -65,5 +62,16 @@ class SubNetworkAdapterTest {
                 ScdException.class,
                 () -> subNetworkAdapter.getConnectedAPAdapter(DTO.HOLDER_IED_NAME,DTO.AP_NAME + "1")
         );
+    }
+
+    @Test
+    void addPrivate() throws Exception {
+        SubNetworkAdapter subNetworkAdapter = new SubNetworkAdapter(null, new TSubNetwork());
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType("Private Type");
+        tPrivate.setSource("Private Source");
+        assertTrue(subNetworkAdapter.getCurrentElem().getPrivate().isEmpty());
+        subNetworkAdapter.addPrivate(tPrivate);
+        assertEquals(1, subNetworkAdapter.getCurrentElem().getPrivate().size());
     }
 }

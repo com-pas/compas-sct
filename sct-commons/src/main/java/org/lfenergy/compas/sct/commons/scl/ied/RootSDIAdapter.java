@@ -5,6 +5,7 @@
 package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.lfenergy.compas.scl2007b4.model.TDAI;
+import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.scl2007b4.model.TSDI;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
@@ -65,6 +66,11 @@ public class RootSDIAdapter extends SclElementAdapter<DOIAdapter, TSDI> implemen
         return new SDIAdapter(this,tsdi);
     }
 
+    @Override
+    protected void addPrivate(TPrivate tPrivate) {
+        currentElem.getPrivate().add(tPrivate);
+    }
+
     public static class DAIAdapter extends AbstractDAIAdapter<RootSDIAdapter> {
 
         public DAIAdapter(RootSDIAdapter rootSDIAdapter, TDAI tdai) {
@@ -74,6 +80,11 @@ public class RootSDIAdapter extends SclElementAdapter<DOIAdapter, TSDI> implemen
         @Override
         protected boolean amChildElementRef() {
             return parentAdapter.getCurrentElem().getSDIOrDAI().contains(currentElem);
+        }
+
+        @Override
+        protected void addPrivate(TPrivate tPrivate) {
+            currentElem.getPrivate().add(tPrivate);
         }
     }
 }

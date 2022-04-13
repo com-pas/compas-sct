@@ -5,37 +5,14 @@
 package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.scl2007b4.model.LN0;
-import org.lfenergy.compas.scl2007b4.model.SCL;
-import org.lfenergy.compas.scl2007b4.model.TDOI;
-import org.lfenergy.compas.scl2007b4.model.TDataSet;
-import org.lfenergy.compas.scl2007b4.model.TExtRef;
-import org.lfenergy.compas.scl2007b4.model.TFCDA;
-import org.lfenergy.compas.scl2007b4.model.TGSEControl;
-import org.lfenergy.compas.scl2007b4.model.TIED;
-import org.lfenergy.compas.scl2007b4.model.TInputs;
-import org.lfenergy.compas.scl2007b4.model.TLDevice;
-import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
-import org.lfenergy.compas.scl2007b4.model.TLN;
-import org.lfenergy.compas.scl2007b4.model.TReportControl;
-import org.lfenergy.compas.scl2007b4.model.TSampledValueControl;
-import org.lfenergy.compas.scl2007b4.model.TServiceType;
-import org.lfenergy.compas.sct.commons.dto.ControlBlock;
-import org.lfenergy.compas.sct.commons.dto.DTO;
-import org.lfenergy.compas.sct.commons.dto.DaTypeName;
-import org.lfenergy.compas.sct.commons.dto.DoTypeName;
-import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
-import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
-import org.lfenergy.compas.sct.commons.dto.GooseControlBlock;
-import org.lfenergy.compas.sct.commons.dto.ReportControlBlock;
-import org.lfenergy.compas.sct.commons.dto.SMVControlBlock;
+import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -334,5 +311,18 @@ class LN0AdapterTest {
         Mockito.when(controlBlock1.getServiceType()).thenReturn(TServiceType.POLL);
         assertThrows(ScdException.class,()->lnAdapter.addControlBlock(controlBlock1));
 
+    }
+
+    @Test
+    void addPrivate() throws Exception {
+        LN0 tln = new LN0();
+        tln.getLnClass().add(TLLN0Enum.LLN_0.value());
+        LN0Adapter lnAdapter = new LN0Adapter(null,tln);
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType("Private Type");
+        tPrivate.setSource("Private Source");
+        assertTrue(lnAdapter.getCurrentElem().getPrivate().isEmpty());
+        lnAdapter.addPrivate(tPrivate);
+        assertEquals(1, lnAdapter.getCurrentElem().getPrivate().size());
     }
 }
