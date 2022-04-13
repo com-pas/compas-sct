@@ -1,4 +1,3 @@
-
 // SPDX-FileCopyrightText: 2021 RTE FRANCE
 //
 // SPDX-License-Identifier: Apache-2.0
@@ -7,7 +6,6 @@ package org.lfenergy.compas.sct.commons.scl.com;
 
 
 import org.lfenergy.compas.scl2007b4.model.TCommunication;
-
 import org.lfenergy.compas.scl2007b4.model.TSubNetwork;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
@@ -38,16 +36,16 @@ public class CommunicationAdapter extends SclElementAdapter<SclRootAdapter, TCom
                                            String iedName, String apName) throws ScdException {
 
         IEDAdapter iedAdapter = parentAdapter.getIEDAdapterByName(iedName);
-        if(!iedAdapter.findAccessPointByName(apName)){
+        if (!iedAdapter.findAccessPointByName(apName)) {
             throw new ScdException("Unknown AccessPoint :" + apName + " in IED :" + iedName);
         }
         Optional<SubNetworkAdapter> opSubNetworkAdapter = getSubnetworkByName(snName);
-        if(!opSubNetworkAdapter.isPresent()){ // create new subnetwork
+        if (opSubNetworkAdapter.isEmpty()) { // create new subnetwork
             TSubNetwork subNetwork = new TSubNetwork();
             subNetwork.setName(snName);
             subNetwork.setType(snType);
             currentElem.getSubNetwork().add(subNetwork);
-            opSubNetworkAdapter = Optional.of(new SubNetworkAdapter(this,subNetwork));
+            opSubNetworkAdapter = Optional.of(new SubNetworkAdapter(this, subNetwork));
         }
 
         opSubNetworkAdapter.get().addConnectedAP(iedName,apName);
@@ -60,13 +58,13 @@ public class CommunicationAdapter extends SclElementAdapter<SclRootAdapter, TCom
                 .stream()
                 .filter(tSubNetwork -> tSubNetwork.getName().equals(snName))
                 .findFirst()
-                .map(tSubNetwork -> new SubNetworkAdapter(this,tSubNetwork));
+                .map(tSubNetwork -> new SubNetworkAdapter(this, tSubNetwork));
     }
 
     public List<SubNetworkAdapter> getSubNetworkAdapters() {
         return currentElem.getSubNetwork()
                 .stream()
-                .map(tSubNetwork -> new SubNetworkAdapter(this,tSubNetwork))
+                .map(tSubNetwork -> new SubNetworkAdapter(this, tSubNetwork))
                 .collect(Collectors.toList());
 
     }
