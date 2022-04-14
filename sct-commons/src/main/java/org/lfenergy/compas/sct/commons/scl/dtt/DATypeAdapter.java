@@ -7,21 +7,12 @@ package org.lfenergy.compas.sct.commons.scl.dtt;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.lfenergy.compas.scl2007b4.model.TBDA;
-
-import org.lfenergy.compas.scl2007b4.model.TDAType;
-import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
-import org.lfenergy.compas.scl2007b4.model.TProtNs;
-
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -261,6 +252,10 @@ public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
         return parentAdapter;
     }
 
+    @Override
+    protected void addPrivate(TPrivate tPrivate) {
+        currentElem.getPrivate().add(tPrivate);
+    }
 
     public Optional<BDAAdapter> getBdaAdapterByName(String name) {
         Optional<TBDA> opBda = getBDAByName(name);
@@ -282,6 +277,11 @@ public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
         @Override
         protected boolean amChildElementRef() {
             return parentAdapter.getCurrentElem().getBDA().contains(currentElem);
+        }
+
+        @Override
+        protected void addPrivate(TPrivate tPrivate) {
+            currentElem.getPrivate().add(tPrivate);
         }
     }
 }

@@ -5,6 +5,7 @@
 package org.lfenergy.compas.sct.commons.scl.dtt;
 
 import org.lfenergy.compas.scl2007b4.model.TDO;
+import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 
 import java.util.Optional;
@@ -28,6 +29,10 @@ public class DOAdapter extends SclElementAdapter<LNodeTypeAdapter, TDO> implemen
         return getDataTypeTemplateAdapter().getDOTypeAdapterById(currentElem.getType());
     }
 
+    @Override
+    protected void addPrivate(TPrivate tPrivate) {
+        currentElem.getPrivate().add(tPrivate);
+    }
 
     public String getType() {
         return currentElem.getType();

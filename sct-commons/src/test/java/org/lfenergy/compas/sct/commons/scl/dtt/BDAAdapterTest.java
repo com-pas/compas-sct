@@ -6,7 +6,6 @@ package org.lfenergy.compas.sct.commons.scl.dtt;
 
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.mockito.Mockito;
 
@@ -90,5 +89,17 @@ class BDAAdapterTest extends AbstractDTTLevel<DATypeAdapter,TBDA> {
         tbda.setType("ID_BDA");
         sclElement = tbda;
         sclElementAdapter.getCurrentElem().getBDA().add(tbda);
+    }
+
+    @Test
+    void addPrivate() {
+        init();
+        DATypeAdapter.BDAAdapter bdaAdapter = new DATypeAdapter.BDAAdapter(sclElementAdapter,sclElement);
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType("Private Type");
+        tPrivate.setSource("Private Source");
+        assertTrue(bdaAdapter.getCurrentElem().getPrivate().isEmpty());
+        bdaAdapter.addPrivate(tPrivate);
+        assertEquals(1, bdaAdapter.getCurrentElem().getPrivate().size());
     }
 }

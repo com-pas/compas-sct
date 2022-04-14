@@ -7,9 +7,9 @@ package org.lfenergy.compas.sct.commons.scl.header;
 
 import org.lfenergy.compas.scl2007b4.model.THeader;
 import org.lfenergy.compas.scl2007b4.model.THitem;
+import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -44,6 +44,11 @@ public class HeaderAdapter extends SclElementAdapter<SclRootAdapter, THeader> {
         history.getHitem().add(tHitem);
 
         return this;
+    }
+
+    @Override
+    protected void addPrivate(TPrivate tPrivate) {
+        throw new IllegalArgumentException("Private is not Allowed here");
     }
 
     public String getHeaderId() {

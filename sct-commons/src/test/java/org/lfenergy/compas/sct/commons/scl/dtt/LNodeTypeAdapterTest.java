@@ -5,7 +5,9 @@
 package org.lfenergy.compas.sct.commons.scl.dtt;
 
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.scl2007b4.model.TDO;
+import org.lfenergy.compas.scl2007b4.model.TLNodeType;
+import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.sct.commons.dto.DTO;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.dto.DoTypeName;
@@ -181,5 +183,17 @@ class LNodeTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TLNo
         LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("LN1").get());
         List<ResumedDataTemplate> rDtts = assertDoesNotThrow(()-> lNodeTypeAdapter.getResumedDTTByDaName(daTypeName));
         assertEquals(2,rDtts.size());
+    }
+
+    @Test
+    void addPrivate() throws Exception {
+        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
+        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getLNodeTypeAdapterById("LN1").get());
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType("Private Type");
+        tPrivate.setSource("Private Source");
+        assertFalse(lNodeTypeAdapter.getCurrentElem().getPrivate().isEmpty());
+        lNodeTypeAdapter.addPrivate(tPrivate);
+        assertEquals(2, lNodeTypeAdapter.getCurrentElem().getPrivate().size());
     }
 }

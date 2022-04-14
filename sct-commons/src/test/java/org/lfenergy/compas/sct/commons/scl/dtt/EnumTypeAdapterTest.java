@@ -7,6 +7,7 @@ package org.lfenergy.compas.sct.commons.scl.dtt;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.TEnumType;
 import org.lfenergy.compas.scl2007b4.model.TEnumVal;
+import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.mockito.Mockito;
 
 import java.util.List;
@@ -56,5 +57,20 @@ class EnumTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TEnum
         anotherEnumType = new TEnumType();
         anotherEnumType.getEnumVal().add(notSameEnumVal);
         assertFalse(enumTypeAdapter.hasSameContentAs(anotherEnumType));
+    }
+
+    @Test
+    void addPrivate() {
+        init();
+        EnumTypeAdapter enumTypeAdapter = assertDoesNotThrow(
+                () -> new EnumTypeAdapter(sclElementAdapter,sclElement)
+        );
+
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType("Private Type");
+        tPrivate.setSource("Private Source");
+        assertTrue(enumTypeAdapter.getCurrentElem().getPrivate().isEmpty());
+        enumTypeAdapter.addPrivate(tPrivate);
+        assertEquals(1, enumTypeAdapter.getCurrentElem().getPrivate().size());
     }
 }

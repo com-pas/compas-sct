@@ -7,7 +7,7 @@ package org.lfenergy.compas.sct.commons.scl.com;
 
 
 import org.lfenergy.compas.scl2007b4.model.TCommunication;
-
+import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.scl2007b4.model.TSubNetwork;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
@@ -32,6 +32,11 @@ public class CommunicationAdapter extends SclElementAdapter<SclRootAdapter, TCom
     @Override
     public boolean amChildElementRef() {
         return currentElem == parentAdapter.getCurrentElem().getCommunication();
+    }
+
+    @Override
+    protected void addPrivate(TPrivate tPrivate) {
+        currentElem.getPrivate().add(tPrivate);
     }
 
     public SubNetworkAdapter addSubnetwork(String snName, String snType,
