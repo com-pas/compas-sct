@@ -15,8 +15,10 @@ import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
+import org.mockito.Mockito;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -228,10 +230,13 @@ class IEDAdapterTest {
     }
 
     @Test
-    void addPrivate() throws Exception {
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
+    void addPrivate() {
+        SclRootAdapter sclRootAdapter = Mockito.mock(SclRootAdapter.class);
+        SCL scl = Mockito.mock(SCL.class);
+        Mockito.when(sclRootAdapter.getCurrentElem()).thenReturn(scl);
+        TIED tied = new TIED();
+        Mockito.when(scl.getIED()).thenReturn(List.of(tied));
+        IEDAdapter iAdapter = new IEDAdapter(sclRootAdapter, tied);
         TPrivate tPrivate = new TPrivate();
         tPrivate.setType("Private Type");
         tPrivate.setSource("Private Source");

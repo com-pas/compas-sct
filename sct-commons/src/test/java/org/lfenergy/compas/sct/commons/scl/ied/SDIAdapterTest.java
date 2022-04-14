@@ -60,7 +60,7 @@ class SDIAdapterTest {
     }
 
     @Test
-    void addPrivate() throws Exception {
+    void addPrivate() {
         TSDI tsdi = new TSDI();
         tsdi.setName("sdo1");
         SDIAdapter sdiAdapter = new SDIAdapter(null,tsdi);
