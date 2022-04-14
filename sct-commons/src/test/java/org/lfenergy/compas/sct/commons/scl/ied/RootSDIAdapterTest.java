@@ -58,7 +58,7 @@ class RootSDIAdapterTest {
     }
 
     @Test
-    void addPrivate() throws Exception {
+    void addPrivate() {
         TSDI tsdi = new TSDI();
         tsdi.setName("sdo1");
         RootSDIAdapter rootSDIAdapter = new RootSDIAdapter(null,tsdi);

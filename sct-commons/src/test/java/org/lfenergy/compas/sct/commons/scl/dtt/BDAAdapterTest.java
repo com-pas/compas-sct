@@ -92,7 +92,7 @@ class BDAAdapterTest extends AbstractDTTLevel<DATypeAdapter,TBDA> {
     }
 
     @Test
-    void addPrivate() throws Exception {
+    void addPrivate() {
         init();
         DATypeAdapter.BDAAdapter bdaAdapter = new DATypeAdapter.BDAAdapter(sclElementAdapter,sclElement);
         TPrivate tPrivate = new TPrivate();

@@ -314,7 +314,7 @@ class LN0AdapterTest {
     }
 
     @Test
-    void addPrivate() throws Exception {
+    void addPrivate() {
         LN0 tln = new LN0();
         tln.getLnClass().add(TLLN0Enum.LLN_0.value());
         LN0Adapter lnAdapter = new LN0Adapter(null,tln);

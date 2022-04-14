@@ -65,7 +65,7 @@ class SubNetworkAdapterTest {
     }
 
     @Test
-    void addPrivate() throws Exception {
+    void addPrivate() {
         SubNetworkAdapter subNetworkAdapter = new SubNetworkAdapter(null, new TSubNetwork());
         TPrivate tPrivate = new TPrivate();
         tPrivate.setType("Private Type");
