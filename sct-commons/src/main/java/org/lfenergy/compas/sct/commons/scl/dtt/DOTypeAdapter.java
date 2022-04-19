@@ -12,14 +12,7 @@ import org.lfenergy.compas.sct.commons.dto.DoTypeName;
 import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -132,6 +125,10 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
         return parentAdapter.getCurrentElem().getDOType().contains(currentElem);
     }
 
+    @Override
+    protected void addPrivate(TPrivate tPrivate) {
+        currentElem.getPrivate().add(tPrivate);
+    }
 
     public boolean containsDAWithDAName(String da){
         return currentElem.getSDOOrDA()

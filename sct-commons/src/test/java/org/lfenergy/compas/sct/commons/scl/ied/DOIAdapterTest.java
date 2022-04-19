@@ -6,12 +6,7 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.scl2007b4.model.LN0;
-import org.lfenergy.compas.scl2007b4.model.SCL;
-import org.lfenergy.compas.scl2007b4.model.TDAI;
-import org.lfenergy.compas.scl2007b4.model.TDOI;
-import org.lfenergy.compas.scl2007b4.model.TSDI;
-import org.lfenergy.compas.scl2007b4.model.TVal;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.dto.DoTypeName;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
@@ -149,5 +144,16 @@ class DOIAdapterTest {
         DOIAdapter.DAIAdapter daiAdapter = assertDoesNotThrow(() -> new DOIAdapter.DAIAdapter(doiAdapter,tdai));
 
         return daiAdapter;
+    }
+
+    @Test
+    void addPrivate() {
+        DOIAdapter.DAIAdapter daiAdapter = initInnerDAIAdapter("Do","da");
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType("Private Type");
+        tPrivate.setSource("Private Source");
+        assertTrue(daiAdapter.getCurrentElem().getPrivate().isEmpty());
+        daiAdapter.addPrivate(tPrivate);
+        assertEquals(1, daiAdapter.getCurrentElem().getPrivate().size());
     }
 }

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.TBDA;
 import org.lfenergy.compas.scl2007b4.model.TDAType;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
+import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.dto.DoTypeName;
 import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
@@ -17,7 +18,6 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -143,5 +143,17 @@ class DATypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TDAType
         assertTrue(rDtt.getBdaNames().isEmpty());
         DATypeAdapter daTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getDATypeAdapterById("DA1").get());
         assertDoesNotThrow(() -> daTypeAdapter.getResumedDTTByDaName(daTypeName,0,rDtt).get());
+    }
+
+    @Test
+    void addPrivate() throws Exception {
+        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
+        DATypeAdapter daTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getDATypeAdapterById("DA1").get());
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType("Private Type");
+        tPrivate.setSource("Private Source");
+        assertFalse(daTypeAdapter.getCurrentElem().getPrivate().isEmpty());
+        daTypeAdapter.addPrivate(tPrivate);
+        assertEquals(2, daTypeAdapter.getCurrentElem().getPrivate().size());
     }
 }

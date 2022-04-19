@@ -6,28 +6,17 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.lfenergy.compas.scl2007b4.model.TAccessPoint;
-import org.lfenergy.compas.scl2007b4.model.TIED;
-import org.lfenergy.compas.scl2007b4.model.TLDevice;
-import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
-import org.lfenergy.compas.scl2007b4.model.TServiceSettingsEnum;
-import org.lfenergy.compas.scl2007b4.model.TServiceSettingsNoDynEnum;
-import org.lfenergy.compas.scl2007b4.model.TServices;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.ControlBlock;
 import org.lfenergy.compas.sct.commons.dto.DataSetInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
+import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import org.lfenergy.compas.sct.commons.exception.ScdException;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -137,6 +126,11 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
         return currentElem.getAccessPoint()
                 .stream()
                 .anyMatch(tAccessPoint -> tAccessPoint.getName().equals(apName));
+    }
+
+    @Override
+    protected void addPrivate(TPrivate tPrivate) {
+        currentElem.getPrivate().add(tPrivate);
     }
 
     public List<ExtRefBindingInfo> getExtRefBinders(@NonNull ExtRefSignalInfo signalInfo) throws ScdException {

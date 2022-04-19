@@ -6,6 +6,7 @@ package org.lfenergy.compas.sct.commons.scl.com;
 
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TConnectedAP;
+import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 
 import java.util.Optional;
@@ -19,6 +20,11 @@ public class ConnectedAPAdapter extends SclElementAdapter<SubNetworkAdapter, TCo
     @Override
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getConnectedAP().contains(currentElem);
+    }
+
+    @Override
+    protected void addPrivate(TPrivate tPrivate) {
+        currentElem.getPrivate().add(tPrivate);
     }
 
     public String getIedName() {

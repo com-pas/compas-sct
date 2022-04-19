@@ -7,6 +7,7 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.TDAI;
 import org.lfenergy.compas.scl2007b4.model.TDOI;
+import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.scl2007b4.model.TSDI;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
@@ -56,4 +57,16 @@ class RootSDIAdapterTest {
         );
     }
 
+    @Test
+    void addPrivate() {
+        TSDI tsdi = new TSDI();
+        tsdi.setName("sdo1");
+        RootSDIAdapter rootSDIAdapter = new RootSDIAdapter(null,tsdi);
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType("Private Type");
+        tPrivate.setSource("Private Source");
+        assertTrue(rootSDIAdapter.getCurrentElem().getPrivate().isEmpty());
+        rootSDIAdapter.addPrivate(tPrivate);
+        assertEquals(1, rootSDIAdapter.getCurrentElem().getPrivate().size());
+    }
 }

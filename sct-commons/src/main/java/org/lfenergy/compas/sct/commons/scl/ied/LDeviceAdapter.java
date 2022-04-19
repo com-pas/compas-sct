@@ -7,24 +7,15 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.lfenergy.compas.scl2007b4.model.TDataSet;
 import org.lfenergy.compas.scl2007b4.model.TLDevice;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
-import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
-import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
-import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
-import org.lfenergy.compas.sct.commons.dto.LNodeDTO;
-import org.lfenergy.compas.sct.commons.dto.LogicalNodeOptions;
-import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
+import org.lfenergy.compas.scl2007b4.model.TPrivate;
+import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -156,5 +147,10 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
         }
         return resumedDataTemplateSet;
 
+    }
+
+    @Override
+    protected void addPrivate(TPrivate tPrivate) {
+        currentElem.getPrivate().add(tPrivate);
     }
 }

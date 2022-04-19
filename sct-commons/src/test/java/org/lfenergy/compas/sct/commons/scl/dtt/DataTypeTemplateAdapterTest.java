@@ -8,11 +8,11 @@ package org.lfenergy.compas.sct.commons.scl.dtt;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.dto.DTO;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 
 import java.util.List;
 import java.util.Optional;
@@ -360,4 +360,13 @@ class DataTypeTemplateAdapterTest {
         assertThrows(ScdException.class, () -> dttAdapter.checkDoAndDaLink("f","origin"));
         assertTrue( dttAdapter.checkDoAndDaLink("origin","d").isEmpty());
     }*/
+
+    @Test
+    void addPrivate() throws Exception {
+        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType("Private Type");
+        tPrivate.setSource("Private Source");
+        assertThrows(IllegalArgumentException.class, () -> dttAdapter.addPrivate(tPrivate));
+    }
 }
