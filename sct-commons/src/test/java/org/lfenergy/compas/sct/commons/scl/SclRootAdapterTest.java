@@ -7,6 +7,7 @@ package org.lfenergy.compas.sct.commons.scl;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.SCL;
+import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
@@ -53,5 +54,17 @@ class SclRootAdapterTest {
         MarshallerWrapper marshallerWrapper = SclTestMarshaller.createWrapper();
         System.out.println(marshallerWrapper.marshall(sclRootAdapter.getCurrentElem()));
 
+    }
+
+    @Test
+    void addPrivate() throws Exception {
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/add_ied_test.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType("Private Type");
+        tPrivate.setSource("Private Source");
+        assertTrue(sclRootAdapter.getCurrentElem().getPrivate().isEmpty());
+        sclRootAdapter.addPrivate(tPrivate);
+        assertEquals(1, sclRootAdapter.getCurrentElem().getPrivate().size());
     }
 }

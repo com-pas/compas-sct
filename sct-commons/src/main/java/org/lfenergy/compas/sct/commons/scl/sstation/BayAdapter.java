@@ -4,6 +4,7 @@
 package org.lfenergy.compas.sct.commons.scl.sstation;
 
 import org.lfenergy.compas.scl2007b4.model.TBay;
+import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 
@@ -28,5 +29,10 @@ public class BayAdapter extends SclElementAdapter<VoltageLevelAdapter, TBay> {
     @Override
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getBay().contains(currentElem);
+    }
+
+    @Override
+    protected void addPrivate(TPrivate tPrivate) {
+        currentElem.getPrivate().add(tPrivate);
     }
 }

@@ -4,9 +4,11 @@
 
 package org.lfenergy.compas.sct.commons.scl.ied;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
+import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.sct.commons.dto.DTO;
 import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
@@ -21,11 +23,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class LDeviceAdapterTest {
 
-    @Test
-    void testUpdateLDName() throws Exception {
+    private IEDAdapter iAdapter;
+
+    @BeforeEach
+    public void init() throws Exception {
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
+        iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
+    }
+
+    @Test
+    void testUpdateLDName() throws Exception {
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS1").get());
         lDeviceAdapter.updateLDName();
         assertEquals("IED_NAMELD_INS1",lDeviceAdapter.getLdName());
@@ -36,10 +44,7 @@ class LDeviceAdapterTest {
     }
 
     @Test
-    void testGetLNAdapters() throws Exception {
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
+    void testGetLNAdapters()  {
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2").get());
 
         assertEquals(1,lDeviceAdapter.getLNAdapters().size());
@@ -49,10 +54,7 @@ class LDeviceAdapterTest {
     }
 
     @Test
-    void testGetExtRefBinders() throws Exception {
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
+    void testGetExtRefBinders() {
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2").get());
         ExtRefSignalInfo signalInfo = DTO.createExtRefSignalInfo();
         signalInfo.setPDO("Do.sdo1");
@@ -63,9 +65,6 @@ class LDeviceAdapterTest {
 
     @Test
     void testGetExtRefInfo() throws Exception {
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2").get());
         List<ExtRefInfo> extRefInfoList = assertDoesNotThrow(()-> lDeviceAdapter.getExtRefInfo());
         assertEquals(2,extRefInfoList.size());
@@ -73,9 +72,6 @@ class LDeviceAdapterTest {
 
     @Test
     void TestGetDAI() throws Exception {
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS1").get());
         var rDtts = lDeviceAdapter.getDAI(new ResumedDataTemplate(),true);
         assertEquals(4,rDtts.size());
@@ -92,5 +88,16 @@ class LDeviceAdapterTest {
         filter.setLnInst("1");
         rDtts = lDeviceAdapter.getDAI(filter,true);
         assertEquals(2,rDtts.size());
+    }
+
+    @Test
+    void addPrivate() {
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2").get());
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType("Private Type");
+        tPrivate.setSource("Private Source");
+        assertTrue(lDeviceAdapter.getCurrentElem().getPrivate().isEmpty());
+        lDeviceAdapter.addPrivate(tPrivate);
+        assertEquals(1, lDeviceAdapter.getCurrentElem().getPrivate().size());
     }
 }

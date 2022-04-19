@@ -5,34 +5,12 @@
 package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.scl2007b4.model.LN0;
-import org.lfenergy.compas.scl2007b4.model.SCL;
-import org.lfenergy.compas.scl2007b4.model.TDataSet;
-import org.lfenergy.compas.scl2007b4.model.TExtRef;
-import org.lfenergy.compas.scl2007b4.model.TFCEnum;
-import org.lfenergy.compas.scl2007b4.model.TInputs;
-import org.lfenergy.compas.scl2007b4.model.TLDevice;
-import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
-import org.lfenergy.compas.scl2007b4.model.TLN;
-import org.lfenergy.compas.scl2007b4.model.TServiceType;
-import org.lfenergy.compas.scl2007b4.model.TVal;
-import org.lfenergy.compas.sct.commons.dto.ControlBlock;
-import org.lfenergy.compas.sct.commons.dto.DaTypeName;
-import org.lfenergy.compas.sct.commons.dto.DoTypeName;
-import org.lfenergy.compas.sct.commons.dto.GooseControlBlock;
-import org.lfenergy.compas.sct.commons.dto.SMVControlBlock;
-import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
-import org.lfenergy.compas.sct.commons.dto.DTO;
-import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
-import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
-import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
-import org.lfenergy.compas.sct.commons.dto.ExtRefSourceInfo;
-import org.lfenergy.compas.sct.commons.dto.ReportControlBlock;
-
-import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
+import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.AbstractDTTLevel;
+import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.mockito.Mockito;
 
@@ -325,6 +303,19 @@ class LNAdapterTest {
         return assertDoesNotThrow( () -> new LNAdapter(lDeviceAdapter,tln));
     }
 
-
+    @Test
+    void addPrivate() throws Exception {
+        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/scd_with_dai_test.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LDSUIED").get());
+        LNAdapter lnAdapter = lDeviceAdapter.getLNAdapter("PIOC","1", null);
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType("Private Type");
+        tPrivate.setSource("Private Source");
+        assertTrue(lnAdapter.getCurrentElem().getPrivate().isEmpty());
+        lnAdapter.addPrivate(tPrivate);
+        assertEquals(1, lnAdapter.getCurrentElem().getPrivate().size());
+    }
 
 }

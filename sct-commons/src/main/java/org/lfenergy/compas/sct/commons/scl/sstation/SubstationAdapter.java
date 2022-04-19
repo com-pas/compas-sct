@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.scl.sstation;
 
+import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.scl2007b4.model.TSubstation;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
@@ -42,5 +43,10 @@ public class SubstationAdapter extends SclElementAdapter<SclRootAdapter, TSubsta
                 .filter(tVoltageLevel -> tVoltageLevel.getName().equals(vLevelName))
                 .map(tVoltageLevel -> new VoltageLevelAdapter(this, tVoltageLevel))
                 .findFirst();
+    }
+
+    @Override
+    protected void addPrivate(TPrivate tPrivate) {
+        currentElem.getPrivate().add(tPrivate);
     }
 }

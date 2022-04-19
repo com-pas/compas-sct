@@ -6,6 +6,7 @@ package org.lfenergy.compas.sct.commons.scl.sstation;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.scl2007b4.model.TSubstation;
 import org.lfenergy.compas.scl2007b4.model.TVoltageLevel;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
@@ -60,5 +61,15 @@ class SubstationAdapterTest {
         tVoltageLevel.setName("VOLTAGE_LEVEL");
         ssAdapter.getCurrentElem().getVoltageLevel().add(tVoltageLevel);
         assertFalse(ssAdapter.getVoltageLevelAdapter("VOLTAGE_LEVEL1").isPresent());
+    }
+
+    @Test
+    void addPrivate() {
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType("Private Type");
+        tPrivate.setSource("Private Source");
+        assertTrue(ssAdapter.getCurrentElem().getPrivate().isEmpty());
+        ssAdapter.addPrivate(tPrivate);
+        assertEquals(1, ssAdapter.getCurrentElem().getPrivate().size());
     }
 }
