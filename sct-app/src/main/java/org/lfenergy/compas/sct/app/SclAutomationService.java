@@ -23,8 +23,8 @@ public class SclAutomationService {
         SclRootAdapter scdAdapter = SclService.initScl(Optional.ofNullable(headerDTO.getId()),
                 headerDTO.getVersion(),headerDTO.getRevision());
         if(!headerDTO.getHistoryItems().isEmpty()) {
-            headerDTO.getHistoryItems().forEach(hItem ->
-                    SclService.addHistoryItem(scdAdapter.getCurrentElem(), hItem.getWho(), hItem.getWhat(), hItem.getWhy()));
+            HeaderDTO.HistoryItem hItem = headerDTO.getHistoryItems().get(0);
+            SclService.addHistoryItem(scdAdapter.getCurrentElem(), hItem.getWho(), hItem.getWhat(), hItem.getWhy());
         }
              SclService.addSubstation(scdAdapter.getCurrentElem(), ssd);
         return scdAdapter;
