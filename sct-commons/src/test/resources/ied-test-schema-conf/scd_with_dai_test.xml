@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-FileCopyrightText: 2022 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+<SCL xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4">
+    <Header id="HeaderID" version="version" revision="Revision" toolID="toolID" nameStructure="IEDName"/>
+    <Communication>
+        <SubNetwork name="name1" type="IP">
+            <ConnectedAP iedName="IED_NAME" apName="accesspoint"></ConnectedAP>
+            <ConnectedAP iedName="IED_NAME" apName="ADMINISTRATION_AP"></ConnectedAP>
+        </SubNetwork>
+    </Communication>
+    <IED name="IED_NAME">
+        <AccessPoint name="accesspoint">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LDSUIED">
+                    <LN0 lnType="LN2" lnClass="LLN0" inst="">
+                        <DOI name="StrVal1">
+                            <SDI name="units">
+                                <DAI name="SIUnit" valImport="false">
+                                    <Val>m</Val>
+                                </DAI>
+                                <DAI name="multiplier" valImport="false">
+                                    <Val>Z</Val>
+                                </DAI>
+                            </SDI>
+                            <SDI name="setMag">
+                                <DAI name="f" valImport="true">
+                                    <Val>92</Val>
+                                </DAI>
+                            </SDI>
+                            <SDI name="maxVal">
+                                <DAI name="f" valImport="false">
+                                    <Val>100</Val>
+                                </DAI>
+                            </SDI>
+                            <SDI name="minVal">
+                                <DAI name="f" valImport="false">
+                                    <Val>80</Val>
+                                </DAI>
+                            </SDI>
+                            <SDI name="stepSize">
+                                <DAI name="f" valImport="false">
+                                    <Val>2</Val>
+                                </DAI>
+                            </SDI>
+                        </DOI>
+                    </LN0>
+                    <LN lnType="LN1" lnClass="PIOC" inst="1">
+                        <DataSet name="dataset1">
+                            <FCDA fc="ST" doName="Op.phsA" daName="origin.Check"/>
+                        </DataSet>
+                        <ReportControl name="Reportname" confRev="11" datSet="dataset1" rptID="id">
+                            <OptFields />
+                        </ReportControl>
+                        <DOI name="OpnDurTmms">
+                            <SDI name="units">
+                                <DAI name="SIUnit" valKind="Conf" valImport="false">
+                                    <Val>s</Val>
+                                </DAI>
+                                <DAI name="multiplier" valKind="Conf" valImport="false">
+                                    <Val>m</Val>
+                                </DAI>
+                            </SDI>
+                            <DAI name="setVal" valKind="Conf" valImport="true">
+                                <Val>100</Val>
+                            </DAI>
+                            <DAI name="minVal" valKind="Conf" valImport="false">
+                                <Val>0</Val>
+                            </DAI>
+                            <DAI name="maxVal" valKind="Conf" valImport="false">
+                                <Val>1000</Val>
+                            </DAI>
+                            <DAI name="stepSize" valKind="Conf" valImport="false">
+                                <Val>5</Val>
+                            </DAI>
+                            <DAI name="d" valKind="Conf">
+                                <Val>Minimal impulsion duration for the contact opening the circuit__breaker</Val>
+                            </DAI>
+                        </DOI>
+                        <DOI name="Opq">
+                            <SDI name="res">
+                                <DAI name="setVal" valImport="true">
+                                    <Val>false</Val>
+                                </DAI>
+                            </SDI>
+                        </DOI>
+                    </LN>
+                </LDevice>
+                <LDevice inst="LDTM">
+                    <LN0 lnType="LN2" lnClass="LLN0" inst="">
+                        <Inputs>
+                            <ExtRef desc="desc_LDTM_1" pDO="Op.phsA" pDA="origin.Check" intAddr="intAddr1" />
+                        </Inputs>
+                    </LN0>
+                </LDevice>
+                <LDevice inst="LDADD">
+                    <LN0 lnType="LN2" lnClass="LLN0" inst=""></LN0>
+                    <LN lnType="LN1" lnClass="PIOC" inst="1"></LN>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+        <AccessPoint name="ADMINISTRATION_AP"/>
+    </IED>
+    <DataTypeTemplates>
+        <LNodeType lnClass="LLN0" id="LN2">
+            <DO name="Beh" type="DO1" transient="false"/>
+            <DO name="FACntRs" type="DO2" transient="true"/>
+            <DO name="StrVal" type="DO3" transient="false"/>
+            <DO name="StrVal1" type="DO6"/>
+            <DO name="InRef1" type="DO7"/>
+        </LNodeType>
+        <LNodeType lnClass="PIOC" id="LN1">
+            <DO name="Beh" type="DO1" transient="false"/>
+            <DO name="StrVal" type="DO3" transient="false"/>
+            <DO name="Op" type="DO3" transient="false"/>
+            <DO name="Opq" type="DO2" transient="false"/>
+            <DO name="OpnDurTmms" type="DO5"/>
+
+        </LNodeType>
+        <DOType cdc="WYE" id="DO1">
+            <DA fc="DC" dchg="false" qchg="false" dupd="false" name="dataNs" bType="VisString255" valImport="true">
+                <Val>IEC 61850-7-3:2007B</Val>
+            </DA>
+            <DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="true"/>
+        </DOType>
+        <DOType cdc="WYE" id="DO2">
+            <SDO name="res" type="DO4"/>
+            <DA fc="CF" dchg="true" qchg="false" dupd="false" name="angRef" bType="Enum" type="PhaseAngleReferenceKind" valImport="true"/>
+        </DOType>
+        <DOType cdc="WYE" id="DO3">
+            <SDO name="phsA" type="DO4"/>
+            <DA fc="CF" dchg="true" qchg="false" dupd="false" name="smpRate" bType="INT32U"/>
+            <DA fc="ST" dchg="false" qchg="false" dupd="false" name="origin" bType="Struct" type="DA3"/>
+        </DOType>
+        <DOType cdc="WYE" id="DO4">
+            <DA fc="ST" dchg="false" qchg="false" dupd="false" name="origin" bType="Struct" type="DA3"/>
+            <DA fc="CF" dchg="true" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="true"/>
+            <DA fc="SP" dchg="true" qchg="false" dupd="false" name="setVal" bType="BOOLEAN" valKind="RO" valImport="true"/>
+        </DOType>
+        <DOType cdc="ING" id="DO5">
+            <DA fc="SP" dchg="true" qchg="false" dupd="false" name="setVal" bType="INT32" desc="0" valImport="true"/>
+            <DA fc="CF" dchg="true" qchg="false" dupd="false" name="minVal" bType="INT32" desc="1"/>
+            <DA fc="CF" dchg="true" qchg="false" dupd="false" name="maxVal" bType="INT32" desc="2"/>
+            <DA fc="CF" dchg="true" qchg="false" dupd="false" name="stepSize" bType="INT32U" desc="3"/>
+            <DA fc="CF" dchg="true" qchg="false" dupd="false" name="units" bType="Struct" type="DA7" desc="4"/>
+            <DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" desc="5"/>
+        </DOType>
+        <DOType cdc="ASG" id="DO6">
+            <DA fc="SP" dchg="true" qchg="false" dupd="false" name="setMag" bType="Struct" type="DA5" valImport="true"/>
+            <DA fc="CF" dchg="true" qchg="false" dupd="false" name="minVal" bType="Struct" valKind="RO" type="DA6"/>
+            <DA fc="CF" dchg="true" qchg="false" dupd="false" name="maxVal" bType="Struct" valKind="RO" type="DA6"/>
+            <DA fc="CF" dchg="true" qchg="false" dupd="false" name="stepSize" bType="Struct" valKind="RO" type="DA6"/>
+            <DA fc="CF" dchg="true" qchg="false" dupd="false" name="units" bType="Struct" type="DA7"/>
+        </DOType>
+        <DOType cdc="WYE" id="DO7">
+            <DA fc="SP" dchg="true" qchg="false" dupd="false" name="setSrcRef" bType="ObjRef" desc="0" valImport="true"/>
+        </DOType>
+        <DAType id="DA1">
+            <BDA name="Check" bType="Check"/>
+            <BDA name="origin" bType="Struct" type="DA3"/>
+            <ProtNs type="8-MMS">IEC 61850-8-1:2003</ProtNs>
+        </DAType>
+        <DAType id="DA2">
+            <BDA name="T" bType="Timestamp"/>
+            <BDA name="ctlVal" bType="Enum" type="RecCycModKind"/>
+            <ProtNs type="8-MMS">IEC 61850-8-1:2003</ProtNs>
+        </DAType>
+        <DAType id="DA3">
+            <BDA name="Check" bType="Check"/>
+            <BDA name="operTm" bType="Timestamp"/>
+            <BDA name="test" bType="VisString255" valImport="true"/>
+            <ProtNs type="8-MMS">IEC 61850-8-1:2003</ProtNs>
+        </DAType>
+        <DAType id="DA5">
+            <BDA name="f" bType="FLOAT32" valKind="RO" valImport="true"/>
+        </DAType>
+        <DAType id="DA6">
+            <BDA name="f" bType="FLOAT32" valKind="RO"/>
+        </DAType>
+        <DAType id="DA7">
+            <BDA name="SIUnit" bType="Enum" type="SIUnitKind" valImport="true"/>
+            <BDA name="multiplier" bType="Enum" type="MultiplierKind" valImport="true"/>
+        </DAType>
+        <EnumType id="RecCycModKind">
+            <EnumVal ord="1">Completed</EnumVal>
+            <EnumVal ord="2">Cancelled</EnumVal>
+            <EnumVal ord="3">New adjustments</EnumVal>
+            <EnumVal ord="4">Under way</EnumVal>
+        </EnumType>
+        <EnumType id="PhaseAngleReferenceKind">
+            <EnumVal ord="0">Va</EnumVal>
+            <EnumVal ord="1">Vb</EnumVal>
+            <EnumVal ord="2">Vc</EnumVal>
+            <EnumVal ord="3">Aa</EnumVal>
+            <EnumVal ord="4">Ab</EnumVal>
+            <EnumVal ord="5">Ac</EnumVal>
+            <EnumVal ord="6">Vab</EnumVal>
+            <EnumVal ord="7">Vbc</EnumVal>
+            <EnumVal ord="8">Vca</EnumVal>
+            <EnumVal ord="9">Vother</EnumVal>
+            <EnumVal ord="10">Aother</EnumVal>
+            <EnumVal ord="11">Synchrophasor</EnumVal>
+        </EnumType>
+        <EnumType id="SIUnitKind">
+            <EnumVal ord="2">m</EnumVal>
+            <EnumVal ord="3">kg</EnumVal>
+            <EnumVal ord="4">s</EnumVal>
+            <EnumVal ord="5">A</EnumVal>
+            <EnumVal ord="6">K</EnumVal>
+            <EnumVal ord="7">mol</EnumVal>
+            <EnumVal ord="8">cd</EnumVal>
+            <EnumVal ord="9">deg</EnumVal>
+            <EnumVal ord="10">rad</EnumVal>
+        </EnumType>
+            <EnumType id="MultiplierKind">
+            <EnumVal ord="-24">y</EnumVal>
+            <EnumVal ord="-21">z</EnumVal>
+            <EnumVal ord="-18">a</EnumVal>
+            <EnumVal ord="-15">f</EnumVal>
+            <EnumVal ord="-12">p</EnumVal>
+            <EnumVal ord="-9">n</EnumVal>
+            <EnumVal ord="-6">µ</EnumVal>
+            <EnumVal ord="-3">m</EnumVal>
+            <EnumVal ord="-2">c</EnumVal>
+            <EnumVal ord="-1">d</EnumVal>
+        </EnumType>
+    </DataTypeTemplates>
+</SCL>

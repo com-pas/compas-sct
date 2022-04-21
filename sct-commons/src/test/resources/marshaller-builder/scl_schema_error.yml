@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: 2021 RTE FRANCE
+#
+# SPDX-License-Identifier: Apache-2.0
+
+---
+compas:
+  scl:
+    # XsdPath currently is a reference to a XSD on the classpath, searched from the root.
+    # ContextPath is the package where the ObjectFactory class can be found, mostly generated there.
+    schemas:
+      xsdPath: "classpath:marshaller-builder/Employee.xsd"
+      namespace: "http://www.employee.com"
+      contextPath: "org.lfenergy.compas.sct.commons.testhelpers.marshaller"
