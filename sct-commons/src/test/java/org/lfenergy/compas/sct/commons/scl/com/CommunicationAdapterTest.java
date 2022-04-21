@@ -81,4 +81,15 @@ class CommunicationAdapterTest {
         communicationAdapter.getCurrentElem().getSubNetwork().add(tSubNetwork);
         assertFalse(communicationAdapter.getSubNetworkAdapters().isEmpty());
     }
+
+    @Test
+    void addPrivate() {
+        CommunicationAdapter communicationAdapter = new CommunicationAdapter(null,new TCommunication());
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType("Private Type");
+        tPrivate.setSource("Private Source");
+        assertTrue(communicationAdapter.getCurrentElem().getPrivate().isEmpty());
+        communicationAdapter.addPrivate(tPrivate);
+        assertEquals(1, communicationAdapter.getCurrentElem().getPrivate().size());
+    }
 }

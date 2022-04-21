@@ -15,8 +15,10 @@ import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
+import org.mockito.Mockito;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -225,5 +227,21 @@ class IEDAdapterTest {
         controlBlock.setHolderIEDName("IED_NAME");
         controlBlock.setHolderIEDName("IED_NAME");
         controlBlock.setHolderIEDName("IED_NAME");
+    }
+
+    @Test
+    void addPrivate() {
+        SclRootAdapter sclRootAdapter = Mockito.mock(SclRootAdapter.class);
+        SCL scl = Mockito.mock(SCL.class);
+        Mockito.when(sclRootAdapter.getCurrentElem()).thenReturn(scl);
+        TIED tied = new TIED();
+        Mockito.when(scl.getIED()).thenReturn(List.of(tied));
+        IEDAdapter iAdapter = new IEDAdapter(sclRootAdapter, tied);
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType("Private Type");
+        tPrivate.setSource("Private Source");
+        assertTrue(iAdapter.getCurrentElem().getPrivate().isEmpty());
+        iAdapter.addPrivate(tPrivate);
+        assertEquals(1, iAdapter.getCurrentElem().getPrivate().size());
     }
 }

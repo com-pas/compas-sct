@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.THeader;
 import org.lfenergy.compas.scl2007b4.model.THitem;
+import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 
@@ -54,5 +55,18 @@ class HeaderAdapterTest {
         hAdapter.updateVersion("newVersion");
         assertEquals("newVersion", hAdapter.getHeaderVersion());
         assertEquals("newRevision", hAdapter.getHeaderRevision());
+    }
+
+    @Test
+    void addPrivate() throws Exception {
+        SclRootAdapter sclRootAdapter =  new SclRootAdapter(
+                "hID","hVersion","hRevision"
+        );
+        HeaderAdapter hAdapter = sclRootAdapter.getHeaderAdapter();
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType("Private Type");
+        tPrivate.setSource("Private Source");
+        assertThrows(IllegalArgumentException.class, () -> hAdapter.addPrivate(tPrivate));
+
     }
 }

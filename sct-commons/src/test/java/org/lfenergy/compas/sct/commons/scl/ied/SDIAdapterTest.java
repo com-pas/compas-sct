@@ -6,9 +6,9 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.TDAI;
+import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.scl2007b4.model.TSDI;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -57,6 +57,19 @@ class SDIAdapterTest {
                 UnsupportedOperationException.class,
                 () -> daiAdapter.getStructuredDataAdapterByName("toto")
         );
+    }
+
+    @Test
+    void addPrivate() {
+        TSDI tsdi = new TSDI();
+        tsdi.setName("sdo1");
+        SDIAdapter sdiAdapter = new SDIAdapter(null,tsdi);
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType("Private Type");
+        tPrivate.setSource("Private Source");
+        assertTrue(sdiAdapter.getCurrentElem().getPrivate().isEmpty());
+        sdiAdapter.addPrivate(tPrivate);
+        assertEquals(1, sdiAdapter.getCurrentElem().getPrivate().size());
     }
 
 }
