@@ -20,8 +20,8 @@ For the SCD file constitution, see diagram above:
 
 For the binding of SCD, see diagram above:
 
-- Removal of ExtRef @iedName @ldInst..... @daname and @srcXXX attributes for all inactive ExtRef or for all Extref which have inactive source or target
-- for each active or untested ExtRef.desc with an existing Extref.iedName attribute and without compas:Flow@CriteriaAssociationID Private attribute, copy the right /IED.name into compas:Flow@ExtRefiedName and into Extref.iedName
+- Removal of ExtRef @iedName @ldInst..... @daname and @srcXXX attributes for all inactive ExtRef or for all Extref which have inactive source or target.
+- for each active or untested ExtRef.desc with an existing Extref.iedName attribute and without compas:Flow@CriteriaAssociationID Private attribute, copy the right /IED.name into compas:Flow@ExtRefiedName and into Extref.iedName.
 
 
 ### Step 3
