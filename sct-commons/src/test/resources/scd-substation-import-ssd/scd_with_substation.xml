@@ -1,0 +1,40 @@
+<!-- SPDX-FileCopyrightText: 2021 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+<SCL xmlns="http://www.iec.ch/61850/2003/SCL" xmlns:compas="https://www.lfenergy.org/compas/extension/v1" version="2007" revision="B" release="4">
+    <Header id="HeaderID" version="version" revision="Revision" toolID="toolID"/>
+
+    <Substation name="SITE">
+        <VoltageLevel nomFreq="50" numPhases="3" name="4">
+            <Voltage unit="V" multiplier="k">90</Voltage>
+            <Bay name="BAY_2">
+                <Private type="COMPAS-Bay">
+                    <compas:Bay BayCodif="CB00001101" UUID="4214a755-3420-42ed-ac2d-766c5149b58a" Version="1" MainLabel="BAY2" SecondLabel="SITE-P41-SS1.12" NumBay="1" ZoneNumber="N/A"/>
+                </Private>
+                <Private type="COMPAS-Criteria">
+                    <compas:Criteria ObjectID="4214a755-3420-42ed-ac2d-766c5149b58a" CriteriaAssociationID="CriteriaAssociationID"/>
+                </Private>
+                <Private type="COMPAS-SystemVersion">
+                    <compas:SystemVersion MainSystemVersion="01.00" MinorSystemVersion="004.001.001"/>
+                </Private>
+                <Function name="FUNCTION_3">
+                    <Private type="COMPAS-Function">
+                        <compas:Function UUID="386365c5-3e99-4499-b3c9-297fcf454f11" Label="FUNCTION_3"/>
+                    </Private>
+                    <Private type="COMPAS-Criteria">
+                        <compas:Criteria ObjectID="386365c5-3e99-4499-b3c9-297fcf454f11" CriteriaAssociationID="CriteriaAssociationID"/>
+                    </Private>
+                    <LNode iedName="None" ldInst="LDFUNCTION_3" lnClass="LLN0">
+                        <Private type="COMPAS-ICDHeader">
+                            <compas:ICDHeader IEDType="BCU" IEDinstance="11" BayLabel="BAY2" IEDName="SITEBAY2BCU44" ICDSystemVersionUUID="ed36220c-5577-4f0c-aaef-c6efa9f7d7c8" VendorName="RTE" IEDredundancy="A" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="9aea4c6f-7ab8-4341-8d84-14c17d73a57d" headerVersion="01.00.00" headerRevision="01.00.00"/>
+                        </Private>
+                    </LNode>
+                </Function>
+                <Function name="FUNCTION_4">
+                </Function>
+            </Bay>
+        </VoltageLevel>
+    </Substation>
+
+</SCL>

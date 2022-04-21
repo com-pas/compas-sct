@@ -7,20 +7,9 @@ package org.lfenergy.compas.sct.commons.scl;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import org.lfenergy.compas.scl2007b4.model.SCL;
-import org.lfenergy.compas.scl2007b4.model.TExtRef;
-import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
-import org.lfenergy.compas.scl2007b4.model.TPredefinedCDCEnum;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.Utils;
-import org.lfenergy.compas.sct.commons.dto.ConnectedApDTO;
-import org.lfenergy.compas.sct.commons.dto.ControlBlock;
-import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
-import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
-import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
-import org.lfenergy.compas.sct.commons.dto.ExtRefSourceInfo;
-import org.lfenergy.compas.sct.commons.dto.HeaderDTO;
-import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
-import org.lfenergy.compas.sct.commons.dto.SubNetworkDTO;
+import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.com.CommunicationAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
@@ -31,12 +20,10 @@ import org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.DAITracker;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
+import org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter;
+import org.lfenergy.compas.sct.commons.scl.sstation.VoltageLevelAdapter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -47,9 +34,9 @@ public class SclService {
 
     private SclService(){ throw new IllegalStateException("SclService class"); }
 
-    public static SclRootAdapter initScl(String hVersion, String hRevision) throws ScdException {
-        UUID hId = UUID.randomUUID();
-        return new SclRootAdapter(hId.toString(),hVersion,hRevision);
+    public static SclRootAdapter initScl(Optional<UUID> hId, String hVersion, String hRevision) throws ScdException {
+        UUID headerId = hId.orElseGet(UUID::randomUUID);
+        return new SclRootAdapter(headerId.toString(), hVersion, hRevision);
     }
 
     public static SclRootAdapter addHistoryItem(SCL scd, String who, String what, String why){
@@ -335,5 +322,52 @@ public class SclService {
         return enumTypeAdapter.getCurrentElem().getEnumVal().stream()
                 .map(tEnumVal -> Pair.of(tEnumVal.getOrd(),tEnumVal.getValue()))
                 .collect(Collectors.toSet());
+    }
+
+    public static SclRootAdapter addSubstation(@NonNull SCL scd, @NonNull SCL ssd) throws ScdException {
+        SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
+        SclRootAdapter ssdRootAdapter = new SclRootAdapter(ssd);
+        if(scdRootAdapter.getCurrentElem().getSubstation().size() > 1
+            || ssdRootAdapter.currentElem.getSubstation().size() != 1) {
+            throw new ScdException("SCD file must have one or zero Substation and " +
+                    "SCD file must have one Substation. The files are rejected.");
+        }
+        TSubstation ssdTSubstation = ssdRootAdapter.currentElem.getSubstation().get(0);
+        if(scdRootAdapter.getCurrentElem().getSubstation().isEmpty()) {
+            scdRootAdapter.getCurrentElem().getSubstation().add(ssdTSubstation);
+            return scdRootAdapter;
+        } else {
+            TSubstation scdTSubstation = scdRootAdapter.currentElem.getSubstation().get(0);
+            if(scdTSubstation.getName().equalsIgnoreCase(ssdTSubstation.getName())) {
+                SubstationAdapter scdSubstationAdapter = scdRootAdapter.getSubstationAdapter(scdTSubstation.getName());
+                for(TVoltageLevel tvl : ssdTSubstation.getVoltageLevel()){
+                    updateVoltageLevel(scdSubstationAdapter, tvl);
+                }
+            } else throw new ScdException("SCD file must have only one Substation and the Substation name from SSD file is" +
+                    " different from the one in SCD file. The files are rejected.");
+        }
+        return scdRootAdapter;
+    }
+
+    private static void updateVoltageLevel(@NonNull SubstationAdapter scdSubstationAdapter, TVoltageLevel vl) throws ScdException {
+        if(scdSubstationAdapter.getVoltageLevelAdapter(vl.getName()).isPresent()) {
+            VoltageLevelAdapter scdVoltageLevelAdapter = scdSubstationAdapter.getVoltageLevelAdapter(vl.getName())
+                    .orElseThrow(() -> new ScdException("Unable to create VoltageLevelAdapter"));
+            for (TBay tbay: vl.getBay()) {
+                updateBay(scdVoltageLevelAdapter, tbay);
+            }
+        } else {
+            scdSubstationAdapter.getCurrentElem().getVoltageLevel().add(vl);
+        }
+    }
+
+    private static void updateBay(@NonNull VoltageLevelAdapter scdVoltageLevelAdapter, TBay tBay) {
+        if(scdVoltageLevelAdapter.getBayAdapter(tBay.getName()).isPresent()){
+          scdVoltageLevelAdapter.getCurrentElem().getBay()
+                  .removeIf(t -> t.getName().equalsIgnoreCase(tBay.getName()));
+            scdVoltageLevelAdapter.getCurrentElem().getBay().add(tBay);
+        } else {
+            scdVoltageLevelAdapter.getCurrentElem().getBay().add(tBay);
+        }
     }
 }
