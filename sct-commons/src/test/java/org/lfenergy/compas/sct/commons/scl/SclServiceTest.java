@@ -446,12 +446,51 @@ class SclServiceTest {
     }
 
     @Test
-    void importIEDInSCD() throws Exception {
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd_sample.xml");
-        SCL std = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/std_sample.xml");
+    void testImportSTDElementsInSCD() throws Exception {
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd.xml");
+        SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
 
-        SclRootAdapter expectedScdAdapter = SclService.importIEDInSCD(scdRootAdapter, Arrays.asList(std));
+        SclRootAdapter expectedScdAdapter = assertDoesNotThrow( () -> SclService.importSTDElementsInSCD(scdRootAdapter, Set.of(std)));
+        assertThat(expectedScdAdapter.getCurrentElem().getIED()).hasSize(1);
+        assertThat(expectedScdAdapter.getCurrentElem().getDataTypeTemplates()).hasNoNullFieldsOrProperties();
+        assertThat(expectedScdAdapter.getCurrentElem().getCommunication().getSubNetwork()).hasSize(2);
+    }
+
+    @Test
+    void testImportSTDElementsInSCD_with_Multiple_STD() throws Exception {
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd_lnode_with_many_compas_icdheader.xml");
+        SCL std0 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SCL std1 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_SITESITE1GTW1.xml");
+        SCL std2 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_SITESITE1GTW2.xml");
+        SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
+
+        SclRootAdapter expectedScdAdapter = assertDoesNotThrow( () -> SclService.importSTDElementsInSCD(scdRootAdapter, Set.of(std0, std1, std2)));
+        assertThat(expectedScdAdapter.getCurrentElem().getIED()).hasSize(3);
+        assertThat(expectedScdAdapter.getCurrentElem().getDataTypeTemplates()).hasNoNullFieldsOrProperties();
+        assertThat(expectedScdAdapter.getCurrentElem().getCommunication().getSubNetwork()).hasSize(2);
+        assertThat(expectedScdAdapter.getCurrentElem().getCommunication().getSubNetwork().get(0).getConnectedAP()).hasSizeBetween(1,3);
+        assertThat(expectedScdAdapter.getCurrentElem().getCommunication().getSubNetwork().get(1).getConnectedAP()).hasSizeBetween(1,3);
+    }
+
+    @Test
+    void testImportSTDElementsInSCD_Several_STD_Match_Compas_ICDHeader() throws Exception {
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd.xml");
+        SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SCL std1 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
+
+        assertThrows(ScdException.class, () -> SclService.importSTDElementsInSCD(scdRootAdapter, Set.of(std, std1)));
+
+    }
+
+    @Test
+    void importSTDElementsInSCD_Compas_ICDHeader_Not_Match() throws Exception {
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd.xml");
+        SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_with_same_ICDSystemVersionUUID.xml");
+        SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
+
+        assertThrows(ScdException.class, ()-> SclService.importSTDElementsInSCD(scdRootAdapter, Set.of(std)));
 
     }
 }
