@@ -7,6 +7,7 @@ package org.lfenergy.compas.sct.commons.scl;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import org.lfenergy.compas.scl.extensions.model.TCompasICDHeader;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.Utils;
 import org.lfenergy.compas.sct.commons.dto.*;
@@ -369,5 +370,43 @@ public class SclService {
         } else {
             scdVoltageLevelAdapter.getCurrentElem().getBay().add(tBay);
         }
+    }
+
+    public static SclRootAdapter importIEDInSCD(@NonNull SclRootAdapter scdRootAdapter, List<SCL> stds){
+
+        // List all Private /Substation/VoltageLevel/Bay/Function/LNode/Private/compas:ICDHeader
+
+        Map<String, TPrivate> tPrivateMap = new HashMap<>();
+
+        scdRootAdapter.getCurrentElem().getSubstation().get(0).getVoltageLevel()
+                .forEach(tVoltageLevel -> tVoltageLevel.getBay()
+                       .forEach(tBay -> tBay.getFunction()
+                             .forEach(tFunction -> tFunction.getLNode()
+                                     .forEach(tlNode -> tlNode.getPrivate()
+                                             .forEach(tPrivate -> {
+                                               if(tPrivate.getType().equals("COMPAS-ICDHeader")){
+                                                   tPrivate.getContent().stream()
+                                                           .filter(o -> !o.toString().trim().isBlank())
+                                                           .forEach(o -> {
+                                                               TCompasICDHeader tCompasICDHeader = (TCompasICDHeader) o;
+                                                               tPrivateMap.put(tCompasICDHeader.getIEDName(), tPrivate);});
+                                               }
+                                             })
+                                     )
+                             )
+                       )
+                );
+
+        //Remove duplicated one with same iedName
+        //For each Private.ICDSystemVersionUUID and Private.iedName find STD File
+          //if =! 1 error
+          //else import /dtt in Scd
+          // import /ied and give /ied.name =  Private.iedName
+          //if /IED/Private/compas:ICDHeader == /Substation/VoltageLevel/Bay/Function/LNode/Private/compas:ICDHeader (~3param)
+            //copy 3 param into /IED/Private/compas:ICDHeader ( @BayLabel @iedName @IEDinstance)
+          //import connectedAP (correspondance from file)
+            //and rename Communication/Subnetwork/ConnectedAP/@iedName by /Substation/VoltageLevel/Bay/Function/LNode/Private/compas:ICDHeader @iedName
+
+        return scdRootAdapter;
     }
 }
