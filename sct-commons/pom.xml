@@ -13,7 +13,6 @@
         <version>local-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.lfenergy.compas</groupId>
     <artifactId>sct-commons</artifactId>
     <version>local-SNAPSHOT</version>
     <name>SCT-COMMONS</name>
@@ -21,6 +20,7 @@
 
     <properties>
         <sonar.coverage.jacoco.xmlReportPaths>${basedir}/${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
+        <assertJ.version>3.22.0</assertJ.version>
     </properties>
 
     <dependencies>
@@ -104,6 +104,12 @@
             <artifactId>jaxb-runtime</artifactId>
             <version>2.3.1</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertJ.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>

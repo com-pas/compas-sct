@@ -16,43 +16,41 @@ import org.lfenergy.compas.sct.commons.scl.ied.LN0Adapter;
 import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class SclServiceTest {
 
     @Test
     void testAddHistoryItem() throws ScdException {
-        SclRootAdapter sclRootAdapter=  new SclRootAdapter("hId",SclRootAdapter.VERSION,SclRootAdapter.REVISION);
+        SclRootAdapter sclRootAdapter = new SclRootAdapter("hId", SclRootAdapter.VERSION, SclRootAdapter.REVISION);
         SCL scd = sclRootAdapter.getCurrentElem();
 
-        SclService.addHistoryItem(scd,"who","what","why");
+        SclService.addHistoryItem(scd, "who", "what", "why");
 
         assertNotNull(scd.getHeader());
         THeader.History history = scd.getHeader().getHistory();
         assertNotNull(history);
-        assertEquals(1,history.getHitem().size());
+        assertEquals(1, history.getHitem().size());
         THitem tHitem = history.getHitem().get(0);
-        assertEquals("who",tHitem.getWho());
-        assertEquals("what",tHitem.getWhat());
-        assertEquals("why",tHitem.getWhy());
-        assertEquals(SclRootAdapter.REVISION,tHitem.getRevision());
-        assertEquals(SclRootAdapter.VERSION,tHitem.getVersion());
+        assertEquals("who", tHitem.getWho());
+        assertEquals("what", tHitem.getWhat());
+        assertEquals("why", tHitem.getWhy());
+        assertEquals(SclRootAdapter.REVISION, tHitem.getRevision());
+        assertEquals(SclRootAdapter.VERSION, tHitem.getVersion());
     }
 
     @Test
     void testAddIED() throws Exception {
 
-        SclRootAdapter sclRootAdapter=  new SclRootAdapter("hId",SclRootAdapter.VERSION,SclRootAdapter.REVISION);
+        SclRootAdapter sclRootAdapter = new SclRootAdapter("hId", SclRootAdapter.VERSION, SclRootAdapter.REVISION);
         SCL scd = sclRootAdapter.getCurrentElem();
         assertNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
         SCL icd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
 
-        IEDAdapter iedAdapter = assertDoesNotThrow(() -> SclService.addIED(scd,"IED_NAME1",icd));
+        IEDAdapter iedAdapter = assertDoesNotThrow(() -> SclService.addIED(scd, "IED_NAME1", icd));
         assertEquals("IED_NAME1", iedAdapter.getName());
         assertNotNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
 
@@ -77,9 +75,58 @@ class SclServiceTest {
         connectedApDTO.setIedName("IED_NAME1");
         subNetworkDTO.addConnectedAP(connectedApDTO);
 
-        assertDoesNotThrow(() -> SclService.addSubnetworks(scd, Set.of(subNetworkDTO)).get());
+        assertDoesNotThrow(() -> SclService.addSubnetworks(scd, Set.of(subNetworkDTO), Optional.of(icd)).get());
         MarshallerWrapper marshallerWrapper = SclTestMarshaller.createWrapper();
         System.out.println(marshallerWrapper.marshall(scd));
+    }
+
+    @Test
+    void testAddSubnetworksWithoutCommunicationTagInIcd() throws Exception {
+        SclRootAdapter sclRootAdapter = new SclRootAdapter("hId", SclRootAdapter.VERSION, SclRootAdapter.REVISION);
+        SCL scd = sclRootAdapter.getCurrentElem();
+        assertNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
+        SCL icd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
+
+        assertDoesNotThrow(() -> SclService.addIED(scd, "IED_NAME1", icd));
+
+        assertDoesNotThrow(() -> SclService.addSubnetworks(scd, new HashSet<>(), Optional.of(icd)));
+        MarshallerWrapper marshallerWrapper = SclTestMarshaller.createWrapper();
+        String marshalledScd = marshallerWrapper.marshall(scd);
+        assertThat(marshalledScd).doesNotContain("<Communication");
+    }
+
+    @Test
+    void testAddSubnetworksWithFilledCommunication() throws Exception {
+        SclRootAdapter sclRootAdapter = new SclRootAdapter("hId", SclRootAdapter.VERSION, SclRootAdapter.REVISION);
+        SCL scd = sclRootAdapter.getCurrentElem();
+        assertNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
+        SCL icd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_with_filled_communication.xml");
+
+        assertDoesNotThrow(() -> SclService.addIED(scd, "IED_NAME1", icd));
+
+        Set<SubNetworkDTO> subNetworkDTOSet = new HashSet<>(SclService.getSubnetwork(icd));
+        assertDoesNotThrow(() -> SclService.addSubnetworks(scd, subNetworkDTOSet, Optional.of(icd)).get());
+
+        MarshallerWrapper marshallerWrapper = SclTestMarshaller.createWrapper();
+        String marshalledScd = marshallerWrapper.marshall(scd);
+        assertThat(marshalledScd).contains("<Address>", "PhysConn");
+    }
+
+    @Test
+    void testAddSubnetworksWithoutImportingIcdAddressAndPhysConn() throws Exception {
+        SclRootAdapter sclRootAdapter = new SclRootAdapter("hId", SclRootAdapter.VERSION, SclRootAdapter.REVISION);
+        SCL scd = sclRootAdapter.getCurrentElem();
+        assertNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
+        SCL icd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_with_filled_communication.xml");
+
+        assertDoesNotThrow(() -> SclService.addIED(scd, "IED_NAME1", icd));
+
+        Set<SubNetworkDTO> subNetworkDTOSet = new HashSet<>(SclService.getSubnetwork(icd));
+        assertDoesNotThrow(() -> SclService.addSubnetworks(scd, subNetworkDTOSet, Optional.empty()).get());
+
+        MarshallerWrapper marshallerWrapper = SclTestMarshaller.createWrapper();
+        String marshalledScd = marshallerWrapper.marshall(scd);
+        assertThat(marshalledScd).doesNotContain("<Address>", "PhysConn");
     }
 
 
@@ -100,26 +147,26 @@ class SclServiceTest {
         connectedApDTO.setIedName("IED_NAME1");
         subNetworkDTO.addConnectedAP(connectedApDTO);
 
-        assertDoesNotThrow(() -> SclService.addSubnetworks(scd, Set.of(subNetworkDTO)).get());
+        assertDoesNotThrow(() -> SclService.addSubnetworks(scd, Set.of(subNetworkDTO), Optional.of(icd)).get());
 
-        List<SubNetworkDTO> subNetworkDTOS = assertDoesNotThrow(()-> SclService.getSubnetwork(scd));
-        assertEquals(1,subNetworkDTOS.size());
+        List<SubNetworkDTO> subNetworkDTOS = assertDoesNotThrow(() -> SclService.getSubnetwork(scd));
+        assertEquals(1, subNetworkDTOS.size());
     }
 
     @Test
     void testGetExtRefInfo() throws Exception {
-        SclRootAdapter sclRootAdapter=  new SclRootAdapter("hId",SclRootAdapter.VERSION,SclRootAdapter.REVISION);
+        SclRootAdapter sclRootAdapter = new SclRootAdapter("hId", SclRootAdapter.VERSION, SclRootAdapter.REVISION);
         SCL scd = sclRootAdapter.getCurrentElem();
         assertNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
         SCL icd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
 
-        assertDoesNotThrow(() -> SclService.addIED(scd,"IED_NAME1",icd));
-        var extRefInfos = assertDoesNotThrow(() -> SclService.getExtRefInfo(scd,"IED_NAME1","LD_INST11"));
-        assertEquals(1,extRefInfos.size());
+        assertDoesNotThrow(() -> SclService.addIED(scd, "IED_NAME1", icd));
+        var extRefInfos = assertDoesNotThrow(() -> SclService.getExtRefInfo(scd, "IED_NAME1", "LD_INST11"));
+        assertEquals(1, extRefInfos.size());
 
-        assertEquals("IED_NAME1",extRefInfos.get(0).getHolderIEDName());
+        assertEquals("IED_NAME1", extRefInfos.get(0).getHolderIEDName());
 
-        assertThrows(ScdException.class, () -> SclService.getExtRefInfo(scd,"IED_NAME1","UNKNOWN_LD"));
+        assertThrows(ScdException.class, () -> SclService.getExtRefInfo(scd, "IED_NAME1", "UNKNOWN_LD"));
     }
 
     @Test
@@ -127,36 +174,36 @@ class SclServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_binders_test.xml");
 
         ExtRefSignalInfo signalInfo = createSignalInfo(
-                "Do11.sdo11","da11.bda111.bda112.bda113","INT_ADDR11"
+                "Do11.sdo11", "da11.bda111.bda112.bda113", "INT_ADDR11"
         );
 
         List<ExtRefBindingInfo> potentialBinders = assertDoesNotThrow(
                 () -> SclService.getExtRefBinders(
-                        scd,"IED_NAME1","LD_INST11","LLN0","","",signalInfo
+                        scd, "IED_NAME1", "LD_INST11", "LLN0", "", "", signalInfo
                 )
         );
 
         assertThrows(
                 ScdException.class,
                 () -> SclService.getExtRefBinders(
-                        scd,"IED_NAME1","UNKNOWN_LD","LLN0","","",signalInfo
+                        scd, "IED_NAME1", "UNKNOWN_LD", "LLN0", "", "", signalInfo
                 )
         );
     }
 
     @Test
     void testUpdateExtRefBinders() throws Exception {
-        SclRootAdapter sclRootAdapter=  new SclRootAdapter("hId",SclRootAdapter.VERSION,SclRootAdapter.REVISION);
+        SclRootAdapter sclRootAdapter = new SclRootAdapter("hId", SclRootAdapter.VERSION, SclRootAdapter.REVISION);
         SCL scd = sclRootAdapter.getCurrentElem();
         assertNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
         SCL icd1 = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
         SCL icd2 = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_2_test.xml");
 
-        assertDoesNotThrow(() -> SclService.addIED(scd,"IED_NAME1",icd1));
-        assertDoesNotThrow(() -> SclService.addIED(scd,"IED_NAME2",icd2));
+        assertDoesNotThrow(() -> SclService.addIED(scd, "IED_NAME1", icd1));
+        assertDoesNotThrow(() -> SclService.addIED(scd, "IED_NAME2", icd2));
 
         ExtRefSignalInfo signalInfo = createSignalInfo(
-                "Do11.sdo11","da11.bda111.bda112.bda113","INT_ADDR11"
+                "Do11.sdo11", "da11.bda111.bda112.bda113", "INT_ADDR11"
         );
         signalInfo.setPServT(null);
         signalInfo.setPLN(null);
@@ -182,13 +229,13 @@ class SclServiceTest {
         lNodeDTO.getExtRefs().add(extRefInfo);
 
         assertDoesNotThrow(
-            () -> SclService.updateExtRefBinders(scd,extRefInfo)
+                () -> SclService.updateExtRefBinders(scd, extRefInfo)
         );
 
         extRefInfo.setHolderLDInst("UNKNOWN_LD");
         assertThrows(
                 ScdException.class,
-                () -> SclService.updateExtRefBinders( scd,extRefInfo)
+                () -> SclService.updateExtRefBinders(scd, extRefInfo)
         );
     }
 
@@ -211,10 +258,10 @@ class SclServiceTest {
         extRefInfo.setHolderLDInst(ldInst);
         extRefInfo.setHolderLnClass(lnClass);
 
-        var controlBlocks = SclService.getExtRefSourceInfo(scd,extRefInfo);
-        assertEquals(2,controlBlocks.size());
+        var controlBlocks = SclService.getExtRefSourceInfo(scd, extRefInfo);
+        assertEquals(2, controlBlocks.size());
         controlBlocks.forEach(controlBlock -> assertTrue(
-                controlBlock.getName().equals("goose1") || controlBlock.getName().equals("smv1")
+                        controlBlock.getName().equals("goose1") || controlBlock.getName().equals("smv1")
                 )
         );
     }
@@ -227,21 +274,21 @@ class SclServiceTest {
         extRefInfo.setHolderLDInst("LD_INST21");
         extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
 
-        assertThrows(ScdException.class, () -> SclService.updateExtRefSource(scd,extRefInfo)); // signal = null
+        assertThrows(ScdException.class, () -> SclService.updateExtRefSource(scd, extRefInfo)); // signal = null
         extRefInfo.setSignalInfo(new ExtRefSignalInfo());
-        assertThrows(ScdException.class, () -> SclService.updateExtRefSource(scd,extRefInfo)); // signal invalid
+        assertThrows(ScdException.class, () -> SclService.updateExtRefSource(scd, extRefInfo)); // signal invalid
 
         extRefInfo.getSignalInfo().setIntAddr("INT_ADDR21");
         extRefInfo.getSignalInfo().setPDA("da21.bda211.bda212.bda213");
         extRefInfo.getSignalInfo().setPDO("Do21.sdo21");
-        assertThrows(ScdException.class, () -> SclService.updateExtRefSource(scd,extRefInfo)); // binding = null
+        assertThrows(ScdException.class, () -> SclService.updateExtRefSource(scd, extRefInfo)); // binding = null
         extRefInfo.setBindingInfo(new ExtRefBindingInfo());
-        assertThrows(ScdException.class, () -> SclService.updateExtRefSource(scd,extRefInfo)); // binding invalid
+        assertThrows(ScdException.class, () -> SclService.updateExtRefSource(scd, extRefInfo)); // binding invalid
 
         extRefInfo.getBindingInfo().setIedName("IED_NAME2"); // internal binding
         extRefInfo.getBindingInfo().setLdInst("LD_INST12");
         extRefInfo.getBindingInfo().setLnClass(TLLN0Enum.LLN_0.value());
-        assertThrows(ScdException.class, () -> SclService.updateExtRefSource(scd,extRefInfo)); // CB not allowed
+        assertThrows(ScdException.class, () -> SclService.updateExtRefSource(scd, extRefInfo)); // CB not allowed
 
         extRefInfo.getBindingInfo().setIedName("IED_NAME1");
 
@@ -249,12 +296,12 @@ class SclServiceTest {
         extRefInfo.getSourceInfo().setSrcLDInst(extRefInfo.getBindingInfo().getLdInst());
         extRefInfo.getSourceInfo().setSrcLNClass(extRefInfo.getBindingInfo().getLnClass());
         extRefInfo.getSourceInfo().setSrcCBName("goose1");
-        TExtRef extRef = assertDoesNotThrow( () -> SclService.updateExtRefSource(scd,extRefInfo));
-        assertEquals(extRefInfo.getSourceInfo().getSrcCBName(),extRef.getSrcCBName());
+        TExtRef extRef = assertDoesNotThrow(() -> SclService.updateExtRefSource(scd, extRefInfo));
+        assertEquals(extRefInfo.getSourceInfo().getSrcCBName(), extRef.getSrcCBName());
     }
 
 
-    private ExtRefSignalInfo createSignalInfo(String pDO, String pDA, String intAddr){
+    private ExtRefSignalInfo createSignalInfo(String pDO, String pDA, String intAddr) {
 
         final String DESC = "DESC";
         final String P_LN = TLLN0Enum.LLN_0.value();
@@ -277,32 +324,32 @@ class SclServiceTest {
 
 
         Set<ResumedDataTemplate> resumedDataTemplates = assertDoesNotThrow(
-                ()-> SclService.getDAI(
-                        scd,"IED_NAME1","LD_INST12",new ResumedDataTemplate(),true
+                () -> SclService.getDAI(
+                        scd, "IED_NAME1", "LD_INST12", new ResumedDataTemplate(), true
                 )
         );
-        assertEquals(13,resumedDataTemplates.size());
+        assertEquals(13, resumedDataTemplates.size());
 
         assertThrows(
                 ScdException.class,
-                ()-> SclService.getDAI(
-                        scd,"IED_NAME1","UNKNOWNLD",new ResumedDataTemplate(),true
+                () -> SclService.getDAI(
+                        scd, "IED_NAME1", "UNKNOWNLD", new ResumedDataTemplate(), true
                 )
         );
     }
 
     @Test
-    void testInitScl(){
+    void testInitScl() {
         assertDoesNotThrow(
-                () -> SclService.initScl(Optional.empty(), "hVersion","hRevision")
+                () -> SclService.initScl(Optional.empty(), "hVersion", "hRevision")
         );
     }
 
     @Test
-    void testInitScl_With_hId_shouldNotThrowError(){
+    void testInitScl_With_hId_shouldNotThrowError() {
         UUID hid = UUID.randomUUID();
         assertDoesNotThrow(
-                () -> SclService.initScl(Optional.of(hid),"hVersion","hRevision")
+                () -> SclService.initScl(Optional.of(hid), "hVersion", "hRevision")
         );
     }
 
@@ -310,12 +357,12 @@ class SclServiceTest {
     void testUpdateHeader() {
 
         SclRootAdapter sclRootAdapter = assertDoesNotThrow(
-                () -> SclService.initScl(Optional.empty(),"hVersion","hRevision")
+                () -> SclService.initScl(Optional.empty(), "hVersion", "hRevision")
         );
         UUID hId = UUID.fromString(sclRootAdapter.getHeaderAdapter().getHeaderId());
         HeaderDTO headerDTO = DTO.createHeaderDTO(hId);
-        SclService.updateHeader(sclRootAdapter.getCurrentElem(),headerDTO);
-        SclService.updateHeader(sclRootAdapter.getCurrentElem(),headerDTO);
+        SclService.updateHeader(sclRootAdapter.getCurrentElem(), headerDTO);
+        SclService.updateHeader(sclRootAdapter.getCurrentElem(), headerDTO);
 
     }
 
@@ -326,8 +373,8 @@ class SclServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
 
-        assertThrows(ScdException.class, ()-> SclService.updateDAI(
-                scd,"IED","LD",rDtt
+        assertThrows(ScdException.class, () -> SclService.updateDAI(
+                scd, "IED", "LD", rDtt
         ));
         rDtt.setLnType("LNO1");
         rDtt.setLnClass(TLLN0Enum.LLN_0.value());
@@ -337,17 +384,17 @@ class SclServiceTest {
         TVal tVal = new TVal();
         tVal.setValue("newValue");
         rDtt.setDaiValues(List.of(tVal));
-        assertDoesNotThrow(() -> SclService.updateDAI(scd,"IED_NAME","LD_INS1",rDtt));
+        assertDoesNotThrow(() -> SclService.updateDAI(scd, "IED_NAME", "LD_INS1", rDtt));
 
     }
 
     @Test
     void testGetEnumTypeElements() throws Exception {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
-        assertThrows(ScdException.class, ()-> SclService.getEnumTypeElements(scd,"unknwnID"));
+        assertThrows(ScdException.class, () -> SclService.getEnumTypeElements(scd, "unknwnID"));
 
         var enumList = assertDoesNotThrow(
-                ()-> SclService.getEnumTypeElements(scd,"RecCycModKind")
+                () -> SclService.getEnumTypeElements(scd, "RecCycModKind")
         );
         assertFalse(enumList.isEmpty());
     }
@@ -359,7 +406,7 @@ class SclServiceTest {
         SCL ssd = SclTestMarshaller.getSCLFromFile(ssdFileName);
 
         assertThrows(ScdException.class,
-                () ->SclService.addSubstation(scd, ssd));
+                () -> SclService.addSubstation(scd, ssd));
     }
 
     @Test
@@ -380,7 +427,7 @@ class SclServiceTest {
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
 
         assertThrows(ScdException.class,
-                () ->SclService.addSubstation(scd, ssd));
+                () -> SclService.addSubstation(scd, ssd));
     }
 
     @Test
