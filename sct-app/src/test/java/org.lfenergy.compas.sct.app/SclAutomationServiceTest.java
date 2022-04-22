@@ -64,11 +64,11 @@ class SclAutomationServiceTest {
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
         SclRootAdapter expectedSCD = SclAutomationService.createSCD(ssd, headerDTO);
         assertNotNull(expectedSCD.getCurrentElem().getHeader().getId());
-        assertEquals(2 ,expectedSCD.getCurrentElem().getHeader().getHistory().getHitem().size());
+        assertEquals(1, expectedSCD.getCurrentElem().getHeader().getHistory().getHitem().size());
+        assertEquals("what", expectedSCD.getCurrentElem().getHeader().getHistory().getHitem().get(0).getWhat());
     }
 
-
-    @Test
+        @Test
     void createSCD_SSD_Without_Substation() throws Exception {
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd_without_substations.xml");
         assertThrows(ScdException.class,
