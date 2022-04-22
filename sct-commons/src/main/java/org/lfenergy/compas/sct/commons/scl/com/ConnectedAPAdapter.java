@@ -4,9 +4,12 @@
 
 package org.lfenergy.compas.sct.commons.scl.com;
 
+import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TConnectedAP;
 import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
+
+import java.util.Optional;
 
 public class ConnectedAPAdapter extends SclElementAdapter<SubNetworkAdapter, TConnectedAP> {
 
@@ -30,5 +33,21 @@ public class ConnectedAPAdapter extends SclElementAdapter<SubNetworkAdapter, TCo
 
     public String getApName() {
         return currentElem.getApName();
+    }
+
+    public void copyAddressAndPhysConnFromIcd(Optional<SCL> icd) {
+        if (icd.isPresent() && icd.get().getCommunication() != null) {
+            icd.stream()
+                    .map(SCL::getCommunication)
+                    .findFirst()
+                    .flatMap(com -> com.getSubNetwork().stream()
+                            .flatMap(subNet -> subNet.getConnectedAP().stream()
+                                    .filter(connAP -> connAP.getApName().equals(currentElem.getApName())))
+                            .findFirst()).ifPresent(connectedAP -> {
+                        currentElem.setAddress(connectedAP.getAddress());
+                        currentElem.getPhysConn().addAll(connectedAP.getPhysConn());
+                    });
+
+        }
     }
 }
