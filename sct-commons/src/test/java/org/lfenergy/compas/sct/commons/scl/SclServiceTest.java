@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.scl;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -443,5 +444,15 @@ class SclServiceTest {
         assertNotEquals(scdRootAdapter, expectedScdAdapter);
         assertEquals(expectedTSubstation.getName(), tSubstation.getName());
         assertEquals(expectedTSubstation.getVoltageLevel().size(), tSubstation.getVoltageLevel().size());
+    }
+
+    @Test
+    @Disabled
+    void importIEDInSCD() throws Exception {
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/scd_with_substation.xml");
+        SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
+
+        SclRootAdapter expectedScdAdapter = SclService.importIEDInSCD(scdRootAdapter, new ArrayList<>());
+
     }
 }
