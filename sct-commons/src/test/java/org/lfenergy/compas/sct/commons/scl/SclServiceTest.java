@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.scl;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -18,8 +19,8 @@ import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 class SclServiceTest {
 
@@ -446,6 +447,7 @@ class SclServiceTest {
     }
 
     @Test
+    @Disabled
     void importIEDInSCD() throws Exception {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd_sample.xml");
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/std_sample.xml");
