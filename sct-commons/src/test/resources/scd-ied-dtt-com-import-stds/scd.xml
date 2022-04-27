@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ // SPDX-FileCopyrightText: 2021 RTE FRANCE
+  ~ //
+  ~ // SPDX-License-Identifier: Apache-2.0
+  -->
+<SCL xmlns:compas="https://www.lfenergy.org/compas/extension/v1" xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4">
+    <Private type="COMPAS-SclFileType">
+        <compas:SclFileType>SCD</compas:SclFileType>
+    </Private>
+    <Header id="HeaderId" version="HeaderVersion" revision="HeaderRevision"/>
+    <Substation name="SITE">
+        <VoltageLevel nomFreq="50" numPhases="3" name="0">
+            <Voltage unit="V" multiplier="k">0</Voltage>
+            <Bay name="BAY_1">
+                <Private type="COMPAS-Bay">
+                    <compas:Bay BayCodif="TG00000001" UUID="9cd6f05b-1bbd-4ba3-86c5-41c99103e06d" Version="1" MainLabel="SITE1" SecondLabel="SITE-TGENE" NumBay="7" ZoneNumber="N/A"/>
+                </Private>
+                <Private type="COMPAS-Criteria">
+                    <compas:Criteria ObjectID="9cd6f05b-1bbd-4ba3-86c5-41c99103e06d" CriteriaAssociationID="CriteriaAssociationID"/>
+                </Private>
+                <Function name="FUNCTION_1">
+                    <Private type="COMPAS-Function">
+                        <compas:Function UUID="8f4cda3f-828c-4006-9b87-2af96b19304b" Label="FUNCTION_1"/>
+                    </Private>
+                    <LNode iedName="None" ldInst="LDGW" lnClass="LLN0">
+                        <Private type="COMPAS-ICDHeader">
+                            <compas:ICDHeader IEDType="GTW" IEDinstance="0" BayLabel="SITE1" IEDName="SITESITE1GTW0" ICDSystemVersionUUID="IED4d4fe1a8cda64cf88a5ee4176a1a0eef" VendorName="RTE" IEDredundancy="A" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="f8dbc8c1-2db7-4652-a9d6-0b414bdeccfa" headerVersion="01.00.00" headerRevision="01.00.00"/>
+                        </Private>
+                        <!--<Private type="COMPAS-ICDHeader">
+                            <compas:ICDHeader IEDType="GTW" IEDinstance="3" BayLabel="SITE1" IEDName="SITESITE1GTW1" ICDSystemVersionUUID="53a72621-4f96-4cc5-b1da-3171c1705bea" VendorName="RTE" IEDredundancy="B" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="f8dbc8c1-2db7-4652-a9d6-0b414bdeccfa" headerVersion="01.00.00" headerRevision="01.00.00"/>
+                        </Private>
+                        <Private type="COMPAS-ICDHeader">
+                            <compas:ICDHeader IEDType="GTW" IEDinstance="3" BayLabel="SITE1" IEDName="SITESITE1GTW2" ICDSystemVersionUUID="03d7e1c7-d490-4768-a968-23c7a42cca28" VendorName="RTE" IEDredundancy="C" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="f8dbc8c1-2db7-4652-a9d6-0b414bdeccfa" headerVersion="01.00.00" headerRevision="01.00.00"/>
+                        </Private>-->
+                    </LNode>
+                </Function>
+            </Bay>
+        </VoltageLevel>
+    </Substation>
+</SCL>
