@@ -6,8 +6,6 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.lfenergy.compas.scl.extensions.model.ObjectFactory;
-import org.lfenergy.compas.scl.extensions.model.TCompasICDHeader;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.ControlBlock;
 import org.lfenergy.compas.sct.commons.dto.DataSetInfo;
@@ -18,15 +16,12 @@ import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 
-import javax.xml.bind.JAXBElement;
 import java.util.*;
 import java.util.stream.Collectors;
 
 
 @Slf4j
 public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
-
-    public static final String COMPAS_ICD_HEADER = "COMPAS-ICDHeader";
 
     public IEDAdapter(SclRootAdapter parentAdapter) {
         super(parentAdapter);
@@ -271,32 +266,4 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
                 .filter(tPrivate -> tPrivate.getType().equals(privateType))
                 .findFirst();
     }
-
-    public void createCompasICDHeader(TCompasICDHeader tIcdHeader) {
-        ObjectFactory objectFactory = new ObjectFactory();
-        TPrivate tPrivateICDHeader = new TPrivate();
-        tPrivateICDHeader.setType(IEDAdapter.COMPAS_ICD_HEADER);
-        JAXBElement<TCompasICDHeader> icdHeaderElement = objectFactory.createICDHeader(tIcdHeader);
-        tPrivateICDHeader.getContent().add(icdHeaderElement);
-        currentElem.getPrivate().add(tPrivateICDHeader);
-    }
-
-    public TCompasICDHeader getCompasICDHeader() throws ScdException {
-        Optional<TPrivate> headerPrivate = getPrivateHeader(COMPAS_ICD_HEADER);
-        if (headerPrivate.isPresent()) {
-            Optional<Object> headerObject =  headerPrivate.get().getContent().stream()
-                    .filter(o -> !o.toString().trim().isBlank())
-                    .findFirst();
-            if (headerObject.isPresent()) {
-                JAXBElement<TCompasICDHeader> header = (JAXBElement) headerObject.get();
-                return header.getValue();
-            } else {
-                throw new ScdException("Empty CoMPAS Private type : " + COMPAS_ICD_HEADER);
-            }
-        } else {
-            throw new ScdException("Unknown RTE Private type : " + COMPAS_ICD_HEADER);
-        }
-    }
-
-
 }

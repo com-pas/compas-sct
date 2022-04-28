@@ -451,7 +451,8 @@ class SclServiceTest {
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
 
-        SclRootAdapter expectedScdAdapter = assertDoesNotThrow( () -> SclService.importSTDElementsInSCD(scdRootAdapter, Set.of(std)));
+        SclRootAdapter expectedScdAdapter = assertDoesNotThrow( () -> SclService.importSTDElementsInSCD(
+                scdRootAdapter, Set.of(std), DTO.comMap));
         assertThat(expectedScdAdapter.getCurrentElem().getIED()).hasSize(1);
         assertThat(expectedScdAdapter.getCurrentElem().getDataTypeTemplates()).hasNoNullFieldsOrProperties();
         assertThat(expectedScdAdapter.getCurrentElem().getCommunication().getSubNetwork()).hasSize(2);
@@ -465,7 +466,8 @@ class SclServiceTest {
         SCL std2 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_SITESITE1GTW2.xml");
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
 
-        SclRootAdapter expectedScdAdapter = assertDoesNotThrow( () -> SclService.importSTDElementsInSCD(scdRootAdapter, Set.of(std0, std1, std2)));
+        SclRootAdapter expectedScdAdapter = assertDoesNotThrow( () -> SclService.importSTDElementsInSCD(
+                scdRootAdapter, Set.of(std0, std1, std2), DTO.comMap));
         assertThat(expectedScdAdapter.getCurrentElem().getIED()).hasSize(3);
         assertThat(expectedScdAdapter.getCurrentElem().getDataTypeTemplates()).hasNoNullFieldsOrProperties();
         assertThat(expectedScdAdapter.getCurrentElem().getCommunication().getSubNetwork()).hasSize(2);
@@ -480,7 +482,7 @@ class SclServiceTest {
         SCL std1 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
 
-        assertThrows(ScdException.class, () -> SclService.importSTDElementsInSCD(scdRootAdapter, Set.of(std, std1)));
+        assertThrows(ScdException.class, () -> SclService.importSTDElementsInSCD(scdRootAdapter, Set.of(std, std1), DTO.comMap));
 
     }
 
@@ -490,7 +492,7 @@ class SclServiceTest {
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_with_same_ICDSystemVersionUUID.xml");
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
 
-        assertThrows(ScdException.class, ()-> SclService.importSTDElementsInSCD(scdRootAdapter, Set.of(std)));
+        assertThrows(ScdException.class, ()-> SclService.importSTDElementsInSCD(scdRootAdapter, Set.of(std), DTO.comMap));
 
     }
 }

@@ -13,7 +13,10 @@ import org.lfenergy.compas.sct.commons.scl.com.CommunicationAdapter;
 import org.lfenergy.compas.sct.commons.scl.com.ConnectedAPAdapter;
 import org.lfenergy.compas.sct.commons.scl.com.SubNetworkAdapter;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -95,10 +98,34 @@ public class SubNetworkDTO {
         }
     }
 
-    public static Set<SubNetworkDTO> createDefaultSubnetwork(String iedName, CommunicationAdapter comAdapter){
-        final Map<Pair<String, String>, List<String>> comMap = Map.of(
-                Pair.of("RSPACE_PROCESS_NETWORK", "8-MMS"), Arrays.asList("PROCESS_AP", "TOTO_AP_GE"),
-                Pair.of("RSPACE_ADMIN_NETWORK","IP"), Arrays.asList("ADMINISTRATION_AP","TATA_AP_EFFACEC"));
+  /*  public enum SubnetworkName {
+        PROCESS_NETWORK("RSPACE_PROCESS_NETWORK"), // 0
+        ADMIN_NETWORK("RSPACE_ADMIN_NETWORK"); // 1
+
+        private final String value;
+
+        SubnetworkName(String value) {
+            this.value = value;
+        }
+
+        @Override
+        @JsonValue
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static SubnetworkName fromValue(String text) {
+            for (SubnetworkName b : SubnetworkName.values()) {
+                if (String.valueOf(b.value).equalsIgnoreCase(text)) {
+                    return b;
+                }
+            }
+            return null;
+        }
+    }*/
+
+    public static Set<SubNetworkDTO> createDefaultSubnetwork(String iedName, CommunicationAdapter comAdapter, Map<Pair<String, String>, List<String>> comMap){
         Set<SubNetworkDTO> subNetworkDTOS = new HashSet<>();
         comMap.forEach((subnetworkNameType, apNames) -> {
             SubNetworkDTO subNetworkDTO = new SubNetworkDTO(subnetworkNameType.getLeft(), subnetworkNameType.getRight());
