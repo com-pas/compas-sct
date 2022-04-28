@@ -451,7 +451,7 @@ class SclServiceTest {
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
 
-        SclRootAdapter expectedScdAdapter = assertDoesNotThrow( () -> SclService.importSTDElementsInSCD(scdRootAdapter, Arrays.asList(std)));
+        SclRootAdapter expectedScdAdapter = assertDoesNotThrow( () -> SclService.importSTDElementsInSCD(scdRootAdapter, Set.of(std)));
         assertThat(expectedScdAdapter.getCurrentElem().getIED()).hasSize(1);
         assertThat(expectedScdAdapter.getCurrentElem().getDataTypeTemplates()).hasNoNullFieldsOrProperties();
         assertThat(expectedScdAdapter.getCurrentElem().getCommunication().getSubNetwork()).hasSize(2);
@@ -465,11 +465,12 @@ class SclServiceTest {
         SCL std2 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_SITESITE1GTW2.xml");
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
 
-        SclRootAdapter expectedScdAdapter = assertDoesNotThrow( () -> SclService.importSTDElementsInSCD(scdRootAdapter, Arrays.asList(std0, std1, std2)));
+        SclRootAdapter expectedScdAdapter = assertDoesNotThrow( () -> SclService.importSTDElementsInSCD(scdRootAdapter, Set.of(std0, std1, std2)));
         assertThat(expectedScdAdapter.getCurrentElem().getIED()).hasSize(3);
         assertThat(expectedScdAdapter.getCurrentElem().getDataTypeTemplates()).hasNoNullFieldsOrProperties();
         assertThat(expectedScdAdapter.getCurrentElem().getCommunication().getSubNetwork()).hasSize(2);
-        assertThat(expectedScdAdapter.getCurrentElem().getCommunication().getSubNetwork().get(0).getConnectedAP()).hasSize(3);
+        assertThat(expectedScdAdapter.getCurrentElem().getCommunication().getSubNetwork().get(0).getConnectedAP()).hasSizeBetween(1,3);
+        assertThat(expectedScdAdapter.getCurrentElem().getCommunication().getSubNetwork().get(1).getConnectedAP()).hasSizeBetween(1,3);
     }
 
     @Test
@@ -479,7 +480,7 @@ class SclServiceTest {
         SCL std1 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
 
-        assertThrows(ScdException.class, () -> SclService.importSTDElementsInSCD(scdRootAdapter, Arrays.asList(std, std1)));
+        assertThrows(ScdException.class, () -> SclService.importSTDElementsInSCD(scdRootAdapter, Set.of(std, std1)));
 
     }
 
@@ -489,7 +490,7 @@ class SclServiceTest {
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_with_same_ICDSystemVersionUUID.xml");
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
 
-        assertThrows(ScdException.class, ()-> SclService.importSTDElementsInSCD(scdRootAdapter, Arrays.asList(std)));
+        assertThrows(ScdException.class, ()-> SclService.importSTDElementsInSCD(scdRootAdapter, Set.of(std)));
 
     }
 }

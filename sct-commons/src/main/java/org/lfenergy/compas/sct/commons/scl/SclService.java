@@ -388,60 +388,55 @@ public class SclService {
         }
     }
 
-    public static SclRootAdapter importSTDElementsInSCD(@NonNull SclRootAdapter scdRootAdapter, List<SCL> stds) throws ScdException {
+    public static SclRootAdapter importSTDElementsInSCD(@NonNull SclRootAdapter scdRootAdapter, Set<SCL> stds) throws ScdException {
         // List all Private and remove duplicated one with same iedName
         Map<String, TPrivate> tPrivateMap = new HashMap<>();
-        getMapIEDAndPrivate(scdRootAdapter, tPrivateMap);
+        createMapIEDNameAndPrivate(scdRootAdapter, tPrivateMap);
 
         //For each Private.ICDSystemVersionUUID and Private.iedName find STD File
         for (Map.Entry<String, TPrivate> entry : tPrivateMap.entrySet()) {
             String iedName = entry.getKey();
             TPrivate tPrivate = entry.getValue();
             //if =!1 ==> error
-            List<SCL> matchedStds = findStds(tPrivate, stds);
+            List<SCL> matchedStds = findStds(tPrivate, stds); //TODO refactor this method, to call it once out of the loop
             if (matchedStds.size() != 1)
                 throw new ScdException("There is no STD file found or there are several STD files corresponding to " +
                         "HeaderId = " + getValueFromPrivate(tPrivate, "headerId") +
                         " HeaderVersion = " + getValueFromPrivate(tPrivate, "headerVersion") +
                         " HeaderRevision = " + getValueFromPrivate(tPrivate, "headerRevision") +
                         "and ICDSystemVersionUUID = " + getValueFromPrivate(tPrivate, ICD_SYSTEM_VERSION_UUID));
-            else {
-                // import /dtt in Scd
-                SCL std = matchedStds.get(0);
-                SclRootAdapter stdRootAdapter = new SclRootAdapter(std);
-                scdRootAdapter.getCurrentElem().setDataTypeTemplates(std.getDataTypeTemplates());
 
-                // import /ied rename Private.iedName
-                IEDAdapter stdIedAdapter = new IEDAdapter(stdRootAdapter, std.getIED().get(0));
-                Optional<TPrivate> optionalTPrivate = stdIedAdapter.getPrivateHeader(COMPAS_ICDHEADER);
-                if(optionalTPrivate.isPresent()){
-                    checkSTDPrivateAndLNodePrivate(optionalTPrivate.get(), tPrivate);
-                }
-                stdIedAdapter.setIEDName(iedName);
-                scdRootAdapter.getCurrentElem().getIED().add(stdIedAdapter.getCurrentElem());
+            // import /dtt in Scd
+            SCL std = matchedStds.get(0);
+            SclRootAdapter stdRootAdapter = new SclRootAdapter(std);
+            scdRootAdapter.getCurrentElem().setDataTypeTemplates(std.getDataTypeTemplates());
 
-                //import connectedAP and rename ConnectedAP/@iedName
-                Set<SubNetworkDTO> subNetworkDTOSet = createDefaultSubnetworkIntoSCD(iedName, std);
-                addSubnetworks(scdRootAdapter.getCurrentElem(), subNetworkDTOSet, Optional.of(std));
-                // TODO remove already traited std
-
+            // import /ied rename Private.iedName
+            IEDAdapter stdIedAdapter = new IEDAdapter(stdRootAdapter, std.getIED().get(0));
+            Optional<TPrivate> optionalTPrivate = stdIedAdapter.getPrivateHeader(COMPAS_ICDHEADER);
+            if(optionalTPrivate.isPresent()){
+                checkSTDPrivateAndLNodePrivate(optionalTPrivate.get(), tPrivate);
             }
+            stdIedAdapter.setIEDName(iedName);
+            scdRootAdapter.getCurrentElem().getIED().add(stdIedAdapter.getCurrentElem());
+
+            //import connectedAP and rename ConnectedAP/@iedName
+            CommunicationAdapter comAdapter = stdRootAdapter.getCommunicationAdapter(false);
+            Set<SubNetworkDTO> subNetworkDTOSet = SubNetworkDTO.createDefaultSubnetwork(iedName, comAdapter);
+            addSubnetworks(scdRootAdapter.getCurrentElem(), subNetworkDTOSet, Optional.of(std));
         }
         return scdRootAdapter;
     }
 
-    private static void getMapIEDAndPrivate(SclRootAdapter scdRootAdapter, Map<String, TPrivate> tPrivateMap) {
+    private static void createMapIEDNameAndPrivate(SclRootAdapter scdRootAdapter, Map<String, TPrivate> tPrivateMap) {
         scdRootAdapter.getCurrentElem().getSubstation().get(0).getVoltageLevel()
                 .forEach(tVoltageLevel -> tVoltageLevel.getBay()
                         .forEach(tBay -> tBay.getFunction()
                                 .forEach(tFunction -> tFunction.getLNode()
                                         .forEach(tlNode -> tlNode.getPrivate()
                                                 .forEach(tPrivate -> {
-                                                    if (tPrivate.getType().equals(COMPAS_ICDHEADER)) {
-                                                        tPrivate.getContent().stream()
-                                                                .filter(o -> !o.toString().trim().isBlank())
-                                                                .forEach(o -> tPrivateMap.put((((Element) o).getAttribute("IEDName")), tPrivate));
-                                                    }
+                                                    String iedName = getValueFromPrivate(tPrivate, "IEDName");
+                                                    if(iedName!= null) tPrivateMap.put(iedName, tPrivate);
                                                 })
                                         )
                                 )
@@ -449,9 +444,10 @@ public class SclService {
                 );
     }
 
-    private static List<SCL> findStds(TPrivate tPrivate, List<SCL> stds) throws ScdException {
+    private static List<SCL> findStds(TPrivate tPrivate, Set<SCL> stds) throws ScdException {
         List<SCL> existingStds = new ArrayList<>();
         String icdSystemVersionUuid = getValueFromPrivate(tPrivate, ICD_SYSTEM_VERSION_UUID);
+        if(icdSystemVersionUuid == null) throw new ScdException("Attribut" + ICD_SYSTEM_VERSION_UUID +" not present in COMPAS-ICDHeader private from SCD");
         stds.forEach(std -> std.getIED().forEach(ied -> ied.getPrivate().forEach(tp -> {
             if (tp.getType().equals(COMPAS_ICDHEADER)) {
                 tp.getContent().stream()
@@ -466,14 +462,12 @@ public class SclService {
         return existingStds;
     }
 
-    private static String getValueFromPrivate(TPrivate tPrivate, String attributName) throws ScdException {
-        Optional<Object> optionalelm = tPrivate.getContent().stream()
+    private static String getValueFromPrivate(TPrivate tPrivate, String attributName) {
+        return tPrivate.getContent().stream()
                 .filter(o -> !o.toString().trim().isBlank())
-                .findFirst();
-        if(optionalelm.isPresent()){
-            return ((Element) optionalelm.get()).getAttribute(attributName);
-        }
-        throw new ScdException("Attribut" + attributName +" not present in COMPAS-ICDHeader private");
+                .findFirst()
+                .map(o -> ((Element) o).getAttribute(attributName))
+                .orElse(null);
     }
 
     private static void checkSTDPrivateAndLNodePrivate(TPrivate iedPrivate, TPrivate scdPrivate) throws ScdException {
@@ -488,31 +482,5 @@ public class SclService {
             iedPrivate.getContent().add(scdElement);
         } else throw new ScdException("COMPAS-ICDHeader is not the same in Substation and in IED");
     }
-
-    private static Set<SubNetworkDTO> createDefaultSubnetworkIntoSCD(String iedName, SCL std){
-        final Map<Pair<String, String>, List<String>> comMap = Map.of(
-                Pair.of("RSPACE_PROCESS_NETWORK", "8-MMS"), Arrays.asList("PROCESS_AP", "TOTO_AP_GE"),
-                Pair.of("RSPACE_ADMIN_NETWORK","IP"), Arrays.asList("ADMIN_AP","TATA_AP_EFFACEC"));
-        Set<SubNetworkDTO> subNetworkDTOS = new HashSet<>();
-        comMap.forEach((subnetworkNameType, apNames) -> {
-            SubNetworkDTO subNetworkDTO = new SubNetworkDTO(subnetworkNameType.getLeft(), subnetworkNameType.getRight());
-            apNames.forEach(s -> {
-                if(getStdConnectedApNames(std).contains(s)){
-                    ConnectedApDTO connectedApDTO = new ConnectedApDTO(iedName, s);
-                    subNetworkDTO.addConnectedAP(connectedApDTO);}
-            });
-            subNetworkDTOS.add(subNetworkDTO);
-        });
-        return subNetworkDTOS;
-    }
-
-    private static List<String> getStdConnectedApNames(SCL std){
-        return std.getCommunication().getSubNetwork().stream()
-                .map(TSubNetwork::getConnectedAP)
-                .flatMap(tConnectedAPS -> tConnectedAPS.stream().map(TConnectedAP::getApName))
-                .collect(Collectors.toList());
-    }
-
-
 
 }
