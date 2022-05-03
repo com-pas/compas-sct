@@ -5,17 +5,16 @@
 package org.lfenergy.compas.sct.commons.dto;
 
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.lfenergy.compas.scl2007b4.model.TConnectedAP;
 import org.lfenergy.compas.sct.commons.scl.com.ConnectedAPAdapter;
-
-import java.util.Objects;
 
 @Setter
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class ConnectedApDTO  {
     private String iedName;
     private String apName;
