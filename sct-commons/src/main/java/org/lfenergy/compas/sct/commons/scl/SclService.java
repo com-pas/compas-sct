@@ -7,7 +7,9 @@ package org.lfenergy.compas.sct.commons.scl;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import org.lfenergy.compas.scl.extensions.commons.CompasExtensionsConstants;
 import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.CommonConstants;
 import org.lfenergy.compas.sct.commons.Utils;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
@@ -25,6 +27,8 @@ import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter;
 import org.lfenergy.compas.sct.commons.scl.sstation.VoltageLevelAdapter;
 
+import javax.xml.bind.JAXBElement;
+import javax.xml.namespace.QName;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -40,7 +44,15 @@ public class SclService {
 
     public static SclRootAdapter initScl(Optional<UUID> hId, String hVersion, String hRevision) throws ScdException {
         UUID headerId = hId.orElseGet(UUID::randomUUID);
-        return new SclRootAdapter(headerId.toString(), hVersion, hRevision);
+        SclRootAdapter scdAdapter = new SclRootAdapter(headerId.toString(), hVersion, hRevision);
+        TPrivate fileTypePrivate = new TPrivate();
+        fileTypePrivate.setType(CommonConstants.COMPAS_SCL_FILE_TYPE);
+        JAXBElement<TCompasSclFileType> compasFileType = new JAXBElement<>(
+                new QName(CompasExtensionsConstants.COMPAS_EXTENSION_NS_URI, CommonConstants.SCL_FILE_TYPE),
+                TCompasSclFileType.class, TCompasSclFileType.SCD);
+        fileTypePrivate.getContent().add(compasFileType);
+        scdAdapter.addPrivate(fileTypePrivate);
+        return scdAdapter;
     }
 
     public static SclRootAdapter addHistoryItem(SCL scd, String who, String what, String why) {

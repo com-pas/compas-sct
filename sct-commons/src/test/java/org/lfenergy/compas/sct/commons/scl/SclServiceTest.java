@@ -16,10 +16,11 @@ import org.lfenergy.compas.sct.commons.scl.ied.LN0Adapter;
 import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
+import java.io.IOException;
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 class SclServiceTest {
 
@@ -351,6 +352,16 @@ class SclServiceTest {
         assertDoesNotThrow(
                 () -> SclService.initScl(Optional.of(hid), "hVersion", "hRevision")
         );
+    }
+
+    @Test
+    void testInitScl_Create_Private_SCL_FILETYPE() throws IOException {
+        UUID hid = UUID.randomUUID();
+        SclRootAdapter rootAdapter = assertDoesNotThrow(
+                () -> SclService.initScl(Optional.of(hid), "hVersion", "hRevision")
+        );
+        assertThat(rootAdapter.getCurrentElem().getPrivate()).isNotEmpty();
+        assertThat(rootAdapter.getCurrentElem().getPrivate().get(0).getType()).isEqualTo("COMPAS-SclFileType");
     }
 
     @Test

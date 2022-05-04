@@ -138,7 +138,6 @@
                         <goals>
                             <goal>unpack</goal>
                         </goals>
-
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
@@ -146,12 +145,47 @@
                                     <artifactId>compas-scl-xsd</artifactId>
                                     <version>0.0.4</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.lfenergy.compas.core</groupId>
+                                    <artifactId>scl-extension</artifactId>
+                                    <version>0.8.0</version>
+                                </artifactItem>
                             </artifactItems>
                             <outputDirectory>${project.build.directory}</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jaxb2-maven-plugin</artifactId>
+                <version>2.5.0</version>
+                <executions>
+                    <execution>
+                        <id>xjc</id>
+                        <goals>
+                            <goal>xjc</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <sources>
+                        <source>${project.build.directory}/xsd/SCL2007B4/SCL.xsd</source>
+                        <!-- <source>${project.build.directory}/xsd/SCL2007B4/SCL_BaseSimpleTypes.xsd</source>
+                         <source>${project.build.directory}/xsd/SCL2007B4/SCL_BaseTypes.xsd</source>
+                         <source>${project.build.directory}/xsd/SCL2007B4/SCL_Communication.xsd</source>
+                         <source>${project.build.directory}/xsd/SCL2007B4/SCL_DataTypeTemplates.xsd</source>
+                         <source>${project.build.directory}/xsd/SCL2007B4/SCL_Enums.xsd</source>
+                         <source>${project.build.directory}/xsd/SCL2007B4/SCL_IED.xsd</source>
+                         <source>${project.build.directory}/xsd/SCL2007B4/SCL_Substation.xsd</source>-->
+                        <source>${project.build.directory}/xsd/SCL_CoMPAS.xsd</source>
+                    </sources>
+                    <packageName>org.lfenergy.compas.scl2007b4.model</packageName>
+                    <noPackageLevelAnnotations>true</noPackageLevelAnnotations>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
