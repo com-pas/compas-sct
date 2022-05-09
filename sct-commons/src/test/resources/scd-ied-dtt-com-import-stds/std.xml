@@ -20,7 +20,7 @@
             </ConnectedAP>
         </SubNetwork>
         <SubNetwork type="IP" name="RSPACE_ADMIN_NETWORK">
-            <ConnectedAP iedName="IED4d4fe1a8cda64cf88a5ee4176a1a0eef" apName="ADMINISTRATION_AP" redProt="none">
+            <ConnectedAP iedName="IED4d4fe1a8cda64cf88a5ee4176a1a0eef" apName="ADMIN_AP" redProt="none">
                 <Address>
                     <P type="SyslogIP">Adresse IP du serveur Syslog</P>
                 </Address>
@@ -130,7 +130,7 @@
                     <RedProt prp="true"/>
                 </Services>
         </AccessPoint>
-        <AccessPoint name="ADMINISTRATION_AP"/>
+        <AccessPoint name="ADMIN_AP"/>
     </IED>
     <DataTypeTemplates>
         <LNodeType lnClass="LPAI" id="RTE_8884DBCF760D916CCE3EE9D1846CE46F_LPAI_V1.0.0">

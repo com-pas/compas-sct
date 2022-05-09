@@ -13,6 +13,8 @@ import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,11 +31,15 @@ class SclAutomationServiceTest {
 
     @Test
     void createSCD() throws Exception {
-        SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
-        SclRootAdapter expectedSCD = SclAutomationService.createSCD(ssd, headerDTO);
+        SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd.xml");
+        SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SclRootAdapter expectedSCD = SclAutomationService.createSCD(ssd, headerDTO, Set.of(std));
         assertNotNull(expectedSCD.getCurrentElem().getHeader().getId());
         assertNull(expectedSCD.getCurrentElem().getHeader().getHistory());
         assertEquals(1, expectedSCD.getCurrentElem().getSubstation().size());
+        assertEquals(1, expectedSCD.getCurrentElem().getIED().size());
+        assertNotNull(expectedSCD.getCurrentElem().getDataTypeTemplates());
+        assertEquals(2, expectedSCD.getCurrentElem().getCommunication().getSubNetwork().size());
     }
 
     @Test
@@ -44,7 +50,10 @@ class SclAutomationServiceTest {
         historyItem.setWhy("because");
         headerDTO.getHistoryItems().add(historyItem);
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
-        SclRootAdapter expectedSCD = SclAutomationService.createSCD(ssd, headerDTO);
+        SCL std1 = SclTestMarshaller.getSCLFromFile("/std_1.xml");
+        SCL std2 = SclTestMarshaller.getSCLFromFile("/std_2.xml");
+        SCL std3 = SclTestMarshaller.getSCLFromFile("/std_3.xml");
+        SclRootAdapter expectedSCD = SclAutomationService.createSCD(ssd, headerDTO, Set.of(std1, std2, std3));
         assertNotNull(expectedSCD.getCurrentElem().getHeader().getId());
         assertEquals(1 ,expectedSCD.getCurrentElem().getHeader().getHistory().getHitem().size());
         assertEquals(1, expectedSCD.getCurrentElem().getSubstation().size());
@@ -62,16 +71,20 @@ class SclAutomationServiceTest {
         historyItemBis.setWhy("because bis");
         headerDTO.getHistoryItems().addAll(Arrays.asList(historyItem, historyItemBis));
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
-        SclRootAdapter expectedSCD = SclAutomationService.createSCD(ssd, headerDTO);
+        SCL std1 = SclTestMarshaller.getSCLFromFile("/std_1.xml");
+        SCL std2 = SclTestMarshaller.getSCLFromFile("/std_2.xml");
+        SCL std3 = SclTestMarshaller.getSCLFromFile("/std_3.xml");
+        SclRootAdapter expectedSCD = SclAutomationService.createSCD(ssd, headerDTO,Set.of(std1, std2, std3));
         assertNotNull(expectedSCD.getCurrentElem().getHeader().getId());
         assertEquals(1, expectedSCD.getCurrentElem().getHeader().getHistory().getHitem().size());
         assertEquals("what", expectedSCD.getCurrentElem().getHeader().getHistory().getHitem().get(0).getWhat());
     }
 
-        @Test
+    @Test
     void createSCD_SSD_Without_Substation() throws Exception {
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd_without_substations.xml");
         assertThrows(ScdException.class,
-                () ->  SclAutomationService.createSCD(ssd, headerDTO) );
+                () ->  SclAutomationService.createSCD(ssd, headerDTO, new HashSet<>()) );
     }
+
 }

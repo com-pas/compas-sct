@@ -130,7 +130,7 @@
                     <RedProt prp="true"/>
                 </Services>
         </AccessPoint>
-        <AccessPoint name="ADMINISTRATION_AP"/>
+        <AccessPoint name="ADMIN_AP"/>
     </IED>
     <DataTypeTemplates>
         <LNodeType lnClass="LPAI" id="RTE_8884DBCF760D916CCE3EE9D1846CE46F_LPAI_V1.0.0">

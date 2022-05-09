@@ -23,8 +23,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
 
-    public static final String COMPAS_ICD_HEADER = "COMPAS-ICDHeader";
-
     public IEDAdapter(SclRootAdapter parentAdapter) {
         super(parentAdapter);
     }
