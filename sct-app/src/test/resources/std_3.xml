@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ // SPDX-FileCopyrightText: 2021 RTE FRANCE
+  ~ //
+  ~ // SPDX-License-Identifier: Apache-2.0
+  -->
+
+<SCL  xmlns:compas="https://www.lfenergy.org/compas/extension/v1" xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4">
+    <Header id="00f999bb-f152-4953-a926-0e72a76d8e09" version="01.00.00" revision="A" toolID="RTE GEN TOOL">
+        <History>
+            <Hitem version="V5" revision="A1" when="20201106" who="RTE" what="LDASRB maintenant en phase 1"/>
+        </History>
+    </Header>
+    <Communication>
+        <SubNetwork type="8-MMS" name="RSPACE_PROCESS_NETWORK">
+            <ConnectedAP iedName="IED4d4fe1a8cda64cf88a5ee4176a1a0eef" apName="PROCESS_AP" redProt="prp">
+                <Address>
+                    <P type="OSI-PSEL">00000001</P>
+                </Address>
+            </ConnectedAP>
+        </SubNetwork>
+        <SubNetwork type="IP" name="RSPACE_ADMIN_NETWORK">
+            <ConnectedAP iedName="IED4d4fe1a8cda64cf88a5ee4176a1a0eef" apName="ADMIN_AP" redProt="none">
+                <Address>
+                    <P type="SyslogIP">Adresse IP du serveur Syslog</P>
+                </Address>
+            </ConnectedAP>
+        </SubNetwork>
+    </Communication>
+    <IED name="IED4d4fe1a8cda64cf88a5ee4176a1a0eef" type="ADU" manufacturer="ADU" configVersion="ADU" originalSclVersion="2007" originalSclRevision="B" originalSclRelease="4">
+        <Private type="RTE-IEDType">SAMU</Private>
+        <Private type="COMPAS-IEDType">SAMU</Private>
+        <Private type="COMPAS-SystemVersion">
+            <compas:SystemVersion MainSystemVersion="01.00" MinorSystemVersion="009.001.001"/>
+        </Private>
+        <Private type="COMPAS-ICDHeader">
+            <compas:ICDHeader IEDType="BCU" ICDSystemVersionUUID="ed36220c-5577-4f0c-aaef-c6efa9f7d7c8" VendorName="RTE" IEDredundancy="A" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="9aea4c6f-7ab8-4341-8d84-14c17d73a57d" headerVersion="01.00.00" headerRevision="01.00.00"/>
+        </Private>
+        <Services nameLength="64">
+            <ConfLNs fixPrefix="true" fixLnInst="true"/>
+            <ConfLdName/>
+            <ValueHandling setToRO="true"/>
+        </Services>
+        <AccessPoint name="PROCESS_AP">
+            <Server>
+                <Authentication none="true" certificate="false"/>
+                <LDevice inst="LDSUIED" ldName="VirtualSAMULDSUIED" desc="IED Monitoring Function">
+                    <Private type="RTE-ProjectStage">Phase 1_Pilotes</Private>
+                    <Private type="RTE-FunctionUUID">9d13ab59-1ec8-4c46-91c8-0326e6a5408e</Private>
+                    <Private type="RTE-LDMaxInst">1</Private>
+                    <Private type="RTE-FunctionIndice">1.0</Private>
+                    <LN0 lnClass="LLN0" inst="" lnType="RTE_080BBB4D93E4E704CF69E8616CAF1A74_LLN0_V1.0.0" desc="">
+                        <DOI name="Beh">
+                            <DAI name="d" valKind="RO" valImport="false">
+                                <Val>Ldevice current status</Val>
+                            </DAI>
+                        </DOI>
+                        <DOI name="Mod">
+                            <DAI name="stVal">
+                                <Val>off</Val>
+                            </DAI>
+                            <DAI name="operTimeout" valKind="RO" valImport="true">
+                                <Val>1000</Val>
+                            </DAI>
+                            <DAI name="d" valKind="RO" valImport="false">
+                                <Val>Activation_deactivation command</Val>
+                            </DAI>
+                        </DOI>
+                    </LN0>
+                    <LN lnClass="LPAI" inst="1" lnType="RTE_8884DBCF760D916CCE3EE9D1846CE46F_LPAI_V1.0.0" desc="">
+                        <DOI name="ARtgHigh1">
+                            <SDI name="units">
+                                <DAI name="multiplier" valKind="RO" valImport="false">
+                                    <Val>m</Val>
+                                </DAI>
+                                <DAI name="SIUnit" valKind="RO" valImport="false">
+                                    <Val>A</Val>
+                                </DAI>
+                            </SDI>
+                            <SDI name="minVal">
+                                <DAI name="f" valKind="RO" valImport="false">
+                                    <Val>10</Val>
+                                </DAI>
+                            </SDI>
+                            <SDI name="maxVal">
+                                <DAI name="f" valKind="RO" valImport="false">
+                                    <Val>20</Val>
+                                </DAI>
+                            </SDI>
+                            <SDI name="setMag">
+                                <DAI name="f" valKind="RO" valImport="true">
+                                    <Val>20</Val>
+                                </DAI>
+                            </SDI>
+                            <SDI name="stepSize">
+                                <DAI name="f" valKind="RO" valImport="false">
+                                    <Val>10</Val>
+                                </DAI>
+                            </SDI>
+                            <DAI name="d" valKind="RO" valImport="false">
+                                <Val>Rated Input Current High</Val>
+                            </DAI>
+                        </DOI>
+                    </LN>
+                </LDevice>
+            </Server>
+                <Services>
+                    <DynAssociation max="4"/>
+                    <GetDirectory/>
+                    <GetDataObjectDefinition/>
+                    <DataObjectDirectory/>
+                    <GetDataSetValue/>
+                    <DataSetDirectory/>
+                    <ConfDataSet modify="true" maxAttributes="50" max="20"/>
+                    <ReadWrite/>
+                    <ConfReportControl bufMode="both" bufConf="true" max="20"/>
+                    <GetCBValues/>
+                    <ReportSettings rptID="Conf" optFields="Conf" bufTime="Conf" trgOps="Conf" intgPd="Conf" resvTms="true" owner="true" cbName="Conf" datSet="Conf"/>
+                    <GSESettings appID="Conf" kdaParticipant="false" cbName="Conf" datSet="Conf"/>
+                    <SMVSettings svID="Conf" optFields="Conf" smpRate="Conf" samplesPerSec="true" pdcTimeStamp="true" synchSrcId="true" nofASDU="Conf" kdaParticipant="false" cbName="Conf" datSet="Conf">
+                        <SamplesPerSec>4800</SamplesPerSec>
+                    </SMVSettings>
+                    <GOOSE fixedOffs="true" goose="true" max="4"/>
+                    <SMVsc sv="true" max="4"/>
+                    <ClientServices goose="true" supportsLdName="true" maxGOOSE="20">
+                        <TimeSyncProt iec61850_9_3="true"/>
+                    </ClientServices>
+                    <SupSubscription maxGo="10" maxSv="0"/>
+                    <ConfSigRef max="100"/>
+                    <RedProt prp="true"/>
+                </Services>
+        </AccessPoint>
+        <AccessPoint name="ADMIN_AP"/>
+    </IED>
+    <DataTypeTemplates>
+        <LNodeType lnClass="LPAI" id="RTE_8884DBCF760D916CCE3EE9D1846CE46F_LPAI_V1.0.0">
+            <DO name="ARtgHigh1" type="RTE_X_X_X_14DAEEE804EEAE54170C341E065DFEAE_ASG_V1.0.0"/>
+        </LNodeType>
+        <LNodeType lnClass="LLN0" id="RTE_080BBB4D93E4E704CF69E8616CAF1A74_LLN0_V1.0.0">
+            <DO name="Beh" type="RTE_X_X_X_7A170650CB603320DB207F938C86BA78_ENS_V1.0.0"/>
+            <DO name="Mod" type="RTE_X_X_X_CED370672B877CDD7FBE78C5A57BFE8C_ENC_V1.0.0"/>
+        </LNodeType>
+        <DOType cdc="ENS" id="RTE_X_X_X_7A170650CB603320DB207F938C86BA78_ENS_V1.0.0">
+            <DA fc="ST" dchg="true" qchg="false" dupd="false" name="stVal" bType="Enum" type="BehaviourModeKind"/>
+            <DA fc="ST" dchg="false" qchg="true" dupd="false" name="q" bType="Quality"/>
+            <DA fc="ST" dchg="false" qchg="false" dupd="false" name="t" bType="Timestamp"/>
+            <DA fc="SV" dchg="false" qchg="false" dupd="false" name="subEna" bType="BOOLEAN"/>
+            <DA fc="SV" dchg="false" qchg="false" dupd="false" name="subVal" bType="Enum" type="BehaviourModeKind"/>
+            <DA fc="SV" dchg="false" qchg="false" dupd="false" name="subQ" bType="Quality"/>
+            <DA fc="SV" dchg="false" qchg="false" dupd="false" name="subID" bType="VisString64"/>
+            <DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+        </DOType>
+        <DOType cdc="ENC" id="RTE_X_X_X_CED370672B877CDD7FBE78C5A57BFE8C_ENC_V1.0.0">
+            <DA fc="ST" dchg="false" qchg="false" dupd="false" name="origin" bType="Struct" type="RTE_7934516A99160CFE6BA163118894B809_V1.0.0"/>
+            <DA fc="ST" dchg="false" qchg="false" dupd="false" name="ctlNum" bType="INT8U"/>
+            <DA fc="ST" dchg="true" qchg="false" dupd="false" name="stVal" bType="Enum" type="BehaviourModeKind"/>
+            <DA fc="ST" dchg="false" qchg="true" dupd="false" name="q" bType="Quality"/>
+            <DA fc="ST" dchg="false" qchg="false" dupd="false" name="t" bType="Timestamp"/>
+            <DA fc="OR" dchg="true" qchg="false" dupd="false" name="opRcvd" bType="BOOLEAN"/>
+            <DA fc="OR" dchg="true" qchg="false" dupd="false" name="opOk" bType="BOOLEAN"/>
+            <DA fc="OR" dchg="false" qchg="false" dupd="false" name="tOpOk" bType="Timestamp"/>
+            <DA fc="SV" dchg="false" qchg="false" dupd="false" name="subEna" bType="BOOLEAN"/>
+            <DA fc="SV" dchg="false" qchg="false" dupd="false" name="subVal" bType="Enum" type="BehaviourModeKind"/>
+            <DA fc="SV" dchg="false" qchg="false" dupd="false" name="subQ" bType="Quality"/>
+            <DA fc="SV" dchg="false" qchg="false" dupd="false" name="subID" bType="VisString64"/>
+            <DA fc="CF" dchg="true" qchg="false" dupd="false" name="ctlModel" bType="Enum" valKind="RO" type="CtlModelKind03" valImport="true">
+                <Val>status-only</Val>
+            </DA>
+            <DA fc="CF" dchg="true" qchg="false" dupd="false" name="operTimeout" bType="INT32U" valKind="RO" valImport="true"/>
+            <DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+            <DA fc="CO" dchg="false" qchg="false" dupd="false" name="Cancel" bType="Struct" type="RTE_5A41B3113CC639FA4A198B4DF532D1CC_V1.0.0"/>
+            <DA fc="CO" dchg="false" qchg="false" dupd="false" name="Oper" bType="Struct" type="RTE_352BE3C45AC7386B3D20C5D496FDD990_V1.0.0"/>
+        </DOType>
+        <DOType cdc="ASG" id="RTE_X_X_X_14DAEEE804EEAE54170C341E065DFEAE_ASG_V1.0.0">
+            <DA fc="SP" dchg="true" qchg="false" dupd="false" name="setMag" bType="Struct" type="RTE_0E1A613237D780705550F7E781EA4447_V1.0.0"/>
+            <DA fc="CF" dchg="true" qchg="false" dupd="false" name="units" bType="Struct" type="RTE_031559973E4A8641DEDCC01E82B100C1_V1.0.0"/>
+            <DA fc="CF" dchg="true" qchg="false" dupd="false" name="minVal" bType="Struct" type="RTE_4EA352A99168EE0B87B2930D18CA941E_V1.0.0"/>
+            <DA fc="CF" dchg="true" qchg="false" dupd="false" name="maxVal" bType="Struct" type="RTE_4EA352A99168EE0B87B2930D18CA941E_V1.0.0"/>
+            <DA fc="CF" dchg="true" qchg="false" dupd="false" name="stepSize" bType="Struct" type="RTE_4EA352A99168EE0B87B2930D18CA941E_V1.0.0"/>
+            <DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+        </DOType>
+        <DAType id="RTE_4EA352A99168EE0B87B2930D18CA941E_V1.0.0">
+            <BDA name="f" bType="FLOAT32" valKind="RO" valImport="false"/>
+        </DAType>
+        <DAType id="RTE_031559973E4A8641DEDCC01E82B100C1_V1.0.0">
+            <BDA name="SIUnit" bType="Enum" valKind="RO" type="SIUnitKind" valImport="false"/>
+            <BDA name="multiplier" bType="Enum" valKind="RO" type="MultiplierKind" valImport="false"/>
+        </DAType>
+        <DAType id="RTE_0E1A613237D780705550F7E781EA4447_V1.0.0">
+            <BDA name="f" bType="FLOAT32" valKind="RO" valImport="true"/>
+        </DAType>
+        <DAType id="RTE_7934516A99160CFE6BA163118894B809_V1.0.0">
+            <BDA name="orCat" bType="Enum" type="OriginatorCategoryKind"/>
+            <BDA name="orIdent" bType="Octet64"/>
+        </DAType>
+        <DAType id="RTE_B18B834DC8584C5D9C468E79625A7AEE_V1.0.0">
+            <BDA name="orCat" bType="Enum" type="OriginatorCategoryKind"/>
+            <BDA name="orIdent" bType="Octet64"/>
+        </DAType>
+        <DAType id="RTE_5A41B3113CC639FA4A198B4DF532D1CC_V1.0.0">
+            <BDA name="ctlVal" bType="Enum" type="BehaviourModeKind"/>
+            <BDA name="origin" bType="Struct" type="RTE_B18B834DC8584C5D9C468E79625A7AEE_V1.0.0"/>
+            <BDA name="ctlNum" bType="INT8U"/>
+            <BDA name="T" bType="Timestamp"/>
+            <BDA name="Test" bType="BOOLEAN"/>
+            <ProtNs type="8-MMS">IEC 61850-8-1:2003</ProtNs>
+        </DAType>
+        <DAType id="RTE_352BE3C45AC7386B3D20C5D496FDD990_V1.0.0">
+            <BDA name="ctlVal" bType="Enum" type="BehaviourModeKind"/>
+            <BDA name="origin" bType="Struct" type="RTE_B18B834DC8584C5D9C468E79625A7AEE_V1.0.0"/>
+            <BDA name="ctlNum" bType="INT8U"/>
+            <BDA name="T" bType="Timestamp"/>
+            <BDA name="Test" bType="BOOLEAN"/>
+            <BDA name="Check" bType="Check"/>
+            <ProtNs type="8-MMS">IEC 61850-8-1:2003</ProtNs>
+        </DAType>
+        <EnumType id="BehaviourModeKind">
+            <EnumVal ord="1">on</EnumVal>
+            <EnumVal ord="2">blocked</EnumVal>
+            <EnumVal ord="3">test</EnumVal>
+            <EnumVal ord="4">test/blocked</EnumVal>
+            <EnumVal ord="5">off</EnumVal>
+        </EnumType>
+        <EnumType id="OriginatorCategoryKind">
+            <EnumVal ord="0">not-supported</EnumVal>
+            <EnumVal ord="1">bay-control</EnumVal>
+            <EnumVal ord="2">station-control</EnumVal>
+            <EnumVal ord="3">remote-control</EnumVal>
+            <EnumVal ord="4">automatic-bay</EnumVal>
+            <EnumVal ord="5">automatic-station</EnumVal>
+            <EnumVal ord="6">automatic-remote</EnumVal>
+            <EnumVal ord="7">maintenance</EnumVal>
+            <EnumVal ord="8">process</EnumVal>
+        </EnumType>
+        <EnumType id="CtlModelKind03">
+            <EnumVal ord="0">status-only</EnumVal>
+            <EnumVal ord="3">direct-with-enhanced-security</EnumVal>
+        </EnumType>
+        <EnumType id="SIUnitKind">
+            <EnumVal ord="1"/>
+            <EnumVal ord="2">m</EnumVal>
+            <EnumVal ord="3">kg</EnumVal>
+            <EnumVal ord="4">s</EnumVal>
+            <EnumVal ord="5">A</EnumVal>
+            <EnumVal ord="6">K</EnumVal>
+            <EnumVal ord="7">mol</EnumVal>
+            <EnumVal ord="8">cd</EnumVal>
+            <EnumVal ord="9">deg</EnumVal>
+            <EnumVal ord="10">rad</EnumVal>
+            <EnumVal ord="11">sr</EnumVal>
+            <EnumVal ord="21">Gy</EnumVal>
+            <EnumVal ord="22">Bq</EnumVal>
+            <EnumVal ord="23">°C</EnumVal>
+            <EnumVal ord="24">Sv</EnumVal>
+            <EnumVal ord="25">F</EnumVal>
+            <EnumVal ord="26">C</EnumVal>
+            <EnumVal ord="27">S</EnumVal>
+            <EnumVal ord="28">H</EnumVal>
+            <EnumVal ord="29">V</EnumVal>
+            <EnumVal ord="30">ohm</EnumVal>
+            <EnumVal ord="31">J</EnumVal>
+            <EnumVal ord="32">N</EnumVal>
+            <EnumVal ord="33">Hz</EnumVal>
+            <EnumVal ord="34">lx</EnumVal>
+            <EnumVal ord="35">Lm</EnumVal>
+            <EnumVal ord="36">Wb</EnumVal>
+            <EnumVal ord="37">T</EnumVal>
+            <EnumVal ord="38">W</EnumVal>
+            <EnumVal ord="39">Pa</EnumVal>
+            <EnumVal ord="41">m²</EnumVal>
+            <EnumVal ord="42">m³</EnumVal>
+            <EnumVal ord="43">m/s</EnumVal>
+            <EnumVal ord="44">m/s²</EnumVal>
+            <EnumVal ord="45">m³/s</EnumVal>
+            <EnumVal ord="46">m/m³</EnumVal>
+            <EnumVal ord="47">M</EnumVal>
+            <EnumVal ord="48">kg/m³</EnumVal>
+            <EnumVal ord="49">m²/s</EnumVal>
+            <EnumVal ord="50">W/m K</EnumVal>
+            <EnumVal ord="51">J/K</EnumVal>
+            <EnumVal ord="52">ppm</EnumVal>
+            <EnumVal ord="53">1/s</EnumVal>
+            <EnumVal ord="54">rad/s</EnumVal>
+            <EnumVal ord="55">W/m²</EnumVal>
+            <EnumVal ord="56">J/m²</EnumVal>
+            <EnumVal ord="57">S/m</EnumVal>
+            <EnumVal ord="58">K/s</EnumVal>
+            <EnumVal ord="59">Pa/s</EnumVal>
+            <EnumVal ord="60">J/kg K</EnumVal>
+            <EnumVal ord="61">VA</EnumVal>
+            <EnumVal ord="62">Watts</EnumVal>
+            <EnumVal ord="63">VAr</EnumVal>
+            <EnumVal ord="64">phi</EnumVal>
+            <EnumVal ord="65">cos(phi)</EnumVal>
+            <EnumVal ord="66">Vs</EnumVal>
+            <EnumVal ord="67">V²</EnumVal>
+            <EnumVal ord="68">As</EnumVal>
+            <EnumVal ord="69">A²</EnumVal>
+            <EnumVal ord="70">A²t</EnumVal>
+            <EnumVal ord="71">VAh</EnumVal>
+            <EnumVal ord="72">Wh</EnumVal>
+            <EnumVal ord="73">VArh</EnumVal>
+            <EnumVal ord="74">V/Hz</EnumVal>
+            <EnumVal ord="75">Hz/s</EnumVal>
+            <EnumVal ord="76">char</EnumVal>
+            <EnumVal ord="77">char/s</EnumVal>
+            <EnumVal ord="78">kgm²</EnumVal>
+            <EnumVal ord="79">dB</EnumVal>
+            <EnumVal ord="80">J/Wh</EnumVal>
+            <EnumVal ord="81">W/s</EnumVal>
+            <EnumVal ord="82">l/s</EnumVal>
+            <EnumVal ord="83">dBm</EnumVal>
+            <EnumVal ord="84">h</EnumVal>
+            <EnumVal ord="85">min</EnumVal>
+            <EnumVal ord="86">Ohm/m</EnumVal>
+            <EnumVal ord="87">percent/s</EnumVal>
+            <EnumVal ord="88">A/V</EnumVal>
+            <EnumVal ord="89">A/Vs</EnumVal>
+        </EnumType>
+        <EnumType id="MultiplierKind">
+            <EnumVal ord="-24">y</EnumVal>
+            <EnumVal ord="-21">z</EnumVal>
+            <EnumVal ord="-18">a</EnumVal>
+            <EnumVal ord="-15">f</EnumVal>
+            <EnumVal ord="-12">p</EnumVal>
+            <EnumVal ord="-9">n</EnumVal>
+            <EnumVal ord="-6">µ</EnumVal>
+            <EnumVal ord="-3">m</EnumVal>
+            <EnumVal ord="-2">c</EnumVal>
+            <EnumVal ord="-1">d</EnumVal>
+            <EnumVal ord="0"/>
+            <EnumVal ord="1">da</EnumVal>
+            <EnumVal ord="2">h</EnumVal>
+            <EnumVal ord="3">k</EnumVal>
+            <EnumVal ord="6">M</EnumVal>
+            <EnumVal ord="9">G</EnumVal>
+            <EnumVal ord="12">T</EnumVal>
+            <EnumVal ord="15">P</EnumVal>
+            <EnumVal ord="18">E</EnumVal>
+            <EnumVal ord="21">Z</EnumVal>
+            <EnumVal ord="24">Y</EnumVal>
+        </EnumType>
+    </DataTypeTemplates>
+</SCL>

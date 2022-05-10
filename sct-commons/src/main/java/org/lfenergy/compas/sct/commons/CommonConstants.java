@@ -15,4 +15,17 @@ public class CommonConstants {
 
     public static final String COMPAS_SCL_FILE_TYPE = "COMPAS-SclFileType";
     public static final String SCL_FILE_TYPE = "SclFileType";
+    public static final String COMPAS_ICDHEADER = "COMPAS-ICDHeader";
+    public static final String ICD_SYSTEM_VERSION_UUID = "ICDSystemVersionUUID";
+    public static final String IED_NAME = "IEDName";
+    public static final String HEADER_ID = "headerId";
+    public static final String HEADER_VERSION = "headerVersion";
+    public static final String HEADER_REVISION = "headerRevision";
+    public static final String IED_TYPE = "IEDType";
+    public static final String VENDOR_NAME = "VendorName";
+    public static final String IED_REDUNDANCY = "IEDredundancy";
+    public static final String IED_MODEL = "IEDmodel";
+    public static final String HW_REV = "hwRev";
+    public static final String SW_REV = "swRev";
+
 }
