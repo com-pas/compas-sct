@@ -45,11 +45,11 @@ public class SclService {
     public static SclRootAdapter initScl(Optional<UUID> hId, String hVersion, String hRevision) throws ScdException {
         UUID headerId = hId.orElseGet(UUID::randomUUID);
         SclRootAdapter scdAdapter = new SclRootAdapter(headerId.toString(), hVersion, hRevision);
-        scdAdapter.addPrivate(getPrivateSclFileType());
+        scdAdapter.addPrivate(initSclFileType());
         return scdAdapter;
     }
 
-    private static TPrivate getPrivateSclFileType() {
+    private static TPrivate initSclFileType() {
         TPrivate fileTypePrivate = new TPrivate();
         fileTypePrivate.setType(CommonConstants.COMPAS_SCL_FILE_TYPE);
         JAXBElement<TCompasSclFileType> compasFileType = new JAXBElement<>(
