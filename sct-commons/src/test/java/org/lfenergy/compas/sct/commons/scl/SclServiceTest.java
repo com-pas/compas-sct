@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.CommonConstants;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
@@ -361,7 +362,7 @@ class SclServiceTest {
                 () -> SclService.initScl(Optional.of(hid), "hVersion", "hRevision")
         );
         assertThat(rootAdapter.getCurrentElem().getPrivate()).isNotEmpty();
-        assertThat(rootAdapter.getCurrentElem().getPrivate().get(0).getType()).isEqualTo("COMPAS-SclFileType");
+        assertThat(rootAdapter.getCurrentElem().getPrivate().get(0).getType()).isEqualTo(CommonConstants.COMPAS_SCL_FILE_TYPE);
     }
 
     @Test
