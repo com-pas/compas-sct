@@ -45,14 +45,18 @@ public class SclService {
     public static SclRootAdapter initScl(Optional<UUID> hId, String hVersion, String hRevision) throws ScdException {
         UUID headerId = hId.orElseGet(UUID::randomUUID);
         SclRootAdapter scdAdapter = new SclRootAdapter(headerId.toString(), hVersion, hRevision);
+        scdAdapter.addPrivate(getPrivateSclFileType());
+        return scdAdapter;
+    }
+
+    private static TPrivate getPrivateSclFileType() {
         TPrivate fileTypePrivate = new TPrivate();
         fileTypePrivate.setType(CommonConstants.COMPAS_SCL_FILE_TYPE);
         JAXBElement<TCompasSclFileType> compasFileType = new JAXBElement<>(
                 new QName(CompasExtensionsConstants.COMPAS_EXTENSION_NS_URI, CommonConstants.SCL_FILE_TYPE),
                 TCompasSclFileType.class, TCompasSclFileType.SCD);
         fileTypePrivate.getContent().add(compasFileType);
-        scdAdapter.addPrivate(fileTypePrivate);
-        return scdAdapter;
+        return fileTypePrivate;
     }
 
     public static SclRootAdapter addHistoryItem(SCL scd, String who, String what, String why) {
