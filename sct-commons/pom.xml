@@ -139,6 +139,7 @@
                             <goal>unpack</goal>
                         </goals>
                         <configuration>
+                            <includes>**/SCL2007B4/*.xsd, **/SCL_CoMPAS.xsd</includes>
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.lfenergy.compas.xsd</groupId>

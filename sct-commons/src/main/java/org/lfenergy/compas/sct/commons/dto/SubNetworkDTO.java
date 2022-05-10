@@ -98,33 +98,6 @@ public class SubNetworkDTO {
         }
     }
 
-  /*  public enum SubnetworkName {
-        PROCESS_NETWORK("RSPACE_PROCESS_NETWORK"), // 0
-        ADMIN_NETWORK("RSPACE_ADMIN_NETWORK"); // 1
-
-        private final String value;
-
-        SubnetworkName(String value) {
-            this.value = value;
-        }
-
-        @Override
-        @JsonValue
-        public String toString() {
-            return String.valueOf(value);
-        }
-
-        @JsonCreator
-        public static SubnetworkName fromValue(String text) {
-            for (SubnetworkName b : SubnetworkName.values()) {
-                if (String.valueOf(b.value).equalsIgnoreCase(text)) {
-                    return b;
-                }
-            }
-            return null;
-        }
-    }*/
-
     public static Set<SubNetworkDTO> createDefaultSubnetwork(String iedName, CommunicationAdapter comAdapter, Map<Pair<String, String>, List<String>> comMap){
         Set<SubNetworkDTO> subNetworkDTOS = new HashSet<>();
         comMap.forEach((subnetworkNameType, apNames) -> {
