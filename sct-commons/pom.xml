@@ -172,13 +172,6 @@
                 <configuration>
                     <sources>
                         <source>${project.build.directory}/xsd/SCL2007B4/SCL.xsd</source>
-                        <!-- <source>${project.build.directory}/xsd/SCL2007B4/SCL_BaseSimpleTypes.xsd</source>
-                         <source>${project.build.directory}/xsd/SCL2007B4/SCL_BaseTypes.xsd</source>
-                         <source>${project.build.directory}/xsd/SCL2007B4/SCL_Communication.xsd</source>
-                         <source>${project.build.directory}/xsd/SCL2007B4/SCL_DataTypeTemplates.xsd</source>
-                         <source>${project.build.directory}/xsd/SCL2007B4/SCL_Enums.xsd</source>
-                         <source>${project.build.directory}/xsd/SCL2007B4/SCL_IED.xsd</source>
-                         <source>${project.build.directory}/xsd/SCL2007B4/SCL_Substation.xsd</source>-->
                         <source>${project.build.directory}/xsd/SCL_CoMPAS.xsd</source>
                     </sources>
                     <packageName>org.lfenergy.compas.scl2007b4.model</packageName>
