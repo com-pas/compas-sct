@@ -20,6 +20,7 @@
 
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
+        <sonar.jacoco.excludes>**/scl2007b4/**/*</sonar.jacoco.excludes>
     </properties>
     <dependencies>
         <dependency>
@@ -43,6 +44,11 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/scl2007b4/**/*</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <id>report-aggregate</id>
