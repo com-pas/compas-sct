@@ -499,12 +499,21 @@ class SclServiceTest {
     }
 
     @Test
-    void importSTDElementsInSCD_Compas_ICDHeader_Not_Match() throws Exception {
+    void testImportSTDElementsInSCD_Compas_ICDHeader_Not_Match() throws Exception {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd.xml");
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_with_same_ICDSystemVersionUUID.xml");
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
 
         assertThrows(ScdException.class, ()-> SclService.importSTDElementsInSCD(scdRootAdapter, Set.of(std), DTO.comMap));
+
+    }
+
+    @Test
+    void testImportSTDElementsInSCD_No_STD_Match() throws Exception {
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/ssd.xml");
+        SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
+
+        assertThrows(ScdException.class, ()-> SclService.importSTDElementsInSCD(scdRootAdapter, new HashSet<>(), DTO.comMap));
 
     }
 }

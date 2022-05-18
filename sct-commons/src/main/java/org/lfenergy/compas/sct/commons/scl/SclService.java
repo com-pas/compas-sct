@@ -406,10 +406,10 @@ public class SclService {
 
 
         // List all Private and remove duplicated one with same iedName
-        Map<String, TPrivate> tPrivateMap = createMapIEDNameAndPrivate(scdRootAdapter);
+        Map<String, TPrivate> mapIEDNameAndPrivate = createMapIEDNameAndPrivate(scdRootAdapter);
 
-        Map<String, Pair<TPrivate, List<SCL>>> stringListMap = createMapICDSystemVersionUuidAndSTDFile(stds);
-        for (Map.Entry<String, Pair<TPrivate, List<SCL>>> entry : stringListMap.entrySet()) {
+        Map<String, Pair<TPrivate, List<SCL>>> mapICDSystemVersionUuidAndSTDFile = createMapICDSystemVersionUuidAndSTDFile(stds);
+        for (Map.Entry<String, Pair<TPrivate, List<SCL>>> entry : mapICDSystemVersionUuidAndSTDFile.entrySet()) {
             if (entry.getValue().getRight().size() != 1) {
                 TPrivate key = entry.getValue().getLeft();
                 throw new ScdException("There are several STD files corresponding to " +
@@ -421,20 +421,20 @@ public class SclService {
         }
 
         //For each Private.ICDSystemVersionUUID and Private.iedName find STD File
-        for (Map.Entry<String, TPrivate> entry : tPrivateMap.entrySet()) {
+        for (Map.Entry<String, TPrivate> entry : mapIEDNameAndPrivate.entrySet()) {
             String iedName = entry.getKey();
             TPrivate tPrivate = entry.getValue();
             Optional<TCompasICDHeader> optLNodeIcdHeader = getCompasICDHeader(tPrivate);
             String icdSysVerUuid = optLNodeIcdHeader.map(TCompasICDHeader::getICDSystemVersionUUID).orElse(null);
 
-            if (icdSysVerUuid == null || !stringListMap.containsKey(icdSysVerUuid))
+            if (icdSysVerUuid == null || !mapICDSystemVersionUuidAndSTDFile.containsKey(icdSysVerUuid))
                 throw new ScdException("There is no STD file found corresponding to " +
                         CommonConstants.HEADER_ID + " = " + optLNodeIcdHeader.map(TCompasICDHeader::getHeaderId).orElse(null) +
                         CommonConstants.HEADER_VERSION + " = " + optLNodeIcdHeader.map(TCompasICDHeader::getHeaderVersion).orElse(null) +
                         CommonConstants.HEADER_REVISION + " = " + optLNodeIcdHeader.map(TCompasICDHeader::getHeaderRevision).orElse(null) +
                         "and " + CommonConstants.ICD_SYSTEM_VERSION_UUID + " = " + icdSysVerUuid);
             // import /dtt in Scd
-            SCL std = stringListMap.get(icdSysVerUuid).getRight().get(0);
+            SCL std = mapICDSystemVersionUuidAndSTDFile.get(icdSysVerUuid).getRight().get(0);
             SclRootAdapter stdRootAdapter = new SclRootAdapter(std);
             scdRootAdapter.getCurrentElem().setDataTypeTemplates(std.getDataTypeTemplates());
 
@@ -442,7 +442,7 @@ public class SclService {
             IEDAdapter stdIedAdapter = new IEDAdapter(stdRootAdapter, std.getIED().get(0));
             Optional<TPrivate> optionalTPrivate = stdIedAdapter.getPrivateHeader(CommonConstants.COMPAS_ICDHEADER);
             if (optionalTPrivate.isPresent()) {
-                checkSTDPrivateAndLNodePrivate(optionalTPrivate.get(), tPrivate);
+                compareAndCopyLNodePrivateIntoSTDPrivate(optionalTPrivate.get(), tPrivate);
             }
             stdIedAdapter.setIEDName(iedName);
             scdRootAdapter.getCurrentElem().getIED().add(stdIedAdapter.getCurrentElem());
@@ -484,7 +484,7 @@ public class SclService {
         return stringSCLMap;
     }
 
-    private static void checkSTDPrivateAndLNodePrivate(TPrivate iedPrivate, TPrivate scdPrivate) throws ScdException {
+    private static void compareAndCopyLNodePrivateIntoSTDPrivate(TPrivate iedPrivate, TPrivate scdPrivate) throws ScdException {
         TCompasICDHeader iedCompasICDHeader = getCompasICDHeader(iedPrivate).orElseThrow(
                 () -> new ScdException(CommonConstants.COMPAS_ICDHEADER + "not found in IED Private "));
         TCompasICDHeader scdCompasICDHeader = getCompasICDHeader(scdPrivate).orElseThrow(

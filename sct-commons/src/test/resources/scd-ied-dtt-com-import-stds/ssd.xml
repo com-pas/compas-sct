@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ // SPDX-FileCopyrightText: 2021 RTE FRANCE
+  ~ //
+  ~ // SPDX-License-Identifier: Apache-2.0
+  -->
+<SCL xmlns:compas="https://www.lfenergy.org/compas/extension/v1" xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4">
+    <Private type="COMPAS-SclFileType">
+        <compas:SclFileType>SCD</compas:SclFileType>
+    </Private>
+    <Header id="HeaderId" version="HeaderVersion" revision="HeaderRevision"/>
+    <Substation name="SITE">
+        <VoltageLevel nomFreq="50" numPhases="3" name="0">
+            <Voltage unit="V" multiplier="k">0</Voltage>
+            <Bay name="BAY_1">
+                <Function name="FUNCTION_1">
+                    <LNode iedName="None" ldInst="LDGW" lnClass="LLN0">
+                        <Private type="COMPAS-ICDHeader">
+                            <compas:ICDHeader IEDType="GTW" IEDinstance="0" BayLabel="SITE1" IEDName="SITESITE1GTW0" ICDSystemVersionUUID="IED4d4fe1a8cda64cf88a5ee4176a1a0eef" VendorName="ABC" IEDredundancy="A" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="f8dbc8c1-2db7-4652-a9d6-0b414bdeccfa" headerVersion="01.00.00" headerRevision="01.00.00"/>
+                        </Private>
+                    </LNode>
+                </Function>
+            </Bay>
+        </VoltageLevel>
+    </Substation>
+</SCL>
