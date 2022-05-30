@@ -433,19 +433,15 @@ public class SclService {
                         CommonConstants.HEADER_VERSION + " = " + optLNodeIcdHeader.map(TCompasICDHeader::getHeaderVersion).orElse(null) +
                         CommonConstants.HEADER_REVISION + " = " + optLNodeIcdHeader.map(TCompasICDHeader::getHeaderRevision).orElse(null) +
                         "and " + CommonConstants.ICD_SYSTEM_VERSION_UUID + " = " + icdSysVerUuid);
-            // import /dtt in Scd
+            // import /ied /dtt in Scd
             SCL std = mapICDSystemVersionUuidAndSTDFile.get(icdSysVerUuid).getRight().get(0);
             SclRootAdapter stdRootAdapter = new SclRootAdapter(std);
-            scdRootAdapter.getCurrentElem().setDataTypeTemplates(std.getDataTypeTemplates());
-
-            // import /ied rename Private.iedName
             IEDAdapter stdIedAdapter = new IEDAdapter(stdRootAdapter, std.getIED().get(0));
             Optional<TPrivate> optionalTPrivate = stdIedAdapter.getPrivateHeader(CommonConstants.COMPAS_ICDHEADER);
             if (optionalTPrivate.isPresent()) {
                 compareAndCopyLNodePrivateIntoSTDPrivate(optionalTPrivate.get(), tPrivate);
             }
-            stdIedAdapter.setIEDName(iedName);
-            scdRootAdapter.getCurrentElem().getIED().add(stdIedAdapter.getCurrentElem());
+            scdRootAdapter.addIED(std, iedName);
 
             //import connectedAP and rename ConnectedAP/@iedName
             CommunicationAdapter comAdapter = stdRootAdapter.getCommunicationAdapter(false);
