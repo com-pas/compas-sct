@@ -404,14 +404,11 @@ public class SclService {
     public static SclRootAdapter importSTDElementsInSCD(@NonNull SclRootAdapter scdRootAdapter, Set<SCL> stds,
                                                         Map<Pair<String, String>, List<String>> comMap) throws ScdException {
 
-
-        // List all Private and remove duplicated one with same iedName
-        Map<String, TPrivate> mapIEDNameAndPrivate = createMapIEDNameAndPrivate(scdRootAdapter);
-
+        //Check SCD and STD compatibilities
         Map<String, Pair<TPrivate, List<SCL>>> mapICDSystemVersionUuidAndSTDFile = createMapICDSystemVersionUuidAndSTDFile(stds);
-        for (Map.Entry<String, Pair<TPrivate, List<SCL>>> entry : mapICDSystemVersionUuidAndSTDFile.entrySet()) {
-            if (entry.getValue().getRight().size() != 1) {
-                TPrivate key = entry.getValue().getLeft();
+        for (Pair<TPrivate, List<SCL>> pairOfPrivateAndSTDs : mapICDSystemVersionUuidAndSTDFile.values()) {
+            if (pairOfPrivateAndSTDs.getRight().size() != 1) {
+                TPrivate key = pairOfPrivateAndSTDs.getLeft();
                 throw new ScdException("There are several STD files corresponding to " +
                         CommonConstants.HEADER_ID + " = " + getCompasICDHeader(key).map(TCompasICDHeader::getHeaderId).orElse(null) +
                         CommonConstants.HEADER_VERSION + " = " + getCompasICDHeader(key).map(TCompasICDHeader::getHeaderVersion).orElse(null) +
@@ -419,7 +416,8 @@ public class SclService {
                         "and " + CommonConstants.ICD_SYSTEM_VERSION_UUID + " = " + getCompasICDHeader(key).map(TCompasICDHeader::getICDSystemVersionUUID).orElse(null));
             }
         }
-
+        // List all Private and remove duplicated one with same iedName
+        Map<String, TPrivate> mapIEDNameAndPrivate = createMapIEDNameAndPrivate(scdRootAdapter);
         //For each Private.ICDSystemVersionUUID and Private.iedName find STD File
         for (Map.Entry<String, TPrivate> entry : mapIEDNameAndPrivate.entrySet()) {
             String iedName = entry.getKey();
