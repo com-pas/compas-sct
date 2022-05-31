@@ -17,7 +17,6 @@ import org.lfenergy.compas.sct.commons.scl.ied.LN0Adapter;
 import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
-import java.io.IOException;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -356,7 +355,7 @@ class SclServiceTest {
     }
 
     @Test
-    void testInitScl_Create_Private_SCL_FILETYPE() throws IOException {
+    void testInitScl_Create_Private_SCL_FILETYPE() {
         UUID hid = UUID.randomUUID();
         SclRootAdapter rootAdapter = assertDoesNotThrow(
                 () -> SclService.initScl(Optional.of(hid), "hVersion", "hRevision")
