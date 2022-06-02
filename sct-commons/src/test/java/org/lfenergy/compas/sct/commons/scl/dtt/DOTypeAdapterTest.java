@@ -12,7 +12,6 @@ import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.mockito.Mockito;
 
-import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -95,23 +94,36 @@ class DOTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter, TDOTyp
     }
 
     @Test
-    void testGetResumedDTTs() throws Exception {
+    void testGetResumedDTTs_filter_on_DO() throws Exception {
+        // given
         DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
         DOTypeAdapter doTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getDOTypeAdapterById("DO2").get());
         ResumedDataTemplate rootRDtt = new ResumedDataTemplate();
         rootRDtt.setDoName(new DoTypeName("Op"));
         ResumedDataTemplate filter = new ResumedDataTemplate();
         filter.setDoName(new DoTypeName("Op.res"));
-        var rDtts = doTypeAdapter.getResumedDTTs(
-                rootRDtt, new HashSet<>(), filter
-        );
-        assertEquals(2,rDtts.size());
 
+        // when
+        List<ResumedDataTemplate> rDtts = doTypeAdapter.getResumedDTTs(rootRDtt, filter);
+
+        // then
+        assertEquals(2,rDtts.size());
+    }
+
+    @Test
+    void testGetResumedDTTs_filter_on_DO_and_DA() throws Exception {
+        // given
+        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
+        DOTypeAdapter doTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getDOTypeAdapterById("DO2").get());
+        ResumedDataTemplate rootRDtt = new ResumedDataTemplate();
+        rootRDtt.setDoName(new DoTypeName("Op"));
+        ResumedDataTemplate filter = new ResumedDataTemplate();
         filter.setDoName(new DoTypeName("Op.res"));
         filter.setDaName(new DaTypeName("d"));
-        rDtts = doTypeAdapter.getResumedDTTs(
-                rootRDtt, new HashSet<>(), filter
-        );
+        // when
+        List<ResumedDataTemplate> rDtts = doTypeAdapter.getResumedDTTs(rootRDtt, filter);
+
+        // then
         assertEquals(1,rDtts.size());
     }
 
