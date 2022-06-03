@@ -7,34 +7,8 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.lfenergy.compas.scl2007b4.model.LN0;
-import org.lfenergy.compas.scl2007b4.model.TAnyLN;
-import org.lfenergy.compas.scl2007b4.model.TControl;
-import org.lfenergy.compas.scl2007b4.model.TDOI;
-import org.lfenergy.compas.scl2007b4.model.TDataSet;
-import org.lfenergy.compas.scl2007b4.model.TExtRef;
-import org.lfenergy.compas.scl2007b4.model.TFCDA;
-import org.lfenergy.compas.scl2007b4.model.TFCEnum;
-import org.lfenergy.compas.scl2007b4.model.TGSEControl;
-import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
-import org.lfenergy.compas.scl2007b4.model.TReportControl;
-import org.lfenergy.compas.scl2007b4.model.TSampledValueControl;
-import org.lfenergy.compas.scl2007b4.model.TServiceType;
-import org.lfenergy.compas.scl2007b4.model.TVal;
-import org.lfenergy.compas.sct.commons.dto.ControlBlock;
-import org.lfenergy.compas.sct.commons.dto.DaTypeName;
-import org.lfenergy.compas.sct.commons.dto.DataSetInfo;
-import org.lfenergy.compas.sct.commons.dto.DoTypeName;
-import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
-import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
-import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
-import org.lfenergy.compas.sct.commons.dto.ExtRefSourceInfo;
-import org.lfenergy.compas.sct.commons.dto.FCDAInfo;
-import org.lfenergy.compas.sct.commons.dto.GooseControlBlock;
-import org.lfenergy.compas.sct.commons.dto.LNodeMetaData;
-import org.lfenergy.compas.sct.commons.dto.ReportControlBlock;
-import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
-import org.lfenergy.compas.sct.commons.dto.SMVControlBlock;
+import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
@@ -43,13 +17,7 @@ import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -472,11 +440,11 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
     /**
      * Returns a list of resumed DataTypeTemplate for DataAttribute (updatable or not)
      * @param rDtt reference resumed DataTypeTemplate (used as filter)
-     * @param updatable true to retrieve updatable DAI, false otherwise
+     * @param updatableOnly true to retrieve only updatable DAI, false to retrieve all DAI
      * @return List of resumed DataTypeTemplate for DataAttribute (updatable or not)
      * @throws ScdException SCD illegal arguments exception
      */
-    public List<ResumedDataTemplate> getDAI(ResumedDataTemplate rDtt, boolean updatable) throws ScdException {
+    public List<ResumedDataTemplate> getDAI(ResumedDataTemplate rDtt, boolean updatableOnly) throws ScdException {
         String lnType = currentElem.getLnType();
         if(!StringUtils.isBlank(rDtt.getLnType())){
             lnType = rDtt.getLnType();
@@ -492,36 +460,48 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
             );
         List<ResumedDataTemplate> resumedDTTs = lNodeTypeAdapter.getResumedDTTs(rDtt);
 
-        // complete the list by the overridden information in DAI
-        resumedDTTs = resumedDTTs.stream()
-                .map(rDTT -> completeResumedDTTFromDAI(rDTT,updatable))
-                .filter(rDTT -> !updatable || (rDTT.isUpdatable()))
-                .collect(Collectors.toList());
-        return resumedDTTs;
+        resumedDTTs.forEach(this::overrideAttributesFromDAI);
+
+        if (updatableOnly){
+            return resumedDTTs.stream().filter(ResumedDataTemplate::isUpdatable).collect(Collectors.toList());
+        } else {
+            return resumedDTTs;
+        }
     }
 
-    protected ResumedDataTemplate completeResumedDTTFromDAI(ResumedDataTemplate rDtt, boolean updatable){
-        Optional<?> opDaiAdapter = findMatch(rDtt.getDoName(), rDtt.getDaName());
-        if(opDaiAdapter.isPresent()) {
-            AbstractDAIAdapter<?> daiAdapter = (AbstractDAIAdapter<?>) opDaiAdapter.get();
-            if(daiAdapter.isValImport() != null) {
-                rDtt.setValImport(daiAdapter.isValImport());
-            }
-            rDtt.setDaiValues(daiAdapter.getCurrentElem().getVal());
-            if (updatable && (daiAdapter.isValImport() == null || daiAdapter.isValImport())) {
-                boolean isSg = daiAdapter.getCurrentElem().getVal().stream()
-                        .anyMatch(tVal -> tVal.getSGroup() != null && tVal.getSGroup().intValue() > 0);
-
-                if (isSg) {
-                    IEDAdapter iedAdapter = parentAdapter.getParentAdapter();
-                    rDtt.setValImport(iedAdapter.isSettingConfig(parentAdapter.getInst())); // override
-                } else if (rDtt.getDaName().getFc() == TFCEnum.SG || rDtt.getDaName().getFc() == TFCEnum.SE) {
-                    log.warn("Inconsistencies in the SCD file (Setting group and DAI FC)!");
-                    rDtt.setValImport(false);
+    protected void overrideAttributesFromDAI(final ResumedDataTemplate rDtt) {
+        findMatch(rDtt.getDoName(), rDtt.getDaName())
+            .map(iDataAdapter -> (AbstractDAIAdapter<?>) iDataAdapter)
+            .map(AbstractDAIAdapter::getCurrentElem)
+            .ifPresent(tdai -> {
+                rDtt.setDaiValues(tdai.getVal());
+                if (rDtt.getDaName().getFc() == TFCEnum.SG || rDtt.getDaName().getFc() == TFCEnum.SE) {
+                    boolean isGroup = hasSgGroup(tdai);
+                    if (isGroup) {
+                        rDtt.setValImport(!Boolean.FALSE.equals(tdai.isValImport()) && iedHasConfSG());
+                    } else {
+                        rDtt.setValImport(false);
+                        log.warn("Inconsistency in the SCD file - DAI {} with fc={} must have a sGroup attribute",
+                            rDtt.getObjRef(getCurrentIED().getName(), parentAdapter.getInst()), rDtt.getDaName().getFc());
+                    }
+                } else if (tdai.isValImport() != null) {
+                    rDtt.setValImport(tdai.isValImport());
                 }
-            }
-        }
-        return rDtt;
+            });
+    }
+
+    private boolean iedHasConfSG() {
+        IEDAdapter iedAdapter = getCurrentIED();
+        return iedAdapter.isSettingConfig(this.parentAdapter.getInst());
+    }
+
+    private IEDAdapter getCurrentIED() {
+        LDeviceAdapter lDeviceAdapter = this.parentAdapter;
+        return lDeviceAdapter.getParentAdapter();
+    }
+
+    private boolean hasSgGroup(TDAI tdai) {
+        return tdai.getVal().stream().anyMatch(tVal -> tVal.getSGroup() != null && tVal.getSGroup().intValue() > 0);
     }
 
     /**
@@ -531,13 +511,13 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      * @param daTypeName defined-DA (da.bda1[.bda2...bda_n])
      * @return Optional of DAIAdapter for the matched DAI
      */
-    protected Optional<? extends AbstractDAIAdapter> findMatch(DoTypeName doTypeName, DaTypeName daTypeName){
+    protected Optional<IDataAdapter> findMatch(DoTypeName doTypeName, DaTypeName daTypeName){
         DAITracker daiTracker = new DAITracker(this,doTypeName,daTypeName);
         DAITracker.MatchResult matchResult = daiTracker.search();
         if(matchResult != DAITracker.MatchResult.FULL_MATCH){
             return Optional.empty();
         }
-        return Optional.of((AbstractDAIAdapter) daiTracker.getBdaiOrDaiAdapter());
+        return Optional.of(daiTracker.getBdaiOrDaiAdapter());
     }
 
     public void updateDAI(@NonNull ResumedDataTemplate rDtt) throws ScdException {
@@ -638,10 +618,10 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                                 String.format("Corrupted  SCD file: Reference to unknown LNodeType(%s)", getLnType())
                         )
                 );
-        ResumedDataTemplate filter = new ResumedDataTemplate();
-        filter.setLnInst(getLNInst());
-        filter.setLnClass(getLNClass());
-        filter.setLnType(currentElem.getLnType());
+        ResumedDataTemplate filter = ResumedDataTemplate.builder()
+            .lnInst(getLNInst())
+            .lnClass(getLNClass())
+            .lnType(currentElem.getLnType()).build();
         List<ResumedDataTemplate> rDtts = lNodeTypeAdapter.getResumedDTTs(filter);
 
         return matchesDataAttributes(dataAttribute) ||
