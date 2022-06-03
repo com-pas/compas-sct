@@ -12,7 +12,10 @@ import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -197,45 +200,33 @@ public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
      * Each Resumed Data Type Template is instantiated from a reference resumed Data Type.
      * @apiNote This method doesn't check relationship between DO/SDO and DA. Check should be done by caller
      * @param rootRDTT reference Resumed Data Type Template used to build the list
-     * @param visitedBDA a cache to stored visited SDO
      * @param filter filter for DO/SDO and DA/BDA
      * @return list of completed Resumed Data Type Templates beginning from this DoType (Do or SDO).
      */
-    public List<ResumedDataTemplate> getResumedDTTs(ResumedDataTemplate rootRDTT,
-                                                    Set<String> visitedBDA, ResumedDataTemplate filter) {
+    public List<ResumedDataTemplate> getResumedDTTs(ResumedDataTemplate rootRDTT, ResumedDataTemplate filter) {
 
-        List<ResumedDataTemplate> resumedDataTemplates = new ArrayList<>();
+        List<ResumedDataTemplate> resultRDTTs = new ArrayList<>();
 
         for(TBDA bda : currentElem.getBDA()){
             if(filter != null && filter.isDaNameDefined() &&
                     !filter.getBdaNames().contains(bda.getName())){
                 continue;
             }
-            rootRDTT.setBType(bda.getBType().value());
+            ResumedDataTemplate currentRDTT = ResumedDataTemplate.copyFrom(rootRDTT);
+            currentRDTT.setBType(bda.getBType().value());
             if(bda.getBType() == TPredefinedBasicTypeEnum.STRUCT) {
-                if(visitedBDA.contains(bda.getType())) {
-                    continue;
-                }
-
-                DATypeAdapter daTypeAdapter = parentAdapter.getDATypeAdapterById(bda.getType()).orElse(null);
-                visitedBDA.add(bda.getType());
-                rootRDTT.addStructName(bda.getName(),DaTypeName.class);
-                if(daTypeAdapter != null){
-                    List<ResumedDataTemplate> resumedDataTemplateList = daTypeAdapter.getResumedDTTs(
-                            rootRDTT,visitedBDA,filter
-                    );
-                    resumedDataTemplates.addAll(resumedDataTemplateList);
-                }
+                currentRDTT.addDaStructName(bda.getName());
+                parentAdapter.getDATypeAdapterById(bda.getType()).ifPresent(
+                    daTypeAdapter -> resultRDTTs.addAll(daTypeAdapter.getResumedDTTs(currentRDTT, filter)));
             } else {
-                ResumedDataTemplate resumedDataTemplate = ResumedDataTemplate.copyFrom(rootRDTT);
-                resumedDataTemplate.addStructName(bda.getName(),DaTypeName.class);
-                resumedDataTemplate.setType(bda.getType());
-                resumedDataTemplate.getDaName().setValImport(bda.isValImport());
-                resumedDataTemplate.getDaName().addDaiValues(bda.getVal());
-                resumedDataTemplates.add(resumedDataTemplate);
+                currentRDTT.addDaStructName(bda.getName());
+                currentRDTT.setType(bda.getType());
+                currentRDTT.getDaName().setValImport(bda.isValImport());
+                currentRDTT.getDaName().addDaiValues(bda.getVal());
+                resultRDTTs.add(currentRDTT);
             }
         }
-        return resumedDataTemplates;
+        return resultRDTTs;
     }
 
     public Optional<DATypeAdapter> getDATypeAdapterByBdaName(String name)  {

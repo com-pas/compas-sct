@@ -10,8 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.lfenergy.compas.scl2007b4.model.TAnyLN;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.sct.commons.Utils;
-import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter;
@@ -92,11 +90,11 @@ public class LNodeDTO {
                                     )
                             )
                     );
-            ResumedDataTemplate filter = new ResumedDataTemplate();
-            filter.setLnInst(nodeAdapter.getLNInst());
-            filter.setLnClass(nodeAdapter.getLNClass());
-            filter.setPrefix(nodeAdapter.getPrefix());
-            filter.setLnType(nodeAdapter.getLnType());
+            ResumedDataTemplate filter = ResumedDataTemplate.builder()
+                .lnInst(nodeAdapter.getLNInst())
+                .lnClass(nodeAdapter.getLNClass())
+                .prefix(nodeAdapter.getPrefix())
+                .lnType(nodeAdapter.getLnType()).build();
             List<ResumedDataTemplate> resumedDataTemplateList = lNodeTypeAdapter.getResumedDTTs(filter);
             lNodeDTO.addAllResumedDataTemplate(resumedDataTemplateList);
         }

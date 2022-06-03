@@ -17,7 +17,10 @@ import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 public class LNodeTypeAdapter
@@ -101,11 +104,11 @@ public class LNodeTypeAdapter
                 return resumedDataTemplates;
             }
         }
-        ResumedDataTemplate rootResumedRTT = new ResumedDataTemplate();
-        rootResumedRTT.setLnType(currentElem.getId());
-        rootResumedRTT.setLnClass(filter.getLnClass());
-        rootResumedRTT.setLnInst(filter.getLnInst());
-        rootResumedRTT.setPrefix(filter.getPrefix());
+        ResumedDataTemplate rootRDTT = new ResumedDataTemplate();
+        rootRDTT.setLnType(currentElem.getId());
+        rootRDTT.setLnClass(filter.getLnClass());
+        rootRDTT.setLnInst(filter.getLnInst());
+        rootRDTT.setPrefix(filter.getPrefix());
 
         for(TDO tdo : currentElem.getDO()){
             if(filter.isDoNameDefined() &&
@@ -113,16 +116,14 @@ public class LNodeTypeAdapter
                 continue;
             }
 
-            rootResumedRTT.getDoName().setName(tdo.getName());
-            DOTypeAdapter doTypeAdapter = parentAdapter.getDOTypeAdapterById(tdo.getType()).orElse(null);
-            if(doTypeAdapter != null){
-                rootResumedRTT.getDoName().setCdc(doTypeAdapter.getCdc());
-                List<ResumedDataTemplate> rDTTList = doTypeAdapter.getResumedDTTs(
-                        rootResumedRTT,new HashSet<>(), filter
-                );
-                resumedDataTemplates.addAll(rDTTList);
-            } // else this should never happen or the scd won't be built in the first place and we'd never be here
-            // may be use an assert here to enforce constrain
+            parentAdapter.getDOTypeAdapterById(tdo.getType()).ifPresent(
+                doTypeAdapter -> {
+                    ResumedDataTemplate currentRDTT = ResumedDataTemplate.copyFrom(rootRDTT);
+                    currentRDTT.getDoName().setName(tdo.getName());
+                    currentRDTT.getDoName().setCdc(doTypeAdapter.getCdc());
+                    resumedDataTemplates.addAll(doTypeAdapter.getResumedDTTs(currentRDTT, filter));
+                }
+            ); // else this should never happen or the scd won't be built in the first place and we'd never be here
         }
         return resumedDataTemplates;
     }

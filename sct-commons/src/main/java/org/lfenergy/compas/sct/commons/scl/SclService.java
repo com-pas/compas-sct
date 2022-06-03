@@ -306,7 +306,6 @@ public class SclService {
                 );
 
         return lDeviceAdapter.getDAI(rDtt, updatable);
-
     }
 
     public static void updateDAI(SCL scd, String iedName, String ldInst, ResumedDataTemplate rDtt) throws ScdException {
