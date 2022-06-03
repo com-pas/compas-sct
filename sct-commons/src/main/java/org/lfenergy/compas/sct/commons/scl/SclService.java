@@ -406,7 +406,6 @@ public class SclService {
     public static SclRootAdapter importSTDElementsInSCD(@NonNull SclRootAdapter scdRootAdapter, Set<SCL> stds,
                                                         Map<Pair<String, String>, List<String>> comMap) throws ScdException {
 
-
         //Check SCD and STD compatibilities
         Map<String, Pair<TPrivate, List<SCL>>> mapICDSystemVersionUuidAndSTDFile = createMapICDSystemVersionUuidAndSTDFile(stds);
         checkSTDCorrespondanceWithLNodeCompasICDHeader(mapICDSystemVersionUuidAndSTDFile);

@@ -4,7 +4,6 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
