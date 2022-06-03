@@ -133,17 +133,13 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
         }
 
         Set<ResumedDataTemplate> resumedDataTemplateSet =  new HashSet<>();
-        List<ResumedDataTemplate> resumedDataTemplateList;
-        ResumedDataTemplate filter;
         for(AbstractLNAdapter<?> lnAdapter : lnAdapters){
-
-            filter = ResumedDataTemplate.copyFrom(rDtt);
+            ResumedDataTemplate filter = ResumedDataTemplate.copyFrom(rDtt);
             filter.setLnClass(lnAdapter.getLNClass());
             filter.setLnInst(lnAdapter.getLNInst());
             filter.setPrefix(lnAdapter.getPrefix());
             filter.setLnType(lnAdapter.getLnType());
-            resumedDataTemplateList = lnAdapter.getDAI(filter, updatable);
-            resumedDataTemplateSet.addAll(resumedDataTemplateList);
+            resumedDataTemplateSet.addAll(lnAdapter.getDAI(filter, updatable));
         }
         return resumedDataTemplateSet;
 

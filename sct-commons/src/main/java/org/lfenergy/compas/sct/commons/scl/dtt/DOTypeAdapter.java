@@ -317,65 +317,60 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
      * return a list of Resumed Data Type Templates beginning from this DoType (Do or SDO).
      * @apiNote This method doesn't check relationship between DO/SDO and DA. Check should be done by caller
      * @param rootRDTT reference Resumed Data Type Template used to build the list
-     * @param visitedSdo a cache to stored visited SDO
      * @param filter filter for DO/SDO and DA/BDA
      * @return list of Resumed Data Type Templates beginning from this DoType (Do or SDO)
      */
-    public List<ResumedDataTemplate> getResumedDTTs(ResumedDataTemplate rootRDTT,
-                                    Set<String> visitedSdo, ResumedDataTemplate filter) {
-
-        List<ResumedDataTemplate> rDtts = new ArrayList<>();
+    public List<ResumedDataTemplate> getResumedDTTs(ResumedDataTemplate rootRDTT, ResumedDataTemplate filter) {
+        List<ResumedDataTemplate> resultRDTTs = new ArrayList<>();
         for(TUnNaming tUnNaming: currentElem.getSDOOrDA()){
             if(tUnNaming.getClass() == TDA.class){
                 TDA tda = (TDA)tUnNaming;
-                if(filter.isDaNameDefined() &&
-                        !filter.getDaName().getName().equals(tda.getName()) ){
-                    // filter out
-                    continue;
-                }
-
-                rootRDTT.getDaName().setName(tda.getName());
-                rootRDTT.getDaName().setFc(tda.getFc());
-                rootRDTT.getDaName().setBType(tda.getBType());
-                if(tda.getBType() == TPredefinedBasicTypeEnum.STRUCT){
-                    DATypeAdapter daTypeAdapter = parentAdapter.getDATypeAdapterById(tda.getType()).orElse(null);
-                    if(daTypeAdapter != null){
-                        // get list of Resumed Data Type Templates beginning from this DAType
-                        List<ResumedDataTemplate> resumedDataTemplateList = daTypeAdapter.getResumedDTTs(
-                                rootRDTT,new HashSet<>(), filter
-                        );
-                        rDtts.addAll(resumedDataTemplateList);
-                    }
-                } else {
-                    ResumedDataTemplate resumedDataTemplate = ResumedDataTemplate.copyFrom(rootRDTT);
-                    resumedDataTemplate.getDaName().setType(tda.getType());
-                    resumedDataTemplate.getDaName().setValImport(tda.isValImport());
-                    resumedDataTemplate.setDaiValues(tda.getVal());
-                    rDtts.add(resumedDataTemplate);
-                }
+                resultRDTTs.addAll(getResumedDTTsOfDA(rootRDTT, filter, tda));
             } else {
                 TSDO tsdo = (TSDO)tUnNaming;
-                if((filter != null &&
-                        !filter.getSdoNames().isEmpty() &&
-                        !filter.getSdoNames().contains(tsdo.getName())) ||
-                        visitedSdo.contains(tsdo.getType())){
+                if(excludedByFilter(filter, tsdo)){
                     continue;
                 }
-                ResumedDataTemplate rDtt = ResumedDataTemplate.copyFrom(rootRDTT);
-
-                DOTypeAdapter doTypeAdapter = parentAdapter.getDOTypeAdapterById(tsdo.getType()).orElse(null);
-                visitedSdo.add(tsdo.getType());
-                rDtt.addStructName(tsdo.getName(),DoTypeName.class);
-                if(doTypeAdapter != null){
-                    // get list of Resumed Data Type Templates beginning from this SDO
-                    List<ResumedDataTemplate> localRDtts = doTypeAdapter.getResumedDTTs(rDtt,visitedSdo, filter);
-                    rDtts.addAll(localRDtts);
-                }
+                ResumedDataTemplate currentRDTT = ResumedDataTemplate.copyFrom(rootRDTT);
+                currentRDTT.addDoStructName(tsdo.getName());
+                parentAdapter.getDOTypeAdapterById(tsdo.getType()).ifPresent(
+                    doTypeAdapter ->
+                        resultRDTTs.addAll(doTypeAdapter.getResumedDTTs(currentRDTT, filter)));
             }
         }
-        return rDtts;
+        return resultRDTTs;
     }
 
+    private List<ResumedDataTemplate> getResumedDTTsOfDA(ResumedDataTemplate rootRDTT, ResumedDataTemplate filter, TDA da){
+        if(excludedByFilter(filter, da)){
+            return Collections.emptyList();
+        }
+        ResumedDataTemplate currentRDTT = ResumedDataTemplate.copyFrom(rootRDTT);
+        currentRDTT.getDaName().setName(da.getName());
+        currentRDTT.getDaName().setFc(da.getFc());
+        currentRDTT.getDaName().setBType(da.getBType());
+        if(da.getBType() == TPredefinedBasicTypeEnum.STRUCT){
+            return parentAdapter.getDATypeAdapterById(da.getType())
+                .map(daTypeAdapter -> daTypeAdapter.getResumedDTTs(currentRDTT, filter))
+                .orElse(Collections.emptyList());
+        } else {
+            currentRDTT.getDaName().setType(da.getType());
+            currentRDTT.getDaName().setValImport(da.isValImport());
+            currentRDTT.setDaiValues(da.getVal());
+            return List.of(currentRDTT);
+        }
+    }
+
+    private boolean excludedByFilter(ResumedDataTemplate filter, TDA da) {
+        return filter != null && filter.isDaNameDefined() &&
+            !filter.getDaName().getName().equals(da.getName());
+    }
+
+    private boolean excludedByFilter(ResumedDataTemplate filter, TSDO tsdo) {
+        return filter != null &&
+            !filter.getSdoNames().isEmpty() &&
+            !filter.getSdoNames().contains(tsdo.getName());
+    }
 
     public Optional<DOTypeAdapter> getDOTypeAdapterBySdoName(String name) {
         Optional<TSDO> opSdo = getSDOByName(name);

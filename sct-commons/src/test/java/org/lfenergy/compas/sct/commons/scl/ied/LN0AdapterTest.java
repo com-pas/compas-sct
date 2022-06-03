@@ -275,7 +275,7 @@ class LN0AdapterTest {
         LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
         DoTypeName doTypeName = new DoTypeName("Do.sdo1.d");
         DaTypeName daTypeName = new DaTypeName("antRef.bda1.bda2.bda3");
-        AbstractDAIAdapter<?> daiAdapter = assertDoesNotThrow(() -> ln0Adapter.findMatch(doTypeName,daTypeName).get());
+        AbstractDAIAdapter<?> daiAdapter = (AbstractDAIAdapter<?>) assertDoesNotThrow(() -> ln0Adapter.findMatch(doTypeName,daTypeName).get());
         assertEquals("bda3",daiAdapter.getCurrentElem().getName());
         assertEquals("Completed-diff",daiAdapter.getCurrentElem().getVal().get(0).getValue());
 

@@ -1,0 +1,87 @@
+﻿<!-- SPDX-FileCopyrightText: 2021 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+<SCL xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4">
+    <Header id="01d2b6da-eb9c-4e07-911c-d243b1bd48f2" version="V1" revision="A" toolID="TEST_GEN" nameStructure="IEDName"/>
+    <IED name="VirtualBCU" type="ADU" manufacturer="ADU" configVersion="ADU" originalSclVersion="2007" originalSclRevision="B" originalSclRelease="4">
+        <AccessPoint name="PROCESS_AP">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LDMODEXPF" ldName="VirtualBCULDMODEXPF" desc="Bay level Operating Mode">
+                    <LN0 lnClass="LLN0" inst="" lnType="lntype1">
+                        <!-- Simple DA (without BDA) -->
+                        <DOI name="DoA">
+                            <DAI name="daiOverrideVal">
+                                <Val>1</Val>
+                            </DAI>
+                            <DAI name="daiOverrideValImport" valImport="true"/>
+                            <DAI name="daiOverrideValImport2" valImport="false"/>
+                        </DOI>
+
+                        <!-- Struct DA (with BDA) -->
+                        <DOI name="DoB">
+                            <SDI name="structDa">
+                                <DAI name="daiOverrideVal">
+                                    <Val>1</Val>
+                                </DAI>
+                                <DAI name="daiOverrideValImport" valImport="true"/>
+                                <DAI name="daiOverrideValImport2" valImport="false"/>
+                            </SDI>
+                        </DOI>
+                    </LN0>
+                    <LN lnClass="LPHD" inst="0" lnType="lntype2" desc="">
+                        <DOI name="PhyNam">
+                            <DAI name="hwRev" valKind="RO" valImport="false">
+                                <Val>VDF</Val>
+                            </DAI>
+                        </DOI>
+                    </LN>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+        <AccessPoint name="ADMINISTRATION_AP"/>
+    </IED>
+    <DataTypeTemplates>
+        <LNodeType lnClass="LLN0" id="lntype1">
+            <DO name="DoA" type="dotype1"/>
+            <DO name="DoB" type="dotype2"/>
+        </LNodeType>
+        <LNodeType lnClass="LPHD" id="lntype2">
+            <DO name="PhyNam" type="dotype3"/>
+        </LNodeType>
+        <DOType cdc="DPL" id="dotype1">
+            <!-- not in DAI -->
+            <DA fc="CF" name="daNotInDai" bType="INT8">
+                <Val>0</Val>
+            </DA>
+            <DA fc="CF" name="daNotInDai2" bType="INT8" valImport="true"/>
+            <!-- overridden in DAI -->
+            <DA fc="CF" name="daiOverrideVal" bType="INT8">
+                <Val>0</Val>
+            </DA>
+            <DA fc="CF" name="daiOverrideValImport" bType="INT8" valImport="false"/>
+            <DA fc="CF" name="daiOverrideValImport2" bType="INT8" valImport="true"/>
+        </DOType>
+        <DOType cdc="ACD" id="dotype2">
+            <!-- Struct DA -->
+            <DA fc="ST" name="structDa" bType="Struct" type="datype1"/>
+        </DOType>
+        <DOType cdc="DPS" id="dotype3">
+            <DA fc="BL" name="aDa" bType="INT8"/>
+        </DOType>
+        <DAType id="datype1">
+            <!-- not in DAI -->
+            <BDA name="daNotInDai" bType="INT8">
+                <Val>0</Val>
+            </BDA>
+            <BDA name="daNotInDai2" bType="INT8" valImport="true"/>
+            <!-- overridden in DAI -->
+            <BDA name="daiOverrideVal" bType="INT8">
+                <Val>0</Val>
+            </BDA>
+            <BDA name="daiOverrideValImport" bType="INT8" valImport="false"/>
+            <BDA name="daiOverrideValImport2" bType="INT8" valImport="true"/>
+        </DAType>
+    </DataTypeTemplates>
+</SCL>
