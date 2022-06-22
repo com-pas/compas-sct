@@ -5,17 +5,19 @@
 package org.lfenergy.compas.sct.commons.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.lfenergy.compas.scl2007b4.model.TSubNetwork;
+import org.apache.commons.lang3.tuple.Pair;
+import org.lfenergy.compas.sct.commons.scl.com.CommunicationAdapter;
+import org.lfenergy.compas.sct.commons.scl.com.ConnectedAPAdapter;
 import org.lfenergy.compas.sct.commons.scl.com.SubNetworkAdapter;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Getter
@@ -94,5 +96,26 @@ public class SubNetworkDTO {
             }
             return null;
         }
+    }
+
+    public static Set<SubNetworkDTO> createDefaultSubnetwork(String iedName, CommunicationAdapter comAdapter, Map<Pair<String, String>, List<String>> comMap){
+        Set<SubNetworkDTO> subNetworkDTOS = new HashSet<>();
+        comMap.forEach((subnetworkNameType, apNames) -> {
+            SubNetworkDTO subNetworkDTO = new SubNetworkDTO(subnetworkNameType.getLeft(), subnetworkNameType.getRight());
+            apNames.forEach(s -> {
+                if(getStdConnectedApNames(comAdapter).contains(s)){
+                    ConnectedApDTO connectedApDTO = new ConnectedApDTO(iedName, s);
+                    subNetworkDTO.addConnectedAP(connectedApDTO);}
+            });
+            subNetworkDTOS.add(subNetworkDTO);
+        });
+        return subNetworkDTOS;
+    }
+
+    private static List<String> getStdConnectedApNames(CommunicationAdapter comAdapter){
+        return comAdapter.getSubNetworkAdapters().stream()
+                .map(SubNetworkAdapter::getConnectedAPAdapters)
+                .flatMap(connectedAPAdapters -> connectedAPAdapters.stream().map(ConnectedAPAdapter::getApName))
+                .collect(Collectors.toList());
     }
 }

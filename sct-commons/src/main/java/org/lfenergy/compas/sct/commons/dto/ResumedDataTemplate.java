@@ -5,27 +5,30 @@
 package org.lfenergy.compas.sct.commons.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.lfenergy.compas.scl2007b4.model.TFCEnum;
-import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
-import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
-import org.lfenergy.compas.scl2007b4.model.TPredefinedCDCEnum;
-import org.lfenergy.compas.scl2007b4.model.TVal;
+import lombok.*;
+import org.lfenergy.compas.scl2007b4.model.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Setter
 @Getter
+@AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode
+@Builder(toBuilder = true)
 public class ResumedDataTemplate {
 
     private String prefix;
     private String lnType;
     private String lnClass;
     private String lnInst;
+    @Builder.Default
+    @NonNull
     private DoTypeName doName = new DoTypeName("");
+    @Builder.Default
+    @NonNull
     private DaTypeName daName = new DaTypeName("");
 
     public static ResumedDataTemplate copyFrom(ResumedDataTemplate dtt){
@@ -41,27 +44,29 @@ public class ResumedDataTemplate {
     }
 
     public boolean isUpdatable(){
-       return daName.isDefined() && daName.isUpdatable();
+        return daName.isDefined() && daName.isUpdatable();
     }
 
     @JsonIgnore
     public String getObjRef(String iedName, String ldInst){
-        StringBuilder stringBuilder = new StringBuilder();
         //LDName
-        stringBuilder.append(iedName)
-                .append(ldInst)
-                .append("/");
+        return iedName + ldInst + "/" + getLNRef();
+    }
+
+    @JsonIgnore
+    public String getLNRef(){
+        StringBuilder stringBuilder = new StringBuilder();
         if(TLLN0Enum.LLN_0.value().equals(lnClass)){
             stringBuilder.append(TLLN0Enum.LLN_0.value());
         } else {
             stringBuilder.append(prefix)
-                    .append(lnClass)
-                    .append(lnInst);
+                .append(lnClass)
+                .append(lnInst);
         }
         stringBuilder.append('.')
-                .append(getDoRef())
-                .append('.')
-                .append(getDaRef());
+            .append(getDoRef())
+            .append('.')
+            .append(getDaRef());
 
         return stringBuilder.toString();
     }
@@ -120,13 +125,19 @@ public class ResumedDataTemplate {
         return List.of(daName.getStructNames().toArray(new String[0]));
     }
 
-    public <T extends DataTypeName> void addStructName(String structName, Class<T> cls){
-        if(cls.equals(DaTypeName.class) && isDaNameDefined()) {
-            daName.addStructName(structName);
-        } else if(cls.equals(DoTypeName.class) && isDoNameDefined()) {
+    public void addDoStructName(String structName){
+        if(isDoNameDefined()) {
             doName.addStructName(structName);
         }  else {
-            throw new IllegalArgumentException("Cannot add Struct name for undefined data type");
+            throw new IllegalArgumentException("DO name must be defined before adding DO StructName");
+        }
+    }
+
+    public void addDaStructName(String structName){
+        if(isDaNameDefined()) {
+            daName.addStructName(structName);
+        }  else {
+            throw new IllegalArgumentException("DA name must be defined before adding DA StructName");
         }
     }
 
@@ -189,7 +200,6 @@ public class ResumedDataTemplate {
             daName.setValImport(valImport);
         }
     }
-
 
     public boolean isValImport(){
         return daName.isValImport();

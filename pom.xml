@@ -43,7 +43,7 @@
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>1.18.20</version>
+                <version>1.18.24</version>
             </dependency>
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
@@ -69,6 +69,11 @@
                 <version>0.2.1</version>
             </dependency>
             <dependency>
+                <groupId>org.lfenergy.compas.core</groupId>
+                <artifactId>scl-extension</artifactId>
+                <version>0.8.0</version>
+            </dependency>
+            <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
                 <version>1.2.6</version>
@@ -79,6 +84,10 @@
         <dependency>
             <groupId>org.lfenergy.compas.core</groupId>
             <artifactId>scl2007b4</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.lfenergy.compas.core</groupId>
+            <artifactId>scl-extension</artifactId>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>

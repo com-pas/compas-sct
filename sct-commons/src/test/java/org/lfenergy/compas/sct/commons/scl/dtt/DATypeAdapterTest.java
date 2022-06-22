@@ -16,7 +16,6 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -122,9 +121,7 @@ class DATypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TDAType
         ResumedDataTemplate rootRDtt = new ResumedDataTemplate();
         rootRDtt.getDaName().setName("origin");
         rootRDtt.getDoName().setName("StrVal");
-        var rDtts = daTypeAdapter.getResumedDTTs(
-                rootRDtt, new HashSet<>(), new ResumedDataTemplate()
-        );
+        List<ResumedDataTemplate> rDtts = daTypeAdapter.getResumedDTTs(rootRDtt, new ResumedDataTemplate());
         assertEquals(2,rDtts.size());
 
     }

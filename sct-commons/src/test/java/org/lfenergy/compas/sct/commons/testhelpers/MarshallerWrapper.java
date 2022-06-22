@@ -14,7 +14,9 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.StringWriter;
 
 @Slf4j
 public class MarshallerWrapper {
@@ -59,7 +61,7 @@ public class MarshallerWrapper {
             return cls.cast(result);
         } catch (JAXBException exp) {
             String message = String.format("Error unmarshalling to the Class: %s", exp.getLocalizedMessage());
-            log.error(message);
+            log.error(message, exp);
             throw new CompasException(CompasErrorCode.UNMARSHAL_ERROR_CODE, message);
         }
     }

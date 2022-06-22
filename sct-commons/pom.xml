@@ -13,14 +13,14 @@
         <version>local-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.lfenergy.compas</groupId>
     <artifactId>sct-commons</artifactId>
     <version>local-SNAPSHOT</version>
     <name>SCT-COMMONS</name>
 
-
     <properties>
         <sonar.coverage.jacoco.xmlReportPaths>${basedir}/${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.jacoco.excludes>**/scl2007b4/**/*</sonar.jacoco.excludes>
+        <assertJ.version>3.22.0</assertJ.version>
     </properties>
 
     <dependencies>
@@ -105,6 +105,12 @@
             <version>2.3.1</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertJ.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -116,12 +122,34 @@
                     <target>11</target>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
-
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/scl2007b4/**/*</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>default-prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -132,19 +160,45 @@
                         <goals>
                             <goal>unpack</goal>
                         </goals>
-
                         <configuration>
+                            <includes>**/SCL2007B4/*.xsd, **/SCL_CoMPAS.xsd</includes>
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.lfenergy.compas.xsd</groupId>
                                     <artifactId>compas-scl-xsd</artifactId>
                                     <version>0.0.4</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.lfenergy.compas.core</groupId>
+                                    <artifactId>scl-extension</artifactId>
+                                    <version>0.8.0</version>
+                                </artifactItem>
                             </artifactItems>
                             <outputDirectory>${project.build.directory}</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jaxb2-maven-plugin</artifactId>
+                <version>2.5.0</version>
+                <executions>
+                    <execution>
+                        <id>xjc</id>
+                        <goals>
+                            <goal>xjc</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <sources>
+                        <source>${project.build.directory}/xsd/SCL2007B4/SCL.xsd</source>
+                        <source>${project.build.directory}/xsd/SCL_CoMPAS.xsd</source>
+                    </sources>
+                    <packageName>org.lfenergy.compas.scl2007b4.model</packageName>
+                    <noPackageLevelAnnotations>true</noPackageLevelAnnotations>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

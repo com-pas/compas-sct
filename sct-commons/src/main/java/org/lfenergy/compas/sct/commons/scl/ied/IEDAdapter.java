@@ -259,4 +259,11 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
         return controlBlock;
 
     }
+
+    public Optional<TPrivate> getPrivateHeader(String privateType){
+        return currentElem.getPrivate()
+                .stream()
+                .filter(tPrivate -> tPrivate.getType().equals(privateType))
+                .findFirst();
+    }
 }

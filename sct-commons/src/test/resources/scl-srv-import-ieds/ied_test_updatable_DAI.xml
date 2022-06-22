@@ -1,0 +1,257 @@
+﻿<!-- SPDX-FileCopyrightText: 2021 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+<SCL xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4">
+    <Header id="01d2b6da-eb9c-4e07-911c-d243b1bd48f2" version="V1" revision="A" toolID="TEST_GEN" nameStructure="IEDName"/>
+    <IED name="VirtualBCU" type="ADU" manufacturer="ADU" configVersion="ADU" originalSclVersion="2007" originalSclRevision="B" originalSclRelease="4">
+        <AccessPoint name="PROCESS_AP">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LDMODEXPF" ldName="VirtualBCULDMODEXPF" desc="Bay level Operating Mode">
+                    <LN0 lnClass="LLN0" inst="" lnType="lntype1">
+                        <!-- Simple DA (without BDA) -->
+                        <DOI name="DoA">
+                            <DAI name="valImportNotSetAndNotSetInDai"/>
+                            <DAI name="valImportTrueAndNotSetInDai"/>
+                            <DAI name="valImportFalseAndNotSetInDai"/>
+                            <DAI name="valImportTrueWithBadFcAndNotSetInDai"/>
+                            <DAI name="valImportNotSetAndTrueInDai" valImport="true"/>
+                            <DAI name="valImportTrueAndTrueInDai" valImport="true"/>
+                            <DAI name="valImportFalseAndTrueInDai" valImport="true"/>
+                            <DAI name="valImportNotSetAndFalseInDai" valImport="false"/>
+                            <DAI name="valImportTrueAndFalseInDai" valImport="false"/>
+                            <DAI name="valImportFalseAndFalseInDai" valImport="false"/>
+                            <DAI name="valImportTrueWithBadFcAndFalseInDai" valImport="false"/>
+                        </DOI>
+
+                        <!-- Struct DA (with BDA) -->
+                        <DOI name="DoB">
+                            <SDI name="structValImportNotSet">
+                                <DAI name="bValImportNotSetAndNotSetInDai"/>
+                                <DAI name="bValImportTrueAndNotSetInDai"/>
+                                <DAI name="bValImportFalseAndNotSetInDai"/>
+                                <DAI name="bValImportNotSetAndTrueInDai" valImport="true"/>
+                                <DAI name="bValImportTrueAndTrueInDai" valImport="true"/>
+                                <DAI name="bValImportFalseAndTrueInDai" valImport="true"/>
+                                <DAI name="bValImportNotSetAndFalseInDai" valImport="false"/>
+                                <DAI name="bValImportTrueAndFalseInDai" valImport="false"/>
+                                <DAI name="bValImportFalseAndFalseInDai" valImport="false"/>
+                            </SDI>
+                            <SDI name="structValImportTrue">
+                                <DAI name="bValImportNotSetAndNotSetInDai"/>
+                                <DAI name="bValImportTrueAndNotSetInDai"/>
+                                <DAI name="bValImportFalseAndNotSetInDai"/>
+                                <DAI name="bValImportNotSetAndTrueInDai" valImport="true"/>
+                                <DAI name="bValImportTrueAndTrueInDai" valImport="true"/>
+                                <DAI name="bValImportFalseAndTrueInDai" valImport="true"/>
+                                <DAI name="bValImportNotSetAndFalseInDai" valImport="false"/>
+                                <DAI name="bValImportTrueAndFalseInDai" valImport="false"/>
+                                <DAI name="bValImportFalseAndFalseInDai" valImport="false"/>
+                            </SDI>
+                            <SDI name="structValImportFalse">
+                                <DAI name="bValImportNotSetAndNotSetInDai"/>
+                                <DAI name="bValImportTrueAndNotSetInDai"/>
+                                <DAI name="bValImportFalseAndNotSetInDai"/>
+                                <DAI name="bValImportNotSetAndTrueInDai" valImport="true"/>
+                                <DAI name="bValImportTrueAndTrueInDai" valImport="true"/>
+                                <DAI name="bValImportFalseAndTrueInDai" valImport="true"/>
+                                <DAI name="bValImportNotSetAndFalseInDai" valImport="false"/>
+                                <DAI name="bValImportTrueAndFalseInDai" valImport="false"/>
+                                <DAI name="bValImportFalseAndFalseInDai" valImport="false"/>
+                            </SDI>
+                            <SDI name="structValImportWithBadFc">
+                                <DAI name="bValImportNotSetAndNotSetInDai"/>
+                                <DAI name="bValImportTrueAndNotSetInDai"/>
+                                <DAI name="bValImportFalseAndNotSetInDai"/>
+                                <DAI name="bValImportNotSetAndTrueInDai" valImport="true"/>
+                                <DAI name="bValImportTrueAndTrueInDai" valImport="true"/>
+                                <DAI name="bValImportFalseAndTrueInDai" valImport="true"/>
+                                <DAI name="bValImportNotSetAndFalseInDai" valImport="false"/>
+                                <DAI name="bValImportTrueAndFalseInDai" valImport="false"/>
+                                <DAI name="bValImportFalseAndFalseInDai" valImport="false"/>
+                            </SDI>
+                        </DOI>
+                        <!-- Sgroup Val with ConfSG Present -->
+                        <DOI name="DoC">
+                            <DAI name="sGroupValImportNotSetAndConfSGPresent">
+                                <Val sGroup="1">0</Val>
+                            </DAI>
+                            <DAI name="sGroupValImportTrueAndConfSGPresent" valImport="true">
+                                <Val sGroup="1">0</Val>
+                            </DAI>
+                            <DAI name="sGroupValImportFalseAndConfSGPresent" valImport="false">
+                                <Val sGroup="1">0</Val>
+                            </DAI>
+                        </DOI>
+                    </LN0>
+                    <LN lnClass="LPHD" inst="0" lnType="lntype2" desc="">
+                        <DOI name="PhyNam">
+                            <DAI name="hwRev" valKind="RO" valImport="false">
+                                <Val>VDF</Val>
+                            </DAI>
+                        </DOI>
+                    </LN>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+        <AccessPoint name="ConfSG_AP">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LDCAP" ldName="VirtualBCULDCAP">
+                    <LN0 lnClass="LLN0" inst="" lnType="lntype3">
+                        <!-- Sgroup Val with ConfSG Present -->
+                        <DOI name="DoD">
+                            <DAI name="sGroupValImportNotSet">
+                                <Val sGroup="1">0</Val>
+                            </DAI>
+                            <DAI name="sGroupValImportTrue" valImport="true">
+                                <Val sGroup="1">0</Val>
+                            </DAI>
+                            <DAI name="sGroupValImportFalse" valImport="false">
+                                <Val sGroup="1">0</Val>
+                            </DAI>
+                            <DAI name="sGroupValImportTrueMissingSGroupAttr" valImport="true">
+                                <Val>0</Val>
+                            </DAI>
+                        </DOI>
+                    </LN0>
+                </LDevice>
+            </Server>
+            <Services>
+                <SettingGroups>
+                    <ConfSG/>
+                </SettingGroups>
+            </Services>
+        </AccessPoint>
+        <AccessPoint name="NOT_ConfSG_AP">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LDMOD" ldName="VirtualBCULDMOD">
+                    <LN0 lnClass="LLN0" inst="" lnType="lntype3">
+                        <!-- Sgroup Val with ConfSG Present -->
+                        <DOI name="DoD">
+                            <DAI name="sGroupValImportNotSet">
+                                <Val sGroup="1">0</Val>
+                            </DAI>
+                            <DAI name="sGroupValImportTrue" valImport="true">
+                                <Val sGroup="1">0</Val>
+                            </DAI>
+                            <DAI name="sGroupValImportFalse" valImport="false">
+                                <Val sGroup="1">0</Val>
+                            </DAI>
+                            <DAI name="sGroupValImportTrueMissingSGroupAttr" valImport="true">
+                                <Val>0</Val>
+                            </DAI>
+                        </DOI>
+                    </LN0>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+        <AccessPoint name="ADMINISTRATION_AP"/>
+    </IED>
+    <DataTypeTemplates>
+        <LNodeType lnClass="LLN0" id="lntype1">
+            <DO name="DoA" type="dotype1a"/>
+            <DO name="DoB" type="dotype1b"/>
+        </LNodeType>
+        <LNodeType lnClass="LPHD" id="lntype2">
+            <DO name="PhyNam" type="dotype2"/>
+        </LNodeType>
+        <LNodeType lnClass="LLN0" id="lntype3">
+            <DO name="DoD" type="dotype3"/>
+        </LNodeType>
+        <DOType cdc="DPL" id="dotype1a">
+            <!-- Start with a struct to make sure BDA do not persist (bug #70) -->
+            <DA name="daStruct" bType="Struct" fc="CF" type="datype3"/>
+            <!--DA not existing in DAI -->
+            <DA fc="CF" name="valImportNotSet" bType="INT8"/>
+            <DA fc="CF" name="valImportTrue" bType="INT8" valImport="true"/>
+            <DA fc="CF" name="valImportFalse" bType="INT8" valImport="false"/>
+            <DA fc="MX" name="valImportTrueWithBadFc" bType="INT8" valImport="true"/>
+            <!--DA existing in DAI and valImport not overridden by DAI -->
+            <DA fc="CF" name="valImportNotSetAndNotSetInDai" bType="INT8"/>
+            <DA fc="CF" name="valImportTrueAndNotSetInDai" bType="INT8" valImport="true"/>
+            <DA fc="CF" name="valImportFalseAndNotSetInDai" bType="INT8" valImport="false"/>
+            <DA fc="MX" name="valImportTrueWithBadFcAndNotSetInDai" bType="INT8" valImport="true"/>
+            <!--DA existing in DAI and valImport true in DAI -->
+            <DA fc="CF" name="valImportNotSetAndTrueInDai" bType="INT8"/>
+            <DA fc="CF" name="valImportTrueAndTrueInDai" bType="INT8" valImport="true"/>
+            <DA fc="CF" name="valImportFalseAndTrueInDai" bType="INT8" valImport="false"/>
+            <DA fc="MX" name="valImportTrueWithBadFcAndTrueInDai" bType="INT8" valImport="true"/>
+            <!--DA existing in DAI and valImport false in DAI -->
+            <DA fc="CF" name="valImportNotSetAndFalseInDai" bType="INT8"/>
+            <DA fc="CF" name="valImportTrueAndFalseInDai" bType="INT8" valImport="true"/>
+            <DA fc="CF" name="valImportFalseAndFalseInDai" bType="INT8" valImport="false"/>
+            <DA fc="MX" name="valImportTrueWithBadFcAndFalseInDai" bType="INT8" valImport="true"/>
+            <!-- All fc -->
+            <DA fc="BL" name="fcBL" bType="INT8" valImport="true"/>
+            <DA fc="CF" name="fcCF" bType="INT8" valImport="true"/>
+            <DA fc="CO" name="fcCO" bType="INT8" valImport="true"/>
+            <DA fc="DC" name="fcDC" bType="INT8" valImport="true"/>
+            <DA fc="EX" name="fcEX" bType="INT8" valImport="true"/>
+            <DA fc="MX" name="fcMX" bType="INT8" valImport="true"/>
+            <DA fc="OR" name="fcOR" bType="INT8" valImport="true"/>
+            <DA fc="SE" name="fcSE" bType="INT8" valImport="true"/>
+            <DA fc="SG" name="fcSG" bType="INT8" valImport="true"/>
+            <DA fc="SP" name="fcSP" bType="INT8" valImport="true"/>
+            <DA fc="SR" name="fcSR" bType="INT8" valImport="true"/>
+            <DA fc="ST" name="fcST" bType="INT8" valImport="true"/>
+            <DA fc="SV" name="fcSV" bType="INT8" valImport="true"/>
+        </DOType>
+        <DOType cdc="DPL" id="dotype1b">
+            <!-- Struct DA -->
+            <DA fc="ST" name="structValImportNotSet" bType="Struct" type="datype1"/>
+            <DA fc="ST" name="structValImportTrue" bType="Struct" type="datype1" valImport="true"/>
+            <DA fc="ST" name="structValImportFalse" bType="Struct" type="datype1" valImport="false"/>
+            <DA fc="MX" name="structValImportWithBadFc" bType="Struct" type="datype1" valImport="true"/>
+            <!-- All fc -->
+            <DA fc="BL" name="structWithFcBL" bType="Struct" type="datype2"/>
+            <DA fc="CF" name="structWithFcCF" bType="Struct" type="datype2"/>
+            <DA fc="CO" name="structWithFcCO" bType="Struct" type="datype2"/>
+            <DA fc="DC" name="structWithFcDC" bType="Struct" type="datype2"/>
+            <DA fc="EX" name="structWithFcEX" bType="Struct" type="datype2"/>
+            <DA fc="MX" name="structWithFcMX" bType="Struct" type="datype2"/>
+            <DA fc="OR" name="structWithFcOR" bType="Struct" type="datype2"/>
+            <DA fc="SE" name="structWithFcSE" bType="Struct" type="datype2"/>
+            <DA fc="SG" name="structWithFcSG" bType="Struct" type="datype2"/>
+            <DA fc="SP" name="structWithFcSP" bType="Struct" type="datype2"/>
+            <DA fc="SR" name="structWithFcSR" bType="Struct" type="datype2"/>
+            <DA fc="ST" name="structWithFcST" bType="Struct" type="datype2"/>
+            <DA fc="SV" name="structWithFcSV" bType="Struct" type="datype2"/>
+        </DOType>
+        <DOType cdc="DPL" id="dotype2">
+            <DA fc="CF" name="aDa" bType="INT8"/>
+        </DOType>
+        <DOType cdc="DPL" id="dotype3">
+            <DA fc="SG" name="sGroupValImportNotSet" bType="INT8"/>
+            <DA fc="SG" name="sGroupValImportTrue" bType="INT8"/>
+            <DA fc="SG" name="sGroupValImportFalse" bType="INT8"/>
+            <DA fc="SG" name="sGroupValImportTrueMissingSGroupAttr" bType="INT8"/>
+        </DOType>
+        <DAType id="datype1">
+            <!--BDA not existing in DAI -->
+            <BDA name="bValImportNotSet" bType="INT16"/>
+            <BDA name="bValImportTrue" bType="INT16" valImport="true"/>
+            <BDA name="bValImportFalse" bType="INT16" valImport="false"/>
+            <!--BDA existing in DAI and valImport not overridden by DAI -->
+            <BDA name="bValImportNotSetAndNotSetInDai" bType="INT16"/>
+            <BDA name="bValImportTrueAndNotSetInDai" bType="INT16" valImport="true"/>
+            <BDA name="bValImportFalseAndNotSetInDai" bType="INT16" valImport="false"/>
+            <!--BDA existing in DAI and valImport true in DAI -->
+            <BDA name="bValImportNotSetAndTrueInDai" bType="INT16"/>
+            <BDA name="bValImportTrueAndTrueInDai" bType="INT16" valImport="true"/>
+            <BDA name="bValImportFalseAndTrueInDai" bType="INT16" valImport="false"/>
+            <!--BDA existing in DAI and valImport false in DAI -->
+            <BDA name="bValImportNotSetAndFalseInDai" bType="INT16"/>
+            <BDA name="bValImportTrueAndFalseInDai" bType="INT16" valImport="true"/>
+            <BDA name="bValImportFalseAndFalseInDai" bType="INT16" valImport="false"/>
+        </DAType>
+        <DAType id="datype2">
+            <BDA name="bda1" bType="INT16" valImport="true"/>
+        </DAType>
+        <DAType id="datype3">
+            <BDA name="bda1" bType="INT16"/>
+        </DAType>
+    </DataTypeTemplates>
+</SCL>

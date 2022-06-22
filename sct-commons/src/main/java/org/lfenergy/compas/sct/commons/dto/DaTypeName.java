@@ -4,10 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,12 +15,12 @@ import org.lfenergy.compas.scl2007b4.model.TVal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class DaTypeName extends DataTypeName{
     public static final String VALIDATION_REGEX
             = "[a-zA-Z][a-zA-Z0-9]*(\\([0-9]+\\))?(\\.[a-zA-Z][a-zA-Z0-9]*(\\([0-9]+\\))?)*";
@@ -37,6 +34,10 @@ public class DaTypeName extends DataTypeName{
         super(daName);
     }
 
+    public DaTypeName(String name, String names) {
+        super(name, names);
+    }
+
     public static DaTypeName from(DaTypeName dataName){
         DaTypeName daTypeName = new DaTypeName(dataName.toString());
         if(dataName.isDefined()) {
@@ -48,11 +49,6 @@ public class DaTypeName extends DataTypeName{
             daTypeName.valImport = dataName.valImport;
         }
         return daTypeName;
-    }
-
-
-    public DaTypeName(String name, String names) {
-        super(name, names);
     }
 
     public boolean isValImport(){
@@ -92,22 +88,6 @@ public class DaTypeName extends DataTypeName{
         } else {
             daiValues.put(sg, val);
         }
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || o.getClass() != getClass()) return false;
-        if (!super.equals(o)) return false;
-        DaTypeName that = (DaTypeName) o;
-        return fc == that.fc &&
-                Objects.equals(bType, that.bType) &&
-                Objects.equals(type, that.type);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), fc, bType, type);
     }
 
     public void merge(DaTypeName daName) {
