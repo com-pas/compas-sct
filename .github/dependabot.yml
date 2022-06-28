@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: 2021 Alliander N.V.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+version: 2
+
+registries:
+  maven-github:
+    type: maven-repository
+    url: https://maven.pkg.github.com/com-pas/*
+    username: OWNER
+    password: ${{ secrets.DB_GITHUB_PACKAGES }}
+
+updates:
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  # Maintain dependencies for Maven
+  - package-ecosystem: "maven"
+    directory: "/"
+    registries:
+      - maven-github
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    ignore:
+      # Next two dependencies shouldn't be upgrade, because RestEasy isn't using newer version. (2.3.X)
+      - dependency-name: jakarta.xml.bind:jakarta.xml.bind-api
+        versions: [ "[3.0,)" ]
+      - dependency-name: com.sun.xml.bind:jaxb-impl
+        versions: [ "[3.0,)" ]
