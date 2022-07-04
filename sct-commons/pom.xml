@@ -32,7 +32,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.11</version>
+            <version>3.12.0</version>
         </dependency>
         <dependency>
             <groupId>jakarta.xml.bind</groupId>
@@ -196,6 +196,9 @@
                         <source>${project.build.directory}/xsd/SCL2007B4/SCL.xsd</source>
                         <source>${project.build.directory}/xsd/SCL_CoMPAS.xsd</source>
                     </sources>
+                    <xjbSources>
+                        <xjbSource>${project.basedir}/src/main/resources/binding_configuration.xjb</xjbSource>
+                    </xjbSources>
                     <packageName>org.lfenergy.compas.scl2007b4.model</packageName>
                     <noPackageLevelAnnotations>true</noPackageLevelAnnotations>
                 </configuration>

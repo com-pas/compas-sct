@@ -6,78 +6,68 @@ package org.lfenergy.compas.sct.commons;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.Field;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 @Slf4j
 public class Utils {
+
+    public static final String LEAVING_PREFIX = "<<< Leaving: ::";
+    public static final String ENTERING_PREFIX = ">>> Entering: ::";
 
     private Utils() {
         throw new IllegalStateException("Utils class");
     }
 
-    public static String entering(){
-        return ">>> " +
-                "Entering: " +
-                "-::" +
+    public static String entering() {
+        return ENTERING_PREFIX +
+            getMethodName();
+    }
+
+    public static String leaving(Long startTime) {
+        if (startTime == null || startTime <= 0) {
+            return LEAVING_PREFIX +
                 getMethodName();
-    }
-
-    public static String leaving(Long startTime){
-        if(startTime == null || startTime <= 0){
-            return leaving();
         }
-        return "<<< " +
-                "Leaving: " +
-                "-::" +
-                getMethodName() +
-                " - Timer duration: " +
-                (System.nanoTime() - startTime) / Math.pow(10, 9) +
-                " sec.";
+        return LEAVING_PREFIX +
+            getMethodName() +
+            " - Timer duration: " +
+            (System.nanoTime() - startTime) / Math.pow(10, 9) +
+            " sec.";
     }
 
-    public static String getMethodName() {
+    private static String getMethodName() {
         try {
             return (new Throwable()).getStackTrace()[2].getMethodName();
-        } catch (Exception e){
+        } catch (Exception e) {
             return "-";
         }
     }
 
-    public static String leaving(){
-        return "<<< " +
-                "Leaving: " +
-                "::" +
-                getMethodName();
+    public static String leaving() {
+        return LEAVING_PREFIX +
+            getMethodName();
     }
 
     /**
-     * Returns the first {@link Field} in the hierarchy for the specified name
+     * Test if two fields with primitive values are equals or are both not set.
+     * @param o1 object to compare
+     * @param o2 object to compare
+     * @param isSet predicate that returns if fields is set
+     * @param getValue getter that return the unboxed field
+     * @return true if both fields are set and are equals, or if both fields are not set. False otherwise.
      */
-    public static Field getField(Class<?> clazz, String name) {
-        Field field = null;
-        while (clazz != null && field == null) {
-            try {
-                field = clazz.getDeclaredField(name);
-            } catch (Exception e) {
-                log.error("Cannot find field name {}", name, e);
-            }
-            clazz = clazz.getSuperclass();
+    public static <T, R> boolean equalsOrNotSet(T o1, T o2, Predicate<T> isSet, Function<T, R> getValue) {
+        Objects.requireNonNull(o1);
+        Objects.requireNonNull(o2);
+        if (!isSet.test(o1)){
+            return !isSet.test(o2);
         }
-        return field;
+        if (!isSet.test(o2)){
+            return false;
+        }
+        return Objects.equals(getValue.apply(o1), getValue.apply(o2));
     }
 
-    /**
-     * Sets {@code value} to the first {@link Field} in the {@code object} hierarchy, for the specified name
-     */
-    public static void setField(Object object, String fieldName, Object value) {
-        try {
-            Field field = getField(object.getClass(), fieldName);
-            if(field != null){
-                field.setAccessible(true);
-                field.set(object, value);
-            }
-        } catch (Exception e) {
-            log.error("Cannot nullify {} : ",fieldName, e);
-        }
-    }
 }

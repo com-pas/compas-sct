@@ -7,14 +7,7 @@ package org.lfenergy.compas.sct.commons.dto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.lfenergy.compas.scl2007b4.model.TClientLN;
-import org.lfenergy.compas.scl2007b4.model.TControl;
-import org.lfenergy.compas.scl2007b4.model.TControlWithIEDName;
-import org.lfenergy.compas.scl2007b4.model.TPredefinedTypeOfSecurityEnum;
-import org.lfenergy.compas.scl2007b4.model.TServiceSettingsNoDynEnum;
-import org.lfenergy.compas.scl2007b4.model.TServiceType;
-import org.lfenergy.compas.scl2007b4.model.TServices;
-import org.lfenergy.compas.sct.commons.Utils;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
@@ -79,14 +72,12 @@ public abstract class ControlBlock<T extends ControlBlock> extends LNodeMetaData
                                     )
                             )
                     );
-            if(!iedName.getLnClass().isEmpty()) {
+            if (iedName.isSetLnClass() && !iedName.getLnClass().isEmpty()) {
                 try {
                     lDeviceAdapter.getLNAdapter(iedName.getLnClass().get(0), iedName.getLnInst(), iedName.getPrefix());
-                } catch (ScdException e){
+                } catch (ScdException e) {
                     throw new ScdException("Control block destination: " + e.getMessage());
                 }
-            } else {
-               Utils.setField(iedName,"lnClass",null);
             }
         }
     }

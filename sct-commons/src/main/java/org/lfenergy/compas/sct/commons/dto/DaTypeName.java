@@ -75,7 +75,7 @@ public class DaTypeName extends DataTypeName{
     }
 
     public void addDaiValue(TVal val) {
-        if(val.getSGroup() == null){
+        if(!val.isSetSGroup()){
             daiValues.put(0L,val.getValue());
         } else {
             daiValues.put(val.getSGroup(), val.getValue());

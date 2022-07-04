@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- // SPDX-FileCopyrightText: 2022 RTE FRANCE -->
+<!-- // -->
+<!-- // SPDX-License-Identifier: Apache-2.0 -->
+<SCL xmlns="http://www.iec.ch/61850/2003/SCL" xmlns:compas="https://www.lfenergy.org/compas/extension/v1" version="2007" revision="B" release="4">
+    <Private type="COMPAS-SclFileType">
+        <compas:SclFileType>SSD</compas:SclFileType>
+    </Private>
+    <Header id="HeaderId" version="HeaderVersion" revision="HeaderRevision"/>
+    <IED name="ied1">
+        <AccessPoint name="ap1">
+            <Server>
+                <Authentication/>
+                <LDevice inst="lDeviceInst1">
+                    <LN0 lnType="lnType0" lnClass="LLN0" inst="">
+                        <DataSet name="dataSet0">
+                            <FCDA fc="CF"/>
+                        </DataSet>
+                        <ReportControl name="reportControl0" confRev="0">
+                            <OptFields/>
+                        </ReportControl>
+                        <LogControl name="logControl0" logName="logName0"/>
+                        <Inputs>
+                            <ExtRef desc="extRef1" srcLDInst="srcLDInst0" srcPrefix="srcPrefix0" srcLNClass="ANCR" srcLNInst="0" srcCBName="srcCBName0"/>
+                            <ExtRef desc="extRef2" srcLDInst="srcLDInst1" srcPrefix="srcPrefix1" srcLNClass="ARIS" srcLNInst="1" srcCBName="srcCBName1"/>
+                        </Inputs>
+                        <GSEControl name="gseName" appID="appID0"/>
+                        <SampledValueControl name="SampledValueControl0" smvID="smvID0" smpRate="0" nofASDU="0" datSet="dataSet0">
+                            <SmvOpts refreshTime="true"/>
+                        </SampledValueControl>
+                        <SettingControl numOfSGs="1"/>
+                    </LN0>
+                    <LN lnType="lnType1" lnClass="ANCR" inst="1">
+                        <DataSet name="dataSet1">
+                            <FCDA fc="CF"/>
+                        </DataSet>
+                        <ReportControl name="reportControl1" confRev="1">
+                            <OptFields/>
+                        </ReportControl>
+                        <LogControl name="logControl1" logName="logName1" datSet="dataSet1"/>
+                    </LN>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
+    <DataTypeTemplates>
+        <LNodeType id="lnType0" lnClass="LLN0">
+            <DO name="Do1" type="doType1"/>
+        </LNodeType>
+        <LNodeType id="lnType1" lnClass="ANCR">
+            <DO name="Do1" type="doType1"/>
+        </LNodeType>
+        <DOType id="doType1" cdc="SPS"/>
+    </DataTypeTemplates>
+</SCL>

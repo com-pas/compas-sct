@@ -12,9 +12,7 @@ import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.CommonConstants;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.LN0Adapter;
+import org.lfenergy.compas.sct.commons.scl.ied.*;
 import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
@@ -685,4 +683,67 @@ class SclServiceTest {
         assertThrows(ScdException.class, ()-> SclService.importSTDElementsInSCD(scdRootAdapter, new HashSet<>(), DTO.comMap));
 
     }
+
+    @Test
+    void removeControlBlocksAndDatasetAndExtRefSrc_should_remove_controlBlocks_and_Dataset_on_ln0() throws Exception {
+        // Given
+        SCL scl = SclTestMarshaller.getSCLFromFile("/scl-remove-controlBlocks-dataSet-extRefSrc/scl-with-control-blocks.xml");
+        // When
+        SclService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scl);
+        // Then
+        SclRootAdapter scdRootAdapter = new SclRootAdapter(scl);
+        List<LDeviceAdapter> lDevices = scdRootAdapter.getIEDAdapters().stream().map(IEDAdapter::getLDeviceAdapters)
+            .flatMap(List::stream).collect(Collectors.toList());
+        List<LN0> ln0s = lDevices.stream().map(LDeviceAdapter::getLN0Adapter).map(LN0Adapter::getCurrentElem).collect(Collectors.toList());
+        assertThat(ln0s)
+            .isNotEmpty()
+            .noneMatch(TAnyLN::isSetDataSet)
+            .noneMatch(TAnyLN::isSetLogControl)
+            .noneMatch(TAnyLN::isSetReportControl)
+            .noneMatch(LN0::isSetGSEControl)
+            .noneMatch(LN0::isSetSampledValueControl);
+    }
+
+    @Test
+    void removeControlBlocksAndDatasetAndExtRefSrc_should_remove_controlBlocks_and_Dataset_on_ln() throws Exception {
+        // Given
+        SCL scl = SclTestMarshaller.getSCLFromFile("/scl-remove-controlBlocks-dataSet-extRefSrc/scl-with-control-blocks.xml");
+        // When
+        SclService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scl);
+        // Then
+        SclRootAdapter scdRootAdapter = new SclRootAdapter(scl);
+        List<LDeviceAdapter> lDevices = scdRootAdapter.getIEDAdapters().stream().map(IEDAdapter::getLDeviceAdapters)
+            .flatMap(List::stream).collect(Collectors.toList());
+        List<TLN> lns = lDevices.stream().map(LDeviceAdapter::getLNAdapters).flatMap(List::stream)
+            .map(LNAdapter::getCurrentElem).collect(Collectors.toList());
+        assertThat(lns)
+            .isNotEmpty()
+            .noneMatch(TAnyLN::isSetDataSet)
+            .noneMatch(TAnyLN::isSetLogControl)
+            .noneMatch(TAnyLN::isSetReportControl);
+    }
+
+    @Test
+    void removeControlBlocksAndDatasetAndExtRefSrc_should_remove_srcXXX_attributes_on_ExtRef() throws Exception {
+        // Given
+        SCL scl = SclTestMarshaller.getSCLFromFile("/scl-remove-controlBlocks-dataSet-extRefSrc/scl-with-control-blocks.xml");
+        // When
+        SclService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scl);
+        // Then
+        SclRootAdapter scdRootAdapter = new SclRootAdapter(scl);
+        List<TExtRef> extRefs = scdRootAdapter
+            .getIEDAdapters().stream()
+            .map(IEDAdapter::getLDeviceAdapters).flatMap(List::stream)
+            .map(LDeviceAdapter::getLN0Adapter)
+            .map(AbstractLNAdapter::getExtRefs).flatMap(List::stream)
+            .collect(Collectors.toList());
+        assertThat(extRefs)
+            .isNotEmpty()
+            .noneMatch(TExtRef::isSetSrcLDInst)
+            .noneMatch(TExtRef::isSetSrcPrefix)
+            .noneMatch(TExtRef::isSetSrcLNInst)
+            .noneMatch(TExtRef::isSetSrcCBName)
+            .noneMatch(TExtRef::isSetSrcLNClass);
+    }
+
 }

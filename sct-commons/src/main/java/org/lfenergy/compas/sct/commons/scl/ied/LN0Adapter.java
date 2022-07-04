@@ -51,4 +51,11 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
                 currentElem.getSampledValueControl().stream().anyMatch(smp -> smp.getName().equals(dataAttribute)) ||
                 currentElem.getGSEControl().stream().anyMatch(gse -> gse.getName().equals(dataAttribute));
     }
+
+    @Override
+    public void removeAllControlBlocksAndDatasets() {
+        super.removeAllControlBlocksAndDatasets();
+        currentElem.unsetGSEControl();
+        currentElem.unsetSampledValueControl();
+    }
 }
