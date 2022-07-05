@@ -20,10 +20,7 @@ import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.EnumTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.DAITracker;
-import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
+import org.lfenergy.compas.sct.commons.scl.ied.*;
 import org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter;
 import org.lfenergy.compas.sct.commons.scl.sstation.VoltageLevelAdapter;
 
@@ -514,4 +511,22 @@ public class SclService {
         return tCompasICDHeader.map(JAXBElement::getValue);
     }
 
+    public static void removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(final SCL scl) {
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scl);
+        List<LDeviceAdapter> lDeviceAdapters = sclRootAdapter.getIEDAdapters().stream()
+            .map(IEDAdapter::getLDeviceAdapters).flatMap(List::stream).collect(Collectors.toList());
+
+        // LN0
+        lDeviceAdapters.stream()
+            .map(LDeviceAdapter::getLN0Adapter)
+            .forEach(ln0 -> {
+                ln0.removeAllControlBlocksAndDatasets();
+                ln0.removeAllExtRefSourceBindings();
+            });
+
+        // Other LN
+        lDeviceAdapters.stream()
+            .map(LDeviceAdapter::getLNAdapters).flatMap(List::stream)
+            .forEach(LNAdapter::removeAllControlBlocksAndDatasets);
+    }
 }

@@ -16,7 +16,6 @@ import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
 
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -96,6 +95,10 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
 
     public String getLnType(){
         return currentElem.getLnType();
+    }
+
+    public List<TExtRef> getExtRefs() {
+        return getExtRefs(null);
     }
 
     public List<TExtRef> getExtRefs(ExtRefSignalInfo filter) {
@@ -194,20 +197,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
 
             extRef.setPrefix(bindingInfo.getPrefix());
             // invalid source info
-            extRef.setSrcCBName(null);
-            extRef.setSrcLDInst(null);
-            extRef.setSrcPrefix(null);
-            extRef.setSrcLNInst(null);
-            // the JAXB don't provide setter for srcLNClass
-            // SCL XSD doesn't accept empty srcLNClass list
-            // No choice here but to do reflection
-            try {
-                Field f = extRef.getClass().getDeclaredField("srcLNClass");
-                f.setAccessible(true);
-                f.set(extRef,null);
-            } catch ( Exception e) {
-                log.error("Cannot nullify srcLNClass:", e);
-            }
+            removeExtRefSourceBinding(extRef);
             isSrcReset = true;
         }
         //
@@ -478,13 +468,13 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 if (rDtt.getDaName().getFc() == TFCEnum.SG || rDtt.getDaName().getFc() == TFCEnum.SE) {
                     boolean isGroup = hasSgGroup(tdai);
                     if (isGroup) {
-                        rDtt.setValImport(!Boolean.FALSE.equals(tdai.isValImport()) && iedHasConfSG());
+                        rDtt.setValImport((!tdai.isSetValImport() || tdai.isValImport()) && iedHasConfSG());
                     } else {
                         rDtt.setValImport(false);
                         log.warn("Inconsistency in the SCD file - DAI {} with fc={} must have a sGroup attribute",
                             rDtt.getObjRef(getCurrentIED().getName(), parentAdapter.getInst()), rDtt.getDaName().getFc());
                     }
-                } else if (tdai.isValImport() != null) {
+                } else if (tdai.isSetValImport()) {
                     rDtt.setValImport(tdai.isValImport());
                 }
             });
@@ -501,7 +491,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
     }
 
     private boolean hasSgGroup(TDAI tdai) {
-        return tdai.getVal().stream().anyMatch(tVal -> tVal.getSGroup() != null && tVal.getSGroup().intValue() > 0);
+        return tdai.getVal().stream().anyMatch(tVal -> tVal.isSetSGroup() && tVal.getSGroup() > 0);
     }
 
     /**
@@ -672,8 +662,28 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         }
 
         Map<Long,String> res = new HashMap<>();
-        tVals.forEach( tVal -> res.put(tVal.getSGroup(),tVal.getValue()));
+        tVals.forEach( tVal -> res.put(
+            tVal.isSetSGroup() ? tVal.getSGroup() : 0L, tVal.getValue())
+        );
 
         return res;
+    }
+
+    public void removeAllControlBlocksAndDatasets() {
+        currentElem.unsetReportControl();
+        currentElem.unsetLogControl();
+        currentElem.unsetDataSet();
+    }
+
+    public void removeAllExtRefSourceBindings() {
+        getExtRefs().forEach(this::removeExtRefSourceBinding);
+    }
+
+    private void removeExtRefSourceBinding(final TExtRef tExtRef){
+        tExtRef.setSrcCBName(null);
+        tExtRef.setSrcLDInst(null);
+        tExtRef.setSrcPrefix(null);
+        tExtRef.setSrcLNInst(null);
+        tExtRef.unsetSrcLNClass();
     }
 }

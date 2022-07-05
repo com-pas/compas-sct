@@ -39,9 +39,8 @@ public class FCDAInfo {
         lnInst = tfcda.getLnInst();
         doName = new DoTypeName(tfcda.getDoName());
         daName = new DaTypeName(tfcda.getDaName());
-        ix = tfcda.getIx();
+        ix = tfcda.isSetIx() ? tfcda.getIx() : null;
     }
-
 
     @JsonIgnore
     public TFCDA getFCDA(){

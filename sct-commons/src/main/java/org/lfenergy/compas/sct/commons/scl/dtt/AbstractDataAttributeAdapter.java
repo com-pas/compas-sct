@@ -5,11 +5,7 @@
 package org.lfenergy.compas.sct.commons.scl.dtt;
 
 import lombok.Getter;
-import org.lfenergy.compas.scl2007b4.model.TAbstractDataAttribute;
-import org.lfenergy.compas.scl2007b4.model.TDA;
-import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
-import org.lfenergy.compas.scl2007b4.model.TProtNs;
-import org.lfenergy.compas.scl2007b4.model.TVal;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.Utils;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
@@ -48,7 +44,6 @@ public abstract class AbstractDataAttributeAdapter<P extends SclElementAdapter,T
 
 
     public boolean hasSameContentAs(T data) {
-        final String countField = "count";
         if(!Objects.equals(getName(),data.getName())
                 || !Objects.equals(getBType(),data.getBType())
                 || !Objects.equals(getType(),data.getType())
@@ -67,18 +62,10 @@ public abstract class AbstractDataAttributeAdapter<P extends SclElementAdapter,T
                 return false;
             }
         }
-        if(!Objects.equals(currentElem.getCount(),data.getCount())){
-            if(currentElem.getCount().isEmpty()){
-                Utils.setField(currentElem,countField,null);
-            }
-            if(data.getCount().isEmpty()){
-                Utils.setField(data,countField,null);
-            }
-            return false ;
-        } else if(currentElem.getCount().isEmpty()){
-            Utils.setField(currentElem,countField,null);
-            Utils.setField(data,countField,null);
+        if (!Utils.equalsOrNotSet(currentElem, data, TAbstractDataAttribute::isSetCount, TAbstractDataAttribute::getCount)){
+            return false;
         }
+
 
         if((getBType() == TPredefinedBasicTypeEnum.ENUM ||
                 getBType() == TPredefinedBasicTypeEnum.STRUCT)
@@ -87,10 +74,9 @@ public abstract class AbstractDataAttributeAdapter<P extends SclElementAdapter,T
         }
 
         for(TVal prdVal : data.getVal()){
-            boolean hasSameVal = currentElem.getVal().stream()
-                    .anyMatch(rcvVal -> rcvVal.getValue().equals(prdVal.getValue()) &&
-                            Objects.equals(rcvVal.getSGroup(), prdVal.getSGroup()));
-            if(!hasSameVal) {
+            if(currentElem.isSetVal() && currentElem.getVal().stream()
+                .noneMatch(rcvVal -> rcvVal.getValue().equals(prdVal.getValue()) &&
+                        Utils.equalsOrNotSet(rcvVal, prdVal, TVal::isSetSGroup, TVal::getSGroup))) {
                 return false;
             }
         }

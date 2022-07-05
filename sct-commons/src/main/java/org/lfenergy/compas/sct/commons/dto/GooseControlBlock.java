@@ -7,12 +7,7 @@ package org.lfenergy.compas.sct.commons.dto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.lfenergy.compas.scl2007b4.model.TGSEControl;
-import org.lfenergy.compas.scl2007b4.model.TMcSecurity;
-import org.lfenergy.compas.scl2007b4.model.TPredefinedTypeOfSecurityEnum;
-import org.lfenergy.compas.scl2007b4.model.TProtocol;
-import org.lfenergy.compas.scl2007b4.model.TServiceType;
-import org.lfenergy.compas.scl2007b4.model.TServices;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
 
@@ -27,7 +22,7 @@ public class GooseControlBlock extends ControlBlock<GooseControlBlock> {
         super();
         this.id = tgseControl.getAppID();
         this.name = tgseControl.getName();
-        if(tgseControl.getConfRev() != null) {
+        if(tgseControl.isSetConfRev()) {
             this.confRev = tgseControl.getConfRev();
         }
         this.desc = tgseControl.getDesc();
