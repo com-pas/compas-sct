@@ -6,10 +6,10 @@ package org.lfenergy.compas.sct.commons.scl.dtt;
 
 import lombok.Getter;
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.Utils;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
+import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.Objects;
 import java.util.Optional;

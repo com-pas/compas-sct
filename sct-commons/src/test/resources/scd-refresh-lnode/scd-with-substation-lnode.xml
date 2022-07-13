@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-FileCopyrightText: 2022 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<SCL xmlns="http://www.iec.ch/61850/2003/SCL" xmlns:compas="https://www.lfenergy.org/compas/extension/v1" version="2007" revision="B" release="4">
+    <Header id="HeaderId" version="HeaderVersion" revision="HeaderRevision"/>
+    <Substation name="SITE">
+        <VoltageLevel name="voltageLevelName">
+            <Bay name="bay1">
+                <Function name="bay1TDCL">
+                    <LNode iedName="None" lnClass="RADR">
+                        <Private type="COMPAS-ICDHeader">
+                            <compas:ICDHeader IEDType="BCU" IEDName="iedName1" VendorName="RTE" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="e4ab52f6-a6d1-4cd0-93d0-d7849ca25402"/>
+                        </Private>
+                    </LNode>
+                    <LNode iedName="None" lnClass="LPHD" ldInst="ldInst1" prefix="prefix1" lnInst="1" lnType="lnType1">
+                        <Private type="COMPAS-ICDHeader">
+                            <compas:ICDHeader IEDType="BCU" IEDName="iedName2" VendorName="RTE" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="e4ab52f6-a6d1-4cd0-93d0-d7849ca25402"/>
+                        </Private>
+                        <Private type="COMPAS-ICDHeader">
+                            <compas:ICDHeader IEDType="BCU" IEDName="iedName3" VendorName="RTE" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="e4ab52f6-a6d1-4cd0-93d0-d7849ca25402"/>
+                        </Private>
+                        <Private type="COMPAS-ICDHeader">
+                            <compas:ICDHeader IEDType="BCU" IEDName="iedName4" VendorName="RTE" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="e4ab52f6-a6d1-4cd0-93d0-d7849ca25402"/>
+                        </Private>
+                    </LNode>
+                </Function>
+            </Bay>
+        </VoltageLevel>
+    </Substation>
+</SCL>

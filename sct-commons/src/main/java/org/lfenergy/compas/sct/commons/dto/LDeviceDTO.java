@@ -6,12 +6,10 @@ package org.lfenergy.compas.sct.commons.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import lombok.extern.slf4j.Slf4j;
-import org.lfenergy.compas.sct.commons.Utils;
 import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LNAdapter;
-
+import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.HashSet;
 import java.util.List;

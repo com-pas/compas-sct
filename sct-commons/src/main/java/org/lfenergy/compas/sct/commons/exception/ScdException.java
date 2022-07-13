@@ -4,7 +4,10 @@
 
 package org.lfenergy.compas.sct.commons.exception;
 
-public class ScdException extends Exception {
+/**
+ * Thrown when SCD is inconsistent
+ */
+public class ScdException extends RuntimeException {
     public ScdException(String message) {
         super(message);
     }

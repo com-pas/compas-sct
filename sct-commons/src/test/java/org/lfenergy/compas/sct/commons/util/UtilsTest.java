@@ -2,16 +2,27 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.sct.commons;
+package org.lfenergy.compas.sct.commons.util;
 
 import org.junit.jupiter.api.Test;
+import org.junit.platform.commons.support.ReflectionSupport;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 
+
 class UtilsTest {
+
+    @Test
+    void constructor_should_throw_exception() {
+        // Given
+        // When & Then
+        assertThatThrownBy(() -> ReflectionSupport.newInstance(Utils.class))
+            .isInstanceOf(UnsupportedOperationException.class);
+    }
 
     @Test
     void entering_should_return_text() {
