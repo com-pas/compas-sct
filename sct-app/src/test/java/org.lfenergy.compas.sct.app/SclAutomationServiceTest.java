@@ -10,6 +10,7 @@ import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.sct.commons.dto.HeaderDTO;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.Arrays;
@@ -17,6 +18,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.createWrapper;
 
 class SclAutomationServiceTest {
 
@@ -30,7 +32,7 @@ class SclAutomationServiceTest {
     }
 
     @Test
-    void createSCD() throws Exception {
+    void createSCD_should_return_generatedSCD() throws Exception {
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd.xml");
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter expectedSCD = SclAutomationService.createSCD(ssd, headerDTO, Set.of(std));
@@ -40,6 +42,8 @@ class SclAutomationServiceTest {
         assertEquals(1, expectedSCD.getCurrentElem().getIED().size());
         assertNotNull(expectedSCD.getCurrentElem().getDataTypeTemplates());
         assertEquals(2, expectedSCD.getCurrentElem().getCommunication().getSubNetwork().size());
+        MarshallerWrapper marshallerWrapper = createWrapper();
+        assertDoesNotThrow(() -> marshallerWrapper.marshall(expectedSCD.getCurrentElem()));
     }
 
     @Test
