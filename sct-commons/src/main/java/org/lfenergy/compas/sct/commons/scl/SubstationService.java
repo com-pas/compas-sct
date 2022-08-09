@@ -25,10 +25,13 @@ public final class SubstationService {
     public static SclRootAdapter addSubstation(@NonNull SCL scd, @NonNull SCL ssd) throws ScdException {
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
         SclRootAdapter ssdRootAdapter = new SclRootAdapter(ssd);
-        if (scdRootAdapter.getCurrentElem().getSubstation().size() > 1
-            || ssdRootAdapter.currentElem.getSubstation().size() != 1) {
-            throw new ScdException("SCD file must have one or zero Substation and " +
-                "SCD file must have one Substation. The files are rejected.");
+        if (scdRootAdapter.getCurrentElem().getSubstation().size() > 1) {
+            throw new ScdException(String.format("SCD file must have 0 or 1 Substation, but got %d",
+                scdRootAdapter.getCurrentElem().getSubstation().size()));
+        }
+        if (ssdRootAdapter.getCurrentElem().getSubstation().size() != 1) {
+            throw new ScdException(String.format("SSD file must have exactly 1 Substation, but got %d",
+                ssdRootAdapter.getCurrentElem().getSubstation().size()));
         }
         TSubstation ssdTSubstation = ssdRootAdapter.currentElem.getSubstation().get(0);
         if (scdRootAdapter.getCurrentElem().getSubstation().isEmpty()) {

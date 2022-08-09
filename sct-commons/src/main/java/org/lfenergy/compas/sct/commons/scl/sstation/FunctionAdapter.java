@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.sct.commons.scl.sstation;
 
+import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.TCompasICDHeader;
 import org.lfenergy.compas.scl2007b4.model.TFunction;
 import org.lfenergy.compas.scl2007b4.model.TLNode;
@@ -43,10 +44,10 @@ public class FunctionAdapter extends SclElementAdapter<BayAdapter, TFunction> {
             TLNode lNode = lNodeIterator.next();
             List<TCompasICDHeader> icdHeaders = PrivateService.getCompasPrivates(lNode, TCompasICDHeader.class);
             if (icdHeaders.isEmpty()){
-                throw new ScdException(String.format("LNode is missing Private element of type %s.", COMPAS_ICDHEADER));
+                throw new ScdException("SCL/Substation/VoltageLevel/Bay/Function/LNode doesn't contain any Private LNode/Private/compas:ICDHeader");
             }
             if (icdHeaders.size() == 1) {
-                lNode.setIedName(icdHeaders.get(0).getIEDName());
+                setLNodeIedName(lNode, icdHeaders.get(0).getIEDName());
             } else {
                 lNodeIterator.remove();
                 PrivateService.removePrivates(lNode, COMPAS_ICDHEADER);
@@ -62,8 +63,15 @@ public class FunctionAdapter extends SclElementAdapter<BayAdapter, TFunction> {
             TPrivate icdHeaderPrivate = PrivateService.createPrivate(compasICDHeader);
             TLNode newLNode = lNodeAdapter.deepCopy();
             newLNode.getPrivate().add(icdHeaderPrivate);
-            newLNode.setIedName(compasICDHeader.getIEDName());
+            setLNodeIedName(newLNode, compasICDHeader.getIEDName());
             return newLNode;
         }).collect(Collectors.toList());
+    }
+
+    private void setLNodeIedName(TLNode lNode, String privateIedName) {
+        if (StringUtils.isBlank(privateIedName)){
+            throw new ScdException("SCL/Substation/VoltageLevel/Bay/Function/LNode/Private/compas:ICDHeader@IEDName is missing or is blank");
+        }
+        lNode.setIedName(privateIedName);
     }
 }

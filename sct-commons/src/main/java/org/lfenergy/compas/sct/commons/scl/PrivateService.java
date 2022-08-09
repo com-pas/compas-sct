@@ -56,7 +56,6 @@ public final class PrivateService {
         return getCompasPrivates(baseElement.getPrivate(), compasClass);
     }
 
-
     public static <T> Optional<T> getCompasPrivate(TPrivate tPrivate, Class<T> compasClass) throws ScdException {
         List<T> compasPrivates = getCompasPrivates(Collections.singletonList(tPrivate), compasClass);
         if (compasPrivates.size() > 1) {

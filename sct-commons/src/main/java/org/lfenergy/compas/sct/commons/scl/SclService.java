@@ -18,6 +18,7 @@ import org.lfenergy.compas.sct.commons.scl.dtt.EnumTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.*;
+import org.lfenergy.compas.sct.commons.util.PrivateEnum;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
@@ -431,7 +432,7 @@ public class SclService {
         TCompasICDHeader lNodeCompasICDHeader = PrivateService.getCompasICDHeader(lNodePrivate).orElseThrow(
                 () -> new ScdException(COMPAS_ICDHEADER + "not found in LNode Private "));
         stdPrivate.getContent().clear();
-        stdPrivate.getContent().add(lNodeCompasICDHeader);
+        stdPrivate.getContent().add(PrivateEnum.createJaxbElement(lNodeCompasICDHeader));
     }
 
     public static void removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(final SCL scl) {

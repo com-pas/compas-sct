@@ -208,7 +208,7 @@ class PrivateServiceTest {
         // Then
         assertThat(baseElement.getPrivate()).hasSize(1);
         TPrivate tPrivate = baseElement.getPrivate().get(0);
-        assertThat(tPrivate.getType()).isEqualTo(PrivateEnum.COMPAS_SCL_FILE_TYPE.getPrivateType());
+        assertThat(tPrivate.getType()).isEqualTo(privateSCD.getType());
         assertThat(tPrivate.getContent()).hasSize(1).first().isInstanceOf(JAXBElement.class);
         JAXBElement<?> jaxbElement = (JAXBElement<?>) tPrivate.getContent().get(0);
         assertThat(jaxbElement.isNil()).isFalse();

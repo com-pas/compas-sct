@@ -5,8 +5,6 @@
 package org.lfenergy.compas.sct.commons.scl;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TLNode;
 import org.lfenergy.compas.scl2007b4.model.TSubstation;
@@ -15,55 +13,73 @@ import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
 
 class SubstationServiceTest {
 
-    @ParameterizedTest
-    @ValueSource(strings = {"/scd-substation-import-ssd/ssd_with_2_substations.xml", "/scd-substation-import-ssd/ssd_without_substations.xml"})
-    void testAddSubstation_Check_SSD_Validity(String ssdFileName) throws Exception {
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/add_ied_test.xml");
-        SCL ssd = SclTestMarshaller.getSCLFromFile(ssdFileName);
-
-        assertThrows(ScdException.class,
-            () -> SubstationService.addSubstation(scd, ssd));
-    }
-
     @Test
-    void testAddSubstation_SCD_Without_Substation() throws Exception {
+    void addSubstation_when_SCD_has_no_substation_should_succeed() throws Exception {
+        // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/add_ied_test.xml");
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
         SclRootAdapter ssdRootAdapter = new SclRootAdapter(ssd);
-        SclRootAdapter expectedScdAdapter = SubstationService.addSubstation(scd, ssd);
-
-        assertNotEquals(scdRootAdapter, expectedScdAdapter);
-        assertEquals(expectedScdAdapter.getCurrentElem().getSubstation(), ssdRootAdapter.getCurrentElem().getSubstation());
+        // When
+        SclRootAdapter resultScdAdapter = SubstationService.addSubstation(scd, ssd);
+        // Then
+        assertNotEquals(scdRootAdapter, resultScdAdapter);
+        assertEquals(resultScdAdapter.getCurrentElem().getSubstation(), ssdRootAdapter.getCurrentElem().getSubstation());
+        assertIsMarshallable(scd);
     }
 
     @Test
-    void testAddSubstation_SCD_With_Different_Substation_Name() throws Exception {
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/scd_with_substation_name_different.xml");
-        SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
-
-        assertThrows(ScdException.class,
-            () -> SubstationService.addSubstation(scd, ssd));
-    }
-
-    @Test
-    void testAddSubstation_SCD_With_Substation() throws Exception {
+    void addSubstation_when_SCD_has_a_substation_should_succeed() throws Exception {
+        // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/scd_with_substation.xml");
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
         SclRootAdapter ssdRootAdapter = new SclRootAdapter(ssd);
-        SclRootAdapter expectedScdAdapter = SubstationService.addSubstation(scd, ssd);
-        TSubstation expectedTSubstation = expectedScdAdapter.getCurrentElem().getSubstation().get(0);
-        TSubstation tSubstation = ssdRootAdapter.getCurrentElem().getSubstation().get(0);
+        TSubstation ssdSubstation = ssdRootAdapter.getCurrentElem().getSubstation().get(0);
+        // When
+        SclRootAdapter resultScdAdapter = SubstationService.addSubstation(scd, ssd);
+        // Then
+        TSubstation resultSubstation = resultScdAdapter.getCurrentElem().getSubstation().get(0);
+        assertNotEquals(scdRootAdapter, resultScdAdapter);
+        assertEquals(ssdSubstation.getName(), resultSubstation.getName());
+        assertEquals(ssdSubstation.getVoltageLevel().size(), resultSubstation.getVoltageLevel().size());
+        assertIsMarshallable(scd);
+    }
 
-        assertNotEquals(scdRootAdapter, expectedScdAdapter);
-        assertEquals(expectedTSubstation.getName(), tSubstation.getName());
-        assertEquals(expectedTSubstation.getVoltageLevel().size(), tSubstation.getVoltageLevel().size());
+    @Test
+    void addSubstation_when_SSD_with_Multiple_Substations_should_throw_exception() throws Exception {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/add_ied_test.xml");
+        SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd_with_2_substations.xml");
+
+        // When & Then
+        assertThrows(ScdException.class, () -> SubstationService.addSubstation(scd, ssd));
+    }
+
+    @Test
+    void addSubstation_when_SSD_with_No_Substation_should_throw_exception() throws Exception {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/add_ied_test.xml");
+        SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd_without_substations.xml");
+
+        // When & Then
+        assertThrows(ScdException.class, () -> SubstationService.addSubstation(scd, ssd));
+    }
+
+    @Test
+    void addSubstation_when_substations_names_differ_should_throw_exception() throws Exception {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/scd_with_substation_name_different.xml");
+        SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
+        // When & Then
+        assertThrows(ScdException.class, () -> SubstationService.addSubstation(scd, ssd));
     }
 
     @Test
@@ -79,6 +95,7 @@ class SubstationServiceTest {
         assertThat(scl.getSubstation().get(0).getVoltageLevel().get(0).getBay().get(0).getFunction()).hasSize(1);
         List<TLNode> lNodes = scl.getSubstation().get(0).getVoltageLevel().get(0).getBay().get(0).getFunction().get(0).getLNode();
         assertThat(lNodes).extracting(TLNode::getIedName).containsOnlyOnce("iedName1");
+        assertIsMarshallable(scl);
     }
 
     @Test
@@ -107,7 +124,7 @@ class SubstationServiceTest {
             assertThat(tlNode.getPrivate())
                 .isNotEmpty()
                 .allSatisfy(tPrivate -> assertThat(PrivateService.getCompasICDHeader(tPrivate)).isPresent()));
-        assertThatNoException().isThrownBy(() -> SclTestMarshaller.createWrapper().marshall(scl));
+        assertIsMarshallable(scl);
     }
 
     @Test
