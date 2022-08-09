@@ -13,7 +13,6 @@ import org.lfenergy.compas.sct.commons.CommonConstants;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ied.*;
-import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.*;
@@ -23,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDa;
 import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDo;
+import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
 
 class SclServiceTest {
 
@@ -43,6 +43,7 @@ class SclServiceTest {
         assertEquals("why", tHitem.getWhy());
         assertEquals(SclRootAdapter.REVISION, tHitem.getRevision());
         assertEquals(SclRootAdapter.VERSION, tHitem.getVersion());
+        assertIsMarshallable(scd);
     }
 
     @Test
@@ -57,8 +58,7 @@ class SclServiceTest {
         assertEquals("IED_NAME1", iedAdapter.getName());
         assertNotNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
 
-        MarshallerWrapper marshallerWrapper = SclTestMarshaller.createWrapper();
-        System.out.println(marshallerWrapper.marshall(scd));
+        assertIsMarshallable(scd);
     }
 
     @Test
@@ -79,8 +79,7 @@ class SclServiceTest {
         subNetworkDTO.addConnectedAP(connectedApDTO);
 
         assertDoesNotThrow(() -> SclService.addSubnetworks(scd, Set.of(subNetworkDTO), Optional.of(icd)).get());
-        MarshallerWrapper marshallerWrapper = SclTestMarshaller.createWrapper();
-        System.out.println(marshallerWrapper.marshall(scd));
+        assertIsMarshallable(scd);
     }
 
     @Test
@@ -93,8 +92,7 @@ class SclServiceTest {
         assertDoesNotThrow(() -> SclService.addIED(scd, "IED_NAME1", icd));
 
         assertDoesNotThrow(() -> SclService.addSubnetworks(scd, new HashSet<>(), Optional.of(icd)));
-        MarshallerWrapper marshallerWrapper = SclTestMarshaller.createWrapper();
-        String marshalledScd = marshallerWrapper.marshall(scd);
+        String marshalledScd = assertIsMarshallable(scd);
         assertThat(marshalledScd).doesNotContain("<Communication");
     }
 
@@ -110,8 +108,7 @@ class SclServiceTest {
         Set<SubNetworkDTO> subNetworkDTOSet = new HashSet<>(SclService.getSubnetwork(icd));
         assertDoesNotThrow(() -> SclService.addSubnetworks(scd, subNetworkDTOSet, Optional.of(icd)).get());
 
-        MarshallerWrapper marshallerWrapper = SclTestMarshaller.createWrapper();
-        String marshalledScd = marshallerWrapper.marshall(scd);
+        String marshalledScd = assertIsMarshallable(scd);
         assertThat(marshalledScd).contains("<Address>", "PhysConn");
     }
 
@@ -127,8 +124,7 @@ class SclServiceTest {
         Set<SubNetworkDTO> subNetworkDTOSet = new HashSet<>(SclService.getSubnetwork(icd));
         assertDoesNotThrow(() -> SclService.addSubnetworks(scd, subNetworkDTOSet, Optional.empty()).get());
 
-        MarshallerWrapper marshallerWrapper = SclTestMarshaller.createWrapper();
-        String marshalledScd = marshallerWrapper.marshall(scd);
+        String marshalledScd = assertIsMarshallable(scd);
         assertThat(marshalledScd).doesNotContain("<Address>", "PhysConn");
     }
 
@@ -240,6 +236,7 @@ class SclServiceTest {
                 ScdException.class,
                 () -> SclService.updateExtRefBinders(scd, extRefInfo)
         );
+        assertIsMarshallable(scd);
     }
 
     @Test
@@ -509,17 +506,19 @@ class SclServiceTest {
 
     @Test
     void testInitScl() {
-        assertDoesNotThrow(
-                () -> SclService.initScl(Optional.empty(), "hVersion", "hRevision")
+        SclRootAdapter sclRootAdapter = assertDoesNotThrow(
+            () -> SclService.initScl(Optional.empty(), "hVersion", "hRevision")
         );
+        assertIsMarshallable(sclRootAdapter.getCurrentElem());
     }
 
     @Test
     void testInitScl_With_hId_shouldNotThrowError() {
         UUID hid = UUID.randomUUID();
-        assertDoesNotThrow(
-                () -> SclService.initScl(Optional.of(hid), "hVersion", "hRevision")
+        SclRootAdapter sclRootAdapter = assertDoesNotThrow(
+            () -> SclService.initScl(Optional.of(hid), "hVersion", "hRevision")
         );
+        assertIsMarshallable(sclRootAdapter.getCurrentElem());
     }
 
     @Test
@@ -530,6 +529,7 @@ class SclServiceTest {
         );
         assertThat(rootAdapter.getCurrentElem().getPrivate()).isNotEmpty();
         assertThat(rootAdapter.getCurrentElem().getPrivate().get(0).getType()).isEqualTo(CommonConstants.COMPAS_SCL_FILE_TYPE);
+        assertIsMarshallable(rootAdapter.getCurrentElem());
     }
 
     @Test
@@ -541,8 +541,7 @@ class SclServiceTest {
         UUID hId = UUID.fromString(sclRootAdapter.getHeaderAdapter().getHeaderId());
         HeaderDTO headerDTO = DTO.createHeaderDTO(hId);
         SclService.updateHeader(sclRootAdapter.getCurrentElem(), headerDTO);
-        SclService.updateHeader(sclRootAdapter.getCurrentElem(), headerDTO);
-
+        assertIsMarshallable(sclRootAdapter.getCurrentElem());
     }
 
     @Test
@@ -564,7 +563,7 @@ class SclServiceTest {
         tVal.setValue("newValue");
         rDtt.setDaiValues(List.of(tVal));
         assertDoesNotThrow(() -> SclService.updateDAI(scd, "IED_NAME", "LD_INS1", rDtt));
-
+        assertIsMarshallable(scd);
     }
 
     @Test
@@ -586,6 +585,7 @@ class SclServiceTest {
 
         assertThrows(ScdException.class,
                 () -> SclService.addSubstation(scd, ssd));
+        assertIsMarshallable(scd);
     }
 
     @Test
@@ -598,6 +598,7 @@ class SclServiceTest {
 
         assertNotEquals(scdRootAdapter, expectedScdAdapter);
         assertEquals(expectedScdAdapter.getCurrentElem().getSubstation(), ssdRootAdapter.getCurrentElem().getSubstation());
+        assertIsMarshallable(scd);
     }
 
     @Test
@@ -607,6 +608,7 @@ class SclServiceTest {
 
         assertThrows(ScdException.class,
                 () -> SclService.addSubstation(scd, ssd));
+        assertIsMarshallable(scd);
     }
 
     @Test
@@ -622,6 +624,7 @@ class SclServiceTest {
         assertNotEquals(scdRootAdapter, expectedScdAdapter);
         assertEquals(expectedTSubstation.getName(), tSubstation.getName());
         assertEquals(expectedTSubstation.getVoltageLevel().size(), tSubstation.getVoltageLevel().size());
+        assertIsMarshallable(scd);
     }
 
     @Test
@@ -635,6 +638,7 @@ class SclServiceTest {
         assertThat(expectedScdAdapter.getCurrentElem().getIED()).hasSize(1);
         assertThat(expectedScdAdapter.getCurrentElem().getDataTypeTemplates()).hasNoNullFieldsOrProperties();
         assertThat(expectedScdAdapter.getCurrentElem().getCommunication().getSubNetwork()).hasSize(2);
+        assertIsMarshallable(scd);
     }
 
     @Test
@@ -652,6 +656,7 @@ class SclServiceTest {
         assertThat(expectedScdAdapter.getCurrentElem().getCommunication().getSubNetwork()).hasSize(2);
         assertThat(expectedScdAdapter.getCurrentElem().getCommunication().getSubNetwork().get(0).getConnectedAP()).hasSizeBetween(1,3);
         assertThat(expectedScdAdapter.getCurrentElem().getCommunication().getSubNetwork().get(1).getConnectedAP()).hasSizeBetween(1,3);
+        assertIsMarshallable(scd);
     }
 
     @Test
@@ -662,7 +667,7 @@ class SclServiceTest {
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
 
         assertThrows(ScdException.class, () -> SclService.importSTDElementsInSCD(scdRootAdapter, Set.of(std, std1), DTO.comMap));
-
+        assertIsMarshallable(scd);
     }
 
     @Test
@@ -672,7 +677,7 @@ class SclServiceTest {
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
 
         assertThrows(ScdException.class, ()-> SclService.importSTDElementsInSCD(scdRootAdapter, Set.of(std), DTO.comMap));
-
+        assertIsMarshallable(scd);
     }
 
     @Test
@@ -681,7 +686,7 @@ class SclServiceTest {
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
 
         assertThrows(ScdException.class, ()-> SclService.importSTDElementsInSCD(scdRootAdapter, new HashSet<>(), DTO.comMap));
-
+        assertIsMarshallable(scd);
     }
 
     @Test
@@ -702,6 +707,7 @@ class SclServiceTest {
             .noneMatch(TAnyLN::isSetReportControl)
             .noneMatch(LN0::isSetGSEControl)
             .noneMatch(LN0::isSetSampledValueControl);
+        assertIsMarshallable(scl);
     }
 
     @Test
@@ -721,6 +727,7 @@ class SclServiceTest {
             .noneMatch(TAnyLN::isSetDataSet)
             .noneMatch(TAnyLN::isSetLogControl)
             .noneMatch(TAnyLN::isSetReportControl);
+        assertIsMarshallable(scl);
     }
 
     @Test
@@ -744,6 +751,7 @@ class SclServiceTest {
             .noneMatch(TExtRef::isSetSrcLNInst)
             .noneMatch(TExtRef::isSetSrcCBName)
             .noneMatch(TExtRef::isSetSrcLNClass);
+        assertIsMarshallable(scl);
     }
 
 }
