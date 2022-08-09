@@ -9,12 +9,12 @@ import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
 
 @Slf4j
 class SclRootAdapterTest {
@@ -34,6 +34,7 @@ class SclRootAdapterTest {
         assertEquals(SclRootAdapter.RELEASE,sclRootAdapter.get().getSclRelease());
         assertEquals(SclRootAdapter.VERSION,sclRootAdapter.get().getSclVersion());
         assertEquals(SclRootAdapter.REVISION,sclRootAdapter.get().getSclRevision());
+        assertIsMarshallable(sclRootAdapter.get().getCurrentElem());
 
         assertThrows(IllegalArgumentException.class, () -> new SclRootAdapter(new SCL()));
     }
@@ -50,10 +51,7 @@ class SclRootAdapterTest {
         assertDoesNotThrow(() -> sclRootAdapter.addIED(icd1, "IED_NAME1"));
         assertThrows(ScdException.class, () -> sclRootAdapter.addIED(icd1, "IED_NAME1"));
         assertDoesNotThrow(() -> sclRootAdapter.addIED(icd2, "IED_NAME2"));
-
-        MarshallerWrapper marshallerWrapper = SclTestMarshaller.createWrapper();
-        System.out.println(marshallerWrapper.marshall(sclRootAdapter.getCurrentElem()));
-
+        assertIsMarshallable(scd);
     }
 
     @Test
@@ -66,5 +64,6 @@ class SclRootAdapterTest {
         assertTrue(sclRootAdapter.getCurrentElem().getPrivate().isEmpty());
         sclRootAdapter.addPrivate(tPrivate);
         assertEquals(1, sclRootAdapter.getCurrentElem().getPrivate().size());
+        assertIsMarshallable(scd);
     }
 }
