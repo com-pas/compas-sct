@@ -14,6 +14,10 @@ import java.util.NoSuchElementException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * A representation of the literals of the enumeration '<em><b>Private Enum</b></em>',
+ * and utility methods for working with them.
+ */
 public enum PrivateEnum {
 
     COMPAS_BAY("COMPAS-Bay", TCompasBay.class),

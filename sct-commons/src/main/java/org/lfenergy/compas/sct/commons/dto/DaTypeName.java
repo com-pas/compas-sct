@@ -17,6 +17,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * A representation of the model object <em><b>DA</b></em>.
+ *
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link DaTypeName#getName <em>Name</em>}</li>
+ *   <li>{@link DaTypeName#getStructNames <em>Refers To StructNames</em>}</li>
+ *   <li>{@link org.lfenergy.compas.scl2007b4.model.TFCEnum <em> Refers To TFCEnum </em>}</li>
+ *   <li>{@link DaTypeName#getType <em>type</em>}</li>
+ *   <li>{@link org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum <em>Refers To TPredefinedBasicTypeEnum</em>}</li>
+ *   <li>{@link DaTypeName#isValImport <em>Refers To valImport</em>}</li>
+ *   <li>{@link DaTypeName#getDaiValues <em>Refers To DAI Values</em>}</li>
+ * </ul>
+ *
+ * @see org.lfenergy.compas.scl2007b4.model.TDA
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -30,14 +48,28 @@ public class DaTypeName extends DataTypeName{
     private boolean valImport;
     private Map<Long,String> daiValues = new HashMap<>();
 
+    /**
+     * Constructor
+     * @param daName input
+     */
     public DaTypeName(String daName) {
         super(daName);
     }
 
+    /**
+     * Constructor
+     * @param name input
+     * @param names input
+     */
     public DaTypeName(String name, String names) {
         super(name, names);
     }
 
+    /**
+     * Initializes DaTypeName
+     * @param dataName input
+     * @return DaTypeName object
+     */
     public static DaTypeName from(DaTypeName dataName){
         DaTypeName daTypeName = new DaTypeName(dataName.toString());
         if(dataName.isDefined()) {
@@ -51,10 +83,18 @@ public class DaTypeName extends DataTypeName{
         return daTypeName;
     }
 
+    /**
+     * Check valImport state
+     * @return boolean value of valImport
+     */
     public boolean isValImport(){
         return valImport;
     }
 
+    /**
+     * Check if DA is updatable
+     * @return boolean value of DA state
+     */
     public boolean isUpdatable(){
         return isValImport() &&
                 (fc == TFCEnum.CF ||
@@ -66,6 +106,10 @@ public class DaTypeName extends DataTypeName{
                 );
     }
 
+    /**
+     * Add DAI values to list of DAI values
+     * @param vals list of DAI values
+     */
     public void addDaiValues(List<TVal> vals) {
         if(vals.size() == 1){
             daiValues.put(0L,vals.get(0).getValue());
@@ -74,6 +118,10 @@ public class DaTypeName extends DataTypeName{
         }
     }
 
+    /**
+     * Add DAI value to Map of DAI values
+     * @param val DAI value
+     */
     public void addDaiValue(TVal val) {
         if(!val.isSetSGroup()){
             daiValues.put(0L,val.getValue());
@@ -82,6 +130,11 @@ public class DaTypeName extends DataTypeName{
         }
     }
 
+    /**
+     *  Add DAI value to Map of DAI values
+     * @param sg Setting group value
+     * @param val value
+     */
     public void addDaiValue(Long sg, String val) {
         if(sg == null){
             daiValues.put(0L,val);
@@ -90,6 +143,10 @@ public class DaTypeName extends DataTypeName{
         }
     }
 
+    /**
+     * Copy DA's contain
+     * @param daName DA object
+     */
     public void merge(DaTypeName daName) {
         if(!isDefined()) return;
         fc = daName.fc;

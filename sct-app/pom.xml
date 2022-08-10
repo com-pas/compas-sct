@@ -17,7 +17,6 @@
     <version>local-SNAPSHOT</version>
     <name>SCT-APP</name>
 
-
     <properties>
         <sonar.coverage.jacoco.xmlReportPaths>${basedir}/${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
