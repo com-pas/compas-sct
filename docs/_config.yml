@@ -1,0 +1,29 @@
+#-- SPDX-FileCopyrightText: 2022 RTE FRANCE
+# -- --
+# SPDX-License-Identifier: Apache-2.0
+
+# Setup
+title:            CoMPAS SCT
+tagline:          'CoMPAS project documentation'
+
+paginate:         5
+
+# Custom vars
+version:          0.1.0
+
+github:
+  repo:           https://github.com/com-pas/compas-sct
+
+github_username:  com-pas
+git_repo:         compas-sct
+git_branch:       develop
+
+baseurl:          /compas-sct
+contributingUrl:  /contributing
+
+defaults:
+  - 
+    scope:
+      path: "HOME.md"
+    values:
+      permalink: "/"

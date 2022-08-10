@@ -7,6 +7,17 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
+/**
+ * A representation of the model object
+ * <em><b>{@link org.lfenergy.compas.sct.commons.scl.ied.LNAdapterBuilder LNAdapterBuilder}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link LNAdapterBuilder#build() <em>Returns Adapter of Given <b>TAnyLN </b> attributes </em>}</li>
+ * </ul>
+ * @see org.lfenergy.compas.scl2007b4.model.TAnyLN
+ */
 public class LNAdapterBuilder {
     private String lnInst = "";
     private String prefix = "";

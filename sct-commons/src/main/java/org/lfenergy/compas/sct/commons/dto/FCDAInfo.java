@@ -12,6 +12,25 @@ import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.TFCDA;
 import org.lfenergy.compas.scl2007b4.model.TFCEnum;
 
+/**
+ * A representation of the model object <em><b>FCDA</b></em>.
+ *
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link FCDAInfo#getDaName <em>Da Name</em>}</li>
+ *   <li>{@link FCDAInfo#getDoName <em>Do Name</em>}</li>
+ *   <li>{@link FCDAInfo#getFc <em>Fc</em>}</li>
+ *   <li>{@link FCDAInfo#getIx  em>Ix</em>}</li>
+ *   <li>{@link FCDAInfo#getLdInst <em>Ld Inst</em>}</li>
+ *   <li>{@link FCDAInfo#getLnClass <em>Ln Class</em>}</li>
+ *   <li>{@link FCDAInfo#getLnInst <em>Ln Inst</em>}</li>
+ *   <li>{@link FCDAInfo#getPrefix <em>Prefix</em>}</li>
+ * </ul>
+ *
+ * @see org.lfenergy.compas.scl2007b4.model.TFCDA
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -28,6 +47,11 @@ public class FCDAInfo {
     private DaTypeName daName; //daName.[...bdaNames]
     private Long ix;
 
+    /**
+     * Constructor
+     * @param dataSet input
+     * @param tfcda input
+     */
     public FCDAInfo(String dataSet, TFCDA tfcda) {
         this.dataSet = dataSet;
         fc = tfcda.getFc();
@@ -42,6 +66,10 @@ public class FCDAInfo {
         ix = tfcda.isSetIx() ? tfcda.getIx() : null;
     }
 
+    /**
+     * Gets FCDA
+     * @return FCDA object
+     */
     @JsonIgnore
     public TFCDA getFCDA(){
         TFCDA tfcda = new TFCDA();
@@ -71,6 +99,10 @@ public class FCDAInfo {
         return tfcda;
     }
 
+    /**
+     * Checks FCDAInfo validity
+     * @return validity state
+     */
     public boolean isValid() {
         return doName != null && doName.isDefined();
     }
