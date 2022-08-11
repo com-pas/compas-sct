@@ -1,10 +1,12 @@
 ## Description of SCD file generation from SSD file and a set of STD files
 
+The automatic generation of SCD file holds on 3 steps which are described below.
+
 ### Step 1
 
 <img width="728" alt="Step1-SCD_Initialisation" src="https://user-images.githubusercontent.com/76168202/164478938-0390c05e-ba30-4157-ac8a-dc46189f2f23.PNG">
 
-For the SCD file constitution, see diagram above:
+For the SCD file initialisation, see diagram above:
 
 - Creation of a new empty SCD file with Header ID and version and revision. Then the SCD file is populated by:
 - import of the SSD file associated with a Site
@@ -37,5 +39,11 @@ For the process of DataSet and Control Block creation and then Extref update, se
   - AND ExtRef binding attributes are existing and populated
   - AND having DA@fc="ST" OR "MX"
 - Then group the lines by ExtRef@pServT and @iedName and @ldInst and FlowKind property (and DA@fc for Report only)
-- Each group of lines is used to vreate a new DataSet and Control Block
+- Each group of lines is used to create a new DataSet and Control Block
 - Then for each ExtRef signal, create and populate ExtRef @srcXXX attributes
+
+### Sequence diagram
+The sequence diagram below summarize the process
+
+![img_2.png](img.png)
+
