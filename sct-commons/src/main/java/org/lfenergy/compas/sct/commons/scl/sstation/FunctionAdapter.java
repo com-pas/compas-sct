@@ -11,6 +11,7 @@ import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.PrivateService;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
+import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.List;
 import java.util.ListIterator;
@@ -30,8 +31,8 @@ public class FunctionAdapter extends SclElementAdapter<BayAdapter, TFunction> {
     }
 
     @Override
-    protected void addPrivate(TPrivate tPrivate) {
-        currentElem.getPrivate().add(tPrivate);
+    protected String elementXPath() {
+        return String.format("Function[%s]", Utils.xpathAttributeFilter("name", currentElem.isSetName() ? currentElem.getName() : null));
     }
 
     public void updateLNodeIedNames() throws ScdException {
@@ -44,7 +45,7 @@ public class FunctionAdapter extends SclElementAdapter<BayAdapter, TFunction> {
             TLNode lNode = lNodeIterator.next();
             List<TCompasICDHeader> icdHeaders = PrivateService.getCompasPrivates(lNode, TCompasICDHeader.class);
             if (icdHeaders.isEmpty()){
-                throw new ScdException("SCL/Substation/VoltageLevel/Bay/Function/LNode doesn't contain any Private LNode/Private/compas:ICDHeader");
+                throw new ScdException(getXPath() + " doesn't contain any Private/compas:ICDHeader");
             }
             if (icdHeaders.size() == 1) {
                 setLNodeIedName(lNode, icdHeaders.get(0).getIEDName());
@@ -70,7 +71,8 @@ public class FunctionAdapter extends SclElementAdapter<BayAdapter, TFunction> {
 
     private void setLNodeIedName(TLNode lNode, String privateIedName) {
         if (StringUtils.isBlank(privateIedName)){
-            throw new ScdException("SCL/Substation/VoltageLevel/Bay/Function/LNode/Private/compas:ICDHeader@IEDName is missing or is blank");
+            LNodeAdapter lNodeAdapter = new LNodeAdapter(null, lNode);
+            throw new ScdException(getXPath() + lNodeAdapter.getXPath() + "/Private/compas:ICDHeader/@IEDName is missing or is blank");
         }
         lNode.setIedName(privateIedName);
     }

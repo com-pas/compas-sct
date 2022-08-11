@@ -6,9 +6,9 @@ package org.lfenergy.compas.sct.commons.scl.sstation;
 
 import org.lfenergy.compas.scl2007b4.model.TFunction;
 import org.lfenergy.compas.scl2007b4.model.TLNode;
-import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.scl2007b4.model.TText;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
+import org.lfenergy.compas.sct.commons.util.Utils;
 
 public class LNodeAdapter extends SclElementAdapter<FunctionAdapter, TLNode> {
 
@@ -20,11 +20,6 @@ public class LNodeAdapter extends SclElementAdapter<FunctionAdapter, TLNode> {
     protected boolean amChildElementRef() {
         TFunction parentElem = parentAdapter.getCurrentElem();
         return parentElem.isSetLNode() && parentElem.getLNode().contains(this.currentElem);
-    }
-
-    @Override
-    protected void addPrivate(TPrivate tPrivate) {
-        currentElem.getPrivate().add(tPrivate);
     }
 
     public TLNode deepCopy() {
@@ -54,4 +49,16 @@ public class LNodeAdapter extends SclElementAdapter<FunctionAdapter, TLNode> {
         newLNode.getOtherAttributes().putAll(currentElem.getOtherAttributes());
         return newLNode;
     }
+
+    @Override
+    protected String elementXPath() {
+        return String.format("LNode[%s and %s and %s and %s and %s]",
+            Utils.xpathAttributeFilter("iedName", currentElem.isSetIedName() ? currentElem.getIedName() : null),
+            Utils.xpathAttributeFilter("ldInst", currentElem.isSetLdInst() ? currentElem.getLdInst() : null),
+            Utils.xpathAttributeFilter("Prefix", currentElem.isSetPrefix() ? currentElem.getPrefix() : null),
+            Utils.xpathAttributeFilter("lnClass", currentElem.isSetLnClass() ? currentElem.getLnClass() : null),
+            Utils.xpathAttributeFilter("lnInst", currentElem.isSetLnInst() ? currentElem.getLnInst() : null)
+        );
+    }
+
 }

@@ -6,7 +6,6 @@ package org.lfenergy.compas.sct.commons.scl.com;
 
 import lombok.NonNull;
 import org.lfenergy.compas.scl2007b4.model.TConnectedAP;
-import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.scl2007b4.model.TSubNetwork;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
@@ -24,11 +23,6 @@ public class SubNetworkAdapter extends SclElementAdapter<CommunicationAdapter, T
     @Override
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getSubNetwork().contains(currentElem);
-    }
-
-    @Override
-    protected void addPrivate(TPrivate tPrivate) {
-        currentElem.getPrivate().add(tPrivate);
     }
 
     /**

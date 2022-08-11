@@ -7,7 +7,6 @@ package org.lfenergy.compas.sct.commons.util;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.TCompasSclFileType;
 
-import javax.xml.bind.JAXBElement;
 import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,25 +30,6 @@ class PrivateEnumTest {
         Class<?> classToTest = Object.class;
         // When & Then
         assertThatThrownBy(() -> PrivateEnum.fromClass(classToTest)).isInstanceOf(NoSuchElementException.class);
-    }
-
-    @Test
-    void createJaxbElement_should_return_Private() {
-        // Given
-        TCompasSclFileType compasElement = TCompasSclFileType.SCD;
-        // When
-        JAXBElement<TCompasSclFileType> result = PrivateEnum.createJaxbElement(compasElement);
-        // Then
-        assertThat(result).isNotNull();
-        assertThat(result.getValue()).isEqualTo(TCompasSclFileType.SCD);
-    }
-
-    @Test
-    void createJaxbElement_with_unknown_class_should_throw_exception() {
-        // Given
-        Object notACompasElement = new Object();
-        // When & Then
-        assertThatThrownBy(() -> PrivateEnum.createJaxbElement(notACompasElement)).isInstanceOf(NoSuchElementException.class);
     }
 
     @Test

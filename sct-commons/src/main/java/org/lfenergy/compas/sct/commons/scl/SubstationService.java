@@ -6,14 +6,15 @@ package org.lfenergy.compas.sct.commons.scl;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.scl2007b4.model.SCL;
+import org.lfenergy.compas.scl2007b4.model.TBay;
+import org.lfenergy.compas.scl2007b4.model.TSubstation;
+import org.lfenergy.compas.scl2007b4.model.TVoltageLevel;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.scl.sstation.BayAdapter;
 import org.lfenergy.compas.sct.commons.scl.sstation.FunctionAdapter;
 import org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter;
 import org.lfenergy.compas.sct.commons.scl.sstation.VoltageLevelAdapter;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 public final class SubstationService {
@@ -77,15 +78,12 @@ public final class SubstationService {
         if (!scd.isSetSubstation()) {
             return;
         }
-        List<TFunction> functionsWithLNodes = scd.getSubstation().stream().filter(TSubstation::isSetVoltageLevel)
-            .map(TSubstation::getVoltageLevel).flatMap(List::stream).filter(TVoltageLevel::isSetBay)
-            .map(TVoltageLevel::getBay).flatMap(List::stream).filter(TBay::isSetFunction)
-            .map(TBay::getFunction).flatMap(List::stream).filter(TLNodeContainer::isSetLNode)
-            .collect(Collectors.toList());
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
 
-        for (TFunction function : functionsWithLNodes) {
-            FunctionAdapter functionAdapter = new FunctionAdapter(null, function);
-            functionAdapter.updateLNodeIedNames();
-        }
+        scd.getSubstation().stream().map(tSubstation -> new SubstationAdapter(sclRootAdapter, tSubstation))
+            .flatMap(SubstationAdapter::streamVoltageLevelAdapters)
+            .flatMap(VoltageLevelAdapter::streamBayAdapters)
+            .flatMap(BayAdapter::streamFunctionAdapters)
+            .forEach(FunctionAdapter::updateLNodeIedNames);
     }
 }

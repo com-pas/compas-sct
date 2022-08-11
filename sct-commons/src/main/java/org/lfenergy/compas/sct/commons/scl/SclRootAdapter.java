@@ -54,8 +54,8 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
     }
 
     @Override
-    protected void addPrivate(TPrivate tPrivate) {
-        currentElem.getPrivate().add(tPrivate);
+    protected String elementXPath() {
+        return "SCL";
     }
 
     public Short getSclRelease(){

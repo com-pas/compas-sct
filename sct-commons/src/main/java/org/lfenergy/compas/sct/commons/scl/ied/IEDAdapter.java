@@ -128,11 +128,6 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
                 .anyMatch(tAccessPoint -> tAccessPoint.getName().equals(apName));
     }
 
-    @Override
-    protected void addPrivate(TPrivate tPrivate) {
-        currentElem.getPrivate().add(tPrivate);
-    }
-
     public List<ExtRefBindingInfo> getExtRefBinders(@NonNull ExtRefSignalInfo signalInfo) throws ScdException {
         if(!signalInfo.isValid()){
             throw new ScdException("Invalid ExtRef signal (pDO,pDA or intAddr))");

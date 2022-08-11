@@ -18,7 +18,6 @@ import org.lfenergy.compas.sct.commons.scl.dtt.EnumTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.*;
-import org.lfenergy.compas.sct.commons.util.PrivateEnum;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
@@ -33,6 +32,7 @@ public class SclService {
 
     public static final String UNKNOWN_LDEVICE_S_IN_IED_S = "Unknown LDevice (%s) in IED (%s)";
     public static final String INVALID_OR_MISSING_ATTRIBUTES_IN_EXT_REF_BINDING_INFO = "Invalid or missing attributes in ExtRef binding info";
+    public static final ObjectFactory objectFactory = new ObjectFactory();
 
     private SclService() {
         throw new IllegalStateException("SclService class");
@@ -430,9 +430,9 @@ public class SclService {
 
     private static void copyCompasICDHeaderFromLNodePrivateIntoSTDPrivate(TPrivate stdPrivate, TPrivate lNodePrivate) throws ScdException {
         TCompasICDHeader lNodeCompasICDHeader = PrivateService.getCompasICDHeader(lNodePrivate).orElseThrow(
-                () -> new ScdException(COMPAS_ICDHEADER + "not found in LNode Private "));
+                () -> new ScdException(COMPAS_ICDHEADER + " not found in LNode Private "));
         stdPrivate.getContent().clear();
-        stdPrivate.getContent().add(PrivateEnum.createJaxbElement(lNodeCompasICDHeader));
+        stdPrivate.getContent().add(objectFactory.createICDHeader(lNodeCompasICDHeader));
     }
 
     public static void removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(final SCL scl) {

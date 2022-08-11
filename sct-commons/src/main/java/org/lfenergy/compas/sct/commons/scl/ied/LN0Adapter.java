@@ -7,7 +7,6 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.lfenergy.compas.scl2007b4.model.LN0;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
-import org.lfenergy.compas.scl2007b4.model.TPrivate;
 
 public class LN0Adapter extends AbstractLNAdapter<LN0> {
 
@@ -38,11 +37,6 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
     @Override
     public String getPrefix() {
         return "";
-    }
-
-    @Override
-    protected void addPrivate(TPrivate tPrivate) {
-        currentElem.getPrivate().add(tPrivate);
     }
 
     @Override

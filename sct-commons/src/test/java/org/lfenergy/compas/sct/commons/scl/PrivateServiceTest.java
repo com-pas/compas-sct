@@ -6,6 +6,9 @@ package org.lfenergy.compas.sct.commons.scl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.platform.commons.support.ReflectionSupport;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.util.PrivateEnum;
@@ -13,9 +16,11 @@ import org.lfenergy.compas.sct.commons.util.PrivateEnum;
 import javax.xml.bind.JAXBElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -159,19 +164,38 @@ class PrivateServiceTest {
         assertThat(optionalResult).isPresent().get().matches(result -> result == tCompasICDHeader);
     }
 
-    @Test
-    void createPrivate_should_return_private_new_private() {
+    @ParameterizedTest
+    @MethodSource("createPrivateTestSources")
+    void createPrivate_should_return_private_new_private(Object compasElement) throws InvocationTargetException, IllegalAccessException {
         // Given
+        PrivateEnum privateEnum = PrivateEnum.fromClass(compasElement.getClass());
+        assertThat(privateEnum).isNotNull();
+        Optional<Method> optionalCreatePrivateMethod = ReflectionSupport.findMethod(PrivateService.class, "createPrivate", compasElement.getClass());
+        assertThat(optionalCreatePrivateMethod).isPresent();
+        Method createPrivateMethod = optionalCreatePrivateMethod.get();
         // When
-        TPrivate result = PrivateService.createPrivate(TCompasSclFileType.SCD);
+        Object result = createPrivateMethod.invoke(null, compasElement);
         //Then
-        assertThat(result).isNotNull()
-            .hasFieldOrPropertyWithValue("type", PrivateEnum.COMPAS_SCL_FILE_TYPE.getPrivateType());
-        assertThat(result.getContent()).hasSize(1).first().satisfies(content -> assertThat(content).isInstanceOf(JAXBElement.class));
-        JAXBElement<?> content = (JAXBElement<?>) result.getContent().get(0);
+        assertThat(result).isInstanceOf(TPrivate.class);
+        TPrivate resultPrivate = (TPrivate) result;
+        assertThat(resultPrivate).isNotNull()
+            .hasFieldOrPropertyWithValue("type", privateEnum.getPrivateType());
+        assertThat(resultPrivate.getContent()).hasSize(1).first().satisfies(content -> assertThat(content).isInstanceOf(JAXBElement.class));
+        JAXBElement<?> content = (JAXBElement<?>) resultPrivate.getContent().get(0);
         assertThat(content.isNil()).isFalse();
-        assertThat(content.getValue()).isNotNull().isInstanceOf(TCompasSclFileType.class)
-            .isEqualTo(TCompasSclFileType.SCD);
+        assertThat(content.getValue()).isNotNull().isInstanceOf(compasElement.getClass())
+            .isEqualTo(compasElement);
+    }
+
+    public static Stream<Object> createPrivateTestSources() {
+        return Stream.of(new TCompasBay(),
+            new TCompasCriteria(),
+            new TCompasFlow(),
+            new TCompasFunction(),
+            new TCompasICDHeader(),
+            new TCompasLDevice(),
+            TCompasSclFileType.SCD,
+            new TCompasSystemVersion());
     }
 
     @Test

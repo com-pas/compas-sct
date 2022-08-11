@@ -6,10 +6,7 @@ package org.lfenergy.compas.sct.commons.scl;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.lfenergy.compas.scl2007b4.model.TAnyContentFromOtherNamespace;
-import org.lfenergy.compas.scl2007b4.model.TBaseElement;
-import org.lfenergy.compas.scl2007b4.model.TCompasICDHeader;
-import org.lfenergy.compas.scl2007b4.model.TPrivate;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.util.PrivateEnum;
 
@@ -27,6 +24,8 @@ public final class PrivateService {
     private PrivateService() {
         throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
+
+    private static final ObjectFactory objectFactory = new ObjectFactory();
 
     public static <T> List<T> getCompasPrivates(List<TPrivate> tPrivates, Class<T> compasClass) throws ScdException {
         PrivateEnum privateEnum = PrivateEnum.fromClass(compasClass);
@@ -72,15 +71,6 @@ public final class PrivateService {
         return getCompasPrivate(tPrivate, TCompasICDHeader.class);
     }
 
-    public static TPrivate createPrivate(Object compasElement) {
-        String privateType = PrivateEnum.fromClass(compasElement.getClass()).getPrivateType();
-        JAXBElement<Object> privateContent = PrivateEnum.createJaxbElement(compasElement);
-        TPrivate tPrivate = new TPrivate();
-        tPrivate.setType(privateType);
-        tPrivate.getContent().add(privateContent);
-        return tPrivate;
-    }
-
     public static void removePrivates(TBaseElement baseElement, @NonNull PrivateEnum privateEnum) {
         if (baseElement.isSetPrivate()) {
             baseElement.getPrivate().removeIf(tPrivate -> privateEnum.getPrivateType().equals(tPrivate.getType()));
@@ -90,4 +80,54 @@ public final class PrivateService {
         }
     }
 
-}
+    public static TPrivate createPrivate(TCompasBay compasBay) {
+        return createPrivate(objectFactory.createBay(compasBay));
+    }
+
+    public static TPrivate createPrivate(TCompasCriteria compasCriteria) {
+        return createPrivate(objectFactory.createCriteria(compasCriteria));
+    }
+
+    public static TPrivate createPrivate(TCompasFlow compasFlow) {
+        return createPrivate(objectFactory.createFlow(compasFlow));
+    }
+
+    public static TPrivate createPrivate(TCompasFunction compasFunction) {
+        return createPrivate(objectFactory.createFunction(compasFunction));
+    }
+
+    public static TPrivate createPrivate(TCompasICDHeader compasICDHeader) {
+        return createPrivate(objectFactory.createICDHeader(compasICDHeader));
+    }
+
+    public static TPrivate createPrivate(TCompasLDevice compasLDevice) {
+        return createPrivate(objectFactory.createLDevice(compasLDevice));
+    }
+
+    public static TPrivate createPrivate(TCompasSclFileType compasSclFileType) {
+        return createPrivate(objectFactory.createSclFileType(compasSclFileType));
+    }
+
+    public static TPrivate createPrivate(TCompasSystemVersion compasSystemVersion) {
+        return createPrivate(objectFactory.createSystemVersion(compasSystemVersion));
+    }
+
+    private static TPrivate createPrivate(JAXBElement<?> jaxbElement) {
+        PrivateEnum privateEnum = PrivateEnum.fromClass(jaxbElement.getDeclaredType());
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType(privateEnum.getPrivateType());
+        tPrivate.getContent().add(jaxbElement);
+        return tPrivate;
+    }
+
+
+
+
+
+
+
+
+
+
+
+    }

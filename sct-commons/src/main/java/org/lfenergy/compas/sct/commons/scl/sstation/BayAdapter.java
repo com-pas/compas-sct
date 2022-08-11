@@ -4,9 +4,11 @@
 package org.lfenergy.compas.sct.commons.scl.sstation;
 
 import org.lfenergy.compas.scl2007b4.model.TBay;
-import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
+import org.lfenergy.compas.sct.commons.util.Utils;
+
+import java.util.stream.Stream;
 
 public class BayAdapter extends SclElementAdapter<VoltageLevelAdapter, TBay> {
 
@@ -32,7 +34,14 @@ public class BayAdapter extends SclElementAdapter<VoltageLevelAdapter, TBay> {
     }
 
     @Override
-    protected void addPrivate(TPrivate tPrivate) {
-        currentElem.getPrivate().add(tPrivate);
+    protected String elementXPath() {
+        return String.format("Bay[%s]", Utils.xpathAttributeFilter("name", currentElem.isSetName() ? currentElem.getName() : null));
+    }
+
+    public Stream<FunctionAdapter> streamFunctionAdapters(){
+        if (!currentElem.isSetFunction()){
+            return Stream.empty();
+        }
+        return currentElem.getFunction().stream().map(tFunction -> new FunctionAdapter(this, tFunction));
     }
 }
