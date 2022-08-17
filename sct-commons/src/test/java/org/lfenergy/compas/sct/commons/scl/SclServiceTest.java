@@ -367,21 +367,21 @@ class SclServiceTest {
         ResumedDataTemplate lln0DoB = lln0.toBuilder().doName(createDo("DoB", TPredefinedCDCEnum.ACD)).build();
 
         assertThat(dais).containsExactlyInAnyOrder(
-                lln0DoA.toBuilder().daName(createDa("daNotInDai", TFCEnum.CF, false, Map.of(0L, "0"))).build(),
-                lln0DoA.toBuilder().daName(createDa("daNotInDai2", TFCEnum.CF, true, Map.of())).build(),
-                lln0DoA.toBuilder().daName(createDa("daiOverrideVal", TFCEnum.CF, false, Map.of(0L, "1"))).build(),
-                lln0DoA.toBuilder().daName(createDa("daiOverrideValImport", TFCEnum.CF, true, Map.of())).build(),
-                lln0DoA.toBuilder().daName(createDa("daiOverrideValImport2", TFCEnum.CF, false, Map.of())).build(),
+            lln0DoA.toBuilder().daName(createDa("daNotInDai", TFCEnum.CF, false, Map.of(0L, "0"))).build(),
+            lln0DoA.toBuilder().daName(createDa("daNotInDai2", TFCEnum.CF, true, Map.of())).build(),
+            lln0DoA.toBuilder().daName(createDa("daiOverrideVal", TFCEnum.CF, false, Map.of(0L, "1"))).build(),
+            lln0DoA.toBuilder().daName(createDa("daiOverrideValImport", TFCEnum.CF, true, Map.of())).build(),
+            lln0DoA.toBuilder().daName(createDa("daiOverrideValImport2", TFCEnum.CF, false, Map.of())).build(),
 
-                lln0DoB.toBuilder().daName(createDa("structDa.daNotInDai", TFCEnum.ST, false, Map.of(0L, "0"))).build(),
-                lln0DoB.toBuilder().daName(createDa("structDa.daNotInDai2", TFCEnum.ST, true, Map.of())).build(),
-                lln0DoB.toBuilder().daName(createDa("structDa.daiOverrideVal", TFCEnum.ST, false, Map.of(0L, "1"))).build(),
-                lln0DoB.toBuilder().daName(createDa("structDa.daiOverrideValImport", TFCEnum.ST, true, Map.of())).build(),
-                lln0DoB.toBuilder().daName(createDa("structDa.daiOverrideValImport2", TFCEnum.ST, false, Map.of())).build(),
+            lln0DoB.toBuilder().daName(createDa("structDa.daNotInDai", TFCEnum.ST, false, Map.of(0L, "0"))).build(),
+            lln0DoB.toBuilder().daName(createDa("structDa.daNotInDai2", TFCEnum.ST, true, Map.of())).build(),
+            lln0DoB.toBuilder().daName(createDa("structDa.daiOverrideVal", TFCEnum.ST, false, Map.of(0L, "1"))).build(),
+            lln0DoB.toBuilder().daName(createDa("structDa.daiOverrideValImport", TFCEnum.ST, true, Map.of())).build(),
+            lln0DoB.toBuilder().daName(createDa("structDa.daiOverrideValImport2", TFCEnum.ST, false, Map.of())).build(),
 
-                ResumedDataTemplate.builder().prefix("").lnType("lntype2").lnClass("LPHD").lnInst("0")
-                        .doName(createDo("PhyNam", TPredefinedCDCEnum.DPS))
-                        .daName(createDa("aDa", TFCEnum.BL, false, Map.of())).build()
+            ResumedDataTemplate.builder().prefix("").lnType("lntype2").lnClass("LPHD").lnInst("0")
+                .doName(createDo("PhyNam", TPredefinedCDCEnum.DPS))
+                .daName(createDa("aDa", TFCEnum.BL, false, Map.of())).build()
         );
     }
 
@@ -392,7 +392,7 @@ class SclServiceTest {
 
         // when & then
         assertThrows(ScdException.class,
-                () -> SclService.getDAI(scd, "IED_NAME1", "UNKNOWNLD", new ResumedDataTemplate(), true));
+            () -> SclService.getDAI(scd, "IED_NAME1", "UNKNOWNLD", new ResumedDataTemplate(), true));
     }
 
     @Test
@@ -406,24 +406,24 @@ class SclServiceTest {
         // then
         assertThat(dais).isNotNull();
         List<String> resultSimpleDa = dais.stream()
-                .filter(rdtt -> rdtt.getBdaNames().isEmpty()) // test only simple DA
-                .map(ResumedDataTemplate::getLNRef).collect(Collectors.toList());
+            .filter(rdtt -> rdtt.getBdaNames().isEmpty()) // test only simple DA
+            .map(ResumedDataTemplate::getLNRef).collect(Collectors.toList());
         assertThat(resultSimpleDa).containsExactlyInAnyOrder(
-                // ...AndTrueInDai : If ValImport is True in DAI, DA is updatable
-                "LLN0.DoA.valImportNotSetAndTrueInDai",
-                "LLN0.DoA.valImportTrueAndTrueInDai",
-                "LLN0.DoA.valImportFalseAndTrueInDai",
-                // valImportTrue : If ValImport is True in DA and DAI does not exist, DA is updatable
-                "LLN0.DoA.valImportTrue",
-                // valImportTrueAndNotSetInDai : If ValImport is True in DA and DAI exists but DAI ValImport is not set, DA is updatable
-                "LLN0.DoA.valImportTrueAndNotSetInDai",
-                // Only these FC are updatable
-                "LLN0.DoA.fcCF",
-                "LLN0.DoA.fcDC",
-                "LLN0.DoA.fcSG",
-                "LLN0.DoA.fcSP",
-                "LLN0.DoA.fcST",
-                "LLN0.DoA.fcSE"
+            // ...AndTrueInDai : If ValImport is True in DAI, DA is updatable
+            "LLN0.DoA.valImportNotSetAndTrueInDai",
+            "LLN0.DoA.valImportTrueAndTrueInDai",
+            "LLN0.DoA.valImportFalseAndTrueInDai",
+            // valImportTrue : If ValImport is True in DA and DAI does not exist, DA is updatable
+            "LLN0.DoA.valImportTrue",
+            // valImportTrueAndNotSetInDai : If ValImport is True in DA and DAI exists but DAI ValImport is not set, DA is updatable
+            "LLN0.DoA.valImportTrueAndNotSetInDai",
+            // Only these FC are updatable
+            "LLN0.DoA.fcCF",
+            "LLN0.DoA.fcDC",
+            "LLN0.DoA.fcSG",
+            "LLN0.DoA.fcSP",
+            "LLN0.DoA.fcST",
+            "LLN0.DoA.fcSE"
         );
     }
 
@@ -438,34 +438,34 @@ class SclServiceTest {
         // then
         assertThat(dais).isNotNull();
         List<String> resultStructDa = dais.stream()
-                .filter(rdtt -> !rdtt.getBdaNames().isEmpty()) // test only struct DA
-                .map(ResumedDataTemplate::getLNRef).collect(Collectors.toList());
+            .filter(rdtt -> !rdtt.getBdaNames().isEmpty()) // test only struct DA
+            .map(ResumedDataTemplate::getLNRef).collect(Collectors.toList());
         assertThat(resultStructDa).containsExactlyInAnyOrder(
-                // ...AndTrueInDai : If ValImport is True in DAI, BDA is updatable
-                "LLN0.DoB.structValImportNotSet.bValImportFalseAndTrueInDai",
-                "LLN0.DoB.structValImportNotSet.bValImportNotSetAndTrueInDai",
-                "LLN0.DoB.structValImportNotSet.bValImportTrueAndTrueInDai",
-                "LLN0.DoB.structValImportTrue.bValImportFalseAndTrueInDai",
-                "LLN0.DoB.structValImportTrue.bValImportNotSetAndTrueInDai",
-                "LLN0.DoB.structValImportTrue.bValImportTrueAndTrueInDai",
-                "LLN0.DoB.structValImportFalse.bValImportFalseAndTrueInDai",
-                "LLN0.DoB.structValImportFalse.bValImportNotSetAndTrueInDai",
-                "LLN0.DoB.structValImportFalse.bValImportTrueAndTrueInDai",
-                // bValImportTrue : If ValImport is True in BDA and DAI does not exist, BDA is updatable
-                "LLN0.DoB.structValImportFalse.bValImportTrue",
-                "LLN0.DoB.structValImportTrue.bValImportTrue",
-                "LLN0.DoB.structValImportNotSet.bValImportTrue",
-                // bValImportTrueAndNotSetInDai : If ValImport is True in BDA and DAI exists but DAI ValImport is not set, BDA is updatable
-                "LLN0.DoB.structValImportTrue.bValImportTrueAndNotSetInDai",
-                "LLN0.DoB.structValImportNotSet.bValImportTrueAndNotSetInDai",
-                "LLN0.DoB.structValImportFalse.bValImportTrueAndNotSetInDai",
-                // Only these FC are updatable
-                "LLN0.DoB.structWithFcCF.bda1",
-                "LLN0.DoB.structWithFcDC.bda1",
-                "LLN0.DoB.structWithFcSG.bda1",
-                "LLN0.DoB.structWithFcSP.bda1",
-                "LLN0.DoB.structWithFcST.bda1",
-                "LLN0.DoB.structWithFcSE.bda1"
+            // ...AndTrueInDai : If ValImport is True in DAI, BDA is updatable
+            "LLN0.DoB.structValImportNotSet.bValImportFalseAndTrueInDai",
+            "LLN0.DoB.structValImportNotSet.bValImportNotSetAndTrueInDai",
+            "LLN0.DoB.structValImportNotSet.bValImportTrueAndTrueInDai",
+            "LLN0.DoB.structValImportTrue.bValImportFalseAndTrueInDai",
+            "LLN0.DoB.structValImportTrue.bValImportNotSetAndTrueInDai",
+            "LLN0.DoB.structValImportTrue.bValImportTrueAndTrueInDai",
+            "LLN0.DoB.structValImportFalse.bValImportFalseAndTrueInDai",
+            "LLN0.DoB.structValImportFalse.bValImportNotSetAndTrueInDai",
+            "LLN0.DoB.structValImportFalse.bValImportTrueAndTrueInDai",
+            // bValImportTrue : If ValImport is True in BDA and DAI does not exist, BDA is updatable
+            "LLN0.DoB.structValImportFalse.bValImportTrue",
+            "LLN0.DoB.structValImportTrue.bValImportTrue",
+            "LLN0.DoB.structValImportNotSet.bValImportTrue",
+            // bValImportTrueAndNotSetInDai : If ValImport is True in BDA and DAI exists but DAI ValImport is not set, BDA is updatable
+            "LLN0.DoB.structValImportTrue.bValImportTrueAndNotSetInDai",
+            "LLN0.DoB.structValImportNotSet.bValImportTrueAndNotSetInDai",
+            "LLN0.DoB.structValImportFalse.bValImportTrueAndNotSetInDai",
+            // Only these FC are updatable
+            "LLN0.DoB.structWithFcCF.bda1",
+            "LLN0.DoB.structWithFcDC.bda1",
+            "LLN0.DoB.structWithFcSG.bda1",
+            "LLN0.DoB.structWithFcSP.bda1",
+            "LLN0.DoB.structWithFcST.bda1",
+            "LLN0.DoB.structWithFcSE.bda1"
         );
     }
 
@@ -480,12 +480,12 @@ class SclServiceTest {
         // then
         assertThat(dais).isNotNull();
         List<String> resultSimpleDa = dais.stream()
-                .filter(rdtt -> rdtt.getBdaNames().isEmpty()) // test only simple DA
-                .map(ResumedDataTemplate::getLNRef).collect(Collectors.toList());
+            .filter(rdtt -> rdtt.getBdaNames().isEmpty()) // test only simple DA
+            .map(ResumedDataTemplate::getLNRef).collect(Collectors.toList());
         assertThat(resultSimpleDa).containsExactlyInAnyOrder(
-                "LLN0.DoD.sGroupValImportNotSet",
-                "LLN0.DoD.sGroupValImportTrue"
-        );
+            "LLN0.DoD.sGroupValImportNotSet",
+            "LLN0.DoD.sGroupValImportTrue"
+            );
     }
 
     @Test
@@ -498,14 +498,14 @@ class SclServiceTest {
 
         // then
         assertThat(dais)
-                .isNotNull()
-                .isEmpty();
+            .isNotNull()
+            .isEmpty();
     }
 
     @Test
     void testInitScl() {
         SclRootAdapter sclRootAdapter = assertDoesNotThrow(
-                () -> SclService.initScl(Optional.empty(), "hVersion", "hRevision")
+            () -> SclService.initScl(Optional.empty(), "hVersion", "hRevision")
         );
         assertIsMarshallable(sclRootAdapter.getCurrentElem());
     }
@@ -514,7 +514,7 @@ class SclServiceTest {
     void testInitScl_With_hId_shouldNotThrowError() {
         UUID hid = UUID.randomUUID();
         SclRootAdapter sclRootAdapter = assertDoesNotThrow(
-                () -> SclService.initScl(Optional.of(hid), "hVersion", "hRevision")
+            () -> SclService.initScl(Optional.of(hid), "hVersion", "hRevision")
         );
         assertIsMarshallable(sclRootAdapter.getCurrentElem());
     }
@@ -645,15 +645,15 @@ class SclServiceTest {
         // Then
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scl);
         List<LDeviceAdapter> lDevices = scdRootAdapter.getIEDAdapters().stream().map(IEDAdapter::getLDeviceAdapters)
-                .flatMap(List::stream).collect(Collectors.toList());
+            .flatMap(List::stream).collect(Collectors.toList());
         List<LN0> ln0s = lDevices.stream().map(LDeviceAdapter::getLN0Adapter).map(LN0Adapter::getCurrentElem).collect(Collectors.toList());
         assertThat(ln0s)
-                .isNotEmpty()
-                .noneMatch(TAnyLN::isSetDataSet)
-                .noneMatch(TAnyLN::isSetLogControl)
-                .noneMatch(TAnyLN::isSetReportControl)
-                .noneMatch(LN0::isSetGSEControl)
-                .noneMatch(LN0::isSetSampledValueControl);
+            .isNotEmpty()
+            .noneMatch(TAnyLN::isSetDataSet)
+            .noneMatch(TAnyLN::isSetLogControl)
+            .noneMatch(TAnyLN::isSetReportControl)
+            .noneMatch(LN0::isSetGSEControl)
+            .noneMatch(LN0::isSetSampledValueControl);
         assertIsMarshallable(scl);
     }
 
@@ -666,14 +666,14 @@ class SclServiceTest {
         // Then
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scl);
         List<LDeviceAdapter> lDevices = scdRootAdapter.getIEDAdapters().stream().map(IEDAdapter::getLDeviceAdapters)
-                .flatMap(List::stream).collect(Collectors.toList());
+            .flatMap(List::stream).collect(Collectors.toList());
         List<TLN> lns = lDevices.stream().map(LDeviceAdapter::getLNAdapters).flatMap(List::stream)
-                .map(LNAdapter::getCurrentElem).collect(Collectors.toList());
+            .map(LNAdapter::getCurrentElem).collect(Collectors.toList());
         assertThat(lns)
-                .isNotEmpty()
-                .noneMatch(TAnyLN::isSetDataSet)
-                .noneMatch(TAnyLN::isSetLogControl)
-                .noneMatch(TAnyLN::isSetReportControl);
+            .isNotEmpty()
+            .noneMatch(TAnyLN::isSetDataSet)
+            .noneMatch(TAnyLN::isSetLogControl)
+            .noneMatch(TAnyLN::isSetReportControl);
         assertIsMarshallable(scl);
     }
 
@@ -686,18 +686,18 @@ class SclServiceTest {
         // Then
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scl);
         List<TExtRef> extRefs = scdRootAdapter
-                .getIEDAdapters().stream()
-                .map(IEDAdapter::getLDeviceAdapters).flatMap(List::stream)
-                .map(LDeviceAdapter::getLN0Adapter)
-                .map(AbstractLNAdapter::getExtRefs).flatMap(List::stream)
-                .collect(Collectors.toList());
+            .getIEDAdapters().stream()
+            .map(IEDAdapter::getLDeviceAdapters).flatMap(List::stream)
+            .map(LDeviceAdapter::getLN0Adapter)
+            .map(AbstractLNAdapter::getExtRefs).flatMap(List::stream)
+            .collect(Collectors.toList());
         assertThat(extRefs)
-                .isNotEmpty()
-                .noneMatch(TExtRef::isSetSrcLDInst)
-                .noneMatch(TExtRef::isSetSrcPrefix)
-                .noneMatch(TExtRef::isSetSrcLNInst)
-                .noneMatch(TExtRef::isSetSrcCBName)
-                .noneMatch(TExtRef::isSetSrcLNClass);
+            .isNotEmpty()
+            .noneMatch(TExtRef::isSetSrcLDInst)
+            .noneMatch(TExtRef::isSetSrcPrefix)
+            .noneMatch(TExtRef::isSetSrcLNInst)
+            .noneMatch(TExtRef::isSetSrcCBName)
+            .noneMatch(TExtRef::isSetSrcLNClass);
         assertIsMarshallable(scl);
     }
 

@@ -114,10 +114,10 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 .filter(tExtRef ->
                         ((filter.getDesc() == null && tExtRef.getDesc().isEmpty())
                                 || Objects.equals(filter.getDesc(),tExtRef.getDesc()) ) &&
-                                Objects.equals(filter.getPDO(),tExtRef.getPDO()) &&
-                                Objects.equals(filter.getPDA(),tExtRef.getPDA()) &&
-                                Objects.equals(filter.getIntAddr(),tExtRef.getIntAddr()) &&
-                                Objects.equals(filter.getPServT(),tExtRef.getPServT()))
+                            Objects.equals(filter.getPDO(),tExtRef.getPDO()) &&
+                            Objects.equals(filter.getPDA(),tExtRef.getPDA()) &&
+                            Objects.equals(filter.getIntAddr(),tExtRef.getIntAddr()) &&
+                            Objects.equals(filter.getPServT(),tExtRef.getPServT()))
                 .collect(Collectors.toList());
     }
 
@@ -139,9 +139,9 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         return currentElem.getInputs().getExtRef()
                 .stream()
                 .filter(tExtRef ->  Objects.equals(signalInfo.getDesc(), tExtRef.getDesc()) &&
-                        Objects.equals(tExtRef.getPDO(), signalInfo.getPDO()) &&
-                        Objects.equals(signalInfo.getIntAddr(), tExtRef.getIntAddr()) &&
-                        Objects.equals(signalInfo.getPServT(), tExtRef.getPServT())
+                            Objects.equals(tExtRef.getPDO(), signalInfo.getPDO()) &&
+                            Objects.equals(signalInfo.getIntAddr(), tExtRef.getIntAddr()) &&
+                            Objects.equals(signalInfo.getPServT(), tExtRef.getPServT())
                 )
                 .collect(Collectors.toList());
     }
@@ -229,12 +229,12 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 tControls = this.lookUpControlBlocksByDataSetRef(tDataSet.getName(),TGSEControl.class);
                 controlBlocks.addAll(
                         tControls.stream()
-                                .map(tgseControl -> {
-                                    var g = new GooseControlBlock((TGSEControl)tgseControl);
-                                    g.setMetaData(metaData);
-                                    return g;
-                                })
-                                .collect(Collectors.toList())
+                        .map(tgseControl -> {
+                            var g = new GooseControlBlock((TGSEControl)tgseControl);
+                            g.setMetaData(metaData);
+                            return g;
+                        })
+                        .collect(Collectors.toList())
                 );
             }
 
@@ -243,12 +243,12 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 tControls = this.lookUpControlBlocksByDataSetRef(tDataSet.getName(),TSampledValueControl.class);
                 controlBlocks.addAll(
                         tControls.stream()
-                                .map(sampledValueControl -> {
-                                    var s = new SMVControlBlock((TSampledValueControl) sampledValueControl);
-                                    s.setMetaData(metaData);
-                                    return s;
-                                })
-                                .collect(Collectors.toList())
+                        .map(sampledValueControl -> {
+                            var s = new SMVControlBlock((TSampledValueControl) sampledValueControl);
+                            s.setMetaData(metaData);
+                            return s;
+                        })
+                        .collect(Collectors.toList())
                 );
             }
 
@@ -256,12 +256,12 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 tControls = this.lookUpControlBlocksByDataSetRef(tDataSet.getName(),TReportControl.class);
                 controlBlocks.addAll(
                         tControls.stream()
-                                .map(reportControl -> {
-                                    var r = new ReportControlBlock((TReportControl) reportControl);
-                                    r.setMetaData(metaData);
-                                    return r;
-                                })
-                                .collect(Collectors.toList())
+                        .map(reportControl -> {
+                            var r = new ReportControlBlock((TReportControl) reportControl);
+                            r.setMetaData(metaData);
+                            return r;
+                        })
+                        .collect(Collectors.toList())
                 );
             }
         }
@@ -443,11 +443,11 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         SclRootAdapter sclRootAdapter = parentAdapter.getParentAdapter().getParentAdapter();
         DataTypeTemplateAdapter dttAdapter = sclRootAdapter.getDataTypeTemplateAdapter();
         LNodeTypeAdapter lNodeTypeAdapter = dttAdapter.getLNodeTypeAdapterById(lnType)
-                .orElseThrow(
-                        () -> new ScdException(
-                                String.format("Corrupted SCD : lnType missing for LN : %s%s", getLNClass(),getLNInst())
-                        )
-                );
+            .orElseThrow(
+                () -> new ScdException(
+                    String.format("Corrupted SCD : lnType missing for LN : %s%s", getLNClass(),getLNInst())
+                )
+            );
         List<ResumedDataTemplate> resumedDTTs = lNodeTypeAdapter.getResumedDTTs(rDtt);
 
         resumedDTTs.forEach(this::overrideAttributesFromDAI);
@@ -461,23 +461,23 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
 
     protected void overrideAttributesFromDAI(final ResumedDataTemplate rDtt) {
         findMatch(rDtt.getDoName(), rDtt.getDaName())
-                .map(iDataAdapter -> (AbstractDAIAdapter<?>) iDataAdapter)
-                .map(AbstractDAIAdapter::getCurrentElem)
-                .ifPresent(tdai -> {
-                    rDtt.setDaiValues(tdai.getVal());
-                    if (rDtt.getDaName().getFc() == TFCEnum.SG || rDtt.getDaName().getFc() == TFCEnum.SE) {
-                        boolean isGroup = hasSgGroup(tdai);
-                        if (isGroup) {
-                            rDtt.setValImport((!tdai.isSetValImport() || tdai.isValImport()) && iedHasConfSG());
-                        } else {
-                            rDtt.setValImport(false);
-                            log.warn("Inconsistency in the SCD file - DAI {} with fc={} must have a sGroup attribute",
-                                    rDtt.getObjRef(getCurrentIED().getName(), parentAdapter.getInst()), rDtt.getDaName().getFc());
-                        }
-                    } else if (tdai.isSetValImport()) {
-                        rDtt.setValImport(tdai.isValImport());
+            .map(iDataAdapter -> (AbstractDAIAdapter<?>) iDataAdapter)
+            .map(AbstractDAIAdapter::getCurrentElem)
+            .ifPresent(tdai -> {
+                rDtt.setDaiValues(tdai.getVal());
+                if (rDtt.getDaName().getFc() == TFCEnum.SG || rDtt.getDaName().getFc() == TFCEnum.SE) {
+                    boolean isGroup = hasSgGroup(tdai);
+                    if (isGroup) {
+                        rDtt.setValImport((!tdai.isSetValImport() || tdai.isValImport()) && iedHasConfSG());
+                    } else {
+                        rDtt.setValImport(false);
+                        log.warn("Inconsistency in the SCD file - DAI {} with fc={} must have a sGroup attribute",
+                            rDtt.getObjRef(getCurrentIED().getName(), parentAdapter.getInst()), rDtt.getDaName().getFc());
                     }
-                });
+                } else if (tdai.isSetValImport()) {
+                    rDtt.setValImport(tdai.isValImport());
+                }
+            });
     }
 
     private boolean iedHasConfSG() {
@@ -570,7 +570,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 }
             }
             if(daiAdapter == null){
-                daiAdapter = doiOrSdoiAdapter.addDAI(daTypeName.getName(),rDtt.isUpdatable());
+               daiAdapter = doiOrSdoiAdapter.addDAI(daTypeName.getName(),rDtt.isUpdatable());
             }
 
             daiAdapter.update(daTypeName.getDaiValues());
@@ -609,9 +609,9 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                         )
                 );
         ResumedDataTemplate filter = ResumedDataTemplate.builder()
-                .lnInst(getLNInst())
-                .lnClass(getLNClass())
-                .lnType(currentElem.getLnType()).build();
+            .lnInst(getLNInst())
+            .lnClass(getLNClass())
+            .lnType(currentElem.getLnType()).build();
         List<ResumedDataTemplate> rDtts = lNodeTypeAdapter.getResumedDTTs(filter);
 
         return matchesDataAttributes(dataAttribute) ||
@@ -663,7 +663,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
 
         Map<Long,String> res = new HashMap<>();
         tVals.forEach( tVal -> res.put(
-                tVal.isSetSGroup() ? tVal.getSGroup() : 0L, tVal.getValue())
+            tVal.isSetSGroup() ? tVal.getSGroup() : 0L, tVal.getValue())
         );
 
         return res;

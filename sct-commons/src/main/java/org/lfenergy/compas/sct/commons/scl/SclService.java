@@ -401,21 +401,21 @@ public class SclService {
     private static Map<String, Pair<TPrivate, List<SCL>>> createMapICDSystemVersionUuidAndSTDFile(Set<SCL> stds) {
         Map<String, Pair<TPrivate, List<SCL>>> stringSCLMap = new HashMap<>();
         stds.forEach(std -> std.getIED().forEach(ied -> ied.getPrivate().forEach(tp ->
-                PrivateService.getCompasICDHeader(tp).map(TCompasICDHeader::getICDSystemVersionUUID).ifPresent(icdSysVer -> {
-                    Pair<TPrivate, List<SCL>> pair = stringSCLMap.get(icdSysVer);
-                    List<SCL> list = pair != null ? pair.getRight() : new ArrayList<>();
-                    list.add(std);
-                    stringSCLMap.put(icdSysVer, Pair.of(tp, list));
-                })
+            PrivateService.getCompasICDHeader(tp).map(TCompasICDHeader::getICDSystemVersionUUID).ifPresent(icdSysVer -> {
+                Pair<TPrivate, List<SCL>> pair = stringSCLMap.get(icdSysVer);
+                List<SCL> list = pair != null ? pair.getRight() : new ArrayList<>();
+                list.add(std);
+                stringSCLMap.put(icdSysVer, Pair.of(tp, list));
+            })
         )));
         return stringSCLMap;
     }
 
     private static boolean comparePrivateCompasICDHeaders(TPrivate iedPrivate, TPrivate scdPrivate) throws ScdException {
         TCompasICDHeader iedCompasICDHeader = PrivateService.getCompasICDHeader(iedPrivate).orElseThrow(
-                () -> new ScdException(COMPAS_ICDHEADER + "not found in IED Private "));
+            () -> new ScdException(COMPAS_ICDHEADER + "not found in IED Private "));
         TCompasICDHeader scdCompasICDHeader = PrivateService.getCompasICDHeader(scdPrivate).orElseThrow(
-                () -> new ScdException(COMPAS_ICDHEADER + "not found in LNode Private "));
+            () -> new ScdException(COMPAS_ICDHEADER + "not found in LNode Private "));
         return iedCompasICDHeader.getIEDType().equals(scdCompasICDHeader.getIEDType())
                 && iedCompasICDHeader.getICDSystemVersionUUID().equals(scdCompasICDHeader.getICDSystemVersionUUID())
                 && iedCompasICDHeader.getVendorName().equals(scdCompasICDHeader.getVendorName())
@@ -438,20 +438,20 @@ public class SclService {
     public static void removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(final SCL scl) {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scl);
         List<LDeviceAdapter> lDeviceAdapters = sclRootAdapter.getIEDAdapters().stream()
-                .map(IEDAdapter::getLDeviceAdapters).flatMap(List::stream).collect(Collectors.toList());
+            .map(IEDAdapter::getLDeviceAdapters).flatMap(List::stream).collect(Collectors.toList());
 
         // LN0
         lDeviceAdapters.stream()
-                .map(LDeviceAdapter::getLN0Adapter)
-                .forEach(ln0 -> {
-                    ln0.removeAllControlBlocksAndDatasets();
-                    ln0.removeAllExtRefSourceBindings();
-                });
+            .map(LDeviceAdapter::getLN0Adapter)
+            .forEach(ln0 -> {
+                ln0.removeAllControlBlocksAndDatasets();
+                ln0.removeAllExtRefSourceBindings();
+            });
 
         // Other LN
         lDeviceAdapters.stream()
-                .map(LDeviceAdapter::getLNAdapters).flatMap(List::stream)
-                .forEach(LNAdapter::removeAllControlBlocksAndDatasets);
+            .map(LDeviceAdapter::getLNAdapters).flatMap(List::stream)
+            .forEach(LNAdapter::removeAllControlBlocksAndDatasets);
     }
 
 }
