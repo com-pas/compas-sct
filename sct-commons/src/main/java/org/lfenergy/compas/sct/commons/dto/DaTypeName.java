@@ -51,10 +51,18 @@ public class DaTypeName extends DataTypeName{
         return daTypeName;
     }
 
+    /**
+     * Check valImport state
+     * @return boolean value of valImport
+     */
     public boolean isValImport(){
         return valImport;
     }
 
+    /**
+     * Check if DA is updatable
+     * @return boolean value of DA state
+     */
     public boolean isUpdatable(){
         return isValImport() &&
                 (fc == TFCEnum.CF ||
@@ -66,6 +74,10 @@ public class DaTypeName extends DataTypeName{
                 );
     }
 
+    /**
+     * Add DAI values to list of DAI values
+     * @param vals list of DAI values
+     */
     public void addDaiValues(List<TVal> vals) {
         if(vals.size() == 1){
             daiValues.put(0L,vals.get(0).getValue());
@@ -74,6 +86,10 @@ public class DaTypeName extends DataTypeName{
         }
     }
 
+    /**
+     * Add DAI value to Map of DAI values
+     * @param val DAI value
+     */
     public void addDaiValue(TVal val) {
         if(!val.isSetSGroup()){
             daiValues.put(0L,val.getValue());
@@ -82,6 +98,11 @@ public class DaTypeName extends DataTypeName{
         }
     }
 
+    /**
+     *  Add DAI value to Map of DAI values
+     * @param sg Setting group value
+     * @param val value
+     */
     public void addDaiValue(Long sg, String val) {
         if(sg == null){
             daiValues.put(0L,val);
@@ -90,6 +111,10 @@ public class DaTypeName extends DataTypeName{
         }
     }
 
+    /**
+     * Copy DA's contain
+     * @param daName DA object
+     */
     public void merge(DaTypeName daName) {
         if(!isDefined()) return;
         fc = daName.fc;
