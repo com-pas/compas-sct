@@ -367,6 +367,6 @@ class DataTypeTemplateAdapterTest {
         TPrivate tPrivate = new TPrivate();
         tPrivate.setType("Private Type");
         tPrivate.setSource("Private Source");
-        assertThrows(IllegalArgumentException.class, () -> dttAdapter.addPrivate(tPrivate));
+        assertThrows(UnsupportedOperationException.class, () -> dttAdapter.addPrivate(tPrivate));
     }
 }

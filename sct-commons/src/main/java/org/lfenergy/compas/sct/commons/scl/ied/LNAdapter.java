@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 package org.lfenergy.compas.sct.commons.scl.ied;
+
 import org.lfenergy.compas.scl2007b4.model.TLN;
-import org.lfenergy.compas.scl2007b4.model.TPrivate;
 
 
 public class LNAdapter extends AbstractLNAdapter<TLN>{
@@ -25,11 +25,6 @@ public class LNAdapter extends AbstractLNAdapter<TLN>{
             return currentElem.getLnClass().get(0);
         }
         return null;
-    }
-
-    @Override
-    protected void addPrivate(TPrivate tPrivate) {
-        currentElem.getPrivate().add(tPrivate);
     }
 
     @Override

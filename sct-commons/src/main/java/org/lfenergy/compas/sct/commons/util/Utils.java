@@ -1,23 +1,25 @@
-// SPDX-FileCopyrightText: 2021 RTE FRANCE
+// SPDX-FileCopyrightText: 2022 RTE FRANCE
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.sct.commons;
+package org.lfenergy.compas.sct.commons.util;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Slf4j
-public class Utils {
+public final class Utils {
 
     public static final String LEAVING_PREFIX = "<<< Leaving: ::";
     public static final String ENTERING_PREFIX = ">>> Entering: ::";
 
     private Utils() {
-        throw new IllegalStateException("Utils class");
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
 
     public static String entering() {
@@ -70,4 +72,19 @@ public class Utils {
         return Objects.equals(getValue.apply(o1), getValue.apply(o2));
     }
 
+    public static String xpathAttributeFilter(String name, String value) {
+        if (value == null){
+            return String.format("not(@%s)", name);
+        } else {
+            return String.format("@%s=\"%s\"", name, value);
+        }
+    }
+
+    public static String xpathAttributeFilter(String name, Collection<String> value) {
+        if (value == null || value.isEmpty() || value.stream().allMatch(Objects::isNull)){
+            return String.format("not(@%s)", name);
+        } else {
+            return xpathAttributeFilter(name, value.stream().filter(Objects::nonNull).collect(Collectors.joining(" ")));
+        }
+    }
 }

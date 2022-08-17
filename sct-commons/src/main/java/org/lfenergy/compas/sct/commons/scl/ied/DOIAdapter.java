@@ -4,7 +4,10 @@
 
 package org.lfenergy.compas.sct.commons.scl.ied;
 
-import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.scl2007b4.model.TAnyLN;
+import org.lfenergy.compas.scl2007b4.model.TDAI;
+import org.lfenergy.compas.scl2007b4.model.TDOI;
+import org.lfenergy.compas.scl2007b4.model.TSDI;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 
@@ -34,11 +37,6 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
                             String.format("Unknown SDI (%s) in DOI (%s)", sName, currentElem.getName())
                     )
                 );
-    }
-
-    @Override
-    protected void addPrivate(TPrivate tPrivate) {
-        currentElem.getPrivate().add(tPrivate);
     }
 
     @Override
@@ -85,9 +83,5 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
             return parentAdapter.getCurrentElem().getSDIOrDAI().contains(currentElem);
         }
 
-        @Override
-        protected void addPrivate(TPrivate tPrivate) {
-            currentElem.getPrivate().add(tPrivate);
-        }
     }
 }

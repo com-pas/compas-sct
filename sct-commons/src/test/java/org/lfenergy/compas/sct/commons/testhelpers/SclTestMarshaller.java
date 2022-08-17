@@ -22,7 +22,7 @@ public class SclTestMarshaller {
         return assertDoesNotThrow(() -> marshallerWrapper.marshall(scl));
     }
 
-    public static MarshallerWrapper createWrapper() {
+    private static MarshallerWrapper createWrapper() {
         return MarshallerWrapper.builder()
                 .withProperties("classpath:scl_schema.yml")
                 .build();

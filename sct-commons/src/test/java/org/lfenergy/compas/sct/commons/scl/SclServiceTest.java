@@ -6,10 +6,7 @@ package org.lfenergy.compas.sct.commons.scl;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.CommonConstants;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ied.*;
@@ -23,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDa;
 import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDo;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
+import static org.lfenergy.compas.sct.commons.util.PrivateEnum.COMPAS_SCL_FILE_TYPE;
 
 class SclServiceTest {
 
@@ -528,7 +526,7 @@ class SclServiceTest {
                 () -> SclService.initScl(Optional.of(hid), "hVersion", "hRevision")
         );
         assertThat(rootAdapter.getCurrentElem().getPrivate()).isNotEmpty();
-        assertThat(rootAdapter.getCurrentElem().getPrivate().get(0).getType()).isEqualTo(CommonConstants.COMPAS_SCL_FILE_TYPE);
+        assertThat(rootAdapter.getCurrentElem().getPrivate().get(0).getType()).isEqualTo(COMPAS_SCL_FILE_TYPE.getPrivateType());
         assertIsMarshallable(rootAdapter.getCurrentElem());
     }
 
@@ -549,7 +547,6 @@ class SclServiceTest {
         ResumedDataTemplate rDtt = new ResumedDataTemplate();
         rDtt.setLnType("unknownID");
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
 
         assertThrows(ScdException.class, () -> SclService.updateDAI(
                 scd, "IED", "LD", rDtt
@@ -575,56 +572,6 @@ class SclServiceTest {
                 () -> SclService.getEnumTypeElements(scd, "RecCycModKind")
         );
         assertFalse(enumList.isEmpty());
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"/scd-substation-import-ssd/ssd_with_2_substations.xml", "/scd-substation-import-ssd/ssd_without_substations.xml"})
-    void testAddSubstation_Check_SSD_Validity(String ssdFileName) throws Exception {
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/add_ied_test.xml");
-        SCL ssd = SclTestMarshaller.getSCLFromFile(ssdFileName);
-
-        assertThrows(ScdException.class,
-                () -> SclService.addSubstation(scd, ssd));
-        assertIsMarshallable(scd);
-    }
-
-    @Test
-    void testAddSubstation_SCD_Without_Substation() throws Exception {
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/add_ied_test.xml");
-        SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
-        SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
-        SclRootAdapter ssdRootAdapter = new SclRootAdapter(ssd);
-        SclRootAdapter expectedScdAdapter = SclService.addSubstation(scd, ssd);
-
-        assertNotEquals(scdRootAdapter, expectedScdAdapter);
-        assertEquals(expectedScdAdapter.getCurrentElem().getSubstation(), ssdRootAdapter.getCurrentElem().getSubstation());
-        assertIsMarshallable(scd);
-    }
-
-    @Test
-    void testAddSubstation_SCD_With_Different_Substation_Name() throws Exception {
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/scd_with_substation_name_different.xml");
-        SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
-
-        assertThrows(ScdException.class,
-                () -> SclService.addSubstation(scd, ssd));
-        assertIsMarshallable(scd);
-    }
-
-    @Test
-    void testAddSubstation_SCD_With_Substation() throws Exception {
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/scd_with_substation.xml");
-        SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
-        SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
-        SclRootAdapter ssdRootAdapter = new SclRootAdapter(ssd);
-        SclRootAdapter expectedScdAdapter = SclService.addSubstation(scd, ssd);
-        TSubstation expectedTSubstation = expectedScdAdapter.getCurrentElem().getSubstation().get(0);
-        TSubstation tSubstation = ssdRootAdapter.getCurrentElem().getSubstation().get(0);
-
-        assertNotEquals(scdRootAdapter, expectedScdAdapter);
-        assertEquals(expectedTSubstation.getName(), tSubstation.getName());
-        assertEquals(expectedTSubstation.getVoltageLevel().size(), tSubstation.getVoltageLevel().size());
-        assertIsMarshallable(scd);
     }
 
     @Test

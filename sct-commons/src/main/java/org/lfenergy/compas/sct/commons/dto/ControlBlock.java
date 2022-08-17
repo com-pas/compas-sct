@@ -72,7 +72,7 @@ public abstract class ControlBlock<T extends ControlBlock> extends LNodeMetaData
                                     )
                             )
                     );
-            if (iedName.isSetLnClass() && !iedName.getLnClass().isEmpty()) {
+            if (iedName.isSetLnClass()) {
                 try {
                     lDeviceAdapter.getLNAdapter(iedName.getLnClass().get(0), iedName.getLnInst(), iedName.getPrefix());
                 } catch (ScdException e) {

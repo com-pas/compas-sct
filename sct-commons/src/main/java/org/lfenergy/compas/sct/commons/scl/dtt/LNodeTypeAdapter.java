@@ -10,7 +10,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.lfenergy.compas.scl2007b4.model.TDO;
 import org.lfenergy.compas.scl2007b4.model.TLNodeType;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
-import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.dto.DoTypeName;
 import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
@@ -67,11 +66,6 @@ public class LNodeTypeAdapter
             }
         }
         return true;
-    }
-
-    @Override
-    protected void addPrivate(TPrivate tPrivate) {
-        currentElem.getPrivate().add(tPrivate);
     }
 
     public boolean containsDOWithDOTypeId(String doTypeId) {
