@@ -31,11 +31,6 @@ public class DataTypeTemplateAdapter extends SclElementAdapter<SclRootAdapter, T
         return currentElem == parentAdapter.getCurrentElem().getDataTypeTemplates();
     }
 
-    @Override
-    protected void addPrivate(TPrivate tPrivate) {
-        throw new IllegalArgumentException("Private is not Allowed here");
-    }
-
     public Optional<LNodeTypeAdapter> getLNodeTypeAdapterById(String id) {
         for(TLNodeType tlNodeType : currentElem.getLNodeType()){
             if(tlNodeType.getId().equals(id)) {

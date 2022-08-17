@@ -13,7 +13,6 @@ import org.lfenergy.compas.sct.commons.dto.ReportControlBlock;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.mockito.Mockito;
 
@@ -22,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
 
 class IEDAdapterTest {
 
@@ -155,8 +155,7 @@ class IEDAdapterTest {
         dataSetInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
         assertDoesNotThrow(() -> iAdapter.createDataSet(dataSetInfo));
 
-        MarshallerWrapper marshallerWrapper = SclTestMarshaller.createWrapper();
-        System.out.println(marshallerWrapper.marshall(scd));
+        assertIsMarshallable(scd);
     }
 
     @Test
@@ -227,6 +226,7 @@ class IEDAdapterTest {
         controlBlock.setHolderIEDName("IED_NAME");
         controlBlock.setHolderIEDName("IED_NAME");
         controlBlock.setHolderIEDName("IED_NAME");
+        assertIsMarshallable(scd);
     }
 
     @Test

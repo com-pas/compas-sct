@@ -7,6 +7,8 @@ package org.lfenergy.compas.sct.commons.testhelpers;
 import org.apache.commons.io.IOUtils;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 public class SclTestMarshaller {
 
     public static SCL getSCLFromFile(String filename) throws Exception {
@@ -15,7 +17,12 @@ public class SclTestMarshaller {
         return marshallerWrapper.unmarshall(rawXml,SCL.class);
     }
 
-    public static MarshallerWrapper createWrapper() {
+    public static String assertIsMarshallable(SCL scl) {
+        MarshallerWrapper marshallerWrapper = createWrapper();
+        return assertDoesNotThrow(() -> marshallerWrapper.marshall(scl));
+    }
+
+    private static MarshallerWrapper createWrapper() {
         return MarshallerWrapper.builder()
                 .withProperties("classpath:scl_schema.yml")
                 .build();

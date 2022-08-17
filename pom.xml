@@ -36,6 +36,8 @@
         <sonar.coverage.exclusions>sct-coverage/**</sonar.coverage.exclusions>
         <aggregate.report.dir>../sct-coverage/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>
         <sonar.coverage.jacoco.xmlReportPaths>${basedir}/${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
+        <scl-extension.version>0.9.1</scl-extension.version>
+        <compas-scl-xsd.version>0.0.4</compas-scl-xsd.version>
     </properties>
 
     <dependencyManagement>
@@ -71,7 +73,12 @@
             <dependency>
                 <groupId>org.lfenergy.compas.core</groupId>
                 <artifactId>scl-extension</artifactId>
-                <version>0.8.0</version>
+                <version>${scl-extension.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.lfenergy.compas.xsd</groupId>
+                <artifactId>compas-scl-xsd</artifactId>
+                <version>${compas-scl-xsd.version}</version>
             </dependency>
             <dependency>
                 <groupId>ch.qos.logback</groupId>
@@ -105,6 +112,16 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <groupId>org.lfenergy.compas.xsd</groupId>
+                    <artifactId>compas-scl-xsd</artifactId>
+                    <version>${compas-scl-xsd.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.lfenergy.compas.core</groupId>
+                    <artifactId>scl-extension</artifactId>
+                    <version>${scl-extension.version}</version>
+                </plugin>
+                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.8.1</version>
@@ -118,6 +135,11 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>2.22.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.2.2</version>
                 </plugin>
             </plugins>
         </pluginManagement>

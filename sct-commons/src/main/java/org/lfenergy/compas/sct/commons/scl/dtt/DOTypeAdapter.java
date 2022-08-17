@@ -125,11 +125,6 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
         return parentAdapter.getCurrentElem().getDOType().contains(currentElem);
     }
 
-    @Override
-    protected void addPrivate(TPrivate tPrivate) {
-        currentElem.getPrivate().add(tPrivate);
-    }
-
     public boolean containsDAWithDAName(String da){
         return currentElem.getSDOOrDA()
                 .stream()

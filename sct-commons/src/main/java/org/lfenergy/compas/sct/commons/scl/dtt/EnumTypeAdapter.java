@@ -7,7 +7,6 @@ package org.lfenergy.compas.sct.commons.scl.dtt;
 
 import org.lfenergy.compas.scl2007b4.model.TEnumType;
 import org.lfenergy.compas.scl2007b4.model.TEnumVal;
-import org.lfenergy.compas.scl2007b4.model.TPrivate;
 
 import java.util.List;
 import java.util.Objects;
@@ -54,8 +53,4 @@ public class EnumTypeAdapter extends AbstractDataTypeAdapter<TEnumType>{
         return parentAdapter;
     }
 
-    @Override
-    protected void addPrivate(TPrivate tPrivate) {
-        currentElem.getPrivate().add(tPrivate);
-    }
 }

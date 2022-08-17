@@ -7,13 +7,7 @@ package org.lfenergy.compas.sct.commons.dto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.lfenergy.compas.scl2007b4.model.TMcSecurity;
-import org.lfenergy.compas.scl2007b4.model.TPredefinedTypeOfSecurityEnum;
-import org.lfenergy.compas.scl2007b4.model.TProtocol;
-import org.lfenergy.compas.scl2007b4.model.TSampledValueControl;
-import org.lfenergy.compas.scl2007b4.model.TServiceType;
-import org.lfenergy.compas.scl2007b4.model.TServices;
-import org.lfenergy.compas.scl2007b4.model.TSmpMod;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
 import java.util.Collections;
@@ -36,9 +30,7 @@ public class SMVControlBlock extends ControlBlock<SMVControlBlock>{
         super();
         this.id = tSampledValueControl.getSmvID();
         this.name = tSampledValueControl.getName();
-        if(tSampledValueControl.getConfRev() != null) {
-            this.confRev = tSampledValueControl.getConfRev();
-        }
+        this.confRev = tSampledValueControl.isSetConfRev() ? tSampledValueControl.getConfRev() : null;
         this.desc = tSampledValueControl.getDesc();
         this.dataSetRef = tSampledValueControl.getDatSet();
         Collections.copy(iedNames, tSampledValueControl.getIEDName());

@@ -41,7 +41,7 @@ public class MarshallerWrapper {
             return sw.toString();
         } catch (JAXBException exp) {
             String message = String.format("Error marshalling the Class: %s", exp);
-            log.error(message);
+            log.error(message, exp);
             throw new CompasException(CompasErrorCode.MARSHAL_ERROR_CODE, message);
         }
     }

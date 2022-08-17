@@ -77,7 +77,7 @@ class DOIAdapterTest {
         assertDoesNotThrow(() -> daiAdapter.update(vals));
         assertFalse(daiAdapter.getCurrentElem().getVal().isEmpty());
         TVal tVal = daiAdapter.getCurrentElem().getVal().get(0);
-        assertNull(tVal.getSGroup());
+        assertFalse(tVal.isSetSGroup());
 
         final Map<Long,String > vals2 = new HashMap<>();
         vals2.put(1L,TOTO);
@@ -85,7 +85,7 @@ class DOIAdapterTest {
         assertDoesNotThrow(() -> daiAdapter.update(vals2));
         assertFalse(daiAdapter.getCurrentElem().getVal().isEmpty());
         tVal = daiAdapter.getCurrentElem().getVal().get(0);
-        assertNull(tVal.getSGroup());
+        assertFalse(tVal.isSetSGroup());
     }
 
     @Test

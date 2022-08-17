@@ -7,7 +7,6 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.lfenergy.compas.scl2007b4.model.LN0;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
-import org.lfenergy.compas.scl2007b4.model.TPrivate;
 
 public class LN0Adapter extends AbstractLNAdapter<LN0> {
 
@@ -41,14 +40,16 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
     }
 
     @Override
-    protected void addPrivate(TPrivate tPrivate) {
-        currentElem.getPrivate().add(tPrivate);
-    }
-
-    @Override
     protected  boolean matchesDataAttributes(String dataAttribute){
         return  super.matchesDataAttributes(dataAttribute) ||
                 currentElem.getSampledValueControl().stream().anyMatch(smp -> smp.getName().equals(dataAttribute)) ||
                 currentElem.getGSEControl().stream().anyMatch(gse -> gse.getName().equals(dataAttribute));
+    }
+
+    @Override
+    public void removeAllControlBlocksAndDatasets() {
+        super.removeAllControlBlocksAndDatasets();
+        currentElem.unsetGSEControl();
+        currentElem.unsetSampledValueControl();
     }
 }

@@ -30,8 +30,9 @@ public abstract class AbstractDAIAdapter<P extends SclElementAdapter> extends Sc
     public void setValImport(boolean b){
         currentElem.setValImport(b);
     }
+
     public Boolean isValImport(){
-        return currentElem.isValImport();
+        return currentElem.isSetValImport() ? currentElem.isValImport() : null;
     }
 
     public AbstractDAIAdapter<? extends SclElementAdapter> update(Map<Long, String> daiValues) throws ScdException {
@@ -46,16 +47,16 @@ public abstract class AbstractDAIAdapter<P extends SclElementAdapter> extends Sc
     }
 
     public void update(Long sGroup, String val) throws ScdException {
-        if(currentElem.isValImport() != null && !currentElem.isValImport()){
+        if(currentElem.isSetValImport() && !currentElem.isValImport()){
             String msg = String.format(
                     "DAI(%s) cannot be updated : valImport(false)",currentElem.getName()
             );
             throw new ScdException(msg);
         }
-        Stream<TVal> tValStream = currentElem.getVal().stream() ;
-        if(sGroup != 0){
-            Optional<TVal> tVal = tValStream.filter(tValElem -> tValElem.getSGroup() != null &&
-                    tValElem.getSGroup().equals(sGroup))
+        Stream<TVal> tValStream = currentElem.getVal().stream();
+        if (sGroup != null && sGroup != 0) {
+            Optional<TVal> tVal = tValStream.filter(tValElem -> tValElem.isSetSGroup() &&
+                    sGroup.equals(tValElem.getSGroup()))
                     .findFirst();
             if(tVal.isPresent()){
                 tVal.get().setValue(val);

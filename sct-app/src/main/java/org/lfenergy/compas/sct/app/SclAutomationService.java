@@ -13,6 +13,7 @@ import org.lfenergy.compas.sct.commons.dto.SubNetworkDTO;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclService;
+import org.lfenergy.compas.sct.commons.scl.SubstationService;
 
 import java.util.*;
 
@@ -32,7 +33,7 @@ public class SclAutomationService {
             HeaderDTO.HistoryItem hItem = headerDTO.getHistoryItems().get(0);
             SclService.addHistoryItem(scdAdapter.getCurrentElem(), hItem.getWho(), hItem.getWhat(), hItem.getWhy());
         }
-        SclService.addSubstation(scdAdapter.getCurrentElem(), ssd);
+        SubstationService.addSubstation(scdAdapter.getCurrentElem(), ssd);
         SclService.importSTDElementsInSCD(scdAdapter, stds, comMap);
         return scdAdapter;
     }

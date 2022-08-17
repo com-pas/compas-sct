@@ -7,10 +7,7 @@ package org.lfenergy.compas.sct.commons.scl;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import org.lfenergy.compas.scl.extensions.commons.CompasExtensionsConstants;
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.CommonConstants;
-import org.lfenergy.compas.sct.commons.Utils;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.com.CommunicationAdapter;
@@ -20,26 +17,22 @@ import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.EnumTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.DAITracker;
-import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
-import org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter;
-import org.lfenergy.compas.sct.commons.scl.sstation.VoltageLevelAdapter;
+import org.lfenergy.compas.sct.commons.scl.ied.*;
+import org.lfenergy.compas.sct.commons.util.Utils;
 
-import javax.xml.bind.JAXBElement;
-import javax.xml.namespace.QName;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.lfenergy.compas.sct.commons.CommonConstants.ICD_SYSTEM_VERSION_UUID;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
+import static org.lfenergy.compas.sct.commons.util.PrivateEnum.COMPAS_ICDHEADER;
 
 @Slf4j
 public class SclService {
 
     public static final String UNKNOWN_LDEVICE_S_IN_IED_S = "Unknown LDevice (%s) in IED (%s)";
     public static final String INVALID_OR_MISSING_ATTRIBUTES_IN_EXT_REF_BINDING_INFO = "Invalid or missing attributes in ExtRef binding info";
+    public static final ObjectFactory objectFactory = new ObjectFactory();
 
     private SclService() {
         throw new IllegalStateException("SclService class");
@@ -48,18 +41,8 @@ public class SclService {
     public static SclRootAdapter initScl(Optional<UUID> hId, String hVersion, String hRevision) throws ScdException {
         UUID headerId = hId.orElseGet(UUID::randomUUID);
         SclRootAdapter scdAdapter = new SclRootAdapter(headerId.toString(), hVersion, hRevision);
-        scdAdapter.addPrivate(initSclFileType());
+        scdAdapter.addPrivate(PrivateService.createPrivate(TCompasSclFileType.SCD));
         return scdAdapter;
-    }
-
-    private static TPrivate initSclFileType() {
-        TPrivate fileTypePrivate = new TPrivate();
-        fileTypePrivate.setType(CommonConstants.COMPAS_SCL_FILE_TYPE);
-        JAXBElement<TCompasSclFileType> compasFileType = new JAXBElement<>(
-                new QName(CompasExtensionsConstants.COMPAS_EXTENSION_NS_URI, CommonConstants.SCL_FILE_TYPE),
-                TCompasSclFileType.class, TCompasSclFileType.SCD);
-        fileTypePrivate.getContent().add(compasFileType);
-        return fileTypePrivate;
     }
 
     public static SclRootAdapter addHistoryItem(SCL scd, String who, String what, String why) {
@@ -70,7 +53,6 @@ public class SclService {
     }
 
     public static SclRootAdapter updateHeader(@NonNull SCL scd, @NonNull HeaderDTO headerDTO) {
-
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         HeaderAdapter headerAdapter = sclRootAdapter.getHeaderAdapter();
 
@@ -151,7 +133,6 @@ public class SclService {
         return lDeviceAdapter.getExtRefInfo();
     }
 
-
     public static List<ExtRefBindingInfo> getExtRefBinders(SCL scd, String iedName, String ldInst,
                                                            String lnClass, String lnInst, String prefix, ExtRefSignalInfo signalInfo) throws ScdException {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -206,9 +187,7 @@ public class SclService {
         abstractLNAdapter.updateExtRefBinders(extRefInfo);
     }
 
-
     public static List<ControlBlock<?>> getExtRefSourceInfo(SCL scd, ExtRefInfo extRefInfo) throws ScdException {
-
 
         ExtRefSignalInfo signalInfo = extRefInfo.getSignalInfo();
         if (!signalInfo.isValid()) {
@@ -329,7 +308,6 @@ public class SclService {
                         () -> new ScdException(String.format(UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName))
                 );
 
-
         AbstractLNAdapter<?> lnAdapter = AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
                 .withLnClass(rDtt.getLnClass())
@@ -355,54 +333,6 @@ public class SclService {
                 .collect(Collectors.toSet());
     }
 
-    public static SclRootAdapter addSubstation(@NonNull SCL scd, @NonNull SCL ssd) throws ScdException {
-        SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
-        SclRootAdapter ssdRootAdapter = new SclRootAdapter(ssd);
-        if (scdRootAdapter.getCurrentElem().getSubstation().size() > 1
-                || ssdRootAdapter.currentElem.getSubstation().size() != 1) {
-            throw new ScdException("SCD file must have one or zero Substation and " +
-                    "SCD file must have one Substation. The files are rejected.");
-        }
-        TSubstation ssdTSubstation = ssdRootAdapter.currentElem.getSubstation().get(0);
-        if (scdRootAdapter.getCurrentElem().getSubstation().isEmpty()) {
-            scdRootAdapter.getCurrentElem().getSubstation().add(ssdTSubstation);
-            return scdRootAdapter;
-        } else {
-            TSubstation scdTSubstation = scdRootAdapter.currentElem.getSubstation().get(0);
-            if (scdTSubstation.getName().equalsIgnoreCase(ssdTSubstation.getName())) {
-                SubstationAdapter scdSubstationAdapter = scdRootAdapter.getSubstationAdapter(scdTSubstation.getName());
-                for (TVoltageLevel tvl : ssdTSubstation.getVoltageLevel()) {
-                    updateVoltageLevel(scdSubstationAdapter, tvl);
-                }
-            } else
-                throw new ScdException("SCD file must have only one Substation and the Substation name from SSD file is" +
-                        " different from the one in SCD file. The files are rejected.");
-        }
-        return scdRootAdapter;
-    }
-
-    private static void updateVoltageLevel(@NonNull SubstationAdapter scdSubstationAdapter, TVoltageLevel vl) throws ScdException {
-        if (scdSubstationAdapter.getVoltageLevelAdapter(vl.getName()).isPresent()) {
-            VoltageLevelAdapter scdVoltageLevelAdapter = scdSubstationAdapter.getVoltageLevelAdapter(vl.getName())
-                    .orElseThrow(() -> new ScdException("Unable to create VoltageLevelAdapter"));
-            for (TBay tbay : vl.getBay()) {
-                updateBay(scdVoltageLevelAdapter, tbay);
-            }
-        } else {
-            scdSubstationAdapter.getCurrentElem().getVoltageLevel().add(vl);
-        }
-    }
-
-    private static void updateBay(@NonNull VoltageLevelAdapter scdVoltageLevelAdapter, TBay tBay) {
-        if (scdVoltageLevelAdapter.getBayAdapter(tBay.getName()).isPresent()) {
-            scdVoltageLevelAdapter.getCurrentElem().getBay()
-                    .removeIf(t -> t.getName().equalsIgnoreCase(tBay.getName()));
-            scdVoltageLevelAdapter.getCurrentElem().getBay().add(tBay);
-        } else {
-            scdVoltageLevelAdapter.getCurrentElem().getBay().add(tBay);
-        }
-    }
-
     public static SclRootAdapter importSTDElementsInSCD(@NonNull SclRootAdapter scdRootAdapter, Set<SCL> stds,
                                                         Map<Pair<String, String>, List<String>> comMap) throws ScdException {
 
@@ -415,7 +345,7 @@ public class SclService {
         for (Map.Entry<String, TPrivate> entry : mapIEDNameAndPrivate.entrySet()) {
             String iedName = entry.getKey();
             TPrivate tPrivate = entry.getValue();
-            String icdSysVerUuid = getCompasICDHeader(tPrivate).map(TCompasICDHeader::getICDSystemVersionUUID).orElseThrow(
+            String icdSysVerUuid = PrivateService.getCompasICDHeader(tPrivate).map(TCompasICDHeader::getICDSystemVersionUUID).orElseThrow(
                     () -> new ScdException(ICD_SYSTEM_VERSION_UUID + " is not present in COMPAS-ICDHeader in LNode")
             );
 
@@ -425,7 +355,7 @@ public class SclService {
             SCL std = mapICDSystemVersionUuidAndSTDFile.get(icdSysVerUuid).getRight().get(0);
             SclRootAdapter stdRootAdapter = new SclRootAdapter(std);
             IEDAdapter stdIedAdapter = new IEDAdapter(stdRootAdapter, std.getIED().get(0));
-            Optional<TPrivate> optionalTPrivate = stdIedAdapter.getPrivateHeader(CommonConstants.COMPAS_ICDHEADER);
+            Optional<TPrivate> optionalTPrivate = stdIedAdapter.getPrivateHeader(COMPAS_ICDHEADER.getPrivateType());
             if (optionalTPrivate.isPresent() && comparePrivateCompasICDHeaders(optionalTPrivate.get(), tPrivate)) {
                 copyCompasICDHeaderFromLNodePrivateIntoSTDPrivate(optionalTPrivate.get(), tPrivate);
             } else throw new ScdException("COMPAS-ICDHeader is not the same in Substation and in IED");
@@ -448,11 +378,12 @@ public class SclService {
         }
     }
 
-    private static String stdCheckFormatExceptionMessage(TPrivate key) {
-        return  CommonConstants.HEADER_ID + " = " + getCompasICDHeader(key).map(TCompasICDHeader::getHeaderId).orElse(null) +
-                CommonConstants.HEADER_VERSION + " = " + getCompasICDHeader(key).map(TCompasICDHeader::getHeaderVersion).orElse(null) +
-                CommonConstants.HEADER_REVISION + " = " + getCompasICDHeader(key).map(TCompasICDHeader::getHeaderRevision).orElse(null) +
-                "and " + ICD_SYSTEM_VERSION_UUID + " = " + getCompasICDHeader(key).map(TCompasICDHeader::getICDSystemVersionUUID).orElse(null);
+    private static String stdCheckFormatExceptionMessage(TPrivate key) throws ScdException {
+        Optional<TCompasICDHeader> optionalCompasICDHeader = PrivateService.getCompasICDHeader(key);
+        return  HEADER_ID + " = " + optionalCompasICDHeader.map(TCompasICDHeader::getHeaderId).orElse(null) +
+                HEADER_VERSION + " = " + optionalCompasICDHeader.map(TCompasICDHeader::getHeaderVersion).orElse(null) +
+                HEADER_REVISION + " = " + optionalCompasICDHeader.map(TCompasICDHeader::getHeaderRevision).orElse(null) +
+                "and " + ICD_SYSTEM_VERSION_UUID + " = " + optionalCompasICDHeader.map(TCompasICDHeader::getICDSystemVersionUUID).orElse(null);
     }
 
     private static Map<String, TPrivate> createMapIEDNameAndPrivate(SclRootAdapter scdRootAdapter) {
@@ -462,30 +393,30 @@ public class SclService {
                 .map(TFunction::getLNode).flatMap(Collection::stream)
                 .map(TLNode::getPrivate).flatMap(Collection::stream)
                 .filter(tPrivate ->
-                        tPrivate.getType().equals(CommonConstants.COMPAS_ICDHEADER)
-                                && getCompasICDHeader(tPrivate).isPresent() && getCompasICDHeader(tPrivate).get().getIEDName() != null)
-                .collect(Collectors.toMap(tPrivate -> getCompasICDHeader(tPrivate).get().getIEDName(), Function.identity()));
+                        tPrivate.getType().equals(COMPAS_ICDHEADER.getPrivateType())
+                                && PrivateService.getCompasICDHeader(tPrivate).isPresent() && PrivateService.getCompasICDHeader(tPrivate).get().getIEDName() != null)
+                .collect(Collectors.toMap(tPrivate -> PrivateService.getCompasICDHeader(tPrivate).get().getIEDName(), Function.identity()));
     }
 
     private static Map<String, Pair<TPrivate, List<SCL>>> createMapICDSystemVersionUuidAndSTDFile(Set<SCL> stds) {
         Map<String, Pair<TPrivate, List<SCL>>> stringSCLMap = new HashMap<>();
-        stds.forEach(std -> std.getIED().forEach(ied -> ied.getPrivate().forEach(tp -> {
-            getCompasICDHeader(tp).map(TCompasICDHeader::getICDSystemVersionUUID).ifPresent(icdSysVer -> {
-                Pair<TPrivate, List<SCL>> pair = stringSCLMap.get(icdSysVer);
-                List<SCL> list = pair != null ? pair.getRight() : new ArrayList<>();
-                list.add(std);
-                stringSCLMap.put(icdSysVer, Pair.of(tp, list));
-            });
-        })));
+        stds.forEach(std -> std.getIED().forEach(ied -> ied.getPrivate().forEach(tp ->
+                PrivateService.getCompasICDHeader(tp).map(TCompasICDHeader::getICDSystemVersionUUID).ifPresent(icdSysVer -> {
+                    Pair<TPrivate, List<SCL>> pair = stringSCLMap.get(icdSysVer);
+                    List<SCL> list = pair != null ? pair.getRight() : new ArrayList<>();
+                    list.add(std);
+                    stringSCLMap.put(icdSysVer, Pair.of(tp, list));
+                })
+        )));
         return stringSCLMap;
     }
 
     private static boolean comparePrivateCompasICDHeaders(TPrivate iedPrivate, TPrivate scdPrivate) throws ScdException {
-        TCompasICDHeader iedCompasICDHeader = getCompasICDHeader(iedPrivate).orElseThrow(
-                () -> new ScdException(CommonConstants.COMPAS_ICDHEADER + "not found in IED Private "));
-        TCompasICDHeader scdCompasICDHeader = getCompasICDHeader(scdPrivate).orElseThrow(
-                () -> new ScdException(CommonConstants.COMPAS_ICDHEADER + "not found in LNode Private "));
-       return iedCompasICDHeader.getIEDType().equals(scdCompasICDHeader.getIEDType())
+        TCompasICDHeader iedCompasICDHeader = PrivateService.getCompasICDHeader(iedPrivate).orElseThrow(
+                () -> new ScdException(COMPAS_ICDHEADER + "not found in IED Private "));
+        TCompasICDHeader scdCompasICDHeader = PrivateService.getCompasICDHeader(scdPrivate).orElseThrow(
+                () -> new ScdException(COMPAS_ICDHEADER + "not found in LNode Private "));
+        return iedCompasICDHeader.getIEDType().equals(scdCompasICDHeader.getIEDType())
                 && iedCompasICDHeader.getICDSystemVersionUUID().equals(scdCompasICDHeader.getICDSystemVersionUUID())
                 && iedCompasICDHeader.getVendorName().equals(scdCompasICDHeader.getVendorName())
                 && iedCompasICDHeader.getIEDredundancy().equals(scdCompasICDHeader.getIEDredundancy())
@@ -498,20 +429,29 @@ public class SclService {
     }
 
     private static void copyCompasICDHeaderFromLNodePrivateIntoSTDPrivate(TPrivate stdPrivate, TPrivate lNodePrivate) throws ScdException {
-        TCompasICDHeader lNodeCompasICDHeader = getCompasICDHeader(lNodePrivate).orElseThrow(
-                () -> new ScdException(CommonConstants.COMPAS_ICDHEADER + "not found in LNode Private "));
+        TCompasICDHeader lNodeCompasICDHeader = PrivateService.getCompasICDHeader(lNodePrivate).orElseThrow(
+                () -> new ScdException(COMPAS_ICDHEADER + " not found in LNode Private "));
         stdPrivate.getContent().clear();
-        stdPrivate.getContent().add(lNodeCompasICDHeader);
-
+        stdPrivate.getContent().add(objectFactory.createICDHeader(lNodeCompasICDHeader));
     }
 
-    private static Optional<TCompasICDHeader> getCompasICDHeader(TPrivate tPrivate) {
-        Optional<JAXBElement<TCompasICDHeader>> tCompasICDHeader = !tPrivate.getType().equals(CommonConstants.COMPAS_ICDHEADER) ? Optional.empty() :
-                tPrivate.getContent().stream()
-                        .filter(JAXBElement.class::isInstance)
-                        .map(o -> (JAXBElement<TCompasICDHeader>) o)
-                        .findFirst();
-        return tCompasICDHeader.map(JAXBElement::getValue);
+    public static void removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(final SCL scl) {
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scl);
+        List<LDeviceAdapter> lDeviceAdapters = sclRootAdapter.getIEDAdapters().stream()
+                .map(IEDAdapter::getLDeviceAdapters).flatMap(List::stream).collect(Collectors.toList());
+
+        // LN0
+        lDeviceAdapters.stream()
+                .map(LDeviceAdapter::getLN0Adapter)
+                .forEach(ln0 -> {
+                    ln0.removeAllControlBlocksAndDatasets();
+                    ln0.removeAllExtRefSourceBindings();
+                });
+
+        // Other LN
+        lDeviceAdapters.stream()
+                .map(LDeviceAdapter::getLNAdapters).flatMap(List::stream)
+                .forEach(LNAdapter::removeAllControlBlocksAndDatasets);
     }
 
 }

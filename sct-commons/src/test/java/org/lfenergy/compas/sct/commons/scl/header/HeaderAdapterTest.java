@@ -66,7 +66,7 @@ class HeaderAdapterTest {
         TPrivate tPrivate = new TPrivate();
         tPrivate.setType("Private Type");
         tPrivate.setSource("Private Source");
-        assertThrows(IllegalArgumentException.class, () -> hAdapter.addPrivate(tPrivate));
+        assertThrows(UnsupportedOperationException.class, () -> hAdapter.addPrivate(tPrivate));
 
     }
 }

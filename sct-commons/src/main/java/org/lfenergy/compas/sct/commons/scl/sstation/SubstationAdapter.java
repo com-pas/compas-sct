@@ -4,13 +4,14 @@
 
 package org.lfenergy.compas.sct.commons.scl.sstation;
 
-import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.scl2007b4.model.TSubstation;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class SubstationAdapter extends SclElementAdapter<SclRootAdapter, TSubstation> {
 
@@ -37,6 +38,11 @@ public class SubstationAdapter extends SclElementAdapter<SclRootAdapter, TSubsta
         return parentAdapter.getCurrentElem().getSubstation().contains(currentElem);
     }
 
+    @Override
+    protected String elementXPath() {
+        return String.format("Substation[%s]", Utils.xpathAttributeFilter("name", currentElem.isSetName() ? currentElem.getName() : null));
+    }
+
     public Optional<VoltageLevelAdapter> getVoltageLevelAdapter(String vLevelName) {
         return currentElem.getVoltageLevel()
                 .stream()
@@ -45,8 +51,11 @@ public class SubstationAdapter extends SclElementAdapter<SclRootAdapter, TSubsta
                 .findFirst();
     }
 
-    @Override
-    protected void addPrivate(TPrivate tPrivate) {
-        currentElem.getPrivate().add(tPrivate);
+    public Stream<VoltageLevelAdapter> streamVoltageLevelAdapters() {
+        if (!currentElem.isSetVoltageLevel()){
+            return Stream.empty();
+        }
+        return currentElem.getVoltageLevel().stream().map(tVoltageLevel -> new VoltageLevelAdapter(this, tVoltageLevel));
     }
+
 }

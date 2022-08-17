@@ -13,7 +13,6 @@
         <version>local-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.lfenergy.compas</groupId>
     <artifactId>sct-app</artifactId>
     <version>local-SNAPSHOT</version>
     <name>SCT-APP</name>
@@ -112,7 +111,10 @@
                                 <artifactItem>
                                     <groupId>org.lfenergy.compas.xsd</groupId>
                                     <artifactId>compas-scl-xsd</artifactId>
-                                    <version>0.0.4</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.lfenergy.compas.core</groupId>
+                                    <artifactId>scl-extension</artifactId>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.lfenergy.compas.core</groupId>

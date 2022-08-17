@@ -5,6 +5,7 @@
 package org.lfenergy.compas.sct.commons.scl;
 
 import lombok.Getter;
+import org.lfenergy.compas.scl2007b4.model.TBaseElement;
 import org.lfenergy.compas.scl2007b4.model.TPrivate;
 
 
@@ -43,7 +44,21 @@ public abstract class SclElementAdapter<P extends SclElementAdapter, T> {
 
     protected abstract boolean amChildElementRef();
 
-    protected abstract void addPrivate(TPrivate tPrivate);
+    public void addPrivate(TPrivate tPrivate){
+        if (currentElem instanceof TBaseElement){
+            ((TBaseElement) currentElem).getPrivate().add(tPrivate);
+        } else {
+            throw new UnsupportedOperationException("Not implemented for class " + this.getClass().getName());
+        }
+    }
+
+    public String getXPath(){
+        String parentXpath = (parentAdapter != null) ? parentAdapter.getXPath() : "";
+        return parentXpath + "/" + elementXPath();
+    }
+
+    protected String elementXPath(){
+        return String.format("undefined(%s)", currentElem.getClass().getSimpleName());
+    }
 
 }
-
