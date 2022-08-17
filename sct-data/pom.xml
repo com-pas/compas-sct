@@ -14,7 +14,6 @@
         <version>local-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.lfenergy.compas</groupId>
     <artifactId>sct-data</artifactId>
     <version>local-SNAPSHOT</version>
     <name>SCT-DATA</name>
