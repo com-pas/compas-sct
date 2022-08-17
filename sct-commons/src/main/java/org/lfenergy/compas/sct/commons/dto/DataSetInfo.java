@@ -28,6 +28,11 @@ public class DataSetInfo extends LNodeMetaDataEmbedder{
         this.name = name;
     }
 
+    /**
+     * Convert DataSet object to DataSetInfo object
+     * @param tDataSet object
+     * @return DataSetInfo object value
+     */
     public static DataSetInfo from(TDataSet tDataSet) {
         DataSetInfo dataSetInfo = new DataSetInfo();
         dataSetInfo.name = tDataSet.getName();
@@ -39,23 +44,44 @@ public class DataSetInfo extends LNodeMetaDataEmbedder{
         return dataSetInfo;
     }
 
+    /**
+     * Get Set of DataSet from LnAdapter
+     * @param lnAdapter object LnAdapter
+     * @return Set of DataSetInfo
+     */
     public static Set<DataSetInfo> getDataSets(AbstractLNAdapter<? extends TAnyLN> lnAdapter){
         return lnAdapter.getDataSet(null)
                 .stream().map(DataSetInfo::from).collect(Collectors.toSet());
     }
 
+    /**
+     * Add FCDA to FCDA list
+     * @param fcdaInfo object FCDAInfo containing FCDA datas
+     */
     public void addFCDAInfo(FCDAInfo fcdaInfo){
         fcdaInfos.add(fcdaInfo);
     }
 
+    /**
+     * Get FCDA list from DtaSetInfo
+     * @return FCDA list
+     */
     public List<FCDAInfo> getFCDAInfos(){
         return Collections.unmodifiableList(fcdaInfos);
     }
 
+    /**
+     * Set DataSet name
+     * @param name string DataSet name
+     */
     public void setName(String name){
         this.name = name;
     }
 
+    /**
+     * Check DataSet validity
+     * @return validity state
+     */
     public boolean isValid(){
         if(name.length() > 32 || fcdaInfos.isEmpty()){
             return false;

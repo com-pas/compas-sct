@@ -46,6 +46,11 @@ public class ExtRefInfo extends LNodeMetaDataEmbedder{
         return extRefInfo;
     }
 
+    /**
+     * Check match between FCDA and ExtRef information (for binding)
+     * @param tfcda FCDA data object
+     * @return match state
+     */
     public boolean matchFCDA(@NonNull TFCDA tfcda){
         boolean returnValue = true;
         if(AbstractLNAdapter.isNull(tfcda)) {

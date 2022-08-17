@@ -11,20 +11,20 @@ SPDX-License-Identifier: Apache-2.0
 [![Slack](https://raw.githubusercontent.com/com-pas/compas-architecture/master/public/LFEnergy-slack.svg)](http://lfenergy.slack.com/)
 
 # System Configuration Tool (SCT) components
-The SCT tool is a library for generating SCD (System Confifuration Description) files based on IEC 61850 constraints.
-It is developped with Java (POJO) and is based on Chain of Responsability pattern.
-It's architecture is modular and is composed by 4 modules (sct-app, sct-service, sct-commons and sct-data).
-+ ***sct-app*** : is the high level part and contains a service which allows automatic generation of the SCD file.
-The service call sct-commons functions to realize staffs.
+The SCT tool is a library for generating SCD (System Confifuration Description) files based on IEC 61850 standard.
+The code is written with Java (POJO) and is based on Chain of Responsability pattern.
+It's architecture is modular and is composed by 3 modules (sct-app, sct-commons and sct-data).
+The main feature is to generate a SCD file from SSD (Substation Specification Description) and STD (System Template definition) files.
++ ***sct-app*** : is the high level part and contains a service which allows automatic generation of the SCD file. This last 
+calls sct-commons functions to realize features.
 For further use of the SCT tool this part could be used to add end points or other monitoring tools to use efficiently the SCT. 
 This will allow to dockerize easily the tool for more portal and large usage.
-+ ***sct-service*** :
-+ ***sct-commons*** : contains implementation of basic elements of SCLin low level methods and functions (midle level methods) to realize needed operations for them in order to allow
++ ***sct-commons*** : contains implementation of basic elements of SCLin low level methods and functions (middle level methods) to realize needed operations for them in order to allow
 easy manipulation of SCL files.
 + ***sct-data*** : module which propose some interfaces to be implemented in order to interact with databases.
 
-The main usage of the product is generation of SCD file (automatically or manually by calling low level functions). 
-Perspectives are given to users for other usage in coherence with the standard IEC-61850 as the SCT stands for a library.
+The main use case of the product is generation of SCD file (automatically or manually by calling low level functions). 
+Perspectives are given to users to implement other use cases in coherence with the standard IEC-61850 as the SCT stands for a library for now.
 
 For more informations about the project documentation (architecture, code documentation, etc), please refer to [Documentation](https://com-pas.github.io/compas-sct/) 
 

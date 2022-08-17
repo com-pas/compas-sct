@@ -31,11 +31,25 @@ public abstract class ControlBlock<T extends ControlBlock> extends LNodeMetaData
     protected List<TControlWithIEDName.IEDName> iedNames = new ArrayList<>();
     protected TPredefinedTypeOfSecurityEnum securityEnable = TPredefinedTypeOfSecurityEnum.NONE;
 
+    /**
+     * Abstract method for getting classe type
+     * @return classe type
+     */
     protected abstract Class<T> getClassType();
+
+    /**
+     * Get ServiceType
+     * @return ServiceType enum object
+     */
     public abstract TServiceType getServiceType();
 
     public abstract <U extends TControl> U createControlBlock();
 
+    /**
+     * Cast object to specified type
+     * @param obj object to cast
+     * @return object casted on specified type
+     */
     public T cast(Object obj){
         if (!obj.getClass().isAssignableFrom(getClassType())) {
             throw new UnsupportedOperationException("Cannot cast object to " + getClassType());
@@ -43,6 +57,10 @@ public abstract class ControlBlock<T extends ControlBlock> extends LNodeMetaData
         return (T) obj;
     }
 
+    /**
+     * Validate Control block structure
+     * @throws ScdException
+     */
     public void validateCB() throws ScdException {
 
         if(id == null || id.isBlank()){
@@ -60,6 +78,11 @@ public abstract class ControlBlock<T extends ControlBlock> extends LNodeMetaData
         }
     }
 
+    /**
+     * Check Control block's destination is present in SCD file
+     * @param sclRootAdapter main adapter containing SCD file
+     * @throws ScdException
+     */
     public void validateDestination(SclRootAdapter sclRootAdapter) throws ScdException {
         for(TControlWithIEDName.IEDName iedName : iedNames){
             IEDAdapter iedAdapter =sclRootAdapter.getIEDAdapterByName(iedName.getValue());
@@ -82,11 +105,20 @@ public abstract class ControlBlock<T extends ControlBlock> extends LNodeMetaData
         }
     }
 
+    /**
+     * Check if Security is enabled in IED (Services)
+     * @param iedAdapter IED adapter containing IED datas
+     * @throws ScdException
+     */
     public final void validateSecurityEnabledValue(IEDAdapter iedAdapter) throws ScdException {
         TServices tServices = iedAdapter.getServices();
         validateSecurityEnabledValue(tServices);
     }
 
+    /**
+     * Get ConfRev value
+     * @return confRev long value
+     */
     protected Long getConfRev() {
         if(dataSetRef == null || dataSetRef.isBlank()){
             return 0L;
@@ -94,8 +126,18 @@ public abstract class ControlBlock<T extends ControlBlock> extends LNodeMetaData
         return 10000L ;
     }
 
+    /**
+     * Abstract method to check validity of Security Enable state for Control blocks
+     * @param tServices Service object
+     * @throws ScdException
+     */
     protected abstract void validateSecurityEnabledValue(TServices tServices) throws ScdException;
 
+    /**
+     * Create Control block iedName element from ClientLN element
+     * @param clientLN property ClientLN
+     * @return IEDName of Control
+     */
     public static TControlWithIEDName.IEDName toIEDName(TClientLN clientLN){
 
         TControlWithIEDName.IEDName iedName = new TControlWithIEDName.IEDName();
@@ -109,6 +151,11 @@ public abstract class ControlBlock<T extends ControlBlock> extends LNodeMetaData
         return iedName;
     }
 
+    /**
+     * Get Control block settings from Service
+     * @param tServices Service object
+     * @return ServiceSettingsNoDynEnum enum value
+     */
     public TServiceSettingsNoDynEnum getControlBlockServiceSetting(TServices tServices){
         if(tServices == null) {
             return TServiceSettingsNoDynEnum.FIX;
@@ -126,6 +173,10 @@ public abstract class ControlBlock<T extends ControlBlock> extends LNodeMetaData
         return TServiceSettingsNoDynEnum.FIX;
     }
 
+    /**
+     * Get Control block
+     * @return Control block's string value from IEDNames
+     */
     @Override
     public String toString() {
         String values = iedNames.stream().map(TControlWithIEDName.IEDName::getValue)

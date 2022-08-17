@@ -74,6 +74,10 @@ public class ExtRefBindingInfo {
         return Objects.hash(iedName, ldInst, prefix, lnClass, lnInst, doName, daName, serviceType);
     }
 
+    /**
+     * Check validity of ExtRef binding information
+     * @return validity state
+     */
     public boolean isValid() {
         final String validationRegex = DaTypeName.VALIDATION_REGEX;
         String doRef = doName == null ? "" : doName.toString();
@@ -91,6 +95,11 @@ public class ExtRefBindingInfo {
                 (TLLN0Enum.LLN_0.value().equals(lnClass) || !StringUtils.isBlank(lnInst)) ;
     }
 
+    /**
+     * Check dependency between ExtRef binding information and ExtRef
+     * @param tExtRef object containing ExtRef data's'
+     * @return dependency state
+     */
     public boolean isWrappedIn(TExtRef tExtRef){
         return Objects.equals(iedName,tExtRef.getIedName()) &&
                 Objects.equals(ldInst,tExtRef.getLdInst()) &&
@@ -100,6 +109,10 @@ public class ExtRefBindingInfo {
                 (tExtRef.getServiceType() == null || Objects.equals(serviceType, tExtRef.getServiceType()));
     }
 
+    /**
+     * Check nullability of ExtRef binding information
+     * @return  nullability state
+     */
     public boolean isNull(){
         return iedName == null &&
                 ldInst == null &&
@@ -111,7 +124,10 @@ public class ExtRefBindingInfo {
                 serviceType == null;
     }
 
-
+    /**
+     * Convert to string
+     * @return ExtRef binding information formatted to string
+     */
     @Override
     public String toString() {
         return "ExtRefBindingInfo{" +

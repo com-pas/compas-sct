@@ -33,6 +33,10 @@ public class DoTypeName extends DataTypeName {
         return doTypeName;
     }
 
+    /**
+     * Copy DO's content
+     * @param doName DO object
+     */
     public void merge(DoTypeName doName) {
         if(!isDefined()) return;
         if(cdc == null)
