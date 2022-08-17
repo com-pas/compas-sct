@@ -172,6 +172,11 @@
                                     <groupId>org.lfenergy.compas.core</groupId>
                                     <artifactId>scl-extension</artifactId>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.lfenergy.compas.core</groupId>
+                                    <artifactId>scl-extension</artifactId>
+                                    <version>0.8.0</version>
+                                </artifactItem>
                             </artifactItems>
                             <outputDirectory>${project.build.directory}</outputDirectory>
                         </configuration>
