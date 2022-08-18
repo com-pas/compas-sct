@@ -16,9 +16,10 @@ github:
 
 github_username:  com-pas
 git_repo:         compas-sct
-git_branch:       main
+git_branch:       feat/117_Documentation_SCD_Generation_Process
 
 baseurl:          /compas-sct
+contributingUrl:  /contributing
 
 defaults:
   - 

@@ -1,8 +1,14 @@
 ## Description of SCD file generation from SSD file and a set of STD files
 
+### Table Of Contents
+
+* [Introduction](#introduction)
+* [Modeling of functional specifications](#modeling-of-functional-specifications)
+
+### Introduction
 The automatic generation of SCD file holds on 3 steps which are described below.
 
-### Step 1
+#### Step 1
 
 <img width="728" alt="Step1-SCD_Initialisation" src="https://user-images.githubusercontent.com/76168202/164478938-0390c05e-ba30-4157-ac8a-dc46189f2f23.PNG">
 
@@ -16,7 +22,7 @@ For the SCD file initialisation, see diagram above:
 - activation of used LDevice and desactivation of unused LDevice according to Function/LNode contained into /Substation
 
 
-### Step 2
+#### Step 2
 
 <img width="436" alt="Step2-Binding_in_current_SCD" src="https://user-images.githubusercontent.com/76168202/164479312-45065d53-7d69-45ec-8c0e-ff97945952dd.PNG">
 
@@ -26,7 +32,7 @@ For the binding of SCD, see diagram above:
 - for each active or untested ExtRef.desc with an existing Extref.iedName attribute and without compas:Flow@CriteriaAssociationID Private attribute, copy the right /IED.name into compas:Flow@ExtRefiedName and into Extref.iedName.
 
 
-### Step 3
+#### Step 3
 
 <img width="791" alt="Step3-DataSet_and_CB_creation_then_ExtRef_update_in_current_SCD" src="https://user-images.githubusercontent.com/76168202/164479442-4245a86a-71b3-4b39-a253-f2e0ae75522e.PNG">
 
@@ -42,7 +48,8 @@ For the process of DataSet and Control Block creation and then Extref update, se
 - Each group of lines is used to create a new DataSet and Control Block
 - Then for each ExtRef signal, create and populate ExtRef @srcXXX attributes
 
-### Sequence diagram
+### Modeling of functional specifications
+#### Sequence diagram
 The sequence diagram below summarize the process
 
 ![img_2.png](img.png)
