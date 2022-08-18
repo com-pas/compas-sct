@@ -30,14 +30,28 @@ public class DaTypeName extends DataTypeName{
     private boolean valImport;
     private Map<Long,String> daiValues = new HashMap<>();
 
+    /**
+     * Constructor
+     * @param daName input
+     */
     public DaTypeName(String daName) {
         super(daName);
     }
 
+    /**
+     * Constructor
+     * @param name input
+     * @param names input
+     */
     public DaTypeName(String name, String names) {
         super(name, names);
     }
 
+    /**
+     * Initializes DaTypeName
+     * @param dataName input
+     * @return DaTypeName object
+     */
     public static DaTypeName from(DaTypeName dataName){
         DaTypeName daTypeName = new DaTypeName(dataName.toString());
         if(dataName.isDefined()) {
@@ -52,7 +66,7 @@ public class DaTypeName extends DataTypeName{
     }
 
     /**
-     * Check valImport state
+     * Checks valImport state
      * @return boolean value of valImport
      */
     public boolean isValImport(){
@@ -60,7 +74,7 @@ public class DaTypeName extends DataTypeName{
     }
 
     /**
-     * Check if DA is updatable
+     * Checks if DA is updatable
      * @return boolean value of DA state
      */
     public boolean isUpdatable(){
@@ -75,7 +89,7 @@ public class DaTypeName extends DataTypeName{
     }
 
     /**
-     * Add DAI values to list of DAI values
+     * Adds DAI values to list of DAI values
      * @param vals list of DAI values
      */
     public void addDaiValues(List<TVal> vals) {
@@ -87,7 +101,7 @@ public class DaTypeName extends DataTypeName{
     }
 
     /**
-     * Add DAI value to Map of DAI values
+     * Adds DAI value to Map of DAI values
      * @param val DAI value
      */
     public void addDaiValue(TVal val) {
@@ -99,7 +113,7 @@ public class DaTypeName extends DataTypeName{
     }
 
     /**
-     *  Add DAI value to Map of DAI values
+     *  Adds DAI value to Map of DAI values
      * @param sg Setting group value
      * @param val value
      */
@@ -112,7 +126,7 @@ public class DaTypeName extends DataTypeName{
     }
 
     /**
-     * Copy DA's contain
+     * Copies DA's contain
      * @param daName DA object
      */
     public void merge(DaTypeName daName) {

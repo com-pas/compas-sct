@@ -29,6 +29,10 @@ public class ExtRefSignalInfo{
     private String intAddr;
     private TServiceType pServT;
 
+    /**
+     * Constructor
+     * @param tExtRef input
+     */
     public ExtRefSignalInfo(TExtRef tExtRef){
         desc = tExtRef.getDesc();
         if(!tExtRef.getPLN().isEmpty()) {
@@ -41,6 +45,11 @@ public class ExtRefSignalInfo{
     }
 
 
+    /**
+     * Initialize ExtRef
+     * @param signalInfo object containing ExtRef data's'
+     * @return ExtRef object
+     */
     public static TExtRef initExtRef(ExtRefSignalInfo signalInfo) {
 
         TExtRef extRef = new TExtRef();
@@ -54,8 +63,11 @@ public class ExtRefSignalInfo{
         return extRef;
     }
 
-
-
+    /**
+     * Check that if TExtRef object is wrappen in ExtRefSignalInfo object vice versa
+     * @param tExtRef object containing ExtRef data's'
+     * @return wrapper state
+     */
     public boolean isWrappedIn(TExtRef tExtRef) {
         ExtRefSignalInfo that = new ExtRefSignalInfo(tExtRef);
         return Objects.equals(desc, that.desc) &&
@@ -66,6 +78,10 @@ public class ExtRefSignalInfo{
                 pServT == that.pServT;
     }
 
+    /**
+     * Check validity of pDO and pDA values
+     * @return validity state
+     */
     public boolean isValid() {
         if(StringUtils.isBlank(pDO) || StringUtils.isBlank(intAddr)){
             return false;
@@ -97,6 +113,10 @@ public class ExtRefSignalInfo{
         return true;
     }
 
+    /**
+     * Convert ExtRefSignalInfo to string value
+     * @return ExtRefSignalInfo formatted to string
+     */
     @Override
     public String toString() {
         return "ExtRefSignalInfo{" +

@@ -20,8 +20,8 @@ public class ConnectedApDTO  {
     private String apName;
 
     /**
-     * Create ConnectedApDTO from constructor
-     * @param connectedAPAdapter object containing data to use
+     * Constructor
+     * @param connectedAPAdapter input
      */
     public ConnectedApDTO(ConnectedAPAdapter connectedAPAdapter) {
         this.iedName = connectedAPAdapter.getIedName();

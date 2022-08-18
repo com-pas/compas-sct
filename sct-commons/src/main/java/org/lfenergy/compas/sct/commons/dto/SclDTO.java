@@ -23,10 +23,19 @@ public class SclDTO {
     protected short release = SclRootAdapter.RELEASE;
     protected HeaderDTO header;
 
+    /**
+     * Constructor
+     * @param id input
+     */
     public SclDTO(UUID id) {
         this.id = id;
     }
 
+    /**
+     * Initializes SclDTO
+     * @param sclRootAdapter input
+     * @return SclDTO object value
+     */
     public static SclDTO from(SclRootAdapter sclRootAdapter) {
         SclDTO sclDTO = new SclDTO();
         sclDTO.version = sclRootAdapter.getSclVersion();
@@ -36,6 +45,10 @@ public class SclDTO {
         return sclDTO;
     }
 
+    /**
+     * Gets History Who parameter value
+     * @return string who value
+     */
     @JsonIgnore
     public String getWho() {
         if(header != null && !header.getHistoryItems().isEmpty()){
@@ -44,6 +57,10 @@ public class SclDTO {
         return "";
     }
 
+    /**
+     * Gets History What value
+     * @return string what value
+     */
     @JsonIgnore
     public String getWhat() {
         if(header != null && !header.getHistoryItems().isEmpty()){
@@ -52,6 +69,10 @@ public class SclDTO {
         return "";
     }
 
+    /**
+     * Gets History Why value
+     * @return string why value
+     */
     @JsonIgnore
     public String getWhy() {
         if(header != null && !header.getHistoryItems().isEmpty()){
@@ -60,6 +81,10 @@ public class SclDTO {
         return "";
     }
 
+    /**
+     * Gets History When value
+     * @return string when value
+     */
     @JsonIgnore
     public String getWhen() {
         if(header != null && !header.getHistoryItems().isEmpty()){

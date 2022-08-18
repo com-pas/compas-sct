@@ -31,6 +31,11 @@ public class ResumedDataTemplate {
     @NonNull
     private DaTypeName daName = new DaTypeName("");
 
+    /**
+     * Copies sumarized DataTypeTemplate informations to another one
+     * @param dtt input
+     * @return Updated ResumedDataTemplate object
+     */
     public static ResumedDataTemplate copyFrom(ResumedDataTemplate dtt){
         ResumedDataTemplate resumedDataTemplate = new ResumedDataTemplate();
         resumedDataTemplate.prefix = dtt.prefix;
@@ -43,6 +48,10 @@ public class ResumedDataTemplate {
         return resumedDataTemplate;
     }
 
+    /**
+     * Checks if DA/DO is updatable
+     * @return Updatable state
+     */
     public boolean isUpdatable(){
         return daName.isDefined() && daName.isUpdatable();
     }
@@ -53,6 +62,10 @@ public class ResumedDataTemplate {
         return iedName + ldInst + "/" + getLNRef();
     }
 
+    /**
+     * Gets LNode reference informations
+     * @return String LNode information concatenated
+     */
     @JsonIgnore
     public String getLNRef(){
         StringBuilder stringBuilder = new StringBuilder();
@@ -71,25 +84,46 @@ public class ResumedDataTemplate {
         return stringBuilder.toString();
     }
 
+    /**
+     * Gets Data Attributes value
+     * @return String Data Attributes reference by concatenated DO reference and DA reference
+     */
     @JsonIgnore
     public String getDataAttributes(){
         return getDoRef() + "." + getDaRef();
     }
+
+    /**
+     * Gets DO reference value
+     * @return String DO (Data Object) reference value
+     */
     @JsonIgnore
     public String getDoRef(){
         return isDoNameDefined() ? doName.toString() : "";
     }
 
+    /**
+     * Gets DA (Data Attribut) reference value
+     * @return DA reference value
+     */
     @JsonIgnore
     public String getDaRef(){
         return isDaNameDefined() ? daName.toString() : "";
     }
 
+    /**
+     * Gets FC (Functional Constraints) reference value
+     * @return
+     */
     @JsonIgnore
     public TFCEnum getFc(){
         return daName.isDefined() ? daName.getFc() : null;
     }
 
+    /**
+     * Sets DA/DO FC's value
+     * @param fc input
+     */
     @JsonIgnore
     public void setFc(TFCEnum fc){
         if(isDaNameDefined()){
@@ -99,11 +133,19 @@ public class ResumedDataTemplate {
         }
     }
 
+    /**
+     * Gets DA/DO CDC's value
+     * @return CDC enum value
+     */
     @JsonIgnore
     public TPredefinedCDCEnum getCdc(){
         return daName.isDefined() ? doName.getCdc() : null;
     }
 
+    /**
+     * Sets DA/DO CDC's value
+     * @param cdc input
+     */
     @JsonIgnore
     public void setCdc(TPredefinedCDCEnum cdc){
         if(isDoNameDefined()){
@@ -113,18 +155,30 @@ public class ResumedDataTemplate {
         }
     }
 
+    /**
+     * Gets SDO names'
+     * @return List of SDO name
+     */
     @JsonIgnore
     public List<String> getSdoNames(){
         if(!isDoNameDefined()) return new ArrayList<>();
         return List.of(doName.getStructNames().toArray(new String[0]));
     }
 
+    /**
+     * GEts BDA names'
+     * @return List of BDA name
+     */
     @JsonIgnore
     public List<String> getBdaNames(){
         if(!isDaNameDefined()) return new ArrayList<>();
         return List.of(daName.getStructNames().toArray(new String[0]));
     }
 
+    /**
+     * Adds DO Structure name
+     * @param structName input
+     */
     public void addDoStructName(String structName){
         if(isDoNameDefined()) {
             doName.addStructName(structName);
@@ -133,6 +187,10 @@ public class ResumedDataTemplate {
         }
     }
 
+    /**
+     * Adds DA Structure name
+     * @param structName input
+     */
     public void addDaStructName(String structName){
         if(isDaNameDefined()) {
             daName.addStructName(structName);
@@ -141,19 +199,35 @@ public class ResumedDataTemplate {
         }
     }
 
+    /**
+     * Checks if DO name is defined
+     * @return definition state
+     */
     public boolean isDoNameDefined() {
         return doName != null && doName.isDefined();
     }
 
+    /**
+     * Checks if DA name is defined
+     * @return definition state
+     */
     public boolean isDaNameDefined() {
         return daName != null && daName.isDefined();
     }
 
+    /**
+     * Gets DA Basic Type value
+     * @return Basic Type enum value
+     */
     @JsonIgnore
     public TPredefinedBasicTypeEnum getBType(){
         return daName != null ? daName.getBType() : null;
     }
 
+    /**
+     * Sets DA type
+     * @param type input
+     */
     @JsonIgnore
     public void setType(String type){
         if(isDaNameDefined()){
@@ -163,10 +237,19 @@ public class ResumedDataTemplate {
         }
     }
 
+    /**
+     * Gets DA type
+     * @return string DA type
+     */
     @JsonIgnore
     public String getType(){
         return daName != null ? daName.getType() : null;
     }
+
+    /**
+     * Sets DA Basic Type value
+     * @param bType input
+     */
     @JsonIgnore
     public void setBType(String bType){
         if(isDaNameDefined()){
@@ -176,24 +259,41 @@ public class ResumedDataTemplate {
         }
     }
 
+    /**
+     * Set DO name
+     * @param doName input
+     */
     public void setDoName(DoTypeName doName){
         if(doName != null) {
             this.doName = DoTypeName.from(doName);
         }
     }
 
+    /**
+     * Sets DA name
+     * @param daName input
+     */
     public void setDaName(DaTypeName daName){
         if(daName != null) {
             this.daName = DaTypeName.from(daName);
         }
     }
 
+    /**
+     * Adds DAI values to DA
+     * @param values input
+     */
     @JsonIgnore
     public void setDaiValues(List<TVal> values) {
         if(isDaNameDefined()){
             daName.addDaiValues(values);
         }
     }
+
+    /**
+     * Set DA ValImport value
+     * @param valImport input
+     */
     @JsonIgnore
     public void setValImport(boolean valImport) {
         if(isDaNameDefined()){
@@ -201,6 +301,10 @@ public class ResumedDataTemplate {
         }
     }
 
+    /**
+     * Checks ValImport value
+     * @return ValImport value
+     */
     public boolean isValImport(){
         return daName.isValImport();
     }

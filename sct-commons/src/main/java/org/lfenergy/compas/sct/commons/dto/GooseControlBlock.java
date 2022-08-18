@@ -18,6 +18,10 @@ public class GooseControlBlock extends ControlBlock<GooseControlBlock> {
     private boolean fixedOffs = false;
     private TProtocol protocol;
 
+    /**
+     * Constructor
+     * @param tgseControl input
+     */
     public GooseControlBlock(TGSEControl tgseControl) {
         super();
         this.id = tgseControl.getAppID();
@@ -32,16 +36,29 @@ public class GooseControlBlock extends ControlBlock<GooseControlBlock> {
         this.protocol = tgseControl.getProtocol();
     }
 
+    /**
+     * Gets classe type
+     * @return classe type
+     */
     @Override
     protected Class<GooseControlBlock> getClassType() {
         return GooseControlBlock.class;
     }
 
+    /**
+     * Gets ServiceType value
+     * @return ServiceType enumeration value
+     */
     @Override
     public TServiceType getServiceType() {
         return TServiceType.GOOSE;
     }
 
+    /**
+     * Checks Goose Control block security enable state from Service
+     * @param tServices Service object
+     * @throws ScdException
+     */
     @Override
     protected void validateSecurityEnabledValue(TServices tServices) throws ScdException {
         if(tServices == null ||
@@ -59,6 +76,10 @@ public class GooseControlBlock extends ControlBlock<GooseControlBlock> {
         }
     }
 
+    /**
+     * Creates ControlBlock
+     * @return Goose Control Block object (GSEControl) value
+     */
     @Override
     public TGSEControl createControlBlock() {
         TGSEControl tgseControl = new TGSEControl();

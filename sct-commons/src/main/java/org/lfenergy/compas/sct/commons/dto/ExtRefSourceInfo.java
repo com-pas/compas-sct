@@ -22,6 +22,10 @@ public class ExtRefSourceInfo {
     private String srcLNInst = "";
     private String srcCBName;
 
+    /**
+     * Constructor
+     * @param tExtRef input
+     */
     public ExtRefSourceInfo(TExtRef tExtRef){
         srcLDInst = tExtRef.getSrcLDInst();
         srcPrefix = tExtRef.getSrcPrefix();
@@ -51,6 +55,10 @@ public class ExtRefSourceInfo {
         return Objects.hash(srcLDInst, srcPrefix, srcLNClass, srcLNInst, srcCBName);
     }
 
+    /**
+     * Checks ExtRefSourceInfo nullability
+     * @return nullability state
+     */
     public boolean isNull(){
         return srcCBName == null &&
                 srcLDInst == null &&
@@ -59,6 +67,10 @@ public class ExtRefSourceInfo {
                 srcPrefix == null;
     }
 
+    /**
+     * Checks ExtRefSourceInfo validity
+     * @return validity state
+     */
     public boolean isValid() {
         return !StringUtils.isBlank(srcCBName);
     }

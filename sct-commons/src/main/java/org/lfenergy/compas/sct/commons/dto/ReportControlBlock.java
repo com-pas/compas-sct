@@ -31,7 +31,10 @@ public class ReportControlBlock extends ControlBlock<ReportControlBlock> {
     private boolean indexed = true;
 
 
-
+    /**
+     * Constructor
+     * @param reportControl input
+     */
     public ReportControlBlock(TReportControl reportControl) {
         super();
         this.id = reportControl.getRptID();
@@ -53,26 +56,47 @@ public class ReportControlBlock extends ControlBlock<ReportControlBlock> {
         }
     }
 
+    /**
+     * Gets Class type value for ReportControlBlock
+     * @return ReportControlBlock.class
+     */
     @Override
     protected Class<ReportControlBlock> getClassType() {
         return ReportControlBlock.class;
     }
 
+    /**
+     * Get Service Type value for ReportControlBlock
+     * @return Report
+     */
     @Override
     public TServiceType getServiceType() {
         return TServiceType.REPORT;
     }
 
+    /**
+     * Gets ConfRev value for ReportControlBlock
+     * @return 1L
+     */
     @Override
     protected Long getConfRev() {
         return 1L;
     }
 
+    /**
+     * Validates Security Enabled parameter value (do nothing)
+     * @param tServices Service object
+     * @throws ScdException
+     */
     @Override
     protected void validateSecurityEnabledValue(TServices tServices) throws ScdException {
         //doNothing
     }
 
+    /**
+     * Creates Report Control Block
+     * @return TReportControl object
+     */
     @Override
     public TReportControl createControlBlock() {
         TReportControl reportControl = new TReportControl();
@@ -93,6 +117,10 @@ public class ReportControlBlock extends ControlBlock<ReportControlBlock> {
         return reportControl;
     }
 
+    /**
+     * Validates Report Control Block
+     * @throws ScdException
+     */
     @Override
     public void validateCB() throws ScdException {
         super.validateCB();

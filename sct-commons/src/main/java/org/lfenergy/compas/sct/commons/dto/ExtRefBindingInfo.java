@@ -31,6 +31,10 @@ public class ExtRefBindingInfo {
     private DaTypeName daName;
     private TServiceType serviceType;
 
+    /**
+     * Constructor
+     * @param tExtRef input
+     */
     public ExtRefBindingInfo(TExtRef tExtRef){
         iedName = tExtRef.getIedName();
         ldInst = tExtRef.getLdInst();
@@ -75,7 +79,7 @@ public class ExtRefBindingInfo {
     }
 
     /**
-     * Check validity of ExtRef binding information
+     * Checks validity of ExtRef binding information
      * @return validity state
      */
     public boolean isValid() {
@@ -96,9 +100,9 @@ public class ExtRefBindingInfo {
     }
 
     /**
-     * Check dependency between ExtRef binding information and ExtRef
+     * Checks that if TExtRef object is wrappen in ExtRefBindingInfo object vice versa
      * @param tExtRef object containing ExtRef data's'
-     * @return dependency state
+     * @return wrapper state
      */
     public boolean isWrappedIn(TExtRef tExtRef){
         return Objects.equals(iedName,tExtRef.getIedName()) &&
@@ -110,7 +114,7 @@ public class ExtRefBindingInfo {
     }
 
     /**
-     * Check nullability of ExtRef binding information
+     * Checks nullability of ExtRef binding information
      * @return  nullability state
      */
     public boolean isNull(){
@@ -125,7 +129,7 @@ public class ExtRefBindingInfo {
     }
 
     /**
-     * Convert to string
+     * Converts to string
      * @return ExtRef binding information formatted to string
      */
     @Override

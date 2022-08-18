@@ -28,6 +28,11 @@ public class FCDAInfo {
     private DaTypeName daName; //daName.[...bdaNames]
     private Long ix;
 
+    /**
+     * Constructor
+     * @param dataSet input
+     * @param tfcda input
+     */
     public FCDAInfo(String dataSet, TFCDA tfcda) {
         this.dataSet = dataSet;
         fc = tfcda.getFc();
@@ -42,6 +47,10 @@ public class FCDAInfo {
         ix = tfcda.isSetIx() ? tfcda.getIx() : null;
     }
 
+    /**
+     * Gets FCDA
+     * @return FCDA object
+     */
     @JsonIgnore
     public TFCDA getFCDA(){
         TFCDA tfcda = new TFCDA();
@@ -71,6 +80,10 @@ public class FCDAInfo {
         return tfcda;
     }
 
+    /**
+     * Checks FCDAInfo validity
+     * @return validity state
+     */
     public boolean isValid() {
         return doName != null && doName.isDefined();
     }

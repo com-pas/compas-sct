@@ -27,6 +27,10 @@ public class ExtRefInfo extends LNodeMetaDataEmbedder{
     private ExtRefBindingInfo bindingInfo;
     private ExtRefSourceInfo sourceInfo;
 
+    /**
+     * Constructor
+     * @param tExtRef input
+     */
     public ExtRefInfo(TExtRef tExtRef) {
         super();
         bindingInfo = new ExtRefBindingInfo(tExtRef);
@@ -34,6 +38,16 @@ public class ExtRefInfo extends LNodeMetaDataEmbedder{
         signalInfo = new ExtRefSignalInfo(tExtRef);
     }
 
+    /**
+     * Initializes ExtRefInfo
+     * @param tExtRef input
+     * @param iedName input
+     * @param ldInst input
+     * @param lnClass input
+     * @param lnInst input
+     * @param prefix input
+     * @return ExtRefInfo object
+     */
     public static ExtRefInfo from(TExtRef tExtRef, String iedName, String ldInst,
                                   String lnClass, String lnInst, String prefix){
         ExtRefInfo extRefInfo = new ExtRefInfo(tExtRef);

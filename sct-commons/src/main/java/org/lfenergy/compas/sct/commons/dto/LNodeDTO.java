@@ -37,6 +37,13 @@ public class LNodeDTO {
     private Set<DataSetInfo> datSets = new HashSet<>();
     private Set<ResumedDataTemplate> resumedDataTemplates = new HashSet<>();
 
+    /**
+     * Constructor
+     * @param inst input
+     * @param lnClass input
+     * @param lnPrefix input
+     * @param lnType input
+     */
     public LNodeDTO(String inst, String lnClass, String lnPrefix, String lnType) {
         this.inst = inst;
         this.nodeClass = lnClass;
@@ -44,6 +51,13 @@ public class LNodeDTO {
         this.prefix = lnPrefix;
     }
 
+    /**
+     * Initialize LN
+     * @param nodeAdapter input
+     * @param options input
+     * @return LNodeDTO object
+     * @param <T> LNode type (LLN0 or other LN's)
+     */
     public static <T extends TAnyLN> LNodeDTO from(AbstractLNAdapter<T> nodeAdapter, LogicalNodeOptions options) {
         log.info(Utils.entering());
         LNodeDTO lNodeDTO = new LNodeDTO();
@@ -106,23 +120,43 @@ public class LNodeDTO {
         return lNodeDTO;
     }
 
+    /**
+     * Sets LNode Inst value
+     * @param inst input
+     */
     public void setInst(String inst){
         this.inst = inst;
     }
 
+    /**
+     * Sets LNode Class value
+     * @param lnClass input
+     */
     public void setNodeClass(String lnClass){
         this.nodeClass = lnClass;
     }
 
+    /**
+     *  Sets LNode Type
+     * @param lnType
+     */
     public void setNodeType(String lnType){
         this.nodeType = lnType;
     }
 
+    /**
+     * Sets LNode Prefix value
+     * @param prefix input
+     */
     public void setPrefix(String prefix){
         this.prefix = prefix;
     }
 
-
+    /**
+     * Extracts LNode ExtRef informations
+     * @param lnAdapter input
+     * @return LNodeDTO object
+     */
     public static LNodeDTO extractExtRefInfo(LNAdapter lnAdapter) {
         String lnClass = lnAdapter.getLNClass() == null ? "" : lnAdapter.getLNClass();
         LNodeDTO lNodeDTO = new LNodeDTO(lnAdapter.getLNInst(),lnClass,lnAdapter.getPrefix(), lnAdapter.getLnType());
@@ -135,14 +169,27 @@ public class LNodeDTO {
         return lNodeDTO;
     }
 
+    /**
+     * Adds ExtRef Info to LNode ExtRefs
+     * @param extRef input
+     */
     public void addExtRefInfo(ExtRefInfo extRef) {
         extRefs.add(extRef);
     }
 
+    /**
+     * Adds list of ExtRef Info into LNode
+     * @param extRefs input
+     */
     public void addAllExtRefInfo(List<ExtRefInfo> extRefs) {
         this.extRefs.addAll(extRefs);
     }
 
+    /**
+     * Adds Control Block to LNode Control Blocks
+     * @param controlBlock input
+     * @param <T> Control Block type (GooseControlBlock, SMVControlBlock, ReportControlBlock)
+     */
     public <T extends ControlBlock> void addControlBlock(ControlBlock<T> controlBlock) {
         if (GooseControlBlock.class.equals(controlBlock.getClassType())) {
             gooseControlBlocks.add((GooseControlBlock) controlBlock);
@@ -157,26 +204,51 @@ public class LNodeDTO {
         }
     }
 
+    /**
+     * Adds lis of Control Block to LNode Control Blocks
+     * @param controlBlockInfoList input
+     * @param <T> Control Block type (GooseControlBlock, SMVControlBlock, ReportControlBlock)
+     */
     public <T extends ControlBlock> void addAllControlBlocks(List< ControlBlock<T> > controlBlockInfoList){
         controlBlockInfoList.forEach(this::addControlBlock);
     }
 
+    /**
+     * Adds list of DataSet to LNode
+     * @param dataSetList input
+     */
     public void addAllDatSets(List<DataSetInfo> dataSetList) {
         this.datSets.addAll(dataSetList);
     }
 
+    /**
+     * Adds DataTypeTemplate's sumarised data
+     * @param dtt input
+     */
     public void addResumedDataTemplate(ResumedDataTemplate dtt) {
         resumedDataTemplates.add(dtt);
     }
 
+    /**
+     * Adds list of DataTypeTemplate's sumarised data
+     * @param dtt input
+     */
     public void addAllResumedDataTemplate(List<ResumedDataTemplate> dtt) {
         this.resumedDataTemplates.addAll(dtt);
     }
 
+    /**
+     * Gets DataTypeTemplate's sumarised data
+     * @return Set of ResumedDataTemplate object
+     */
     public Set<ResumedDataTemplate> getResumedDataTemplates(){
         return Set.of(resumedDataTemplates.toArray(new ResumedDataTemplate[0]));
     }
 
+    /**
+     * Adds DataSet information to LNode
+     * @param dataSetInfo input
+     */
     public void addDataSet(DataSetInfo dataSetInfo) {
         this.datSets.add(dataSetInfo);
     }

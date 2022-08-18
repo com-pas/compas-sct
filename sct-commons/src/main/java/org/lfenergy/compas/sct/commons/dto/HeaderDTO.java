@@ -25,12 +25,23 @@ public class HeaderDTO {
     private String revision;
     private List<HistoryItem> historyItems = new ArrayList<>();
 
+    /**
+     * Constructor
+     * @param id input
+     * @param version input
+     * @param revision input
+     */
     public HeaderDTO(UUID id, String version, String revision) {
         this.id = id;
         this.version = version;
         this.revision = revision;
     }
 
+    /**
+     * Creates HeaderDTO from HeaderAdapter object
+     * @param headerAdapter input
+     * @return HeaderDTO object
+     */
     public static HeaderDTO from(HeaderAdapter headerAdapter) {
         HeaderDTO headerDTO = new HeaderDTO();
         headerDTO.id = UUID.fromString(headerAdapter.getHeaderId());
@@ -41,6 +52,9 @@ public class HeaderDTO {
         return headerDTO;
     }
 
+    /**
+     * Anaonymous class for History management
+     */
     @Getter
     @Setter
     public static class HistoryItem {
@@ -51,6 +65,11 @@ public class HeaderDTO {
         private String why;
         private String when;
 
+        /**
+         * Initializes History
+         * @param tHitem input
+         * @return HistoryItem object
+         */
         public static HistoryItem from(THitem tHitem){
             HistoryItem historyItem = new HistoryItem();
             historyItem.version = tHitem.getVersion();

@@ -25,7 +25,10 @@ public class SMVControlBlock extends ControlBlock<SMVControlBlock>{
     private Long nofASDU;
     private TSmpMod smpMod = TSmpMod.SMP_PER_PERIOD;
 
-
+    /**
+     * Constructor
+     * @param tSampledValueControl input
+     */
     public SMVControlBlock(TSampledValueControl tSampledValueControl) {
         super();
         this.id = tSampledValueControl.getSmvID();
@@ -43,16 +46,29 @@ public class SMVControlBlock extends ControlBlock<SMVControlBlock>{
         securityEnable = tSampledValueControl.getSecurityEnable();
     }
 
+    /**
+     * Gets SMV Control Block Class Type value
+     * @return SMVControlBlock.class
+     */
     @Override
     protected Class<SMVControlBlock> getClassType() {
         return SMVControlBlock.class;
     }
 
+    /**
+     * Gets SMV Control Block Service Type value
+     * @return SMV
+     */
     @Override
     public TServiceType getServiceType() {
         return TServiceType.SMV;
     }
 
+    /**
+     * Validates Security Enabled parameter value
+     * @param tServices Service object
+     * @throws ScdException
+     */
     @Override
     protected void validateSecurityEnabledValue(TServices tServices) throws ScdException {
         if(tServices == null ||
@@ -70,6 +86,10 @@ public class SMVControlBlock extends ControlBlock<SMVControlBlock>{
         }
     }
 
+    /**
+     * Validates SMV Control Block
+     * @throws ScdException
+     */
     @Override
     public void validateCB() throws ScdException {
         super.validateCB();
@@ -86,6 +106,10 @@ public class SMVControlBlock extends ControlBlock<SMVControlBlock>{
         }
     }
 
+    /**
+     * Creates SMV Control Block
+     * @return TSampledValueControl object
+     */
     @Override
     public TSampledValueControl createControlBlock() {
 

@@ -17,6 +17,13 @@ public class LogicalNodeOptions {
     private boolean withCB = false;
     private boolean withDatSet = false;
 
+    /**
+     * Constructor
+     * @param withExtRef input
+     * @param withResumedDtt input
+     * @param withCB input
+     * @param withDatSet input
+     */
     public LogicalNodeOptions(boolean withExtRef, boolean withResumedDtt, boolean withCB, boolean withDatSet) {
         this.withExtRef = withExtRef;
         this.withResumedDtt = withResumedDtt;

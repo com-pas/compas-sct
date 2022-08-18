@@ -21,6 +21,11 @@ public class LNodeMetaData {
     private String lnInst;
     private String lnPrefix;
 
+    /**
+     * Initializes LNode meta data's'
+     * @param tAbstractLNAdapter input
+     * @return LNodeMetaData object
+     */
     public static LNodeMetaData from(@NonNull AbstractLNAdapter<?> tAbstractLNAdapter) {
         LNodeMetaData metaData = new LNodeMetaData();
         metaData.lnClass = tAbstractLNAdapter.getLNClass();

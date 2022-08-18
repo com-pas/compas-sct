@@ -38,7 +38,7 @@ public abstract class ControlBlock<T extends ControlBlock> extends LNodeMetaData
     protected abstract Class<T> getClassType();
 
     /**
-     * Get ServiceType
+     * Gets ServiceType
      * @return ServiceType enum object
      */
     public abstract TServiceType getServiceType();
@@ -46,7 +46,7 @@ public abstract class ControlBlock<T extends ControlBlock> extends LNodeMetaData
     public abstract <U extends TControl> U createControlBlock();
 
     /**
-     * Cast object to specified type
+     * Casts object to specified type
      * @param obj object to cast
      * @return object casted on specified type
      */
@@ -58,7 +58,7 @@ public abstract class ControlBlock<T extends ControlBlock> extends LNodeMetaData
     }
 
     /**
-     * Validate Control block structure
+     * Validates Control block structure
      * @throws ScdException
      */
     public void validateCB() throws ScdException {
@@ -79,7 +79,7 @@ public abstract class ControlBlock<T extends ControlBlock> extends LNodeMetaData
     }
 
     /**
-     * Check Control block's destination is present in SCD file
+     * Checks Control block's destination is present in SCD file
      * @param sclRootAdapter main adapter containing SCD file
      * @throws ScdException
      */
@@ -106,7 +106,7 @@ public abstract class ControlBlock<T extends ControlBlock> extends LNodeMetaData
     }
 
     /**
-     * Check if Security is enabled in IED (Services)
+     * Checks if Security is enabled in IED (Services)
      * @param iedAdapter IED adapter containing IED datas
      * @throws ScdException
      */
@@ -116,7 +116,7 @@ public abstract class ControlBlock<T extends ControlBlock> extends LNodeMetaData
     }
 
     /**
-     * Get ConfRev value
+     * Gets ConfRev value
      * @return confRev long value
      */
     protected Long getConfRev() {
@@ -152,7 +152,7 @@ public abstract class ControlBlock<T extends ControlBlock> extends LNodeMetaData
     }
 
     /**
-     * Get Control block settings from Service
+     * Gets Control block settings from Service
      * @param tServices Service object
      * @return ServiceSettingsNoDynEnum enum value
      */
@@ -174,7 +174,7 @@ public abstract class ControlBlock<T extends ControlBlock> extends LNodeMetaData
     }
 
     /**
-     * Get Control block
+     * Gets Control block
      * @return Control block's string value from IEDNames
      */
     @Override

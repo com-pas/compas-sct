@@ -18,13 +18,28 @@ public class DoTypeName extends DataTypeName {
     public static final String VALIDATION_REGEX = "[A-Z][0-9A-Za-z]{0,11}(\\.[a-z][0-9A-Za-z]*(\\([0-9]+\\))?)?";
     private TPredefinedCDCEnum cdc;
 
+    /**
+     * Constructor
+     * @param doName input
+     */
     public DoTypeName(String doName) {
         super(doName);
     }
+
+    /**
+     * Constructor
+     * @param ppDoName input
+     * @param sdoNames input
+     */
     public DoTypeName(String ppDoName, String sdoNames) {
         super(ppDoName, sdoNames);
     }
 
+    /**
+     * Initializes DoTypeName
+     * @param dataName input
+     * @return DoTypeName object
+     */
     public static DoTypeName from(DoTypeName dataName){
         DoTypeName doTypeName = new DoTypeName(dataName.toString());
         if(doTypeName.isDefined()) {
@@ -34,7 +49,7 @@ public class DoTypeName extends DataTypeName {
     }
 
     /**
-     * Copy DO's content
+     * Copies DO's content
      * @param doName DO object
      */
     public void merge(DoTypeName doName) {

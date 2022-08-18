@@ -23,13 +23,17 @@ public class DataSetInfo extends LNodeMetaDataEmbedder{
     private String name;
     private List<FCDAInfo> fcdaInfos = new ArrayList<>();
 
+    /**
+     * Constructor
+     * @param name input
+     */
     public DataSetInfo(String name){
         super();
         this.name = name;
     }
 
     /**
-     * Convert DataSet object to DataSetInfo object
+     * Converts DataSet object to DataSetInfo object
      * @param tDataSet object
      * @return DataSetInfo object value
      */
@@ -45,7 +49,7 @@ public class DataSetInfo extends LNodeMetaDataEmbedder{
     }
 
     /**
-     * Get Set of DataSet from LnAdapter
+     * Gets Set of DataSet from LnAdapter
      * @param lnAdapter object LnAdapter
      * @return Set of DataSetInfo
      */
@@ -55,7 +59,7 @@ public class DataSetInfo extends LNodeMetaDataEmbedder{
     }
 
     /**
-     * Add FCDA to FCDA list
+     * Adds FCDA to FCDA list
      * @param fcdaInfo object FCDAInfo containing FCDA datas
      */
     public void addFCDAInfo(FCDAInfo fcdaInfo){
@@ -63,7 +67,7 @@ public class DataSetInfo extends LNodeMetaDataEmbedder{
     }
 
     /**
-     * Get FCDA list from DtaSetInfo
+     * Gets FCDA list from DtaSetInfo
      * @return FCDA list
      */
     public List<FCDAInfo> getFCDAInfos(){
@@ -71,7 +75,7 @@ public class DataSetInfo extends LNodeMetaDataEmbedder{
     }
 
     /**
-     * Set DataSet name
+     * Sets DataSet name
      * @param name string DataSet name
      */
     public void setName(String name){
@@ -79,7 +83,7 @@ public class DataSetInfo extends LNodeMetaDataEmbedder{
     }
 
     /**
-     * Check DataSet validity
+     * Checks DataSet validity
      * @return validity state
      */
     public boolean isValid(){
