@@ -1,4 +1,4 @@
-# Developing for CoMPAS
+# Developing for CoMPAS SCT
 
 #### Table Of Contents
 
