@@ -98,7 +98,7 @@ The iterative process has several goals:
 
 Please follow these steps to have your contribution considered by the maintainers:
 
-1. Follow all instructions in the [pull requests section](PULL_REQUESTS.md)
+1. Follow all instructions in the [pull requests section](https://com-pas.github.io/contributing/PULL_REQUESTS.html)
 2. Follow the [styleguides](STYLEGUIDE.md)
 3. After you submit your pull request, verify that all [status checks](https://help.github.com/articles/about-status-checks/) are passing.
 5. Request a GitHub review by one of the projects' Committers
@@ -140,7 +140,7 @@ Current Definition of Done:
 
 Before you start your coding journey within the CoMPAS project, there are some things we have to talk about.
 Some things that will make your start a little easier!
-On the [developing](DEVELOPING.md) page information about tooling can be found.
+On the [developing](https://com-pas.github.io/contributing/DEVELOPING.html) page information about tooling can be found.
 
 #### Open Community Calls
 
