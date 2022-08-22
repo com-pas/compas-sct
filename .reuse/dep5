@@ -4,15 +4,15 @@ Upstream-Contact: Mohamed SYLLA <mohamed.sylla@rte-france.com>
 Source: https://github.com/com-pas/compas-sct
 
 Files: docs/images/*
-Copyright: 2021 RTE FRANCE
+Copyright: 2022 RTE FRANCE
 License: Apache-2.0
 
 Files: docs/drawio/*
-Copyright: 2021 RTE FRANCE
+Copyright: 2022 RTE FRANCE
 License: Apache-2.0
 
 Files: docs/blob-files/*
-Copyright: 2021 RTE FRANCE
+Copyright: 2022 RTE FRANCE
 License: Apache-2.0
 
 Files: docs/javadoc/*
