@@ -44,8 +44,8 @@ jobs:
       - name: Prepare Pull Request branch
         run: |
           mvn -s custom_maven_settings.xml clean javadoc:aggregate -P javadoc
-          mkdir docs/javadoc
-          cp -Rf target/site/apidocs/* docs/javadoc/
+          mkdir -p docs/javadoc
+          yes | cp -Rf target/site/apidocs/* docs/javadoc/
           git add docs/ && git commit -m "updated Java docs repository" 
           git checkout -b feat/javadoc-pull-request
 
