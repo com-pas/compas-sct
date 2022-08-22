@@ -1,4 +1,4 @@
-<!-- SPDX-FileCopyrightText: 2021 RTE FRANCE -->
+<!-- SPDX-FileCopyrightText: 2022 RTE FRANCE -->
 <!-- -->
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 # COMPAS SCT (Substation Configuration Tool)

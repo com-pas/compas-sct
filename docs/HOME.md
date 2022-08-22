@@ -1,3 +1,6 @@
+<!-- SPDX-FileCopyrightText: 2022 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
 # Contributing to CoMPAS
 
 First off, thanks for taking the time to contribute!
