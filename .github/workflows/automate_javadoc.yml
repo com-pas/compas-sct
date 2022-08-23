@@ -45,8 +45,8 @@ jobs:
           mvn -s custom_maven_settings.xml clean javadoc:aggregate -P javadoc
           mkdir -p docs/javadoc
           yes | cp -Rf target/site/apidocs/* docs/javadoc/
-          git add docs/ && git commit -m "updated Java docs repository" 
           git checkout -b feat/javadoc-pull-request
+          git add docs/ && git commit -s -m "updated Java docs repository" 
 
       # Note that will fail if branch already exists.
       - name: Push Git Branch
