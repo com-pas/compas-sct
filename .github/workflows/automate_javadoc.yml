@@ -7,6 +7,11 @@ on:
   push:
     branches:
       - 'feat/javadoc'
+
+env:
+  from_branch: feat/javadoc
+  target_branch: feat/117_Documentation_SCD_Generation_Process
+
 jobs:
   build:
     name: Java Docs
@@ -19,7 +24,7 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '11'
-          ref: feat/117_Documentation_SCD_Generation_Process
+          ref: ${{ env.from_branch }}
 
       - name: Create custom Maven Settings.xml
         uses: whelk-io/maven-settings-xml-action@v20
@@ -45,23 +50,23 @@ jobs:
           mvn -s custom_maven_settings.xml clean javadoc:aggregate -P javadoc
           mkdir -p docs/javadoc
           yes | cp -Rf target/site/apidocs/* docs/javadoc/
-          git checkout -b feat/javadoc-pull-request
-          git add docs/ && git commit -s -m "updated Java docs repository" 
+          git checkout -b ${{ env.from_branch }}-pull-request
+          git add docs/javadoc/ && git commit -s -m "updated Java docs repository" 
 
       # Note that will fail if branch already exists.
       - name: Push Git Branch
         uses: ad-m/github-push-action@v0.6.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: feat/javadoc-pull-request
+          branch: ${{ env.from_branch }}-pull-request
 
       # Note that will silently fail if PR already exists.
       - name: Create Pull Request
         uses: repo-sync/pull-request@v2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          source_branch: feat/javadoc-pull-request
-          destination_branch: feat/117_Documentation_SCD_Generation_Process
+          source_branch: ${{ env.from_branch }}-pull-request
+          destination_branch: ${{ env.target_branch }}
           pr_title: "Docs: Update Java docs repository"
           pr_body: "Automatically created from CI workflow"
           pr_label: "documentation,javadoc"
