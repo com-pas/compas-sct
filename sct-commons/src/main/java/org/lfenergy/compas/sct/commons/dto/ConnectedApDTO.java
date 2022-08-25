@@ -11,6 +11,19 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.lfenergy.compas.sct.commons.scl.com.ConnectedAPAdapter;
 
+/**
+ * A representation of the model object <em><b>Connected AP</b></em>.
+ *
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link ConnectedApDTO#getApName() <em>Ap Name</em>}</li>
+ *   <li>{@link ConnectedApDTO#getIedName() <em>Ied Name</em>}</li>
+ * </ul>
+ *
+ * @see org.lfenergy.compas.scl2007b4.model.TConnectedAP
+ */
 @Setter
 @Getter
 @NoArgsConstructor

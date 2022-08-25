@@ -11,6 +11,28 @@ import org.lfenergy.compas.scl2007b4.model.TEnumVal;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * A representation of the model object
+ * <em><b>{@link org.lfenergy.compas.scl2007b4.model.TEnumType EnumType}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ol>
+ *   <li>Adapter</li>
+ *   <ul>
+ *       <li>{@link EnumTypeAdapter#getDataTypeTemplateAdapter <em>Returns the value of the <b>DataTypeTemplateAdapter </b>reference object</em>}</li>
+ *    </ul>
+ *   <li>Principal functions</li>
+ *    <ul>
+ *      <li>{@link EnumTypeAdapter#addPrivate <em>Add <b>TPrivate </b>under this object</em>}</li>
+ *    </ul>
+ *   <li>Checklist functions</li>
+ *    <ul>
+ *       <li>{@link EnumTypeAdapter#hasSameContentAs <em>Compare Two TEnumType</em>}</li>
+ *       <li>{@link EnumTypeAdapter#hasValue <em>Check whether TEnumType contain given value</em>}</li>
+ *    </ul>
+ * </ol>
+ */
 public class EnumTypeAdapter extends AbstractDataTypeAdapter<TEnumType>{
 
     public EnumTypeAdapter(DataTypeTemplateAdapter parentAdapter, TEnumType currentElem) {

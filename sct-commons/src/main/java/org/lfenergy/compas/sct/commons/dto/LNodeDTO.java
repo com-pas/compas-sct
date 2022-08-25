@@ -21,6 +21,26 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * A representation of the model object <em><b>LNode</b></em>.
+ *
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link LNodeDTO#getNodeClass <em>Ln Class</em>}</li>
+ *   <li>{@link LNodeDTO#getInst <em>Ln Inst</em>}</li>
+ *   <li>{@link LNodeDTO#getNodeType <em>Ln Type</em>}</li>
+ *   <li>{@link LNodeDTO#getPrefix <em>Prefix</em>}</li>
+ *   <li>{@link LNodeDTO#getExtRefs <em>Refers To ExtRef</em>}</li>
+ *   <li>{@link LNodeDTO#getGooseControlBlocks <em>Refers To GooseControl Blocks</em>}</li>
+ *   <li>{@link LNodeDTO#getSmvControlBlocks <em>Refers To SmvControl Blocks</em>}</li>
+ *   <li>{@link LNodeDTO#getReportControlBlocks <em>Refers To ReportControl Blocks</em>}</li>
+ *  <li>{@link LNodeDTO#getResumedDataTemplates <em>Refers To DataTemplates Objects</em>}</li>
+ * </ul>
+ *
+ * @see org.lfenergy.compas.scl2007b4.model.TLNode
+ */
 
 @Slf4j
 @Getter

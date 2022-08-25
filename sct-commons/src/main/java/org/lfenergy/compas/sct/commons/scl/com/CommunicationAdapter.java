@@ -16,13 +16,35 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-
+/**
+ * A representation of the model object
+ * <em><b>{@link org.lfenergy.compas.scl2007b4.model.TCommunication Communication}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link CommunicationAdapter#addSubnetwork <em>add <b>Subnetwork </b> under this object</em>}</li>
+ *   <li>{@link CommunicationAdapter#addPrivate <em>Add <b>TPrivate </b> under this object</em>}</li>
+ * </ul>
+ *
+ * @see org.lfenergy.compas.sct.commons.scl.SclRootAdapter
+ * @see org.lfenergy.compas.scl2007b4.model.TCommunication
+ */
 public class CommunicationAdapter extends SclElementAdapter<SclRootAdapter, TCommunication> {
 
+    /**
+     * Constructor
+     * @param parentAdapter Parent container reference
+     */
     public CommunicationAdapter(SclRootAdapter parentAdapter) {
         super(parentAdapter);
     }
 
+    /**
+     * Constructor
+     * @param parentAdapter Parent container reference
+     * @param currentElem Current reference
+     */
     public CommunicationAdapter(SclRootAdapter parentAdapter, TCommunication currentElem) {
         super(parentAdapter, currentElem);
     }
@@ -32,6 +54,15 @@ public class CommunicationAdapter extends SclElementAdapter<SclRootAdapter, TCom
         return currentElem == parentAdapter.getCurrentElem().getCommunication();
     }
 
+    /**
+     * Returns the <em><b>SubNetworkAdapter</b></em> element
+     * @param snName input
+     * @param snType input
+     * @param iedName input
+     * @param apName input
+     * @return SubNetworkAdapter Current reference
+     * @throws ScdException
+     */
     public SubNetworkAdapter addSubnetwork(String snName, String snType,
                                            String iedName, String apName) throws ScdException {
 
@@ -53,6 +84,11 @@ public class CommunicationAdapter extends SclElementAdapter<SclRootAdapter, TCom
         return opSubNetworkAdapter.get();
     }
 
+    /**
+     * Returns the value of the <em><b>SubNetworkAdapter</b></em> containment reference list.
+     * @param snName Sub Network Name
+     * @return the value of the <em><b>SubNetworkAdapter</b></em> containment reference list.
+     */
     public Optional<SubNetworkAdapter> getSubnetworkByName(String snName) {
         return currentElem.getSubNetwork()
                 .stream()
@@ -61,6 +97,10 @@ public class CommunicationAdapter extends SclElementAdapter<SclRootAdapter, TCom
                 .map(tSubNetwork -> new SubNetworkAdapter(this, tSubNetwork));
     }
 
+    /**
+     * Returns the value of the <em><b>SubNetworkAdapter</b></em> containment reference list.
+     * @return the value of the <em><b>SubNetworkAdapter</b></em> containment reference list.
+     */
     public List<SubNetworkAdapter> getSubNetworkAdapters() {
         return currentElem.getSubNetwork()
                 .stream()

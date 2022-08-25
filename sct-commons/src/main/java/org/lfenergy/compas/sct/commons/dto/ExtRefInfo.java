@@ -16,8 +16,25 @@ import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
 import org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter;
 
 import java.util.Objects;
-
-
+/**
+ * A representation of the model object <em><b>ExtRef</b></em>.
+ *
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link ExtRefInfo#getHolderIEDName() <em>Ied Name</em>}</li>
+ *   <li>{@link ExtRefInfo#getHolderLDInst() <em>Ld Inst</em>}</li>
+ *   <li>{@link ExtRefInfo#getHolderLnClass() <em>Ln Class</em>}</li>
+ *   <li>{@link ExtRefInfo#getHolderLnInst() <em>Ln Inst</em>}</li>
+ *   <li>{@link ExtRefInfo#getHolderLnPrefix() <em>Prefix</em>}</li>
+ *   <li>{@link org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo <em>Refers To SignalInfo</em>}</li>
+ *   <li>{@link org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo <em>Refers To BindingInfo</em>}</li>
+ *   <li>{@link org.lfenergy.compas.sct.commons.dto.ExtRefSourceInfo <em>Refers To SourceInfo</em>}</li>
+ * </ul>
+ *
+ * @see org.lfenergy.compas.scl2007b4.model.TExtRef
+ */
 @Getter
 @Setter
 @NoArgsConstructor

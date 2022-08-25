@@ -8,6 +8,31 @@ import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
 
+/**
+ * A representation of the model object
+ * <em><b>{@link ObjectReference ObjectReference}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ol>
+ *   <li>Principal functions</li>
+ *    <ul>
+ *      <li>{@link ObjectReference#getReference() <em>Returns <b>LDName </b> : "name" attribute of IEDName element + "inst" attribute of LDevice element </em>}</li>
+ *      <li>{@link ObjectReference#getLdName() <em>Returns <b>LNName </b> : "prefix" + "lnClass" + "lnInst" of LN element </em>}</li>
+ *      <li>{@link ObjectReference#getLNodeName() <em>Returns <b>DataName </b></em>}</li>
+ *      <li>{@link ObjectReference#getDataAttributes() <em>Returns <b>DataName[.DataName[…]].DataAttributeName[.DAComponentName[ ….]] </b></em>}</li>
+ *    </ul>
+ * </ol>
+ * <br/>
+ *  <pre>
+ *      <b>ObjectReference</b>: LDName/LNName.DataName[.DataName[…]].DataAttributeName[.DAComponentName[ ….]]
+ *      <b>LDName</b> = "name" attribute of IEDName element + "inst" attribute of LDevice element
+ *      <b>LNName</b> = "prefix" + "lnClass" + "lnInst"
+ *  </pre>
+ * @see org.lfenergy.compas.sct.commons.scl.ied.LNAdapter
+ * @see org.lfenergy.compas.sct.commons.scl.ied.LN0Adapter
+ * @see org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter
+ */
 @Getter
 public class ObjectReference {
     private static final String MALFORMED_OBJ_REF = "Malformed ObjRef : %s" ;

@@ -12,6 +12,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+/**
+ * A representation of the model object <em><b>ResumedDataTemplate</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link ResumedDataTemplate#lnInst <em>LN Inst</em>}</li>
+ *   <li>{@link ResumedDataTemplate#lnClass <em>LN Class</em>}</li>
+ *   <li>{@link ResumedDataTemplate#lnType <em>LN Type</em>}</li>
+ *   <li>{@link ResumedDataTemplate#prefix <em>Prefix</em>}</li>
+ *   <li>{@link org.lfenergy.compas.sct.commons.dto.DoTypeName <em>Refers To DoTypeName</em>}</li>
+ *   <li>{@link org.lfenergy.compas.sct.commons.dto.DaTypeName <em>Refers To DaTypeName</em>}</li>
+ * </ul>
+ */
 @Setter
 @Getter
 @AllArgsConstructor

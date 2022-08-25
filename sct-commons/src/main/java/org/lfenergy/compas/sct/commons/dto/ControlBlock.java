@@ -17,7 +17,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
+/**
+ * A representation of the model object <em><b>ControlBlock</b></em>.
+ * @param <T> input such as {@link org.lfenergy.compas.sct.commons.dto.GooseControlBlock <em>GooseControlBlock</em>},
+ *          {@link org.lfenergy.compas.sct.commons.dto.ReportControlBlock <em>ReportControlBlock</em>},
+ *          {@link org.lfenergy.compas.sct.commons.dto.SMVControlBlock <em>SMVControlBlock</em>},
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link ControlBlock#getId() <em>appID, smvID or rptID</em>}</li>
+ *   <li>{@link ControlBlock#getName() <em>Name</em>}</li>
+ *   <li>{@link ControlBlock#getDataSetRef() <em>dataSetRef</em>}</li>
+ *   <li>{@link ControlBlock#getDesc() <em>Desc</em>}</li>
+ *   <li>{@link ControlBlock#getConfRev() <em>Refers To confRev</em>}</li>
+ *   <li>{@link ControlBlock#getIedNames() <em>Refers To IedNames</em>}</li>
+ *   <li>{@link ControlBlock#getSecurityEnable() <em>Refers To security Enable</em>}</li>
+ * </ul>
+ *
+ * @see org.lfenergy.compas.scl2007b4.model.TControlBlock
+ */
 @Getter
 @Setter
 @NoArgsConstructor

@@ -6,7 +6,15 @@ package org.lfenergy.compas.sct.commons.dto;
 
 import lombok.AllArgsConstructor;
 
-
+/**
+ * A representation of the model object <em><b>LNodeMetaDataEmbedder</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link LNodeMetaDataEmbedder#metaData <em>Refers to {@link org.lfenergy.compas.sct.commons.dto.LNodeMetaData LNodeMetaData}</em>}</li>
+ * </ul>
+ */
 @AllArgsConstructor
 public class LNodeMetaDataEmbedder {
 

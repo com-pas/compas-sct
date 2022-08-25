@@ -19,7 +19,42 @@ import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
+/**
+ * A representation of the model object
+ * <em><b>{@link org.lfenergy.compas.scl2007b4.model.TIED IED}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ol>
+ *   <li>Adapter</li>
+ *    <ul>
+ *      <li>{@link IEDAdapter#getLDeviceAdapters <em>Returns the value of the <b>LDeviceAdapter </b>containment reference list</em>}</li>
+ *      <li>{@link IEDAdapter#getLDeviceAdapterByLdInst <em>Returns the value of the <b>LDeviceAdapter </b>reference object By LDevice Inst</em>}</li>
+ *    </ul>
+ *   <li>Principal functions</li>
+ *    <ul>
+ *      <li>{@link IEDAdapter#getName <em>Returns the value of the <b>name </b>attribute</em>}</li>
+ *      <li>{@link IEDAdapter#getServices Returns the value of the <b>Service </b>object</em>}</li>
+ *      <li>{@link IEDAdapter#getPrivateHeader <em>Returns the value of the <b>TPrivate </b>containment reference list</em>}</li>
+ *      <li>{@link IEDAdapter#getExtRefBinders <em>Returns the value of the <b>ExtRefBindingInfo </b>containment reference list By <b>ExtRefSignalInfo</b></em>}</li>
+ *      <li>{@link IEDAdapter#createDataSet <em>Add <b>DataSetInfo </b> describing the children <b>TDataSet </b> that can be created under <b>TAnyLN</b></em>}</li>
+ *      <li>{@link IEDAdapter#createControlBlock <em>Add <b>ControlBlock </b> describing the children <b>TControlBlock </b> that can be created under <b>TAnyLN</b></em>}</li>
+ *      <li>{@link IEDAdapter#addPrivate <em>Add <b>TPrivate </b>under this object</em>}</li>
+ *      <li>{@link IEDAdapter#updateLDeviceNodesType <em>Update <b>Type </b> describing the value of the children <b>TAnyLN</b></em>}</li>
+ *    </ul>
+ *   <li>Checklist functions</li>
+ *    <ul>
+ *      <li>{@link IEDAdapter#isSettingConfig <em>Check whether IIED contain confSG</em>}</li>
+ *      <li>{@link IEDAdapter#hasDataSetCreationCapability <em>Check the ability to support DataSet Creation</em>}</li>
+ *    </ul>
+ * </ol>
+ *
+ * @see org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter
+ * @see org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter
+ * @see org.lfenergy.compas.sct.commons.scl.ied.AbstractDAIAdapter
+ * @see org.lfenergy.compas.scl2007b4.model.TSettingGroups
+ * @see <a href="https://github.com/com-pas/compas-sct/issues/3" target="_blank">Issue !3 (Add new IEDs)</a>
+ */
 @Slf4j
 public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
 

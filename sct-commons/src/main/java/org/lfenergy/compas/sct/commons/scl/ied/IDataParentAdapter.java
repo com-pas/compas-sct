@@ -9,6 +9,29 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 
 import java.util.List;
 
+/**
+ * A representation of the model object
+ * <em><b>{@link org.lfenergy.compas.sct.commons.scl.ied.IDataParentAdapter IDataParentAdapter}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ol>
+ *   <li>Adapter</li>
+ *    <ul>
+ *      <li>{@link IDataParentAdapter#getStructuredDataAdapterByName(String) <em>Returns the value of the <b>Child Adapter </b>object reference</em>}</li>
+ *      <li>{@link IDataParentAdapter#getDataAdapterByName(String) <em>Returns the value of the <b>Child Adapter </b>object reference By Name</em>}</li>
+ *    </ul>
+ *   <li>Principal functions</li>
+ *    <ul>
+ *      <li>{@link IDataParentAdapter#addDAI <em>Add <b>TDAI </b>under this object</em>}</li>
+ *      <li>{@link IDataParentAdapter#addSDOI <em>Add <b>TSDI </b>under this object</em>}</li>
+ *    </ul>
+ *    </ul>
+ * </ol>
+ *
+ * @see org.lfenergy.compas.scl2007b4.model.TDAI
+ * @see org.lfenergy.compas.scl2007b4.model.TSDI
+ */
 public interface IDataParentAdapter extends IDataAdapter {
     <S extends IDataParentAdapter> S getStructuredDataAdapterByName(String sName) throws ScdException;
     <S extends AbstractDAIAdapter> S getDataAdapterByName(String sName) throws ScdException;

@@ -11,6 +11,25 @@ import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
 
+/**
+ * A representation of the model object <em><b>GooseControlBlock</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link GooseControlBlock#getId <em>appID</em>}</li>
+ *   <li>{@link GooseControlBlock#getName <em>Name</em>}</li>
+ *   <li>{@link GooseControlBlock#getDataSetRef <em>dataSetRef</em>}</li>
+ *   <li>{@link GooseControlBlock#getDesc <em>Desc</em>}</li>
+ *   <li>{@link GooseControlBlock#getConfRev <em>Refers To confRev</em>}</li>
+ *   <li>{@link GooseControlBlock#getIedNames <em>Refers To Ied Names</em>}</li>
+ *   <li>{@link GooseControlBlock#getSecurityEnable <em>Refers To security Enable</em>}</li>
+ *   <li>{@link GooseControlBlock#isFixedOffs <em>Refers To fixedOffs</em>}</li>
+ *   <li>{@link GooseControlBlock#getProtocol <em>Refers To Protocol</em>}</li>
+ * </ul>
+ *
+ * @see org.lfenergy.compas.scl2007b4.model.TGSEControl
+ */
 @Getter
 @Setter
 @NoArgsConstructor
