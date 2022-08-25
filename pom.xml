@@ -192,6 +192,7 @@
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <version>${maven.plugin.javadoc}</version>
                         <configuration>
+                            <additionalJOption>--no-module-directories</additionalJOption>
                             <doctitle>${javadoc.title}</doctitle>
                             <doclint>${javadoc.lint}</doclint>
                         </configuration>

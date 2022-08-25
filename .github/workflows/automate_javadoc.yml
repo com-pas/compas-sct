@@ -19,7 +19,7 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '11'
-          ref: feat/117_Documentation_SCD_Generation_Process
+#          ref: develop
 
       - name: Create custom Maven Settings.xml
         uses: whelk-io/maven-settings-xml-action@v20
