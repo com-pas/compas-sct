@@ -16,7 +16,23 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
+/**
+ * A representation of the model object <em><b>ExtRef Signal Information</b></em>.
+ *
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link ExtRefSignalInfo#getDesc <em>Desc</em>}</li>
+ *   <li>{@link ExtRefSignalInfo#getPLN <em>PLN</em>}</li>
+ *   <li>{@link ExtRefSignalInfo#getPDO <em>PDO</em>}</li>
+ *   <li>{@link ExtRefSignalInfo#getPDA <em>PDA</em>}</li>
+ *   <li>{@link ExtRefSignalInfo#getPServT <em>PServ T</em>}</li>
+ *   <li>{@link ExtRefSignalInfo#getIntAddr <em>Int Addr</em>}</li>
+ * </ul>
+ *
+ * @see org.lfenergy.compas.scl2007b4.model.TExtRef
+ */
 @Slf4j
 @Getter
 @Setter

@@ -16,6 +16,26 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * A representation of the model object <em><b>ExtRef Binding Information</b></em>.
+ *
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link ExtRefBindingInfo#getIedName <em>Ied Name</em>}</li>
+ *   <li>{@link ExtRefBindingInfo#getLdInst <em>Ld Inst</em>}</li>
+ *   <li>{@link ExtRefBindingInfo#getLnClass <em>Ln Class</em>}</li>
+ *   <li>{@link ExtRefBindingInfo#getLnInst <em>Ln Inst</em>}</li>
+ *   <li>{@link ExtRefBindingInfo#getPrefix <em>Prefix</em>}</li>
+ *   <li>{@link ExtRefBindingInfo#getLnType <em>Ln Type</em>}</li>
+ *   <li>{@link ExtRefBindingInfo#getDaName <em>Refers To {@link org.lfenergy.compas.sct.commons.dto.DaTypeName}</em>}</li>
+ *   <li>{@link ExtRefBindingInfo#getDoName <em>Refers To {@link org.lfenergy.compas.sct.commons.dto.DoTypeName}</em>}</li>
+ *   <li>{@link ExtRefBindingInfo#getServiceType <em>Service Type</em>}</li>
+ * </ul>
+ *
+ * @see org.lfenergy.compas.scl2007b4.model.TExtRef
+ */
 @Getter
 @Setter
 @NoArgsConstructor

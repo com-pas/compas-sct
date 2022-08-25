@@ -9,10 +9,25 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter;
 
 import java.util.UUID;
 
+
+/**
+ * A representation of the model object <em><b>SCL</b></em>.
+ *
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link SclDTO#getId <em>Id</em>}</li>
+ *   <li>{@link SclDTO#getVersion <em>Version</em>}</li>
+ *   <li>{@link SclDTO#getRevision <em>Revision</em>}</li>
+ *   <li>{@link SclDTO#getHeader <em>Refers To Header</em>}</li>
+ * </ul>
+ *
+ * @see org.lfenergy.compas.scl2007b4.model.SCL
+ */
 @Getter
 @Setter
 @NoArgsConstructor

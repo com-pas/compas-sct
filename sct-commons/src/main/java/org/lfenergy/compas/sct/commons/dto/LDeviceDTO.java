@@ -16,6 +16,20 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * A representation of the model object <em><b>LDevice</b></em>.
+ *
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link LDeviceDTO#getLdName <em>LD Name</em>}</li>
+ *   <li>{@link LDeviceDTO#getLdInst <em>LD Inst</em>}</li>
+ *   <li>{@link LDeviceDTO#getLNodes <em>Refers To LNode</em>}</li>
+ * </ul>
+ *
+ * @see org.lfenergy.compas.scl2007b4.model.TIED
+ */
 @Slf4j
 @Getter
 @NoArgsConstructor

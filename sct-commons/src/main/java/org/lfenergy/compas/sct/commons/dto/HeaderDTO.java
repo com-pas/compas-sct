@@ -15,6 +15,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * A representation of the model object <em><b>Header</b></em>.
+ *
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link HeaderDTO#getId <em>id</em>}</li>
+ *   <li>{@link HeaderDTO#getVersion <em>version</em>}</li>
+ *   <li>{@link HeaderDTO#getRevision <em>revision</em>}</li>
+ *   <li>{@link HeaderDTO#getHistoryItems <em>Refers to History</em>}</li>
+ * </ul>
+ *
+ * @see org.lfenergy.compas.scl2007b4.model.THeader
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -38,9 +53,9 @@ public class HeaderDTO {
     }
 
     /**
-     * Creates HeaderDTO from HeaderAdapter object
+     * Creates HeaderDTO from {@link HeaderAdapter <em>HeaderAdapter</em>} object
      * @param headerAdapter input
-     * @return HeaderDTO object
+     * @return {@link HeaderDTO <em>HeaderDTO</em>}
      */
     public static HeaderDTO from(HeaderAdapter headerAdapter) {
         HeaderDTO headerDTO = new HeaderDTO();
@@ -48,12 +63,25 @@ public class HeaderDTO {
         headerDTO.version = headerAdapter.getHeaderVersion();
         headerDTO.revision = headerAdapter.getHeaderRevision();
         headerAdapter.getHistoryItems().forEach(tHItem -> headerDTO.historyItems.add(HistoryItem.from(tHItem)));
-
         return headerDTO;
     }
 
     /**
-     * Anaonymous class for History management
+     * A representation of the model object <em><b>History</b></em>.
+     *
+     * <p>
+     * The following features are supported:
+     * </p>
+     * <ul>
+     *   <li>{@link HistoryItem#getVersion <em>version</em>}</li>
+     *   <li>{@link HistoryItem#getRevision <em>revision</em>}</li>
+     *   <li>{@link HistoryItem#getWho <em>who</em>}</li>
+     *   <li>{@link HistoryItem#getWhat <em>what</em>}</li>
+     *   <li>{@link HistoryItem#getWhy <em>why</em>}</li>
+     *   <li>{@link HistoryItem#getWhen <em>when</em>}</li>
+     * </ul>
+     *
+     * @see org.lfenergy.compas.scl2007b4.model.THeader.History
      */
     @Getter
     @Setter
@@ -68,7 +96,7 @@ public class HeaderDTO {
         /**
          * Initializes History
          * @param tHitem input
-         * @return HistoryItem object
+         * @return {@link HistoryItem <em>HistoryItem</em>} object
          */
         public static HistoryItem from(THitem tHitem){
             HistoryItem historyItem = new HistoryItem();

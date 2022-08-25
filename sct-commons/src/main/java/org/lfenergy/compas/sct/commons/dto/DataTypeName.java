@@ -15,7 +15,32 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * A representation of the model object <em><b>Data Type Name</b></em>.
+ *
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link DataTypeName#getName <em>Name</em>}</li>
+ *   <li>{@link DataTypeName#getStructNames <em>Refers to middle name part of a structured data name</em>}
+ *      <p>
+ *          <b>Example of instantiated subdata</b>
+ *      </p>
+ *      <pre>
+ *          {@code
+ *              <DOI name=”X”>
+ *                  <SDI name=”X”>
+ *                      <SDI name=”X”>
+ *                          <DAI name=”X” />
+ *                      </SDI>
+ *                  </SDI>
+ *              </DOI>
+ *          }
+ *   </li>
+ * </ul>
+ *
+ */
 @Getter
 @Setter
 @Slf4j

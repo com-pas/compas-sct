@@ -14,8 +14,27 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * A representation of the model object
+ * <em><b>{@link org.lfenergy.compas.scl2007b4.model.TSubNetwork SubNetwork}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link org.lfenergy.compas.sct.commons.scl.com.SubNetworkAdapter#addPrivate <em>add Private</em>}</li>
+ *   <li>{@link org.lfenergy.compas.sct.commons.scl.com.SubNetworkAdapter#addConnectedAP <em>add ConnectedAP</em>}</li>
+ * </ul>
+ *
+ * @see org.lfenergy.compas.sct.commons.scl.com.CommunicationAdapter
+ * @see org.lfenergy.compas.scl2007b4.model.TSubNetwork
+ */
 public class SubNetworkAdapter extends SclElementAdapter<CommunicationAdapter, TSubNetwork> {
 
+    /**
+     * Constructor
+     * @param parentAdapter Parent container reference
+     * @param currentElem Current reference
+     */
     public SubNetworkAdapter(CommunicationAdapter parentAdapter, @NonNull TSubNetwork currentElem) {
         super(parentAdapter, currentElem);
     }
@@ -26,11 +45,13 @@ public class SubNetworkAdapter extends SclElementAdapter<CommunicationAdapter, T
     }
 
     /**
-     * Create a Connected Access Point for this subnetwork.
+     * Create a Connected Access Point for this subnetwork.<br/>
+     * <p>
      * Note : this method doesn't check the validity on neither the IED name nor the access point name.
-     * @param iedName
-     * @param apName
-     * @return
+     * </p>
+     * @param iedName input
+     * @param apName input
+     * @return the <em><b>ConnectedAPAdapter</b></em> object
      */
     public ConnectedAPAdapter addConnectedAP(@NonNull String iedName, @NonNull String apName) {
         TConnectedAP tConnectedAP = currentElem.getConnectedAP().stream()
@@ -48,14 +69,26 @@ public class SubNetworkAdapter extends SclElementAdapter<CommunicationAdapter, T
         return new ConnectedAPAdapter(this,tConnectedAP);
     }
 
+    /**
+     * Returns the value of the <em><b>name</b></em> attribute.
+     * @return the value of the <em><b>name</b></em> attribute.
+     */
     public String getName() {
         return currentElem.getName();
     }
 
+    /**
+     * Returns the value of the <em><b>type</b></em> attribute.
+     * @return the value of the <em><b>type</b></em> attribute.
+     */
     public String getType() {
         return currentElem.getType();
     }
 
+    /**
+     * Returns the value of the <em><b>ConnectedAPAdapter</b></em> containment reference list.
+     * @return the value of the <em><b>ConnectedAPAdapter</b></em> containment reference list.
+     */
     public List<ConnectedAPAdapter> getConnectedAPAdapters() {
         return currentElem.getConnectedAP()
                 .stream()
@@ -63,6 +96,12 @@ public class SubNetworkAdapter extends SclElementAdapter<CommunicationAdapter, T
                 .collect(Collectors.toList());
     }
 
+    /**
+     * @param iedName input
+     * @param apName input
+     * @return the <em><b>ConnectedAPAdapter</b></em> object
+     * @throws ScdException
+     */
     public ConnectedAPAdapter getConnectedAPAdapter(String iedName, String apName) throws ScdException {
         return currentElem.getConnectedAP()
                 .stream()

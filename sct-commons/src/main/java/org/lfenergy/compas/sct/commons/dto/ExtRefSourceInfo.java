@@ -12,6 +12,22 @@ import org.lfenergy.compas.scl2007b4.model.TExtRef;
 
 import java.util.Objects;
 
+/**
+ * A representation of the model object <em><b>ExtRef Source Information</b></em>.
+ *
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link ExtRefSourceInfo#getSrcLDInst <em>Src LD Inst</em>}</li>
+ *   <li>{@link ExtRefSourceInfo#getSrcLNClass <em>Src LN Class</em>}</li>
+ *   <li>{@link ExtRefSourceInfo#getSrcLNInst <em>Src LN Inst</em>}</li>
+ *   <li>{@link ExtRefSourceInfo#getSrcPrefix <em>Src Prefix</em>}</li>
+ *   <li>{@link ExtRefSourceInfo#getSrcCBName <em>Src CB Name</em>}</li>
+ * </ul>
+ *
+ * @see org.lfenergy.compas.scl2007b4.model.TExtRef
+ */
 @Setter
 @Getter
 @NoArgsConstructor

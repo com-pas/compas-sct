@@ -17,6 +17,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * A representation of the model object <em><b>DA</b></em>.
+ *
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link DaTypeName#getName <em>Name</em>}</li>
+ *   <li>{@link DaTypeName#getStructNames <em>Refers To StructNames</em>}</li>
+ *   <li>{@link org.lfenergy.compas.scl2007b4.model.TFCEnum <em> Refers To TFCEnum </em>}</li>
+ *   <li>{@link DaTypeName#getType <em>type</em>}</li>
+ *   <li>{@link org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum <em>Refers To TPredefinedBasicTypeEnum</em>}</li>
+ *   <li>{@link DaTypeName#isValImport <em>Refers To valImport</em>}</li>
+ *   <li>{@link DaTypeName#getDaiValues <em>Refers To DAI Values</em>}</li>
+ * </ul>
+ *
+ * @see org.lfenergy.compas.scl2007b4.model.TDA
+ */
 @Getter
 @Setter
 @NoArgsConstructor

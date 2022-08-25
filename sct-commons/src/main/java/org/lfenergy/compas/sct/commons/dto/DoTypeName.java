@@ -10,6 +10,20 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedCDCEnum;
 
+/**
+ * A representation of the model object <em><b>DoTypeName</b></em>.
+ *
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link DoTypeName#getName <em>Name</em>}</li>
+ *   <li>{@link DoTypeName#getStructNames <em>Refers To getStructNames</em>}</li>
+ *   <li>{@link DoTypeName#getCdc <em>Refers To CDC</em>}</li>
+ * </ul>
+ *
+ * @see org.lfenergy.compas.scl2007b4.model.TDO
+ */
 @Getter
 @Setter
 @NoArgsConstructor
