@@ -12,23 +12,45 @@ import java.util.Optional;
 
 public class ConnectedAPAdapter extends SclElementAdapter<SubNetworkAdapter, TConnectedAP> {
 
+    /**
+     * Constructor
+     * @param parentAdapter input
+     * @param currentElem input
+     */
     public ConnectedAPAdapter(SubNetworkAdapter parentAdapter, TConnectedAP currentElem) {
         super(parentAdapter, currentElem);
     }
 
+    /**
+     * Check if node is child of the reference node
+     * @return link parent child existence
+     */
     @Override
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getConnectedAP().contains(currentElem);
     }
 
+    /**
+     * Gets IED name on ConnectedAP
+     * @return IED name
+     */
     public String getIedName() {
         return currentElem.getIedName();
     }
 
+    /**
+     * Gets AccessPoint name
+     * @return AccessPoint name
+     *
+     */
     public String getApName() {
         return currentElem.getApName();
     }
 
+    /**
+     * Copies Address and PhysicalConnection nodes from ICD file to SCL (SCD) file
+     * @param icd ICD file
+     */
     public void copyAddressAndPhysConnFromIcd(Optional<SCL> icd) {
         if (icd.isPresent() && icd.get().getCommunication() != null) {
             icd.stream()

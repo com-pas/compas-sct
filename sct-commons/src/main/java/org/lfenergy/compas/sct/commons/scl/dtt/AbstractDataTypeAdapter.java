@@ -9,6 +9,11 @@ import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 public abstract class AbstractDataTypeAdapter<T>
         extends SclElementAdapter<DataTypeTemplateAdapter, T>  implements IDataTemplate, IDTTComparable<T>{
 
+    /**
+     * Constructor
+     * @param parentAdapter input
+     * @param currentElem input
+     */
     protected AbstractDataTypeAdapter(DataTypeTemplateAdapter parentAdapter, T currentElem) {
         super(parentAdapter, currentElem);
     }
