@@ -11,8 +11,8 @@ public abstract class AbstractDataTypeAdapter<T>
 
     /**
      * Constructor
-     * @param parentAdapter input
-     * @param currentElem input
+     * @param parentAdapter Parent container reference
+     * @param currentElem Current reference
      */
     protected AbstractDataTypeAdapter(DataTypeTemplateAdapter parentAdapter, T currentElem) {
         super(parentAdapter, currentElem);

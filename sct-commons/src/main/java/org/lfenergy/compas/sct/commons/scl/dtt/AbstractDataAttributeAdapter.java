@@ -22,8 +22,8 @@ public abstract class AbstractDataAttributeAdapter<P extends SclElementAdapter,T
 
     /**
      * Constructor
-     * @param parentAdapter input
-     * @param currentElem input
+     * @param parentAdapter Parent container reference
+     * @param currentElem Current reference
      */
     protected AbstractDataAttributeAdapter(P parentAdapter, T currentElem) {
         super(parentAdapter, currentElem);

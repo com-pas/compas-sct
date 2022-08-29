@@ -13,15 +13,29 @@ import java.util.Objects;
 
 public class EnumTypeAdapter extends AbstractDataTypeAdapter<TEnumType>{
 
+    /**
+     * Constructor
+     * @param parentAdapter Parent container reference
+     * @param currentElem Current reference
+     */
     public EnumTypeAdapter(DataTypeTemplateAdapter parentAdapter, TEnumType currentElem) {
         super(parentAdapter, currentElem);
     }
 
+    /**
+     * Check if node is child of the reference node
+     * @return link parent child existence
+     */
     @Override
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getEnumType().contains(currentElem);
     }
 
+    /**
+     * Compares current EnumType and given EnumType
+     * @param tEnumType EnumType to compare with
+     * @return <em>Boolean</em> value of comparison result
+     */
     public boolean hasSameContentAs(TEnumType tEnumType) {
 
         if(!DataTypeTemplateAdapter.hasSamePrivates(currentElem, tEnumType)) {
@@ -44,10 +58,19 @@ public class EnumTypeAdapter extends AbstractDataTypeAdapter<TEnumType>{
         return true;
     }
 
+    /**
+     * Checks if current EnumType has specified value
+     * @param val value to check
+     * @return <em>Boolean</em> value of check result
+     */
     public boolean hasValue(String val) {
         return currentElem.getEnumVal().stream().anyMatch(tEnumVal -> tEnumVal.getValue().equals(val));
     }
 
+    /**
+     * Gets linked DataTypeTemplateAdapter as parent
+     * @return <em>DataTypeTemplateAdapter</em> object
+     */
     @Override
     public DataTypeTemplateAdapter getDataTypeTemplateAdapter() {
         return parentAdapter;

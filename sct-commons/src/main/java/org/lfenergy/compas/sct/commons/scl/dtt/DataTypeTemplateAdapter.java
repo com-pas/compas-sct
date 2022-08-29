@@ -23,8 +23,8 @@ public class DataTypeTemplateAdapter extends SclElementAdapter<SclRootAdapter, T
 
     /**
      * Constructor
-     * @param parentAdapter input
-     * @param dataTypeTemplate input
+     * @param parentAdapter Parent container reference
+     * @param dataTypeTemplate Current reference
      */
     public DataTypeTemplateAdapter(SclRootAdapter parentAdapter, TDataTypeTemplates dataTypeTemplate) {
         super(parentAdapter,dataTypeTemplate);
@@ -142,7 +142,7 @@ public class DataTypeTemplateAdapter extends SclElementAdapter<SclRootAdapter, T
     }
 
     /**
-     * import enum type from this DataTypeTemplate adapter from provider DataTypeTemplate adapter
+     * Import enum type from this DataTypeTemplate adapter from provider DataTypeTemplate adapter
      * @param thisIEDName IED name (in which DO Type is localized)
      * @param prvDttAdapter Adapter of the Data Type template that provides its DataTypeTemplate
      */
@@ -202,9 +202,9 @@ public class DataTypeTemplateAdapter extends SclElementAdapter<SclRootAdapter, T
     }
 
     /**
-     * import DataTypeTemplate from IEDName and received DataTypeTemplate datas'
+     * Import DataTypeTemplate from IEDName and received DataTypeTemplate
      * @param thisIEDName IED name (in which DO Type is localized)
-     * @param rcvDttAdapter Adapter of the Data Type template that provides its DataTypeTemplate
+     * @param rcvDttAdapter Adapter of the Data Type template that receives its DataTypeTemplate
      * @return map of (old enumId, new enumId)
      */
     public Map<String,String> importDTT(String thisIEDName, DataTypeTemplateAdapter rcvDttAdapter) {
@@ -219,9 +219,9 @@ public class DataTypeTemplateAdapter extends SclElementAdapter<SclRootAdapter, T
     }
 
     /**
-     * Finds LNode Types' ID in DataTypeTemplate
-     * @param thisIEDName IED Name
-     * @param prvDttAdapter Previous DataTypeTemplate
+     * Import LNodeType from IEDName and received DataTypeTemplate
+     * @param thisIEDName IED name (in which DO Type is localized)
+     * @param prvDttAdapter Adapter of the Data Type template that provides its DataTypeTemplate
      * @return map of (old enumId, new enumId)
      */
     protected Map<String, String> importLNodeType(String thisIEDName, DataTypeTemplateAdapter prvDttAdapter) {
@@ -258,9 +258,9 @@ public class DataTypeTemplateAdapter extends SclElementAdapter<SclRootAdapter, T
     }
 
     /**
-     * Finds DO in DataTypeTemplate
-     * @param thisIEDName
-     * @param prvDttAdapter
+     * Import DOType from IEDName and received DataTypeTemplate
+     * @param thisIEDName IED name (in which DO Type is localized)
+     * @param prvDttAdapter Adapter of the Data Type template that provides its DataTypeTemplate
      */
     protected void importDOType(String thisIEDName, DataTypeTemplateAdapter prvDttAdapter) {
         Map<String,String> pairOldAndNewDOTyYpeId = new HashMap<>();
@@ -313,6 +313,11 @@ public class DataTypeTemplateAdapter extends SclElementAdapter<SclRootAdapter, T
         });
     }
 
+    /**
+     * Import DOType from IEDName and received DataTypeTemplate
+     * @param thisIEDName IED name (in which DO Type is localized)
+     * @param prvDttAdapter Adapter of the Data Type template that provides its DataTypeTemplate
+     */
     protected void importDAType(String thisIEDName, DataTypeTemplateAdapter prvDttAdapter) {
 
         Map<String,String> pairOldAndNewEnumId = new HashMap<>();
@@ -480,6 +485,12 @@ public class DataTypeTemplateAdapter extends SclElementAdapter<SclRootAdapter, T
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Generates formatted DataTypeTemplate ID from
+     * @param iedName IED name
+     * @param dttId DataTypeTemplate ID
+     * @return formatted DataTypeTemplate ID
+     */
     protected String generateDttId(String iedName,String dttId){
         final int MAX_LENGTH = 255;
         StringBuilder stringBuilder = new StringBuilder();
@@ -488,6 +499,13 @@ public class DataTypeTemplateAdapter extends SclElementAdapter<SclRootAdapter, T
         return str.length() <= MAX_LENGTH ? str : str.substring(0,MAX_LENGTH);
     }
 
+    /**
+     * Gets binding information for ExtRefs
+     * @param lnType NodeType ID
+     * @param signalInfo ExtRef signal information
+     * @return ExtRef binding information in <em>ExtRefBindingInfo</em> object
+     * @throws ScdException
+     */
     public ExtRefBindingInfo getBinderResumedDTT(String lnType, ExtRefSignalInfo signalInfo) throws ScdException {
 
         ExtRefBindingInfo binder = new ExtRefBindingInfo();

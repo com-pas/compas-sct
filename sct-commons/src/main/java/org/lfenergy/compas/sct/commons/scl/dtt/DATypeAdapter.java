@@ -24,10 +24,20 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
 
+    /**
+     * Constructor
+     * @param parentAdapter Parent container reference
+     * @param currentElem Current reference
+     */
     public DATypeAdapter(DataTypeTemplateAdapter parentAdapter, TDAType currentElem) {
         super(parentAdapter, currentElem);
     }
 
+    /**
+     * Completes recursively given summarized DataTypeTemplate information from BDAs
+     * @param rDtt summarized DataTypeTemplate to complete
+     * @return list of completed (updated) summarized DataTypeTemplate
+     */
     public List<ResumedDataTemplate> completeResumedDTT(ResumedDataTemplate rDtt) {
         List<ResumedDataTemplate> result = new ArrayList<>();
         for(BDAAdapter bdaAdapter : getBdaAdapters()){
@@ -105,11 +115,19 @@ public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
     }
 
 
+    /**
+     * Check if node is child of the reference node
+     * @return link parent child existence
+     */
     @Override
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getDAType().contains(currentElem);
     }
 
+    /**
+     * Gets all BDAs from current DAType
+     * @return list of linked BDA as <em>BDAAdapter</em> object
+     */
     public List<BDAAdapter> getBdaAdapters(){
         return currentElem.getBDA()
                 .stream()
@@ -117,6 +135,11 @@ public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Gets BDA by name
+     * @param sdoName BDA name
+     * @return Optional <em>TBDA</em> object
+     */
     public Optional<TBDA> getBDAByName(String sdoName) {
         for(TBDA tbda : currentElem.getBDA()){
             if(tbda.getName().equals(sdoName)){
@@ -126,7 +149,11 @@ public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
         return Optional.empty();
     }
 
-
+    /**
+     * Checks if current DAType contains BDA with specific EnumType
+     * @param enumTypeId ID of EnumType in BDA to check
+     * @return <em>Boolean</em> value of check result
+     */
     public boolean containsBDAWithEnumTypeID(String enumTypeId) {
         return currentElem.getBDA()
                 .stream()
@@ -136,6 +163,11 @@ public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
                 );
     }
 
+    /**
+     * Checks if current DAType contains StructBDA
+     * @param daTypeId ID of DAType (which type is Struct)
+     * @return <em>Boolean</em> value of check result
+     */
     public Boolean containsStructBdaWithDATypeId(String daTypeId) {
         return currentElem.getBDA()
             .stream()
@@ -145,6 +177,11 @@ public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
             );
     }
 
+    /**
+     * Compares current DAType and given DAType
+     * @param inputDAType DAType to compare with
+     * @return <em>Boolean</em> value of comparison result
+     */
     @Override
     public boolean hasSameContentAs(TDAType inputDAType) {
         if(!DataTypeTemplateAdapter.hasSamePrivates(currentElem,inputDAType) ||
@@ -175,6 +212,11 @@ public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
         return true;
     }
 
+    /**
+     * Check if DaTypeName is correct and coherent with this DATypeAdapter
+     * @param daTypeName string containing all BDA/DA names to check
+     * @throws ScdException throws when DaTypeName structured names is not well-ordered
+     */
     public void check(DaTypeName daTypeName) throws ScdException {
         int sz= daTypeName.getStructNames().size();
         String strBDAs = StringUtils.join(daTypeName.getStructNames());
@@ -232,6 +274,11 @@ public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
         return resultRDTTs;
     }
 
+    /**
+     * Gets DATypeAdapter by BDA name
+     * @param name BDA name
+     * @return Optional of <em>DATypeAdapter</em> object
+     */
     public Optional<DATypeAdapter> getDATypeAdapterByBdaName(String name)  {
         Optional<TBDA> opBda = getBDAByName(name);
         if(opBda.isPresent()){
@@ -240,12 +287,20 @@ public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
         return Optional.empty();
     }
 
-
+    /**
+     * Gets linked DataTypeTemplateAdapter as parent
+     * @return <em>DataTypeTemplateAdapter</em> object
+     */
     @Override
     public DataTypeTemplateAdapter getDataTypeTemplateAdapter() {
         return parentAdapter;
     }
 
+    /**
+     * Gets BDAAdapter by name
+     * @param name BDAAdapter name
+     * @return Optiobnal of <em>BDAAdapter</em> object
+     */
     public Optional<BDAAdapter> getBdaAdapterByName(String name) {
         Optional<TBDA> opBda = getBDAByName(name);
         if(opBda.isPresent()){
@@ -255,14 +310,26 @@ public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
     }
 
 
-
+    /**
+     * A representation of the model object
+     * <em><b>{@link org.lfenergy.compas.scl2007b4.model.TBDA BDA}</b></em>.
+     */
     @Getter
     public static class BDAAdapter extends AbstractDataAttributeAdapter<DATypeAdapter, TBDA>{
 
+        /**
+         * Constructor
+         * @param parentAdapter Parent container reference
+         * @param currentElem Current reference
+         */
         protected BDAAdapter(DATypeAdapter parentAdapter, TBDA currentElem) {
             super(parentAdapter, currentElem);
         }
 
+        /**
+         * Check if node is child of the reference node
+         * @return link parent child existence
+         */
         @Override
         protected boolean amChildElementRef() {
             return parentAdapter.getCurrentElem().getBDA().contains(currentElem);

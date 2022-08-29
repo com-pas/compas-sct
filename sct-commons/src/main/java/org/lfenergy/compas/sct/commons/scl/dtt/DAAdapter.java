@@ -13,8 +13,8 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 public class DAAdapter extends AbstractDataAttributeAdapter<DOTypeAdapter, TDA> implements IDataTemplate, IDTTComparable<TDA> {
     /**
      * Constructor
-     * @param parentAdapter input
-     * @param currentElem input
+     * @param parentAdapter Parent container reference
+     * @param currentElem Current reference
      */
     protected DAAdapter(DOTypeAdapter parentAdapter, TDA currentElem) {
         super(parentAdapter, currentElem);
