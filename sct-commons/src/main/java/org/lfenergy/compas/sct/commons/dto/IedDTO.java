@@ -15,7 +15,19 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-
+/**
+ * A representation of the model object <em><b>IED</b></em>.
+ *
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link IedDTO#getName <em>Ied Name</em>}</li>
+ *   <li>{@link IedDTO#getLDevices <em>Refers to LDevice</em>}</li>
+ * </ul>
+ *
+ * @see org.lfenergy.compas.scl2007b4.model.TIED
+ */
 @Getter
 @NoArgsConstructor
 public class IedDTO {

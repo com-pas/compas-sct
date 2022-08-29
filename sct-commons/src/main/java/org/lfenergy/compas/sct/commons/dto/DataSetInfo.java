@@ -1,7 +1,6 @@
 // SPDX-FileCopyrightText: 2021 RTE FRANCE
 //
 // SPDX-License-Identifier: Apache-2.0
-
 package org.lfenergy.compas.sct.commons.dto;
 
 import lombok.Getter;
@@ -11,12 +10,24 @@ import org.lfenergy.compas.scl2007b4.model.TDataSet;
 import org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * A representation of the model object <em><b>Data Set</b></em>.
+ *
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link DataSetInfo#getName() <em>Name</em>}</li>
+ *   <li>{@link DataSetInfo#getFCDAInfos() <em>Refers to FCDA infos</em>}</li>
+ * </ul>
+ *
+ * @see org.lfenergy.compas.scl2007b4.model.TDataSet
+ */
 @Getter
 @NoArgsConstructor
 public class DataSetInfo extends LNodeMetaDataEmbedder{

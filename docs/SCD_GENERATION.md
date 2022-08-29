@@ -1,3 +1,6 @@
+<!-- SPDX-FileCopyrightText: 2022 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
 ## Description of SCD file generation from SSD file and a set of STD files
 
 ### Table Of Contents
@@ -52,5 +55,5 @@ For the process of DataSet and Control Block creation and then Extref update, se
 #### Sequence diagram
 The sequence diagram below summarize the process
 
-![img_2.png](img.png)
+![img_2.png](images/SequenceDiagram-CompasSCT.png)
 

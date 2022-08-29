@@ -16,12 +16,25 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-
+/**
+ * A representation of the model object
+ * <em><b>{@link org.lfenergy.compas.scl2007b4.model.TCommunication Communication}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link org.lfenergy.compas.sct.commons.scl.com.CommunicationAdapter#addSubnetwork <em>add Subnetwork</em>}</li>
+ *   <li>{@link org.lfenergy.compas.sct.commons.scl.com.CommunicationAdapter#addPrivate <em>add Private</em>}</li>
+ * </ul>
+ *
+ * @see org.lfenergy.compas.sct.commons.scl.SclRootAdapter
+ * @see org.lfenergy.compas.scl2007b4.model.TCommunication
+ */
 public class CommunicationAdapter extends SclElementAdapter<SclRootAdapter, TCommunication> {
 
     /**
      * Constructor
-     * @param parentAdapter
+     * @param parentAdapter Parent container reference
      */
     public CommunicationAdapter(SclRootAdapter parentAdapter) {
         super(parentAdapter);
@@ -29,8 +42,8 @@ public class CommunicationAdapter extends SclElementAdapter<SclRootAdapter, TCom
 
     /**
      * Constructor
-     * @param parentAdapter input
-     * @param currentElem input
+     * @param parentAdapter Parent container reference
+     * @param currentElem Current reference
      */
     public CommunicationAdapter(SclRootAdapter parentAdapter, TCommunication currentElem) {
         super(parentAdapter, currentElem);
@@ -58,7 +71,7 @@ public class CommunicationAdapter extends SclElementAdapter<SclRootAdapter, TCom
      * @param snType Subnetwork type
      * @param iedName IED name
      * @param apName AccessPoint name
-     * @return SubNetworkAdapter object
+     * @return SubNetworkAdapter Current reference
      * @throws ScdException
      */
     public SubNetworkAdapter addSubnetwork(String snName, String snType,
@@ -83,9 +96,9 @@ public class CommunicationAdapter extends SclElementAdapter<SclRootAdapter, TCom
     }
 
     /**
-     * Gets Subnetwork  by name from Communication in an adapter wrapper
+     * Gets Subnetwork by name from Communication in an adapter wrapper
      * @param snName Subnetwork name
-     * @return Optional SubNetworkAdapter object
+     * @return Optional <em><b>SubNetworkAdapter</b></em> object
      */
     public Optional<SubNetworkAdapter> getSubnetworkByName(String snName) {
         return currentElem.getSubNetwork()
@@ -97,7 +110,7 @@ public class CommunicationAdapter extends SclElementAdapter<SclRootAdapter, TCom
 
     /**
      * Gets all Subnetworks from Communication node in an adapter wrapper
-     * @return list of SubNetworkAdapter object
+     * @return the value of the <em><b>SubNetworkAdapter</b></em> containment reference list.
      */
     public List<SubNetworkAdapter> getSubNetworkAdapters() {
         return currentElem.getSubNetwork()

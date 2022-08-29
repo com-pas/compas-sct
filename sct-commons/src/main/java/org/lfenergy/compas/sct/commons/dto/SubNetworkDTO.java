@@ -19,7 +19,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-
+/**
+ * A representation of the model object <em><b>Sub Network</b></em>.
+ *
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link SubNetworkDTO#getType <em>Type</em>}</li>
+ *   <li>{@link SubNetworkDTO#getName <em>Name</em>}</li>
+ *   <li>{@link SubNetworkDTO#getConnectedAPs <em>Refers To Connected AP</em>}</li>
+ * </ul>
+ *
+ * @see org.lfenergy.compas.scl2007b4.model.TSubNetwork
+ */
 @Getter
 @NoArgsConstructor
 public class SubNetworkDTO {

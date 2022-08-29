@@ -3,10 +3,18 @@ Upstream-Name: compas-sct
 Upstream-Contact: Mohamed SYLLA <mohamed.sylla@rte-france.com>
 Source: https://github.com/com-pas/compas-sct
 
-Files: doc/images/*
-Copyright: 2021 RTE FRANCE
+Files: docs/images/*
+Copyright: 2022 RTE FRANCE
 License: Apache-2.0
 
-Files: doc/drawio/*
-Copyright: 2021 RTE FRANCE
+Files: docs/drawio/*
+Copyright: 2022 RTE FRANCE
+License: Apache-2.0
+
+Files: docs/blob-files/*
+Copyright: 2022 RTE FRANCE
+License: Apache-2.0
+
+Files: docs/javadoc/*
+Copyright: 2022 RTE FRANCE
 License: Apache-2.0

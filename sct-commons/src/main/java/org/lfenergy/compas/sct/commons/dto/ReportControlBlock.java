@@ -7,16 +7,35 @@ package org.lfenergy.compas.sct.commons.dto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.lfenergy.compas.scl2007b4.model.TReportControl;
-import org.lfenergy.compas.scl2007b4.model.TRptEnabled;
-import org.lfenergy.compas.scl2007b4.model.TServiceType;
-import org.lfenergy.compas.scl2007b4.model.TServices;
-import org.lfenergy.compas.scl2007b4.model.TTrgOps;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
 import java.util.stream.Collectors;
 
 
+/**
+ * A representation of the model object <em><b>ReportControlBlock</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link ReportControlBlock#getId <em>rptID</em>}</li>
+ *   <li>{@link ReportControlBlock#getName <em>Name</em>}</li>
+ *   <li>{@link ReportControlBlock#getDataSetRef <em>dataSetRef</em>}</li>
+ *   <li>{@link ReportControlBlock#getDesc <em>Desc</em>}</li>
+ *   <li>{@link ReportControlBlock#getConfRev <em>Refers To confRev</em>}</li>
+ *   <li>{@link ReportControlBlock#getIedNames <em>Refers To IedNames</em>}</li>
+ *   <li>{@link ReportControlBlock#getSecurityEnable <em>Refers To securityEnable</em>}</li>
+ *   <li>{@link ReportControlBlock#getTrgOps <em>Refers To trgOps</em>}</li>
+ *   <li>{@link ReportControlBlock#getIntgPd <em>Refers To intgPd</em>}</li>
+ *   <li>{@link ReportControlBlock#getRptEnabled <em>Refers To rptEnabled</em>}</li>
+ *   <li>{@link ReportControlBlock#isBuffered <em>Refers To buffered</em>}</li>
+ *   <li>{@link ReportControlBlock#getBufTime <em>Refers To bufTime</em>}</li>
+ *   <li>{@link ReportControlBlock#isIndexed <em>Refers To indexed</em>}</li>
+ * </ul>
+ *
+ * @see org.lfenergy.compas.scl2007b4.model.TReportControl
+ */
 @Getter
 @Setter
 @NoArgsConstructor
