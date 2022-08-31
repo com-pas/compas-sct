@@ -38,6 +38,14 @@ public class SclService {
         throw new IllegalStateException("SclService class");
     }
 
+    /**
+     * Initialise SCD file with Header and Private SCLFileType
+     * @param hId optional SCL Header ID, if empty random UUID will be created
+     * @param hVersion SCL Header Version
+     * @param hRevision SCL Header Revision
+     * @return <em>SclRootAdapter</em> object as SCD file
+     * @throws ScdException throws when inconsistenc in SCL file
+     */
     public static SclRootAdapter initScl(Optional<UUID> hId, String hVersion, String hRevision) throws ScdException {
         UUID headerId = hId.orElseGet(UUID::randomUUID);
         SclRootAdapter scdAdapter = new SclRootAdapter(headerId.toString(), hVersion, hRevision);
@@ -45,6 +53,14 @@ public class SclService {
         return scdAdapter;
     }
 
+    /**
+     * Adds new HistoryItem in SCL file
+     * @param scd SCL file in which new History should be added
+     * @param who Who realize the action
+     * @param what What kind of action is realized
+     * @param why Why this action is done
+     * @return <em>SclRootAdapter</em> object as SCD file
+     */
     public static SclRootAdapter addHistoryItem(SCL scd, String who, String what, String why) {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         HeaderAdapter headerAdapter = sclRootAdapter.getHeaderAdapter();
@@ -52,6 +68,12 @@ public class SclService {
         return sclRootAdapter;
     }
 
+    /**
+     * Updates Header of SCL file
+     * @param scd SCL file in which Header should be updated
+     * @param headerDTO Header new values
+     * @return <em>SclRootAdapter</em> object as SCD file
+     */
     public static SclRootAdapter updateHeader(@NonNull SCL scd, @NonNull HeaderDTO headerDTO) {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         HeaderAdapter headerAdapter = sclRootAdapter.getHeaderAdapter();
@@ -80,11 +102,28 @@ public class SclService {
         return sclRootAdapter;
     }
 
+    /**
+     * Adds IED in SCL file (Related DataTypeTemplate of SCL is updated also)
+     * @param scd SCL file in which IED should be added
+     * @param iedName name of IED to add in SCL
+     * @param icd ICD containing IED to add and related DataTypeTemplate
+     * @return <em>IEDAdapter</em> as added IED
+     * @throws ScdException throws when inconsistency between IED to add and SCL file content
+     */
     public static IEDAdapter addIED(SCL scd, String iedName, SCL icd) throws ScdException {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         return sclRootAdapter.addIED(icd, iedName);
     }
 
+    /**
+     * Adds new SubNetworks in SCL file from ICD file
+     * @param scd SCL file in which SubNetworks should be added
+     * @param subNetworks list of SubNetworks DTO contenting SubNetwork and ConnectedAp parameter names
+     * @param icd ICD file from which SubNetworks functional data are copied from
+     * @return optional of <em>CommunicationAdapter</em> object as Communication node of SCL file.
+     * Calling getParentAdapter() will give SCL file
+     * @throws ScdException
+     */
     public static Optional<CommunicationAdapter> addSubnetworks(SCL scd, Set<SubNetworkDTO> subNetworks, Optional<SCL> icd) throws ScdException {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         CommunicationAdapter communicationAdapter;
@@ -113,6 +152,12 @@ public class SclService {
         return Optional.empty();
     }
 
+    /**
+     * Gets list of SCL SubNetworks
+     * @param scd SCL file in which SubNetworks should found
+     * @return List of <em>SubNetworkDTO</em> from SCL
+     * @throws ScdException throws when no Communication in SCL and <em>createIfNotExists == false</em>
+     */
     public static List<SubNetworkDTO> getSubnetwork(SCL scd) throws ScdException {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         CommunicationAdapter communicationAdapter = sclRootAdapter.getCommunicationAdapter(false);

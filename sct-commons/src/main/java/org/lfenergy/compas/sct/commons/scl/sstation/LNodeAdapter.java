@@ -12,16 +12,29 @@ import org.lfenergy.compas.sct.commons.util.Utils;
 
 public class LNodeAdapter extends SclElementAdapter<FunctionAdapter, TLNode> {
 
+    /**
+     * Constructor
+     * @param parentAdapter Parent container reference
+     * @param currentElem Current reference
+     */
     public LNodeAdapter(FunctionAdapter parentAdapter, TLNode currentElem) {
         super(parentAdapter, currentElem);
     }
 
+    /**
+     * Check if node is child of the reference node
+     * @return link parent child existence
+     */
     @Override
     protected boolean amChildElementRef() {
         TFunction parentElem = parentAdapter.getCurrentElem();
         return parentElem.isSetLNode() && parentElem.getLNode().contains(this.currentElem);
     }
 
+    /**
+     * Copies current Substation LNode to new one
+     * @return copie of current Substation LNode
+     */
     public TLNode deepCopy() {
         TLNode newLNode = new TLNode();
         newLNode.setDesc(currentElem.getDesc());
@@ -50,6 +63,10 @@ public class LNodeAdapter extends SclElementAdapter<FunctionAdapter, TLNode> {
         return newLNode;
     }
 
+    /**
+     * Returns XPath path to current Substation LNode
+     * @return path to current Substation LNode
+     */
     @Override
     protected String elementXPath() {
         return String.format("LNode[%s and %s and %s and %s and %s]",

@@ -12,12 +12,26 @@ import java.util.stream.Stream;
 
 public class BayAdapter extends SclElementAdapter<VoltageLevelAdapter, TBay> {
 
+    /**
+     * Constructor
+     * @param parentAdapter Parent container reference
+     */
     public BayAdapter(VoltageLevelAdapter parentAdapter){super(parentAdapter);}
 
+    /**
+     * Constructor
+     * @param parentAdapter Parent container reference
+     * @param currentElem Current reference
+     */
     public BayAdapter(VoltageLevelAdapter parentAdapter, TBay currentElem){
         super (parentAdapter, currentElem);
     }
 
+    /**
+     * Constructor
+     * @param parentAdapter Parent container reference
+     * @param bayName BAY name reference
+     */
     public BayAdapter(VoltageLevelAdapter parentAdapter, String bayName) throws ScdException {
         super(parentAdapter);
         TBay tBay = parentAdapter.getCurrentElem().getBay()
@@ -28,16 +42,28 @@ public class BayAdapter extends SclElementAdapter<VoltageLevelAdapter, TBay> {
         setCurrentElem(tBay);
     }
 
+    /**
+     * Check if node is child of the reference node
+     * @return link parent child existence
+     */
     @Override
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getBay().contains(currentElem);
     }
 
+    /**
+     * Returns XPath path to current Bay
+     * @return path to current Bay
+     */
     @Override
     protected String elementXPath() {
         return String.format("Bay[%s]", Utils.xpathAttributeFilter("name", currentElem.isSetName() ? currentElem.getName() : null));
     }
 
+    /**
+     * Gets Functions in Stream from current Bay
+     * @return Stream of <em>FunctionAdapter</em> object from Bay
+     */
     public Stream<FunctionAdapter> streamFunctionAdapters(){
         if (!currentElem.isSetFunction()){
             return Stream.empty();

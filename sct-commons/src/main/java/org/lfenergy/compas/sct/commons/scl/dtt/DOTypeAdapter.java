@@ -83,6 +83,13 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
         return result;
     }
 
+    /**
+     * Completes recursively summarize Data Type Templates (rdtt) from DOType to specified DaTypeName.
+     * @param daTypeName the Data object, eventually with DA
+     * @param rDtt reference Resumed Data Type Template to complete
+     * @return optional of <em>ResumedDataTemplate</em> object
+     * @throws ScdException
+     */
     public Optional<ResumedDataTemplate> getResumedDTTByDaName(DaTypeName daTypeName,
                                                                ResumedDataTemplate rDtt) throws ScdException {
         if(!rDtt.getDoName().isDefined()) {
@@ -329,7 +336,8 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
      * Checks current DOType structure coherence and completes given DoTypeName with CDC value
      * @param doTypeName DoTypeName to check and complete
      * @return pair of last DO name in DOType. current DOTypeAdapter
-     * @throws ScdException
+     * @throws ScdException when inconsistency are found in th SCL's
+     *                     DataTypeTemplate (unknown reference for example). Which should normally not happens.
      */
     public Optional<Pair<String,DOTypeAdapter>> checkAndCompleteStructData(DoTypeName doTypeName) throws ScdException {
         int sz = doTypeName.getStructNames().size();

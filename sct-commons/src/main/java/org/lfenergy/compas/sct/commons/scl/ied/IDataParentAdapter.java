@@ -10,9 +10,37 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 import java.util.List;
 
 public interface IDataParentAdapter extends IDataAdapter {
+
+    /**
+     * Gets SDI by name from current DOI
+     * @param sName name of SDI to get
+     * @return <em>RootSDIAdapter</em> object
+     * @throws ScdException throws when specified name of SDI not present in current DOI
+     */
     <S extends IDataParentAdapter> S getStructuredDataAdapterByName(String sName) throws ScdException;
+
+    /**
+     * Gets DAI from current DOI
+     * @param sName name of DAI to get
+     * @return <em>DAIAdapter</em> object
+     * @throws ScdException throws when specified name of DAI not present in current DOI
+     */
     <S extends AbstractDAIAdapter> S getDataAdapterByName(String sName) throws ScdException;
+
+    /**
+     * Adds DAI to current DOI
+     * @param name name of DAI to add
+     * @param isUpdatable updatability state of DAI
+     * @return <em>DAIAdapter</em> object as added DAI
+     */
     <S extends AbstractDAIAdapter> S addDAI(String name,boolean isUpdatable);
+
+
+    /**
+     * Adds SDOI to SDI in current DOI
+     * @param sdoNme name of SDOI to add
+     * @return <em>RootSDIAdapter</em> object as added SDOI
+     */
     <S extends IDataParentAdapter> S addSDOI(String sdoNme) ;
 
     /**
