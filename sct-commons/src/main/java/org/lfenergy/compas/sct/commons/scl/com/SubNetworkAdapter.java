@@ -21,8 +21,8 @@ import java.util.stream.Collectors;
  * The following features are supported:
  * </p>
  * <ul>
- *   <li>{@link org.lfenergy.compas.sct.commons.scl.com.SubNetworkAdapter#addPrivate <em>add Private</em>}</li>
- *   <li>{@link org.lfenergy.compas.sct.commons.scl.com.SubNetworkAdapter#addConnectedAP <em>add ConnectedAP</em>}</li>
+ *   <li>{@link SubNetworkAdapter#addPrivate <em>Add <b>TPrivate </b> under this object</em>}</li>
+ *   <li>{@link SubNetworkAdapter#addConnectedAP <em>add <b>ConnectedAP </b> under this object</em>}</li>
  * </ul>
  *
  * @see org.lfenergy.compas.sct.commons.scl.com.CommunicationAdapter

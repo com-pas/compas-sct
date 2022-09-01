@@ -10,6 +10,29 @@ import org.lfenergy.compas.scl2007b4.model.TText;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
+/**
+ * A representation of the model object
+ * <em><b>{@link LNodeAdapter LNodeAdapter}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ol>
+ *   <li>Principal functions</li>
+ *    <ul>
+ *      <li>{@link LNodeAdapter#addPrivate <em>Add <b>TPrivate </b> under this object</em>}</li>
+ *      <li>{@link LNodeAdapter#elementXPath <em>Returns the <b>XPATH </b> for this object</em>}</li>
+ *      <li>{@link LNodeAdapter#deepCopy <em>Copy the <b>LNode </b> object</em>}</li>
+ *    </ul>
+ *  </ol>
+ *  <p>
+ *    <b>XPATH Example :</b>
+ *    <pre>
+ *      LNode[@iedName="iedName1" and @ldInst="ldInst1" and @Prefix="prefix1" and @lnClass="lnClass1" and @lnInst="lnInst1"]
+ *    </pre>
+ *  </p>
+ *  @see org.lfenergy.compas.scl2007b4.model.TCompasICDHeader
+ *  @see <a href="https://github.com/com-pas/compas-sct/issues/124" target="_blank">Issue !124 (update LNode iedName)</a>
+ */
 public class LNodeAdapter extends SclElementAdapter<FunctionAdapter, TLNode> {
 
     public LNodeAdapter(FunctionAdapter parentAdapter, TLNode currentElem) {

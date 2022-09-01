@@ -6,6 +6,7 @@ package org.lfenergy.compas.sct.commons.scl.header;
 
 import org.lfenergy.compas.scl2007b4.model.THeader;
 import org.lfenergy.compas.scl2007b4.model.THitem;
+import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 
@@ -21,14 +22,16 @@ import java.util.List;
  * The following features are supported:
  * </p>
  * <ul>
- *   <li>{@link org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter#addHistoryItem <em>add History</em>}</li>
- *   <li>{@link org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter#updateVersion <em>update Version</em>}</li>
- *   <li>{@link org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter#updateRevision <em>update Revision</em>}</li>
+ *   <li>{@link HeaderAdapter#addHistoryItem <em>add History</em>}</li>
+ *   <li>{@link HeaderAdapter#updateVersion <em>update Version</em>}</li>
+ *   <li>{@link HeaderAdapter#updateRevision <em>update Revision</em>}</li>
+ *   <li>{@link HeaderAdapter#addPrivate <em>Add <b>TPrivate </b>under this object</em>}</li>
  * </ul>
  *
  * @see org.lfenergy.compas.sct.commons.scl.SclRootAdapter
  * @see org.lfenergy.compas.scl2007b4.model.THeader
  * @see org.lfenergy.compas.scl2007b4.model.THitem
+ * @see <a href="https://github.com/com-pas/compas-sct/issues/88" target="_blank">Issue !88</a>
  */
 public class HeaderAdapter extends SclElementAdapter<SclRootAdapter, THeader> {
 

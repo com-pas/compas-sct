@@ -18,6 +18,23 @@ import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A representation of the model object
+ * <em><b>{@link org.lfenergy.compas.sct.commons.scl.ied.DAITracker DAITracker}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link DAITracker#search() <em>Compare Two <b>ObjectReference </b> sections </em>}</li>
+ *   <li>{@link DAITracker#validateBoundedDAI() <em>Validate <b>ObjectReference</b> base <b>cdc </b> attribute </em>}</li>
+ *   <li>{@link DAITracker#getDaiNumericValue(DaTypeName, double) <em>Returns value of the <b>bType </b> attribute By <b>DaTypeName </b> </em>}</li>
+ * </ul>
+ * <br/>
+ * <pre>
+ *     <b>ObjectReference</b>: LDName/LNName.DataName[.DataName[…]].DataAttributeName[.DAComponentName[ ….]]
+ * </pre>
+ * @see <a href="https://github.com/com-pas/compas-sct/issues/32" target="_blank">Issue !32</a>
+ */
 @Getter
 public class DAITracker {
     private final AbstractLNAdapter<?> lnAdapter;

@@ -21,6 +21,33 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * A representation of the model object
+ * <em><b>{@link org.lfenergy.compas.scl2007b4.model.TLNodeType LNodeType}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ol>
+ *   <li>Adapter</li>
+ *    <ul>
+ *       <li>{@link LNodeTypeAdapter#getDataTypeTemplateAdapter() <em>Returns the value of the <b>DataTypeTemplateAdapter </b>reference object</em>}</li>
+ *       <li>{@link LNodeTypeAdapter#getDOAdapterByName <em>Returns the value of the <b>DOAdapter </b> by <b>DO </b> name </em>}</li>
+ *    </ul>
+ *   <li>Principal functions</li>
+ *    <ul>
+ *      <li>{@link LNodeTypeAdapter#addPrivate <em>Add <b>TPrivate </b>under this object</em>}</li>
+ *      <li>{@link LNodeTypeAdapter#getDOTypeId <em>Returns the value of the <b>type </b>attribute By DOType Id</em>}</li>
+ *      <li>{@link LNodeTypeAdapter#getId() <em>Returns the value of the <b>id </b>attribute</em>}</li>
+ *      <li>{@link LNodeTypeAdapter#getLNClass <em>Returns the value of the <b>lnClass </b>attribute</em>}</li>
+ *      <li>{@link LNodeTypeAdapter#getResumedDTTs <em>Returns <b>ResumedDataTemplate </b> list</em>}</li>
+ *    </ul>
+ *   <li>Checklist functions</li>
+ *    <ul>
+ *       <li>{@link LNodeTypeAdapter#hasSameContentAs <em>Compare Two TLNodeType</em>}</li>
+ *       <li>{@link LNodeTypeAdapter#containsDOWithDOTypeId <em>Check whether TLNodeType contain TDO By Id</em>}</li>
+ *    </ul>
+ * </ol>
+ */
 @Slf4j
 public class LNodeTypeAdapter
         extends SclElementAdapter <DataTypeTemplateAdapter, TLNodeType>

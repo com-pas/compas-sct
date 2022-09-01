@@ -18,6 +18,24 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+/**
+ * A representation of the <em><b>{@link PrivateService PrivateService}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ol>
+ *  <li>{@link PrivateService#getCompasPrivate(TPrivate, Class)
+ *      <em>Returns the value of the <b>TPrivate </b> reference object By class type</em>}</li>
+ *
+ *  <li>{@link PrivateService#getCompasPrivates(TBaseElement, Class)
+ *      <em>Returns the value of the <b>TPrivate </b> containment reference list from given <b>TBaseElement </b> By class type</em>}</li>
+ *
+ *  <li>{@link PrivateService#getCompasPrivates(List, Class)
+ *      <em>Returns the value of the <b>TPrivate </b> containment reference list from given <b>TPrivate </b> elements By class type</em>}
+ *   </li>
+ * </ol>
+ * @see org.lfenergy.compas.scl2007b4.model.TPrivate
+ */
 @Slf4j
 public final class PrivateService {
 

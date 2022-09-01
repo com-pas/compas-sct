@@ -10,6 +10,33 @@ import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.stream.Stream;
 
+/**
+ * A representation of the model object
+ * <em><b>{@link BayAdapter BayAdapter}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ol>
+ *   <li>Adapter</li>
+ *    <ul>
+ *      <li>{@link BayAdapter#streamFunctionAdapters <em>Returns the value of the <b>FunctionAdapter </b>reference object as stream</em>}</li>
+ *    </ul>
+ *   <li>Principal functions</li>
+ *    <ul>
+ *      <li>{@link BayAdapter#addPrivate <em>Add <b>TPrivate </b> under this object</em>}</li>
+ *      <li>{@link BayAdapter#elementXPath <em>Returns the <b>XPATH </b> for this object</em>}</li>
+ *    </ul>
+ *  </ol>
+ *   <p>
+ *      <b>XPATH Example :</b>
+ *      <pre>
+ *          Bay[@name="BayName"]
+ *      </pre>
+ *   </p>
+ *  @see org.lfenergy.compas.scl2007b4.model.TFunction
+ *  @see org.lfenergy.compas.scl2007b4.model.TCompasICDHeader
+ *  @see <a href="https://github.com/com-pas/compas-sct/issues/124" target="_blank">Issue !124 (update LNode iedName)</a>
+ */
 public class BayAdapter extends SclElementAdapter<VoltageLevelAdapter, TBay> {
 
     public BayAdapter(VoltageLevelAdapter parentAdapter){super(parentAdapter);}

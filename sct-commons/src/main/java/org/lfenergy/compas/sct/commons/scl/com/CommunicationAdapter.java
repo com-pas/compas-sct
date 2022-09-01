@@ -23,8 +23,8 @@ import java.util.stream.Collectors;
  * The following features are supported:
  * </p>
  * <ul>
- *   <li>{@link org.lfenergy.compas.sct.commons.scl.com.CommunicationAdapter#addSubnetwork <em>add Subnetwork</em>}</li>
- *   <li>{@link org.lfenergy.compas.sct.commons.scl.com.CommunicationAdapter#addPrivate <em>add Private</em>}</li>
+ *   <li>{@link CommunicationAdapter#addSubnetwork <em>add <b>Subnetwork </b> under this object</em>}</li>
+ *   <li>{@link CommunicationAdapter#addPrivate <em>Add <b>TPrivate </b> under this object</em>}</li>
  * </ul>
  *
  * @see org.lfenergy.compas.sct.commons.scl.SclRootAdapter

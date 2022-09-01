@@ -11,6 +11,29 @@ import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 
 import java.util.Objects;
 
+/**
+ * A representation of the model object
+ * <em><b>{@link org.lfenergy.compas.sct.commons.scl.ied.SDIAdapter DOIAdapter}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ol>
+ *   <li>Adapter</li>
+ *    <ul>
+ *      <li>{@link SDIAdapter#getStructuredDataAdapterByName(String) <em>Returns the value of the <b>Child Adapter </b>object reference</em>}</li>
+ *      <li>{@link SDIAdapter#getDataAdapterByName(String) <em>Returns the value of the <b>Child Adapter </b>object reference By Name</em>}</li>
+ *    </ul>
+ *   <li>Principal functions</li>
+ *    <ul>
+ *      <li>{@link SDIAdapter#addDAI <em>Add <b>TDAI </b> under this object</em>}</li>
+ *      <li>{@link SDIAdapter#addSDOI <em>Add <b>TSDI </b> under this object</em>}</li>
+ *      <li>{@link SDIAdapter#addPrivate <em>Add <b>TPrivate </b> under this object</em>}</li>
+ *    </ul>
+ *    </ul>
+ * </ol>
+ *
+ * @see org.lfenergy.compas.scl2007b4.model.TSDI
+ */
 public class SDIAdapter extends SclElementAdapter<SclElementAdapter, TSDI> implements IDataParentAdapter {
 
     protected SDIAdapter(SclElementAdapter parentAdapter, TSDI currentElem) {
@@ -75,6 +98,28 @@ public class SDIAdapter extends SclElementAdapter<SclElementAdapter, TSDI> imple
         return new SDIAdapter(this,tsdi);
     }
 
+    /**
+     * A representation of the model object
+     * <em><b>{@link org.lfenergy.compas.sct.commons.scl.ied.SDIAdapter.DAIAdapter SDIAdapter.DAIAdapter}</b></em>.
+     * <p>
+     * The following features are supported:
+     * </p>
+     * <ol>
+     *   <li>Adapter</li>
+     *    <ul>
+     *      <li>{@link DAIAdapter#getStructuredDataAdapterByName(String) <em>Returns the value of the <b>Child Adapter </b>object reference</em>}</li>
+     *      <li>{@link DAIAdapter#getDataAdapterByName(String) <em>Returns the value of the <b>Child Adapter </b>object reference By Name</em>}</li>
+     *    </ul>
+     *   <li>Principal functions</li>
+     *    <ul>
+     *      <li>{@link DAIAdapter#addDAI <em>Add <b>TDAI </b> under this object</em>}</li>
+     *      <li>{@link DAIAdapter#addSDOI <em>Add <b>TSDI </b> under this object</em>}</li>
+     *      <li>{@link DAIAdapter#addPrivate <em>Add <b>TPrivate </b> under this object</em>}</li>
+     *    </ul>
+     * </ol>
+     *
+     * @see org.lfenergy.compas.scl2007b4.model.TDAI
+     */
     public static class DAIAdapter extends AbstractDAIAdapter<SDIAdapter> {
 
         protected DAIAdapter(SDIAdapter parentAdapter, TDAI currentElem) {

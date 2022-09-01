@@ -15,7 +15,42 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
+/**
+ * A representation of the model object
+ * <em><b>{@link org.lfenergy.compas.scl2007b4.model.TDOType DOType}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ol>
+ *   <li>Adapter</li>
+ *   <ul>
+ *       <li>{@link DOTypeAdapter#getDataTypeTemplateAdapter <em>Returns the value of the <b>DataTypeTemplateAdapter </b>reference object</em>}</li>
+ *       <li>{@link DOTypeAdapter#getDAAdapterByName <em>Returns the value of the <b>DAAdapter </b>reference object By <b>DA </b> name </em>}</li>
+ *       <li>{@link DOTypeAdapter#getDOTypeAdapterBySdoName <em>Returns the value of the <b>DOTypeAdapter </b>reference object By <b>SDO </b> name </em>}</li>
+ *    </ul>
+ *   <li>Principal functions</li>
+ *    <ul>
+ *      <li>{@link DOTypeAdapter#addPrivate <em>Add <b>TPrivate </b>under this object</em>}</li>
+ *      <li>{@link DOTypeAdapter#getDAByName <em>Returns the value of the <b>TDA </b>reference object By name</em>}</li>
+ *      <li>{@link DOTypeAdapter#getResumedDTTByDaName <em>Returns <b>ResumedDTT</b> By <b>DaTypeName </b> </em>}</li>
+ *      <li>{@link DOTypeAdapter#getResumedDTTByDoName <em>Returns <b>ResumedDTT</b> By <b>DoTypeName </b></em>}</li>
+ *      <li>{@link DOTypeAdapter#getResumedDTTs <em>Returns List Of <b>ResumedDTT</b> By Custom filter</em>}</li>
+ *      <li>{@link DOTypeAdapter#getResumedDTTsOfDA <em>Returns List Of <b>ResumedDTT</b> By <b>DA </b> Object</em>}</li>
+ *      <li>{@link DOTypeAdapter#getSdoOrDAs <em>Returns List of <b>TSDO or TDA</b> </em>}</li>
+ *      <li>{@link DOTypeAdapter#getCdc <em>Returns the value of the <b>cdc </b>attribute</em>}</li>
+ *    </ul>
+ *   <li>Checklist functions</li>
+ *    <ul>
+ *       <li>{@link DOTypeAdapter#hasSameContent <em>Compare two TSDO or Two TDA</em>}</li>
+ *       <li>{@link DOTypeAdapter#hasSameContentAs <em>Compare Two TDOType</em>}</li>
+ *       <li>{@link DOTypeAdapter#checkAndCompleteStructData <em>Check and Complete structData from DoTypeName</em>}</li>
+ *       <li>{@link DOTypeAdapter#containsDAStructWithDATypeId <em>Check whether TDOType contain TDA with Struct Btype By Id</em>}</li>
+ *       <li>{@link DOTypeAdapter#containsSDOWithDOTypeId <em>Check whether TDOType contain TSDO By Id</em>}</li>
+ *       <li>{@link DOTypeAdapter#containsDAWithDAName <em>Check whether TDOType contain TDA By Name</em>}</li>
+ *       <li>{@link DOTypeAdapter#containsDAWithEnumTypeId <em>Check whether TDOType contain TEnumType By Id</em>}</li>
+ *    </ul>
+ * </ol>
+ */
 @Slf4j
 public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
 

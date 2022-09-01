@@ -11,6 +11,33 @@ import org.lfenergy.compas.sct.commons.util.Utils;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+/**
+ * A representation of the model object
+ * <em><b>{@link VoltageLevelAdapter VoltageLevelAdapter}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ol>
+ *   <li>Adapter</li>
+ *    <ul>
+ *      <li>{@link VoltageLevelAdapter#getBayAdapter(String) <em>Returns the value of the <b>BayAdapter </b>reference object By Name</em>}</li>
+ *      <li>{@link VoltageLevelAdapter#streamBayAdapters <em>Returns the value of the <b>BayAdapter </b>reference object as stream</em>}</li>
+ *    </ul>
+ *   <li>Principal functions</li>
+ *    <ul>
+ *      <li>{@link VoltageLevelAdapter#addPrivate <em>Add <b>TPrivate </b>under this object</em>}</li>
+ *      <li>{@link VoltageLevelAdapter#elementXPath <em>Returns the <b>XPATH </b>for this object</em>}</li>
+ *    </ul>
+ *   <p>
+ *      <b>XPATH Example :</b>
+ *      <pre>
+ *          VoltageLevel[@name="VOLTAGE_LEVEL"]
+ *      </pre>
+ *   </p>
+ *  @see org.lfenergy.compas.scl2007b4.model.TBay
+ *  @see org.lfenergy.compas.scl2007b4.model.TCompasICDHeader
+ *  @see <a href="https://github.com/com-pas/compas-sct/issues/124" target="_blank">Issue !124 (update LNode iedName)</a>
+ */
 public class VoltageLevelAdapter extends SclElementAdapter<SubstationAdapter, TVoltageLevel> {
 
     public VoltageLevelAdapter(SubstationAdapter parentAdapter) {super(parentAdapter);}
