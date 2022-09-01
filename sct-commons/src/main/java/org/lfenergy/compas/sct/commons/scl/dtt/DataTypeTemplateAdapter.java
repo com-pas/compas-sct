@@ -13,11 +13,62 @@ import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 
+/**
+ * A representation of the model object
+ * <em><b>{@link org.lfenergy.compas.scl2007b4.model.TDataTypeTemplates DataTypeTemplates}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ol>
+ *   <li>Adapter</li>
+ *    <ul>
+ *      <li>{@link DataTypeTemplateAdapter#getLNodeTypeAdapterById <em>Returns the value of the <b>LNodeTypeAdapter </b>reference object By Id</em>}</li>
+ *      <li>{@link DataTypeTemplateAdapter#getLNodeTypeAdapters <em>Returns the value of the <b>LNodeTypeAdapter </b>containment reference list</em>}</li>
+ *      <li>{@link DataTypeTemplateAdapter#getDOTypeAdapterById <em>Returns the value of the <b>DOTypeAdapter </b>reference object By Id</em>}</li>
+ *      <li>{@link DataTypeTemplateAdapter#getDOTypeAdapters <em>Returns the value of the <b>DOTypeAdapters </b>containment reference list</em>}</li>
+ *      <li>{@link DataTypeTemplateAdapter#getDATypeAdapterById <em>Returns the value of the <b>DATypeAdapter </b>reference object By Id</em>}</li>
+ *      <li>{@link DataTypeTemplateAdapter#getDATypeAdapters <em>Returns the value of the <b>DATypeAdapter </b>containment reference list</em>}</li>
+ *      <li>{@link DataTypeTemplateAdapter#getEnumTypeAdapterById <em>Returns the value of the <b>EnumTypeAdapter </b>reference object By Id</em>}</li>
+ *      <li>{@link DataTypeTemplateAdapter#getEnumTypeAdapters <em>Returns the value of the <b>EnumTypeAdapters </b>containment reference list</em>}</li>
+ *    </ul>
+ *   <li>Principal functions</li>
+ *    <ul>
+ *      <li>{@link DataTypeTemplateAdapter#addPrivate <em>Add <b>TPrivate </b>under this object</em>}</li>
+ *      <li>{@link DataTypeTemplateAdapter#importDTT <em>Add <b>TDataTypeTemplates </b>
+ *      describing the childrens <b>TLNodeType,TDOType,TDAType,TEnumType </b> that can be created under this object</em>}</li>
+ *      <li>{@link DataTypeTemplateAdapter#importEnumType <em>Add <b>TDataTypeTemplates </b> describing the children <b>TEnumType </b> that can be created under this object</em>}</li>
+ *      <li>{@link DataTypeTemplateAdapter#importLNodeType <em>Add <b>TDataTypeTemplates </b> describing the children <b>TLNodeType </b> that can be created under this object</em>}</li>
+ *      <li>{@link DataTypeTemplateAdapter#importDOType <em>Add <b>TDataTypeTemplates </b> describing the children <b>TDOType </b> that can be created under this object</em>}</li>
+ *      <li>{@link DataTypeTemplateAdapter#importDAType <em>Add <b>TDataTypeTemplates </b> describing the children <b>TDAType </b> that can be created under this object</em>}</li>
+ *
+ *      <li>{@link DataTypeTemplateAdapter#findLNodeTypesFromDoWithDoTypeId <em>Returns <b>LNodeTypeAdapter </b> containment reference list that match <b>DO </b> object And DOType Id</em>}</li>
+ *      <li>{@link DataTypeTemplateAdapter#findDOTypesFromSDOWithDOTypeId <em>Returns <b>DOTypeAdapter </b> object Of Type <b>SDO </b> By DOType Id</em>}</li>
+ *      <li>{@link DataTypeTemplateAdapter#findDOTypesWhichDAContainsEnumTypeId <em>Returns <b>DOTypeAdapter </b> containment reference list that match <b>DA </b> object Of Type <b>Enum </b> And EnumType Id</em>}</li>
+ *      <li>{@link DataTypeTemplateAdapter#findDATypesWhichBdaContainsEnumTypeId <em>Returns <b>DATypeAdapter </b> containment reference list that match <b>BDA </b> object Of Type <b>Enum </b> And EnumType Id</em>}</li>
+ *      <li>{@link DataTypeTemplateAdapter#findDATypesFromStructBdaWithDATypeId <em>Returns <b>DATypeAdapter </b> object that match <b>BDA </b> object Of Type <b>Struct </b> By DAType Id</em>}</li>
+ *    </ul>
+ *   <li>Checklist functions</li>
+ *    <ul>
+ *      <li>{@link DataTypeTemplateAdapter#hasSameID <em>Compare Two TIDNaming</em>}</li>
+ *      <li>{@link DataTypeTemplateAdapter#hasSamePrivates <em>Compare Two TDataTypeTemplateAdapter's By these Private</em>}</li>
+ *    </ul>
+ * </ol>
+ *
+ * @see org.lfenergy.compas.scl2007b4.model.TLNodeType
+ * @see org.lfenergy.compas.scl2007b4.model.TDOType
+ * @see org.lfenergy.compas.scl2007b4.model.TDAType
+ * @see org.lfenergy.compas.scl2007b4.model.TEnumType
+ * @see org.lfenergy.compas.scl2007b4.model.TDA
+ * @see org.lfenergy.compas.scl2007b4.model.TBDA
+ * @see org.lfenergy.compas.scl2007b4.model.TSDO
+ * @see <a href="https://github.com/com-pas/compas-sct/issues/5" target="_blank">General rules to define if two DTT are different</a>
+ */
 @Slf4j
 public class DataTypeTemplateAdapter extends SclElementAdapter<SclRootAdapter, TDataTypeTemplates> {
 
@@ -247,7 +298,7 @@ public class DataTypeTemplateAdapter extends SclElementAdapter<SclRootAdapter, T
             }
 
             if(isImportable) {
-                //import this enumType
+                //import this LNodeType
                 currentElem.getLNodeType().add(prvLNodeType);
                 if(!Objects.equals(oldId,newId)) {
                     pairOldAndNewId.put(oldId,newId);
@@ -286,7 +337,7 @@ public class DataTypeTemplateAdapter extends SclElementAdapter<SclRootAdapter, T
             }
 
             if(isImportable) {
-                //import this enumType
+                //import this DOType
                 currentElem.getDOType().add(prvDOType);
                 if(!Objects.equals(oldId,newId)) {
                     pairOldAndNewDOTyYpeId.put(oldId,newId);
@@ -343,7 +394,7 @@ public class DataTypeTemplateAdapter extends SclElementAdapter<SclRootAdapter, T
             }
 
             if(isImportable) {
-                //import this enumType
+                //import this DAType
                 currentElem.getDAType().add(prvDAType);
                 if(!Objects.equals(oldId,newId)) {
                     pairOldAndNewEnumId.put(oldId,newId);

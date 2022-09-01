@@ -16,6 +16,25 @@ import org.lfenergy.compas.sct.commons.scl.sstation.FunctionAdapter;
 import org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter;
 import org.lfenergy.compas.sct.commons.scl.sstation.VoltageLevelAdapter;
 
+
+/**
+ * A representation of the <em><b>{@link SubstationService SubstationService}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link SubstationService#addSubstation(SCL, SCL) <em>Adds the <b>Substation </b> object from given <b>SCL </b> object</em>}</li>
+ *   <li>{@link SubstationService#updateVoltageLevel(SubstationAdapter, TVoltageLevel) <em>Adds the <b>TVoltageLevel </b> element under <b>TSubstation </b> reference object</em>}</li>
+ *   <li>{@link SubstationService#updateBay(VoltageLevelAdapter, TBay) <em>Adds the <b>TBay </b> element under <b>TVoltageLevel </b> reference object</em>}</li>
+ *   <li>{@link SubstationService#updateLNodeIEDNames(SCL) <em>Update the value of <b>LNode@iedName </b> attribute corresponding to the value of <b>ICDHeader@IEDName </b> attribute </em> }</li>
+ * </ul>
+ * @see org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter
+ * @see org.lfenergy.compas.sct.commons.scl.sstation.VoltageLevelAdapter
+ * @see org.lfenergy.compas.sct.commons.scl.sstation.BayAdapter
+ * @see org.lfenergy.compas.sct.commons.scl.sstation.FunctionAdapter
+ * @see org.lfenergy.compas.sct.commons.scl.sstation.LNodeAdapter
+ * @see org.lfenergy.compas.sct.commons.scl.PrivateService
+ */
 @Slf4j
 public final class SubstationService {
 

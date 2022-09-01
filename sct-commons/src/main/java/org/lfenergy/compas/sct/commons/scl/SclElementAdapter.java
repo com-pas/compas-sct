@@ -7,8 +7,31 @@ package org.lfenergy.compas.sct.commons.scl;
 import lombok.Getter;
 import org.lfenergy.compas.scl2007b4.model.TBaseElement;
 import org.lfenergy.compas.scl2007b4.model.TPrivate;
-
-
+/**
+ * A representation of the model object
+ * <em><b>{@link SclElementAdapter SclElementAdapter}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ol>
+ *   <li>Adapter</li>
+ *    <ul>
+ *      <li>{@link SclElementAdapter#getParentAdapter <em>Returns the value of the <b>SclElementAdapter </b> parent reference object</em>}</li>
+ *      <li>{@link SclElementAdapter#getCurrentElem <em>Returns the value of the <b>SclElementAdapter </b> current reference object</em>}</li>
+ *    </ul>
+ *   <li>Principal functions</li>
+ *    <ul>
+ *      <li>{@link SclElementAdapter#addPrivate <em>Add <b>TPrivate </b>under object</em>}</li>
+ *      <li>{@link SclElementAdapter#getXPath() <em>Returns <b>XPath </b></em>}</li>
+ *    </ul>
+ *   <li>Checklist functions</li>
+ *    <ul>
+ *      <li>{@link SclElementAdapter#amRootElement() <em>Check relation between SCL parent element and child</em>}</li>
+ *      <li>{@link SclElementAdapter#amChildElementRef() <em>Check whether SCL parent element implement SCL child element</em>}</li>
+ *    </ul>
+ * </ol>
+ *
+ */
 @Getter
 public abstract class SclElementAdapter<P extends SclElementAdapter, T> {
     protected P parentAdapter;

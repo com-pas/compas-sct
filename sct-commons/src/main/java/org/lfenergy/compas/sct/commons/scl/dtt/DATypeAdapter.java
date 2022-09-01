@@ -21,6 +21,36 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * A representation of the model object <em><b>{@link org.lfenergy.compas.scl2007b4.model.TDAType DAType}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ol>
+ *   <li>Adapter</li>
+ *   <ul>
+ *       <li>{@link DATypeAdapter#getDataTypeTemplateAdapter <em>Returns the value of the <b>DataTypeTemplateAdapter </b>reference object</em>}</li>
+ *       <li>{@link DATypeAdapter#getBdaAdapterByName <em>Returns the value of the <b>BDAAdapter </b> reference object By <b>BDA</b> name</em>}</li>
+ *       <li>{@link DATypeAdapter#getBdaAdapters <em>Returns the value of the <b>BDAAdapters </b>containment reference list</em>}</li>
+ *       <li>{@link DATypeAdapter#getDATypeAdapterByBdaName <em>Returns the value of the <b>DATypeAdapter </b>reference object By <b>BDA</b> name/em>}</li>
+ *    </ul>
+ *   <li>Principal functions</li>
+ *    <ul>
+ *      <li>{@link DATypeAdapter#addPrivate <em>Add <b>TPrivate </b>under this object</em>}</li>
+ *      <li>{@link DATypeAdapter#getBDAByName <em>Returns the value of the <b>TBDA </b>reference object By name</em>}</li>
+ *      <li>{@link DATypeAdapter#getResumedDTTByDaName <em>Returns List Of <b>ResumedDataTemplate</b> By <b>DaTypeName </b></em>}</li>
+ *      <li>{@link DATypeAdapter#getResumedDTTs <em>Returns List Of <b>ResumedDataTemplate </b> By Custom filter</em>}</li>
+ *      <li>{@link DATypeAdapter#completeResumedDTT <em>Returns Completed list Of <b>ResumedDataTemplate </b></em>}</li>
+ *    </ul>
+ *   <li>Checklist functions</li>
+ *    <ul>
+ *       <li>{@link DATypeAdapter#hasSameContentAs <em>Compare Two TDA</em>}</li>
+ *       <li>{@link DATypeAdapter#check <em>Check structData from DaTypeName</em>}</li>
+ *       <li>{@link DATypeAdapter#containsStructBdaWithDATypeId <em>Check whether TDA contain TBDA with Struct Btype By Id</em>}</li>
+ *       <li>{@link DATypeAdapter#containsBDAWithEnumTypeID <em>Check whether TDAType contain contain TEnumType By Id</em>}</li>
+ *    </ul>
+ * </ol>
+ */
 @Slf4j
 public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
 
@@ -135,14 +165,15 @@ public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
                 .collect(Collectors.toList());
     }
 
+
     /**
      * Gets BDA by name
-     * @param sdoName BDA name
+     * @param bdaName BDA name
      * @return Optional <em>TBDA</em> object
      */
-    public Optional<TBDA> getBDAByName(String sdoName) {
+    public Optional<TBDA> getBDAByName(String bdaName) {
         for(TBDA tbda : currentElem.getBDA()){
-            if(tbda.getName().equals(sdoName)){
+            if(tbda.getName().equals(bdaName)){
                 return Optional.of(tbda);
             }
         }
@@ -311,8 +342,35 @@ public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
 
 
     /**
-     * A representation of the model object
-     * <em><b>{@link org.lfenergy.compas.scl2007b4.model.TBDA BDA}</b></em>.
+    /**
+     * A representation of the model object <em><b>{@link org.lfenergy.compas.scl2007b4.model.TBDA BDA}</b></em>.
+     * <p>
+     * The following features are supported:
+     * </p>
+     * <ol>
+     *   <li>Adapter</li>
+     *   <ul>
+     *       <li>{@link BDAAdapter#getDataTypeTemplateAdapter <em>get DataTypeTemplateAdapter</em>}</li>
+     *       <li>{@link BDAAdapter#getBdaAdapterByName <em>get BdaAdapter By Name</em>}</li>
+     *       <li>{@link BDAAdapter#getBdaAdapters <em>get getBdaAdapters</em>}</li>
+     *       <li>{@link BDAAdapter#getDATypeAdapterByBdaName <em>get DATypeAdapter By TBDA Name</em>}</li>
+     *    </ul>
+     *   <li>Functions</li>
+     *    <ul>
+     *      <li>{@link BDAAdapter#addPrivate <em>add Private</em>}</li>
+     *      <li>{@link BDAAdapter#getBDAByName <em>get TBDA By Name</em>}</li>
+     *      <li>{@link BDAAdapter#getResumedDTTByDaName <em>get ResumedDTT By DaTypeName</em>}</li>
+     *      <li>{@link BDAAdapter#getResumedDTTs <em>get ResumedDTTs By Custom filter</em>}</li>
+     *      <li>{@link BDAAdapter#completeResumedDTT <em>Construct and Complete ResumedDTTs</em>}</li>
+     *    </ul>
+     *   <li>Check rules</li>
+     *    <ul>
+     *       <li>{@link BDAAdapter#hasSameContentAs <em>Compare Two TBDA</em>}</li>
+     *       <li>{@link BDAAdapter#check <em>Check structData from DaTypeName</em>}</li>
+     *       <li>{@link BDAAdapter#containsStructBdaWithDATypeId <em>Check whether TBDA contain TBDA with Struct Btype By Id</em>}</li>
+     *       <li>{@link BDAAdapter#containsBDAWithEnumTypeID <em>Check whether TBDA contain contain TEnumType By Id</em>}</li>
+     *    </ul>
+     * </ol>
      */
     @Getter
     public static class BDAAdapter extends AbstractDataAttributeAdapter<DATypeAdapter, TBDA>{

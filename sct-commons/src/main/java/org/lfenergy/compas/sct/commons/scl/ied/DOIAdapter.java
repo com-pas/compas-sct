@@ -12,6 +12,30 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 
 
+/**
+ * A representation of the model object
+ * <em><b>{@link org.lfenergy.compas.sct.commons.scl.ied.DOIAdapter DOIAdapter}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ol>
+ *   <li>Adapter</li>
+ *    <ul>
+ *      <li>{@link DOIAdapter#getStructuredDataAdapterByName(String) <em>Returns the value of the <b>Child Adapter </b>object reference</em>}</li>
+ *      <li>{@link DOIAdapter#getDataAdapterByName(String) <em>Returns the value of the <b>Child Adapter </b>object reference By Name</em>}</li>
+ *    </ul>
+ *   <li>Principal functions</li>
+ *    <ul>
+ *      <li>{@link DOIAdapter#addDAI <em>Add <b>TDAI </b> under this object</em>}</li>
+ *      <li>{@link DOIAdapter#addSDOI <em>Add <b>TSDI </b> under this object</em>}</li>
+ *      <li>{@link DOIAdapter#addPrivate <em>Add <b>TPrivate </b> under this object</em>}</li>
+ *    </ul>
+ *    </ul>
+ * </ol>
+ *
+ * @see org.lfenergy.compas.scl2007b4.model.TDAI
+ * @see org.lfenergy.compas.scl2007b4.model.TSDI
+ */
 public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TAnyLN>, TDOI> implements IDataParentAdapter {
 
     /**
@@ -105,7 +129,30 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
     }
 
     /**
+<<<<<<< HEAD
      * DAIAdapter for DAI creation and link with parent DOI
+=======
+     * A representation of the model object
+     * <em><b>{@link org.lfenergy.compas.sct.commons.scl.ied.DOIAdapter.DAIAdapter DOIAdapter.DAIAdapter}</b></em>.
+     * <p>
+     * The following features are supported:
+     * </p>
+     * <ol>
+     *   <li>Adapter</li>
+     *    <ul>
+     *      <li>{@link DAIAdapter#getStructuredDataAdapterByName(String) <em>Returns the value of the <b>Child Adapter </b>object reference</em>}</li>
+     *      <li>{@link DAIAdapter#getDataAdapterByName(String) <em>Returns the value of the <b>Child Adapter </b>object reference By Name</em>}</li>
+     *    </ul>
+     *   <li>Principal functions</li>
+     *    <ul>
+     *      <li>{@link DAIAdapter#addDAI <em>Add <b>TDAI </b> under this object</em>}</li>
+     *      <li>{@link DAIAdapter#addSDOI <em>Add <b>TSDI </b> under this object</em>}</li>
+     *      <li>{@link DAIAdapter#addPrivate <em>Add <b>TPrivate </b> under this object</em>}</li>
+     *    </ul>
+     * </ol>
+     *
+     * @see org.lfenergy.compas.scl2007b4.model.TSDI
+>>>>>>> feat/117_Documentation_SCD_Generation_Process
      */
     public static class DAIAdapter extends AbstractDAIAdapter<DOIAdapter> {
 

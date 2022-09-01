@@ -18,8 +18,8 @@ import java.util.Optional;
  * The following features are supported:
  * </p>
  * <ul>
- *   <li>{@link org.lfenergy.compas.sct.commons.scl.com.ConnectedAPAdapter#addPrivate <em>add Private</em>}</li>
- *   <li>{@link org.lfenergy.compas.sct.commons.scl.com.ConnectedAPAdapter#copyAddressAndPhysConnFromIcd  <em>copy Address And PhysConn From Icd</em>}</li>
+ *   <li>{@link ConnectedAPAdapter#addPrivate <em>Add <b>TPrivate </b> under this object</em>}</li>
+ *   <li>{@link ConnectedAPAdapter#copyAddressAndPhysConnFromIcd  <em>copy Address And PhysConn From Icd</em>}</li>
  * </ul>
  *
  * @see org.lfenergy.compas.sct.commons.scl.com.SubNetworkAdapter
@@ -64,7 +64,7 @@ public class ConnectedAPAdapter extends SclElementAdapter<SubNetworkAdapter, TCo
     /**
      * Copies Address and PhysicalConnection nodes from ICD file
      * @param icd ICD file
-     * @see <a href="https://github.com/com-pas/compas-sct/issues/76">Issue !76</a>
+     * @see <a href="https://github.com/com-pas/compas-sct/issues/76" target="_blank">Issue !76</a>
      */
     public void copyAddressAndPhysConnFromIcd(Optional<SCL> icd) {
         if (icd.isPresent() && icd.get().getCommunication() != null) {

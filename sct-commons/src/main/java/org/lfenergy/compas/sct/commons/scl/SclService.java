@@ -27,6 +27,53 @@ import java.util.stream.Collectors;
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 import static org.lfenergy.compas.sct.commons.util.PrivateEnum.COMPAS_ICDHEADER;
 
+/**
+ * A representation of the <em><b>{@link SclService SclService}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>Initialization functions</li>
+ *   <ol>
+ *      <li>{@link SclService#initScl(Optional, String, String) <em>Initialize the <b>SCL </b> object</em>}</li>
+ *      <li>{@link SclService#addHistoryItem(SCL, String, String, String) <em>Adds <b>History </b> object under <b>THeader </b> reference object</em>}</li>
+ *      <li>{@link SclService#updateHeader(SCL, HeaderDTO) <em>Update <b>Header </b> reference object</em>}</li>
+ *   </ol>
+ *   <li>IED features</li>
+ *   <ol>
+ *       <li>{@link SclService#addIED(SCL, String, SCL) <em>Adds the <b>IED </b> object</em>}</li>
+ *   </ol>
+ *   <li>Communication features</li>
+ *   <ol>
+ *      <li>{@link SclService#getSubnetwork(SCL) <em>Returns list of <b>SubNetworkDTO </b></em>}</li>
+ *      <li>{@link SclService#addSubnetworks(SCL, Set, Optional) <em>Adds the <b>Subnetwork </b> elements under <b>TCommunication </b> reference object</em>}</li>
+ *   </ol>
+ *   <li>ExtRef features</li>
+ *   <ol>
+ *      <li>{@link SclService#getExtRefInfo <em>Returns list of <b>ExtRefInfo </b></em>}</li>
+ *      <li>{@link SclService#getExtRefBinders <em>Returns list of <b>ExtRefBindingInfo </b></em>}</li>
+ *      <li>{@link SclService#updateExtRefBinders(SCL, ExtRefInfo) <em>Update the <b>TExtRef </b> reference object for given <b>ExtRefBindingInfo </b> model</em>}</li>
+ *      <li>{@link SclService#getExtRefSourceInfo <em>Returns list of <b>ExtRefSourceInfo </b></em>}</li>
+ *      <li>{@link SclService#updateExtRefSource(SCL, ExtRefInfo) <em>Update the <b>TExtRef </b> reference object for given <b>ExtRefSourceInfo </b> model</em>}</li>
+ *   </ol>
+ *   <li>DAI features</li>
+ *   <ol>
+ *      <li>{@link SclService#getDAI <em>Returns list of <b>ResumedDataTemplate </b></em>}</li>
+ *      <li>{@link SclService#updateDAI(SCL, String, String, ResumedDataTemplate)
+ *      <em>Update the <b>TDAI </b> reference object for given <b>iedName</b>, <b>ldInst </b> and <b>ResumedDataTemplate </b> model</em>}</li>
+ *   </ol>
+ *   <li>EnumType features</li>
+ *   <ol>
+ *      <li>{@link SclService#getEnumTypeElements(SCL, String) <em>Returns Map <b>(ord, enumVal) </b> of <b>TEnumType </b> reference object</em>}</li>
+ *   </ol>
+ *
+ * </ul>
+ * @see org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter
+ * @see org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter
+ * @see org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter
+ * @see org.lfenergy.compas.sct.commons.scl.com.CommunicationAdapter
+ * @see org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter
+ */
 @Slf4j
 public class SclService {
 

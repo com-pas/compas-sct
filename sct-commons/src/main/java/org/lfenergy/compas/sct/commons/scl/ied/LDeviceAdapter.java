@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.TLDevice;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
+import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
@@ -17,6 +18,37 @@ import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * A representation of the model object
+ * <em><b>{@link org.lfenergy.compas.scl2007b4.model.TLDevice LDevice}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ol>
+ *   <li>Adapter</li>
+ *    <ul>
+ *      <li>{@link LDeviceAdapter#getLNAdapters <em>Returns the value of the <b>LNAdapter </b>containment reference list</em>}</li>
+ *      <li>{@link LDeviceAdapter#getLN0Adapter <em>Returns the value of the <b>LN0Adapter </b>containment reference list</em>}</li>
+ *      <li>{@link LDeviceAdapter#getLNAdapter <em>Returns the value of the <b>LNAdapter </b>reference object By  LNClass, inst and prefix</em>}</li>
+ *    </ul>
+ *   <li>Principal functions</li>
+ *    <ul>
+ *      <li>{@link LDeviceAdapter#getInst <em>Returns the value of the <b>inst </b>attribute</em>}</li>
+ *      <li>{@link LDeviceAdapter#getLdName <em>Returns the value of the <b>ldName </b>attribute</em>}</li>
+ *      <li>{@link LDeviceAdapter#getExtRefInfo em>Returns the value of the <b>ExtRefInfo </b>containment reference</em>}</li>
+ *      <li>{@link LDeviceAdapter#getExtRefBinders <em>Returns the value of the <b>ExtRefBindingInfo </b>containment reference list By <b>ExtRefSignalInfo</b></em>}</li>
+ *      <li>{@link LDeviceAdapter#getDAI <em>Returns the value of the <b>ResumedDataTemplate </b>containment reference By filter</em>}</li>
+ *      <li>{@link LDeviceAdapter#addPrivate <em>Add <b>TPrivate </b>under this object</em>}</li>
+ *    </ul>
+ * </ol>
+ *
+ * @see org.lfenergy.compas.sct.commons.scl.ied.LNAdapter
+ * @see org.lfenergy.compas.sct.commons.scl.ied.LN0Adapter
+ * @see org.lfenergy.compas.scl2007b4.model.TLDevice
+ * @see org.lfenergy.compas.scl2007b4.model.TDOI
+ * @see org.lfenergy.compas.scl2007b4.model.TDAI
+ * @see <a href="https://github.com/com-pas/compas-sct/issues/32" target="_blank">Issue !32</a>
+ */
 @Slf4j
 public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
 

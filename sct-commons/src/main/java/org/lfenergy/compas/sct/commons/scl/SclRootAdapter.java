@@ -20,6 +20,38 @@ import org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * A representation of the model object
+ * <em><b>{@link org.lfenergy.compas.scl2007b4.model.SCL SCL}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ol>
+ *   <li>Adapter</li>
+ *    <ul>
+ *      <li>{@link SclRootAdapter#getHeaderAdapter <em>Returns the value of the <b>HeaderAdapter </b> reference object</em>}</li>
+ *      <li>{@link SclRootAdapter#getSubstationAdapter(String) <em>Returns the value of the <b>SubstationAdapter </b> reference object By nme</em>}</li>
+ *      <li>{@link SclRootAdapter#getCommunicationAdapter(boolean) <em>Returns or Adds the value of the <b>CommunicationAdapter </b> reference object</em>}</li>
+ *      <li>{@link SclRootAdapter#getIEDAdapters() <em>Returns the value of the <b>IEDAdapter </b> containment reference list</em>}</li>
+ *      <li>{@link SclRootAdapter#getIEDAdapterByName(String) <em>Returns the value of the <b>IEDAdapter </b> reference object By name</em>}</li>
+ *      <li>{@link SclRootAdapter#getDataTypeTemplateAdapter() <em>Returns the value of the <b>DataTypeTemplateAdapter </b> containment reference list</em>}</li>
+ *    </ul>
+ *   <li>Principal functions</li>
+ *    <ul>
+ *      <li>{@link SclRootAdapter#addPrivate <em>Add <b>Private </b>under this object</em>}</li>
+ *      <li>{@link SclRootAdapter#addHeader(String, String, String) <em>Adds <b>Header </b> describing the children under this object</em>}</li>
+ *      <li>{@link SclRootAdapter#addIED(SCL, String) <em>Adds <b>IED </b> describing the children under this object</em>}</li>
+ *      <li>{@link SclRootAdapter#addPrivate(TPrivate) <em>Add  given <b>TPrivate </b> describing the children under this object</em>}</li>
+ *      <li>{@link SclRootAdapter#getSclRevision() <em>Returns the value of the <b>revision </b> attribute</em>}</li>
+ *      <li>{@link SclRootAdapter#getSclRelease() <em>Returns the value of the <b>release </b> attribute</em>}</li>
+ *      <li>{@link SclRootAdapter#getSclVersion() <em>Returns the value of the <b>version </b> attribute</em>}</li>
+ *    </ul>
+ *   <li>Checklist functions</li>
+ *    <ul>
+ *        <li>{@link SclRootAdapter#checkObjRef(String) <em>Check the value of <b>ObjectReference </b> object</em>}</li>
+ *    </ul>
+ * </ol>
+ */
 @Getter
 @Setter
 @Slf4j

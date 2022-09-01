@@ -13,6 +13,34 @@ import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.Objects;
 import java.util.Optional;
+
+/**
+ * A representation of the model object
+ * <em><b>{@link org.lfenergy.compas.sct.commons.scl.dtt.AbstractDataAttributeAdapter AbstractDataAttributeAdapter}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ol>
+ *   <li>Adapter</li>
+ *   <ul>
+ *       <li>{@link AbstractDataAttributeAdapter#getDataTypeTemplateAdapter <em>get DataTypeTemplateAdapter</em>}</li>
+ *       <li>{@link AbstractDataAttributeAdapter#getDATypeAdapter <em>get DATypeAdapter</em>}</li>
+ *    </ul>
+ *   <li>Principal functions</li>
+ *    <ul>
+ *      <li>{@link AbstractDataAttributeAdapter#addPrivate <em>Add <b>TPrivate </b>under this object</em>}</li>
+ *    </ul>
+ *   <li>Checklist functions</li>
+ *    <ul>
+ *       <li>{@link AbstractDataAttributeAdapter#hasSameContentAs <em>Compare Two SCL element</em>}</li>
+ *       <li>{@link AbstractDataAttributeAdapter#check <em>Check structData from DaTypeName</em>}</li>
+ *    </ul>
+ * </ol>
+ * @see org.lfenergy.compas.sct.commons.scl.SclElementAdapter
+ * @see org.lfenergy.compas.scl2007b4.model.TAbstractDataAttribute
+ * @see org.lfenergy.compas.sct.commons.scl.dtt.IDataTemplate
+ * @see org.lfenergy.compas.sct.commons.scl.dtt.IDTTComparable
+ */
 @Getter
 public abstract class AbstractDataAttributeAdapter<P extends SclElementAdapter,T extends TAbstractDataAttribute>
         extends SclElementAdapter<P,T>

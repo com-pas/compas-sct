@@ -13,6 +13,32 @@ import org.lfenergy.compas.sct.commons.util.Utils;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+/**
+ * A representation of the model object
+ * <em><b>{@link SubstationAdapter SubstationAdapter}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ol>
+ *   <li>Adapter</li>
+ *    <ul>
+ *      <li>{@link SubstationAdapter#getVoltageLevelAdapter <em>Returns the value of the <b>VoltageLevelAdapter </b>reference object By Name</em>}</li>
+ *      <li>{@link SubstationAdapter#streamVoltageLevelAdapters <em>Returns the value of the <b>VoltageLevelAdapter </b>reference object as stream</em>}</li>
+ *    </ul>
+ *   <li>Principal functions</li>
+ *    <ul>
+ *      <li>{@link SubstationAdapter#addPrivate <em>Add <b>TPrivate </b>under this object</em>}</li>
+ *      <li>{@link SubstationAdapter#elementXPath <em>Returns the <b>XPATH </b>for this object</em>}</li>
+ *    </ul>
+ *   <p>
+ *       <b>XPATH Example :</b>
+ *       <pre>
+ *           Substation[@name="SUBSTATION"]
+ *       </pre>
+ *   </p>
+ * @see org.lfenergy.compas.scl2007b4.model.TVoltageLevel
+ * @see org.lfenergy.compas.scl2007b4.model.TCompasICDHeader
+ */
 public class SubstationAdapter extends SclElementAdapter<SclRootAdapter, TSubstation> {
 
     /**
