@@ -200,9 +200,9 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
     }
 
     /**
-     * Gets a list of summarized DataTypeTemplate for DataAttribute DA (updatable or not)
+     * Gets a list of summarized DataTypeTemplate for DataAttribute DAIs (updatable or not)
      * @param rDtt reference resumed DataTypeTemplate (used as filter)
-     * @param updatable true to retrieve only updatable DAI, false to retrieve all DAI
+     * @param updatable true to retrieve only updatable DAIs, false to retrieve all DAIs
      * @return List of <em>ResumedDataTemplate</em> (updatable or not)
      * @throws ScdException SCD illegal arguments exception
      */

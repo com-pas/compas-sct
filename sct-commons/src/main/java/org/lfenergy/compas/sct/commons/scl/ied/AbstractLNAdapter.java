@@ -295,6 +295,11 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         }
     }
 
+    /**
+     * Gets Control Blocks of LN specified in <em>extRefInfo</em>
+     * @param extRefInfo ExtRef signal data for which Control Blocks should be found
+     * @return list of <em>ControlBlock</em> object as ControlBlocks of LNode
+     */
     public List<ControlBlock<?>> getControlSetByExtRefInfo(ExtRefInfo extRefInfo) {
         List<TDataSet> tDataSets = this.getDataSet(extRefInfo);
         return getControlBlocks(tDataSets,extRefInfo.getBindingInfo().getServiceType());
@@ -427,6 +432,12 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Updates ExtRef source binding data's based on given data in <em>extRefInfo</em>
+     * @param extRefInfo new data for ExtRef source binding data
+     * @return <em>TExtRef</em> object as update ExtRef with new source binding data
+     * @throws ScdException throws when mandatory data of ExtRef are missing
+     */
     public TExtRef updateExtRefSource(ExtRefInfo extRefInfo) throws ScdException {
         ExtRefSignalInfo signalInfo = extRefInfo.getSignalInfo();
         ExtRefSourceInfo sourceInfo = extRefInfo.getSourceInfo();
@@ -535,7 +546,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
     /**
      * Returns a list of resumed DataTypeTemplate for DataAttribute (updatable or not)
      * @param rDtt reference resumed DataTypeTemplate (used as filter)
-     * @param updatableOnly true to retrieve only updatable DAI, false to retrieve all DAI
+     * @param updatableOnly true to retrieve DataTypeTemplate's related to only updatable DAI, false to retrieve all
      * @return List of resumed DataTypeTemplate for DataAttribute (updatable or not)
      * @throws ScdException SCD illegal arguments exception
      */
@@ -637,9 +648,9 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      * Updates DAI (in LNode section) after checking updatability with summarized Data Type Template given information and LNode
      * Summarized Data Type Temple and LNode helps to check updatability. rDtt gives DAI which should be found in LNode,
      * that LNode gives LNodeType localized in DataTypeTemplate section and contains DOType in which the DAI is localized.
-     * @param rDtt summarized Data Type Temple containing DO and DA data's
+     * @param rDtt summarized Data Type Temple containing new DO and DA data's
      * @throws ScdException when inconsistency are found in th SCL's
-     *      *                     DataTypeTemplate. Which should normally not happens.
+     *                     DataTypeTemplate. Which should normally not happens.
      */
     public void updateDAI(@NonNull ResumedDataTemplate rDtt) throws ScdException {
 
@@ -830,16 +841,26 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         return res;
     }
 
+    /**
+     * Removes all ControlBlocks and DataSets from current LN
+     */
     public void removeAllControlBlocksAndDatasets() {
         currentElem.unsetReportControl();
         currentElem.unsetLogControl();
         currentElem.unsetDataSet();
     }
 
+    /**
+     * Removes all ExtRefs source binding data's
+     */
     public void removeAllExtRefSourceBindings() {
         getExtRefs().forEach(this::removeExtRefSourceBinding);
     }
 
+    /**
+     * Removes specified ExtRef Source binding data's
+     * @param tExtRef ExtRef Source for which binding data's should be removed
+     */
     private void removeExtRefSourceBinding(final TExtRef tExtRef){
         tExtRef.setSrcCBName(null);
         tExtRef.setSrcLDInst(null);
