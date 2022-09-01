@@ -3,7 +3,7 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 ## Description of SCD file generation from SSD file and a set of STD files
 
-### Table Of Contents
+### Table of Contents
 
 * [Introduction](#introduction)
 * [Modeling of functional specifications](#modeling-of-functional-specifications)
