@@ -17,6 +17,15 @@ import org.lfenergy.compas.sct.commons.scl.SubstationService;
 
 import java.util.*;
 
+/**
+ * A representation of the <em><b>{@link SclAutomationService SclAutomationService}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link SclAutomationService#createSCD(SCL, HeaderDTO, Set) Adds all elements under the <b>SCL </b> object from given <b>SSD </b> and <b>STD </b> files}
+ *  </ul>
+ */
 @Slf4j
 public class SclAutomationService {
 
