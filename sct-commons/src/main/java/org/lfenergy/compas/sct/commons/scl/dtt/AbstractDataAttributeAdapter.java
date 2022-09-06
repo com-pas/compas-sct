@@ -48,21 +48,44 @@ public abstract class AbstractDataAttributeAdapter<P extends SclElementAdapter,T
 
     protected final boolean tail;
 
+    /**
+     * Constructor
+     * @param parentAdapter Parent container reference
+     * @param currentElem Current reference
+     */
     protected AbstractDataAttributeAdapter(P parentAdapter, T currentElem) {
         super(parentAdapter, currentElem);
         tail = getBType() != TPredefinedBasicTypeEnum.STRUCT;
     }
 
+    /**
+     * Gets Type
+     * @return Type
+     */
     public String getType(){
         return currentElem.getType();
     }
+
+    /**
+     * Gets Basic Type
+     * @return Basic Type enum value
+     */
     public TPredefinedBasicTypeEnum getBType(){
         return currentElem.getBType();
     }
+
+    /**
+     * Gets Name
+     * @return Name
+     */
     public String getName(){
         return currentElem.getName();
     }
 
+    /**
+     * Gets DATypeAdapter
+     * @return DATypeAdapter object
+     */
     public Optional<DATypeAdapter> getDATypeAdapter() {
         if(isTail()){
             return Optional.empty();
@@ -70,7 +93,11 @@ public abstract class AbstractDataAttributeAdapter<P extends SclElementAdapter,T
         return getDataTypeTemplateAdapter().getDATypeAdapterById(getType());
     }
 
-
+    /**
+     * Cheeks if DataAttributes have the same contents
+     * @param data input
+     * @return Equality state
+     */
     public boolean hasSameContentAs(T data) {
         if(!Objects.equals(getName(),data.getName())
                 || !Objects.equals(getBType(),data.getBType())
@@ -122,12 +149,20 @@ public abstract class AbstractDataAttributeAdapter<P extends SclElementAdapter,T
         return true;
     }
 
+    /**
+     * Gets DataTypeTemplateAdapter
+     * @return DataTypeTemplateAdapter object
+     */
     @Override
     public DataTypeTemplateAdapter getDataTypeTemplateAdapter() {
         return ((IDataTemplate)parentAdapter).getDataTypeTemplateAdapter();
     }
 
-
+    /**
+     * Updates DA Type Name
+     * @param daTypeName DA Type Name to update
+     * @throws ScdException
+     */
     public void check(DaTypeName daTypeName) throws ScdException {
 
         if(getBType() == TPredefinedBasicTypeEnum.ENUM){
@@ -153,8 +188,10 @@ public abstract class AbstractDataAttributeAdapter<P extends SclElementAdapter,T
         daTypeName.setValImport(currentElem.isValImport());
     }
 
-
-
+    /**
+     * Checks valImport state
+     * @return boolean value of valImport
+     */
     public boolean isValImport() {
         return currentElem.isValImport();
     }

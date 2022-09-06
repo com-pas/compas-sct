@@ -41,14 +41,28 @@ import java.util.stream.Stream;
  */
 public class SubstationAdapter extends SclElementAdapter<SclRootAdapter, TSubstation> {
 
+    /**
+     * Constructor
+     * @param parentAdapter Parent container reference
+     */
     public SubstationAdapter(SclRootAdapter parentAdapter) {
         super(parentAdapter);
     }
 
+    /**
+     * Constructor
+     * @param parentAdapter Parent container reference
+     * @param currentElem Current reference
+     */
     public SubstationAdapter(SclRootAdapter parentAdapter, TSubstation currentElem) {
         super(parentAdapter, currentElem);
     }
 
+    /**
+     * Constructor
+     * @param parentAdapter Parent container reference
+     * @param ssName Substation name reference
+     */
     public SubstationAdapter(SclRootAdapter parentAdapter, String ssName) throws ScdException {
         super(parentAdapter);
         TSubstation tSubstation = parentAdapter.getCurrentElem().getSubstation()
@@ -59,16 +73,29 @@ public class SubstationAdapter extends SclElementAdapter<SclRootAdapter, TSubsta
         setCurrentElem(tSubstation);
     }
 
+    /**
+     * Check if node is child of the reference node
+     * @return link parent child existence
+     */
     @Override
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getSubstation().contains(currentElem);
     }
 
+    /**
+     * Returns XPath path to current Substation
+     * @return path to current Substation
+     */
     @Override
     protected String elementXPath() {
         return String.format("Substation[%s]", Utils.xpathAttributeFilter("name", currentElem.isSetName() ? currentElem.getName() : null));
     }
 
+    /**
+     * Gets Voltage Level from current Substation
+     * @param vLevelName name of Voltage Level to get
+     * @return optional of <em>VoltageLevelAdapter</em> object
+     */
     public Optional<VoltageLevelAdapter> getVoltageLevelAdapter(String vLevelName) {
         return currentElem.getVoltageLevel()
                 .stream()
@@ -77,6 +104,10 @@ public class SubstationAdapter extends SclElementAdapter<SclRootAdapter, TSubsta
                 .findFirst();
     }
 
+    /**
+     * Gets Voltage Level in Stream from current Substation
+     * @return Stream of <em>VoltageLevelAdapter</em> object from Substation
+     */
     public Stream<VoltageLevelAdapter> streamVoltageLevelAdapters() {
         if (!currentElem.isSetVoltageLevel()){
             return Stream.empty();

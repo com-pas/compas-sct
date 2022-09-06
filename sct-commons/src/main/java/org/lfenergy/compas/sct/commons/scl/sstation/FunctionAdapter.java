@@ -47,20 +47,42 @@ import static org.lfenergy.compas.sct.commons.util.PrivateEnum.COMPAS_ICDHEADER;
  */
 public class FunctionAdapter extends SclElementAdapter<BayAdapter, TFunction> {
 
+    /**
+     * Constructor
+     * @param parentAdapter Parent container reference
+     * @param currentElem Current reference
+     */
     public FunctionAdapter(BayAdapter parentAdapter, TFunction currentElem) {
         super(parentAdapter, currentElem);
     }
 
+    /**
+     * Check if node is child of the reference node
+     * @return link parent child existence
+     */
     @Override
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getFunction().contains(currentElem);
     }
 
+    /**
+     * Returns XPath path to current Function
+     * @return path to current Function
+     */
     @Override
     protected String elementXPath() {
         return String.format("Function[%s]", Utils.xpathAttributeFilter("name", currentElem.isSetName() ? currentElem.getName() : null));
     }
 
+    /**
+     * Updates LNode IED name in current Function
+     * <ul>
+     *     <li>If LNode contents one Private Compas-ICDHEADER so LNode name is update with IED name from the Private</li>
+     *     <li>If LNode contents more than one Private Compas-ICDHEADER so new LNodes are created for each Private Compas-ICDHEADER
+     *         and naming them with the Private IED name</li>
+     * </ul>
+     * @throws ScdException throws when no Private Compas-ICDHEADER found on at least one LNode of current Function
+     */
     public void updateLNodeIedNames() throws ScdException {
         if (!currentElem.isSetLNode()) {
             return;
@@ -84,6 +106,12 @@ public class FunctionAdapter extends SclElementAdapter<BayAdapter, TFunction> {
         }
     }
 
+    /**
+     * Splits given LNode by Private Compas-ICDHEADER in list of new LNodes which have one and only one Private Compas-ICDHEADER for each of them
+     * @param lNode LNode to split
+     * @param compasICDHeaders list of Compas-ICDHEADER for each LNode should be created
+     * @return list of <em>TLNode</em> object
+     */
     private List<TLNode> distributeIcdHeaders(TLNode lNode, List<TCompasICDHeader> compasICDHeaders) {
         LNodeAdapter lNodeAdapter = new LNodeAdapter(null, lNode);
         return compasICDHeaders.stream().map(compasICDHeader -> {
@@ -95,6 +123,11 @@ public class FunctionAdapter extends SclElementAdapter<BayAdapter, TFunction> {
         }).collect(Collectors.toList());
     }
 
+    /**
+     * Sets LNode's IEDName from given name
+     * @param lNode LNode for which IEDName should be updated
+     * @param privateIedName new name of LNode IEDName
+     */
     private void setLNodeIedName(TLNode lNode, String privateIedName) {
         if (StringUtils.isBlank(privateIedName)){
             LNodeAdapter lNodeAdapter = new LNodeAdapter(null, lNode);

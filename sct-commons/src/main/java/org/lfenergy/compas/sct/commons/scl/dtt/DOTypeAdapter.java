@@ -54,10 +54,22 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
 
+    /**
+     * Constructor
+     * @param parentAdapter Parent container reference
+     * @param currentElem Current reference
+     */
     public DOTypeAdapter(DataTypeTemplateAdapter parentAdapter, TDOType currentElem) {
         super(parentAdapter, currentElem);
     }
 
+    /**
+     * complete the input resumed data type template from DataTypeTemplate filtered out by the given DoTypeName
+     * @param doTypeName the Data object, eventually with DOs
+     * @param idx index of the DOs in the given DoTypeName
+     * @param rDtt Resumed Data Template to complete
+     * @return completed Resumed Data Template or null if the filter constrains are not met
+     */
     public List<ResumedDataTemplate> getResumedDTTByDoName(DoTypeName doTypeName, int idx, ResumedDataTemplate rDtt) {
 
         int sz = doTypeName.getStructNames().size();
@@ -106,6 +118,13 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
         return result;
     }
 
+    /**
+     * Completes recursively summarize Data Type Templates (rdtt) from DOType to specified DaTypeName.
+     * @param daTypeName the Data object, eventually with DA
+     * @param rDtt reference Resumed Data Type Template to complete
+     * @return optional of <em>ResumedDataTemplate</em> object
+     * @throws ScdException
+     */
     public Optional<ResumedDataTemplate> getResumedDTTByDaName(DaTypeName daTypeName,
                                                                ResumedDataTemplate rDtt) throws ScdException {
         if(!rDtt.getDoName().isDefined()) {
@@ -155,11 +174,20 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
         return Optional.empty();
     }
 
+    /**
+     * Check if node is child of the reference node
+     * @return link parent child existence
+     */
     @Override
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getDOType().contains(currentElem);
     }
 
+    /**
+     * Checks if current DOType contains DA
+     * @param da DA name
+     * @return <em>Boolean</em> value of check result
+     */
     public boolean containsDAWithDAName(String da){
         return currentElem.getSDOOrDA()
                 .stream()
@@ -169,6 +197,12 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
                     tda -> tda.getName().equals(da)
                 );
     }
+
+    /**
+     * Checks if current DOType contains DA with specific EnumType
+     * @param enumTypeId ID of EnumType in DA to check
+     * @return <em>Boolean</em> value of check result
+     */
     public boolean containsDAWithEnumTypeId(String enumTypeId) {
         return currentElem.getSDOOrDA()
                 .stream()
@@ -218,7 +252,14 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
         return Pair.of(currSDO.getName(),doTypeAdapter);
     }
 
-
+    /**
+     * Find path from a SDO to DA (defined by names)
+     * @param sdoName SDO from which find a path
+     * @param daName DA for which find a path to
+     * @return pair of DO/SDO and DoType. DO/SDO references the DOType
+     * @throws ScdException when inconsistency are found in th SCL's
+     *                     DataTypeTemplate (unknown reference for example). Which should normally not happens.
+     */
     Pair<String,DOTypeAdapter> findPathSDO2DA(String sdoName, String daName) throws ScdException {
         String errMsg = String.format("No coherence or path between DO/SDO(%s) and DA(%s)", sdoName,daName);
         Optional<TSDO> opSdo = getSDOByName(sdoName);
@@ -236,6 +277,11 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
         return doTypeAdapter.findPathDoType2DA(daName);
     }
 
+    /**
+     * Checks if current DOType contains DAStruct
+     * @param daTypeId ID of DAType (which type is Struct)
+     * @return <em>Boolean</em> value of check result
+     */
     public boolean containsDAStructWithDATypeId(String daTypeId) {
         return currentElem.getSDOOrDA()
                 .stream()
@@ -247,6 +293,11 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
                 );
     }
 
+    /**
+     * Compares current DOType and given DOType
+     * @param tdoType DOType to compare with
+     * @return <em>Boolean</em> value of comparison result
+     */
     @Override
     public boolean hasSameContentAs(TDOType tdoType) {
         if(!DataTypeTemplateAdapter.hasSamePrivates(currentElem,tdoType)){
@@ -277,6 +328,12 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
         return true;
     }
 
+    /**
+     * Compares two SDOs
+     * @param thisSdo SDO to compare
+     * @param inSdo SDO to compare
+     * @return <em>Boolean</em> value of comparison result
+     */
     protected boolean hasSameContent(TSDO thisSdo, TSDO inSdo) {
         return Objects.equals(thisSdo.getName(),inSdo.getName())
                 && Objects.equals(thisSdo.getType(),inSdo.getType())
@@ -284,11 +341,22 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
 
     }
 
+    /**
+     * Compares DA from current DOType and given DA
+     * @param thisTDA DA from current DOType to compare
+     * @param inTDA DA to compare with
+     * @return <em>Boolean</em> value of comparison result
+     */
     protected boolean hasSameContent(TDA thisTDA, TDA inTDA) {
         DAAdapter daAdapter = new DAAdapter(this,thisTDA);
         return daAdapter.hasSameContentAs(inTDA);
     }
 
+    /**
+     * Checks if current DOType contains SDO with specific DOTYpe ID
+     * @param doTypeId ID of DOType in SDO to check
+     * @return <em>Boolean</em> value of check result
+     */
     public boolean containsSDOWithDOTypeId(String doTypeId) {
         List<TSDO> sdoList = new ArrayList<>();
         for( TUnNaming unNaming : currentElem.getSDOOrDA()){
@@ -299,6 +367,13 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
         return sdoList.stream().anyMatch(sdo -> sdo.getType().equals(doTypeId));
     }
 
+    /**
+     * Checks current DOType structure coherence and completes given DoTypeName with CDC value
+     * @param doTypeName DoTypeName to check and complete
+     * @return pair of last DO name in DOType. current DOTypeAdapter
+     * @throws ScdException when inconsistency are found in th SCL's
+     *                     DataTypeTemplate (unknown reference for example). Which should normally not happens.
+     */
     public Optional<Pair<String,DOTypeAdapter>> checkAndCompleteStructData(DoTypeName doTypeName) throws ScdException {
         int sz = doTypeName.getStructNames().size();
         if(sz == 0){
@@ -321,6 +396,11 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
         return Optional.of(Pair.of(doTypeName.getStructNames().get(sz-1),doTypeAdapter));
     }
 
+    /**
+     * Gets from current DOType specific SDO
+     * @param sdoName name of SDO to return
+     * @return optional of <em>TSDO</em> object or empty if unknown SDO name
+     */
     public Optional<TSDO> getSDOByName(String sdoName) {
         for(TUnNaming tUnNaming : currentElem.getSDOOrDA()){
             if(tUnNaming.getClass() == TSDO.class && ((TSDO)tUnNaming).getName().equals(sdoName)){
@@ -330,6 +410,11 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
         return Optional.empty();
     }
 
+    /**
+     * Gets from current DOType specific DA
+     * @param name name of DA to return
+     * @return optional of <em>TDA</em> object or empty if unknown DA name
+     */
     public Optional<TDA> getDAByName(String name) {
         for(TUnNaming tUnNaming : currentElem.getSDOOrDA()){
             if(tUnNaming.getClass() == TDA.class && ((TDA)tUnNaming).getName().equals(name)){
@@ -339,6 +424,10 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
         return Optional.empty();
     }
 
+    /**
+     * Gets from current DOType CDC enum value
+     * @return <em>TPredefinedCDCEnum</em> corresponding value
+     */
     public TPredefinedCDCEnum getCdc() {
         return currentElem.getCdc();
     }
@@ -371,6 +460,18 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
         return resultRDTTs;
     }
 
+    /**
+     * return a list of summarized Resumed Data Type Templates beginning from given DA/BDA.
+     * <ul>
+     *     <li> If DA the list will contain only one summarized Resumed Data Type Templates  </li>
+     *     <li> If BDA list will contain all summarized Resumed Data Type Templates for each DA in BDA </li>
+     * </ul>
+     * @apiNote This method doesn't check relationship between DO/SDO and DA. Check should be done by caller
+     * @param rootRDTT reference Resumed Data Type Template used to build the list
+     * @param filter filter for DA/BDA
+     * @param da DA containing information to summarize
+     * @return list of completed Resumed Data Type Templates beginning from this DoType.
+     */
     private List<ResumedDataTemplate> getResumedDTTsOfDA(ResumedDataTemplate rootRDTT, ResumedDataTemplate filter, TDA da){
         if(excludedByFilter(filter, da)){
             return Collections.emptyList();
@@ -391,17 +492,34 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
         }
     }
 
+    /**
+     * Checks if given Resumed Data Type Template contains specified DA
+     * @param filter Resumed Data Type Template to check contain
+     * @param da SDO to checked
+     * @return <em>Boolean</em> exclusion result
+     */
     private boolean excludedByFilter(ResumedDataTemplate filter, TDA da) {
         return filter != null && filter.isDaNameDefined() &&
             !filter.getDaName().getName().equals(da.getName());
     }
 
+    /**
+     * Checks if given Resumed Data Type Template contains specified SDO
+     * @param filter Resumed Data Type Template to check contain
+     * @param tsdo SDO to checked
+     * @return <em>Boolean</em> exclusion result
+     */
     private boolean excludedByFilter(ResumedDataTemplate filter, TSDO tsdo) {
         return filter != null &&
             !filter.getSdoNames().isEmpty() &&
             !filter.getSdoNames().contains(tsdo.getName());
     }
 
+    /**
+     * Gets DOType from SDO
+     * @param name name of SDO linked to DOType
+     * @return optional of <em>DOTypeAdapter</em> object
+     */
     public Optional<DOTypeAdapter> getDOTypeAdapterBySdoName(String name) {
         Optional<TSDO> opSdo = getSDOByName(name);
         if(!opSdo.isPresent()){
@@ -410,6 +528,11 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
        return parentAdapter.getDOTypeAdapterById(opSdo.get().getType());
     }
 
+    /**
+     * Gets DA from current DOType
+     * @param name name of DA to find
+     * @return optional of <em>DAAdapter</em> adapter
+     */
     public Optional<DAAdapter> getDAAdapterByName(String name){
         for(TUnNaming tUnNaming : currentElem.getSDOOrDA()){
             if(tUnNaming.getClass() == TDA.class && ((TDA)tUnNaming).getName().equals(name)){
@@ -419,6 +542,10 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
         return  Optional.empty();
     }
 
+    /**
+     * Gets Data Type Template linked to this DOType as parent reference
+     * @return <em>DataTypeTemplateAdapter</em> object
+     */
     @Override
     public DataTypeTemplateAdapter getDataTypeTemplateAdapter() {
         return parentAdapter;

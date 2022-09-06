@@ -49,17 +49,28 @@ public class CommunicationAdapter extends SclElementAdapter<SclRootAdapter, TCom
         super(parentAdapter, currentElem);
     }
 
+    /**
+     * Check if node is child of the reference node
+     * @return link parent child existence
+     */
     @Override
     public boolean amChildElementRef() {
         return currentElem == parentAdapter.getCurrentElem().getCommunication();
     }
 
     /**
-     * Returns the <em><b>SubNetworkAdapter</b></em> element
-     * @param snName input
-     * @param snType input
-     * @param iedName input
-     * @param apName input
+     * Add Subnetwork node in Communication one.
+     * For that :
+     * <ul>
+     *     <li> coherence is checked first one AccessPoint's name between given
+     *      * data and IED/Services/AccessPoint</li>
+     *      <li>If good, Subnetworks are created</li>
+     *      <li>And then AccessPoint are created two in the Subnetwork</li>
+     * </ul>.
+     * @param snName Subnetwork name
+     * @param snType Subnetwork type
+     * @param iedName IED name
+     * @param apName AccessPoint name
      * @return SubNetworkAdapter Current reference
      * @throws ScdException
      */
@@ -85,9 +96,9 @@ public class CommunicationAdapter extends SclElementAdapter<SclRootAdapter, TCom
     }
 
     /**
-     * Returns the value of the <em><b>SubNetworkAdapter</b></em> containment reference list.
-     * @param snName Sub Network Name
-     * @return the value of the <em><b>SubNetworkAdapter</b></em> containment reference list.
+     * Gets Subnetwork by name from Communication in an adapter wrapper
+     * @param snName Subnetwork name
+     * @return Optional <em><b>SubNetworkAdapter</b></em> object
      */
     public Optional<SubNetworkAdapter> getSubnetworkByName(String snName) {
         return currentElem.getSubNetwork()
@@ -98,7 +109,7 @@ public class CommunicationAdapter extends SclElementAdapter<SclRootAdapter, TCom
     }
 
     /**
-     * Returns the value of the <em><b>SubNetworkAdapter</b></em> containment reference list.
+     * Gets all Subnetworks from Communication node in an adapter wrapper
      * @return the value of the <em><b>SubNetworkAdapter</b></em> containment reference list.
      */
     public List<SubNetworkAdapter> getSubNetworkAdapters() {

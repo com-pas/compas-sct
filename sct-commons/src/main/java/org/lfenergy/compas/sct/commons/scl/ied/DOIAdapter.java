@@ -38,15 +38,30 @@ import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
  */
 public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TAnyLN>, TDOI> implements IDataParentAdapter {
 
+    /**
+     * Constructor
+     * @param parentAdapter Parent container reference
+     * @param currentElem Current reference
+     */
     protected DOIAdapter(AbstractLNAdapter<? extends TAnyLN> parentAdapter, TDOI currentElem) {
         super(parentAdapter, currentElem);
     }
 
+    /**
+     * Check if node is child of the reference node
+     * @return link parent child existence
+     */
     @Override
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getDOI().contains(currentElem);
     }
 
+    /**
+     * Gets SDI by name from current DOI
+     * @param sName name of SDI to get
+     * @return <em>RootSDIAdapter</em> object
+     * @throws ScdException throws when specified name of SDI not present in current DOI
+     */
     @Override
     public RootSDIAdapter getStructuredDataAdapterByName(String sName) throws ScdException {
         return currentElem.getSDIOrDAI()
@@ -63,6 +78,12 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
                 );
     }
 
+    /**
+     * Gets DAI from current DOI
+     * @param daName name of DAI to get
+     * @return <em>DAIAdapter</em> object
+     * @throws ScdException throws when specified name of DAI not present in current DOI
+     */
     @Override
     public DAIAdapter getDataAdapterByName(String daName) throws ScdException {
         return  currentElem.getSDIOrDAI()
@@ -79,6 +100,12 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
                 );
     }
 
+    /**
+     * Adds DAI to current DOI
+     * @param name name of DAI to add
+     * @param isUpdatable updatability state of DAI
+     * @return <em>DAIAdapter</em> object as added DAI
+     */
     @Override
     public DAIAdapter addDAI(String name, boolean isUpdatable) {
         TDAI tdai = new TDAI();
@@ -88,6 +115,11 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
         return new DAIAdapter(this,tdai);
     }
 
+    /**
+     * Adds SDOI to SDI in current DOI
+     * @param sdoName name of SDOI to add
+     * @return <em>RootSDIAdapter</em> object as added SDOI
+     */
     @Override
     public RootSDIAdapter addSDOI(String sdoName) {
         TSDI tsdi = new TSDI();
@@ -97,6 +129,9 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
     }
 
     /**
+<<<<<<< HEAD
+     * DAIAdapter for DAI creation and link with parent DOI
+=======
      * A representation of the model object
      * <em><b>{@link org.lfenergy.compas.sct.commons.scl.ied.DOIAdapter.DAIAdapter DOIAdapter.DAIAdapter}</b></em>.
      * <p>
@@ -117,6 +152,7 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
      * </ol>
      *
      * @see org.lfenergy.compas.scl2007b4.model.TSDI
+>>>>>>> feat/117_Documentation_SCD_Generation_Process
      */
     public static class DAIAdapter extends AbstractDAIAdapter<DOIAdapter> {
 

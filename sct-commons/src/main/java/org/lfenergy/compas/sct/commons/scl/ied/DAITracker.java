@@ -46,6 +46,12 @@ public class DAITracker {
     private IDataAdapter bdaiOrDaiAdapter;
     private int indexDaType = -2;
 
+    /**
+     * Constructor
+     * @param lnAdapter Parent container reference
+     * @param doTypeName DOTypeName reference containing DO data leading to DA
+     * @param daTypeName DATypeName reference containing linked DA to track data
+     */
     public DAITracker(@NonNull AbstractLNAdapter<?> lnAdapter,
                       @NonNull DoTypeName doTypeName,
                       @NonNull DaTypeName daTypeName) {
@@ -54,6 +60,16 @@ public class DAITracker {
         this.daTypeName = daTypeName;
     }
 
+    /**
+     * Checks DO/DA presence in LNode by browsing through LNode based path given in <em><b>doTypeName</b></em>
+     * and <em><b>daTypeName</b></em> attributes
+     * @return one of <em>MatchResult</em> enum value :
+     *      <ul>
+     *          <li>FAILED</li>
+     *          <li>PARTIAL_MATCH</li>
+     *          <li>FULL_MATCH</li>
+     *      </ul>
+     */
     public MatchResult search() {
 
         Pair<? extends IDataAdapter,Integer> matchResult;
@@ -108,6 +124,10 @@ public class DAITracker {
         return MatchResult.FULL_MATCH;
     }
 
+    /**
+     * Validate if DAI Setting Group value is between boundaries (of DA BType)
+     * @throws ScdException throws when value inconsistancy
+     */
     public void validateBoundedDAI() throws ScdException {
         if(TPredefinedCDCEnum.ING != doTypeName.getCdc() && TPredefinedCDCEnum.ASG != doTypeName.getCdc() ){
             return;
@@ -178,6 +198,12 @@ public class DAITracker {
         }
     }
 
+    /**
+     * Gets DAI value from DaTypeName for specific known types and throws exception if unknown type
+     * @param daTypeName contains DA information
+     * @param defaultValue default init value
+     * @return <em>Double</em> corresponding value for DAI val
+     */
     protected double getDaiNumericValue(DaTypeName daTypeName, double defaultValue) {
         String value = daTypeName.getDaiValues().values().stream().findFirst().orElse(null);
         if(value == null){
@@ -204,7 +230,9 @@ public class DAITracker {
         }
     }
 
-
+    /**
+     * Enumeration of three states for matching check (<em>FAILED</em>, <em>PARTIAL_MATCH</em>, <em>FULL_MATCH</em>)
+     */
     public enum MatchResult {
         FAILED("FAILED"),
         PARTIAL_MATCH("PARTIAL_MATCH"),

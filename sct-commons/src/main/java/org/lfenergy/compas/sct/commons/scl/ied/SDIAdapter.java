@@ -36,10 +36,19 @@ import java.util.Objects;
  */
 public class SDIAdapter extends SclElementAdapter<SclElementAdapter, TSDI> implements IDataParentAdapter {
 
+    /**
+     * Constructor
+     * @param parentAdapter Parent container reference
+     * @param currentElem Current reference
+     */
     protected SDIAdapter(SclElementAdapter parentAdapter, TSDI currentElem) {
         super(parentAdapter, currentElem);
     }
 
+    /**
+     * Check if node is child of the reference node
+     * @return link parent child existence
+     */
     @Override
     protected boolean amChildElementRef() {
         if(parentAdapter.getClass().equals(RootSDIAdapter.class)){
@@ -48,6 +57,12 @@ public class SDIAdapter extends SclElementAdapter<SclElementAdapter, TSDI> imple
         return SDIAdapter.class.cast(parentAdapter).getCurrentElem().getSDIOrDAI().contains(currentElem);
     }
 
+    /**
+     * Gets in current SDI specific SDI by its name
+     * @param sName name of SDI to get
+     * @return <em>SDIAdapter</em> object
+     * @throws ScdException throws when DAI unknown in current SDI
+     */
     @Override
     public SDIAdapter getStructuredDataAdapterByName(String sName) throws ScdException {
         return currentElem.getSDIOrDAI()
@@ -64,7 +79,12 @@ public class SDIAdapter extends SclElementAdapter<SclElementAdapter, TSDI> imple
                 );
     }
 
-
+    /**
+     * Gets in current SDI specific DAI by its name
+     * @param sName name of DAI to get
+     * @return <em>DAIAdapter</em> object
+     * @throws ScdException throws when DAI unknown in current SDI
+     */
     @Override
     public DAIAdapter getDataAdapterByName(String sName) throws ScdException {
         return currentElem.getSDIOrDAI()
@@ -81,6 +101,12 @@ public class SDIAdapter extends SclElementAdapter<SclElementAdapter, TSDI> imple
             );
     }
 
+    /**
+     * Adds in current SDI a specific DAI
+     * @param name name of DAI to add
+     * @param isUpdatable updatability state of DAI
+     * @return <em>DAIAdapter</em> object
+     */
     @Override
     public DAIAdapter addDAI(String name, boolean isUpdatable) {
         TDAI tdai = new TDAI();
@@ -90,6 +116,11 @@ public class SDIAdapter extends SclElementAdapter<SclElementAdapter, TSDI> imple
         return new DAIAdapter(this,tdai);
     }
 
+    /**
+     * Adds in current SDI a specific SDOI
+     * @param sdoName name of SDOI to add
+     * @return <em>IDataParentAdapter</em> object as added SDOI
+     */
     @Override
     public SDIAdapter addSDOI(String sdoName) {
         TSDI tsdi = new TSDI();

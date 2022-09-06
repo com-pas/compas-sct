@@ -36,6 +36,10 @@ public class ConnectedAPAdapter extends SclElementAdapter<SubNetworkAdapter, TCo
         super(parentAdapter, currentElem);
     }
 
+    /**
+     * Check if node is child of the reference node
+     * @return link parent child existence
+     */
     @Override
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getConnectedAP().contains(currentElem);
@@ -48,6 +52,7 @@ public class ConnectedAPAdapter extends SclElementAdapter<SubNetworkAdapter, TCo
     public String getIedName() {
         return currentElem.getIedName();
     }
+
     /**
      * Returns the value of the <em><b>apName</b></em> attribute.
      * @return the value of the <em><b>apName</b></em> attribute.
@@ -57,8 +62,8 @@ public class ConnectedAPAdapter extends SclElementAdapter<SubNetworkAdapter, TCo
     }
 
     /**
-     * Copy Address And PhysConn From Icd
-     * @param icd input
+     * Copies Address and PhysicalConnection nodes from ICD file
+     * @param icd ICD file
      * @see <a href="https://github.com/com-pas/compas-sct/issues/76" target="_blank">Issue !76</a>
      */
     public void copyAddressAndPhysConnFromIcd(Optional<SCL> icd) {

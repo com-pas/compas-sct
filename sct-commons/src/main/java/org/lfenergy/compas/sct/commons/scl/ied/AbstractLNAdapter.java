@@ -73,6 +73,11 @@ import java.util.stream.Collectors;
 public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdapter<LDeviceAdapter, T> {
 
 
+    /**
+     * Constructor
+     * @param parentAdapter Parent container reference
+     * @param currentElem Current reference
+     */
     protected AbstractLNAdapter(LDeviceAdapter parentAdapter, T currentElem) {
         super(parentAdapter, currentElem);
     }
@@ -85,6 +90,11 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
     public abstract String getLNInst();
     public abstract String getPrefix();
 
+    /**
+     * Add given ControlBlock to LNode
+     * @param controlBlock ControlBlock to add
+     * @throws ScdException throws when the ControlBlock type is unknown
+     */
     protected void addControlBlock(ControlBlock<?> controlBlock) throws ScdException {
 
         switch (controlBlock.getServiceType() ) {
@@ -145,10 +155,19 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         return currentElem.getLnType();
     }
 
+    /**
+     * Gets all ExtRefs
+     * @return list of LNode ExtRefs elements
+     */
     public List<TExtRef> getExtRefs() {
         return getExtRefs(null);
     }
 
+    /**
+     * Gets all ExtRefs matches specified ExtRef info
+     * @param filter ExtRef filter value
+     * @return list of <em>TExtRef</em>
+     */
     public List<TExtRef> getExtRefs(ExtRefSignalInfo filter) {
         if(!hasInputs()){
             return new ArrayList<>();
@@ -173,6 +192,11 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         return currentElem.getInputs() != null;
     }
 
+    /**
+     * Gets all ExtRefs matches specified ExtRef info without PDA attribute
+     * @param signalInfo ExtRef filter value
+     * @return list of <em>TExtRef</em>
+     */
     public List<TExtRef> getExtRefsBySignalInfo(ExtRefSignalInfo signalInfo) {
         if (currentElem.getInputs() == null) {
             return new ArrayList<>();
@@ -194,6 +218,11 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Update LNode ExtRefs data with ExtRefInfo data
+     * @param extRefInfo contains new data for LNode ExtREf update
+     * @throws ScdException throws when mandatory data are missing
+     */
     public void updateExtRefBinders(ExtRefInfo extRefInfo) throws ScdException {
 
         if(extRefInfo.getBindingInfo() == null || !extRefInfo.getBindingInfo().isValid()){
@@ -218,6 +247,11 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         updateExtRefBindingInfo(extRef, extRefInfo);
     }
 
+    /**
+     * Updates ExtRef with data from ExtRefInfo
+     * @param extRef ExtRef to update
+     * @param extRefInfo contains new data for LNode ExtREf update
+     */
     protected void updateExtRefBindingInfo(TExtRef extRef, ExtRefInfo extRefInfo) {
         //update binding info
         ExtRefBindingInfo bindingInfo = extRefInfo.getBindingInfo();
@@ -261,11 +295,22 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         }
     }
 
+    /**
+     * Gets Control Blocks of LN specified in <em>extRefInfo</em>
+     * @param extRefInfo ExtRef signal data for which Control Blocks should be found
+     * @return list of <em>ControlBlock</em> object as ControlBlocks of LNode
+     */
     public List<ControlBlock<?>> getControlSetByExtRefInfo(ExtRefInfo extRefInfo) {
         List<TDataSet> tDataSets = this.getDataSet(extRefInfo);
         return getControlBlocks(tDataSets,extRefInfo.getBindingInfo().getServiceType());
     }
 
+    /**
+     * Gets all Control Blocks from LNode for specified Service Type (GOOSE, SMV and REPORT) and Data Sets
+     * @param tDataSets Data Sets for which Control Blocks are needed
+     * @param serviceType Service Type of Control Blocks needed
+     * @return list of <em>ControlBlock</em> objects
+     */
     protected List<ControlBlock<?>> getControlBlocks(List<TDataSet> tDataSets, TServiceType serviceType) {
         List<ControlBlock<?>> controlBlocks = new ArrayList<>();
         List<?> tControls;
@@ -316,6 +361,13 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         return controlBlocks;
     }
 
+    /**
+     * Gets Control Blocks for specified Data Set reference
+     * @param dataSetRef Data Set for which Control Blocks are needed
+     * @param cls class type of Control Block (GOOSE, SMV and REPORT)
+     * @return List of Control Blocks corresponding to cls
+     * @param <T> inference type
+     */
     protected <T> List<? extends TControl> lookUpControlBlocksByDataSetRef(@NonNull String dataSetRef, Class<T> cls){
         List<? extends TControl> ls = new ArrayList<>();
         if (TGSEControl.class.equals(cls) && isLN0()) {
@@ -332,6 +384,11 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Checks if FCDA is null
+     * @param tfcda FCDA to check
+     * @return <em>Boolean</em> value of check result
+     */
     public static boolean isNull(TFCDA tfcda){
         return Objects.isNull(tfcda.getLdInst()) &&
                 tfcda.getLnClass().isEmpty() &&
@@ -339,6 +396,11 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
 
     }
 
+    /**
+     * Checks if specified Control Block is present in LNode
+     * @param controlBlock Control Block to check
+     * @return <em>Boolean</em> value of check result
+     */
     public boolean hasControlBlock(ControlBlock<? extends ControlBlock> controlBlock) {
 
         switch (controlBlock.getServiceType()){
@@ -370,6 +432,12 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Updates ExtRef source binding data's based on given data in <em>extRefInfo</em>
+     * @param extRefInfo new data for ExtRef source binding data
+     * @return <em>TExtRef</em> object as update ExtRef with new source binding data
+     * @throws ScdException throws when mandatory data of ExtRef are missing
+     */
     public TExtRef updateExtRefSource(ExtRefInfo extRefInfo) throws ScdException {
         ExtRefSignalInfo signalInfo = extRefInfo.getSignalInfo();
         ExtRefSourceInfo sourceInfo = extRefInfo.getSourceInfo();
@@ -478,7 +546,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
     /**
      * Returns a list of resumed DataTypeTemplate for DataAttribute (updatable or not)
      * @param rDtt reference resumed DataTypeTemplate (used as filter)
-     * @param updatableOnly true to retrieve only updatable DAI, false to retrieve all DAI
+     * @param updatableOnly true to retrieve DataTypeTemplate's related to only updatable DAI, false to retrieve all
      * @return List of resumed DataTypeTemplate for DataAttribute (updatable or not)
      * @throws ScdException SCD illegal arguments exception
      */
@@ -507,6 +575,10 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         }
     }
 
+    /**
+     * Update given ResumedDataTemplate DAI datas from LNode
+     * @param rDtt summarized Data Type Template object to update DAI datas
+     */
     protected void overrideAttributesFromDAI(final ResumedDataTemplate rDtt) {
         findMatch(rDtt.getDoName(), rDtt.getDaName())
                 .map(iDataAdapter -> (AbstractDAIAdapter<?>) iDataAdapter)
@@ -528,16 +600,30 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 });
     }
 
+    /**
+     * Checks if linked IED as parent has Setting Group set
+     * @return <em>Boolean</em> value of check result
+     */
     private boolean iedHasConfSG() {
         IEDAdapter iedAdapter = getCurrentIED();
         return iedAdapter.isSettingConfig(this.parentAdapter.getInst());
     }
 
+    /**
+     * Gets linked IED as parent
+     * @return <em>IEDAdapter</em> object
+     */
     private IEDAdapter getCurrentIED() {
         LDeviceAdapter lDeviceAdapter = this.parentAdapter;
         return lDeviceAdapter.getParentAdapter();
     }
 
+
+    /**
+     * Checks fro DAI if Setting Group value is set correctly
+     * @param tdai DAI for which check is done
+     * @return <em>Boolean</em> value of check result
+     */
     private boolean hasSgGroup(TDAI tdai) {
         return tdai.getVal().stream().anyMatch(tVal -> tVal.isSetSGroup() && tVal.getSGroup() > 0);
     }
@@ -558,6 +644,14 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         return Optional.of(daiTracker.getBdaiOrDaiAdapter());
     }
 
+    /**
+     * Updates DAI (in LNode section) after checking updatability with summarized Data Type Template given information and LNode
+     * Summarized Data Type Temple and LNode helps to check updatability. rDtt gives DAI which should be found in LNode,
+     * that LNode gives LNodeType localized in DataTypeTemplate section and contains DOType in which the DAI is localized.
+     * @param rDtt summarized Data Type Temple containing new DO and DA data's
+     * @throws ScdException when inconsistency are found in th SCL's
+     *                     DataTypeTemplate. Which should normally not happens.
+     */
     public void updateDAI(@NonNull ResumedDataTemplate rDtt) throws ScdException {
 
         if(!rDtt.isDoNameDefined() || !rDtt.isDaNameDefined()){
@@ -625,6 +719,11 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         }
     }
 
+    /**
+     * Adds DO in LNode
+     * @param name DOI name
+     * @return added <em>DOIAdapter</em> object
+     */
     protected DOIAdapter addDOI(String name) {
         TDOI tdoi = new TDOI();
         tdoi.setName(name);
@@ -646,6 +745,12 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         return stringBuilder.toString();
     }
 
+    /**
+     * Checks given reference matches with DataSet or ReportControl or DataTypeTemplate element for calling LNode
+     * in SCL file
+     * @param objRef reference to compare with LNode datas
+     * @return <em>Boolean</em> value of check result
+     */
     public boolean matches(ObjectReference objRef) {
         String dataAttribute = objRef.getDataAttributes();
         SclRootAdapter sclRootAdapter = parentAdapter.getParentAdapter().getParentAdapter();
@@ -666,11 +771,21 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 rDtts.stream().anyMatch(rDtt -> rDtt.getDataAttributes().startsWith(dataAttribute));
     }
 
+    /**
+     * Checks if given attibrute corresponds to DataSet or ReportControl in LNode
+     * @param dataAttribute attribute to check
+     * @return <em>Boolean</em> value of check result
+     */
     protected  boolean matchesDataAttributes(String dataAttribute){
         return  currentElem.getDataSet().stream().anyMatch(tDataSet -> tDataSet.getName().equals(dataAttribute)) ||
                 currentElem.getReportControl().stream().anyMatch(rptCtl -> rptCtl.getName().equals(dataAttribute));
     }
 
+    /**
+     * Gets Data Set in LNode by its name
+     * @param dataSetRef Data Set name
+     * @return optional of <em>DataSetInfo</em>
+     */
     public Optional<DataSetInfo> getDataSetByRef(String dataSetRef) {
         return currentElem.getDataSet()
                 .stream()
@@ -679,6 +794,10 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 .findFirst();
     }
 
+    /**
+     * Adds Data Set to LNode Data Sets
+     * @param dataSetInfo data's of Data Set to add
+     */
     public void addDataSet(DataSetInfo dataSetInfo) {
         TDataSet tDataSet = new TDataSet();
         tDataSet.setName(dataSetInfo.getName());
@@ -693,6 +812,11 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         return parentAdapter.getParentAdapter().getParentAdapter().getDataTypeTemplateAdapter();
     }
 
+    /**
+     * Gets DAI values for specified DA in summaraized Data Type Template
+     * @param rDtt summaraized Data Type Template containing DA datas
+     * @return map of Setting Group and it's VAL
+     */
     public Map<Long, String> getDAIValues(ResumedDataTemplate rDtt) {
         DAITracker daiTracker = new DAITracker(this,rDtt.getDoName(),rDtt.getDaName());
         DAITracker.MatchResult matchResult = daiTracker.search();
@@ -717,16 +841,26 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         return res;
     }
 
+    /**
+     * Removes all ControlBlocks and DataSets from current LN
+     */
     public void removeAllControlBlocksAndDatasets() {
         currentElem.unsetReportControl();
         currentElem.unsetLogControl();
         currentElem.unsetDataSet();
     }
 
+    /**
+     * Removes all ExtRefs source binding data's
+     */
     public void removeAllExtRefSourceBindings() {
         getExtRefs().forEach(this::removeExtRefSourceBinding);
     }
 
+    /**
+     * Removes specified ExtRef Source binding data's
+     * @param tExtRef ExtRef Source for which binding data's should be removed
+     */
     private void removeExtRefSourceBinding(final TExtRef tExtRef){
         tExtRef.setSrcCBName(null);
         tExtRef.setSrcLDInst(null);

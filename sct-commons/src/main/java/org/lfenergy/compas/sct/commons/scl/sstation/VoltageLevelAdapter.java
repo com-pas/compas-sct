@@ -40,12 +40,26 @@ import java.util.stream.Stream;
  */
 public class VoltageLevelAdapter extends SclElementAdapter<SubstationAdapter, TVoltageLevel> {
 
+    /**
+     * Constructor
+     * @param parentAdapter Parent container reference
+     */
     public VoltageLevelAdapter(SubstationAdapter parentAdapter) {super(parentAdapter);}
 
+    /**
+     * Constructor
+     * @param substationAdapter Parent container reference
+     * @param currentElem Current reference
+     */
     public VoltageLevelAdapter(SubstationAdapter substationAdapter, TVoltageLevel currentElem){
         super(substationAdapter, currentElem);
     }
 
+    /**
+     * Constructor
+     * @param parentAdapter Parent container reference
+     * @param vLevelName Voltage Level name reference
+     */
     public VoltageLevelAdapter(SubstationAdapter parentAdapter, String vLevelName) throws ScdException {
         super(parentAdapter);
         TVoltageLevel tVoltageLevel = parentAdapter.getCurrentElem().getVoltageLevel()
@@ -56,16 +70,29 @@ public class VoltageLevelAdapter extends SclElementAdapter<SubstationAdapter, TV
         setCurrentElem(tVoltageLevel);
     }
 
+    /**
+     * Check if node is child of the reference node
+     * @return link parent child existence
+     */
     @Override
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getVoltageLevel().contains(currentElem);
     }
 
+    /**
+     * Returns XPath path to current Substation
+     * @return path to current Substation
+     */
     @Override
     protected String elementXPath() {
         return String.format("VoltageLevel[%s]", Utils.xpathAttributeFilter("name", currentElem.isSetName() ? currentElem.getName() : null));
     }
 
+    /**
+     * Gets Bay from current VoltageLevel
+     * @param bayName name of Bay to get
+     * @return optional of <em>BayAdapter</em> object
+     */
     public Optional<BayAdapter> getBayAdapter(String bayName) {
         return currentElem.getBay()
                 .stream()
@@ -74,6 +101,10 @@ public class VoltageLevelAdapter extends SclElementAdapter<SubstationAdapter, TV
                 .findFirst();
     }
 
+    /**
+     * Gets Ba in Stream from current VoltageLevel
+     * @return Stream of <em>BayAdapter</em> object from VoltageLevel
+     */
     public Stream<BayAdapter> streamBayAdapters() {
         if (!currentElem.isSetBay()){
             return Stream.empty();

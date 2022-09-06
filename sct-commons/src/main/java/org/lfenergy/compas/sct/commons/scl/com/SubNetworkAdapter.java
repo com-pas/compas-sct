@@ -39,6 +39,10 @@ public class SubNetworkAdapter extends SclElementAdapter<CommunicationAdapter, T
         super(parentAdapter, currentElem);
     }
 
+    /**
+     * Check if node is child of the reference node
+     * @return link parent child existence
+     */
     @Override
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getSubNetwork().contains(currentElem);
@@ -97,8 +101,9 @@ public class SubNetworkAdapter extends SclElementAdapter<CommunicationAdapter, T
     }
 
     /**
-     * @param iedName input
-     * @param apName input
+     * Gets ConnectedAP from Subnetwork
+     * @param iedName IED name
+     * @param apName AccessPoint name
      * @return the <em><b>ConnectedAPAdapter</b></em> object
      * @throws ScdException
      */
