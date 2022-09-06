@@ -33,9 +33,11 @@ public class SclAutomationService {
      */
     private static final Map<Pair<String, String>, List<String>> comMap = Map.of(
             Pair.of("RSPACE_PROCESS_NETWORK", SubNetworkDTO.SubnetworkType.MMS.toString()), Arrays.asList("PROCESS_AP", "TOTO_AP_GE"),
-            Pair.of("RSPACE_ADMIN_NETWORK", SubNetworkDTO.SubnetworkType.IP.toString()), Arrays.asList("ADMIN_AP","TATA_AP_EFFACEC"));
+            Pair.of("RSPACE_ADMIN_NETWORK", SubNetworkDTO.SubnetworkType.IP.toString()), Arrays.asList("ADMIN_AP", "TATA_AP_EFFACEC"));
 
-    private SclAutomationService(){throw new IllegalStateException("SclAutomationService class"); }
+    private SclAutomationService() {
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+    }
 
     /**
      * Create a SCD file from specified parameters, it calls all functions defined in the process one by one, every step
@@ -48,13 +50,14 @@ public class SclAutomationService {
      */
     public static SclRootAdapter createSCD(@NonNull SCL ssd, @NonNull HeaderDTO headerDTO, Set<SCL> stds) throws ScdException {
         SclRootAdapter scdAdapter = SclService.initScl(Optional.ofNullable(headerDTO.getId()),
-                headerDTO.getVersion(),headerDTO.getRevision());
-        if(!headerDTO.getHistoryItems().isEmpty()) {
+                headerDTO.getVersion(), headerDTO.getRevision());
+        if (!headerDTO.getHistoryItems().isEmpty()) {
             HeaderDTO.HistoryItem hItem = headerDTO.getHistoryItems().get(0);
             SclService.addHistoryItem(scdAdapter.getCurrentElem(), hItem.getWho(), hItem.getWhat(), hItem.getWhy());
         }
         SubstationService.addSubstation(scdAdapter.getCurrentElem(), ssd);
         SclService.importSTDElementsInSCD(scdAdapter, stds, comMap);
+        SclService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scdAdapter.getCurrentElem());
         return scdAdapter;
     }
 }
