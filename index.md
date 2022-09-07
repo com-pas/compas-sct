@@ -10,7 +10,6 @@ For the SCD file constitution, see diagram above:
 - import of the SSD file associated with a Site
 - import of the STD files associated with the functions for a given system version. A system version defines a qualified set of ICD. And each ICD describes an IED for an IED version.
 - suppression of all Control Blocks, DataSets and all ExtRef @srcXXX attributes
-- edition of LNode @iedName attribute
 - activation of used LDevice and desactivation of unused LDevice according to Function/LNode contained into /Substation
 
 
