@@ -2,7 +2,6 @@
 
 ### Step 1
 
-<img width="728" alt="Step1-SCD_<img width="592" alt="Step1-SCD_InitialisationV2" src="https://user-images.githubusercontent.com/76168202/188947046-1e267ca4-d5a4-4716-a202-af6ff693e77a.PNG">
 Initialisation" src="https://user-images.githubusercontent.com/76168202/164478938-0390c05e-ba30-4157-ac8a-dc46189f2f23.PNG">
 
 For the SCD file constitution, see diagram above:
