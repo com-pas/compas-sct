@@ -5,11 +5,14 @@
 package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.lfenergy.compas.scl2007b4.model.TDAI;
 import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.scl2007b4.model.TSDI;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SDIAdapterTest {
@@ -70,6 +73,20 @@ class SDIAdapterTest {
         assertTrue(sdiAdapter.getCurrentElem().getPrivate().isEmpty());
         sdiAdapter.addPrivate(tPrivate);
         assertEquals(1, sdiAdapter.getCurrentElem().getPrivate().size());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"sdo1;SDI[@name=\"sdo1\"]", ";SDI[not(@name)]"}
+            , delimiter = ';')
+    void elementXPath(String sdo, String message) {
+        // Given
+        TSDI tsdi = new TSDI();
+        tsdi.setName(sdo);
+        SDIAdapter sdiAdapter = new SDIAdapter(null,tsdi);
+        // When
+        String sdiAdapterResult = sdiAdapter.elementXPath();
+        // Then
+        assertThat(sdiAdapterResult).isEqualTo(message);
     }
 
 }

@@ -6,7 +6,10 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.lfenergy.compas.scl2007b4.model.SCL;
+import org.lfenergy.compas.scl2007b4.model.TLDevice;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
 import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.sct.commons.dto.DTO;
@@ -19,6 +22,7 @@ import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class LDeviceAdapterTest {
@@ -99,5 +103,20 @@ class LDeviceAdapterTest {
         assertTrue(lDeviceAdapter.getCurrentElem().getPrivate().isEmpty());
         lDeviceAdapter.addPrivate(tPrivate);
         assertEquals(1, lDeviceAdapter.getCurrentElem().getPrivate().size());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"ldInst;LDevice[@inst=\"ldInst\"]", ";LDevice[not(@inst)]"}
+            , delimiter = ';')
+    void elementXPath(String ldInst, String message) {
+        // Given
+        TLDevice tlDevice = new TLDevice();
+        tlDevice.setInst(ldInst);
+        LDeviceAdapter lDeviceAdapter = new LDeviceAdapter(null, tlDevice);
+        // When
+        String elementXPathResult = lDeviceAdapter.elementXPath();
+        // Then
+        assertThat(elementXPathResult).isEqualTo(message);
+
     }
 }

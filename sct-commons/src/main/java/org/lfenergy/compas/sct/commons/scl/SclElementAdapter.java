@@ -67,6 +67,12 @@ public abstract class SclElementAdapter<P extends SclElementAdapter, T> {
         return parentAdapter == null;
     }
 
+    /**
+     * Returns XPath path to current element
+     * @return message as <em>undefined</em>
+     */
+    protected abstract String elementXPath();
+
     protected void customInit() {
         // do nothing
     }
@@ -107,14 +113,6 @@ public abstract class SclElementAdapter<P extends SclElementAdapter, T> {
     public String getXPath(){
         String parentXpath = (parentAdapter != null) ? parentAdapter.getXPath() : "";
         return parentXpath + "/" + elementXPath();
-    }
-
-    /**
-     * Returns XPath path to current element
-     * @return message as <em>undefined</em>
-     */
-    protected String elementXPath(){
-        return String.format("undefined(%s)", currentElem.getClass().getSimpleName());
     }
 
 }

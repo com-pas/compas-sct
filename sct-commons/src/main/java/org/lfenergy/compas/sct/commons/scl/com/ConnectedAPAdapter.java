@@ -6,8 +6,8 @@ package org.lfenergy.compas.sct.commons.scl.com;
 
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TConnectedAP;
-import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
+import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.Optional;
 
@@ -43,6 +43,13 @@ public class ConnectedAPAdapter extends SclElementAdapter<SubNetworkAdapter, TCo
     @Override
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getConnectedAP().contains(currentElem);
+    }
+
+    @Override
+    protected String elementXPath() {
+        return String.format("ConnectedAP[%s and %s]",
+                Utils.xpathAttributeFilter("apName", currentElem.isSetApName() ? currentElem.getApName() : null),
+                Utils.xpathAttributeFilter("iedName", currentElem.isSetIedName() ? currentElem.getApName() : null));
     }
 
     /**

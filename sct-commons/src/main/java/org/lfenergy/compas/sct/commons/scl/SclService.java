@@ -18,6 +18,7 @@ import org.lfenergy.compas.sct.commons.scl.dtt.EnumTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.*;
+import org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
@@ -680,4 +681,27 @@ public class SclService {
                 .forEach(LNAdapter::removeAllControlBlocksAndDatasets);
     }
 
+     /**
+     * Activate used LDevice and Deactivate unused LDevice in {@link TLNode <em><b>TLNode </b></em>}
+     * @param scd SCL file for which LDevice should be activated or deactivated
+     * @return SclReport Object that contain SCL file and set of errors
+     */
+    public static SclReport updateLDeviceStatus(SCL scd) {
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        SubstationAdapter substationAdapter = sclRootAdapter.getSubstationAdapter();
+        final List<Pair<String, String>> iedNameLdInstList = substationAdapter.getIedAndLDeviceNamesForLN0FromLNode();
+        List<SclReport.ErrorDescription> errors = sclRootAdapter.getIEDAdapters().stream()
+                .map(IEDAdapter::getLDeviceAdapters)
+                .flatMap(Collection::stream)
+                .map(LDeviceAdapter::getLN0Adapter)
+                .map(ln0Adapter -> ln0Adapter.checkAndUpdateLDeviceStatus(iedNameLdInstList))
+                .reduce(new ArrayList<>(),(sclReportErrors, partialSclReportErrors) -> {
+                    sclReportErrors.addAll(partialSclReportErrors);
+                    return sclReportErrors;
+                });
+        SclReport sclReport = new SclReport();
+        sclReport.getErrorDescriptionList().addAll(errors);
+        sclReport.setSclRootAdapter(sclRootAdapter);
+        return sclReport;
+     }
 }

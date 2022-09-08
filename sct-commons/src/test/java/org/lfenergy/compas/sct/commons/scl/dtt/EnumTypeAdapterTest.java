@@ -12,6 +12,7 @@ import org.mockito.Mockito;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EnumTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TEnumType> {
@@ -72,5 +73,19 @@ class EnumTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TEnum
         assertTrue(enumTypeAdapter.getCurrentElem().getPrivate().isEmpty());
         enumTypeAdapter.addPrivate(tPrivate);
         assertEquals(1, enumTypeAdapter.getCurrentElem().getPrivate().size());
+    }
+
+
+    @Test
+    void elementXPath() {
+        // Given
+        init();
+        EnumTypeAdapter enumTypeAdapter = assertDoesNotThrow(
+                () -> new EnumTypeAdapter(sclElementAdapter,sclElement)
+        );
+        // When
+        String result = enumTypeAdapter.elementXPath();
+        // Then
+        assertThat(result).isEqualTo("EnumType[@id=\"ID\"]");
     }
 }

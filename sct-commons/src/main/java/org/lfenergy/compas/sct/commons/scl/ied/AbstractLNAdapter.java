@@ -14,6 +14,7 @@ import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
+import org.lfenergy.compas.sct.commons.scl.dtt.EnumTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
 
 import java.util.*;
@@ -89,6 +90,24 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
     public abstract String getLNClass() ;
     public abstract String getLNInst();
     public abstract String getPrefix();
+
+    /**
+     * Returns sets of enum value for given ResumedDataTemplate object
+     * @param enumType enum Type
+     * @return Enum value list
+     */
+    public Set<String> getEnumValues(String enumType) {
+        Optional<EnumTypeAdapter> enumTypeAdapter = parentAdapter
+                .getParentAdapter().getParentAdapter().getDataTypeTemplateAdapter()
+                .getEnumTypeAdapterById(enumType);
+
+        if(enumTypeAdapter.isEmpty()){
+            return Collections.emptySet();
+        }
+        return enumTypeAdapter.get().getCurrentElem().getEnumVal()
+                .stream().map(TEnumVal::getValue)
+                .collect(Collectors.toSet());
+    }
 
     /**
      * Add given ControlBlock to LNode

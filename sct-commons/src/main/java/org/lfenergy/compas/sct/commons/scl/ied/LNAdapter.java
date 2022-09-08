@@ -10,6 +10,7 @@ import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
+import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.List;
 
@@ -113,6 +114,7 @@ public class LNAdapter extends AbstractLNAdapter<TLN>{
         return currentElem.getPrefix();
     }
 
+
     /**
      * Check if node is child of the reference node
      * @return link parent child existence
@@ -122,5 +124,13 @@ public class LNAdapter extends AbstractLNAdapter<TLN>{
         // the contains method compares object ref by default
         // as there's no equals method in TLN
         return parentAdapter.getCurrentElem().getLN().contains(currentElem);
+    }
+
+    @Override
+    protected String elementXPath() {
+        return String.format("LN[%s and %s and %s]",
+                Utils.xpathAttributeFilter("lnClass", currentElem.isSetLnClass() ? currentElem.getLnClass() : null),
+                Utils.xpathAttributeFilter("inst", currentElem.isSetInst() ? currentElem.getInst() : null),
+                Utils.xpathAttributeFilter("lnType", currentElem.isSetLnType() ? currentElem.getLnType() : null));
     }
 }

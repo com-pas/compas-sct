@@ -15,6 +15,9 @@ public final class CommonConstants {
     public static final String HEADER_ID = "headerId";
     public static final String HEADER_VERSION = "headerVersion";
     public static final String HEADER_REVISION = "headerRevision";
+    public static final String BEHAVIOUR_DO_NAME = "Beh";
+    public static final String MOD_DO_NAME = "Mod";
+    public static final String STVAL = "stVal";
 
     /**
      * Private Controlller, should not be instanced

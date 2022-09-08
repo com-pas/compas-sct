@@ -14,7 +14,6 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter;
 import org.lfenergy.compas.sct.commons.scl.sstation.VoltageLevelAdapter;
 
-
 /**
  * A representation of the <em><b>{@link SubstationService SubstationService}</b></em>.
  * <p>

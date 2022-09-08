@@ -14,7 +14,9 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import java.util.List;
+import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class LN0AdapterTest {
@@ -324,5 +326,73 @@ class LN0AdapterTest {
         assertTrue(lnAdapter.getCurrentElem().getPrivate().isEmpty());
         lnAdapter.addPrivate(tPrivate);
         assertEquals(1, lnAdapter.getCurrentElem().getPrivate().size());
+    }
+
+
+    @Test
+    void testGetDAI() throws Exception {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LDSUIED").get());
+        LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
+        ResumedDataTemplate filter = new ResumedDataTemplate();
+        filter.setLnClass(ln0Adapter.getLNClass());
+        filter.setLnInst(ln0Adapter.getLNInst());
+        filter.setPrefix(ln0Adapter.getPrefix());
+        filter.setLnType(ln0Adapter.getLnType());
+        filter.setDoName(new DoTypeName("Beh"));
+        DaTypeName daTypeName = new DaTypeName();
+        daTypeName.setName("stVal");
+        daTypeName.setBType(TPredefinedBasicTypeEnum.ENUM);
+        daTypeName.setFc(TFCEnum.ST);
+        filter.setDaName(daTypeName);
+        //When
+        var rDtts = ln0Adapter.getDAI(filter,false);
+        //Then
+        assertFalse(rDtts.isEmpty());
+        assertEquals(1,rDtts.size());
+        assertNotNull(rDtts.get(0).getDaName().getType());
+        assertEquals("BehaviourModeKind", rDtts.get(0).getDaName().getType());
+    }
+
+    @Test
+    void getEnumValue() throws Exception {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LDSUIED").get());
+        LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
+        ResumedDataTemplate filter = new ResumedDataTemplate();
+        filter.setLnClass(ln0Adapter.getLNClass());
+        filter.setLnInst(ln0Adapter.getLNInst());
+        filter.setPrefix(ln0Adapter.getPrefix());
+        filter.setLnType(ln0Adapter.getLnType());
+        filter.setDoName(new DoTypeName("Beh"));
+        DaTypeName daTypeName = new DaTypeName();
+        daTypeName.setName("stVal");
+        daTypeName.setBType(TPredefinedBasicTypeEnum.ENUM);
+        daTypeName.setFc(TFCEnum.ST);
+        daTypeName.setType("BehaviourModeKind");
+        filter.setDaName(daTypeName);
+        //When
+        Set<String> enumValues = ln0Adapter.getEnumValues(filter.getType());
+        //Then
+        assertEquals(5, enumValues.size());
+        assertThat(enumValues).containsExactlyInAnyOrder("blocked", "test", "test/blocked", "off", "on");
+    }
+
+    @Test
+    void elementXPath() {
+        // Given
+        LN0 tln = new LN0();
+        tln.getLnClass().add(TLLN0Enum.LLN_0.value());
+        LN0Adapter lnAdapter = new LN0Adapter(null,tln);
+        // When
+        String result = lnAdapter.elementXPath();
+        // Then
+        assertThat(result).isEqualTo("LN[lnClass=\"LLN0\" and not(@inst) and not(@lnType)]");
     }
 }

@@ -13,6 +13,7 @@ import org.lfenergy.compas.sct.commons.dto.ReportControlBlock;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.scl.com.SubNetworkAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.mockito.Mockito;
 
@@ -20,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
 
@@ -244,4 +246,21 @@ class IEDAdapterTest {
         iAdapter.addPrivate(tPrivate);
         assertEquals(1, iAdapter.getCurrentElem().getPrivate().size());
     }
+
+    @Test
+    void elementXPath() {
+        // Given
+        SclRootAdapter sclRootAdapter = Mockito.mock(SclRootAdapter.class);
+        SCL scl = Mockito.mock(SCL.class);
+        Mockito.when(sclRootAdapter.getCurrentElem()).thenReturn(scl);
+        TIED tied = new TIED();
+        tied.setName("iedName");
+        Mockito.when(scl.getIED()).thenReturn(List.of(tied));
+        IEDAdapter iAdapter = new IEDAdapter(sclRootAdapter, tied);
+        // When
+        String result = iAdapter.elementXPath();
+        // Then
+        assertThat(result).isEqualTo("IED[@name=\"iedName\"]");
+    }
+
 }

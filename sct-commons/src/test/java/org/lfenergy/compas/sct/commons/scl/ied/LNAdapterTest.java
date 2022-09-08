@@ -16,6 +16,7 @@ import org.mockito.Mockito;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class LNAdapterTest {
@@ -316,6 +317,17 @@ class LNAdapterTest {
         assertTrue(lnAdapter.getCurrentElem().getPrivate().isEmpty());
         lnAdapter.addPrivate(tPrivate);
         assertEquals(1, lnAdapter.getCurrentElem().getPrivate().size());
+    }
+
+    @Test
+    void elementXPath() {
+        // Given
+        TLN tln = new TLN();
+        LNAdapter lnAdapter = initLNAdapter(tln);
+        // When
+        String result = lnAdapter.elementXPath();
+        // Then
+        assertThat(result).isEqualTo("LN[@lnClass=\"LN_CLASS_H\" and @inst=\"1\" and @lnType=\"LN_TYPE\"]");
     }
 
 }

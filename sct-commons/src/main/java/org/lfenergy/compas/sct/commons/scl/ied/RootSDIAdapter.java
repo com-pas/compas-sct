@@ -8,6 +8,7 @@ import org.lfenergy.compas.scl2007b4.model.TDAI;
 import org.lfenergy.compas.scl2007b4.model.TSDI;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
+import org.lfenergy.compas.sct.commons.util.Utils;
 
 
 /**
@@ -51,6 +52,13 @@ public class RootSDIAdapter extends SclElementAdapter<DOIAdapter, TSDI> implemen
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getSDIOrDAI().contains(currentElem);
     }
+
+    @Override
+    protected String elementXPath() {
+        return String.format("SDI[%s]",
+                Utils.xpathAttributeFilter("name", currentElem.isSetName() ? currentElem.getName() : null));
+    }
+
 
     /**
      * Gets in current root SDI specific SDI by its name
@@ -150,6 +158,12 @@ public class RootSDIAdapter extends SclElementAdapter<DOIAdapter, TSDI> implemen
         @Override
         protected boolean amChildElementRef() {
             return parentAdapter.getCurrentElem().getSDIOrDAI().contains(currentElem);
+        }
+
+        @Override
+        protected String elementXPath() {
+            return String.format("DAI[%s]",
+                    Utils.xpathAttributeFilter("name", currentElem.isSetName() ? currentElem.getName() : null));
         }
 
     }

@@ -18,6 +18,7 @@ import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -138,6 +139,19 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
      */
     public SubstationAdapter getSubstationAdapter(String ssName) throws ScdException {
         return new SubstationAdapter(this,ssName);
+    }
+
+    /**
+     * Gets the first Substation from SCL root node
+     * @return <em>SubstationAdapter</em> object
+     * @throws ScdException throws when unknown Substation
+     */
+    public SubstationAdapter getSubstationAdapter() throws ScdException {
+        TSubstation tSubstation = currentElem.getSubstation()
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new ScdException("No Substation in SCL file"));
+        return new SubstationAdapter(this, tSubstation);
     }
 
     /**
@@ -275,4 +289,5 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
         }
         throw new ScdException("Invalid ObjRef: " + val);
     }
+
 }

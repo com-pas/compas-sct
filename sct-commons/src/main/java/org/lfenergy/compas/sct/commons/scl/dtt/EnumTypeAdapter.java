@@ -7,6 +7,7 @@ package org.lfenergy.compas.sct.commons.scl.dtt;
 
 import org.lfenergy.compas.scl2007b4.model.TEnumType;
 import org.lfenergy.compas.scl2007b4.model.TEnumVal;
+import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.List;
 import java.util.Objects;
@@ -51,6 +52,12 @@ public class EnumTypeAdapter extends AbstractDataTypeAdapter<TEnumType>{
     @Override
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getEnumType().contains(currentElem);
+    }
+
+    @Override
+    protected String elementXPath() {
+        return String.format("EnumType[%s]",
+                Utils.xpathAttributeFilter("id", currentElem.isSetId() ? currentElem.getId() : null));
     }
 
     /**

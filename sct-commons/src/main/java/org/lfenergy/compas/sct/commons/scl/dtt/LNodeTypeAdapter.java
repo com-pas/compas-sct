@@ -15,6 +15,7 @@ import org.lfenergy.compas.sct.commons.dto.DoTypeName;
 import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
+import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,6 +70,13 @@ public class LNodeTypeAdapter
     @Override
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getLNodeType().contains(currentElem);
+    }
+
+    @Override
+    protected String elementXPath() {
+        return String.format("LNodeType[%s and %s]",
+                Utils.xpathAttributeFilter("id", currentElem.isSetId() ? currentElem.getId() : null),
+                Utils.xpathAttributeFilter("lnClass", currentElem.isSetLnClass() ? currentElem.getLnClass() : null));
     }
 
     /**

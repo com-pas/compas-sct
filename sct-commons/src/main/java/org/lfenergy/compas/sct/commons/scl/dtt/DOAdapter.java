@@ -6,6 +6,7 @@ package org.lfenergy.compas.sct.commons.scl.dtt;
 
 import org.lfenergy.compas.scl2007b4.model.TDO;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
+import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.Optional;
 
@@ -51,6 +52,13 @@ public class DOAdapter extends SclElementAdapter<LNodeTypeAdapter, TDO> implemen
     @Override
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getDO().contains(currentElem);
+    }
+
+    @Override
+    protected String elementXPath() {
+        return String.format("DO[%s and %s]",
+                Utils.xpathAttributeFilter("name", currentElem.isSetName() ? currentElem.getName() : null),
+                Utils.xpathAttributeFilter("type", currentElem.isSetType() ? currentElem.getType() : null));
     }
 
     /**
