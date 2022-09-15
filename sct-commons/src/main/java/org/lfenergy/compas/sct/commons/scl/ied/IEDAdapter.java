@@ -19,17 +19,67 @@ import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
+/**
+ * A representation of the model object
+ * <em><b>{@link org.lfenergy.compas.scl2007b4.model.TIED IED}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ol>
+ *   <li>Adapter</li>
+ *    <ul>
+ *      <li>{@link IEDAdapter#getLDeviceAdapters <em>Returns the value of the <b>LDeviceAdapter </b>containment reference list</em>}</li>
+ *      <li>{@link IEDAdapter#getLDeviceAdapterByLdInst <em>Returns the value of the <b>LDeviceAdapter </b>reference object By LDevice Inst</em>}</li>
+ *    </ul>
+ *   <li>Principal functions</li>
+ *    <ul>
+ *      <li>{@link IEDAdapter#getName <em>Returns the value of the <b>name </b>attribute</em>}</li>
+ *      <li>{@link IEDAdapter#getServices Returns the value of the <b>Service </b>object</em>}</li>
+ *      <li>{@link IEDAdapter#getPrivateHeader <em>Returns the value of the <b>TPrivate </b>containment reference list</em>}</li>
+ *      <li>{@link IEDAdapter#getExtRefBinders <em>Returns the value of the <b>ExtRefBindingInfo </b>containment reference list By <b>ExtRefSignalInfo</b></em>}</li>
+ *      <li>{@link IEDAdapter#createDataSet <em>Add <b>DataSetInfo </b> describing the children <b>TDataSet </b> that can be created under <b>TAnyLN</b></em>}</li>
+ *      <li>{@link IEDAdapter#createControlBlock <em>Add <b>ControlBlock </b> describing the children <b>TControlBlock </b> that can be created under <b>TAnyLN</b></em>}</li>
+ *      <li>{@link IEDAdapter#addPrivate <em>Add <b>TPrivate </b>under this object</em>}</li>
+ *      <li>{@link IEDAdapter#updateLDeviceNodesType <em>Update <b>Type </b> describing the value of the children <b>TAnyLN</b></em>}</li>
+ *    </ul>
+ *   <li>Checklist functions</li>
+ *    <ul>
+ *      <li>{@link IEDAdapter#isSettingConfig <em>Check whether IIED contain confSG</em>}</li>
+ *      <li>{@link IEDAdapter#hasDataSetCreationCapability <em>Check the ability to support DataSet Creation</em>}</li>
+ *    </ul>
+ * </ol>
+ *
+ * @see org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter
+ * @see org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter
+ * @see org.lfenergy.compas.sct.commons.scl.ied.AbstractDAIAdapter
+ * @see org.lfenergy.compas.scl2007b4.model.TSettingGroups
+ * @see <a href="https://github.com/com-pas/compas-sct/issues/3" target="_blank">Issue !3 (Add new IEDs)</a>
+ */
 @Slf4j
 public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
 
+    /**
+     * Constructor
+     * @param parentAdapter Parent container reference
+     */
     public IEDAdapter(SclRootAdapter parentAdapter) {
         super(parentAdapter);
     }
 
+    /**
+     * Constructor
+     * @param parentAdapter Parent container reference
+     * @param currentElem Current reference
+     */
     public IEDAdapter(SclRootAdapter parentAdapter, TIED currentElem) {
         super(parentAdapter, currentElem);
     }
+
+    /**
+     * Constructor
+     * @param parentAdapter Parent container reference
+     * @param iedName IED name reference
+     */
     public IEDAdapter(SclRootAdapter parentAdapter, String iedName) throws ScdException {
         super(parentAdapter);
         TIED ied = parentAdapter.getCurrentElem().getIED()
@@ -40,15 +90,27 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
         setCurrentElem(ied);
     }
 
+    /**
+     * Check if node is child of the reference node
+     * @return link parent child existence
+     */
     @Override
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getIED().contains(currentElem);
     }
 
+    /**
+     * Sets IED name in current IED
+     * @param iedName new name to set
+     */
     public void setIEDName(String iedName) {
         currentElem.setName(iedName);
     }
 
+    /**
+     * Gets all LDevices linked to current IED
+     * @return list of <em>LDeviceAdapter</em>
+     */
     public List<LDeviceAdapter> getLDeviceAdapters(){
         return currentElem.getAccessPoint()
                 .stream()
@@ -59,6 +121,11 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Gets LDevice from current IED by ldInst parameter
+     * @param ldInst ldInst value of LDevice to get
+     * @return optional of <em>LDeviceAdapter</em>  object
+     */
     public Optional<LDeviceAdapter> getLDeviceAdapterByLdInst(String ldInst){
         return currentElem.getAccessPoint()
                 .stream()
@@ -70,6 +137,13 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
                 .findFirst();
     }
 
+    /**
+     * Updates all LNode type value specified in <em>pairOldNewId</em> as key (oldID), by corresponding value (newID)
+     * in all LDevice of the current IED.
+     * Update LDevice name by combining IED name and LDevice ldInst value
+     * @param pairOldNewId map of old ID and new ID. Old ID to find in LNode Type and replace it with New ID
+     * @throws ScdException throws when renaming LDevice and new name has more than 33 caracteres
+     */
     public void updateLDeviceNodesType(Map<String, String> pairOldNewId) throws ScdException {
         // renaming ldName
         for(LDeviceAdapter lDeviceAdapter : getLDeviceAdapters()) {
@@ -90,13 +164,28 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
         }
     }
 
+    /**
+     * Gets Services of current IED
+     * @return <em>TServices</em> object
+     */
     public TServices getServices(){
         return currentElem.getServices();
     }
+
+    /**
+     * Gets name of current IED
+     * @return string name
+     */
     public String getName(){
         return currentElem.getName();
     }
 
+    /**
+     * Checks if given ObjectReference matches with one of current IED LNode
+     * (ie having common reference with DataSet, ReportControl or DataTypeTemplate)
+     * @param objRef reference to compare with LNodes data's
+     * @return <em>Boolean</em> value of check result
+     */
     public boolean matches(ObjectReference objRef){
         if(!objRef.getLdName().startsWith(getName())) {
             return false;
@@ -122,12 +211,23 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
                         && lnAdapter.matches(objRef));
     }
 
+    /**
+     * Checks existence of Access Point in curent IED by name
+     * @param apName AccessPoint name to check
+     * @return <em>Boolean</em> value of check result
+     */
     public boolean findAccessPointByName(String apName) {
         return currentElem.getAccessPoint()
                 .stream()
                 .anyMatch(tAccessPoint -> tAccessPoint.getName().equals(apName));
     }
 
+    /**
+     * Checks all possible ExtRef in current IED which could be bound to given ExtRef as parameter
+     * @param signalInfo ExtRef to bind data
+     * @return list of <em>ExtRefBindingInfo</em> object (containing binding data for each LDevice in current IED)
+     * @throws ScdException throws when ExtRef contains inconsistency data
+     */
     public List<ExtRefBindingInfo> getExtRefBinders(@NonNull ExtRefSignalInfo signalInfo) throws ScdException {
         if(!signalInfo.isValid()){
             throw new ScdException("Invalid ExtRef signal (pDO,pDA or intAddr))");
@@ -140,6 +240,11 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
         return potentialBinders;
     }
 
+    /**
+     * Checks for a given LDevice in current IED if Setting Group is well setted
+     * @param ldInst ldInst for LDevice for which Setting Group is checked
+     * @return <em>Boolean</em> value of check result
+     */
     public boolean isSettingConfig(String ldInst)  {
         TAccessPoint accessPoint = currentElem.getAccessPoint().stream()
                 .filter(tAccessPoint ->
@@ -159,6 +264,11 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
         return srv != null && srv.getSettingGroups() != null && srv.getSettingGroups().getConfSG() != null;
     }
 
+    /**
+     * Adds Data Set in specified LNode in current IED
+     * @param dataSetInfo Data Set data to add (and LNode path)
+     * @throws ScdException throws when IED is not able to add DataSet
+     */
     public void createDataSet(DataSetInfo dataSetInfo) throws ScdException {
         if(!hasDataSetCreationCapability()){
             throw new ScdException("The capability of IED is not allowing DataSet creation");
@@ -180,6 +290,10 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
         lNodeAdapter.addDataSet(dataSetInfo);
     }
 
+    /**
+     * Checks if IED is able to create new Data Set
+     * @return <em>Boolean</em> value of check result
+     */
     protected boolean hasDataSetCreationCapability() {
         if(currentElem.getServices() == null){
             return false ;
@@ -208,6 +322,12 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
         return hasCapability ;
     }
 
+    /**
+     * Creates Control Block in specified LNode in current IED
+     * @param controlBlock Control Block data to add (and LNode path)
+     * @return created <em>ControlBlock</em> object
+     * @throws ScdException throws when inconsistency between given ControlBlock and IED configuration
+     */
     public ControlBlock<? extends ControlBlock> createControlBlock(ControlBlock<? extends ControlBlock> controlBlock)
             throws ScdException {
 
@@ -255,6 +375,11 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
 
     }
 
+    /**
+     * Gets IED Private corresponding to specified type in parameter
+     * @param privateType Private type to get
+     * @return optional of <em>TPrivate</em> object
+     */
     public Optional<TPrivate> getPrivateHeader(String privateType){
         return currentElem.getPrivate()
                 .stream()

@@ -11,6 +11,25 @@ import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
 
+/**
+ * A representation of the model object <em><b>GooseControlBlock</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link GooseControlBlock#getId <em>appID</em>}</li>
+ *   <li>{@link GooseControlBlock#getName <em>Name</em>}</li>
+ *   <li>{@link GooseControlBlock#getDataSetRef <em>dataSetRef</em>}</li>
+ *   <li>{@link GooseControlBlock#getDesc <em>Desc</em>}</li>
+ *   <li>{@link GooseControlBlock#getConfRev <em>Refers To confRev</em>}</li>
+ *   <li>{@link GooseControlBlock#getIedNames <em>Refers To Ied Names</em>}</li>
+ *   <li>{@link GooseControlBlock#getSecurityEnable <em>Refers To security Enable</em>}</li>
+ *   <li>{@link GooseControlBlock#isFixedOffs <em>Refers To fixedOffs</em>}</li>
+ *   <li>{@link GooseControlBlock#getProtocol <em>Refers To Protocol</em>}</li>
+ * </ul>
+ *
+ * @see org.lfenergy.compas.scl2007b4.model.TGSEControl
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,6 +37,10 @@ public class GooseControlBlock extends ControlBlock<GooseControlBlock> {
     private boolean fixedOffs = false;
     private TProtocol protocol;
 
+    /**
+     * Constructor
+     * @param tgseControl input
+     */
     public GooseControlBlock(TGSEControl tgseControl) {
         super();
         this.id = tgseControl.getAppID();
@@ -32,16 +55,29 @@ public class GooseControlBlock extends ControlBlock<GooseControlBlock> {
         this.protocol = tgseControl.getProtocol();
     }
 
+    /**
+     * Gets classe type
+     * @return classe type
+     */
     @Override
     protected Class<GooseControlBlock> getClassType() {
         return GooseControlBlock.class;
     }
 
+    /**
+     * Gets ServiceType value
+     * @return ServiceType enumeration value
+     */
     @Override
     public TServiceType getServiceType() {
         return TServiceType.GOOSE;
     }
 
+    /**
+     * Checks Goose Control block security enable state from Service
+     * @param tServices Service object
+     * @throws ScdException
+     */
     @Override
     protected void validateSecurityEnabledValue(TServices tServices) throws ScdException {
         if(tServices == null ||
@@ -59,6 +95,10 @@ public class GooseControlBlock extends ControlBlock<GooseControlBlock> {
         }
     }
 
+    /**
+     * Creates ControlBlock
+     * @return Goose Control Block object (GSEControl) value
+     */
     @Override
     public TGSEControl createControlBlock() {
         TGSEControl tgseControl = new TGSEControl();

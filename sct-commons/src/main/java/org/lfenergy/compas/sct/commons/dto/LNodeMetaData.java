@@ -11,6 +11,17 @@ import lombok.Setter;
 import org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
 
+/**
+ * A representation of common attributes that defines <em><b>LDName, LNName</b></em>.
+ * <ul>
+ *   <li>{@link LNodeMetaData#getIedName <em>Ied Name</em>}</li>
+ *   <li>{@link LNodeMetaData#getLdInst <em>Ld Inst</em>}</li>
+ *   <li>{@link LNodeMetaData#getLnClass <em>Ln Class</em>}</li>
+ *   <li>{@link LNodeMetaData#getLnInst <em>Ln Inst</em>}</li>
+ *   <li>{@link LNodeMetaData#getLnPrefix <em>Prefix</em>}</li>
+ * </ul>
+ *  @see org.lfenergy.compas.sct.commons.scl.ObjectReference
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,6 +32,11 @@ public class LNodeMetaData {
     private String lnInst;
     private String lnPrefix;
 
+    /**
+     * Initializes LNode meta data's'
+     * @param tAbstractLNAdapter input
+     * @return LNodeMetaData object
+     */
     public static LNodeMetaData from(@NonNull AbstractLNAdapter<?> tAbstractLNAdapter) {
         LNodeMetaData metaData = new LNodeMetaData();
         metaData.lnClass = tAbstractLNAdapter.getLNClass();
