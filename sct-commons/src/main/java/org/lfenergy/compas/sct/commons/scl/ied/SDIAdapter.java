@@ -11,12 +11,44 @@ import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 
 import java.util.Objects;
 
+/**
+ * A representation of the model object
+ * <em><b>{@link org.lfenergy.compas.sct.commons.scl.ied.SDIAdapter DOIAdapter}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ol>
+ *   <li>Adapter</li>
+ *    <ul>
+ *      <li>{@link SDIAdapter#getStructuredDataAdapterByName(String) <em>Returns the value of the <b>Child Adapter </b>object reference</em>}</li>
+ *      <li>{@link SDIAdapter#getDataAdapterByName(String) <em>Returns the value of the <b>Child Adapter </b>object reference By Name</em>}</li>
+ *    </ul>
+ *   <li>Principal functions</li>
+ *    <ul>
+ *      <li>{@link SDIAdapter#addDAI <em>Add <b>TDAI </b> under this object</em>}</li>
+ *      <li>{@link SDIAdapter#addSDOI <em>Add <b>TSDI </b> under this object</em>}</li>
+ *      <li>{@link SDIAdapter#addPrivate <em>Add <b>TPrivate </b> under this object</em>}</li>
+ *    </ul>
+ *    </ul>
+ * </ol>
+ *
+ * @see org.lfenergy.compas.scl2007b4.model.TSDI
+ */
 public class SDIAdapter extends SclElementAdapter<SclElementAdapter, TSDI> implements IDataParentAdapter {
 
+    /**
+     * Constructor
+     * @param parentAdapter Parent container reference
+     * @param currentElem Current reference
+     */
     protected SDIAdapter(SclElementAdapter parentAdapter, TSDI currentElem) {
         super(parentAdapter, currentElem);
     }
 
+    /**
+     * Check if node is child of the reference node
+     * @return link parent child existence
+     */
     @Override
     protected boolean amChildElementRef() {
         if(parentAdapter.getClass().equals(RootSDIAdapter.class)){
@@ -25,6 +57,12 @@ public class SDIAdapter extends SclElementAdapter<SclElementAdapter, TSDI> imple
         return SDIAdapter.class.cast(parentAdapter).getCurrentElem().getSDIOrDAI().contains(currentElem);
     }
 
+    /**
+     * Gets in current SDI specific SDI by its name
+     * @param sName name of SDI to get
+     * @return <em>SDIAdapter</em> object
+     * @throws ScdException throws when DAI unknown in current SDI
+     */
     @Override
     public SDIAdapter getStructuredDataAdapterByName(String sName) throws ScdException {
         return currentElem.getSDIOrDAI()
@@ -41,7 +79,12 @@ public class SDIAdapter extends SclElementAdapter<SclElementAdapter, TSDI> imple
                 );
     }
 
-
+    /**
+     * Gets in current SDI specific DAI by its name
+     * @param sName name of DAI to get
+     * @return <em>DAIAdapter</em> object
+     * @throws ScdException throws when DAI unknown in current SDI
+     */
     @Override
     public DAIAdapter getDataAdapterByName(String sName) throws ScdException {
         return currentElem.getSDIOrDAI()
@@ -58,6 +101,12 @@ public class SDIAdapter extends SclElementAdapter<SclElementAdapter, TSDI> imple
             );
     }
 
+    /**
+     * Adds in current SDI a specific DAI
+     * @param name name of DAI to add
+     * @param isUpdatable updatability state of DAI
+     * @return <em>DAIAdapter</em> object
+     */
     @Override
     public DAIAdapter addDAI(String name, boolean isUpdatable) {
         TDAI tdai = new TDAI();
@@ -67,6 +116,11 @@ public class SDIAdapter extends SclElementAdapter<SclElementAdapter, TSDI> imple
         return new DAIAdapter(this,tdai);
     }
 
+    /**
+     * Adds in current SDI a specific SDOI
+     * @param sdoName name of SDOI to add
+     * @return <em>IDataParentAdapter</em> object as added SDOI
+     */
     @Override
     public SDIAdapter addSDOI(String sdoName) {
         TSDI tsdi = new TSDI();
@@ -75,6 +129,28 @@ public class SDIAdapter extends SclElementAdapter<SclElementAdapter, TSDI> imple
         return new SDIAdapter(this,tsdi);
     }
 
+    /**
+     * A representation of the model object
+     * <em><b>{@link org.lfenergy.compas.sct.commons.scl.ied.SDIAdapter.DAIAdapter SDIAdapter.DAIAdapter}</b></em>.
+     * <p>
+     * The following features are supported:
+     * </p>
+     * <ol>
+     *   <li>Adapter</li>
+     *    <ul>
+     *      <li>{@link DAIAdapter#getStructuredDataAdapterByName(String) <em>Returns the value of the <b>Child Adapter </b>object reference</em>}</li>
+     *      <li>{@link DAIAdapter#getDataAdapterByName(String) <em>Returns the value of the <b>Child Adapter </b>object reference By Name</em>}</li>
+     *    </ul>
+     *   <li>Principal functions</li>
+     *    <ul>
+     *      <li>{@link DAIAdapter#addDAI <em>Add <b>TDAI </b> under this object</em>}</li>
+     *      <li>{@link DAIAdapter#addSDOI <em>Add <b>TSDI </b> under this object</em>}</li>
+     *      <li>{@link DAIAdapter#addPrivate <em>Add <b>TPrivate </b> under this object</em>}</li>
+     *    </ul>
+     * </ol>
+     *
+     * @see org.lfenergy.compas.scl2007b4.model.TDAI
+     */
     public static class DAIAdapter extends AbstractDAIAdapter<SDIAdapter> {
 
         protected DAIAdapter(SDIAdapter parentAdapter, TDAI currentElem) {

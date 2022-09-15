@@ -16,7 +16,23 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
+/**
+ * A representation of the model object <em><b>ExtRef Signal Information</b></em>.
+ *
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link ExtRefSignalInfo#getDesc <em>Desc</em>}</li>
+ *   <li>{@link ExtRefSignalInfo#getPLN <em>PLN</em>}</li>
+ *   <li>{@link ExtRefSignalInfo#getPDO <em>PDO</em>}</li>
+ *   <li>{@link ExtRefSignalInfo#getPDA <em>PDA</em>}</li>
+ *   <li>{@link ExtRefSignalInfo#getPServT <em>PServ T</em>}</li>
+ *   <li>{@link ExtRefSignalInfo#getIntAddr <em>Int Addr</em>}</li>
+ * </ul>
+ *
+ * @see org.lfenergy.compas.scl2007b4.model.TExtRef
+ */
 @Slf4j
 @Getter
 @Setter
@@ -29,6 +45,10 @@ public class ExtRefSignalInfo{
     private String intAddr;
     private TServiceType pServT;
 
+    /**
+     * Constructor
+     * @param tExtRef input
+     */
     public ExtRefSignalInfo(TExtRef tExtRef){
         desc = tExtRef.getDesc();
         if(!tExtRef.getPLN().isEmpty()) {
@@ -41,6 +61,11 @@ public class ExtRefSignalInfo{
     }
 
 
+    /**
+     * Initialize ExtRef
+     * @param signalInfo object containing ExtRef data's'
+     * @return ExtRef object
+     */
     public static TExtRef initExtRef(ExtRefSignalInfo signalInfo) {
 
         TExtRef extRef = new TExtRef();
@@ -54,8 +79,11 @@ public class ExtRefSignalInfo{
         return extRef;
     }
 
-
-
+    /**
+     * Check that if TExtRef object is wrappen in ExtRefSignalInfo object vice versa
+     * @param tExtRef object containing ExtRef data's'
+     * @return wrapper state
+     */
     public boolean isWrappedIn(TExtRef tExtRef) {
         ExtRefSignalInfo that = new ExtRefSignalInfo(tExtRef);
         return Objects.equals(desc, that.desc) &&
@@ -66,6 +94,10 @@ public class ExtRefSignalInfo{
                 pServT == that.pServT;
     }
 
+    /**
+     * Check validity of pDO and pDA values
+     * @return validity state
+     */
     public boolean isValid() {
         if(StringUtils.isBlank(pDO) || StringUtils.isBlank(intAddr)){
             return false;
@@ -97,6 +129,10 @@ public class ExtRefSignalInfo{
         return true;
     }
 
+    /**
+     * Convert ExtRefSignalInfo to string value
+     * @return ExtRefSignalInfo formatted to string
+     */
     @Override
     public String toString() {
         return "ExtRefSignalInfo{" +

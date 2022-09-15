@@ -16,13 +16,43 @@ import org.lfenergy.compas.sct.commons.scl.sstation.FunctionAdapter;
 import org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter;
 import org.lfenergy.compas.sct.commons.scl.sstation.VoltageLevelAdapter;
 
+
+/**
+ * A representation of the <em><b>{@link SubstationService SubstationService}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link SubstationService#addSubstation(SCL, SCL) <em>Adds the <b>Substation </b> object from given <b>SCL </b> object</em>}</li>
+ *   <li>{@link SubstationService#updateVoltageLevel(SubstationAdapter, TVoltageLevel) <em>Adds the <b>TVoltageLevel </b> element under <b>TSubstation </b> reference object</em>}</li>
+ *   <li>{@link SubstationService#updateBay(VoltageLevelAdapter, TBay) <em>Adds the <b>TBay </b> element under <b>TVoltageLevel </b> reference object</em>}</li>
+ *   <li>{@link SubstationService#updateLNodeIEDNames(SCL) <em>Update the value of <b>LNode@iedName </b> attribute corresponding to the value of <b>ICDHeader@IEDName </b> attribute </em> }</li>
+ * </ul>
+ * @see org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter
+ * @see org.lfenergy.compas.sct.commons.scl.sstation.VoltageLevelAdapter
+ * @see org.lfenergy.compas.sct.commons.scl.sstation.BayAdapter
+ * @see org.lfenergy.compas.sct.commons.scl.sstation.FunctionAdapter
+ * @see org.lfenergy.compas.sct.commons.scl.sstation.LNodeAdapter
+ * @see org.lfenergy.compas.sct.commons.scl.PrivateService
+ */
 @Slf4j
 public final class SubstationService {
 
+    /**
+     * Private Controlller, should not be instanced
+     */
     private SubstationService() {
         throw new UnsupportedOperationException("This service class cannot be instantiated");
     }
 
+    /**
+     * Adds or Updates Substation section in SCL
+     * @param scd SCL file in which Substation should be added/updated
+     * @param ssd SCL file from which Substation should be copied
+     * @return <em>SclRootAdapter</em> object as SCD file
+     * @throws ScdException throws when SCD contents already another Substation, or with different name, or contents
+     * more than one Substation
+     */
     public static SclRootAdapter addSubstation(@NonNull SCL scd, @NonNull SCL ssd) throws ScdException {
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
         SclRootAdapter ssdRootAdapter = new SclRootAdapter(ssd);
@@ -52,6 +82,12 @@ public final class SubstationService {
         return scdRootAdapter;
     }
 
+    /**
+     * Creates new VoltageLevel section or updates VoltageLevel contents
+     * @param scdSubstationAdapter Substation in which VoltageLevel should be created/updated
+     * @param vl VoltageLevel to create/update
+     * @throws ScdException throws when unable to create new VoltageLevel section which is not already present in Substation
+     */
     private static void updateVoltageLevel(@NonNull SubstationAdapter scdSubstationAdapter, TVoltageLevel vl) throws ScdException {
         if (scdSubstationAdapter.getVoltageLevelAdapter(vl.getName()).isPresent()) {
             VoltageLevelAdapter scdVoltageLevelAdapter = scdSubstationAdapter.getVoltageLevelAdapter(vl.getName())
@@ -64,6 +100,11 @@ public final class SubstationService {
         }
     }
 
+    /**
+     * Adds new Bay in VoltageLevel or if already exist removes and replaces it
+     * @param scdVoltageLevelAdapter VoltageLevel in which Bay should be created/updated
+     * @param tBay Bay to add
+     */
     private static void updateBay(@NonNull VoltageLevelAdapter scdVoltageLevelAdapter, TBay tBay) {
         if (scdVoltageLevelAdapter.getBayAdapter(tBay.getName()).isPresent()) {
             scdVoltageLevelAdapter.getCurrentElem().getBay()
@@ -74,6 +115,15 @@ public final class SubstationService {
         }
     }
 
+    /** Updates all LNodes IEDNames in given SCD file
+     * <ul>
+     *     <li>If LNode contents one Private Compas-ICDHEADER so LNode name is update with IED name from the Private</li>
+     *     <li>If LNode contents more than one Private Compas-ICDHEADER so new LNodes are created for each Private Compas-ICDHEADER
+     *         and naming them with the Private IED name</li>
+     * </ul>
+     * @param scd SCL file in which LNodes names should be updated
+     * @throws ScdException throws when no Private Compas-ICDHEADER found on at least one LNode of current SCL file
+     */
     public static void updateLNodeIEDNames(SCL scd) throws ScdException {
         if (!scd.isSetSubstation()) {
             return;

@@ -18,15 +18,27 @@ public final class Utils {
     public static final String LEAVING_PREFIX = "<<< Leaving: ::";
     public static final String ENTERING_PREFIX = ">>> Entering: ::";
 
+    /**
+     * Private Controlller, should not be instanced
+     */
     private Utils() {
         throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
 
+    /**
+     * Generic message
+     * @return >>> Entering: :: + methode name
+     */
     public static String entering() {
         return ENTERING_PREFIX +
             getMethodName();
     }
 
+    /**
+     * Generic message for leaving a methode call, its calculates CPU time taken by methode execution
+     * @param startTime methode call start time
+     * @return message with methode name and duration
+     */
     public static String leaving(Long startTime) {
         if (startTime == null || startTime <= 0) {
             return LEAVING_PREFIX +
@@ -39,6 +51,10 @@ public final class Utils {
             " sec.";
     }
 
+    /**
+     * Gets methode name
+     * @return methode name
+     */
     private static String getMethodName() {
         try {
             return (new Throwable()).getStackTrace()[2].getMethodName();
@@ -47,6 +63,10 @@ public final class Utils {
         }
     }
 
+    /**
+     * Generic message for leaving a methode call
+     * @return >>> Entering: :: + methode name
+     */
     public static String leaving() {
         return LEAVING_PREFIX +
             getMethodName();
@@ -72,6 +92,12 @@ public final class Utils {
         return Objects.equals(getValue.apply(o1), getValue.apply(o2));
     }
 
+    /**
+     * Builds string
+     * @param name name to display
+     * @param value value to display
+     * @return not (name) or name=value
+     */
     public static String xpathAttributeFilter(String name, String value) {
         if (value == null){
             return String.format("not(@%s)", name);
@@ -80,6 +106,12 @@ public final class Utils {
         }
     }
 
+    /**
+     * Builds string
+     * @param name name to display
+     * @param value values to display
+     * @return not (name) or name=values
+     */
     public static String xpathAttributeFilter(String name, Collection<String> value) {
         if (value == null || value.isEmpty() || value.stream().allMatch(Objects::isNull)){
             return String.format("not(@%s)", name);
