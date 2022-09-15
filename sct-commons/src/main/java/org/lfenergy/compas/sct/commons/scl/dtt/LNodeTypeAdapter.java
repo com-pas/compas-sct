@@ -72,6 +72,11 @@ public class LNodeTypeAdapter
         return parentAdapter.getCurrentElem().getLNodeType().contains(currentElem);
     }
 
+    /**
+     * Compares current LNodeType and given LNodeType
+     * @param tlNodeType LNodeType to compare with
+     * @return <em>Boolean</em> value of comparison result
+     */
     @Override
     protected String elementXPath() {
         return String.format("LNodeType[%s and %s]",

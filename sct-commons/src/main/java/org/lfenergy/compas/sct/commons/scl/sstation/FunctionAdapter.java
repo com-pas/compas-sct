@@ -58,5 +58,4 @@ public class FunctionAdapter extends SclElementAdapter<BayAdapter, TFunction> {
     protected String elementXPath() {
         return String.format("Function[%s]", Utils.xpathAttributeFilter("name", currentElem.isSetName() ? currentElem.getName() : null));
     }
-
 }
