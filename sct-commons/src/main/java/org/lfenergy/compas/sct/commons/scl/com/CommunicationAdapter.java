@@ -23,18 +23,8 @@ import java.util.stream.Collectors;
  * The following features are supported:
  * </p>
  * <ul>
-<<<<<<< HEAD
-<<<<<<< HEAD
- *   <li>{@link org.lfenergy.compas.sct.commons.scl.com.CommunicationAdapter#addSubnetwork <em>add Subnetwork</em>}</li>
- *   <li>{@link org.lfenergy.compas.sct.commons.scl.com.CommunicationAdapter#addPrivate <em>add Private</em>}</li>
-=======
  *   <li>{@link CommunicationAdapter#addSubnetwork <em>add <b>Subnetwork </b> under this object</em>}</li>
  *   <li>{@link CommunicationAdapter#addPrivate <em>Add <b>TPrivate </b> under this object</em>}</li>
->>>>>>> 1935523... update javadoc, packages & classes
-=======
- *   <li>{@link CommunicationAdapter#addSubnetwork <em>add <b>Subnetwork </b> under this object</em>}</li>
- *   <li>{@link CommunicationAdapter#addPrivate <em>Add <b>TPrivate </b> under this object</em>}</li>
->>>>>>> 72aa46e... update docs and init javadocs (#157)
  * </ul>
  *
  * @see org.lfenergy.compas.sct.commons.scl.SclRootAdapter
@@ -69,13 +59,6 @@ public class CommunicationAdapter extends SclElementAdapter<SclRootAdapter, TCom
     }
 
     /**
-<<<<<<< HEAD
-     * Returns the <em><b>SubNetworkAdapter</b></em> element
-     * @param snName input
-     * @param snType input
-     * @param iedName input
-     * @param apName input
-=======
      * Add Subnetwork node in Communication one.
      * For that :
      * <ul>
@@ -88,7 +71,6 @@ public class CommunicationAdapter extends SclElementAdapter<SclRootAdapter, TCom
      * @param snType Subnetwork type
      * @param iedName IED name
      * @param apName AccessPoint name
->>>>>>> 72aa46e... update docs and init javadocs (#157)
      * @return SubNetworkAdapter Current reference
      * @throws ScdException
      */
@@ -114,15 +96,9 @@ public class CommunicationAdapter extends SclElementAdapter<SclRootAdapter, TCom
     }
 
     /**
-<<<<<<< HEAD
-     * Returns the value of the <em><b>SubNetworkAdapter</b></em> containment reference list.
-     * @param snName Sub Network Name
-     * @return the value of the <em><b>SubNetworkAdapter</b></em> containment reference list.
-=======
      * Gets Subnetwork by name from Communication in an adapter wrapper
      * @param snName Subnetwork name
      * @return Optional <em><b>SubNetworkAdapter</b></em> object
->>>>>>> 72aa46e... update docs and init javadocs (#157)
      */
     public Optional<SubNetworkAdapter> getSubnetworkByName(String snName) {
         return currentElem.getSubNetwork()
@@ -133,11 +109,7 @@ public class CommunicationAdapter extends SclElementAdapter<SclRootAdapter, TCom
     }
 
     /**
-<<<<<<< HEAD
-     * Returns the value of the <em><b>SubNetworkAdapter</b></em> containment reference list.
-=======
      * Gets all Subnetworks from Communication node in an adapter wrapper
->>>>>>> 72aa46e... update docs and init javadocs (#157)
      * @return the value of the <em><b>SubNetworkAdapter</b></em> containment reference list.
      */
     public List<SubNetworkAdapter> getSubNetworkAdapters() {

@@ -22,35 +22,16 @@ import java.util.List;
  * The following features are supported:
  * </p>
  * <ul>
-<<<<<<< HEAD
-<<<<<<< HEAD
- *   <li>{@link org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter#addHistoryItem <em>add History</em>}</li>
- *   <li>{@link org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter#updateVersion <em>update Version</em>}</li>
- *   <li>{@link org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter#updateRevision <em>update Revision</em>}</li>
-=======
-=======
->>>>>>> 72aa46e... update docs and init javadocs (#157)
  *   <li>{@link HeaderAdapter#addHistoryItem <em>add History</em>}</li>
  *   <li>{@link HeaderAdapter#updateVersion <em>update Version</em>}</li>
  *   <li>{@link HeaderAdapter#updateRevision <em>update Revision</em>}</li>
  *   <li>{@link HeaderAdapter#addPrivate <em>Add <b>TPrivate </b>under this object</em>}</li>
-<<<<<<< HEAD
->>>>>>> 1935523... update javadoc, packages & classes
-=======
->>>>>>> 72aa46e... update docs and init javadocs (#157)
  * </ul>
  *
  * @see org.lfenergy.compas.sct.commons.scl.SclRootAdapter
  * @see org.lfenergy.compas.scl2007b4.model.THeader
  * @see org.lfenergy.compas.scl2007b4.model.THitem
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
  * @see <a href="https://github.com/com-pas/compas-sct/issues/88" target="_blank">Issue !88</a>
->>>>>>> 1935523... update javadoc, packages & classes
-=======
- * @see <a href="https://github.com/com-pas/compas-sct/issues/88" target="_blank">Issue !88</a>
->>>>>>> 72aa46e... update docs and init javadocs (#157)
  */
 public class HeaderAdapter extends SclElementAdapter<SclRootAdapter, THeader> {
 

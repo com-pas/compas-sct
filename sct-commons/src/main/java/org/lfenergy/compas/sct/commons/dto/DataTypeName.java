@@ -128,13 +128,8 @@ public class DataTypeName {
     }
 
     /**
-<<<<<<< HEAD
-     * Adds DA (da.bda1[.bda2...bda_n])/DO (do.sdo1[.sdo2 ...sdo_n]) name to DataTypeName
-     * @param name DA (da.bda1[.bda2...bda_n])/DO (do.sdo1[.sdo2 ...sdo_n]) name
-=======
      * Add DA/DO name to DataTypeName
      * @param name DA/DO name
->>>>>>> 72aa46e... update docs and init javadocs (#157)
      */
     public void addName(String name) {
         if(isDefined()){

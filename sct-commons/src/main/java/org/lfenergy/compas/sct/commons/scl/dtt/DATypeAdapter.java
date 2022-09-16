@@ -165,15 +165,11 @@ public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
                 .collect(Collectors.toList());
     }
 
-<<<<<<< HEAD
-=======
-
     /**
      * Gets BDA by name
      * @param bdaName BDA name
      * @return Optional <em>TBDA</em> object
      */
->>>>>>> 72aa46e... update docs and init javadocs (#157)
     public Optional<TBDA> getBDAByName(String bdaName) {
         for(TBDA tbda : currentElem.getBDA()){
             if(tbda.getName().equals(bdaName)){
@@ -343,12 +339,6 @@ public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
         return Optional.empty();
     }
 
-
-<<<<<<< HEAD
-
-=======
-    /**
->>>>>>> 72aa46e... update docs and init javadocs (#157)
     /**
      * A representation of the model object <em><b>{@link org.lfenergy.compas.scl2007b4.model.TBDA BDA}</b></em>.
      * <p>

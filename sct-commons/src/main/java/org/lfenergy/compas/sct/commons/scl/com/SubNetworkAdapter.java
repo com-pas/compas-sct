@@ -21,18 +21,8 @@ import java.util.stream.Collectors;
  * The following features are supported:
  * </p>
  * <ul>
-<<<<<<< HEAD
-<<<<<<< HEAD
- *   <li>{@link org.lfenergy.compas.sct.commons.scl.com.SubNetworkAdapter#addPrivate <em>add Private</em>}</li>
- *   <li>{@link org.lfenergy.compas.sct.commons.scl.com.SubNetworkAdapter#addConnectedAP <em>add ConnectedAP</em>}</li>
-=======
  *   <li>{@link SubNetworkAdapter#addPrivate <em>Add <b>TPrivate </b> under this object</em>}</li>
  *   <li>{@link SubNetworkAdapter#addConnectedAP <em>add <b>ConnectedAP </b> under this object</em>}</li>
->>>>>>> 1935523... update javadoc, packages & classes
-=======
- *   <li>{@link SubNetworkAdapter#addPrivate <em>Add <b>TPrivate </b> under this object</em>}</li>
- *   <li>{@link SubNetworkAdapter#addConnectedAP <em>add <b>ConnectedAP </b> under this object</em>}</li>
->>>>>>> 72aa46e... update docs and init javadocs (#157)
  * </ul>
  *
  * @see org.lfenergy.compas.sct.commons.scl.com.CommunicationAdapter
@@ -111,14 +101,9 @@ public class SubNetworkAdapter extends SclElementAdapter<CommunicationAdapter, T
     }
 
     /**
-<<<<<<< HEAD
-     * @param iedName input
-     * @param apName input
-=======
      * Gets ConnectedAP from Subnetwork
      * @param iedName IED name
      * @param apName AccessPoint name
->>>>>>> 72aa46e... update docs and init javadocs (#157)
      * @return the <em><b>ConnectedAPAdapter</b></em> object
      * @throws ScdException
      */

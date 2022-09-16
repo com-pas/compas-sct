@@ -18,18 +18,8 @@ import java.util.Optional;
  * The following features are supported:
  * </p>
  * <ul>
-<<<<<<< HEAD
-<<<<<<< HEAD
- *   <li>{@link org.lfenergy.compas.sct.commons.scl.com.ConnectedAPAdapter#addPrivate <em>add Private</em>}</li>
- *   <li>{@link org.lfenergy.compas.sct.commons.scl.com.ConnectedAPAdapter#copyAddressAndPhysConnFromIcd  <em>copy Address And PhysConn From Icd</em>}</li>
-=======
  *   <li>{@link ConnectedAPAdapter#addPrivate <em>Add <b>TPrivate </b> under this object</em>}</li>
  *   <li>{@link ConnectedAPAdapter#copyAddressAndPhysConnFromIcd  <em>copy Address And PhysConn From Icd</em>}</li>
->>>>>>> 1935523... update javadoc, packages & classes
-=======
- *   <li>{@link ConnectedAPAdapter#addPrivate <em>Add <b>TPrivate </b> under this object</em>}</li>
- *   <li>{@link ConnectedAPAdapter#copyAddressAndPhysConnFromIcd  <em>copy Address And PhysConn From Icd</em>}</li>
->>>>>>> 72aa46e... update docs and init javadocs (#157)
  * </ul>
  *
  * @see org.lfenergy.compas.sct.commons.scl.com.SubNetworkAdapter
@@ -62,10 +52,7 @@ public class ConnectedAPAdapter extends SclElementAdapter<SubNetworkAdapter, TCo
     public String getIedName() {
         return currentElem.getIedName();
     }
-<<<<<<< HEAD
-=======
 
->>>>>>> 72aa46e... update docs and init javadocs (#157)
     /**
      * Returns the value of the <em><b>apName</b></em> attribute.
      * @return the value of the <em><b>apName</b></em> attribute.
@@ -75,19 +62,10 @@ public class ConnectedAPAdapter extends SclElementAdapter<SubNetworkAdapter, TCo
     }
 
     /**
-<<<<<<< HEAD
-     * Copy Address And PhysConn From Icd
-     * @param icd input
-<<<<<<< HEAD
-     * @see <a href="https://github.com/com-pas/compas-sct/issues/76">Issue !76</a>
-=======
-     * @see <a href="https://github.com/com-pas/compas-sct/issues/76" target="_blank">Issue !76</a>
->>>>>>> 1935523... update javadoc, packages & classes
-=======
      * Copies Address and PhysicalConnection nodes from ICD file
      * @param icd ICD file
      * @see <a href="https://github.com/com-pas/compas-sct/issues/76" target="_blank">Issue !76</a>
->>>>>>> 72aa46e... update docs and init javadocs (#157)
+     * Copies Address and PhysicalConnection nodes from ICD file
      */
     public void copyAddressAndPhysConnFromIcd(Optional<SCL> icd) {
         if (icd.isPresent() && icd.get().getCommunication() != null) {

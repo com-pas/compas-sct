@@ -39,35 +39,7 @@ import java.util.List;
  *
  *      <li>{@link LN0Adapter#getDAI <em>Returns the value of the <b>ResumedDataTemplate </b> containment reference By filter</em>}</li>
  *      <li>{@link LN0Adapter#getDAIValues(ResumedDataTemplate) <em>Returns <b>DAI (sGroup, value) </b> containment reference list By <b>ResumedDataTemplate </b> filter</em>}</li>
-<<<<<<< HEAD
-
- *      <li>{@link LN0Adapter#getDataSet(ExtRefInfo)  <em>Returns the value of the <b>TDataSet </b>containment reference list By <b>ExtRefInfo</b> </em>}</li>
- *      <li>{@link LN0Adapter#getDataSetByRef(String) <em>Returns the value of the <b>TDataSet </b>object reference By the value of the <b>name </b>attribute </em>}</li>
  *
- *      <li>{@link LN0Adapter#getControlSetByExtRefInfo(ExtRefInfo) <em>Returns the value of the <b>ControlBlock </b>containment reference list By <b>ExtRefInfo</b> </em>}</li>
- *      <li>{@link LN0Adapter#getControlBlocks(List, TServiceType) <em>Returns the value of the <b>ControlBlock </b>containment reference list that match <b>datSet </b> value of given <b>TDataSet</b> </em>}</li>
- *      <li>{@link LN0Adapter#addPrivate <em>Add <b>TPrivate </b>under this object</em>}</li>
- *      <li>{@link LN0Adapter#removeAllControlBlocksAndDatasets() <em>Remove all <b>ControlBlock</b></em>}</li>
- *    </ul>
- *   <li>Checklist functions</li>
- *    <ul>
- *      <li>{@link LN0Adapter#matches(ObjectReference) <em>Check whether the section <b>DataName </b> of given <b>ObjectReference </b> match current LN0Adapter DataName</em>}</li>
- *      <li>{@link LN0Adapter#matchesDataAttributes(String) <em>Check whether the section <b>DataName </b> of given <b>ObjectReference </b> match current LNAdapter DataName Excluding DataName from DataTypeTemplat</em>}</li>
- *    </ul>
- * </ol>
- * <br/>
- *  <pre>
- *      <b>ObjectReference</b>: LDName/LNName.DataName[.DataName[…]].DataAttributeName[.DAComponentName[ ….]]
- *      <b>LDName</b> = "name" attribute of IEDName element + "inst" attribute of LDevice element
- *      <b>LNName</b> = "prefix" + "lnClass" + "lnInst"
- *  </pre>
- * @see org.lfenergy.compas.scl2007b4.model.TLN0
- * @see org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter
- */
-public class LN0Adapter extends AbstractLNAdapter<LN0> {
-=======
->>>>>>> 72aa46e... update docs and init javadocs (#157)
-
  *      <li>{@link LN0Adapter#getDataSet(ExtRefInfo)  <em>Returns the value of the <b>TDataSet </b>containment reference list By <b>ExtRefInfo</b> </em>}</li>
  *      <li>{@link LN0Adapter#getDataSetByRef(String) <em>Returns the value of the <b>TDataSet </b>object reference By the value of the <b>name </b>attribute </em>}</li>
  *
