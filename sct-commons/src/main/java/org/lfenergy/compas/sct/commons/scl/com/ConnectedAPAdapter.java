@@ -65,6 +65,7 @@ public class ConnectedAPAdapter extends SclElementAdapter<SubNetworkAdapter, TCo
      * Copies Address and PhysicalConnection nodes from ICD file
      * @param icd ICD file
      * @see <a href="https://github.com/com-pas/compas-sct/issues/76" target="_blank">Issue !76</a>
+     * Copies Address and PhysicalConnection nodes from ICD file
      */
     public void copyAddressAndPhysConnFromIcd(Optional<SCL> icd) {
         if (icd.isPresent() && icd.get().getCommunication() != null) {

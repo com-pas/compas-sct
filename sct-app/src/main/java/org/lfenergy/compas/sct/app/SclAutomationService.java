@@ -40,7 +40,7 @@ public class SclAutomationService {
     private SclAutomationService(){throw new IllegalStateException("SclAutomationService class"); }
 
     /**
-     * Create a SCD file from specified parameters, it call all functions defined in the process one by one, every step
+     * Create a SCD file from specified parameters, it calls all functions defined in the process one by one, every step
      * return a SCD file which will be used by the next step.
      * @param ssd : (mandatory) file contains substation datas
      * @param headerDTO : (mandatory) object which hold header datas and historys' one
