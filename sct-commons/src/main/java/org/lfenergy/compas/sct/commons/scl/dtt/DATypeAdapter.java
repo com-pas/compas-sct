@@ -165,7 +165,6 @@ public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
                 .collect(Collectors.toList());
     }
 
-
     /**
      * Gets BDA by name
      * @param bdaName BDA name
@@ -340,8 +339,6 @@ public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
         return Optional.empty();
     }
 
-
-    /**
     /**
      * A representation of the model object <em><b>{@link org.lfenergy.compas.scl2007b4.model.TBDA BDA}</b></em>.
      * <p>
