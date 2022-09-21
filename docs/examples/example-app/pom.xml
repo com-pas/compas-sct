@@ -23,6 +23,22 @@ SPDX-License-Identifier: Apache-2.0
     <maven.compiler.release>11</maven.compiler.release>
   </properties>
 
+  <distributionManagement>
+    <repository>
+      <id>github-packages-compas</id>
+      <name>GitHub Packages</name>
+      <url>https://maven.pkg.github.com/com-pas/compas-sct</url>
+    </repository>
+  </distributionManagement>
+
+  <repositories>
+    <repository>
+      <id>github-packages-compas</id>
+      <name>Github Packages CoMPAS</name>
+      <url>https://maven.pkg.github.com/com-pas/*</url>
+    </repository>
+  </repositories>
+
   <dependencies>
     <!-- SclService -->
     <dependency>
@@ -37,9 +53,9 @@ SPDX-License-Identifier: Apache-2.0
       <version>0.1.0</version>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.11</version>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>5.8.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
