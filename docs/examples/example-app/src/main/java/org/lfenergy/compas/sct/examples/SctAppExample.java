@@ -21,7 +21,7 @@ public class SctAppExample {
     }
 
     public static SclRootAdapter initSclWithSclService(Optional<UUID> hId, String hVersion, String hRevision) throws JAXBException {
-        var scl = SclService.initScl(hId, hVersion, hRevision);
+        SclRootAdapter scl = SclService.initScl(hId, hVersion, hRevision);
         marshaller.marshal(scl.getCurrentElem(), System.out);
         return scl;
     }
