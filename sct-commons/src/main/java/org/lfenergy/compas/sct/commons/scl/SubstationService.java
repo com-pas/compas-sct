@@ -11,8 +11,6 @@ import org.lfenergy.compas.scl2007b4.model.TBay;
 import org.lfenergy.compas.scl2007b4.model.TSubstation;
 import org.lfenergy.compas.scl2007b4.model.TVoltageLevel;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.sstation.BayAdapter;
-import org.lfenergy.compas.sct.commons.scl.sstation.FunctionAdapter;
 import org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter;
 import org.lfenergy.compas.sct.commons.scl.sstation.VoltageLevelAdapter;
 
@@ -26,7 +24,6 @@ import org.lfenergy.compas.sct.commons.scl.sstation.VoltageLevelAdapter;
  *   <li>{@link SubstationService#addSubstation(SCL, SCL) <em>Adds the <b>Substation </b> object from given <b>SCL </b> object</em>}</li>
  *   <li>{@link SubstationService#updateVoltageLevel(SubstationAdapter, TVoltageLevel) <em>Adds the <b>TVoltageLevel </b> element under <b>TSubstation </b> reference object</em>}</li>
  *   <li>{@link SubstationService#updateBay(VoltageLevelAdapter, TBay) <em>Adds the <b>TBay </b> element under <b>TVoltageLevel </b> reference object</em>}</li>
- *   <li>{@link SubstationService#updateLNodeIEDNames(SCL) <em>Update the value of <b>LNode@iedName </b> attribute corresponding to the value of <b>ICDHeader@IEDName </b> attribute </em> }</li>
  * </ul>
  * @see org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter
  * @see org.lfenergy.compas.sct.commons.scl.sstation.VoltageLevelAdapter
@@ -115,25 +112,4 @@ public final class SubstationService {
         }
     }
 
-    /** Updates all LNodes IEDNames in given SCD file
-     * <ul>
-     *     <li>If LNode contents one Private Compas-ICDHEADER so LNode name is update with IED name from the Private</li>
-     *     <li>If LNode contents more than one Private Compas-ICDHEADER so new LNodes are created for each Private Compas-ICDHEADER
-     *         and naming them with the Private IED name</li>
-     * </ul>
-     * @param scd SCL file in which LNodes names should be updated
-     * @throws ScdException throws when no Private Compas-ICDHEADER found on at least one LNode of current SCL file
-     */
-    public static void updateLNodeIEDNames(SCL scd) throws ScdException {
-        if (!scd.isSetSubstation()) {
-            return;
-        }
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-
-        scd.getSubstation().stream().map(tSubstation -> new SubstationAdapter(sclRootAdapter, tSubstation))
-            .flatMap(SubstationAdapter::streamVoltageLevelAdapters)
-            .flatMap(VoltageLevelAdapter::streamBayAdapters)
-            .flatMap(BayAdapter::streamFunctionAdapters)
-            .forEach(FunctionAdapter::updateLNodeIedNames);
-    }
 }
