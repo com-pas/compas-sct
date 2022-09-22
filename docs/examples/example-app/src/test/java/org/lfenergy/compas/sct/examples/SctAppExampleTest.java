@@ -4,7 +4,7 @@
 
 package org.lfenergy.compas.sct.examples;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 
@@ -13,7 +13,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
+
 
 public class SctAppExampleTest {
 
@@ -24,7 +25,7 @@ public class SctAppExampleTest {
         String headerVersion = SclRootAdapter.VERSION;
         String headerRevision = SclRootAdapter.REVISION;
         // When: Sct Service
-        var scl = SctAppExample
+        SclRootAdapter scl = SctAppExample
                 .initSclWithSclService(headerId, headerVersion, headerRevision);
         // Then
         assertNotNull(scl.getCurrentElem().getHeader());
