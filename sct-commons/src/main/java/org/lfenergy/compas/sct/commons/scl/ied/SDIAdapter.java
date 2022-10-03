@@ -58,6 +58,12 @@ public class SDIAdapter extends SclElementAdapter<SclElementAdapter, TSDI> imple
         return SDIAdapter.class.cast(parentAdapter).getCurrentElem().getSDIOrDAI().contains(currentElem);
     }
 
+    @Override
+    protected String elementXPath() {
+        return String.format("SDI[%s]",
+                Utils.xpathAttributeFilter("name", currentElem.isSetName() ? currentElem.getName() : null));
+    }
+
     /**
      * Gets in current SDI specific SDI by its name
      * @param sName name of SDI to get

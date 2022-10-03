@@ -57,6 +57,12 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
         return parentAdapter.getCurrentElem().getDOI().contains(currentElem);
     }
 
+    @Override
+    protected String elementXPath() {
+        return String.format("DOI[%s]",
+                Utils.xpathAttributeFilter("name", currentElem.isSetName() ? currentElem.getName() : null));
+    }
+
     /**
      * Gets SDI by name from current DOI
      * @param sName name of SDI to get

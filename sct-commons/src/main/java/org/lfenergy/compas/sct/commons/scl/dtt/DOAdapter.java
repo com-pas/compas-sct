@@ -54,6 +54,13 @@ public class DOAdapter extends SclElementAdapter<LNodeTypeAdapter, TDO> implemen
         return parentAdapter.getCurrentElem().getDO().contains(currentElem);
     }
 
+    @Override
+    protected String elementXPath() {
+        return String.format("DO[%s and %s]",
+                Utils.xpathAttributeFilter("name", currentElem.isSetName() ? currentElem.getName() : null),
+                Utils.xpathAttributeFilter("type", currentElem.isSetType() ? currentElem.getType() : null));
+    }
+
     /**
      * Gets linked DataTypeTemplateAdapter as parent
      * @return <em>DataTypeTemplateAdapter</em> object

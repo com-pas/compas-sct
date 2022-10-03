@@ -5,7 +5,6 @@
 package org.lfenergy.compas.sct.commons.scl.ied;
 
 
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
@@ -88,16 +87,13 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
         return currentElem == parentAdapter.getCurrentElem().getLN0();
     }
 
-    /**
-     * Gets current LN0 class type
-     * @return <em>LN0.class</em>
-     */
     @Override
     protected String elementXPath() {
         return String.format("LN[lnClass=\"LLN0\" and %s and %s]",
                 Utils.xpathAttributeFilter("inst", currentElem.isSetInst() ? currentElem.getInst() : null),
                 Utils.xpathAttributeFilter("lnType", currentElem.isSetLnType() ? currentElem.getLnType() : null));
     }
+
 
     /**
      * Gets current LN0 class type

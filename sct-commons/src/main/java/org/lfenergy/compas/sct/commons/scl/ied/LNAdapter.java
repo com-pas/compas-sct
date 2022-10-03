@@ -114,6 +114,7 @@ public class LNAdapter extends AbstractLNAdapter<TLN>{
         return currentElem.getPrefix();
     }
 
+
     /**
      * Check if node is child of the reference node
      * @return link parent child existence
