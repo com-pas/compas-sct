@@ -11,6 +11,7 @@ import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.scl2007b4.model.TSDI;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class RootSDIAdapterTest {
@@ -69,4 +70,34 @@ class RootSDIAdapterTest {
         rootSDIAdapter.addPrivate(tPrivate);
         assertEquals(1, rootSDIAdapter.getCurrentElem().getPrivate().size());
     }
+
+    @Test
+    void elementXPath_sdi() {
+        // Given
+        TSDI tsdi = new TSDI();
+        tsdi.setName("sdo1");
+        RootSDIAdapter rootSDIAdapter = new RootSDIAdapter(null,tsdi);
+        // When
+        String result = rootSDIAdapter.elementXPath();
+        // Then
+        assertThat(result).isEqualTo("SDI[@name=\"sdo1\"]");
+    }
+
+    @Test
+    void elementXPath_dai() {
+        // Given
+        TSDI tsdi = new TSDI();
+        tsdi.setName("sdo1");
+        RootSDIAdapter rootSDIAdapter = new RootSDIAdapter(null,tsdi);
+
+        TDAI tdai = new TDAI();
+        tdai.setName("angRef");
+        tsdi.getSDIOrDAI().add(tdai);
+        RootSDIAdapter.DAIAdapter daiAdapter = assertDoesNotThrow(() -> new RootSDIAdapter.DAIAdapter(rootSDIAdapter,tdai));
+        // When
+        String result = daiAdapter.elementXPath();
+        // Then
+        assertThat(result).isEqualTo("DAI[@name=\"angRef\"]");
+    }
+
 }

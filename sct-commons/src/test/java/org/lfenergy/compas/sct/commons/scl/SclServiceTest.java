@@ -5,7 +5,11 @@
 package org.lfenergy.compas.sct.commons.scl;
 
 import org.apache.commons.lang3.StringUtils;
+import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
@@ -14,12 +18,15 @@ import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDa;
 import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDo;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
+import static org.lfenergy.compas.sct.commons.testhelpers.marshaller.SclTestMarshaller.createWrapper;
 import static org.lfenergy.compas.sct.commons.util.PrivateEnum.COMPAS_SCL_FILE_TYPE;
 
 class SclServiceTest {
@@ -699,6 +706,188 @@ class SclServiceTest {
                 .noneMatch(TExtRef::isSetSrcCBName)
                 .noneMatch(TExtRef::isSetSrcLNClass);
         assertIsMarshallable(scl);
+    }
+
+    private static Stream<Arguments> sclProviderMissingRequiredObjects() throws Exception {
+        SCL scl1 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_KO_MissingBeh.scd");
+        SCL scl2 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_KO_MissingLDevicePrivate.scd");
+        SCL scl3 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_KO_MissingLDevicePrivateAttribute.scd");
+        SCL scl4 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_KO_MissingMod.scd");
+        Tuple[] scl1Errors = new Tuple[]{Tuple.tuple("The LDevice doesn't have a DO @name='Beh' OR its associated DA@fc='ST' AND DA@name='stVal'",
+                "/SCL/IED[@name=\"IedName1\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType1\"]")};
+        Tuple[] scl2Errors = new Tuple[]{Tuple.tuple("The LDevice doesn't have a Private compas:LDevice.",
+                "/SCL/IED[@name=\"IedName1\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType1\"]")};
+        Tuple[] scl3Errors = new Tuple[]{Tuple.tuple("The Private compas:LDevice doesn't have the attribute 'LDeviceStatus'",
+                "/SCL/IED[@name=\"IedName1\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType1\"]")};
+        Tuple[] scl4Errors = new Tuple[]{Tuple.tuple("The LDevice doesn't have a DO @name='Mod'",
+                "/SCL/IED[@name=\"IedName1\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType1\"]")};
+        return Stream.of(
+                Arguments.of("MissingDOBeh",scl1, scl1Errors),
+                Arguments.of("MissingLDevicePrivate",scl2, scl2Errors),
+                Arguments.of("MissingLDevicePrivateAttribute",scl3, scl3Errors),
+                Arguments.of("MissingDOMod",scl4, scl4Errors)
+        );
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("sclProviderMissingRequiredObjects")
+    void updateLDeviceStatus_shouldReturnReportWithError_MissingRequiredObject(String testCase, SCL scl, Tuple... errors) {
+        // Given
+        assertTrue(getLDeviceStatusValue(scl, "IedName1", "LDSUIED").isPresent());
+        assertEquals("off", getLDeviceStatusValue(scl, "IedName1", "LDSUIED").get().getValue());
+        String before = createWrapper().marshall(scl);
+        // When
+        SclReport sclReport = SclService.updateLDeviceStatus(scl);
+        // Then
+        String after = createWrapper().marshall(sclReport.getSclRootAdapter().getCurrentElem());
+        assertFalse(sclReport.isSuccess());
+        assertThat(sclReport.getErrorDescriptionList())
+                .hasSize(1)
+                .extracting(SclReport.ErrorDescription::getMessage, SclReport.ErrorDescription::getXpath)
+                .containsExactly(errors);
+        assertEquals("off", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName1", "LDSUIED").get().getValue());
+        assertEquals(before, after);
+    }
+
+    private static Stream<Arguments> sclProviderBasedLDeviceStatus() throws Exception {
+        SCL scl1 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_LD_STATUS_ACTIVE.scd");
+        SCL scl2 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_LD_STATUS_UNTESTED.scd");
+        SCL scl3 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test1_LD_STATUS_INACTIVE.scd");
+        Tuple[] scl1Errors = new Tuple[]{Tuple.tuple("The LDevice cannot be set to 'off' but has not been selected into SSD.",
+                        "/SCL/IED[@name=\"IedName1\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType1\"]"),
+                Tuple.tuple("The LDevice cannot be set to 'on' but has been selected into SSD.",
+                        "/SCL/IED[@name=\"IedName2\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType2\"]"),
+                Tuple.tuple("The LDevice cannot be activated or desactivated because its BehaviourKind Enum contains NOT 'on' AND NOT 'off'.",
+                        "/SCL/IED[@name=\"IedName3\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType3\"]"
+                )};
+        Tuple[] scl2Errors = new Tuple[]{Tuple.tuple("The LDevice cannot be set to 'off' but has not been selected into SSD.",
+                        "/SCL/IED[@name=\"IedName1\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType1\"]"),
+                Tuple.tuple("The LDevice cannot be set to 'on' but has been selected into SSD.",
+                        "/SCL/IED[@name=\"IedName2\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType2\"]"),
+                Tuple.tuple("The LDevice cannot be activated or desactivated because its BehaviourKind Enum contains NOT 'on' AND NOT 'off'.",
+                        "/SCL/IED[@name=\"IedName3\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType3\"]"
+                )};
+        Tuple[] scl3Errors = new Tuple[]{Tuple.tuple("The LDevice is not qualified into STD but has been selected into SSD.",
+                        "/SCL/IED[@name=\"IedName1\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType1\"]"),
+                Tuple.tuple("The LDevice cannot be set to 'on' but has been selected into SSD.",
+                        "/SCL/IED[@name=\"IedName2\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType2\"]"),
+                Tuple.tuple("The LDevice cannot be activated or desactivated because its BehaviourKind Enum contains NOT 'on' AND NOT 'off'.",
+                        "/SCL/IED[@name=\"IedName3\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType3\"]"
+                )};
+        return Stream.of(
+                Arguments.of("ACTIVE", scl1, scl1Errors),
+                Arguments.of("UNTESTED", scl2, scl2Errors),
+                Arguments.of("INACTIVE", scl3, scl3Errors)
+        );
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("sclProviderBasedLDeviceStatus")
+    void updateLDeviceStatus_shouldReturnReportWithError_WhenLDeviceStatusActiveOrUntestedOrInactive(String testCase, SCL scl, Tuple... errors) {
+        // Given
+        assertEquals("off", getLDeviceStatusValue(scl, "IedName1", "LDSUIED").get().getValue());
+        assertEquals("on", getLDeviceStatusValue(scl, "IedName2", "LDSUIED").get().getValue());
+        assertFalse(getLDeviceStatusValue(scl, "IedName3", "LDSUIED").isPresent());
+        String before = createWrapper().marshall(scl);
+        // When
+        SclReport sclReport = SclService.updateLDeviceStatus(scl);
+        // Then
+        String after = createWrapper().marshall(sclReport.getSclRootAdapter().getCurrentElem());
+        assertFalse(sclReport.isSuccess());
+        assertThat(sclReport.getErrorDescriptionList())
+                .hasSize(3)
+                .extracting(SclReport.ErrorDescription::getMessage, SclReport.ErrorDescription::getXpath)
+                .containsExactly(errors);
+        assertEquals("off", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName1", "LDSUIED").get().getValue());
+        assertEquals("on", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName2", "LDSUIED").get().getValue());
+        assertFalse(getLDeviceStatusValue(scl, "IedName3", "LDSUIED").isPresent());
+        assertEquals(before, after);
+    }
+
+    @Test
+    void updateLDeviceStatus_shouldReturnReportWithError_WhenAllLDeviceInactive_Test2() throws Exception {
+        // Given
+        SCL scl = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test2_LD_STATUS_INACTIVE.scd");
+        assertEquals("off", getLDeviceStatusValue(scl, "IedName1", "LDSUIED").get().getValue());
+        assertEquals("on", getLDeviceStatusValue(scl, "IedName2", "LDSUIED").get().getValue());
+        assertFalse(getLDeviceStatusValue(scl, "IedName3", "LDSUIED").isPresent());
+        // When
+        SclReport sclReport = SclService.updateLDeviceStatus(scl);
+        // Then
+        assertFalse(sclReport.isSuccess());
+        assertThat(sclReport.getErrorDescriptionList())
+                .hasSize(2)
+                .extracting(SclReport.ErrorDescription::getMessage, SclReport.ErrorDescription::getXpath)
+                .containsExactly(Tuple.tuple("The LDevice cannot be set to 'off' but has not been selected into SSD.",
+                                "/SCL/IED[@name=\"IedName1\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType1\"]"),
+                        Tuple.tuple("The LDevice is not qualified into STD but has been selected into SSD.",
+                                "/SCL/IED[@name=\"IedName2\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType2\"]"));
+        assertEquals("off", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName1", "LDSUIED").get().getValue());
+        assertEquals("on", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName2", "LDSUIED").get().getValue());
+        assertTrue(getLDeviceStatusValue(scl, "IedName3", "LDSUIED").isPresent());
+        assertEquals("off", getLDeviceStatusValue(scl, "IedName3", "LDSUIED").get().getValue());
+    }
+
+
+    @Test
+    void updateLDeviceStatus_shouldReturnUpdatedFile() throws Exception {
+        // Given
+        SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_Template.scd");
+        assertTrue(getLDeviceStatusValue(givenScl, "IedName1", "LDSUIED").isPresent());
+        assertEquals("off", getLDeviceStatusValue(givenScl, "IedName1", "LDSUIED").get().getValue());
+
+        assertTrue(getLDeviceStatusValue(givenScl, "IedName2", "LDSUIED").isPresent());
+        assertEquals("on", getLDeviceStatusValue(givenScl, "IedName2", "LDSUIED").get().getValue());
+
+        assertFalse(getLDeviceStatusValue(givenScl, "IedName3", "LDSUIED").isPresent());
+
+        // When
+        SclReport sclReport = SclService.updateLDeviceStatus(givenScl);
+        // Then
+        assertTrue(sclReport.isSuccess());
+        assertTrue(getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName1", "LDSUIED").isPresent());
+        assertEquals("on", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName1", "LDSUIED").get().getValue());
+
+        assertTrue(getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName2", "LDSUIED").isPresent());
+        assertEquals("off", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName2", "LDSUIED").get().getValue());
+
+        assertTrue(getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName3", "LDSUIED").isPresent());
+        assertEquals("off", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName3", "LDSUIED").get().getValue());
+    }
+
+    @Test
+    void updateLDeviceStatus_shouldReturnError_when_DaiNotUpdatable() throws Exception {
+        // Given
+        SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_Dai_Not_Updatable.scd");
+        assertTrue(getLDeviceStatusValue(givenScl, "IedName1", "LDSUIED").isPresent());
+        assertEquals("off", getLDeviceStatusValue(givenScl, "IedName1", "LDSUIED").get().getValue());
+        assertTrue(getLDeviceStatusValue(givenScl, "IedName2", "LDSUIED").isPresent());
+        assertEquals("on", getLDeviceStatusValue(givenScl, "IedName2", "LDSUIED").get().getValue());
+        assertFalse(getLDeviceStatusValue(givenScl, "IedName3", "LDSUIED").isPresent());
+
+        // When
+        // Then
+       assertThatCode(() -> SclService.updateLDeviceStatus(givenScl))
+                .isInstanceOf(ScdException.class)
+                .hasMessage("DAI (Mod -stVal) cannot be updated");
+    }
+
+
+    private Optional<TVal> getLDeviceStatusValue(SCL scl, String iedName, String ldInst){
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scl);
+        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
+        Optional<LDeviceAdapter> lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst);
+        LN0Adapter ln0Adapter = lDeviceAdapter.get().getLN0Adapter();
+        Optional<DOIAdapter> doiAdapter = ln0Adapter.getDOIAdapters().stream()
+                .filter(doiAdapter1 -> doiAdapter1.getCurrentElem().getName().equals("Mod"))
+                .findFirst();
+        if(doiAdapter.isEmpty()) return Optional.empty();
+        return doiAdapter.get().getCurrentElem().getSDIOrDAI().stream()
+                .filter(tUnNaming -> tUnNaming.getClass().equals(TDAI.class))
+                .map(TDAI.class::cast)
+                .filter(tdai -> tdai.getName().equals("stVal"))
+                .map(tdai -> tdai.getVal().get(0))
+                .findFirst();
     }
 
 }

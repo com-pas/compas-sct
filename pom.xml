@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- SPDX-FileCopyrightText: 2020 RTE FRANCE -->
+<!-- SPDX-FileCopyrightText: 2022 2021 2020 RTE FRANCE -->
 <!-- -->
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -38,6 +38,7 @@
         <sonar.coverage.jacoco.xmlReportPaths>${basedir}/${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
         <scl-extension.version>0.9.1</scl-extension.version>
         <compas-scl-xsd.version>0.0.4</compas-scl-xsd.version>
+        <maven.plugin.javadoc>3.4.1</maven.plugin.javadoc>
     </properties>
 
     <dependencyManagement>
@@ -141,6 +142,20 @@
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>3.2.2</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>${maven.plugin.javadoc}</version>
+                    <executions>
+                        <execution>
+                            <id>attach-javadocs</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>aggregate</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -163,4 +178,27 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>javadoc</id>
+            <properties>
+                <javadoc.title>CoMPAS SCT</javadoc.title>
+                <javadoc.lint>all,-html,-missing,-syntax,-reference</javadoc.lint>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>${maven.plugin.javadoc}</version>
+                        <configuration>
+                            <doctitle>${javadoc.title}</doctitle>
+                            <doclint>${javadoc.lint}</doclint>
+                            <additionalJOption>--no-module-directories</additionalJOption>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

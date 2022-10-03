@@ -11,6 +11,7 @@ import org.mockito.Mockito;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class BDAAdapterTest extends AbstractDTTLevel<DATypeAdapter,TBDA> {
@@ -102,4 +103,16 @@ class BDAAdapterTest extends AbstractDTTLevel<DATypeAdapter,TBDA> {
         bdaAdapter.addPrivate(tPrivate);
         assertEquals(1, bdaAdapter.getCurrentElem().getPrivate().size());
     }
+
+    @Test
+    void elementXPath() {
+        // Given
+        init();
+        DATypeAdapter.BDAAdapter bdaAdapter = new DATypeAdapter.BDAAdapter(sclElementAdapter,sclElement);
+        // When
+        String result = bdaAdapter.elementXPath();
+        // Then
+        assertThat(result).isEqualTo("BDA[not(@name)]");
+    }
+
 }

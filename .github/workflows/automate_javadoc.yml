@@ -1,0 +1,68 @@
+# SPDX-FileCopyrightText: 2022 RTE FRANCE
+#
+# SPDX-License-Identifier: Apache-2.0
+name: Continuous Deployment - JavaDocs
+
+on:
+  push:
+    branches:
+      - 'feat/javadoc'
+jobs:
+  build:
+    name: Java Docs
+    runs-on: ubuntu-latest
+    env:
+      from_branch: feat/javadoc
+      target_branch: feat/117_Documentation_SCD_Generation_Process
+    steps:
+      # Use develop as base branch to generate javadoc
+      - name: Setup Environment
+        uses: actions/checkout@v2
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+          ref: ${{ env.target_branch }}
+
+      - name: Create custom Maven Settings.xml
+        uses: whelk-io/maven-settings-xml-action@v20
+        with:
+          output_file: custom_maven_settings.xml
+          servers: '[{ "id": "github-packages-compas", "username": "OWNER", "password": "${{ secrets.GITHUB_TOKEN }}" }]'
+
+      - name: Configure Git
+        run: |
+          git config --global user.name '${{ secrets.CONFIG_CI_USER_NAME }}'
+          git config --global user.email '${{ secrets.CONFIG_CI_USER_EMAIL }}'
+
+      - name: Import GPG key
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v5
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY_BOT}}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+
+      - name: Prepare Pull Request branch
+        run: |
+          mvn -s custom_maven_settings.xml clean javadoc:aggregate -P javadoc
+          mkdir -p docs/javadoc
+          yes | cp -Rf target/site/apidocs/* docs/javadoc/
+          git checkout -b ${{ env.from_branch }}-pull-request
+
+      # Note that will fail if branch already exists.
+      - name: Push Git Branch
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ env.from_branch }}-pull-request
+
+      # Note that will silently fail if PR already exists.
+      - name: Create Pull Request
+        uses: repo-sync/pull-request@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          source_branch: ${{ env.from_branch }}-pull-request
+          destination_branch: ${{ env.target_branch }}
+          pr_title: "Docs: Update Java docs repository"
+          pr_body: "Automatically created from CI workflow"
+          pr_label: "documentation,javadoc"

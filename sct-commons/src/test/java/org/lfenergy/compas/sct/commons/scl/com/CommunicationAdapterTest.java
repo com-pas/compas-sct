@@ -9,6 +9,7 @@ import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CommunicationAdapterTest {
@@ -92,4 +93,15 @@ class CommunicationAdapterTest {
         communicationAdapter.addPrivate(tPrivate);
         assertEquals(1, communicationAdapter.getCurrentElem().getPrivate().size());
     }
+
+    @Test
+    void elementXPath() {
+        // Given
+        CommunicationAdapter communicationAdapter = new CommunicationAdapter(null,new TCommunication());
+        // When
+        String result = communicationAdapter.elementXPath();
+        // Then
+        assertThat(result).isEqualTo("Communication");
+    }
+
 }

@@ -18,6 +18,7 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class LNodeTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TLNodeType> {
@@ -195,5 +196,17 @@ class LNodeTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TLNo
         assertFalse(lNodeTypeAdapter.getCurrentElem().getPrivate().isEmpty());
         lNodeTypeAdapter.addPrivate(tPrivate);
         assertEquals(2, lNodeTypeAdapter.getCurrentElem().getPrivate().size());
+    }
+
+
+    @Test
+    void elementXPath() throws Exception {
+        // Given
+        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
+        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getLNodeTypeAdapterById("LN1").get());
+        // When
+        String result = lNodeTypeAdapter.elementXPath();
+        // Then
+        assertThat(result).isEqualTo("LNodeType[@id=\"LN1\" and @lnClass=\"PIOC\"]");
     }
 }

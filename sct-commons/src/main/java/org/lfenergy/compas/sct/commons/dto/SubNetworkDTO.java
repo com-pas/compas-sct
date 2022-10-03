@@ -19,7 +19,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-
+/**
+ * A representation of the model object <em><b>Sub Network</b></em>.
+ *
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link SubNetworkDTO#getType <em>Type</em>}</li>
+ *   <li>{@link SubNetworkDTO#getName <em>Name</em>}</li>
+ *   <li>{@link SubNetworkDTO#getConnectedAPs <em>Refers To Connected AP</em>}</li>
+ * </ul>
+ *
+ * @see org.lfenergy.compas.scl2007b4.model.TSubNetwork
+ */
 @Getter
 @NoArgsConstructor
 public class SubNetworkDTO {
@@ -28,11 +41,21 @@ public class SubNetworkDTO {
     private SubnetworkType type;
     private Set<ConnectedApDTO> connectedAPs = new HashSet<>();
 
+    /**
+     * Constructor
+     * @param name input
+     * @param type input
+     */
     public SubNetworkDTO(String name, String type) {
         this.name = name;
         this.type = SubnetworkType.fromValue(type);
     }
 
+    /**
+     * Initializes SubNetworkDTO
+     * @param subNetworkAdapter input
+     * @return SubNetworkDTO object value
+     */
     public static SubNetworkDTO  from(SubNetworkAdapter subNetworkAdapter) {
         SubNetworkDTO subNetworkDTO = new SubNetworkDTO();
         subNetworkDTO.name = subNetworkAdapter.getName();
@@ -45,27 +68,50 @@ public class SubNetworkDTO {
         return subNetworkDTO;
     }
 
+    /**
+     * Gets list of ConnectedApDTO of SubNetwork
+     * @return Set of ConnectedApDTO object
+     */
     public Set<ConnectedApDTO> getConnectedAPs() {
         return Set.of(connectedAPs.toArray(new ConnectedApDTO[0]));
     }
 
+    /**
+     * Gets SubNetwork type
+     * @return string SubNetwork type
+     */
     public String getType(){
         return this.type.value;
     }
 
+    /**
+     * Add ConnectedApDTO to SubNetwork list of ConnectedAPs'
+     * @param cap input
+     */
     public void addConnectedAP(ConnectedApDTO cap) {
         connectedAPs.add(cap);
     }
 
+    /**
+     * Sets SubNetwork name
+     * @param sName input
+     */
     public void setName(String sName){
         name = sName;
     }
+
+    /**
+     * Sets SubNetwork Type
+     * @param type input
+     */
     public void setType(String type) {
         this.type = SubnetworkType.fromValue(type);
     }
 
 
-
+    /**
+     * Subnetwork Type enum
+     */
     public enum SubnetworkType {
         IP("IP"), // 0
         MMS("8-MMS"), // 1
@@ -98,6 +144,13 @@ public class SubNetworkDTO {
         }
     }
 
+    /**
+     * Create default SubnetworkType in Communication node of SCL file
+     * @param iedName name of existing IED in SCL
+     * @param comAdapter Communication node Adapter object value
+     * @param comMap possible name of SubnetworkTypes and corresponding ConnectedAPs
+     * @return
+     */
     public static Set<SubNetworkDTO> createDefaultSubnetwork(String iedName, CommunicationAdapter comAdapter, Map<Pair<String, String>, List<String>> comMap){
         Set<SubNetworkDTO> subNetworkDTOS = new HashSet<>();
         comMap.forEach((subnetworkNameType, apNames) -> {
@@ -112,6 +165,11 @@ public class SubNetworkDTO {
         return subNetworkDTOS;
     }
 
+    /**
+     * Gets ConnectedAP name's from Communication node
+     * @param comAdapter Communication node object value
+     * @return
+     */
     private static List<String> getStdConnectedApNames(CommunicationAdapter comAdapter){
         return comAdapter.getSubNetworkAdapters().stream()
                 .map(SubNetworkAdapter::getConnectedAPAdapters)

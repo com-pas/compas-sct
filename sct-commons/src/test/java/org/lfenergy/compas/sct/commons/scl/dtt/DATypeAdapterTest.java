@@ -18,6 +18,7 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DATypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TDAType> {
@@ -153,4 +154,15 @@ class DATypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TDAType
         daTypeAdapter.addPrivate(tPrivate);
         assertEquals(2, daTypeAdapter.getCurrentElem().getPrivate().size());
     }
+    @Test
+    void elementXPath() throws Exception {
+        // Given
+        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
+        DATypeAdapter daTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getDATypeAdapterById("DA1").get());
+        // When
+        String result = daTypeAdapter.elementXPath();
+        // Then
+        assertThat(result).isEqualTo("DAType[@id=\"DA1\"]");
+    }
+
 }

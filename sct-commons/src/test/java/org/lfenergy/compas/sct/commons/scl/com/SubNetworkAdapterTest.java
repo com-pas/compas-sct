@@ -5,6 +5,8 @@
 package org.lfenergy.compas.sct.commons.scl.com;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.lfenergy.compas.scl2007b4.model.TCommunication;
 import org.lfenergy.compas.scl2007b4.model.TConnectedAP;
 import org.lfenergy.compas.scl2007b4.model.TPrivate;
@@ -12,6 +14,7 @@ import org.lfenergy.compas.scl2007b4.model.TSubNetwork;
 import org.lfenergy.compas.sct.commons.dto.DTO;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SubNetworkAdapterTest {
@@ -74,4 +77,21 @@ class SubNetworkAdapterTest {
         subNetworkAdapter.addPrivate(tPrivate);
         assertEquals(1, subNetworkAdapter.getCurrentElem().getPrivate().size());
     }
+
+    @ParameterizedTest
+    @CsvSource(value = {"sName;sType;SubNetwork[@name=\"sName\"]", ";;SubNetwork[not(@name)]"}
+            , delimiter = ';')
+    void elementXPath(String sName, String sType, String message) {
+        // Given
+        TSubNetwork tSubNetwork = new TSubNetwork();
+        tSubNetwork.setName(sName);
+        tSubNetwork.setType(sType);
+        SubNetworkAdapter subNetworkAdapter = new SubNetworkAdapter(null, tSubNetwork);
+        // When
+        String elementXPath = subNetworkAdapter.elementXPath();
+        // Then
+        assertThat(elementXPath).isEqualTo(message);
+
+    }
+
 }

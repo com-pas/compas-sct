@@ -17,15 +17,37 @@ import org.lfenergy.compas.sct.commons.scl.SubstationService;
 
 import java.util.*;
 
+/**
+ * A representation of the <em><b>{@link SclAutomationService SclAutomationService}</b></em>.
+ * <p>
+ * The following features are supported:
+ * </p>
+ * <ul>
+ *   <li>{@link SclAutomationService#createSCD(SCL, HeaderDTO, Set) Adds all elements under the <b>SCL </b> object from given <b>SSD </b> and <b>STD </b> files}
+ *  </ul>
+ */
 @Slf4j
 public class SclAutomationService {
 
+    /**
+     * Possible Subnetwork and ConnectAP names which should be used in generated SCD in order a have global coherence
+     * Configuration based on used framework can be used to externalize this datas
+     */
     private static final Map<Pair<String, String>, List<String>> comMap = Map.of(
             Pair.of("RSPACE_PROCESS_NETWORK", SubNetworkDTO.SubnetworkType.MMS.toString()), Arrays.asList("PROCESS_AP", "TOTO_AP_GE"),
             Pair.of("RSPACE_ADMIN_NETWORK", SubNetworkDTO.SubnetworkType.IP.toString()), Arrays.asList("ADMIN_AP","TATA_AP_EFFACEC"));
 
     private SclAutomationService(){throw new IllegalStateException("SclAutomationService class"); }
 
+    /**
+     * Create a SCD file from specified parameters, it calls all functions defined in the process one by one, every step
+     * return a SCD file which will be used by the next step.
+     * @param ssd : (mandatory) file contains substation datas
+     * @param headerDTO : (mandatory) object which hold header datas and historys' one
+     * @param stds : (optional) list of STD files containing IED datas (IED, Communication and DataTypeTemplate)
+     * @return a SCD file encapsuled in object SclRootAdapter
+     * @throws ScdException
+     */
     public static SclRootAdapter createSCD(@NonNull SCL ssd, @NonNull HeaderDTO headerDTO, Set<SCL> stds) throws ScdException {
         SclRootAdapter scdAdapter = SclService.initScl(Optional.ofNullable(headerDTO.getId()),
                 headerDTO.getVersion(),headerDTO.getRevision());

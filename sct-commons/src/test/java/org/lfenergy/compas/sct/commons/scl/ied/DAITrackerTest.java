@@ -16,6 +16,7 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DAITrackerTest {
@@ -176,4 +177,5 @@ class DAITrackerTest {
         daTypeName.setBType(TPredefinedBasicTypeEnum.FLOAT_32);
         assertDoesNotThrow(()->daiTracker.getDaiNumericValue(daTypeName,13.0));
     }
+
 }

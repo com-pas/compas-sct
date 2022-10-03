@@ -1,0 +1,41 @@
+<!--
+SPDX-FileCopyrightText: 2021 Alliander N.V.
+
+SPDX-License-Identifier: CC-BY-4.0
+-->
+<div class="sidebar">
+  <div class="container">
+    <div class="sidebar-about">
+      <img src="{{ site.baseurl }}/public/compas-horizontal-color.svg"/>
+      <h2>
+        <a href="{{ site.baseurl }}">
+          {{ site.title }}
+        </a>
+      </h2>
+      <p class="lead">{{ site.description }}</p>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="sidebar-nav-item{% if page.url == '/' %} active{% endif %}" href="{{ site.baseurl }}">Home</a>
+      <a class="sidebar-nav-item{% if page.url == '/MISSION-COMPAS.html' %} active{% endif %}" target="_blank" href="{{ site.contributingUrl }}/MISSION-COMPAS.html">Mission</a>
+      <a class="sidebar-nav-item{% if page.url == '/GOVERNANCE.html' %} active{% endif %}" target="_blank" href="{{ site.contributingUrl }}/GOVERNANCE.html">Governance</a>
+      <a class="sidebar-nav-item{% if page.url == '/DEVELOPING.html' %} active{% endif %}" target="_blank" href="{{ site.contributingUrl }}/DEVELOPING.html">Developing</a>
+      <a class="sidebar-nav-item{% if page.url == '/SCD_GENERATION.html' %} active{% endif %}" href="{{ site.baseurl }}/SCD_GENERATION.html">Documentation</a>
+      <ul class="nav-list ">
+        <li class="nav-list-item">
+          <a class="sidebar-nav-item{% if page.url == '/QUICK_START.html' %} active{% endif %}" href="{{ site.baseurl }}/QUICK_START.html">Quick Start</a>
+        </li>
+        <li class="nav-list-item">
+          <a class="sidebar-nav-item{% if page.url == '/SCD_GENERATION.html' %} active{% endif %}" href="{{ site.baseurl }}/SCD_GENERATION.html">SCD generation process</a>
+        </li>
+        <li class="nav-list-item">
+          <a class="sidebar-nav-item{% if page.url == '/compas-sct.html' %} active{% endif %}" href="{{ site.baseurl }}/compas-sct.html">Architecture</a>
+        </li>
+        <li class="nav-list-item">
+          <a class="sidebar-nav-item{% if page.url == '/javadoc/index.html' %} active{% endif %}" target="_blank" href="{{ site.baseurl }}/javadoc/index.html">Java Docs</a>
+        </li>
+      </ul>
+    </nav>
+    <p>Currently v{{ site.version }}</p>
+    <p>&copy; {{ site.time | date: '%Y' }}. All rights reserved.</p>
+  </div>
+</div>
