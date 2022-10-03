@@ -14,6 +14,7 @@ import org.lfenergy.compas.scl2007b4.model.TProtNs;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -152,6 +153,12 @@ public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
     @Override
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getDAType().contains(currentElem);
+    }
+
+    @Override
+    protected String elementXPath() {
+        return String.format("DAType[%s]",
+                Utils.xpathAttributeFilter("id", currentElem.isSetId() ? currentElem.getId() : null));
     }
 
     /**
@@ -388,6 +395,12 @@ public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
         @Override
         protected boolean amChildElementRef() {
             return parentAdapter.getCurrentElem().getBDA().contains(currentElem);
+        }
+
+        @Override
+        protected String elementXPath() {
+            return String.format("BDA[%s]",
+                    Utils.xpathAttributeFilter("name", currentElem.isSetName() ? currentElem.getName() : null));
         }
 
     }

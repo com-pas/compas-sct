@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DOIAdapterTest {
@@ -156,4 +157,30 @@ class DOIAdapterTest {
         daiAdapter.addPrivate(tPrivate);
         assertEquals(1, daiAdapter.getCurrentElem().getPrivate().size());
     }
+
+    @Test
+    void elementXPath_doi() {
+        // Given
+        TDOI tdoi = new TDOI();
+        tdoi.setName("doName");
+        DOIAdapter doiAdapter = new DOIAdapter(null,new TDOI());
+        DOIAdapter namedDoiAdapter = new DOIAdapter(null,tdoi);
+        // When
+        String elementXPathResult = doiAdapter.elementXPath();
+        String namedElementXPathResult = namedDoiAdapter.elementXPath();
+        // Then
+        assertThat(elementXPathResult).isEqualTo("DOI[not(@name)]");
+        assertThat(namedElementXPathResult).isEqualTo("DOI[@name=\"doName\"]");
+    }
+
+    @Test
+    void elementXPath_dai() {
+        // Given
+        DOIAdapter.DAIAdapter daiAdapter = initInnerDAIAdapter("Do","da");
+        // When
+        String result = daiAdapter.elementXPath();
+        // Then
+        assertThat(result).isEqualTo("DAI[@name=\"da\"]");
+    }
+
 }

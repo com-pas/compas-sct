@@ -8,6 +8,7 @@ import lombok.Getter;
 import org.lfenergy.compas.scl2007b4.model.TDA;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.util.Utils;
 
 /**
  * A representation of the model object <em><b>{@link org.lfenergy.compas.scl2007b4.model.TDA DA}</b></em>.
@@ -55,6 +56,13 @@ public class DAAdapter extends AbstractDataAttributeAdapter<DOTypeAdapter, TDA> 
     @Override
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getSDOOrDA().contains(currentElem);
+    }
+
+    @Override
+    protected String elementXPath() {
+        return String.format("DA[name=%s and type=%s]",
+                Utils.xpathAttributeFilter("name", currentElem.isSetName() ? currentElem.getName() : null),
+                Utils.xpathAttributeFilter("type", currentElem.isSetType() ? currentElem.getType() : null));
     }
 
     /**

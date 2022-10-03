@@ -14,6 +14,7 @@ import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
+import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -73,6 +74,11 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
                 .map(tAccessPoint -> tAccessPoint.getServer().getLDevice())
                 .flatMap(Collection::stream)
                 .anyMatch(tlDevice -> currentElem.getInst().equals(tlDevice.getInst()));
+    }
+
+    @Override
+    protected String elementXPath() {
+        return String.format("LDevice[%s]", Utils.xpathAttributeFilter("inst", currentElem.isSetInst() ? currentElem.getInst() : null));
     }
 
     /**

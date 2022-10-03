@@ -58,6 +58,11 @@ public class CommunicationAdapter extends SclElementAdapter<SclRootAdapter, TCom
         return currentElem == parentAdapter.getCurrentElem().getCommunication();
     }
 
+    @Override
+    protected String elementXPath() {
+        return "Communication";
+    }
+
     /**
      * Add Subnetwork node in Communication one.
      * For that :

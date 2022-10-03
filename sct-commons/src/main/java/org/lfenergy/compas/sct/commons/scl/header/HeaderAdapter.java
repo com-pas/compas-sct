@@ -9,6 +9,7 @@ import org.lfenergy.compas.scl2007b4.model.THitem;
 import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -53,6 +54,14 @@ public class HeaderAdapter extends SclElementAdapter<SclRootAdapter, THeader> {
     @Override
     protected boolean amChildElementRef() {
         return currentElem == parentAdapter.getCurrentElem().getHeader();
+    }
+
+    @Override
+    protected String elementXPath() {
+        return String.format("Header[%s and %s and %s]",
+                Utils.xpathAttributeFilter("id", currentElem.isSetId() ? currentElem.getId() : null),
+                Utils.xpathAttributeFilter("version", currentElem.isSetVersion() ? currentElem.getVersion() : null),
+                Utils.xpathAttributeFilter("revision", currentElem.isSetRevision() ? currentElem.getRevision() : null));
     }
 
     /**

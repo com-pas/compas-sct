@@ -17,6 +17,7 @@ import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DataTypeTemplateAdapterTest {
@@ -369,4 +370,15 @@ class DataTypeTemplateAdapterTest {
         tPrivate.setSource("Private Source");
         assertThrows(UnsupportedOperationException.class, () -> dttAdapter.addPrivate(tPrivate));
     }
+
+    @Test
+    void elementXPath() throws Exception {
+        // Given
+        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
+        // When
+        String result = dttAdapter.elementXPath();
+        // Then
+        assertThat(result).isEqualTo("DataTypeTemplates");
+    }
+
 }

@@ -10,6 +10,7 @@ import org.lfenergy.compas.scl2007b4.model.TDOI;
 import org.lfenergy.compas.scl2007b4.model.TSDI;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
+import org.lfenergy.compas.sct.commons.util.Utils;
 
 
 /**
@@ -54,6 +55,12 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
     @Override
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getDOI().contains(currentElem);
+    }
+
+    @Override
+    protected String elementXPath() {
+        return String.format("DOI[%s]",
+                Utils.xpathAttributeFilter("name", currentElem.isSetName() ? currentElem.getName() : null));
     }
 
     /**
@@ -159,6 +166,12 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
         @Override
         protected boolean amChildElementRef() {
             return parentAdapter.getCurrentElem().getSDIOrDAI().contains(currentElem);
+        }
+
+        @Override
+        protected String elementXPath() {
+            return String.format("DAI[%s]",
+                    Utils.xpathAttributeFilter("name", currentElem.isSetName() ? currentElem.getName() : null));
         }
 
     }

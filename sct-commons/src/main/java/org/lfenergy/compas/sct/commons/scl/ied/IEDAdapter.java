@@ -15,6 +15,7 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -97,6 +98,11 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
     @Override
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getIED().contains(currentElem);
+    }
+
+    @Override
+    protected String elementXPath() {
+        return String.format("IED[%s]", Utils.xpathAttributeFilter("name", currentElem.isSetName() ? currentElem.getName() : null));
     }
 
     /**

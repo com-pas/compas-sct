@@ -97,4 +97,5 @@ public class BayAdapter extends SclElementAdapter<VoltageLevelAdapter, TBay> {
         }
         return currentElem.getFunction().stream().map(tFunction -> new FunctionAdapter(this, tFunction));
     }
+
 }

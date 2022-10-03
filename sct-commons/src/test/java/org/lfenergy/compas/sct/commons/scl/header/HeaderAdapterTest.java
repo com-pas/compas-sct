@@ -5,12 +5,15 @@ package org.lfenergy.compas.sct.commons.scl.header;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.lfenergy.compas.scl2007b4.model.THeader;
 import org.lfenergy.compas.scl2007b4.model.THitem;
 import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class HeaderAdapterTest {
@@ -58,7 +61,7 @@ class HeaderAdapterTest {
     }
 
     @Test
-    void addPrivate() throws Exception {
+    void addPrivate() {
         SclRootAdapter sclRootAdapter =  new SclRootAdapter(
                 "hID","hVersion","hRevision"
         );
@@ -67,6 +70,22 @@ class HeaderAdapterTest {
         tPrivate.setType("Private Type");
         tPrivate.setSource("Private Source");
         assertThrows(UnsupportedOperationException.class, () -> hAdapter.addPrivate(tPrivate));
-
     }
+
+    @ParameterizedTest
+    @CsvSource(value = {"hID;hVersion;hRevision;Header[@id=\"hID\" and @version=\"hVersion\" and @revision=\"hRevision\"]", ";;;Header[not(@id) and not(@version) and not(@revision)]"}
+            , delimiter = ';')
+    void elementXPath(String hID, String hVersion, String hRevision,String message) {
+        // Given
+        THeader tHeader = new THeader();
+        tHeader.setId(hID);
+        tHeader.setVersion(hVersion);
+        tHeader.setRevision(hRevision);
+        HeaderAdapter headerAdapter = new HeaderAdapter(null, tHeader);
+        // When
+        String elementXPathResult = headerAdapter.elementXPath();
+        // Then
+        assertThat(elementXPathResult).isEqualTo(message);
+    }
+
 }

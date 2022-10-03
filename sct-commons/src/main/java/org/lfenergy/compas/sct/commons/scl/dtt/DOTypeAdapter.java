@@ -11,6 +11,7 @@ import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.dto.DoTypeName;
 import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -182,6 +183,13 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getDOType().contains(currentElem);
     }
+
+    @Override
+    protected String elementXPath() {
+        return String.format("DOType[%s]",
+                Utils.xpathAttributeFilter("id", currentElem.isSetId() ? currentElem.getId() : null));
+    }
+
 
     /**
      * Checks if current DOType contains DA

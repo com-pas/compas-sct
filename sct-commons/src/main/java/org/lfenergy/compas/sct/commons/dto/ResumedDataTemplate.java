@@ -322,4 +322,11 @@ public class ResumedDataTemplate {
     public boolean isValImport(){
         return daName.isValImport();
     }
+
+    public ResumedDataTemplate setVal(String daiValue) {
+        TVal newDaiVal = new TVal();
+        newDaiVal.setValue(daiValue);
+        this.setDaiValues(List.of(newDaiVal));
+        return this;
+    }
 }

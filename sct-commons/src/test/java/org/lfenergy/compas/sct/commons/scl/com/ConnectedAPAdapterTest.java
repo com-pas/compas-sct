@@ -4,9 +4,10 @@
 
 package org.lfenergy.compas.sct.commons.scl.com;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TConnectedAP;
 import org.lfenergy.compas.scl2007b4.model.TPrivate;
@@ -17,8 +18,8 @@ import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.assertj.core.api.Assertions.*;
 
 class ConnectedAPAdapterTest {
 
@@ -90,4 +91,20 @@ class ConnectedAPAdapterTest {
         assertThat(connectedAPAdapter.getCurrentElem().getPhysConn()).isEmpty();
         assertThat(connectedAPAdapter.getCurrentElem().getGSE()).isEmpty();
     }
+
+    @ParameterizedTest
+    @CsvSource(value = {"IED_NAME;AP_NAME;ConnectedAP[@apName=\"IED_NAME\" and @iedName=\"IED_NAME\"]", ";;ConnectedAP[not(@apName) and not(@iedName)]"}
+            , delimiter = ';')
+    void elementXPath(String iedName, String apName, String message) {
+        // Given
+        TConnectedAP tConnectedAP = new TConnectedAP();
+        tConnectedAP.setApName(iedName);
+        tConnectedAP.setIedName(apName);
+        ConnectedAPAdapter connectedAPAdapter = new ConnectedAPAdapter(null, tConnectedAP);
+        // When
+        String elementXPath = connectedAPAdapter.elementXPath();
+        // Then
+        assertThat(elementXPath).isEqualTo(message);
+    }
+
 }

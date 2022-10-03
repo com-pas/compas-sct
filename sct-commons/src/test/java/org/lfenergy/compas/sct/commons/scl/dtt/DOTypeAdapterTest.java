@@ -14,6 +14,7 @@ import org.mockito.Mockito;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DOTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter, TDOType> {
@@ -170,5 +171,18 @@ class DOTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter, TDOTyp
         assertTrue(doTypeAdapter.getCurrentElem().getPrivate().isEmpty());
         doTypeAdapter.addPrivate(tPrivate);
         assertEquals(1, doTypeAdapter.getCurrentElem().getPrivate().size());
+    }
+
+    @Test
+    void elementXPath() throws Exception {
+        // Given
+        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(
+                AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID
+        );
+        DOTypeAdapter doTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getDOTypeAdapterById("DO1").get());
+        // When
+        String result = doTypeAdapter.elementXPath();
+        // Then
+        assertThat(result).isEqualTo("DOType[@id=\"DO1\"]");
     }
 }

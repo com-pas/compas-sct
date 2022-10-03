@@ -12,6 +12,7 @@ import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DAAdapterTest {
@@ -76,5 +77,17 @@ class DAAdapterTest {
         assertTrue(daAdapter.getCurrentElem().getPrivate().isEmpty());
         daAdapter.addPrivate(tPrivate);
         assertEquals(1, daAdapter.getCurrentElem().getPrivate().size());
+    }
+
+    @Test
+    void elementXPath() throws Exception {
+        // Given
+        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
+        DOTypeAdapter doTypeAdapter =  dttAdapter.getDOTypeAdapters().get(0);
+        DAAdapter daAdapter = assertDoesNotThrow(() -> doTypeAdapter.getDAAdapterByName("dataNs").get());
+        // When
+        String result = daAdapter.elementXPath();
+        // Then
+        assertThat(result).isEqualTo("DA[name=@name=\"dataNs\" and type=not(@type)]");
     }
 }
