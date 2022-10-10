@@ -11,6 +11,9 @@ import org.lfenergy.compas.scl2007b4.model.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.MOD_DO_NAME;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL;
+
 
 /**
  * A representation of the model object <em><b>ResumedDataTemplate</b></em>.
@@ -64,10 +67,18 @@ public class ResumedDataTemplate {
 
     /**
      * Checks if DA/DO is updatable
-     * @return Updatable state
+     * @return true if updatable, false otherwise
      */
     public boolean isUpdatable(){
-        return daName.isDefined() && daName.isUpdatable();
+        return isDOModDAstVal() || daName.isDefined() && daName.isUpdatable();
+    }
+
+    /**
+     * Checks if DO is Mod and DA is stVal
+     * @return true if DO is "Mod" and DA is "stVal", false otherwise
+     */
+    private boolean isDOModDAstVal(){
+        return doName.getName().equals(MOD_DO_NAME) && daName.getName().equals(STVAL);
     }
 
     @JsonIgnore
