@@ -5,7 +5,6 @@
 package org.lfenergy.compas.sct.commons.scl;
 
 import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TBay;
 import org.lfenergy.compas.scl2007b4.model.TSubstation;
@@ -31,7 +30,6 @@ import org.lfenergy.compas.sct.commons.scl.sstation.VoltageLevelAdapter;
  * @see org.lfenergy.compas.sct.commons.scl.sstation.LNodeAdapter
  * @see org.lfenergy.compas.sct.commons.scl.PrivateService
  */
-@Slf4j
 public final class SubstationService {
 
     /**
