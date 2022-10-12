@@ -5,9 +5,6 @@
 package org.lfenergy.compas.sct.commons.dto;
 
 
-import lombok.extern.slf4j.Slf4j;
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
@@ -15,10 +12,10 @@ import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
-
 import java.util.Set;
 
-@Slf4j
+import static org.junit.jupiter.api.Assertions.*;
+
 class LDeviceDTOTest {
 
     @Test

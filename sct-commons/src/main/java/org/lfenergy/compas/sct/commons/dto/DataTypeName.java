@@ -9,7 +9,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -43,7 +42,6 @@ import java.util.List;
  */
 @Getter
 @Setter
-@Slf4j
 @NoArgsConstructor
 @EqualsAndHashCode
 public class DataTypeName {

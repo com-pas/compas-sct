@@ -4,15 +4,12 @@
 
 package org.lfenergy.compas.sct.commons.util;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-@Slf4j
 public final class Utils {
 
     public static final String LEAVING_PREFIX = "<<< Leaving: ::";

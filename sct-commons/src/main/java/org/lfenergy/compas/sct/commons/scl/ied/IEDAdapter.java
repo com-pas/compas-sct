@@ -5,7 +5,6 @@
 package org.lfenergy.compas.sct.commons.scl.ied;
 
 import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.ControlBlock;
 import org.lfenergy.compas.sct.commons.dto.DataSetInfo;
@@ -56,7 +55,6 @@ import java.util.stream.Collectors;
  * @see org.lfenergy.compas.scl2007b4.model.TSettingGroups
  * @see <a href="https://github.com/com-pas/compas-sct/issues/3" target="_blank">Issue !3 (Add new IEDs)</a>
  */
-@Slf4j
 public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
 
     /**
