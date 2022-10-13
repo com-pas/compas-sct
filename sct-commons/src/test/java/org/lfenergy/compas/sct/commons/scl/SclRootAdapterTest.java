@@ -4,7 +4,6 @@
 
 package org.lfenergy.compas.sct.commons.scl;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TPrivate;
@@ -16,7 +15,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
 
-@Slf4j
 class SclRootAdapterTest {
 
 

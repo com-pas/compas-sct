@@ -5,7 +5,6 @@
 package org.lfenergy.compas.sct.commons.scl.dtt;
 
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.TBDA;
 import org.lfenergy.compas.scl2007b4.model.TDAType;
@@ -52,7 +51,6 @@ import java.util.stream.Collectors;
  *    </ul>
  * </ol>
  */
-@Slf4j
 public class DATypeAdapter extends AbstractDataTypeAdapter<TDAType>{
 
     /**

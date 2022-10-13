@@ -5,7 +5,6 @@
 package org.lfenergy.compas.sct.commons.scl;
 
 import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.util.PrivateEnum;
@@ -36,7 +35,6 @@ import java.util.stream.Collectors;
  * </ol>
  * @see org.lfenergy.compas.scl2007b4.model.TPrivate
  */
-@Slf4j
 public final class PrivateService {
 
     private PrivateService() {
