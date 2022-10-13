@@ -5,9 +5,13 @@
 package org.lfenergy.compas.sct.commons.dto;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.TFCEnum;
 
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDa;
@@ -122,4 +126,37 @@ class DaTypeNameTest {
         // then
         assertThat(da2).isEqualTo(da1);
     }
+
+    /**
+     * ListFcEnum = CF, DC, SG, SP, ST , SE
+     * Fc value should be in ListFcEnum to be considered as known
+     */
+    @Test
+    void isUpdatable_shouldReturnTrue_whenFcKnown_And_valImportIsTrue() {
+        // given
+        DaTypeName da1 = createDa("da1.bda1.bda2",  TFCEnum.CF, true, Map.of(0L, "value"));
+        // when
+        boolean isDAUpdatable = da1.isUpdatable();
+        // then
+        assertThat(isDAUpdatable).isTrue();
+    }
+
+    @ParameterizedTest
+    @MethodSource("daParametersProvider")
+    void isUpdatable(String testName, TFCEnum fc, boolean valImport) {
+        // given
+        DaTypeName da1 = createDa("da1.bda1.bda2", fc, valImport, Map.of(0L, "value"));
+        // when
+        boolean isDAUpdatable = da1.isUpdatable();
+        // then
+        assertThat(isDAUpdatable).isFalse();
+    }
+
+    private static Stream<Arguments> daParametersProvider() {
+        return Stream.of(
+                Arguments.of("should return false when ", TFCEnum.MX, true),
+                Arguments.of("should return false when ",TFCEnum.CF, false)
+        );
+    }
+
 }

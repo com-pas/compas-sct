@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDa;
 import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDo;
@@ -854,24 +853,6 @@ class SclServiceTest {
         assertTrue(getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName3", "LDSUIED").isPresent());
         assertEquals("off", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName3", "LDSUIED").get().getValue());
     }
-
-    @Test
-    void updateLDeviceStatus_shouldReturnError_when_DaiNotUpdatable() throws Exception {
-        // Given
-        SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_Dai_Not_Updatable.scd");
-        assertTrue(getLDeviceStatusValue(givenScl, "IedName1", "LDSUIED").isPresent());
-        assertEquals("off", getLDeviceStatusValue(givenScl, "IedName1", "LDSUIED").get().getValue());
-        assertTrue(getLDeviceStatusValue(givenScl, "IedName2", "LDSUIED").isPresent());
-        assertEquals("on", getLDeviceStatusValue(givenScl, "IedName2", "LDSUIED").get().getValue());
-        assertFalse(getLDeviceStatusValue(givenScl, "IedName3", "LDSUIED").isPresent());
-
-        // When
-        // Then
-       assertThatCode(() -> SclService.updateLDeviceStatus(givenScl))
-                .isInstanceOf(ScdException.class)
-                .hasMessage("DAI (Mod -stVal) cannot be updated");
-    }
-
 
     private Optional<TVal> getLDeviceStatusValue(SCL scl, String iedName, String ldInst){
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scl);
