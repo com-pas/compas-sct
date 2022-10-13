@@ -7,8 +7,10 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.lfenergy.compas.scl2007b4.model.TAccessPoint;
 import org.lfenergy.compas.scl2007b4.model.TLDevice;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
+import org.lfenergy.compas.scl2007b4.model.TServer;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
@@ -69,8 +71,10 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getAccessPoint()
                 .stream()
-                .filter(tAccessPoint -> tAccessPoint.getServer() != null)
-                .map(tAccessPoint -> tAccessPoint.getServer().getLDevice())
+                .map(TAccessPoint::getServer)
+                .filter(Objects::nonNull)
+                .filter(TServer::isSetLDevice)
+                .map(TServer::getLDevice)
                 .flatMap(Collection::stream)
                 .anyMatch(tlDevice -> currentElem.getInst().equals(tlDevice.getInst()));
     }
@@ -78,6 +82,15 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
     @Override
     protected String elementXPath() {
         return String.format("LDevice[%s]", Utils.xpathAttributeFilter("inst", currentElem.isSetInst() ? currentElem.getInst() : null));
+    }
+
+    @Override
+    public String getXPath() {
+        if (parentAdapter != null){
+            return parentAdapter.getXPath() + "/AccessPoint/Server/" + elementXPath();
+        } else {
+            return super.getXPath();
+        }
     }
 
     /**
@@ -115,6 +128,14 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
      */
     public LN0Adapter getLN0Adapter(){
         return new LN0Adapter(this, currentElem.getLN0());
+    }
+
+    /**
+     * Checks if LDevice has an LN0 node
+     * @return true if lDevice has a LN0 node, false otherwise
+     */
+    public boolean hasLN0(){
+        return currentElem.isSetLN0();
     }
 
     /**

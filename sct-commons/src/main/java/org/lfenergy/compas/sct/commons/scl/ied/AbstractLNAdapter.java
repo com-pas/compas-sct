@@ -97,8 +97,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      * @return Enum value list
      */
     public Set<String> getEnumValues(String enumType) {
-        Optional<EnumTypeAdapter> enumTypeAdapter = parentAdapter
-                .getParentAdapter().getParentAdapter().getDataTypeTemplateAdapter()
+        Optional<EnumTypeAdapter> enumTypeAdapter = getDataTypeTemplateAdapter()
                 .getEnumTypeAdapterById(enumType);
 
         if(enumTypeAdapter.isEmpty()){
@@ -144,7 +143,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
     }
 
     public DOIAdapter getDOIAdapterByName(String doiName) throws ScdException {
-        String iedName = parentAdapter.getParentAdapter().getName();
+        String iedName = getCurrentIed().getName();
         String ldInst = parentAdapter.getInst();
         return currentElem.getDOI()
                 .stream()
@@ -207,8 +206,12 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Check whether the LN has an Inputs node
+     * @return true if the LN has an Inputs node
+     */
     public boolean hasInputs() {
-        return currentElem.getInputs() != null;
+        return currentElem.isSetInputs();
     }
 
     /**
@@ -524,11 +527,10 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         String binderLnInst = bindingInfo.getLnInst();
         String binderLnPrefix = bindingInfo.getPrefix();
         IEDAdapter binderIEDAdapter;
-        if(!binderIedName.equals( parentAdapter.getParentAdapter().getName())){ // external binding
-            SclRootAdapter sclRootAdapter = parentAdapter.getParentAdapter().getParentAdapter();
-            binderIEDAdapter = sclRootAdapter.getIEDAdapterByName(binderIedName);
+        if(!binderIedName.equals( getCurrentIed().getName())){ // external binding
+            binderIEDAdapter = getCurrentScd().getIEDAdapterByName(binderIedName);
         } else {
-            binderIEDAdapter = parentAdapter.getParentAdapter();
+            binderIEDAdapter = getCurrentIed();
         }
         LDeviceAdapter binderLDAdapter = binderIEDAdapter.getLDeviceAdapterByLdInst(binderLdInst)
                 .orElseThrow(
@@ -575,8 +577,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
             lnType = rDtt.getLnType();
         }
         // get resumedDTT from DataTypeTemplate (it might be overridden in the DAI)
-        SclRootAdapter sclRootAdapter = parentAdapter.getParentAdapter().getParentAdapter();
-        DataTypeTemplateAdapter dttAdapter = sclRootAdapter.getDataTypeTemplateAdapter();
+        DataTypeTemplateAdapter dttAdapter = getDataTypeTemplateAdapter();
         LNodeTypeAdapter lNodeTypeAdapter = dttAdapter.getLNodeTypeAdapterById(lnType)
                 .orElseThrow(
                         () -> new ScdException(
@@ -611,7 +612,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                         } else {
                             rDtt.setValImport(false);
                             log.warn("Inconsistency in the SCD file - DAI {} with fc={} must have a sGroup attribute",
-                                    rDtt.getObjRef(getCurrentIED().getName(), parentAdapter.getInst()), rDtt.getDaName().getFc());
+                                    rDtt.getObjRef(getCurrentIed().getName(), parentAdapter.getInst()), rDtt.getDaName().getFc());
                         }
                     } else if (tdai.isSetValImport()) {
                         rDtt.setValImport(tdai.isValImport());
@@ -624,7 +625,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      * @return <em>Boolean</em> value of check result
      */
     private boolean iedHasConfSG() {
-        IEDAdapter iedAdapter = getCurrentIED();
+        IEDAdapter iedAdapter = getCurrentIed();
         return iedAdapter.isSettingConfig(this.parentAdapter.getInst());
     }
 
@@ -632,9 +633,25 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      * Gets linked IED as parent
      * @return <em>IEDAdapter</em> object
      */
-    private IEDAdapter getCurrentIED() {
+    private IEDAdapter getCurrentIed() {
         LDeviceAdapter lDeviceAdapter = this.parentAdapter;
         return lDeviceAdapter.getParentAdapter();
+    }
+
+    /**
+     * Gets root Scd
+     * @return <em>SclRootAdapter</em> object
+     */
+    protected SclRootAdapter getCurrentScd() {
+        return getCurrentIed().getParentAdapter();
+    }
+
+    /**
+     * Gets SCL DataTypeTemplate
+     * @return <em>DataTypeTemplateAdapter</em> object
+     */
+    public DataTypeTemplateAdapter getDataTypeTemplateAdapter() {
+        return getCurrentScd().getDataTypeTemplateAdapter();
     }
 
 
@@ -772,8 +789,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      */
     public boolean matches(ObjectReference objRef) {
         String dataAttribute = objRef.getDataAttributes();
-        SclRootAdapter sclRootAdapter = parentAdapter.getParentAdapter().getParentAdapter();
-        DataTypeTemplateAdapter dttAdapter = sclRootAdapter.getDataTypeTemplateAdapter();
+        DataTypeTemplateAdapter dttAdapter = getDataTypeTemplateAdapter();
         LNodeTypeAdapter lNodeTypeAdapter = dttAdapter.getLNodeTypeAdapterById(getLnType())
                 .orElseThrow(
                         () -> new AssertionError(
@@ -825,10 +841,6 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         );
         currentElem.getDataSet().add(tDataSet);
 
-    }
-
-    public DataTypeTemplateAdapter getDataTypeTemplateAdapter() {
-        return parentAdapter.getParentAdapter().getParentAdapter().getDataTypeTemplateAdapter();
     }
 
     /**

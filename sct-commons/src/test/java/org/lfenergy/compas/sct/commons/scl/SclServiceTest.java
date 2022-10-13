@@ -650,8 +650,7 @@ class SclServiceTest {
         SclService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scl);
         // Then
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scl);
-        List<LDeviceAdapter> lDevices = scdRootAdapter.getIEDAdapters().stream().map(IEDAdapter::getLDeviceAdapters)
-                .flatMap(List::stream).collect(Collectors.toList());
+        List<LDeviceAdapter> lDevices = scdRootAdapter.streamIEDAdapters().flatMap(IEDAdapter::streamLDeviceAdapters).collect(Collectors.toList());
         List<LN0> ln0s = lDevices.stream().map(LDeviceAdapter::getLN0Adapter).map(LN0Adapter::getCurrentElem).collect(Collectors.toList());
         assertThat(ln0s)
                 .isNotEmpty()
@@ -671,9 +670,9 @@ class SclServiceTest {
         SclService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scl);
         // Then
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scl);
-        List<LDeviceAdapter> lDevices = scdRootAdapter.getIEDAdapters().stream().map(IEDAdapter::getLDeviceAdapters)
-                .flatMap(List::stream).collect(Collectors.toList());
-        List<TLN> lns = lDevices.stream().map(LDeviceAdapter::getLNAdapters).flatMap(List::stream)
+        List<TLN> lns = scdRootAdapter.streamIEDAdapters()
+                .flatMap(IEDAdapter::streamLDeviceAdapters)
+                .map(LDeviceAdapter::getLNAdapters).flatMap(List::stream)
                 .map(LNAdapter::getCurrentElem).collect(Collectors.toList());
         assertThat(lns)
                 .isNotEmpty()
@@ -692,8 +691,8 @@ class SclServiceTest {
         // Then
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scl);
         List<TExtRef> extRefs = scdRootAdapter
-                .getIEDAdapters().stream()
-                .map(IEDAdapter::getLDeviceAdapters).flatMap(List::stream)
+                .streamIEDAdapters()
+                .flatMap(IEDAdapter::streamLDeviceAdapters)
                 .map(LDeviceAdapter::getLN0Adapter)
                 .map(AbstractLNAdapter::getExtRefs).flatMap(List::stream)
                 .collect(Collectors.toList());
@@ -713,13 +712,13 @@ class SclServiceTest {
         SCL scl3 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_KO_MissingLDevicePrivateAttribute.scd");
         SCL scl4 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_KO_MissingMod.scd");
         Tuple[] scl1Errors = new Tuple[]{Tuple.tuple("The LDevice doesn't have a DO @name='Beh' OR its associated DA@fc='ST' AND DA@name='stVal'",
-                "/SCL/IED[@name=\"IedName1\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType1\"]")};
+                "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0")};
         Tuple[] scl2Errors = new Tuple[]{Tuple.tuple("The LDevice doesn't have a Private compas:LDevice.",
-                "/SCL/IED[@name=\"IedName1\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType1\"]")};
+                "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0")};
         Tuple[] scl3Errors = new Tuple[]{Tuple.tuple("The Private compas:LDevice doesn't have the attribute 'LDeviceStatus'",
-                "/SCL/IED[@name=\"IedName1\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType1\"]")};
+                "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0")};
         Tuple[] scl4Errors = new Tuple[]{Tuple.tuple("The LDevice doesn't have a DO @name='Mod'",
-                "/SCL/IED[@name=\"IedName1\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType1\"]")};
+                "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0")};
         return Stream.of(
                 Arguments.of("MissingDOBeh",scl1, scl1Errors),
                 Arguments.of("MissingLDevicePrivate",scl2, scl2Errors),
@@ -753,25 +752,25 @@ class SclServiceTest {
         SCL scl2 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_LD_STATUS_UNTESTED.scd");
         SCL scl3 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test1_LD_STATUS_INACTIVE.scd");
         Tuple[] scl1Errors = new Tuple[]{Tuple.tuple("The LDevice cannot be set to 'off' but has not been selected into SSD.",
-                        "/SCL/IED[@name=\"IedName1\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType1\"]"),
+                        "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
                 Tuple.tuple("The LDevice cannot be set to 'on' but has been selected into SSD.",
-                        "/SCL/IED[@name=\"IedName2\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType2\"]"),
+                        "/SCL/IED[@name=\"IedName2\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
                 Tuple.tuple("The LDevice cannot be activated or desactivated because its BehaviourKind Enum contains NOT 'on' AND NOT 'off'.",
-                        "/SCL/IED[@name=\"IedName3\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType3\"]"
+                        "/SCL/IED[@name=\"IedName3\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"
                 )};
         Tuple[] scl2Errors = new Tuple[]{Tuple.tuple("The LDevice cannot be set to 'off' but has not been selected into SSD.",
-                        "/SCL/IED[@name=\"IedName1\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType1\"]"),
+                        "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
                 Tuple.tuple("The LDevice cannot be set to 'on' but has been selected into SSD.",
-                        "/SCL/IED[@name=\"IedName2\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType2\"]"),
+                        "/SCL/IED[@name=\"IedName2\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
                 Tuple.tuple("The LDevice cannot be activated or desactivated because its BehaviourKind Enum contains NOT 'on' AND NOT 'off'.",
-                        "/SCL/IED[@name=\"IedName3\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType3\"]"
+                        "/SCL/IED[@name=\"IedName3\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"
                 )};
         Tuple[] scl3Errors = new Tuple[]{Tuple.tuple("The LDevice is not qualified into STD but has been selected into SSD.",
-                        "/SCL/IED[@name=\"IedName1\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType1\"]"),
+                        "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
                 Tuple.tuple("The LDevice cannot be set to 'on' but has been selected into SSD.",
-                        "/SCL/IED[@name=\"IedName2\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType2\"]"),
+                        "/SCL/IED[@name=\"IedName2\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
                 Tuple.tuple("The LDevice cannot be activated or desactivated because its BehaviourKind Enum contains NOT 'on' AND NOT 'off'.",
-                        "/SCL/IED[@name=\"IedName3\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType3\"]"
+                        "/SCL/IED[@name=\"IedName3\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"
                 )};
         return Stream.of(
                 Arguments.of("ACTIVE", scl1, scl1Errors),
@@ -818,9 +817,9 @@ class SclServiceTest {
                 .hasSize(2)
                 .extracting(SclReport.ErrorDescription::getMessage, SclReport.ErrorDescription::getXpath)
                 .containsExactly(Tuple.tuple("The LDevice cannot be set to 'off' but has not been selected into SSD.",
-                                "/SCL/IED[@name=\"IedName1\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType1\"]"),
+                                "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
                         Tuple.tuple("The LDevice is not qualified into STD but has been selected into SSD.",
-                                "/SCL/IED[@name=\"IedName2\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType2\"]"));
+                                "/SCL/IED[@name=\"IedName2\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"));
         assertEquals("off", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName1", "LDSUIED").get().getValue());
         assertEquals("on", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName2", "LDSUIED").get().getValue());
         assertTrue(getLDeviceStatusValue(scl, "IedName3", "LDSUIED").isPresent());
