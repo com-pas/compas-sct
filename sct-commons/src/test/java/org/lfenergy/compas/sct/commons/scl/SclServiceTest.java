@@ -767,9 +767,9 @@ class SclServiceTest {
         // Then
         String after = createWrapper().marshall(sclReport.getSclRootAdapter().getCurrentElem());
         assertFalse(sclReport.isSuccess());
-        assertThat(sclReport.getErrorDescriptionList())
+        assertThat(sclReport.getSclReportItems())
                 .hasSize(1)
-                .extracting(SclReport.ErrorDescription::getMessage, SclReport.ErrorDescription::getXpath)
+                .extracting(SclReportItem::getMessage, SclReportItem::getXpath)
                 .containsExactly(errors);
         assertEquals("off", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName1", "LDSUIED").get().getValue());
         assertEquals(before, after);
@@ -820,9 +820,9 @@ class SclServiceTest {
         // Then
         String after = createWrapper().marshall(sclReport.getSclRootAdapter().getCurrentElem());
         assertFalse(sclReport.isSuccess());
-        assertThat(sclReport.getErrorDescriptionList())
+        assertThat(sclReport.getSclReportItems())
                 .hasSize(3)
-                .extracting(SclReport.ErrorDescription::getMessage, SclReport.ErrorDescription::getXpath)
+                .extracting(SclReportItem::getMessage, SclReportItem::getXpath)
                 .containsExactly(errors);
         assertEquals("off", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName1", "LDSUIED").get().getValue());
         assertEquals("on", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName2", "LDSUIED").get().getValue());
@@ -841,9 +841,9 @@ class SclServiceTest {
         SclReport sclReport = SclService.updateLDeviceStatus(scl);
         // Then
         assertFalse(sclReport.isSuccess());
-        assertThat(sclReport.getErrorDescriptionList())
+        assertThat(sclReport.getSclReportItems())
                 .hasSize(2)
-                .extracting(SclReport.ErrorDescription::getMessage, SclReport.ErrorDescription::getXpath)
+                .extracting(SclReportItem::getMessage, SclReportItem::getXpath)
                 .containsExactly(Tuple.tuple("The LDevice cannot be set to 'off' but has not been selected into SSD.",
                                 "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
                         Tuple.tuple("The LDevice is not qualified into STD but has been selected into SSD.",

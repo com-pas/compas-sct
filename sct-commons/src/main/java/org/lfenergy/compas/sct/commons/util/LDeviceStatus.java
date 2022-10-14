@@ -6,16 +6,14 @@
 
 package org.lfenergy.compas.sct.commons.util;
 
+import lombok.experimental.UtilityClass;
+
 /**
  * A representation of a specific object <em><b>TDAI</b></em> name that have attribute name STVal.
  *
- * @see org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum
  */
-public enum STValEnum {
-    ON("on"),
-    OFF("off");
-    public final String value;
-    STValEnum(String value) {
-        this.value = value;
-    }
+@UtilityClass
+public class LDeviceStatus {
+    public static final String ON = "on";
+    public static final String OFF = "off";
 }

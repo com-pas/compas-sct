@@ -30,24 +30,14 @@ public class SclReport {
     /**
      * List of errors
      */
-    private List<ErrorDescription> errorDescriptionList = new ArrayList<>();
+    private List<SclReportItem> sclReportItems = new ArrayList<>();
 
     /**
      *
      * @return true the service succeeded, false otherwise
      */
     public boolean isSuccess() {
-        return errorDescriptionList.isEmpty();
+        return sclReportItems.stream().noneMatch(SclReportItem::isFatal);
     }
 
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @ToString
-    @EqualsAndHashCode
-    @Builder
-    public static class ErrorDescription{
-        private String xpath;
-        private String message;
-    }
 }

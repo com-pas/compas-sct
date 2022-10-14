@@ -56,7 +56,7 @@ public class DataTypeName {
     public DataTypeName(String dataName){
         if(dataName == null) return;
         String[] tokens = dataName.split("\\.");
-        name = tokens[0];
+        this.name = tokens[0];
         if(tokens.length > 1){
             structNames.addAll(List.of(tokens).subList(1, tokens.length));
         }
