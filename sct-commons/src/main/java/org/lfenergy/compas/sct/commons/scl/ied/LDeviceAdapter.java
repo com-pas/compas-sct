@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  * <ol>
  *   <li>Adapter</li>
  *    <ul>
- *      <li>{@link LDeviceAdapter#getLNAdapters <em>Returns the value of the <b>LNAdapter </b>containment reference list</em>}</li>
+ *      <li>{@link LDeviceAdapter#streamLnAdapters <em>Returns the value of the <b>LNAdapter </b>containment reference list</em>}</li>
  *      <li>{@link LDeviceAdapter#getLN0Adapter <em>Returns the value of the <b>LN0Adapter </b>containment reference list</em>}</li>
  *      <li>{@link LDeviceAdapter#getLNAdapter <em>Returns the value of the <b>LNAdapter </b>reference object By  LNClass, inst and prefix</em>}</li>
  *    </ul>
@@ -160,11 +160,9 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
     public LNAdapter getLNAdapter(String lnClass, String lnInst, String prefix) throws ScdException {
         return currentElem.getLN()
                 .stream()
-                .filter(tln -> tln.getLnClass().contains(lnClass) &&
-                        tln.getInst().equals(lnInst) &&
-                        ( (prefix == null && tln.getPrefix().isEmpty()) ||
-                                prefix.equals(tln.getPrefix()))
-                )
+                .filter(tln -> tln.getLnClass().contains(lnClass)
+                    && tln.getInst().equals(lnInst)
+                    && Utils.equalsOrBothBlank(prefix, tln.getPrefix()))
                 .map(tln -> new LNAdapter(this,tln))
                 .findFirst()
                 .orElseThrow(
@@ -226,13 +224,13 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
     }
 
     /**
-     * Gets a list of summarized DataTypeTemplate for DataAttribute DAIs (updatable or not)
+     * Gets a list of summarized DataTypeTemplate for DataAttribute DAIs (updatableOnly or not)
      * @param rDtt reference resumed DataTypeTemplate (used as filter)
-     * @param updatable true to retrieve only updatable DAIs, false to retrieve all DAIs
-     * @return List of <em>ResumedDataTemplate</em> (updatable or not)
+     * @param updatableOnly true to retrieve only updatableOnly DAIs, false to retrieve all DAIs
+     * @return List of <em>ResumedDataTemplate</em> (updatableOnly or not)
      * @throws ScdException SCD illegal arguments exception
      */
-    public Set<ResumedDataTemplate> getDAI(ResumedDataTemplate rDtt, boolean updatable) throws ScdException {
+    public Set<ResumedDataTemplate> getDAI(ResumedDataTemplate rDtt, boolean updatableOnly) throws ScdException {
         List<AbstractLNAdapter<?>> lnAdapters = new ArrayList<>();
         if(StringUtils.isBlank(rDtt.getLnClass())){
             lnAdapters.add(getLN0Adapter());
@@ -250,10 +248,16 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
             filter.setLnInst(lnAdapter.getLNInst());
             filter.setPrefix(lnAdapter.getPrefix());
             filter.setLnType(lnAdapter.getLnType());
-            resumedDataTemplateSet.addAll(lnAdapter.getDAI(filter, updatable));
+            resumedDataTemplateSet.addAll(lnAdapter.getDAI(filter, updatableOnly));
         }
         return resumedDataTemplateSet;
 
     }
 
+    public Optional<String> getLDeviceStatus() {
+        if (!hasLN0()){
+            return Optional.empty();
+        }
+        return getLN0Adapter().getLDeviceStatus();
+    }
 }

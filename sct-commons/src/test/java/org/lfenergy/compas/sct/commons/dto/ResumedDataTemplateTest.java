@@ -14,10 +14,12 @@ import org.lfenergy.compas.scl2007b4.model.TVal;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDa;
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.MOD_DO_NAME;
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL;
 
@@ -209,5 +211,42 @@ class ResumedDataTemplateTest {
                 Arguments.of("should return false when Mod", CTL_MODEL, null, true),
                 Arguments.of("should return false when Mod", CTL_MODEL, null, false)
         );
+    }
+
+    @Test
+    void findFirstValue_should_return_value(){
+        // Given
+        ResumedDataTemplate rDTT = new ResumedDataTemplate();
+        DaTypeName da1 = createDa("da1", TFCEnum.CF, true, Map.of(10L, "a value"));
+        rDTT.setDaName(da1);
+        // When
+        Optional<String> firstValue = rDTT.findFirstValue();
+        // Then
+        assertThat(firstValue).hasValue("a value");
+    }
+
+    @Test
+    void findFirstValue_should_return_first_value(){
+        // Given
+        ResumedDataTemplate rDTT = new ResumedDataTemplate();
+        DaTypeName da1 = createDa("da1", TFCEnum.CF, true,
+            Map.of(1L, "value 1", 0L, "value 0"));
+        rDTT.setDaName(da1);
+        // When
+        Optional<String> firstValue = rDTT.findFirstValue();
+        // Then
+        assertThat(firstValue).hasValue("value 0");
+    }
+
+    @Test
+    void findFirstValue_should_return_empty_optional(){
+        // Given
+        ResumedDataTemplate rDTT = new ResumedDataTemplate();
+        DaTypeName da1 = createDa("da1", TFCEnum.CF, true, Map.of());
+        rDTT.setDaName(da1);
+        // When
+        Optional<String> firstValue = rDTT.findFirstValue();
+        // Then
+        assertThat(firstValue).isNotPresent();
     }
 }
