@@ -18,7 +18,8 @@ public class DTO {
     /*                   ConnectedAPDTO              */
     /*-----------------------------------------------*/
     public static final String AP_NAME = "AP_NAME";
-    public static ConnectedApDTO createCapDTO(){
+
+    public static ConnectedApDTO createCapDTO() {
 
         ConnectedApDTO cap = new ConnectedApDTO();
         cap.setApName(AP_NAME);
@@ -49,16 +50,16 @@ public class DTO {
     public static final String REMOTE_LN_CLASS = "LN_CLASS_R";
     public static final String DA_NAME = P_DA;
     public static final String DO_NAME = P_DO;
-    public static final String REMOTE_LN_PREFIX = "PR_R";
+    public static final String REMOTE_LN_PREFIX = "LN_PREFIX_R";
     public static final String SERVICE_TYPE = P_SERV_T;
 
-    public static final String SRC_LD_INST= REMOTE_LD_INST;
-    public static final String SRC_LN_INST= REMOTE_LN_INST;
-    public static final String SRC_LN_CLASS= REMOTE_LN_CLASS;
-    public static final String SRC_PREFIX = REMOTE_LN_PREFIX;
+    public static final String SRC_LD_INST = "LD_INST_S";
+    public static final String SRC_LN_INST = "2";
+    public static final String SRC_LN_CLASS = "LN_CLASS_S";
+    public static final String SRC_LN_PREFIX = "LN_PREFIX_S";
     public static final String SRC_CB_NAME = "SRC_CB_NAME";
 
-    public static TExtRef createExtRef(){
+    public static TExtRef createExtRef() {
         TExtRef tExtRef = new TExtRef();
         tExtRef.setDesc(DESC);
         tExtRef.setPDA(P_DA);
@@ -79,14 +80,14 @@ public class DTO {
         tExtRef.setSrcLDInst(SRC_LD_INST);
         tExtRef.setSrcLNInst(SRC_LN_INST);
         tExtRef.getSrcLNClass().add(SRC_LN_CLASS);
-        tExtRef.setSrcPrefix(SRC_PREFIX);
+        tExtRef.setSrcPrefix(SRC_LN_PREFIX);
         tExtRef.setSrcCBName(SRC_CB_NAME);
 
         return tExtRef;
     }
 
 
-    public static ExtRefSignalInfo createExtRefSignalInfo(){
+    public static ExtRefSignalInfo createExtRefSignalInfo() {
         ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
         signalInfo.setDesc(DESC);
         signalInfo.setPDA(P_DA);
@@ -98,7 +99,7 @@ public class DTO {
         return signalInfo;
     }
 
-    public static ExtRefBindingInfo createExtRefBindingInfo(){
+    public static ExtRefBindingInfo createExtRefBindingInfo_Remote() {
         ExtRefBindingInfo bindingInfo = new ExtRefBindingInfo();
         bindingInfo.setIedName(REMOTE_IED_NAME);
         bindingInfo.setLdInst(REMOTE_LD_INST);
@@ -112,28 +113,43 @@ public class DTO {
         return bindingInfo;
     }
 
-    public static ExtRefSourceInfo createExtRefSourceInfo(){
+    public static ExtRefBindingInfo createExtRefBindingInfo_Source() {
+        ExtRefBindingInfo bindingInfo = new ExtRefBindingInfo();
+        bindingInfo.setIedName(HOLDER_IED_NAME);
+        bindingInfo.setLdInst(HOLDER_LD_INST);
+        bindingInfo.setLnInst(SRC_LN_INST);
+        bindingInfo.setLnClass(SRC_LN_CLASS);
+        bindingInfo.setDaName(new DaTypeName(DA_NAME));
+        bindingInfo.setDoName(new DoTypeName(DO_NAME));
+        bindingInfo.setPrefix(REMOTE_LN_PREFIX);
+        bindingInfo.setServiceType(TServiceType.fromValue(SERVICE_TYPE));
+
+        return bindingInfo;
+    }
+
+    public static ExtRefSourceInfo createExtRefSourceInfo() {
         ExtRefSourceInfo sourceInfo = new ExtRefSourceInfo();
         sourceInfo.setSrcLDInst(SRC_LD_INST);
         sourceInfo.setSrcLNInst(SRC_LN_INST);
         sourceInfo.setSrcLNClass(SRC_LN_CLASS);
-        sourceInfo.setSrcPrefix(SRC_PREFIX);
+        sourceInfo.setSrcPrefix(SRC_LN_PREFIX);
         sourceInfo.setSrcCBName(SRC_CB_NAME);
 
         return sourceInfo;
     }
 
-    public static ExtRefInfo createExtRefInfo(){
+    public static ExtRefInfo createExtRefInfo() {
         ExtRefInfo extRefInfo = new ExtRefInfo();
         extRefInfo.setMetaData(createMetaDataInfo());
 
         extRefInfo.setSourceInfo(DTO.createExtRefSourceInfo());
-        extRefInfo.setBindingInfo(DTO.createExtRefBindingInfo());
+        extRefInfo.setBindingInfo(DTO.createExtRefBindingInfo_Remote());
         extRefInfo.setSignalInfo(DTO.createExtRefSignalInfo());
 
         return extRefInfo;
     }
-    public static LNodeMetaData createMetaDataInfo(){
+
+    public static LNodeMetaData createMetaDataInfo() {
         LNodeMetaData metaData = new LNodeMetaData();
         metaData.setIedName(HOLDER_IED_NAME);
         metaData.setLdInst(HOLDER_LD_INST);
@@ -144,7 +160,6 @@ public class DTO {
     }
 
 
-
     /*-----------------------------------------------*/
     /*                   ResumedDataTemplate         */
     /*-----------------------------------------------*/
@@ -152,7 +167,8 @@ public class DTO {
 
     public static final String CDC = TPredefinedCDCEnum.WYE.value();
     public static final String FC = TFCEnum.CF.value();
-    public static ResumedDataTemplate createRTT(){
+
+    public static ResumedDataTemplate createRTT() {
         ResumedDataTemplate rDTT = new ResumedDataTemplate();
 
         rDTT.setLnType(LN_TYPE);
@@ -165,7 +181,7 @@ public class DTO {
         return rDTT;
     }
 
-    public static ResumedDataTemplate createRTT(String prefix, String lnClass, String lnInst){
+    public static ResumedDataTemplate createRTT(String prefix, String lnClass, String lnInst) {
         ResumedDataTemplate rDTT = new ResumedDataTemplate();
 
         rDTT.setLnType(LN_TYPE);
@@ -208,7 +224,7 @@ public class DTO {
         return rptEnabled;
     }
 
-    public static TReportControl.OptFields createOptFields(){
+    public static TReportControl.OptFields createOptFields() {
         TReportControl.OptFields optFields = new TReportControl.OptFields();
         optFields.setBufOvfl(true);
         optFields.setBufOvfl(true);
@@ -219,15 +235,16 @@ public class DTO {
     /*-----------------------------------------------*/
     /*                   LNodeDTO                    */
     /*-----------------------------------------------*/
-    public static LNodeDTO createLNodeDTO(){
-        return new LNodeDTO(HOLDER_LN_INST, HOLDER_LN_CLASS,null,LN_TYPE);
+    public static LNodeDTO createLNodeDTO() {
+        return new LNodeDTO(HOLDER_LN_INST, HOLDER_LN_CLASS, null, LN_TYPE);
     }
 
     /*-----------------------------------------------*/
     /*                   LDeviceDTO                  */
     /*-----------------------------------------------*/
     public static final String LD_NAME = "LDPO";
-    public static LDeviceDTO createLdDTO(){
+
+    public static LDeviceDTO createLdDTO() {
 
         LDeviceDTO lDeviceDTO = new LDeviceDTO();
         lDeviceDTO.setLdInst(HOLDER_LD_INST);
@@ -242,7 +259,7 @@ public class DTO {
     /*                   IedDTO                      */
     /*-----------------------------------------------*/
 
-    public static IedDTO createIedDTO(){
+    public static IedDTO createIedDTO() {
 
         IedDTO iedDTO = new IedDTO();
         iedDTO.setName(HOLDER_IED_NAME);
@@ -254,7 +271,7 @@ public class DTO {
     /*                   FCDAInfo                    */
     /*-----------------------------------------------*/
 
-    public static TFCDA createFCDA(){
+    public static TFCDA createFCDA() {
         TFCDA tfcda = new TFCDA();
         tfcda.setDaName("da.bda");
         tfcda.setDoName("do.sdo");
@@ -272,7 +289,8 @@ public class DTO {
     /*-----------------------------------------------*/
 
     public static final String NOW_STR = LocalDateTime.now().toString();
-    public static HeaderDTO createHeaderDTO(UUID id){
+
+    public static HeaderDTO createHeaderDTO(UUID id) {
         HeaderDTO headerDTO = new HeaderDTO();
         headerDTO.setId(id);
         headerDTO.setRevision("1.0");
@@ -281,7 +299,7 @@ public class DTO {
         return headerDTO;
     }
 
-    public static HeaderDTO.HistoryItem createHeaderItem(String now){
+    public static HeaderDTO.HistoryItem createHeaderItem(String now) {
         HeaderDTO.HistoryItem historyItem = new HeaderDTO.HistoryItem();
         historyItem.setRevision("1.0");
         historyItem.setVersion("1.0");
@@ -293,7 +311,5 @@ public class DTO {
         return historyItem;
     }
 
-    public static final Map<Pair<String, String>, List<String>> comMap = Map.of(
-            Pair.of("RSPACE_PROCESS_NETWORK", SubNetworkDTO.SubnetworkType.MMS.toString()), Arrays.asList("PROCESS_AP", "TOTO_AP_GE"),
-            Pair.of("RSPACE_ADMIN_NETWORK", SubNetworkDTO.SubnetworkType.IP.toString()), Arrays.asList("ADMIN_AP","TATA_AP_EFFACEC"));
+    public static final Map<Pair<String, String>, List<String>> comMap = Map.of(Pair.of("RSPACE_PROCESS_NETWORK", SubNetworkDTO.SubnetworkType.MMS.toString()), Arrays.asList("PROCESS_AP", "TOTO_AP_GE"), Pair.of("RSPACE_ADMIN_NETWORK", SubNetworkDTO.SubnetworkType.IP.toString()), Arrays.asList("ADMIN_AP", "TATA_AP_EFFACEC"));
 }

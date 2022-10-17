@@ -180,7 +180,7 @@ class SclServiceTest {
                 "Do11.sdo11", "da11.bda111.bda112.bda113", "INT_ADDR11"
         );
 
-        List<ExtRefBindingInfo> potentialBinders = assertDoesNotThrow(
+        assertDoesNotThrow(
                 () -> SclService.getExtRefBinders(
                         scd, "IED_NAME1", "LD_INST11", "LLN0", "", "", signalInfo
                 )
@@ -192,6 +192,33 @@ class SclServiceTest {
                         scd, "IED_NAME1", "UNKNOWN_LD", "LLN0", "", "", signalInfo
                 )
         );
+    }
+
+    @Test
+    void test_getExtRefBinders_should_return_sorted_list() throws Exception {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_binders_test.xml");
+
+        ExtRefSignalInfo signalInfo = createSignalInfo(
+                "Do11.sdo11", "da11.bda111.bda112.bda113", "INT_ADDR11"
+        );
+
+        // When
+        List<ExtRefBindingInfo> potentialBinders = SclService.getExtRefBinders(scd, "IED_NAME1", "LD_INST11", "LLN0", "", "", signalInfo);
+
+        // Then
+        assertThat(potentialBinders)
+                .extracting(ExtRefBindingInfo::getIedName)
+                .containsExactly("IED_NAME1");
+        assertThat(potentialBinders)
+                .extracting(ExtRefBindingInfo::getLdInst)
+                .containsExactly("LD_INST12");
+        assertThat(potentialBinders)
+                .extracting(ExtRefBindingInfo::getLnClass)
+                .containsExactly("LLN0");
+        assertThat(potentialBinders)
+                .extracting(ExtRefBindingInfo::getLnInst)
+                .containsExactly("");
     }
 
     @Test
