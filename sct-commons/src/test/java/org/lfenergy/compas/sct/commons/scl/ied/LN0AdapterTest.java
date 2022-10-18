@@ -393,6 +393,6 @@ class LN0AdapterTest {
         // When
         String result = lnAdapter.elementXPath();
         // Then
-        assertThat(result).isEqualTo("LN[lnClass=\"LLN0\" and not(@inst) and not(@lnType)]");
+        assertThat(result).isEqualTo("LN0");
     }
 }
