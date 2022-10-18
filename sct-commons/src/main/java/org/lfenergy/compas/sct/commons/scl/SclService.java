@@ -265,6 +265,7 @@ public class SclService {
 
         // check for signal existence
         // The below throws exception if the signal doesn't exist
+        //TODO: create method which purpose is only ckecking instead of this one
         abstractLNAdapter.getExtRefsBySignalInfo(signalInfo);
 
         // find potential binders for the signalInfo
@@ -327,36 +328,20 @@ public class SclService {
             throw new ScdException("Internal binding can't have control block");
         }
 
-        String ldInst = extRefInfo.getHolderLDInst();
-        String lnClass = extRefInfo.getHolderLnClass();
-        String lnInst = extRefInfo.getHolderLnInst();
-        String prefix = extRefInfo.getHolderLnPrefix();
-        // Check holder (IED,LD,LN) exists
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
-        LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
-                .orElseThrow(() -> new ScdException(String.format(UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName)));
-        AbstractLNAdapter<?> abstractLNAdapter = AbstractLNAdapter.builder()
-                .withLDeviceAdapter(lDeviceAdapter)
-                .withLnClass(lnClass)
-                .withLnInst(lnInst)
-                .withLnPrefix(prefix)
-                .build();
-
-        abstractLNAdapter.checkExtRefInfoCoherence(extRefInfo);
 
         // Get CBs
         IEDAdapter srcIEDAdapter = sclRootAdapter.getIEDAdapterByName(bindingInfo.getIedName());
         LDeviceAdapter srcLDeviceAdapter = srcIEDAdapter.getLDeviceAdapterByLdInst(extRefInfo.getBindingInfo().getLdInst())
                 .orElseThrow();
 
-        AbstractLNAdapter<?> srcLnAdapter = AbstractLNAdapter.builder()
-                .withLDeviceAdapter(srcLDeviceAdapter)
-                .withLnClass(extRefInfo.getBindingInfo().getLnClass())
-                .withLnInst(extRefInfo.getBindingInfo().getLnInst())
-                .withLnPrefix(extRefInfo.getBindingInfo().getPrefix())
-                .build();
-        return srcLnAdapter.getControlSetByExtRefInfo(extRefInfo);
+        List<AbstractLNAdapter<?>> aLNAdapters = srcLDeviceAdapter.getLNAdaptersInclundigLN0();
+
+        return aLNAdapters.stream()
+                .map(abstractLNAdapter1 -> abstractLNAdapter1.getControlBlocksForMatchingFCDA(extRefInfo))
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+
     }
 
     /**

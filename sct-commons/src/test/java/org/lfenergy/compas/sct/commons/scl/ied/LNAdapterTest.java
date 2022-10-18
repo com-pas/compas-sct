@@ -5,6 +5,9 @@
 package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
@@ -15,8 +18,10 @@ import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.mockito.Mockito;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 
 class LNAdapterTest {
@@ -177,8 +182,48 @@ class LNAdapterTest {
         assertDoesNotThrow(() ->lnAdapter.checkExtRefInfoCoherence(extRefInfo));
     }
 
+    @ParameterizedTest
+    @MethodSource("provideIncompleteExtRefInfo")
+    void should_throw_exception_when_trying_update_extRefSource_with_wrong_arguments(ExtRefInfo incompleteExtrefInfo) throws Exception {
+
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-cb/scd_get_cbs_test.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+
+        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME1"));
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.getLDeviceAdapterByLdInst("LD_INST11").get());
+        AbstractLNAdapter<?> lnAdapter = AbstractLNAdapter.builder()
+                .withLDeviceAdapter(lDeviceAdapter)
+                .withLnClass(TLLN0Enum.LLN_0.value())
+                .build();
+
+        //When Then
+        assertThatThrownBy(() -> lnAdapter.updateExtRefSource(incompleteExtrefInfo))
+                .isInstanceOf(IllegalArgumentException.class);
+
+    }
+
+    private static Stream<Arguments> provideIncompleteExtRefInfo() {
+
+        ExtRefInfo extRefInfoEmpty = new ExtRefInfo();
+
+        ExtRefInfo extRefInfoWithOnlySignalInfo = new ExtRefInfo();
+        extRefInfoWithOnlySignalInfo.setSignalInfo(new ExtRefSignalInfo());
+
+        ExtRefInfo extRefInfoWithSignalInfoAndBindingInfo = new ExtRefInfo();
+        extRefInfoWithSignalInfoAndBindingInfo.setSignalInfo(new ExtRefSignalInfo());
+        extRefInfoWithSignalInfoAndBindingInfo.setBindingInfo(new ExtRefBindingInfo());
+
+        return Stream.of(
+                Arguments.of(extRefInfoEmpty),
+                Arguments.of(extRefInfoWithOnlySignalInfo),
+                Arguments.of(extRefInfoWithSignalInfoAndBindingInfo)
+        );
+    }
     @Test
     void testUpdateExtRefSource() throws Exception {
+
+        //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-cb/scd_get_cbs_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME1"));
@@ -187,13 +232,22 @@ class LNAdapterTest {
                 .withLDeviceAdapter(lDeviceAdapter)
                 .withLnClass(TLLN0Enum.LLN_0.value())
                 .build();
-        ExtRefInfo extRefInfo = new ExtRefInfo();
-        assertThrows(IllegalArgumentException.class, () ->lnAdapter.updateExtRefSource(extRefInfo));
-        extRefInfo.setSignalInfo(new ExtRefSignalInfo());
-        assertThrows(IllegalArgumentException.class, () ->lnAdapter.updateExtRefSource(extRefInfo));
-        extRefInfo.setBindingInfo(new ExtRefBindingInfo());
-        assertThrows(IllegalArgumentException.class, () ->lnAdapter.updateExtRefSource(extRefInfo));
+        ExtRefInfo extRefInfo = givenCompleteExtRefInfo();
 
+        //When
+        TExtRef extRef = assertDoesNotThrow(() -> lnAdapter.updateExtRefSource(extRefInfo));
+
+        //Then
+        assertThat(extRef.getSrcCBName()).isEqualTo(extRefInfo.getSourceInfo().getSrcCBName());
+        assertThat(extRef.getSrcLDInst()).isEqualTo(extRefInfo.getSourceInfo().getSrcLDInst());
+        assertThat(extRef.getLnClass().contains(extRefInfo.getSourceInfo().getSrcLNClass()));
+
+    }
+
+    private ExtRefInfo givenCompleteExtRefInfo() {
+        ExtRefInfo extRefInfo = new ExtRefInfo();
+        extRefInfo.setSignalInfo(new ExtRefSignalInfo());
+        extRefInfo.setBindingInfo(new ExtRefBindingInfo());
         extRefInfo.getSignalInfo().setPDA("da11.bda111.bda112.bda113");
         extRefInfo.getSignalInfo().setPDO("Do11.sdo11");
         extRefInfo.getSignalInfo().setIntAddr("INT_ADDR11");
@@ -208,12 +262,7 @@ class LNAdapterTest {
         extRefInfo.getSourceInfo().setSrcLNInst(extRefInfo.getBindingInfo().getLnInst());
         extRefInfo.getSourceInfo().setSrcLNClass(extRefInfo.getBindingInfo().getLnClass());
         extRefInfo.getSourceInfo().setSrcPrefix(extRefInfo.getBindingInfo().getPrefix());
-
-        TExtRef extRef = assertDoesNotThrow( () ->lnAdapter.updateExtRefSource(extRefInfo));
-        assertEquals(extRefInfo.getSourceInfo().getSrcCBName(), extRef.getSrcCBName());
-        assertEquals(extRefInfo.getSourceInfo().getSrcLDInst(), extRef.getSrcLDInst());
-        assertTrue(extRef.getLnClass().contains(extRefInfo.getSourceInfo().getSrcLNClass()) );
-
+        return extRefInfo;
     }
 
     @Test

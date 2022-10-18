@@ -184,9 +184,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
         DataTypeTemplateAdapter dttAdapter = parentAdapter.getParentAdapter().getDataTypeTemplateAdapter();
         List<ExtRefBindingInfo> potentialBinders = new ArrayList<>();
 
-        List<AbstractLNAdapter<?>> lnAdapters = new ArrayList<>();
-        lnAdapters.add(getLN0Adapter());
-        lnAdapters.addAll(getLNAdapters());
+        List<AbstractLNAdapter<?>> lnAdapters = getLNAdaptersInclundigLN0();
         for(AbstractLNAdapter<?> lnAdapter : lnAdapters) {
             String lnType = lnAdapter.getLnType();
             try {
@@ -211,9 +209,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
      */
     public List<ExtRefInfo> getExtRefInfo() {
         List<ExtRefInfo> extRefInfos = new ArrayList<>();
-        List<AbstractLNAdapter<?>> lnAdapters = new ArrayList<>();
-        lnAdapters.add(getLN0Adapter());
-        lnAdapters.addAll(getLNAdapters());
+        List<AbstractLNAdapter<?>> lnAdapters = getLNAdaptersInclundigLN0();
         LogicalNodeOptions logicalNodeOptions = new LogicalNodeOptions();
         logicalNodeOptions.setWithExtRef(true);
         for(AbstractLNAdapter<?> lnAdapter : lnAdapters) {
@@ -254,10 +250,23 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
 
     }
 
+
     public Optional<String> getLDeviceStatus() {
         if (!hasLN0()){
             return Optional.empty();
         }
         return getLN0Adapter().getLDeviceStatus();
     }
+
+    /**
+     * Gets all LN of LDevice including LN0
+     * @return list of all LN of LDevice
+     */
+    public List<AbstractLNAdapter<?>> getLNAdaptersInclundigLN0() {
+        List<AbstractLNAdapter<?>> aLNAdapters = new ArrayList<>();
+        aLNAdapters.add(getLN0Adapter());
+        aLNAdapters.addAll(getLNAdapters());
+        return aLNAdapters;
+    }
+
 }

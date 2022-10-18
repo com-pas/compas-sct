@@ -138,4 +138,19 @@ class LDeviceAdapterTest {
             .isPresent()
             .hasValue("test");
     }
+
+    @Test
+    void getLNAdaptersInclundigLN0() {
+        //Given
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2").get());
+        //When
+        List<AbstractLNAdapter<?>> lnAdapters = lDeviceAdapter.getLNAdaptersInclundigLN0();
+        //Then
+        assertThat(lnAdapters)
+                .hasSize(2)
+                .hasAtLeastOneElementOfType(LN0Adapter.class)
+                .hasAtLeastOneElementOfType(LNAdapter.class);
+
+    }
 }
+

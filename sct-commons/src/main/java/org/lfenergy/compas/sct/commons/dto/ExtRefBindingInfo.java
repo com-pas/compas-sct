@@ -163,8 +163,22 @@ public class ExtRefBindingInfo implements Comparable<ExtRefBindingInfo> {
      * @param o the object to be compared.
      * @return the comparaison's result (a negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater than the second)
      */
-    @Override
     public int compareTo(ExtRefBindingInfo o) {
         return EXT_REF_BINDING_INFO_COMPARATOR.compare(this, o);
+    }
+
+    @Override
+    public String toString() {
+        String sType = serviceType != null ? serviceType.value() : null;
+        return "ExtRefBindingInfo{" +
+                "iedName='" + iedName + '\'' +
+                ", ldInst='" + ldInst + '\'' +
+                ", prefix='" + prefix + '\'' +
+                ", lnClass='" + lnClass + '\'' +
+                ", lnInst='" + lnInst + '\'' +
+                ", lnType='" + lnType + '\'' +
+                ", serviceType=" +  sType +
+                '}';
+
     }
 }
