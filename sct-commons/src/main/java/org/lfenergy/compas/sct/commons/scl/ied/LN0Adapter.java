@@ -11,7 +11,6 @@ import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.scl.LDeviceActivation;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.PrivateService;
-import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,9 +88,7 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
 
     @Override
     protected String elementXPath() {
-        return String.format("LN[lnClass=\"LLN0\" and %s and %s]",
-                Utils.xpathAttributeFilter("inst", currentElem.isSetInst() ? currentElem.getInst() : null),
-                Utils.xpathAttributeFilter("lnType", currentElem.isSetLnType() ? currentElem.getLnType() : null));
+        return "LN0";
     }
 
 
@@ -128,6 +125,14 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
     @Override
     public String getPrefix() {
         return "";
+    }
+
+    /**
+     * Gets Inputs node as an adapter
+     * @return an InputsAdapter
+     */
+    public InputsAdapter getInputsAdapter(){
+        return new InputsAdapter(this, currentElem.getInputs());
     }
 
     /** Checks if given attibrute corresponds to DataSet or ReportControl or SMVControl or GSEControl in current LN0

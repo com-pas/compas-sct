@@ -4,6 +4,8 @@
 
 package org.lfenergy.compas.sct.commons.util;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Function;
@@ -115,5 +117,19 @@ public final class Utils {
         } else {
             return xpathAttributeFilter(name, value.stream().filter(Objects::nonNull).collect(Collectors.joining(" ")));
         }
+    }
+
+    /**
+     * Checks if strings are equals or both blank.
+     * Blank means : null, empty string or whitespaces only string.
+     * @param s1 first string
+     * @param s2 seconde string
+     * @return true if strings are equals or both blank, false otherwise
+     *
+     * @see org.apache.commons.lang3.StringUtils#isBlank(CharSequence)
+     */
+    public static boolean equalsOrBothBlank(String s1, String s2){
+        return Objects.equals(s1, s2)
+            || (StringUtils.isBlank(s1) && StringUtils.isBlank(s2));
     }
 }
