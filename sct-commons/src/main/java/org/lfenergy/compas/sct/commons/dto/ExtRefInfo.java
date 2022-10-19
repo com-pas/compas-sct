@@ -5,10 +5,7 @@
 package org.lfenergy.compas.sct.commons.dto;
 
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.Setter;
+import lombok.*;
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.scl2007b4.model.TFCDA;
@@ -38,6 +35,8 @@ import java.util.Objects;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ExtRefInfo extends LNodeMetaDataEmbedder{
 
     private ExtRefSignalInfo signalInfo;

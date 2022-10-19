@@ -54,7 +54,7 @@ import static org.lfenergy.compas.sct.commons.util.PrivateEnum.COMPAS_ICDHEADER;
  *      <li>{@link SclService#getExtRefInfo <em>Returns list of <b>ExtRefInfo </b></em>}</li>
  *      <li>{@link SclService#getExtRefBinders <em>Returns list of <b>ExtRefBindingInfo </b></em>}</li>
  *      <li>{@link SclService#updateExtRefBinders(SCL, ExtRefInfo) <em>Update the <b>TExtRef </b> reference object for given <b>ExtRefBindingInfo </b> model</em>}</li>
- *      <li>{@link SclService#getExtRefSourceInfo <em>Returns list of <b>ExtRefSourceInfo </b></em>}</li>
+ *      <li>{@link SclService#findAllControlBlocksByExtRefInfo <em>Returns list of <b>ExtRefSourceInfo </b></em>}</li>
  *      <li>{@link SclService#updateExtRefSource(SCL, ExtRefInfo) <em>Update the <b>TExtRef </b> reference object for given <b>ExtRefSourceInfo </b> model</em>}</li>
  *   </ol>
  *   <li>DAI features</li>
@@ -248,7 +248,11 @@ public class SclService {
      * @param lnInst     lnInst of LN in which ExtRef signal to find binders is localized
      * @param prefix     prefix of LN in which ExtRef signal to find binders is localized
      * @param signalInfo ExtRef signal for which we should find possible binders in SCL file binders
+<<<<<<< HEAD
      * @return list of <em>ExtRefBindingInfo</em> object (containing binding data for each LNode in current SCL file) sorted by {@link ExtRefBindingInfo#compareTo(ExtRefBindingInfo) compareTo} method.
+=======
+     * @return list of <em>ExtRefBindingInfo</em> object (containing binding data for each LNode in current SCL file)
+>>>>>>> fix(175): wip
      * @throws ScdException throws when ExtRef contains inconsistency data
      */
     public static List<ExtRefBindingInfo> getExtRefBinders(SCL scd, String iedName, String ldInst, String lnClass, String lnInst, String prefix, ExtRefSignalInfo signalInfo) throws ScdException {
@@ -312,7 +316,7 @@ public class SclService {
      * @return list of <em>ControlBlock</em> object as ControlBlocks of LNode specified in <em>extRefInfo</em>
      * @throws ScdException throws when mandatory data of ExtRef are missing
      */
-    public static List<ControlBlock<?>> getExtRefSourceInfo(SCL scd, ExtRefInfo extRefInfo) throws ScdException {
+    public static List<ControlBlock<?>> findAllControlBlocksByExtRefInfo(SCL scd, ExtRefInfo extRefInfo) throws ScdException {
 
         ExtRefSignalInfo signalInfo = extRefInfo.getSignalInfo();
         if (!signalInfo.isValid()) {
