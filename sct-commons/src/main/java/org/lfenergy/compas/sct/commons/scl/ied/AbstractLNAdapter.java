@@ -329,6 +329,11 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         List<TDataSet> tDataSets = this.getDataSet(extRefInfo);
         return getControlBlocks(tDataSets,extRefInfo.getBindingInfo().getServiceType());
     }
+      public List<ControlBlock<?>> getControlSet(ExtRefInfo extRefInfo) {
+        List<TDataSet> tDataSets = this.getDataSetMatchingExtRefInfo(extRefInfo);
+        return getControlBlocks(tDataSets,extRefInfo.getBindingInfo().getServiceType());
+    }
+
 
     /**
      * Gets Control Blocks matching FCDA compatible with specified in <em>extRefInfo</em>
@@ -555,6 +560,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         String binderLnClass = bindingInfo.getLnClass();
         String binderLnInst = bindingInfo.getLnInst();
         String binderLnPrefix = bindingInfo.getPrefix();
+
         IEDAdapter binderIEDAdapter;
         if(!binderIedName.equals( getCurrentIed().getName())){ // external binding
             binderIEDAdapter = getCurrentScd().getIEDAdapterByName(binderIedName);
