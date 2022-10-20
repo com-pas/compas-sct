@@ -268,7 +268,7 @@ public class SclService {
         abstractLNAdapter.getExtRefsBySignalInfo(signalInfo);
 
         // find potential binders for the signalInfo
-        return sclRootAdapter.getIEDAdapters().stream()
+        return sclRootAdapter.streamIEDAdapters()
                 .map(iedAdapter1 -> iedAdapter1.getExtRefBinders(signalInfo))
                 .flatMap(Collection::stream)
                 .sorted()
@@ -664,8 +664,8 @@ public class SclService {
      */
     public static void removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(final SCL scl) {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scl);
-        List<LDeviceAdapter> lDeviceAdapters = sclRootAdapter.getIEDAdapters().stream()
-                .map(IEDAdapter::getLDeviceAdapters).flatMap(List::stream).collect(Collectors.toList());
+        List<LDeviceAdapter> lDeviceAdapters = sclRootAdapter.streamIEDAdapters()
+                .flatMap(IEDAdapter::streamLDeviceAdapters).collect(Collectors.toList());
 
         // LN0
         lDeviceAdapters.stream()
@@ -691,9 +691,8 @@ public class SclService {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         SubstationAdapter substationAdapter = sclRootAdapter.getSubstationAdapter();
         final List<Pair<String, String>> iedNameLdInstList = substationAdapter.getIedAndLDeviceNamesForLN0FromLNode();
-        List<SclReport.ErrorDescription> errors = sclRootAdapter.getIEDAdapters().stream()
-                .map(IEDAdapter::getLDeviceAdapters)
-                .flatMap(Collection::stream)
+        List<SclReport.ErrorDescription> errors = sclRootAdapter.streamIEDAdapters()
+                .flatMap(IEDAdapter::streamLDeviceAdapters)
                 .map(LDeviceAdapter::getLN0Adapter)
                 .map(ln0Adapter -> ln0Adapter.checkAndUpdateLDeviceStatus(iedNameLdInstList))
                 .reduce(new ArrayList<>(),(sclReportErrors, partialSclReportErrors) -> {
