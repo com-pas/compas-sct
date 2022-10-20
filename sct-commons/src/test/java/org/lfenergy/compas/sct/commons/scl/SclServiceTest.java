@@ -207,6 +207,7 @@ class SclServiceTest {
         List<ExtRefBindingInfo> potentialBinders = SclService.getExtRefBinders(scd, "IED_NAME1", "LD_INST11", "LLN0", "", "", signalInfo);
 
         // Then
+        // Not so relevant because we get a single element list from the XML file
         assertThat(potentialBinders)
                 .extracting(ExtRefBindingInfo::getIedName)
                 .containsExactly("IED_NAME1");
