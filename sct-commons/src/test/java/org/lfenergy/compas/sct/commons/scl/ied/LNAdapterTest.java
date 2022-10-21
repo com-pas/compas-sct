@@ -198,10 +198,8 @@ class LNAdapterTest {
                 .withLnClass(TLLN0Enum.LLN_0.value())
                 .build();
 
-        //When
+        //When Then
         Assertions.assertThatThrownBy(() -> lnAdapter.updateExtRefSource(incompleteExtrefInfo))
-
-                //Then
                 .isInstanceOf(IllegalArgumentException.class);
 
     }
