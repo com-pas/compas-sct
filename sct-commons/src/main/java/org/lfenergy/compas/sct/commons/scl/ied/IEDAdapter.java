@@ -351,7 +351,7 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
         controlBlock.validateSecurityEnabledValue(this);
         controlBlock.validateDestination(this.parentAdapter);
 
-        LDeviceAdapter lDeviceAdapter =getLDeviceAdapterByLdInst(controlBlock.getHolderLDInst()).orElseThrow();
+        LDeviceAdapter lDeviceAdapter = getLDeviceAdapterByLdInst(controlBlock.getHolderLDInst()).orElseThrow();
         AbstractLNAdapter<?> lnAdapter =  AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
                 .withLnClass(controlBlock.getHolderLnClass())

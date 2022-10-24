@@ -7,6 +7,8 @@ package org.lfenergy.compas.sct.commons.scl;
 import lombok.Getter;
 import org.lfenergy.compas.scl2007b4.model.TBaseElement;
 import org.lfenergy.compas.scl2007b4.model.TPrivate;
+import org.lfenergy.compas.sct.commons.dto.SclReportItem;
+
 /**
  * A representation of the model object
  * <em><b>{@link SclElementAdapter SclElementAdapter}</b></em>.
@@ -115,4 +117,12 @@ public abstract class SclElementAdapter<P extends SclElementAdapter, T> {
         return parentXpath + "/" + elementXPath();
     }
 
+    /**
+     * builds message with message content and currentElement xpath
+      * @param message message
+     * @return error description with message and current element xpath
+     */
+    public SclReportItem buildFatalReportItem(String message){
+        return SclReportItem.fatal(getXPath(), message);
+    }
 }

@@ -14,6 +14,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -394,5 +395,25 @@ class LN0AdapterTest {
         String result = lnAdapter.elementXPath();
         // Then
         assertThat(result).isEqualTo("LN0");
+    }
+
+    @Test
+    void getLDeviceStatus_should_succeed() throws Exception {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_with_extref_errors.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        Optional<LN0Adapter> optionalLN0Adapter = sclRootAdapter.streamIEDAdapters()
+            .flatMap(IEDAdapter::streamLDeviceAdapters)
+            .filter(lDeviceAdapter -> "IED_NAME1LD_INST13".equals(lDeviceAdapter.getLdName()))
+            .map(LDeviceAdapter::getLN0Adapter)
+            .findFirst();
+        assertThat(optionalLN0Adapter).isPresent();
+        LN0Adapter ln0Adapter = optionalLN0Adapter.get();
+        // When
+        Optional<String> result = ln0Adapter.getLDeviceStatus();
+        // Then
+        assertThat(result)
+            .isPresent()
+            .hasValue("test");
     }
 }

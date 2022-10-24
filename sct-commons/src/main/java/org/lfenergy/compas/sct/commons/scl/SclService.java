@@ -524,8 +524,9 @@ public class SclService {
         for (Map.Entry<String, TPrivate> entry : mapIEDNameAndPrivate.entrySet()) {
             String iedName = entry.getKey();
             TPrivate tPrivate = entry.getValue();
-            String icdSysVerUuid = PrivateService.getCompasICDHeader(tPrivate).map(TCompasICDHeader::getICDSystemVersionUUID)
-                    .orElseThrow(() -> new ScdException(ICD_SYSTEM_VERSION_UUID + " is not present in COMPAS-ICDHeader in LNode"));
+            String icdSysVerUuid = PrivateService.extractCompasICDHeader(tPrivate).map(TCompasICDHeader::getICDSystemVersionUUID)
+                .orElseThrow(() -> new ScdException(ICD_SYSTEM_VERSION_UUID + " is not present in COMPAS-ICDHeader in LNode")
+            );
 
             if (!mapICDSystemVersionUuidAndSTDFile.containsKey(icdSysVerUuid))
                 throw new ScdException("There is no STD file found corresponding to " + stdCheckFormatExceptionMessage(tPrivate));
@@ -572,11 +573,11 @@ public class SclService {
      * @throws ScdException throws when parameter not present in Private
      */
     private static String stdCheckFormatExceptionMessage(TPrivate key) throws ScdException {
-        Optional<TCompasICDHeader> optionalCompasICDHeader = PrivateService.getCompasICDHeader(key);
-        return HEADER_ID + " = " + optionalCompasICDHeader.map(TCompasICDHeader::getHeaderId).orElse(null) + " " +
-                HEADER_VERSION + " = " + optionalCompasICDHeader.map(TCompasICDHeader::getHeaderVersion).orElse(null) + " " +
-                HEADER_REVISION + " = " + optionalCompasICDHeader.map(TCompasICDHeader::getHeaderRevision).orElse(null) +
-                " and " + ICD_SYSTEM_VERSION_UUID + " = " + optionalCompasICDHeader.map(TCompasICDHeader::getICDSystemVersionUUID).orElse(null);
+        Optional<TCompasICDHeader> optionalCompasICDHeader = PrivateService.extractCompasICDHeader(key);
+        return  HEADER_ID + " = " + optionalCompasICDHeader.map(TCompasICDHeader::getHeaderId).orElse(null) + " " +
+            HEADER_VERSION + " = " + optionalCompasICDHeader.map(TCompasICDHeader::getHeaderVersion).orElse(null) + " " +
+            HEADER_REVISION + " = " + optionalCompasICDHeader.map(TCompasICDHeader::getHeaderRevision).orElse(null) +
+            " and " + ICD_SYSTEM_VERSION_UUID + " = " + optionalCompasICDHeader.map(TCompasICDHeader::getICDSystemVersionUUID).orElse(null);
     }
 
     /**
@@ -593,9 +594,9 @@ public class SclService {
                 .map(TLNode::getPrivate).flatMap(Collection::stream)
                 .filter(tPrivate ->
                         tPrivate.getType().equals(COMPAS_ICDHEADER.getPrivateType())
-                                && PrivateService.getCompasICDHeader(tPrivate).isPresent()
-                                && PrivateService.getCompasICDHeader(tPrivate).get().getIEDName() != null)
-                .collect(Collectors.toMap(tPrivate -> PrivateService.getCompasICDHeader(tPrivate).get().getIEDName(), Function.identity()));
+                            && PrivateService.extractCompasICDHeader(tPrivate).isPresent()
+                            && PrivateService.extractCompasICDHeader(tPrivate).get().getIEDName() != null)
+                .collect(Collectors.toMap(tPrivate -> PrivateService.extractCompasICDHeader(tPrivate).get().getIEDName(), Function.identity()));
     }
 
     /**
@@ -608,7 +609,7 @@ public class SclService {
     private static Map<String, Pair<TPrivate, List<SCL>>> createMapICDSystemVersionUuidAndSTDFile(Set<SCL> stds) {
         Map<String, Pair<TPrivate, List<SCL>>> stringSCLMap = new HashMap<>();
         stds.forEach(std -> std.getIED().forEach(ied -> ied.getPrivate().forEach(tp ->
-                PrivateService.getCompasICDHeader(tp).map(TCompasICDHeader::getICDSystemVersionUUID).ifPresent(icdSysVer -> {
+                PrivateService.extractCompasICDHeader(tp).map(TCompasICDHeader::getICDSystemVersionUUID).ifPresent(icdSysVer -> {
                     Pair<TPrivate, List<SCL>> pair = stringSCLMap.get(icdSysVer);
                     List<SCL> list = pair != null ? pair.getRight() : new ArrayList<>();
                     list.add(std);
@@ -627,10 +628,10 @@ public class SclService {
      * @throws ScdException throws when Private is not COMPAS_ICDHEADER one
      */
     private static boolean comparePrivateCompasICDHeaders(TPrivate iedPrivate, TPrivate scdPrivate) throws ScdException {
-        TCompasICDHeader iedCompasICDHeader = PrivateService.getCompasICDHeader(iedPrivate)
-                .orElseThrow(() -> new ScdException(COMPAS_ICDHEADER + "not found in IED Private "));
-        TCompasICDHeader scdCompasICDHeader = PrivateService.getCompasICDHeader(scdPrivate)
-                .orElseThrow(() -> new ScdException(COMPAS_ICDHEADER + "not found in LNode Private "));
+        TCompasICDHeader iedCompasICDHeader = PrivateService.extractCompasICDHeader(iedPrivate)
+            .orElseThrow(() -> new ScdException(COMPAS_ICDHEADER + "not found in IED Private "));
+        TCompasICDHeader scdCompasICDHeader = PrivateService.extractCompasICDHeader(scdPrivate)
+            .orElseThrow(() -> new ScdException(COMPAS_ICDHEADER + "not found in LNode Private "));
         return iedCompasICDHeader.getIEDType().equals(scdCompasICDHeader.getIEDType())
                 && iedCompasICDHeader.getICDSystemVersionUUID().equals(scdCompasICDHeader.getICDSystemVersionUUID())
                 && iedCompasICDHeader.getVendorName().equals(scdCompasICDHeader.getVendorName())
@@ -651,8 +652,8 @@ public class SclService {
      * @throws ScdException throws when Private is not COMPAS_ICDHEADER one
      */
     private static void copyCompasICDHeaderFromLNodePrivateIntoSTDPrivate(TPrivate stdPrivate, TPrivate lNodePrivate) throws ScdException {
-        TCompasICDHeader lNodeCompasICDHeader = PrivateService.getCompasICDHeader(lNodePrivate)
-                .orElseThrow(() -> new ScdException(COMPAS_ICDHEADER + " not found in LNode Private "));
+        TCompasICDHeader lNodeCompasICDHeader = PrivateService.extractCompasICDHeader(lNodePrivate)
+            .orElseThrow(() -> new ScdException(COMPAS_ICDHEADER + " not found in LNode Private "));
         stdPrivate.getContent().clear();
         stdPrivate.getContent().add(objectFactory.createICDHeader(lNodeCompasICDHeader));
     }
@@ -691,16 +692,14 @@ public class SclService {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         SubstationAdapter substationAdapter = sclRootAdapter.getSubstationAdapter();
         final List<Pair<String, String>> iedNameLdInstList = substationAdapter.getIedAndLDeviceNamesForLN0FromLNode();
-        List<SclReport.ErrorDescription> errors = sclRootAdapter.streamIEDAdapters()
+        List<SclReportItem> errors = sclRootAdapter.streamIEDAdapters()
                 .flatMap(IEDAdapter::streamLDeviceAdapters)
                 .map(LDeviceAdapter::getLN0Adapter)
-                .map(ln0Adapter -> ln0Adapter.checkAndUpdateLDeviceStatus(iedNameLdInstList))
-                .reduce(new ArrayList<>(),(sclReportErrors, partialSclReportErrors) -> {
-                    sclReportErrors.addAll(partialSclReportErrors);
-                    return sclReportErrors;
-                });
+                .map(ln0Adapter -> ln0Adapter.updateLDeviceStatus(iedNameLdInstList))
+                .flatMap(Optional::stream)
+                .collect(Collectors.toList());
         SclReport sclReport = new SclReport();
-        sclReport.getErrorDescriptionList().addAll(errors);
+        sclReport.getSclReportItems().addAll(errors);
         sclReport.setSclRootAdapter(sclRootAdapter);
         return sclReport;
     }
