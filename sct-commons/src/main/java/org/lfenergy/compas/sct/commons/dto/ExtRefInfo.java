@@ -36,7 +36,6 @@ import java.util.Objects;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class ExtRefInfo extends LNodeMetaDataEmbedder{
 
     private ExtRefSignalInfo signalInfo;

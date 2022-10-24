@@ -4,7 +4,6 @@
 
 package org.lfenergy.compas.sct.commons.scl.ied;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -199,45 +198,6 @@ class LNAdapterTest {
                 .build();
 
         //When Then
-        Assertions.assertThatThrownBy(() -> lnAdapter.updateExtRefSource(incompleteExtrefInfo))
-                .isInstanceOf(IllegalArgumentException.class);
-
-    }
-
-    private static Stream<Arguments> provideIncompleteExtRefInfo() {
-
-        ExtRefInfo extRefInfoEmpty = new ExtRefInfo();
-
-        ExtRefInfo extRefInfoWithOnlySignalInfo = ExtRefInfo.builder()
-                .signalInfo(new ExtRefSignalInfo()).build();
-
-        ExtRefInfo extRefInfoWithSignalInfoAndBindingInfo = ExtRefInfo.builder()
-                .signalInfo(new ExtRefSignalInfo())
-                .bindingInfo(new ExtRefBindingInfo()).build();
-
-        return Stream.of(
-                Arguments.of(extRefInfoEmpty),
-                Arguments.of(extRefInfoWithOnlySignalInfo),
-                Arguments.of(extRefInfoWithSignalInfoAndBindingInfo)
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("provideIncompleteExtRefInfo")
-    void should_throw_exception_when_trying_update_extRefSource_with_wrong_arguments(ExtRefInfo incompleteExtrefInfo) throws Exception {
-
-        //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-cb/scd_get_cbs_test.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-
-        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME1"));
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.getLDeviceAdapterByLdInst("LD_INST11").get());
-        AbstractLNAdapter<?> lnAdapter = AbstractLNAdapter.builder()
-                .withLDeviceAdapter(lDeviceAdapter)
-                .withLnClass(TLLN0Enum.LLN_0.value())
-                .build();
-
-        //When Then
         assertThatThrownBy(() -> lnAdapter.updateExtRefSource(incompleteExtrefInfo))
                 .isInstanceOf(IllegalArgumentException.class);
 
@@ -260,6 +220,7 @@ class LNAdapterTest {
                 Arguments.of(extRefInfoWithSignalInfoAndBindingInfo)
         );
     }
+
     @Test
     void testUpdateExtRefSource() throws Exception {
 
@@ -278,15 +239,9 @@ class LNAdapterTest {
         TExtRef extRef = assertDoesNotThrow(() -> lnAdapter.updateExtRefSource(extRefInfo));
 
         //Then
-<<<<<<< HEAD
         assertThat(extRef.getSrcCBName()).isEqualTo(extRefInfo.getSourceInfo().getSrcCBName());
         assertThat(extRef.getSrcLDInst()).isEqualTo(extRefInfo.getSourceInfo().getSrcLDInst());
         assertThat(extRef.getLnClass().contains(extRefInfo.getSourceInfo().getSrcLNClass()));
-=======
-        assertEquals(extRefInfo.getSourceInfo().getSrcCBName(), extRef.getSrcCBName());
-        assertEquals(extRefInfo.getSourceInfo().getSrcLDInst(), extRef.getSrcLDInst());
-        assertTrue(extRef.getLnClass().contains(extRefInfo.getSourceInfo().getSrcLNClass()));
->>>>>>> fix(175): wip
 
     }
 

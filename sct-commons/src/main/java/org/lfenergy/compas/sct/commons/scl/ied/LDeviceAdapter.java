@@ -229,8 +229,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
     public Set<ResumedDataTemplate> getDAI(ResumedDataTemplate rDtt, boolean updatableOnly) throws ScdException {
         List<AbstractLNAdapter<?>> lnAdapters = new ArrayList<>();
         if(StringUtils.isBlank(rDtt.getLnClass())){
-            lnAdapters.add(getLN0Adapter());
-            lnAdapters.addAll(getLNAdapters());
+            lnAdapters = getLNAdaptersInclundigLN0();
         } else if(rDtt.getLnClass().equals(TLLN0Enum.LLN_0.value())){
             lnAdapters.add(getLN0Adapter());
         } else {
@@ -268,5 +267,4 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
         aLNAdapters.addAll(getLNAdapters());
         return aLNAdapters;
     }
-
 }

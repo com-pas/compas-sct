@@ -292,20 +292,11 @@ class SclServiceTest {
         extRefInfo.setHolderLDInst(ldInst);
         extRefInfo.setHolderLnClass(lnClass);
 
-<<<<<<< HEAD
         //When
         List<ControlBlock<?>>  controlBlocks = SclService.getExtRefSourceInfo(scd, extRefInfo);
 
         //Then
         assertThat(controlBlocks).hasSize(0);
-=======
-        var controlBlocks = SclService.findAllControlBlocksByExtRefInfo(scd, extRefInfo);
-        assertEquals(2, controlBlocks.size());
-        controlBlocks.forEach(controlBlock -> assertTrue(
-                        controlBlock.getName().equals("goose1") || controlBlock.getName().equals("smv1")
-                )
-        );
->>>>>>> fix(175): wip
     }
 
     @Test
@@ -328,18 +319,12 @@ class SclServiceTest {
         extRefInfo.setHolderLDInst(ldInst);
         extRefInfo.setHolderLnClass(lnClass);
 
-<<<<<<< HEAD
         //When
         List<ControlBlock<?>> controlBlocks = SclService.getExtRefSourceInfo(scd, extRefInfo);
 
         //Then
         assertThat(controlBlocks).hasSize(1);
         assertThat(controlBlocks.get(0).getName()).isEqualTo("goose2");
-=======
-        var controlBlocks = SclService.findAllControlBlocksByExtRefInfo(scd, extRefInfo);
-        assertEquals(1, controlBlocks.size());
-        assertEquals("goose2", controlBlocks.get(0).getName());
->>>>>>> fix(175): wip
     }
 
     @Test
