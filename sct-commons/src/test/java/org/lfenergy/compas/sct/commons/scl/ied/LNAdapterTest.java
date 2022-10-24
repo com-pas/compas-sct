@@ -155,7 +155,7 @@ class LNAdapterTest {
         TExtRef extRef = assertDoesNotThrow(() ->lnAdapter.checkExtRefInfoCoherence(extRefInfo));
         assertEquals(extRefInfo.getSignalInfo().getPDO(),extRef.getPDO());
 
-        ExtRefBindingInfo bindingInfo = DTO.createExtRefBindingInfo();
+        ExtRefBindingInfo bindingInfo = DTO.createExtRefBindingInfo_Remote();
         extRefInfo.setBindingInfo(bindingInfo);
         assertThrows(ScdException.class, () ->lnAdapter.checkExtRefInfoCoherence(extRefInfo));
 

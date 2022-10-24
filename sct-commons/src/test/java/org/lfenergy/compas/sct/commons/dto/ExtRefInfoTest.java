@@ -86,7 +86,7 @@ class ExtRefInfoTest {
     private ExtRefInfo createExtRef(){
         ExtRefInfo extRefInfo = new ExtRefInfo();
         extRefInfo.setSignalInfo(DTO.createExtRefSignalInfo());
-        extRefInfo.setBindingInfo(DTO.createExtRefBindingInfo());
+        extRefInfo.setBindingInfo(DTO.createExtRefBindingInfo_Remote());
         extRefInfo.setSourceInfo(DTO.createExtRefSourceInfo());
 
         return extRefInfo;
