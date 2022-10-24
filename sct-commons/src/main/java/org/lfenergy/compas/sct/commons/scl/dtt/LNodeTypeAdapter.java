@@ -85,18 +85,6 @@ public class LNodeTypeAdapter
      * @return <em>Boolean</em> value of comparison result
      */
     @Override
-    protected String elementXPath() {
-        return String.format("LNodeType[%s and %s]",
-                Utils.xpathAttributeFilter("id", currentElem.isSetId() ? currentElem.getId() : null),
-                Utils.xpathAttributeFilter("lnClass", currentElem.isSetLnClass() ? currentElem.getLnClass() : null));
-    }
-
-    /**
-     * Compares current LNodeType and given LNodeType
-     * @param tlNodeType LNodeType to compare with
-     * @return <em>Boolean</em> value of comparison result
-     */
-    @Override
     public boolean hasSameContentAs(TLNodeType tlNodeType) {
 
         if(!DataTypeTemplateAdapter.hasSamePrivates(currentElem,tlNodeType)){

@@ -71,18 +71,6 @@ public class SDIAdapter extends SclElementAdapter<SclElementAdapter, TSDI> imple
      * @throws ScdException throws when DAI unknown in current SDI
      */
     @Override
-    protected String elementXPath() {
-        return String.format("SDI[%s]",
-                Utils.xpathAttributeFilter("name", currentElem.isSetName() ? currentElem.getName() : null));
-    }
-
-    /**
-     * Gets in current SDI specific SDI by its name
-     * @param sName name of SDI to get
-     * @return <em>SDIAdapter</em> object
-     * @throws ScdException throws when DAI unknown in current SDI
-     */
-    @Override
     public SDIAdapter getStructuredDataAdapterByName(String sName) throws ScdException {
         return currentElem.getSDIOrDAI()
                 .stream()

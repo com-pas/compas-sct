@@ -70,18 +70,6 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
      * @throws ScdException throws when specified name of SDI not present in current DOI
      */
     @Override
-    protected String elementXPath() {
-        return String.format("DOI[%s]",
-                Utils.xpathAttributeFilter("name", currentElem.isSetName() ? currentElem.getName() : null));
-    }
-
-    /**
-     * Gets SDI by name from current DOI
-     * @param sName name of SDI to get
-     * @return <em>RootSDIAdapter</em> object
-     * @throws ScdException throws when specified name of SDI not present in current DOI
-     */
-    @Override
     public RootSDIAdapter getStructuredDataAdapterByName(String sName) throws ScdException {
         return currentElem.getSDIOrDAI()
                 .stream()

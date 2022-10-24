@@ -71,18 +71,6 @@ public class DAAdapter extends AbstractDataAttributeAdapter<DOTypeAdapter, TDA> 
      * @throws ScdException
      */
     @Override
-    protected String elementXPath() {
-        return String.format("DA[name=%s and type=%s]",
-                Utils.xpathAttributeFilter("name", currentElem.isSetName() ? currentElem.getName() : null),
-                Utils.xpathAttributeFilter("type", currentElem.isSetType() ? currentElem.getType() : null));
-    }
-
-    /**
-     * Updates DA Type Name
-     * @param daTypeName DA Type Name to update
-     * @throws ScdException
-     */
-    @Override
     public void check(DaTypeName daTypeName) throws ScdException {
         super.check(daTypeName);
         daTypeName.setFc(currentElem.getFc());
