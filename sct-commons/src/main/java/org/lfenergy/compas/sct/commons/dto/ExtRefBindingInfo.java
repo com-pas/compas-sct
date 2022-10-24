@@ -12,6 +12,7 @@ import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
 import org.lfenergy.compas.scl2007b4.model.TServiceType;
 
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,8 +40,12 @@ import java.util.regex.Pattern;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ExtRefBindingInfo {
+public class ExtRefBindingInfo implements Comparable<ExtRefBindingInfo> {
 
+    public static final Comparator<ExtRefBindingInfo> EXT_REF_BINDING_INFO_COMPARATOR = Comparator.comparing(ExtRefBindingInfo::getIedName)
+            .thenComparing(ExtRefBindingInfo::getLdInst)
+            .thenComparing(ExtRefBindingInfo::getLnClass)
+            .thenComparing(ExtRefBindingInfo::getLnInst);
     private String iedName;
     private String ldInst;
     private String prefix;
@@ -53,23 +58,24 @@ public class ExtRefBindingInfo {
 
     /**
      * Constructor
+     *
      * @param tExtRef input
      */
-    public ExtRefBindingInfo(TExtRef tExtRef){
+    public ExtRefBindingInfo(TExtRef tExtRef) {
         iedName = tExtRef.getIedName();
         ldInst = tExtRef.getLdInst();
         prefix = tExtRef.getPrefix();
-        if(!tExtRef.getLnClass().isEmpty()) {
+        if (!tExtRef.getLnClass().isEmpty()) {
             this.lnClass = tExtRef.getLnClass().get(0);
         }
         lnInst = tExtRef.getLnInst();
-        if(tExtRef.getDoName() != null) {
+        if (tExtRef.getDoName() != null) {
             doName = new DoTypeName(tExtRef.getDoName());
         }
-        if(tExtRef.getDaName() != null) {
+        if (tExtRef.getDaName() != null) {
             daName = new DaTypeName(tExtRef.getDaName());
         }
-        if(tExtRef.getServiceType() != null) {
+        if (tExtRef.getServiceType() != null) {
             serviceType = tExtRef.getServiceType();
         }
     }
@@ -100,33 +106,35 @@ public class ExtRefBindingInfo {
 
     /**
      * Check validity of ExtRef binding information
+     *
      * @return validity state
      */
     public boolean isValid() {
         final String validationRegex = DaTypeName.VALIDATION_REGEX;
         String doRef = doName == null ? "" : doName.toString();
 
-        Pattern pattern = Pattern.compile(validationRegex,Pattern.MULTILINE);
+        Pattern pattern = Pattern.compile(validationRegex, Pattern.MULTILINE);
         Matcher matcher = pattern.matcher(doRef);
         matcher.find();
 
-        if(!StringUtils.isBlank(doRef) && doRef.length() != matcher.end()){
+        if (!StringUtils.isBlank(doRef) && doRef.length() != matcher.end()) {
             return false;
         }
         return !StringUtils.isBlank(iedName) &&
                 !StringUtils.isBlank(ldInst) &&
                 !StringUtils.isBlank(lnClass) &&
-                (TLLN0Enum.LLN_0.value().equals(lnClass) || !StringUtils.isBlank(lnInst)) ;
+                (TLLN0Enum.LLN_0.value().equals(lnClass) || !StringUtils.isBlank(lnInst));
     }
 
     /**
      * Check dependency between ExtRef binding information and ExtRef
+     *
      * @param tExtRef object containing ExtRef data's'
      * @return dependency state
      */
-    public boolean isWrappedIn(TExtRef tExtRef){
-        return Objects.equals(iedName,tExtRef.getIedName()) &&
-                Objects.equals(ldInst,tExtRef.getLdInst()) &&
+    public boolean isWrappedIn(TExtRef tExtRef) {
+        return Objects.equals(iedName, tExtRef.getIedName()) &&
+                Objects.equals(ldInst, tExtRef.getLdInst()) &&
                 Objects.equals(prefix, tExtRef.getPrefix()) &&
                 Objects.equals(lnInst, tExtRef.getLnInst()) &&
                 tExtRef.getLnClass().contains(lnClass) &&
@@ -135,9 +143,10 @@ public class ExtRefBindingInfo {
 
     /**
      * Check nullability of ExtRef binding information
-     * @return  nullability state
+     *
+     * @return nullability state
      */
-    public boolean isNull(){
+    public boolean isNull() {
         return iedName == null &&
                 ldInst == null &&
                 prefix == null &&
@@ -149,11 +158,18 @@ public class ExtRefBindingInfo {
     }
 
     /**
-     * Convert to string
-     * @return ExtRef binding information formatted to string
+     * Define the way to compare 2 objects ExtRefBindingInfo in order to allow sorting items
+     *
+     * @param o the object to be compared.
+     * @return the comparaison's result (a negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater than the second)
      */
+    public int compareTo(ExtRefBindingInfo o) {
+        return EXT_REF_BINDING_INFO_COMPARATOR.compare(this, o);
+    }
+
     @Override
     public String toString() {
+        String sType = serviceType != null ? serviceType.value() : null;
         return "ExtRefBindingInfo{" +
                 "iedName='" + iedName + '\'' +
                 ", ldInst='" + ldInst + '\'' +
@@ -161,7 +177,8 @@ public class ExtRefBindingInfo {
                 ", lnClass='" + lnClass + '\'' +
                 ", lnInst='" + lnInst + '\'' +
                 ", lnType='" + lnType + '\'' +
-                ", serviceType=" + serviceType.value() +
+                ", serviceType=" +  sType +
                 '}';
+
     }
 }

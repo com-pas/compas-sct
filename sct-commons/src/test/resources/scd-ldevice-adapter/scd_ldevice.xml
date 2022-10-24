@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- SPDX-FileCopyrightText: 2022 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+<SCL version="2007" revision="B" release="4" xmlns="http://www.iec.ch/61850/2003/SCL" xmlns:compas="https://www.lfenergy.org/compas/extension/v1">
+    <Header id="hId" version="2007" revision="B" toolID="COMPAS"/>
+    <IED name="IED_NAME1">
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LD_INST11" ldName="IED_NAME1LD_INST11">
+                    <LN0 lnClass="LLN0" inst="" lnType="LNEX1">
+                        <DOI name="Mod">
+                            <DAI name="stVal">
+                                <Val>on</Val>
+                            </DAI>
+                        </DOI>
+                        <Inputs>
+                            <Private type="COMPAS-Flow">
+                                <compas:Flow FlowID="FlowId1" FlowKind="BAY_INTERNAL" ExtRefiedName="IED_NAME1" ExtReflnClass="ANCR" ExtRefldinst="LD_INST12" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE" dataStreamKey="STAT_LDSUIED_LPDO 1 Sortie_13_BOOLEAN_18_stVal_1"/>
+                            </Private>
+                            <ExtRef iedName="IED_NAME1" ldInst="LD_INST12" lnClass="ANCR" lnInst="1" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113" desc="STAT_LDSUIED_LPDO 1 Sortie_13_BOOLEAN_18_stVal_1"/>
+                        </Inputs>
+                    </LN0>
+                    <LN lnType="lnType1" lnClass="ANCR" inst="1" prefix="prefix"/>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
+    <DataTypeTemplates>
+        <LNodeType lnClass="LLN0" id="LNEX1">
+            <DO name="Mod" type="DO1"/>
+        </LNodeType>
+        <LNodeType lnClass="ANCR" id="lnType1">
+            <DO name="DoName1" type="DO2"/>
+        </LNodeType>
+        <DOType cdc="ENC" id="DO1">
+            <DA fc="ST" name="stVal" bType="Enum" type="BehaviourModeKind"/>
+        </DOType>
+        <DOType cdc="ENC" id="DO2">
+            <DA fc="BL" name="daName1" bType="BOOLEAN"/>
+        </DOType>
+        <EnumType id="BehaviourModeKind">
+            <EnumVal ord="1">on</EnumVal>
+            <EnumVal ord="2">off</EnumVal>
+            <EnumVal ord="3">test</EnumVal>
+        </EnumType>
+    </DataTypeTemplates>
+</SCL>

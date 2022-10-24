@@ -7,9 +7,10 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.lfenergy.compas.scl2007b4.model.TAccessPoint;
 import org.lfenergy.compas.scl2007b4.model.TLDevice;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
-import org.lfenergy.compas.scl2007b4.model.TPrivate;
+import org.lfenergy.compas.scl2007b4.model.TServer;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
@@ -28,7 +29,7 @@ import java.util.stream.Collectors;
  * <ol>
  *   <li>Adapter</li>
  *    <ul>
- *      <li>{@link LDeviceAdapter#getLNAdapters <em>Returns the value of the <b>LNAdapter </b>containment reference list</em>}</li>
+ *      <li>{@link LDeviceAdapter#streamLnAdapters <em>Returns the value of the <b>LNAdapter </b>containment reference list</em>}</li>
  *      <li>{@link LDeviceAdapter#getLN0Adapter <em>Returns the value of the <b>LN0Adapter </b>containment reference list</em>}</li>
  *      <li>{@link LDeviceAdapter#getLNAdapter <em>Returns the value of the <b>LNAdapter </b>reference object By  LNClass, inst and prefix</em>}</li>
  *    </ul>
@@ -70,8 +71,10 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().getAccessPoint()
                 .stream()
-                .filter(tAccessPoint -> tAccessPoint.getServer() != null)
-                .map(tAccessPoint -> tAccessPoint.getServer().getLDevice())
+                .map(TAccessPoint::getServer)
+                .filter(Objects::nonNull)
+                .filter(TServer::isSetLDevice)
+                .map(TServer::getLDevice)
                 .flatMap(Collection::stream)
                 .anyMatch(tlDevice -> currentElem.getInst().equals(tlDevice.getInst()));
     }
@@ -79,6 +82,15 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
     @Override
     protected String elementXPath() {
         return String.format("LDevice[%s]", Utils.xpathAttributeFilter("inst", currentElem.isSetInst() ? currentElem.getInst() : null));
+    }
+
+    @Override
+    public String getXPath() {
+        if (parentAdapter != null){
+            return parentAdapter.getXPath() + "/AccessPoint/Server/" + elementXPath();
+        } else {
+            return super.getXPath();
+        }
     }
 
     /**
@@ -119,6 +131,14 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
     }
 
     /**
+     * Checks if LDevice has an LN0 node
+     * @return true if lDevice has a LN0 node, false otherwise
+     */
+    public boolean hasLN0(){
+        return currentElem.isSetLN0();
+    }
+
+    /**
      * Gets current LDevice LNodes (except LN0)
      * @return list of <em>LNAdapter</em> object
      */
@@ -140,11 +160,9 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
     public LNAdapter getLNAdapter(String lnClass, String lnInst, String prefix) throws ScdException {
         return currentElem.getLN()
                 .stream()
-                .filter(tln -> tln.getLnClass().contains(lnClass) &&
-                        tln.getInst().equals(lnInst) &&
-                        ( (prefix == null && tln.getPrefix().isEmpty()) ||
-                                prefix.equals(tln.getPrefix()))
-                )
+                .filter(tln -> tln.getLnClass().contains(lnClass)
+                    && tln.getInst().equals(lnInst)
+                    && Utils.equalsOrBothBlank(prefix, tln.getPrefix()))
                 .map(tln -> new LNAdapter(this,tln))
                 .findFirst()
                 .orElseThrow(
@@ -166,9 +184,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
         DataTypeTemplateAdapter dttAdapter = parentAdapter.getParentAdapter().getDataTypeTemplateAdapter();
         List<ExtRefBindingInfo> potentialBinders = new ArrayList<>();
 
-        List<AbstractLNAdapter<?>> lnAdapters = new ArrayList<>();
-        lnAdapters.add(getLN0Adapter());
-        lnAdapters.addAll(getLNAdapters());
+        List<AbstractLNAdapter<?>> lnAdapters = getLNAdaptersInclundigLN0();
         for(AbstractLNAdapter<?> lnAdapter : lnAdapters) {
             String lnType = lnAdapter.getLnType();
             try {
@@ -193,9 +209,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
      */
     public List<ExtRefInfo> getExtRefInfo() {
         List<ExtRefInfo> extRefInfos = new ArrayList<>();
-        List<AbstractLNAdapter<?>> lnAdapters = new ArrayList<>();
-        lnAdapters.add(getLN0Adapter());
-        lnAdapters.addAll(getLNAdapters());
+        List<AbstractLNAdapter<?>> lnAdapters = getLNAdaptersInclundigLN0();
         LogicalNodeOptions logicalNodeOptions = new LogicalNodeOptions();
         logicalNodeOptions.setWithExtRef(true);
         for(AbstractLNAdapter<?> lnAdapter : lnAdapters) {
@@ -206,17 +220,16 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
     }
 
     /**
-     * Gets a list of summarized DataTypeTemplate for DataAttribute DAIs (updatable or not)
+     * Gets a list of summarized DataTypeTemplate for DataAttribute DAIs (updatableOnly or not)
      * @param rDtt reference resumed DataTypeTemplate (used as filter)
-     * @param updatable true to retrieve only updatable DAIs, false to retrieve all DAIs
-     * @return List of <em>ResumedDataTemplate</em> (updatable or not)
+     * @param updatableOnly true to retrieve only updatableOnly DAIs, false to retrieve all DAIs
+     * @return List of <em>ResumedDataTemplate</em> (updatableOnly or not)
      * @throws ScdException SCD illegal arguments exception
      */
-    public Set<ResumedDataTemplate> getDAI(ResumedDataTemplate rDtt, boolean updatable) throws ScdException {
+    public Set<ResumedDataTemplate> getDAI(ResumedDataTemplate rDtt, boolean updatableOnly) throws ScdException {
         List<AbstractLNAdapter<?>> lnAdapters = new ArrayList<>();
         if(StringUtils.isBlank(rDtt.getLnClass())){
-            lnAdapters.add(getLN0Adapter());
-            lnAdapters.addAll(getLNAdapters());
+            lnAdapters = getLNAdaptersInclundigLN0();
         } else if(rDtt.getLnClass().equals(TLLN0Enum.LLN_0.value())){
             lnAdapters.add(getLN0Adapter());
         } else {
@@ -230,10 +243,28 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
             filter.setLnInst(lnAdapter.getLNInst());
             filter.setPrefix(lnAdapter.getPrefix());
             filter.setLnType(lnAdapter.getLnType());
-            resumedDataTemplateSet.addAll(lnAdapter.getDAI(filter, updatable));
+            resumedDataTemplateSet.addAll(lnAdapter.getDAI(filter, updatableOnly));
         }
         return resumedDataTemplateSet;
 
     }
 
+
+    public Optional<String> getLDeviceStatus() {
+        if (!hasLN0()){
+            return Optional.empty();
+        }
+        return getLN0Adapter().getLDeviceStatus();
+    }
+
+    /**
+     * Gets all LN of LDevice including LN0
+     * @return list of all LN of LDevice
+     */
+    public List<AbstractLNAdapter<?>> getLNAdaptersInclundigLN0() {
+        List<AbstractLNAdapter<?>> aLNAdapters = new ArrayList<>();
+        aLNAdapters.add(getLN0Adapter());
+        aLNAdapters.addAll(getLNAdapters());
+        return aLNAdapters;
+    }
 }

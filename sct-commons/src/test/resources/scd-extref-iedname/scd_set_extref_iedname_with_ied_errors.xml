@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- SPDX-FileCopyrightText: 2022 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+<SCL version="2007" revision="B" release="4" xmlns="http://www.iec.ch/61850/2003/SCL" xmlns:compas="https://www.lfenergy.org/compas/extension/v1">
+    <Header id="hId" version="2007" revision="B" toolID="COMPAS"/>
+    <!-- Duplicate ICDSystemVersionUUID -->
+    <IED name="IED_NAME1">
+        <Private type="COMPAS-ICDHeader">
+            <compas:ICDHeader IEDType="BCU" IEDinstance="22" BayLabel="3THEIX2" IEDName="IED_NAME1" ICDSystemVersionUUID="Duplicated_ICDSystemVersionUUID" VendorName="SCLE SFE" IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+        </Private>
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LD_INST31">
+                    <LN0 lnClass="LLN0" inst="" lnType="LNEX1"/>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
+    <IED name="IED_NAME2">
+        <Private type="COMPAS-ICDHeader">
+            <compas:ICDHeader IEDType="BCU" IEDinstance="22" BayLabel="3THEIX2" IEDName="IED_NAME2" ICDSystemVersionUUID="Duplicated_ICDSystemVersionUUID" VendorName="SCLE SFE" IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+        </Private>
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LD_INST31">
+                    <LN0 lnClass="LLN0" inst="" lnType="LNEX1"/>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
+    <!-- Missing compas:ICDHeader -->
+    <IED name="IED_NAME3">
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LD_INST31">
+                    <LN0 lnClass="LLN0" inst="" lnType="LNEX1"/>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
+    <!-- Blank compas:ICDHeader iedName -->
+    <IED name="IED_NAME4">
+        <Private type="COMPAS-ICDHeader">
+            <compas:ICDHeader IEDType="BCU" IEDinstance="22" BayLabel="3THEIX2" IEDName="" ICDSystemVersionUUID="System_Version_IED_NAME4" VendorName="SCLE SFE" IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+        </Private>
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LD_INST31">
+                    <LN0 lnClass="LLN0" inst="" lnType="LNEX1"/>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
+    <!-- Blank compas:ICDHeader ICDSystemVersionUUID -->
+    <IED name="IED_NAME5">
+        <Private type="COMPAS-ICDHeader">
+            <compas:ICDHeader IEDType="BCU" IEDinstance="22" BayLabel="3THEIX2" IEDName="IED_NAME5" ICDSystemVersionUUID="" VendorName="SCLE SFE" IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+        </Private>
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LD_INST31">
+                    <LN0 lnClass="LLN0" inst="" lnType="LNEX1"/>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
+    <DataTypeTemplates>
+        <LNodeType lnClass="LLN0" id="LNEX1">
+            <DO name="Mod" type="DO1"/>
+        </LNodeType>
+        <DOType cdc="ENC" id="DO1">
+            <DA fc="ST" name="stVal" bType="Enum" type="BehaviourModeKind"/>
+        </DOType>
+        <EnumType id="BehaviourModeKind">
+            <EnumVal ord="1">on</EnumVal>
+            <EnumVal ord="2">off</EnumVal>
+            <EnumVal ord="3">test</EnumVal>
+        </EnumType>
+    </DataTypeTemplates>
+</SCL>

@@ -10,6 +10,10 @@ import org.lfenergy.compas.scl2007b4.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.MOD_DO_NAME;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL;
 
 
 /**
@@ -64,10 +68,18 @@ public class ResumedDataTemplate {
 
     /**
      * Checks if DA/DO is updatable
-     * @return Updatable state
+     * @return true if updatable, false otherwise
      */
     public boolean isUpdatable(){
-        return daName.isDefined() && daName.isUpdatable();
+        return isDOModDAstVal() || daName.isDefined() && daName.isUpdatable();
+    }
+
+    /**
+     * Checks if DO is Mod and DA is stVal
+     * @return true if DO is "Mod" and DA is "stVal", false otherwise
+     */
+    private boolean isDOModDAstVal(){
+        return doName.getName().equals(MOD_DO_NAME) && daName.getName().equals(STVAL);
     }
 
     @JsonIgnore
@@ -328,5 +340,17 @@ public class ResumedDataTemplate {
         newDaiVal.setValue(daiValue);
         this.setDaiValues(List.of(newDaiVal));
         return this;
+    }
+
+    /**
+     * Retrieve value of the DAI, if present. If multiples values are found,
+     * the value with the lowest index is returned.
+     * @return Return the DAI value with the lowest key from getDaName().getdaiValues() map,
+     * or empty Optional if this DAI has no value.
+     */
+    public Optional<String> findFirstValue() {
+        return getDaName().getDaiValues().keySet().stream()
+            .min(Long::compareTo)
+            .map(key -> getDaName().getDaiValues().get(key));
     }
 }

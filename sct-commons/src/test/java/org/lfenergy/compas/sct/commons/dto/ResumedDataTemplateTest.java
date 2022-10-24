@@ -5,17 +5,27 @@
 package org.lfenergy.compas.sct.commons.dto;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.TFCEnum;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedCDCEnum;
 import org.lfenergy.compas.scl2007b4.model.TVal;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDa;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.MOD_DO_NAME;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL;
 
 class ResumedDataTemplateTest {
 
+    public static final String CTL_MODEL = "ctlModel";
     @Test
     void testGetObjRef(){
         String expected = "IEDLDTM/prelnclass1.do.sdo1.sdo2.da.bda1.bda2";
@@ -148,12 +158,95 @@ class ResumedDataTemplateTest {
         assertThrows(IllegalArgumentException.class, () -> rDtt_t.setFc(TFCEnum.BL));
     }
 
-    @Test
-    void testIsUpdatable(){
-        ResumedDataTemplate rDtt = DTO.createRTT("pre","lnclass","1");
-        assertTrue(rDtt.isUpdatable());
+    /**
+     * Known Fc = CF, DC, SG, SP, ST , SE
+     */
+    @ParameterizedTest
+    @MethodSource("daParametersProviderUpdatable")
+    void isUpdatable_case0(String testName, String daName, TFCEnum fc, boolean valImport) {
+        //Given
+        ResumedDataTemplate rDTT = new ResumedDataTemplate();
+        rDTT.setDoName(new DoTypeName(MOD_DO_NAME));
+        rDTT.setDaName(new DaTypeName(daName));
+        rDTT.setFc(fc);
+        rDTT.setValImport(valImport);
+        //When
+        boolean isRdttUpdatable = rDTT.isUpdatable();
+        // Then
+        assertThat(isRdttUpdatable).isTrue();
+    }
 
-        rDtt.getDaName().setFc(TFCEnum.BL);
-        assertFalse(rDtt.isUpdatable());
+    private static Stream<Arguments> daParametersProviderUpdatable() {
+        return Stream.of(
+                Arguments.of("should return true when Mod", STVAL, TFCEnum.CF, true),
+                Arguments.of("should return true when Mod", STVAL, TFCEnum.CF, false),
+                Arguments.of("should return true when Mod", STVAL, TFCEnum.MX, true),
+                Arguments.of("should return true when Mod", STVAL, TFCEnum.MX, false),
+                Arguments.of("should return true when Mod", STVAL, null, true),
+                Arguments.of("should return true when Mod", STVAL, null, false),
+                Arguments.of("should return true when Mod", CTL_MODEL, TFCEnum.CF, true)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("daParametersProviderNotUpdatable")
+    void isUpdatable_case1(String testName, String daName, TFCEnum fc, boolean valImport) {
+        //Given
+        ResumedDataTemplate rDTT = new ResumedDataTemplate();
+        rDTT.setDoName(new DoTypeName(MOD_DO_NAME));
+        rDTT.setDaName(new DaTypeName(daName));
+        rDTT.setFc(fc);
+        rDTT.setValImport(valImport);
+        //When
+        boolean isRdttUpdatable = rDTT.isUpdatable();
+        // Then
+        assertThat(isRdttUpdatable).isFalse();
+    }
+
+    private static Stream<Arguments> daParametersProviderNotUpdatable() {
+        return Stream.of(
+                Arguments.of("should return false when Mod", CTL_MODEL, TFCEnum.CF, false),
+                Arguments.of("should return false when Mod", CTL_MODEL, TFCEnum.MX, true),
+                Arguments.of("should return false when Mod", CTL_MODEL, TFCEnum.MX, false),
+                Arguments.of("should return false when Mod", CTL_MODEL, null, true),
+                Arguments.of("should return false when Mod", CTL_MODEL, null, false)
+        );
+    }
+
+    @Test
+    void findFirstValue_should_return_value(){
+        // Given
+        ResumedDataTemplate rDTT = new ResumedDataTemplate();
+        DaTypeName da1 = createDa("da1", TFCEnum.CF, true, Map.of(10L, "a value"));
+        rDTT.setDaName(da1);
+        // When
+        Optional<String> firstValue = rDTT.findFirstValue();
+        // Then
+        assertThat(firstValue).hasValue("a value");
+    }
+
+    @Test
+    void findFirstValue_should_return_first_value(){
+        // Given
+        ResumedDataTemplate rDTT = new ResumedDataTemplate();
+        DaTypeName da1 = createDa("da1", TFCEnum.CF, true,
+            Map.of(1L, "value 1", 0L, "value 0"));
+        rDTT.setDaName(da1);
+        // When
+        Optional<String> firstValue = rDTT.findFirstValue();
+        // Then
+        assertThat(firstValue).hasValue("value 0");
+    }
+
+    @Test
+    void findFirstValue_should_return_empty_optional(){
+        // Given
+        ResumedDataTemplate rDTT = new ResumedDataTemplate();
+        DaTypeName da1 = createDa("da1", TFCEnum.CF, true, Map.of());
+        rDTT.setDaName(da1);
+        // When
+        Optional<String> firstValue = rDTT.findFirstValue();
+        // Then
+        assertThat(firstValue).isNotPresent();
     }
 }

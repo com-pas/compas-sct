@@ -21,6 +21,7 @@ import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -117,6 +118,39 @@ class LDeviceAdapterTest {
         String elementXPathResult = lDeviceAdapter.elementXPath();
         // Then
         assertThat(elementXPathResult).isEqualTo(message);
+    }
+
+    @Test
+    void getLDeviceStatus_should_succeed() throws Exception {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_with_extref_errors.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        Optional<LDeviceAdapter> optionalLDeviceAdapter = sclRootAdapter.streamIEDAdapters()
+            .flatMap(IEDAdapter::streamLDeviceAdapters)
+            .filter(lDeviceAdapter -> "IED_NAME1LD_INST13".equals(lDeviceAdapter.getLdName()))
+            .findFirst();
+        assertThat(optionalLDeviceAdapter).isPresent();
+        LDeviceAdapter lDeviceAdapter = optionalLDeviceAdapter.get();
+        // When
+        Optional<String> result = lDeviceAdapter.getLDeviceStatus();
+        // Then
+        assertThat(result)
+            .isPresent()
+            .hasValue("test");
+    }
+
+    @Test
+    void getLNAdaptersInclundigLN0() {
+        //Given
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2").get());
+        //When
+        List<AbstractLNAdapter<?>> lnAdapters = lDeviceAdapter.getLNAdaptersInclundigLN0();
+        //Then
+        assertThat(lnAdapters)
+                .hasSize(2)
+                .hasAtLeastOneElementOfType(LN0Adapter.class)
+                .hasAtLeastOneElementOfType(LNAdapter.class);
 
     }
 }
+

@@ -13,13 +13,13 @@ import org.lfenergy.compas.sct.commons.dto.ReportControlBlock;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import org.lfenergy.compas.sct.commons.scl.com.SubNetworkAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.mockito.Mockito;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -53,13 +53,16 @@ class IEDAdapterTest {
 
     }
 
-
     @Test
-    void testGetLDeviceAdapters() throws Exception {
+    void streamLDeviceAdapters_should_return_all_lDevices() throws Exception {
+        // Given
         SCL scd = SclTestMarshaller.getSCLFromFile(SCD_IED_U_TEST);
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iAdapter = assertDoesNotThrow( () -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
-        assertFalse(iAdapter.getLDeviceAdapters().isEmpty());
+        IEDAdapter iAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
+        // When
+        Stream<LDeviceAdapter> result = iAdapter.streamLDeviceAdapters();
+        // Then
+        assertThat(result).hasSize(3);
     }
 
     @Test
@@ -77,13 +80,13 @@ class IEDAdapterTest {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow( () -> sclRootAdapter.getIEDAdapterByName(DTO.HOLDER_IED_NAME));
 
-        assertTrue(iAdapter.getLDeviceAdapters().size() >= 2);
+        assertTrue(iAdapter.streamLDeviceAdapters().count() >= 2);
         Map<String,String> pairOldNewId = new HashMap<>();
         pairOldNewId.put("LNO1", DTO.HOLDER_IED_NAME + "_LNO1");
         pairOldNewId.put("LNO2", DTO.HOLDER_IED_NAME + "_LNO2");
         assertDoesNotThrow( () ->iAdapter.updateLDeviceNodesType(pairOldNewId));
 
-        LDeviceAdapter lDeviceAdapter = iAdapter.getLDeviceAdapters().get(0);
+        LDeviceAdapter lDeviceAdapter = iAdapter.streamLDeviceAdapters().findFirst().get();
         assertEquals(DTO.HOLDER_IED_NAME + "_LNO1",lDeviceAdapter.getLN0Adapter().getLnType());
     }
 

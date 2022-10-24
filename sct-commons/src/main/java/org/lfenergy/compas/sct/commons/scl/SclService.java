@@ -69,6 +69,7 @@ import static org.lfenergy.compas.sct.commons.util.PrivateEnum.COMPAS_ICDHEADER;
  *   </ol>
  *
  * </ul>
+ *
  * @see org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter
  * @see org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter
  * @see org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter
@@ -88,8 +89,9 @@ public class SclService {
 
     /**
      * Initialise SCD file with Header and Private SCLFileType
-     * @param hId optional SCL Header ID, if empty random UUID will be created
-     * @param hVersion SCL Header Version
+     *
+     * @param hId       optional SCL Header ID, if empty random UUID will be created
+     * @param hVersion  SCL Header Version
      * @param hRevision SCL Header Revision
      * @return <em>SclRootAdapter</em> object as SCD file
      * @throws ScdException throws when inconsistenc in SCL file
@@ -103,10 +105,11 @@ public class SclService {
 
     /**
      * Adds new HistoryItem in SCL file
-     * @param scd SCL file in which new History should be added
-     * @param who Who realize the action
+     *
+     * @param scd  SCL file in which new History should be added
+     * @param who  Who realize the action
      * @param what What kind of action is realized
-     * @param why Why this action is done
+     * @param why  Why this action is done
      * @return <em>SclRootAdapter</em> object as SCD file
      */
     public static SclRootAdapter addHistoryItem(SCL scd, String who, String what, String why) {
@@ -118,7 +121,8 @@ public class SclService {
 
     /**
      * Updates Header of SCL file
-     * @param scd SCL file in which Header should be updated
+     *
+     * @param scd       SCL file in which Header should be updated
      * @param headerDTO Header new values
      * @return <em>SclRootAdapter</em> object as SCD file
      */
@@ -152,9 +156,10 @@ public class SclService {
 
     /**
      * Adds IED in SCL file (Related DataTypeTemplate of SCL is updated also)
-     * @param scd SCL file in which IED should be added
+     *
+     * @param scd     SCL file in which IED should be added
      * @param iedName name of IED to add in SCL
-     * @param icd ICD containing IED to add and related DataTypeTemplate
+     * @param icd     ICD containing IED to add and related DataTypeTemplate
      * @return <em>IEDAdapter</em> as added IED
      * @throws ScdException throws when inconsistency between IED to add and SCL file content
      */
@@ -165,9 +170,10 @@ public class SclService {
 
     /**
      * Adds new SubNetworks in SCL file from ICD file
-     * @param scd SCL file in which SubNetworks should be added
+     *
+     * @param scd         SCL file in which SubNetworks should be added
      * @param subNetworks list of SubNetworks DTO contenting SubNetwork and ConnectedAp parameter names
-     * @param icd ICD file from which SubNetworks functional data are copied from
+     * @param icd         ICD file from which SubNetworks functional data are copied from
      * @return optional of <em>CommunicationAdapter</em> object as Communication node of SCL file.
      * Calling getParentAdapter() will give SCL file
      * @throws ScdException throws when no Communication in SCL and <em>createIfNotExists == false</em>
@@ -188,8 +194,7 @@ public class SclService {
 
                     Optional<SubNetworkAdapter> subNetworkAdapter = communicationAdapter.getSubnetworkByName(snName);
                     if (subNetworkAdapter.isPresent()) {
-                        ConnectedAPAdapter connectedAPAdapter = subNetworkAdapter.get()
-                                .getConnectedAPAdapter(iedName, apName);
+                        ConnectedAPAdapter connectedAPAdapter = subNetworkAdapter.get().getConnectedAPAdapter(iedName, apName);
                         connectedAPAdapter.copyAddressAndPhysConnFromIcd(icd);
                     }
 
@@ -202,6 +207,7 @@ public class SclService {
 
     /**
      * Gets list of SCL SubNetworks
+     *
      * @param scd SCL file in which SubNetworks should be found
      * @return List of <em>SubNetworkDTO</em> from SCL
      * @throws ScdException throws when no Communication in SCL and <em>createIfNotExists == false</em>
@@ -209,17 +215,17 @@ public class SclService {
     public static List<SubNetworkDTO> getSubnetwork(SCL scd) throws ScdException {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         CommunicationAdapter communicationAdapter = sclRootAdapter.getCommunicationAdapter(false);
-        return communicationAdapter.getSubNetworkAdapters()
-                .stream()
+        return communicationAdapter.getSubNetworkAdapters().stream()
                 .map(SubNetworkDTO::from)
                 .collect(Collectors.toList());
     }
 
     /**
      * Gets all ExtRef from specific IED/LDevice in SCL file
-     * @param scd SCL file in which ExtRefs should be found
+     *
+     * @param scd     SCL file in which ExtRefs should be found
      * @param iedName name of IED in which LDevice is localized
-     * @param ldInst LdInst of LDevice in which all ExtRefs should be found
+     * @param ldInst  LdInst of LDevice in which all ExtRefs should be found
      * @return list of <em>ExtRefInfo</em> from specified parameter SCL/IED/LDevice
      * @throws ScdException throws when unknown specified IED or LDevice
      */
@@ -228,32 +234,28 @@ public class SclService {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
-                .orElseThrow(
-                        () -> new ScdException(String.format(UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName))
-                );
+                .orElseThrow(() -> new ScdException(String.format(UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName)));
         return lDeviceAdapter.getExtRefInfo();
     }
 
     /**
      * Gets all possible ExtRefs to bind in SCL file with given ExtRef (<em>signalInfo</em>) in SCL file
-     * @param scd SCL file in which ExtRefs should be found
-     * @param iedName name of IED in which LDevice is localized
-     * @param ldInst ldInst of LDevice in which LN is localized
-     * @param lnClass lnClass of LN in which ExtRef signal to find binders is localized
-     * @param lnInst lnInst of LN in which ExtRef signal to find binders is localized
-     * @param prefix prefix of LN in which ExtRef signal to find binders is localized
+     *
+     * @param scd        SCL file in which ExtRefs should be found
+     * @param iedName    name of IED in which LDevice is localized
+     * @param ldInst     ldInst of LDevice in which LN is localized
+     * @param lnClass    lnClass of LN in which ExtRef signal to find binders is localized
+     * @param lnInst     lnInst of LN in which ExtRef signal to find binders is localized
+     * @param prefix     prefix of LN in which ExtRef signal to find binders is localized
      * @param signalInfo ExtRef signal for which we should find possible binders in SCL file binders
-     * @return  list of <em>ExtRefBindingInfo</em> object (containing binding data for each LNode in current SCL file)
+     * @return list of <em>ExtRefBindingInfo</em> object (containing binding data for each LNode in current SCL file) sorted by {@link ExtRefBindingInfo#compareTo(ExtRefBindingInfo) compareTo} method.
      * @throws ScdException throws when ExtRef contains inconsistency data
      */
-    public static List<ExtRefBindingInfo> getExtRefBinders(SCL scd, String iedName, String ldInst,
-                                                           String lnClass, String lnInst, String prefix, ExtRefSignalInfo signalInfo) throws ScdException {
+    public static List<ExtRefBindingInfo> getExtRefBinders(SCL scd, String iedName, String ldInst, String lnClass, String lnInst, String prefix, ExtRefSignalInfo signalInfo) throws ScdException {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
-                .orElseThrow(
-                        () -> new ScdException(String.format(UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName))
-                );
+                .orElseThrow(() -> new ScdException(String.format(UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName)));
         AbstractLNAdapter<?> abstractLNAdapter = AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
                 .withLnClass(lnClass)
@@ -263,19 +265,21 @@ public class SclService {
 
         // check for signal existence
         // The below throws exception if the signal doesn't exist
+        //TODO: create method which purpose is only ckecking instead of this one
         abstractLNAdapter.getExtRefsBySignalInfo(signalInfo);
 
         // find potential binders for the signalInfo
-        List<ExtRefBindingInfo> potentialBinders = new ArrayList<>();
-        for (IEDAdapter iedA : sclRootAdapter.getIEDAdapters()) {
-            potentialBinders.addAll(iedA.getExtRefBinders(signalInfo));
-        }
-        return potentialBinders;
+        return sclRootAdapter.streamIEDAdapters()
+                .map(iedAdapter1 -> iedAdapter1.getExtRefBinders(signalInfo))
+                .flatMap(Collection::stream)
+                .sorted()
+                .collect(Collectors.toList());
     }
 
     /**
      * Updates ExtRef binding data related to given ExtRef (<em>extRefInfo</em>) in given SCL file
-     * @param scd SCL file in which ExtRef to update should be found
+     *
+     * @param scd        SCL file in which ExtRef to update should be found
      * @param extRefInfo ExtRef signal for which we should find possible binders in SCL file
      * @throws ScdException throws when mandatory data of ExtRef are missing
      */
@@ -288,13 +292,7 @@ public class SclService {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
-                .orElseThrow(
-                        () -> new ScdException(
-                                String.format(
-                                        UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName
-                                )
-                        )
-                );
+                .orElseThrow(() -> new ScdException(String.format(UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName)));
 
         AbstractLNAdapter<?> abstractLNAdapter = AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
@@ -308,7 +306,8 @@ public class SclService {
 
     /**
      * Gets all Control Blocks related to <em>extRefInfo</em> in given SCL file
-     * @param scd SCL file in which ControlBlocks should be found
+     *
+     * @param scd        SCL file in which ControlBlocks should be found
      * @param extRefInfo ExtRef signal for which we should find related ControlBlocks
      * @return list of <em>ControlBlock</em> object as ControlBlocks of LNode specified in <em>extRefInfo</em>
      * @throws ScdException throws when mandatory data of ExtRef are missing
@@ -329,43 +328,26 @@ public class SclService {
             throw new ScdException("Internal binding can't have control block");
         }
 
-        String ldInst = extRefInfo.getHolderLDInst();
-        String lnClass = extRefInfo.getHolderLnClass();
-        String lnInst = extRefInfo.getHolderLnInst();
-        String prefix = extRefInfo.getHolderLnPrefix();
-        // Check holder (IED,LD,LN) exists
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
-        LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
-                .orElseThrow(
-                        () -> new ScdException(String.format(UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName))
-                );
-        AbstractLNAdapter<?> abstractLNAdapter = AbstractLNAdapter.builder()
-                .withLDeviceAdapter(lDeviceAdapter)
-                .withLnClass(lnClass)
-                .withLnInst(lnInst)
-                .withLnPrefix(prefix)
-                .build();
-
-        abstractLNAdapter.checkExtRefInfoCoherence(extRefInfo);
 
         // Get CBs
         IEDAdapter srcIEDAdapter = sclRootAdapter.getIEDAdapterByName(bindingInfo.getIedName());
         LDeviceAdapter srcLDeviceAdapter = srcIEDAdapter.getLDeviceAdapterByLdInst(extRefInfo.getBindingInfo().getLdInst())
                 .orElseThrow();
 
-        AbstractLNAdapter<?> srcLnAdapter = AbstractLNAdapter.builder()
-                .withLDeviceAdapter(srcLDeviceAdapter)
-                .withLnClass(extRefInfo.getBindingInfo().getLnClass())
-                .withLnInst(extRefInfo.getBindingInfo().getLnInst())
-                .withLnPrefix(extRefInfo.getBindingInfo().getPrefix())
-                .build();
-        return srcLnAdapter.getControlSetByExtRefInfo(extRefInfo);
+        List<AbstractLNAdapter<?>> aLNAdapters = srcLDeviceAdapter.getLNAdaptersInclundigLN0();
+
+        return aLNAdapters.stream()
+                .map(abstractLNAdapter1 -> abstractLNAdapter1.getControlBlocksForMatchingFCDA(extRefInfo))
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+
     }
 
     /**
      * Updates ExtRef source binding data's based on given data in <em>extRefInfo</em>
-     * @param scd SCL file in which ExtRef source data's to update should be found
+     *
+     * @param scd        SCL file in which ExtRef source data's to update should be found
      * @param extRefInfo new data for ExtRef source binding data
      * @return <em>TExtRef</em> object as update ExtRef with new source binding data
      * @throws ScdException throws when mandatory data of ExtRef are missing
@@ -396,9 +378,7 @@ public class SclService {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
-                .orElseThrow(
-                        () -> new ScdException(String.format(UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName))
-                );
+                .orElseThrow(() -> new ScdException(String.format(UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName)));
         var anLNAdapter = AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
                 .withLnClass(lnClass)
@@ -411,34 +391,33 @@ public class SclService {
     /**
      * Gets a list of summarized DataTypeTemplate for DataAttribute DA (updatable or not) related to the one given
      * in <em>rDtt</em>
-     * @param scd SCL file in which DataTypeTemplate of DAIs should be found
-     * @param iedName name of IED in which DAs are localized
-     * @param ldInst ldInst of LDevice in which DAIs are localized
-     * @param rDtt reference summarized DataTypeTemplate related to IED DAIs
+     *
+     * @param scd       SCL file in which DataTypeTemplate of DAIs should be found
+     * @param iedName   name of IED in which DAs are localized
+     * @param ldInst    ldInst of LDevice in which DAIs are localized
+     * @param rDtt      reference summarized DataTypeTemplate related to IED DAIs
      * @param updatable true to retrieve DataTypeTemplate's related to only updatable DAIs, false to retrieve all
      * @return List of resumed DataTypeTemplate for DataAttribute (updatable or not)
      * @throws ScdException SCD illegal arguments exception, missing mandatory data
      */
-    public static Set<ResumedDataTemplate> getDAI(SCL scd, String iedName, String ldInst,
-                                                  ResumedDataTemplate rDtt, boolean updatable) throws ScdException {
+    public static Set<ResumedDataTemplate> getDAI(SCL scd, String iedName, String ldInst, ResumedDataTemplate rDtt, boolean updatable) throws ScdException {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = new IEDAdapter(sclRootAdapter, iedName);
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
-                .orElseThrow(
-                        () -> new ScdException(String.format(UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName))
-                );
+                .orElseThrow(() -> new ScdException(String.format(UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName)));
 
         return lDeviceAdapter.getDAI(rDtt, updatable);
     }
 
     /**
      * Updates DAI based on given data in <em>rDtt</em>
-     * @param scd SCL file in which DataTypeTemplate of DAI should be found
+     *
+     * @param scd     SCL file in which DataTypeTemplate of DAI should be found
      * @param iedName name of IED in which DAI is localized
-     * @param ldInst ldInst of LDevice in which DAI is localized
-     * @param rDtt reference summarized DataTypeTemplate related to DAI to update
+     * @param ldInst  ldInst of LDevice in which DAI is localized
+     * @param rDtt    reference summarized DataTypeTemplate related to DAI to update
      * @throws ScdException when inconsistency are found in th SCL's
-     *                     DataTypeTemplate. Which should normally not happens.
+     *                      DataTypeTemplate. Which should normally not happens.
      */
     public static void updateDAI(SCL scd, String iedName, String ldInst, ResumedDataTemplate rDtt) throws ScdException {
         long startTime = System.nanoTime();
@@ -457,9 +436,7 @@ public class SclService {
 
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
-                .orElseThrow(
-                        () -> new ScdException(String.format(UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName))
-                );
+                .orElseThrow(() -> new ScdException(String.format(UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName)));
 
         AbstractLNAdapter<?> lnAdapter = AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
@@ -478,7 +455,8 @@ public class SclService {
 
     /**
      * Gets EnumTypes values of ID <em>idEnum</em> from DataTypeTemplate of SCL file
-     * @param scd SCL file in which EnumType should be found
+     *
+     * @param scd    SCL file in which EnumType should be found
      * @param idEnum ID of EnumType for which values are retrieved
      * @return list of couple EnumType value and it's order
      * @throws ScdException throws when unkonown EnumType
@@ -506,21 +484,21 @@ public class SclService {
      *     <li>import /IED /DataTypeTemplate  from that STD file and update IEDName of /IED in SCD file</li>
      *     <li>import connectedAP and rename ConnectedAP/@iedName in Communication node in SCD file</li>
      * </ul>
+     *
      * @param scdRootAdapter adapter object related to SCL file in which content of STD files are imported
-     * @param stds list of STD files contenting datas to import into SCD
-     * @param comMap couple of Subnetwork name and possible corresponding ConnectAP names
+     * @param stds           list of STD files contenting datas to import into SCD
+     * @param comMap         couple of Subnetwork name and possible corresponding ConnectAP names
      * @return updated SCD file as <em>SclRootAdapter</em>
      * @throws ScdException throws when inconsistency between Substation of SCL content and gien STD files as :
-     *      <ul>
-     *           <li>ICD_SYSTEM_VERSION_UUID in IED/Private of STD is not present in COMPAS-ICDHeader in Substation/../LNode of SCL</li>
-     *           <li>There are several STD files corresponding to ICD_SYSTEM_VERSION_UUID of COMPAS-ICDHeader in Substation/../LNode of SCL</li>
-     *           <li>There is no STD file found corresponding to COMPAS-ICDHeader in Substation/../LNode of SCL</li>
-     *           <li>COMPAS-ICDHeader is not the same in Substation/../LNode of SCL and in IED/Private of STD</li>
-     *           <li>COMPAS_ICDHEADER in Substation/../LNode of SCL not found in IED/Private of STD</li>
-     *      </ul>
+     *                      <ul>
+     *                           <li>ICD_SYSTEM_VERSION_UUID in IED/Private of STD is not present in COMPAS-ICDHeader in Substation/../LNode of SCL</li>
+     *                           <li>There are several STD files corresponding to ICD_SYSTEM_VERSION_UUID of COMPAS-ICDHeader in Substation/../LNode of SCL</li>
+     *                           <li>There is no STD file found corresponding to COMPAS-ICDHeader in Substation/../LNode of SCL</li>
+     *                           <li>COMPAS-ICDHeader is not the same in Substation/../LNode of SCL and in IED/Private of STD</li>
+     *                           <li>COMPAS_ICDHEADER in Substation/../LNode of SCL not found in IED/Private of STD</li>
+     *                      </ul>
      */
-    public static SclRootAdapter importSTDElementsInSCD(@NonNull SclRootAdapter scdRootAdapter, Set<SCL> stds,
-                                                        Map<Pair<String, String>, List<String>> comMap) throws ScdException {
+    public static SclRootAdapter importSTDElementsInSCD(@NonNull SclRootAdapter scdRootAdapter, Set<SCL> stds, Map<Pair<String, String>, List<String>> comMap) throws ScdException {
 
         //Check SCD and STD compatibilities
         Map<String, Pair<TPrivate, List<SCL>>> mapICDSystemVersionUuidAndSTDFile = createMapICDSystemVersionUuidAndSTDFile(stds);
@@ -531,8 +509,8 @@ public class SclService {
         for (Map.Entry<String, TPrivate> entry : mapIEDNameAndPrivate.entrySet()) {
             String iedName = entry.getKey();
             TPrivate tPrivate = entry.getValue();
-            String icdSysVerUuid = PrivateService.getCompasICDHeader(tPrivate).map(TCompasICDHeader::getICDSystemVersionUUID).orElseThrow(
-                    () -> new ScdException(ICD_SYSTEM_VERSION_UUID + " is not present in COMPAS-ICDHeader in LNode")
+            String icdSysVerUuid = PrivateService.extractCompasICDHeader(tPrivate).map(TCompasICDHeader::getICDSystemVersionUUID)
+                .orElseThrow(() -> new ScdException(ICD_SYSTEM_VERSION_UUID + " is not present in COMPAS-ICDHeader in LNode")
             );
 
             if (!mapICDSystemVersionUuidAndSTDFile.containsKey(icdSysVerUuid))
@@ -557,10 +535,11 @@ public class SclService {
 
     /**
      * Checks SCD and STD compatibilities by checking if there is at least one ICD_SYSTEM_VERSION_UUID in
-     *      Substation/../LNode/Private COMPAS-ICDHeader of SCL not present in IED/Private COMPAS-ICDHeader of STD
+     * Substation/../LNode/Private COMPAS-ICDHeader of SCL not present in IED/Private COMPAS-ICDHeader of STD
+     *
      * @param mapICDSystemVersionUuidAndSTDFile map of ICD_SYSTEM_VERSION_UUID and list of corresponding STD
      * @throws ScdException throws when there are several STD files corresponding to <em>ICD_SYSTEM_VERSION_UUID</em>
-     * from Substation/../LNode/Private COMPAS-ICDHeader of SCL
+     *                      from Substation/../LNode/Private COMPAS-ICDHeader of SCL
      */
     private static void checkSTDCorrespondanceWithLNodeCompasICDHeader(Map<String, Pair<TPrivate, List<SCL>>> mapICDSystemVersionUuidAndSTDFile) throws ScdException {
         for (Pair<TPrivate, List<SCL>> pairOfPrivateAndSTDs : mapICDSystemVersionUuidAndSTDFile.values()) {
@@ -573,20 +552,22 @@ public class SclService {
 
     /**
      * Creates formatted message including data's of Private for Exception
+     *
      * @param key Private causing exception
      * @return formatted message
      * @throws ScdException throws when parameter not present in Private
      */
     private static String stdCheckFormatExceptionMessage(TPrivate key) throws ScdException {
-        Optional<TCompasICDHeader> optionalCompasICDHeader = PrivateService.getCompasICDHeader(key);
-        return  HEADER_ID + " = " + optionalCompasICDHeader.map(TCompasICDHeader::getHeaderId).orElse(null) +
-                HEADER_VERSION + " = " + optionalCompasICDHeader.map(TCompasICDHeader::getHeaderVersion).orElse(null) +
-                HEADER_REVISION + " = " + optionalCompasICDHeader.map(TCompasICDHeader::getHeaderRevision).orElse(null) +
-                "and " + ICD_SYSTEM_VERSION_UUID + " = " + optionalCompasICDHeader.map(TCompasICDHeader::getICDSystemVersionUUID).orElse(null);
+        Optional<TCompasICDHeader> optionalCompasICDHeader = PrivateService.extractCompasICDHeader(key);
+        return  HEADER_ID + " = " + optionalCompasICDHeader.map(TCompasICDHeader::getHeaderId).orElse(null) + " " +
+            HEADER_VERSION + " = " + optionalCompasICDHeader.map(TCompasICDHeader::getHeaderVersion).orElse(null) + " " +
+            HEADER_REVISION + " = " + optionalCompasICDHeader.map(TCompasICDHeader::getHeaderRevision).orElse(null) +
+            " and " + ICD_SYSTEM_VERSION_UUID + " = " + optionalCompasICDHeader.map(TCompasICDHeader::getICDSystemVersionUUID).orElse(null);
     }
 
     /**
      * Creates map of IEDName and related Private for all Privates COMPAS-ICDHeader in /Substation of SCL
+     *
      * @param scdRootAdapter SCL file in which Private should be found
      * @return map of Private and its IEDName parameter
      */
@@ -598,12 +579,14 @@ public class SclService {
                 .map(TLNode::getPrivate).flatMap(Collection::stream)
                 .filter(tPrivate ->
                         tPrivate.getType().equals(COMPAS_ICDHEADER.getPrivateType())
-                                && PrivateService.getCompasICDHeader(tPrivate).isPresent() && PrivateService.getCompasICDHeader(tPrivate).get().getIEDName() != null)
-                .collect(Collectors.toMap(tPrivate -> PrivateService.getCompasICDHeader(tPrivate).get().getIEDName(), Function.identity()));
+                            && PrivateService.extractCompasICDHeader(tPrivate).isPresent()
+                            && PrivateService.extractCompasICDHeader(tPrivate).get().getIEDName() != null)
+                .collect(Collectors.toMap(tPrivate -> PrivateService.extractCompasICDHeader(tPrivate).get().getIEDName(), Function.identity()));
     }
 
     /**
      * Sorts in map of ICD_SYSTEM_VERSION_UUID and related Private coupled with all corresponding STD for all given STD
+     *
      * @param stds list of STD to short
      * @return map of ICD_SYSTEM_VERSION_UUID attribute in IED/Private:COMPAS-ICDHeader and related Private coupled with
      * all corresponding STD
@@ -611,7 +594,7 @@ public class SclService {
     private static Map<String, Pair<TPrivate, List<SCL>>> createMapICDSystemVersionUuidAndSTDFile(Set<SCL> stds) {
         Map<String, Pair<TPrivate, List<SCL>>> stringSCLMap = new HashMap<>();
         stds.forEach(std -> std.getIED().forEach(ied -> ied.getPrivate().forEach(tp ->
-                PrivateService.getCompasICDHeader(tp).map(TCompasICDHeader::getICDSystemVersionUUID).ifPresent(icdSysVer -> {
+                PrivateService.extractCompasICDHeader(tp).map(TCompasICDHeader::getICDSystemVersionUUID).ifPresent(icdSysVer -> {
                     Pair<TPrivate, List<SCL>> pair = stringSCLMap.get(icdSysVer);
                     List<SCL> list = pair != null ? pair.getRight() : new ArrayList<>();
                     list.add(std);
@@ -623,16 +606,17 @@ public class SclService {
 
     /**
      * Compares if two Private:COMPAS-ICDHeader have all attributes equal except IEDNane, BayLabel and IEDinstance
+     *
      * @param iedPrivate Private of IED from STD to compare
      * @param scdPrivate Private of LNode fro SCD to compare
      * @return <em>Boolean</em> value of check result
      * @throws ScdException throws when Private is not COMPAS_ICDHEADER one
      */
     private static boolean comparePrivateCompasICDHeaders(TPrivate iedPrivate, TPrivate scdPrivate) throws ScdException {
-        TCompasICDHeader iedCompasICDHeader = PrivateService.getCompasICDHeader(iedPrivate).orElseThrow(
-                () -> new ScdException(COMPAS_ICDHEADER + "not found in IED Private "));
-        TCompasICDHeader scdCompasICDHeader = PrivateService.getCompasICDHeader(scdPrivate).orElseThrow(
-                () -> new ScdException(COMPAS_ICDHEADER + "not found in LNode Private "));
+        TCompasICDHeader iedCompasICDHeader = PrivateService.extractCompasICDHeader(iedPrivate)
+            .orElseThrow(() -> new ScdException(COMPAS_ICDHEADER + "not found in IED Private "));
+        TCompasICDHeader scdCompasICDHeader = PrivateService.extractCompasICDHeader(scdPrivate)
+            .orElseThrow(() -> new ScdException(COMPAS_ICDHEADER + "not found in LNode Private "));
         return iedCompasICDHeader.getIEDType().equals(scdCompasICDHeader.getIEDType())
                 && iedCompasICDHeader.getICDSystemVersionUUID().equals(scdCompasICDHeader.getICDSystemVersionUUID())
                 && iedCompasICDHeader.getVendorName().equals(scdCompasICDHeader.getVendorName())
@@ -647,25 +631,27 @@ public class SclService {
 
     /**
      * Copy Private COMPAS_ICDHEADER from LNode of SCD into Private COMPAS_ICDHEADER from IED of STD
-     * @param stdPrivate Private of IED from STD in which to copy new data
+     *
+     * @param stdPrivate   Private of IED from STD in which to copy new data
      * @param lNodePrivate Private of IED from STD from which new data are taken
      * @throws ScdException throws when Private is not COMPAS_ICDHEADER one
      */
     private static void copyCompasICDHeaderFromLNodePrivateIntoSTDPrivate(TPrivate stdPrivate, TPrivate lNodePrivate) throws ScdException {
-        TCompasICDHeader lNodeCompasICDHeader = PrivateService.getCompasICDHeader(lNodePrivate).orElseThrow(
-                () -> new ScdException(COMPAS_ICDHEADER + " not found in LNode Private "));
+        TCompasICDHeader lNodeCompasICDHeader = PrivateService.extractCompasICDHeader(lNodePrivate)
+            .orElseThrow(() -> new ScdException(COMPAS_ICDHEADER + " not found in LNode Private "));
         stdPrivate.getContent().clear();
         stdPrivate.getContent().add(objectFactory.createICDHeader(lNodeCompasICDHeader));
     }
 
     /**
      * Removes all ControlBlocks and DataSets for all LNs in SCL
+     *
      * @param scl SCL file for which ControlBlocks and DataSets should be deleted
      */
     public static void removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(final SCL scl) {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scl);
-        List<LDeviceAdapter> lDeviceAdapters = sclRootAdapter.getIEDAdapters().stream()
-                .map(IEDAdapter::getLDeviceAdapters).flatMap(List::stream).collect(Collectors.toList());
+        List<LDeviceAdapter> lDeviceAdapters = sclRootAdapter.streamIEDAdapters()
+                .flatMap(IEDAdapter::streamLDeviceAdapters).collect(Collectors.toList());
 
         // LN0
         lDeviceAdapters.stream()
@@ -681,8 +667,9 @@ public class SclService {
                 .forEach(LNAdapter::removeAllControlBlocksAndDatasets);
     }
 
-     /**
+    /**
      * Activate used LDevice and Deactivate unused LDevice in {@link TLNode <em><b>TLNode </b></em>}
+     *
      * @param scd SCL file for which LDevice should be activated or deactivated
      * @return SclReport Object that contain SCL file and set of errors
      */
@@ -690,18 +677,15 @@ public class SclService {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         SubstationAdapter substationAdapter = sclRootAdapter.getSubstationAdapter();
         final List<Pair<String, String>> iedNameLdInstList = substationAdapter.getIedAndLDeviceNamesForLN0FromLNode();
-        List<SclReport.ErrorDescription> errors = sclRootAdapter.getIEDAdapters().stream()
-                .map(IEDAdapter::getLDeviceAdapters)
-                .flatMap(Collection::stream)
+        List<SclReportItem> errors = sclRootAdapter.streamIEDAdapters()
+                .flatMap(IEDAdapter::streamLDeviceAdapters)
                 .map(LDeviceAdapter::getLN0Adapter)
-                .map(ln0Adapter -> ln0Adapter.checkAndUpdateLDeviceStatus(iedNameLdInstList))
-                .reduce(new ArrayList<>(),(sclReportErrors, partialSclReportErrors) -> {
-                    sclReportErrors.addAll(partialSclReportErrors);
-                    return sclReportErrors;
-                });
+                .map(ln0Adapter -> ln0Adapter.updateLDeviceStatus(iedNameLdInstList))
+                .flatMap(Optional::stream)
+                .collect(Collectors.toList());
         SclReport sclReport = new SclReport();
-        sclReport.getErrorDescriptionList().addAll(errors);
+        sclReport.getSclReportItems().addAll(errors);
         sclReport.setSclRootAdapter(sclRootAdapter);
         return sclReport;
-     }
+    }
 }

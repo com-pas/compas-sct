@@ -12,6 +12,9 @@ import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Report of services which work on the SCD.
+ */
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
@@ -19,22 +22,22 @@ import java.util.List;
 @Builder
 public class SclReport {
 
+    /**
+     * The SCD on which errors were encountered
+     */
     private SclRootAdapter sclRootAdapter;
 
-    private List<ErrorDescription> errorDescriptionList = new ArrayList<>();
+    /**
+     * List of errors
+     */
+    private List<SclReportItem> sclReportItems = new ArrayList<>();
 
+    /**
+     *
+     * @return true the service succeeded, false otherwise
+     */
     public boolean isSuccess() {
-        return errorDescriptionList.isEmpty();
+        return sclReportItems.stream().noneMatch(SclReportItem::isFatal);
     }
 
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @ToString
-    @EqualsAndHashCode
-    @Builder
-    public static class ErrorDescription{
-        private String xpath;
-        private String message;
-    }
 }

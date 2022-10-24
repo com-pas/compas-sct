@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDa;
 import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDo;
@@ -181,7 +181,7 @@ class SclServiceTest {
                 "Do11.sdo11", "da11.bda111.bda112.bda113", "INT_ADDR11"
         );
 
-        List<ExtRefBindingInfo> potentialBinders = assertDoesNotThrow(
+        assertDoesNotThrow(
                 () -> SclService.getExtRefBinders(
                         scd, "IED_NAME1", "LD_INST11", "LLN0", "", "", signalInfo
                 )
@@ -193,6 +193,34 @@ class SclServiceTest {
                         scd, "IED_NAME1", "UNKNOWN_LD", "LLN0", "", "", signalInfo
                 )
         );
+    }
+
+    @Test
+    void test_getExtRefBinders_should_return_sorted_list() throws Exception {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_binders_test.xml");
+
+        ExtRefSignalInfo signalInfo = createSignalInfo(
+                "Do11.sdo11", "da11.bda111.bda112.bda113", "INT_ADDR11"
+        );
+
+        // When
+        List<ExtRefBindingInfo> potentialBinders = SclService.getExtRefBinders(scd, "IED_NAME1", "LD_INST11", "LLN0", "", "", signalInfo);
+
+        // Then
+        // Not so relevant because we get a single element list from the XML file
+        assertThat(potentialBinders)
+                .extracting(ExtRefBindingInfo::getIedName)
+                .containsExactly("IED_NAME1");
+        assertThat(potentialBinders)
+                .extracting(ExtRefBindingInfo::getLdInst)
+                .containsExactly("LD_INST12");
+        assertThat(potentialBinders)
+                .extracting(ExtRefBindingInfo::getLnClass)
+                .containsExactly("LLN0");
+        assertThat(potentialBinders)
+                .extracting(ExtRefBindingInfo::getLnInst)
+                .containsExactly("");
     }
 
     @Test
@@ -245,7 +273,8 @@ class SclServiceTest {
     }
 
     @Test
-    void testGetExtRefSourceInfo() throws Exception {
+    void getExtRefSourceInfo_shouldReturnEmptyList_whenExtRefMatchNoFCDA() throws Exception {
+        //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
         String iedName = "IED_NAME2";
         String ldInst = "LD_INST21";
@@ -263,48 +292,128 @@ class SclServiceTest {
         extRefInfo.setHolderLDInst(ldInst);
         extRefInfo.setHolderLnClass(lnClass);
 
-        var controlBlocks = SclService.getExtRefSourceInfo(scd, extRefInfo);
-        assertEquals(2, controlBlocks.size());
-        controlBlocks.forEach(controlBlock -> assertTrue(
-                        controlBlock.getName().equals("goose1") || controlBlock.getName().equals("smv1")
-                )
-        );
+        //When
+        List<ControlBlock<?>>  controlBlocks = SclService.getExtRefSourceInfo(scd, extRefInfo);
+
+        //Then
+        assertThat(controlBlocks).hasSize(0);
     }
 
     @Test
-    void testUpdateExtRefSource() throws Exception {
+    void getExtRefSourceInfo_shouldReturnListOfControlBlocks_whenExtRefMatchFCDA() throws Exception {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/issue_175_scd_get_cbs_test.xml");
+        String iedName = "IED_NAME2";
+        String ldInst = "LD_INST21";
+        String lnClass = TLLN0Enum.LLN_0.value();
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iedAdapter.getLDeviceAdapterByLdInst(ldInst).get());
+        LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
+        List<TExtRef> extRefs = ln0Adapter.getExtRefs(null);
+        assertFalse(extRefs.isEmpty());
+
+        ExtRefInfo extRefInfo = new ExtRefInfo(extRefs.get(0));
+
+        extRefInfo.setHolderIEDName(iedName);
+        extRefInfo.setHolderLDInst(ldInst);
+        extRefInfo.setHolderLnClass(lnClass);
+
+        //When
+        List<ControlBlock<?>> controlBlocks = SclService.getExtRefSourceInfo(scd, extRefInfo);
+
+        //Then
+        assertThat(controlBlocks).hasSize(1);
+        assertThat(controlBlocks.get(0).getName()).isEqualTo("goose2");
+    }
+
+    @Test
+    void updateExtRefSource_shouldThrowScdException_whenSignalInfoNullOrInvalid() throws Exception {
+        //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
         ExtRefInfo extRefInfo = new ExtRefInfo();
         extRefInfo.setHolderIEDName("IED_NAME2");
         extRefInfo.setHolderLDInst("LD_INST21");
         extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
 
-        assertThrows(ScdException.class, () -> SclService.updateExtRefSource(scd, extRefInfo)); // signal = null
+        //When Then
+        assertThatThrownBy(() -> SclService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class); // signal = null
         extRefInfo.setSignalInfo(new ExtRefSignalInfo());
-        assertThrows(ScdException.class, () -> SclService.updateExtRefSource(scd, extRefInfo)); // signal invalid
+        assertThatThrownBy(() -> SclService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class);// signal invalid
+    }
 
-        extRefInfo.getSignalInfo().setIntAddr("INT_ADDR21");
-        extRefInfo.getSignalInfo().setPDA("da21.bda211.bda212.bda213");
-        extRefInfo.getSignalInfo().setPDO("Do21.sdo21");
-        assertThrows(ScdException.class, () -> SclService.updateExtRefSource(scd, extRefInfo)); // binding = null
+    @Test
+    void updateExtRefSource_shouldThrowScdException_whenBindingInfoNullOrInvalid() throws Exception {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
+        ExtRefInfo extRefInfo = new ExtRefInfo();
+        extRefInfo.setHolderIEDName("IED_NAME2");
+        extRefInfo.setHolderLDInst("LD_INST21");
+        extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
+
+        ExtRefSignalInfo extRefSignalInfo = new ExtRefSignalInfo();
+        extRefSignalInfo.setIntAddr("INT_ADDR21");
+        extRefSignalInfo.setPDA("da21.bda211.bda212.bda213");
+        extRefSignalInfo.setPDO("Do21.sdo21");
+        extRefInfo.setSignalInfo(extRefSignalInfo);
+        //When Then
+        assertThatThrownBy(() -> SclService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class); // binding = null
         extRefInfo.setBindingInfo(new ExtRefBindingInfo());
-        assertThrows(ScdException.class, () -> SclService.updateExtRefSource(scd, extRefInfo)); // binding invalid
+        assertThatThrownBy(() -> SclService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class);// binding invalid
+    }
+    @Test
+    void updateExtRefSource_shouldThrowScdException_whenBindingInternalBinding() throws Exception {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
+        ExtRefInfo extRefInfo = new ExtRefInfo();
+        extRefInfo.setHolderIEDName("IED_NAME2");
+        extRefInfo.setHolderLDInst("LD_INST21");
+        extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
 
-        extRefInfo.getBindingInfo().setIedName("IED_NAME2"); // internal binding
-        extRefInfo.getBindingInfo().setLdInst("LD_INST12");
-        extRefInfo.getBindingInfo().setLnClass(TLLN0Enum.LLN_0.value());
-        assertThrows(ScdException.class, () -> SclService.updateExtRefSource(scd, extRefInfo)); // CB not allowed
+        ExtRefSignalInfo extRefSignalInfo = new ExtRefSignalInfo();
+        extRefSignalInfo.setIntAddr("INT_ADDR21");
+        extRefSignalInfo.setPDA("da21.bda211.bda212.bda213");
+        extRefSignalInfo.setPDO("Do21.sdo21");
+        extRefInfo.setSignalInfo(extRefSignalInfo);
 
-        extRefInfo.getBindingInfo().setIedName("IED_NAME1");
+        ExtRefBindingInfo extRefBindingInfo = new ExtRefBindingInfo();
+        extRefBindingInfo.setIedName("IED_NAME2"); // internal binding
+        extRefBindingInfo.setLdInst("LD_INST12");
+        extRefBindingInfo.setLnClass(TLLN0Enum.LLN_0.value());
+        extRefInfo.setBindingInfo(new ExtRefBindingInfo());
+        //When Then
+        assertThatThrownBy(() -> SclService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class); // CB not allowed
+    }
+    @Test
+    void updateExtRefSource_shouldThrowScdException_whenBindingExternalBinding() throws Exception {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
+        ExtRefInfo extRefInfo = new ExtRefInfo();
+        extRefInfo.setHolderIEDName("IED_NAME2");
+        extRefInfo.setHolderLDInst("LD_INST21");
+        extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
+
+        ExtRefSignalInfo extRefSignalInfo = new ExtRefSignalInfo();
+        extRefSignalInfo.setIntAddr("INT_ADDR21");
+        extRefSignalInfo.setPDA("da21.bda211.bda212.bda213");
+        extRefSignalInfo.setPDO("Do21.sdo21");
+        extRefInfo.setSignalInfo(extRefSignalInfo);
+
+        ExtRefBindingInfo extRefBindingInfo = new ExtRefBindingInfo();
+        extRefBindingInfo.setIedName("IED_NAME1");
+        extRefBindingInfo.setLdInst("LD_INST12");
+        extRefBindingInfo.setLnClass(TLLN0Enum.LLN_0.value());
+        extRefInfo.setBindingInfo(extRefBindingInfo);
 
         extRefInfo.setSourceInfo(new ExtRefSourceInfo());
         extRefInfo.getSourceInfo().setSrcLDInst(extRefInfo.getBindingInfo().getLdInst());
         extRefInfo.getSourceInfo().setSrcLNClass(extRefInfo.getBindingInfo().getLnClass());
         extRefInfo.getSourceInfo().setSrcCBName("goose1");
+
+        //When Then
         TExtRef extRef = assertDoesNotThrow(() -> SclService.updateExtRefSource(scd, extRefInfo));
         assertEquals(extRefInfo.getSourceInfo().getSrcCBName(), extRef.getSrcCBName());
     }
-
 
     private ExtRefSignalInfo createSignalInfo(String pDO, String pDA, String intAddr) {
 
@@ -651,8 +760,7 @@ class SclServiceTest {
         SclService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scl);
         // Then
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scl);
-        List<LDeviceAdapter> lDevices = scdRootAdapter.getIEDAdapters().stream().map(IEDAdapter::getLDeviceAdapters)
-                .flatMap(List::stream).collect(Collectors.toList());
+        List<LDeviceAdapter> lDevices = scdRootAdapter.streamIEDAdapters().flatMap(IEDAdapter::streamLDeviceAdapters).collect(Collectors.toList());
         List<LN0> ln0s = lDevices.stream().map(LDeviceAdapter::getLN0Adapter).map(LN0Adapter::getCurrentElem).collect(Collectors.toList());
         assertThat(ln0s)
                 .isNotEmpty()
@@ -672,9 +780,9 @@ class SclServiceTest {
         SclService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scl);
         // Then
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scl);
-        List<LDeviceAdapter> lDevices = scdRootAdapter.getIEDAdapters().stream().map(IEDAdapter::getLDeviceAdapters)
-                .flatMap(List::stream).collect(Collectors.toList());
-        List<TLN> lns = lDevices.stream().map(LDeviceAdapter::getLNAdapters).flatMap(List::stream)
+        List<TLN> lns = scdRootAdapter.streamIEDAdapters()
+                .flatMap(IEDAdapter::streamLDeviceAdapters)
+                .map(LDeviceAdapter::getLNAdapters).flatMap(List::stream)
                 .map(LNAdapter::getCurrentElem).collect(Collectors.toList());
         assertThat(lns)
                 .isNotEmpty()
@@ -693,8 +801,8 @@ class SclServiceTest {
         // Then
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scl);
         List<TExtRef> extRefs = scdRootAdapter
-                .getIEDAdapters().stream()
-                .map(IEDAdapter::getLDeviceAdapters).flatMap(List::stream)
+                .streamIEDAdapters()
+                .flatMap(IEDAdapter::streamLDeviceAdapters)
                 .map(LDeviceAdapter::getLN0Adapter)
                 .map(AbstractLNAdapter::getExtRefs).flatMap(List::stream)
                 .collect(Collectors.toList());
@@ -714,13 +822,13 @@ class SclServiceTest {
         SCL scl3 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_KO_MissingLDevicePrivateAttribute.scd");
         SCL scl4 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_KO_MissingMod.scd");
         Tuple[] scl1Errors = new Tuple[]{Tuple.tuple("The LDevice doesn't have a DO @name='Beh' OR its associated DA@fc='ST' AND DA@name='stVal'",
-                "/SCL/IED[@name=\"IedName1\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType1\"]")};
+                "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0")};
         Tuple[] scl2Errors = new Tuple[]{Tuple.tuple("The LDevice doesn't have a Private compas:LDevice.",
-                "/SCL/IED[@name=\"IedName1\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType1\"]")};
+                "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0")};
         Tuple[] scl3Errors = new Tuple[]{Tuple.tuple("The Private compas:LDevice doesn't have the attribute 'LDeviceStatus'",
-                "/SCL/IED[@name=\"IedName1\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType1\"]")};
+                "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0")};
         Tuple[] scl4Errors = new Tuple[]{Tuple.tuple("The LDevice doesn't have a DO @name='Mod'",
-                "/SCL/IED[@name=\"IedName1\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType1\"]")};
+                "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0")};
         return Stream.of(
                 Arguments.of("MissingDOBeh",scl1, scl1Errors),
                 Arguments.of("MissingLDevicePrivate",scl2, scl2Errors),
@@ -741,9 +849,9 @@ class SclServiceTest {
         // Then
         String after = createWrapper().marshall(sclReport.getSclRootAdapter().getCurrentElem());
         assertFalse(sclReport.isSuccess());
-        assertThat(sclReport.getErrorDescriptionList())
+        assertThat(sclReport.getSclReportItems())
                 .hasSize(1)
-                .extracting(SclReport.ErrorDescription::getMessage, SclReport.ErrorDescription::getXpath)
+                .extracting(SclReportItem::getMessage, SclReportItem::getXpath)
                 .containsExactly(errors);
         assertEquals("off", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName1", "LDSUIED").get().getValue());
         assertEquals(before, after);
@@ -754,25 +862,25 @@ class SclServiceTest {
         SCL scl2 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_LD_STATUS_UNTESTED.scd");
         SCL scl3 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test1_LD_STATUS_INACTIVE.scd");
         Tuple[] scl1Errors = new Tuple[]{Tuple.tuple("The LDevice cannot be set to 'off' but has not been selected into SSD.",
-                        "/SCL/IED[@name=\"IedName1\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType1\"]"),
+                        "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
                 Tuple.tuple("The LDevice cannot be set to 'on' but has been selected into SSD.",
-                        "/SCL/IED[@name=\"IedName2\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType2\"]"),
+                        "/SCL/IED[@name=\"IedName2\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
                 Tuple.tuple("The LDevice cannot be activated or desactivated because its BehaviourKind Enum contains NOT 'on' AND NOT 'off'.",
-                        "/SCL/IED[@name=\"IedName3\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType3\"]"
+                        "/SCL/IED[@name=\"IedName3\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"
                 )};
         Tuple[] scl2Errors = new Tuple[]{Tuple.tuple("The LDevice cannot be set to 'off' but has not been selected into SSD.",
-                        "/SCL/IED[@name=\"IedName1\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType1\"]"),
+                        "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
                 Tuple.tuple("The LDevice cannot be set to 'on' but has been selected into SSD.",
-                        "/SCL/IED[@name=\"IedName2\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType2\"]"),
+                        "/SCL/IED[@name=\"IedName2\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
                 Tuple.tuple("The LDevice cannot be activated or desactivated because its BehaviourKind Enum contains NOT 'on' AND NOT 'off'.",
-                        "/SCL/IED[@name=\"IedName3\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType3\"]"
+                        "/SCL/IED[@name=\"IedName3\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"
                 )};
         Tuple[] scl3Errors = new Tuple[]{Tuple.tuple("The LDevice is not qualified into STD but has been selected into SSD.",
-                        "/SCL/IED[@name=\"IedName1\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType1\"]"),
+                        "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
                 Tuple.tuple("The LDevice cannot be set to 'on' but has been selected into SSD.",
-                        "/SCL/IED[@name=\"IedName2\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType2\"]"),
+                        "/SCL/IED[@name=\"IedName2\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
                 Tuple.tuple("The LDevice cannot be activated or desactivated because its BehaviourKind Enum contains NOT 'on' AND NOT 'off'.",
-                        "/SCL/IED[@name=\"IedName3\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType3\"]"
+                        "/SCL/IED[@name=\"IedName3\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"
                 )};
         return Stream.of(
                 Arguments.of("ACTIVE", scl1, scl1Errors),
@@ -794,9 +902,9 @@ class SclServiceTest {
         // Then
         String after = createWrapper().marshall(sclReport.getSclRootAdapter().getCurrentElem());
         assertFalse(sclReport.isSuccess());
-        assertThat(sclReport.getErrorDescriptionList())
+        assertThat(sclReport.getSclReportItems())
                 .hasSize(3)
-                .extracting(SclReport.ErrorDescription::getMessage, SclReport.ErrorDescription::getXpath)
+                .extracting(SclReportItem::getMessage, SclReportItem::getXpath)
                 .containsExactly(errors);
         assertEquals("off", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName1", "LDSUIED").get().getValue());
         assertEquals("on", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName2", "LDSUIED").get().getValue());
@@ -815,13 +923,13 @@ class SclServiceTest {
         SclReport sclReport = SclService.updateLDeviceStatus(scl);
         // Then
         assertFalse(sclReport.isSuccess());
-        assertThat(sclReport.getErrorDescriptionList())
+        assertThat(sclReport.getSclReportItems())
                 .hasSize(2)
-                .extracting(SclReport.ErrorDescription::getMessage, SclReport.ErrorDescription::getXpath)
+                .extracting(SclReportItem::getMessage, SclReportItem::getXpath)
                 .containsExactly(Tuple.tuple("The LDevice cannot be set to 'off' but has not been selected into SSD.",
-                                "/SCL/IED[@name=\"IedName1\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType1\"]"),
+                                "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
                         Tuple.tuple("The LDevice is not qualified into STD but has been selected into SSD.",
-                                "/SCL/IED[@name=\"IedName2\"]/LDevice[@inst=\"LDSUIED\"]/LN[lnClass=\"LLN0\" and @inst=\"\" and @lnType=\"LNType2\"]"));
+                                "/SCL/IED[@name=\"IedName2\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"));
         assertEquals("off", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName1", "LDSUIED").get().getValue());
         assertEquals("on", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName2", "LDSUIED").get().getValue());
         assertTrue(getLDeviceStatusValue(scl, "IedName3", "LDSUIED").isPresent());
@@ -854,24 +962,6 @@ class SclServiceTest {
         assertTrue(getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName3", "LDSUIED").isPresent());
         assertEquals("off", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName3", "LDSUIED").get().getValue());
     }
-
-    @Test
-    void updateLDeviceStatus_shouldReturnError_when_DaiNotUpdatable() throws Exception {
-        // Given
-        SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_Dai_Not_Updatable.scd");
-        assertTrue(getLDeviceStatusValue(givenScl, "IedName1", "LDSUIED").isPresent());
-        assertEquals("off", getLDeviceStatusValue(givenScl, "IedName1", "LDSUIED").get().getValue());
-        assertTrue(getLDeviceStatusValue(givenScl, "IedName2", "LDSUIED").isPresent());
-        assertEquals("on", getLDeviceStatusValue(givenScl, "IedName2", "LDSUIED").get().getValue());
-        assertFalse(getLDeviceStatusValue(givenScl, "IedName3", "LDSUIED").isPresent());
-
-        // When
-        // Then
-       assertThatCode(() -> SclService.updateLDeviceStatus(givenScl))
-                .isInstanceOf(ScdException.class)
-                .hasMessage("DAI (Mod -stVal) cannot be updated");
-    }
-
 
     private Optional<TVal> getLDeviceStatusValue(SCL scl, String iedName, String ldInst){
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scl);
