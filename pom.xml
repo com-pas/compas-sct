@@ -39,7 +39,6 @@
         <scl-extension.version>0.9.1</scl-extension.version>
         <compas-scl-xsd.version>0.0.4</compas-scl-xsd.version>
         <maven.plugin.javadoc>3.4.1</maven.plugin.javadoc>
-        <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -153,20 +152,6 @@
                             <phase>package</phase>
                             <goals>
                                 <goal>aggregate</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-source-plugin</artifactId>
-                    <version>${maven-source-plugin.version}</version>
-                    <executions>
-                        <execution>
-                            <id>attach-sources</id>
-                            <phase>verify</phase>
-                            <goals>
-                                <goal>jar-no-fork</goal>
                             </goals>
                         </execution>
                     </executions>

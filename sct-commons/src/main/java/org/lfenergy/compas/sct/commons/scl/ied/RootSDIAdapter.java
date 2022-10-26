@@ -59,6 +59,7 @@ public class RootSDIAdapter extends SclElementAdapter<DOIAdapter, TSDI> implemen
                 Utils.xpathAttributeFilter("name", currentElem.isSetName() ? currentElem.getName() : null));
     }
 
+
     /**
      * Gets in current root SDI specific SDI by its name
      * @param name name of SDI to get

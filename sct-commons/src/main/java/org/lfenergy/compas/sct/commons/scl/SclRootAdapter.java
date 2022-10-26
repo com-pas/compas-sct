@@ -17,7 +17,9 @@ import org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter;
 
-import java.util.stream.Stream;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * A representation of the model object
@@ -31,7 +33,7 @@ import java.util.stream.Stream;
  *      <li>{@link SclRootAdapter#getHeaderAdapter <em>Returns the value of the <b>HeaderAdapter </b> reference object</em>}</li>
  *      <li>{@link SclRootAdapter#getSubstationAdapter(String) <em>Returns the value of the <b>SubstationAdapter </b> reference object By nme</em>}</li>
  *      <li>{@link SclRootAdapter#getCommunicationAdapter(boolean) <em>Returns or Adds the value of the <b>CommunicationAdapter </b> reference object</em>}</li>
- *      <li>{@link SclRootAdapter#streamIEDAdapters() <em>Returns the value of the <b>IEDAdapter </b> containment reference list</em>}</li>
+ *      <li>{@link SclRootAdapter#getIEDAdapters() <em>Returns the value of the <b>IEDAdapter </b> containment reference list</em>}</li>
  *      <li>{@link SclRootAdapter#getIEDAdapterByName(String) <em>Returns the value of the <b>IEDAdapter </b> reference object By name</em>}</li>
  *      <li>{@link SclRootAdapter#getDataTypeTemplateAdapter() <em>Returns the value of the <b>DataTypeTemplateAdapter </b> containment reference list</em>}</li>
  *    </ul>
@@ -263,11 +265,12 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
 
     /**
      * Gets all IEDs from SCL
-     * @return Stream of <em>IEDAdapter</em> object as IEDs of SCL
+     * @return list of <em>IEDAdapter</em> object as IEDs of SCL
      */
-    public Stream<IEDAdapter> streamIEDAdapters() {
+    public List<IEDAdapter> getIEDAdapters() {
         return currentElem.getIED().stream()
-            .map(tied -> new IEDAdapter(this, tied));
+                .map(tied -> new IEDAdapter(this,tied))
+                .collect(Collectors.toList());
     }
 
     /**

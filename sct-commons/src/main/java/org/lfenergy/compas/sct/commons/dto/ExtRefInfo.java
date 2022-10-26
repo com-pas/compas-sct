@@ -5,7 +5,10 @@
 package org.lfenergy.compas.sct.commons.dto;
 
 
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.scl2007b4.model.TFCDA;
@@ -35,7 +38,6 @@ import java.util.Objects;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class ExtRefInfo extends LNodeMetaDataEmbedder{
 
     private ExtRefSignalInfo signalInfo;
@@ -80,10 +82,9 @@ public class ExtRefInfo extends LNodeMetaDataEmbedder{
      * @param tfcda FCDA data object
      * @return match state
      */
-    //TODO  this method should be checked, return if parameter tested are not present in FCDA even if two object are different
     public boolean matchFCDA(@NonNull TFCDA tfcda){
         boolean returnValue = true;
-        if(AbstractLNAdapter.isFCDANull(tfcda)) {
+        if(AbstractLNAdapter.isNull(tfcda)) {
             returnValue = false;
         }
 
@@ -117,25 +118,4 @@ public class ExtRefInfo extends LNodeMetaDataEmbedder{
         }
         return returnValue;
     }
-    /**
-     * Check matching between FCDA and ExtRef information (for external binding)
-     * Check is done for parameter lDInst(mandatory), lNClass(mandatory), lNInst, prefix doName as pDO(mandatory) and daName as pDA
-     * present in ExtRef and FCDA
-     * @param tfcda FCDA data to check compatibilities with ExtRef
-     * @return true if ExtRef matches FCDA for parameters ahead false otherwise
-     */
-    public boolean checkMatchingFCDA(@NonNull TFCDA tfcda){
-        if(bindingInfo == null  || signalInfo == null) return false;
-        FCDAInfo fcdaInfo = new FCDAInfo(tfcda);
-        FCDAInfo fcdaOfBinding = FCDAInfo.builder()
-                .ldInst(bindingInfo.getLdInst())
-                .lnClass(bindingInfo.getLnClass())
-                .lnInst(bindingInfo.getLnInst())
-                .prefix(bindingInfo.getPrefix())
-                .doName(new DoTypeName(signalInfo.getPDO()))
-                .daName(new DaTypeName(signalInfo.getPDA()))
-                .build();
-        return fcdaInfo.checkFCDACompatibilitiesForBinding(fcdaOfBinding);
-    }
-
 }

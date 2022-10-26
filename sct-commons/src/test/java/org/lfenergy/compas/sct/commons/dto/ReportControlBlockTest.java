@@ -5,7 +5,16 @@
 package org.lfenergy.compas.sct.commons.dto;
 
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.scl2007b4.model.TClientLN;
+import org.lfenergy.compas.scl2007b4.model.TControlWithIEDName;
+import org.lfenergy.compas.scl2007b4.model.TPredefinedTypeOfSecurityEnum;
+import org.lfenergy.compas.scl2007b4.model.TReportControl;
+import org.lfenergy.compas.scl2007b4.model.TReportSettings;
+import org.lfenergy.compas.scl2007b4.model.TRptEnabled;
+import org.lfenergy.compas.scl2007b4.model.TServiceSettingsNoDynEnum;
+import org.lfenergy.compas.scl2007b4.model.TServiceType;
+import org.lfenergy.compas.scl2007b4.model.TServices;
+import org.lfenergy.compas.scl2007b4.model.TText;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
@@ -18,7 +27,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ReportControlBlockTest {
 

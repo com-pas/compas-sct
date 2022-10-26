@@ -5,14 +5,12 @@
 package org.lfenergy.compas.sct.commons.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.TFCDA;
 import org.lfenergy.compas.scl2007b4.model.TFCEnum;
-
-import java.util.Objects;
-
-import static org.lfenergy.compas.sct.commons.util.Utils.equalsOrBothBlank;
 
 /**
  * A representation of the model object <em><b>FCDA</b></em>.
@@ -35,9 +33,7 @@ import static org.lfenergy.compas.sct.commons.util.Utils.equalsOrBothBlank;
  */
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class FCDAInfo {
 
     private String dataSet;
@@ -57,11 +53,7 @@ public class FCDAInfo {
      * @param tfcda input
      */
     public FCDAInfo(String dataSet, TFCDA tfcda) {
-        this(tfcda);
         this.dataSet = dataSet;
-    }
-
-    public FCDAInfo(TFCDA tfcda) {
         fc = tfcda.getFc();
         ldInst = tfcda.getLdInst();
         prefix = tfcda.getPrefix();
@@ -113,19 +105,5 @@ public class FCDAInfo {
      */
     public boolean isValid() {
         return doName != null && doName.isDefined();
-    }
-
-    /**
-     * Checks if two FCDAInfo object match for ldInst, lnInst, lnClass, lnPrefix doName and daName for search of binding control blocks
-     * @param fcdaInfo FCDA to copare with
-     * @return true if FCDAs match for binding, otherwise false
-     */
-    public boolean checkFCDACompatibilitiesForBinding(FCDAInfo fcdaInfo) {
-        return  equalsOrBothBlank(getLdInst(), fcdaInfo.getLdInst())
-                && equalsOrBothBlank(getPrefix(), fcdaInfo.getPrefix())
-                && equalsOrBothBlank(getLnClass(), fcdaInfo.getLnClass())
-                && equalsOrBothBlank(getLnInst(), fcdaInfo.getLnInst())
-                && Objects.equals(getDoName(), fcdaInfo.getDoName())
-                && Objects.equals(getDaName(), fcdaInfo.getDaName());
     }
 }

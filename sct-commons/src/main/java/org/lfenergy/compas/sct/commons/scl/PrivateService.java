@@ -5,6 +5,7 @@
 package org.lfenergy.compas.sct.commons.scl;
 
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.util.PrivateEnum;
@@ -23,18 +24,19 @@ import java.util.stream.Collectors;
  * The following features are supported:
  * </p>
  * <ol>
- *  <li>{@link PrivateService#extractCompasPrivate(TPrivate, Class)
+ *  <li>{@link PrivateService#getCompasPrivate(TPrivate, Class)
  *      <em>Returns the value of the <b>TPrivate </b> reference object By class type</em>}</li>
  *
- *  <li>{@link PrivateService#extractCompasPrivates(TBaseElement, Class)
+ *  <li>{@link PrivateService#getCompasPrivates(TBaseElement, Class)
  *      <em>Returns the value of the <b>TPrivate </b> containment reference list from given <b>TBaseElement </b> By class type</em>}</li>
  *
- *  <li>{@link PrivateService#extractCompasPrivates(List, Class)
+ *  <li>{@link PrivateService#getCompasPrivates(List, Class)
  *      <em>Returns the value of the <b>TPrivate </b> containment reference list from given <b>TPrivate </b> elements By class type</em>}
  *   </li>
  * </ol>
  * @see org.lfenergy.compas.scl2007b4.model.TPrivate
  */
+@Slf4j
 public final class PrivateService {
 
     private PrivateService() {
@@ -44,14 +46,14 @@ public final class PrivateService {
     private static final ObjectFactory objectFactory = new ObjectFactory();
 
     /**
-     * Extract compas element of class <em>compasClass</em> nested in private elements.
-     * @param tPrivates list of privates to look in
-     * @param compasClass class of privates to extract
-     * @return list of compas objects nested in the privates.
-     * @param <T> Inference parameter stands for class <em>compasClass</em>
+     * Converts each item of given list of Private to list of Private element of type <em>compasClass</em>
+     * @param tPrivates list of private to convert
+     * @param compasClass type in which Privates should be
+     * @return list of formatted Private
+     * @param <T> Inference parameter stands for wanted type of Privates
      * @throws ScdException throws when inconsistency between types
      */
-    public static <T> List<T> extractCompasPrivates(List<TPrivate> tPrivates, Class<T> compasClass) throws ScdException {
+    public static <T> List<T> getCompasPrivates(List<TPrivate> tPrivates, Class<T> compasClass) throws ScdException {
         PrivateEnum privateEnum = PrivateEnum.fromClass(compasClass);
         List<Object> compasElements = tPrivates.stream().filter(tPrivate -> privateEnum.getPrivateType().equals(tPrivate.getType()))
             .map(TAnyContentFromOtherNamespace::getContent).flatMap(List::stream)
@@ -73,55 +75,33 @@ public final class PrivateService {
     }
 
     /**
-     * Extract compas elements of class <em>compasClass</em> nested in private elements of the given baseElement.
-     * @param baseElement element where to look for privates
-     * @param compasClass class of privates to extract
-     * @return list of compas objects nested in the privates.
-     * @param <T> Inference parameter stands for class <em>compasClass</em>
+     * Converts all Private of given <em>TBaseElement</em> of type <em>compasClass</em> given as parameter
+     * @param baseElement TBaseElement contenting Privates
+     * @param compasClass type in which Privates should be given
+     * @return list of formatted Private
+     * @param <T> Inference parameter stands for wanted type of Privates
      * @throws ScdException throws when inconsistency between types
      */
-    public static <T> List<T> extractCompasPrivates(TBaseElement baseElement, Class<T> compasClass) throws ScdException {
+    public static <T> List<T> getCompasPrivates(TBaseElement baseElement, Class<T> compasClass) throws ScdException {
         if (!baseElement.isSetPrivate()) {
             return Collections.emptyList();
         }
-        return extractCompasPrivates(baseElement.getPrivate(), compasClass);
+        return getCompasPrivates(baseElement.getPrivate(), compasClass);
     }
 
     /**
-     * Extract a single compas element of class <em>compasClass</em> nested in a private element.
-     * Throws an exception when there are more than 1 compas element of given <em>compasClass</em> nested inside the private element.
-     * @param tPrivate private where to look in
-     * @param compasClass class of privates to extract
-     * @return list of compas objects nested in the privates.
-     * @param <T> Inference parameter stands for class <em>compasClass</em>
-     * @throws ScdException throws when inconsistency between types, or when more than 1 compas element is found
+     * Converts Private of type <em>compasClass</em> given as parameter
+     * @param tPrivate Private to check if is in wanted type
+     * @param compasClass type in which Privates should be given
+     * @return optional of formatted Private
+     * @param <T> Inference parameter stands for wanted type of Private
+     * @throws ScdException throws when inconsistency between types
      */
-    public static <T> Optional<T> extractCompasPrivate(TPrivate tPrivate, Class<T> compasClass) throws ScdException {
-        List<T> compasPrivates = extractCompasPrivates(Collections.singletonList(tPrivate), compasClass);
+    public static <T> Optional<T> getCompasPrivate(TPrivate tPrivate, Class<T> compasClass) throws ScdException {
+        List<T> compasPrivates = getCompasPrivates(Collections.singletonList(tPrivate), compasClass);
         if (compasPrivates.size() > 1) {
             throw new ScdException(String.format("Expecting maximum 1 element of type %s in private %s, but got %d",
                 compasClass.getName(), tPrivate.getType(), compasPrivates.size()));
-        }
-        if (compasPrivates.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(compasPrivates.get(0));
-    }
-
-    /**
-     * Extract a single compas element of class <em>compasClass</em> nested in private elements of a given baseElement.
-     * Throws an exception when there are more than 1 compas element of given <em>compasClass</em> nested inside privates of the baseElement.
-     * @param baseElement element where to look for privates
-     * @param compasClass class of privates to extract
-     * @return list of compas objects nested in the privates.
-     * @param <T> Inference parameter stands for class <em>compasClass</em>
-     * @throws ScdException throws when inconsistency between types, or when more than 1 compas element is found
-     */
-    public static <T> Optional<T> extractCompasPrivate(TBaseElement baseElement, Class<T> compasClass) throws ScdException {
-        List<T> compasPrivates = extractCompasPrivates(baseElement, compasClass);
-        if (compasPrivates.size() > 1) {
-            throw new ScdException(String.format("Expecting maximum 1 private of type %s with 1 element, but found %d",
-                PrivateEnum.fromClass(compasClass).getPrivateType(), compasPrivates.size()));
         }
         if (compasPrivates.isEmpty()) {
             return Optional.empty();
@@ -135,14 +115,14 @@ public final class PrivateService {
      * @return content of th Private as optional of <em>TCompasICDHeader</em> object
      * @throws ScdException throws when inconsistency between types
      */
-    public static Optional<TCompasICDHeader> extractCompasICDHeader(TPrivate tPrivate) throws ScdException {
-        return extractCompasPrivate(tPrivate, TCompasICDHeader.class);
+    public static Optional<TCompasICDHeader> getCompasICDHeader(TPrivate tPrivate) throws ScdException {
+        return getCompasPrivate(tPrivate, TCompasICDHeader.class);
     }
 
     /**
-     * Removes all privates of type <em>privateEnum</em> from <em>baseElement</em>
-     * @param baseElement baseElement containing privates
-     * @param privateEnum enum type of private to remove
+     * Removes specified Private from <em>TBaseElement</em> Privates
+     * @param baseElement BaseElement contenting Privates
+     * @param privateEnum enum type of Private to remove
      */
     public static void removePrivates(TBaseElement baseElement, @NonNull PrivateEnum privateEnum) {
         if (baseElement.isSetPrivate()) {

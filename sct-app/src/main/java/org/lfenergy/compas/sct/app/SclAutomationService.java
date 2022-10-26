@@ -5,6 +5,7 @@
 package org.lfenergy.compas.sct.app;
 
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.sct.commons.dto.HeaderDTO;
@@ -25,6 +26,7 @@ import java.util.*;
  *   <li>{@link SclAutomationService#createSCD(SCL, HeaderDTO, Set) Adds all elements under the <b>SCL </b> object from given <b>SSD </b> and <b>STD </b> files}
  *  </ul>
  */
+@Slf4j
 public class SclAutomationService {
 
     /**

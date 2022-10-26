@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.scl.dtt;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
@@ -51,6 +52,7 @@ import java.util.stream.Collectors;
  *    </ul>
  * </ol>
  */
+@Slf4j
 public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
 
     /**

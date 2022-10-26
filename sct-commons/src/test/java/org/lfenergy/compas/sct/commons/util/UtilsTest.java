@@ -4,10 +4,8 @@
 
 package org.lfenergy.compas.sct.commons.util;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.platform.commons.support.ReflectionSupport;
 
@@ -187,53 +185,6 @@ class UtilsTest {
             Collections.emptyList(),
             Arrays.asList(new String[1]),
             Arrays.asList(new String[5])
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("equalsOrBothBlankMatchingSource")
-    void equalsOrBothBlank_should_be_true(String s1, String s2) {
-        // Given : parameters
-        // When
-        boolean result = Utils.equalsOrBothBlank(s1, s2);
-        // Then
-        Assertions.assertThat(result).isTrue();
-    }
-
-    @ParameterizedTest
-    @MethodSource("equalsOrBothBlankNotMatchingSource")
-    void equalsOrBothBlank_should_be_false(String s1, String s2) {
-        // Given : parameters
-        // When
-        boolean result = Utils.equalsOrBothBlank(s1, s2);
-        // Then
-        Assertions.assertThat(result).isFalse();
-    }
-
-    public static Stream<Arguments> equalsOrBothBlankMatchingSource() {
-        return Stream.of(
-            Arguments.of("a", "a"),
-            Arguments.of("", ""),
-            Arguments.of(" ", " "),
-            Arguments.of(null, null),
-            Arguments.of("", null),
-            Arguments.of(null, ""),
-            Arguments.of(" ", null),
-            Arguments.of(null, " "),
-            Arguments.of("", " "),
-            Arguments.of(" ", "")
-        );
-    }
-
-    public static Stream<Arguments> equalsOrBothBlankNotMatchingSource() {
-        return Stream.of(
-            Arguments.of("a", "b"),
-            Arguments.of("a", ""),
-            Arguments.of("a", " "),
-            Arguments.of("a", null),
-            Arguments.of("", "a"),
-            Arguments.of(" ", "a"),
-            Arguments.of( null, "a")
         );
     }
 }

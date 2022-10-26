@@ -11,9 +11,10 @@ import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.scl.LDeviceActivation;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.PrivateService;
+import org.lfenergy.compas.sct.commons.util.Utils;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
@@ -68,10 +69,6 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
  */
 public class LN0Adapter extends AbstractLNAdapter<LN0> {
 
-    public static final DoTypeName MOD_DO_TYPE_NAME = new DoTypeName(MOD_DO_NAME);
-    public static final DaTypeName STVAL_DA_TYPE_NAME = new DaTypeName(STVAL);
-    public static final DoTypeName BEHAVIOUR_DO_TYPE_NAME = new DoTypeName(BEHAVIOUR_DO_NAME);
-    public static final DaTypeName BEHAVIOUR_DA_TYPE_NAME = getDaTypeNameForBeh();
     /**
      * Constructor
      * @param parentAdapter Parent container reference
@@ -92,9 +89,10 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
 
     @Override
     protected String elementXPath() {
-        return "LN0";
+        return String.format("LN[lnClass=\"LLN0\" and %s and %s]",
+                Utils.xpathAttributeFilter("inst", currentElem.isSetInst() ? currentElem.getInst() : null),
+                Utils.xpathAttributeFilter("lnType", currentElem.isSetLnType() ? currentElem.getLnType() : null));
     }
-
 
     /**
      * Gets current LN0 class type
@@ -131,14 +129,6 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
         return "";
     }
 
-    /**
-     * Gets Inputs node as an adapter
-     * @return an InputsAdapter
-     */
-    public InputsAdapter getInputsAdapter(){
-        return new InputsAdapter(this, currentElem.getInputs());
-    }
-
     /** Checks if given attibrute corresponds to DataSet or ReportControl or SMVControl or GSEControl in current LN0
      * @param dataAttribute attribute to check
      * @return <em>Boolean</em> value of check result
@@ -162,18 +152,17 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
 
     /**
      * Construct ResumedDataTemplate object with DO and DA attributes
-     *
-     * @param doTypeName <em><b>DoTypeName </b> object</em>
+     * @param doName <em>The value of the <b>name </b> attribute of <b>DO </b> object</em>
      * @param daTypeName <em><b>DaTypeName </b> object</em>
      * @return ResumedDataTemplate
      */
-    private ResumedDataTemplate createDaiFilter(DoTypeName doTypeName, DaTypeName daTypeName) {
+    private ResumedDataTemplate getResumedDataTemplate(String doName, DaTypeName daTypeName) {
         ResumedDataTemplate filter = new ResumedDataTemplate();
         filter.setLnClass(getLNClass());
         filter.setLnInst(getLNInst());
         filter.setPrefix(getPrefix());
         filter.setLnType(getLnType());
-        filter.setDoName(doTypeName);
+        filter.setDoName(new DoTypeName(doName));
         filter.setDaName(daTypeName);
         return filter;
     }
@@ -183,30 +172,42 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
      * @param iedNameLDeviceInstList pair of Ied name and LDevice inst attributes
      * @return Set of Errors
      */
-    public Optional<SclReportItem> updateLDeviceStatus(List<Pair<String, String>> iedNameLDeviceInstList) {
+    public List<SclReport.ErrorDescription> checkAndUpdateLDeviceStatus(List<Pair<String, String>> iedNameLDeviceInstList) {
+        List<SclReport.ErrorDescription> errors = new ArrayList<>();
         LDeviceActivation lDeviceActivation = new LDeviceActivation(iedNameLDeviceInstList);
         final String iedName = getParentAdapter().getParentAdapter().getName();
         final String ldInst = getParentAdapter().getInst();
-        ResumedDataTemplate daiBehFilter = createDaiFilter(BEHAVIOUR_DO_TYPE_NAME, BEHAVIOUR_DA_TYPE_NAME);
-            List<ResumedDataTemplate> daiBehList = getDAI(daiBehFilter, false);
+        DaTypeName daTypeNameBeh = new DaTypeName();
+        daTypeNameBeh.setName(STVAL);
+        daTypeNameBeh.setBType(TPredefinedBasicTypeEnum.ENUM);
+        daTypeNameBeh.setFc(TFCEnum.ST);
+        ResumedDataTemplate daiBehFilter = getResumedDataTemplate(BEHAVIOUR_DO_NAME, daTypeNameBeh);
+        List<ResumedDataTemplate> daiBehList = getDAI(daiBehFilter, false);
         if (daiBehList.isEmpty()) {
-            return Optional.of(buildFatalReportItem("The LDevice doesn't have a DO @name='Beh' OR its associated DA@fc='ST' AND DA@name='stVal'"));
+            errors.add(buildErrorDescriptionMessage("The LDevice doesn't have a DO @name='Beh' OR its associated DA@fc='ST' AND DA@name='stVal'"));
+            return errors;
         }
         Set<String> enumValues = getEnumValues(daiBehList.get(0).getDaName().getType());
-        List<TCompasLDevice> compasLDevicePrivateList = PrivateService.extractCompasPrivates(getParentAdapter().getCurrentElem(), TCompasLDevice.class);
+        List<TCompasLDevice> compasLDevicePrivateList = PrivateService.getCompasPrivates(getParentAdapter().getCurrentElem(), TCompasLDevice.class);
         if (compasLDevicePrivateList.isEmpty()) {
-            return Optional.of(buildFatalReportItem("The LDevice doesn't have a Private compas:LDevice."));
+            errors.add(buildErrorDescriptionMessage("The LDevice doesn't have a Private compas:LDevice."));
+            return errors;
         }
         if (!compasLDevicePrivateList.get(0).isSetLDeviceStatus()) {
-            return Optional.of(buildFatalReportItem("The Private compas:LDevice doesn't have the attribute 'LDeviceStatus'"));
+            errors.add(buildErrorDescriptionMessage("The Private compas:LDevice doesn't have the attribute 'LDeviceStatus'"));
+            return errors;
         }
         TCompasLDeviceStatus compasLDeviceStatus = compasLDevicePrivateList.get(0).getLDeviceStatus();
-        Optional<ResumedDataTemplate> optionalModStVal = getDaiModStVal();
-        if (optionalModStVal.isEmpty()) {
-            return Optional.of(buildFatalReportItem("The LDevice doesn't have a DO @name='Mod'"));
+        DaTypeName daTypeNameMod = new DaTypeName();
+        daTypeNameMod.setName(STVAL);
+        ResumedDataTemplate daiModFilter = getResumedDataTemplate(MOD_DO_NAME, daTypeNameMod);
+        List<ResumedDataTemplate> daiModList = getDAI(daiModFilter, false);
+        if (daiModList.isEmpty()) {
+            errors.add(buildErrorDescriptionMessage("The LDevice doesn't have a DO @name='Mod'"));
+            return errors;
         }
-        ResumedDataTemplate newDaModToSetInLN0 = optionalModStVal.get();
-        String initialValue = newDaModToSetInLN0.findFirstValue().orElse("");
+        ResumedDataTemplate newDaModToSetInLN0 = daiModList.get(0);
+        String initialValue = newDaModToSetInLN0.getDaName().getDaiValues().isEmpty() ? "" : newDaModToSetInLN0.getDaName().getDaiValues().values().toArray()[0].toString();
         lDeviceActivation.checkLDeviceActivationStatus(iedName, ldInst, compasLDeviceStatus, enumValues);
         if(lDeviceActivation.isUpdatable()){
             if(!initialValue.equals(lDeviceActivation.getNewVal())) {
@@ -215,28 +216,18 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
             }
         }else {
             if(lDeviceActivation.getErrorMessage() != null) {
-                return Optional.of(buildFatalReportItem(lDeviceActivation.getErrorMessage()));
-            }
+                errors.add(buildErrorDescriptionMessage(lDeviceActivation.getErrorMessage()));}
         }
-        return Optional.empty();
+        return errors;
     }
 
-    public Optional<String> getLDeviceStatus() {
-        return getDaiModStVal()
-            .flatMap(ResumedDataTemplate::findFirstValue);
+    /**
+     * builds message with message content and xpath
+      * @param message message to return
+     * @return error description with message and xpath as SclReport.ErrorDescription object
+     */
+    private SclReport.ErrorDescription buildErrorDescriptionMessage(String message){
+        return SclReport.ErrorDescription.builder().message(message).xpath(getXPath()).build();
     }
 
-    private Optional<ResumedDataTemplate> getDaiModStVal() {
-        ResumedDataTemplate daiModFilter = createDaiFilter(MOD_DO_TYPE_NAME, STVAL_DA_TYPE_NAME);
-        return getDAI(daiModFilter, false).stream()
-            .findFirst();
-    }
-
-    private static DaTypeName getDaTypeNameForBeh() {
-        DaTypeName daTypeNameBeh = new DaTypeName();
-        daTypeNameBeh.setName(STVAL);
-        daTypeNameBeh.setBType(TPredefinedBasicTypeEnum.ENUM);
-        daTypeNameBeh.setFc(TFCEnum.ST);
-        return daTypeNameBeh;
-    }
 }

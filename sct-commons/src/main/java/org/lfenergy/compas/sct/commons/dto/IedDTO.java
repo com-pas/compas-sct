@@ -7,8 +7,10 @@ package org.lfenergy.compas.sct.commons.dto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
+import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -50,7 +52,8 @@ public class IedDTO {
     public static IedDTO from(IEDAdapter iedAdapter, LogicalNodeOptions options) {
         IedDTO iedDTO = new IedDTO();
         iedDTO.name = iedAdapter.getName();
-        iedDTO.lDevices = iedAdapter.streamLDeviceAdapters()
+        List<LDeviceAdapter> lDeviceAdapters = iedAdapter.getLDeviceAdapters();
+        iedDTO.lDevices = lDeviceAdapters.stream()
                 .map(lDeviceAdapter -> LDeviceDTO.from(lDeviceAdapter,options))
                 .collect(Collectors.toUnmodifiableSet());
 

@@ -56,10 +56,10 @@ class PrivateServiceTest {
     }
 
     @Test
-    void extractCompasPrivates_should_return_privates_value() {
+    void getCompasPrivates_should_return_privates_value() {
         // Given : setUp
         // When
-        List<TCompasSclFileType> result = PrivateService.extractCompasPrivates(List.of(privateSCD, privateICD),
+        List<TCompasSclFileType> result = PrivateService.getCompasPrivates(List.of(privateSCD, privateICD),
             TCompasSclFileType.class);
         //Then
         assertThat(result)
@@ -68,42 +68,42 @@ class PrivateServiceTest {
     }
 
     @Test
-    void extractCompasPrivates_when_no_privates_match_class_should_return_empty_list() {
+    void getCompasPrivates_when_no_privates_match_class_should_return_empty_list() {
         // Given : setUp
         // When
-        List<TCompasICDHeader> result = PrivateService.extractCompasPrivates(List.of(privateSCD), TCompasICDHeader.class);
+        List<TCompasICDHeader> result = PrivateService.getCompasPrivates(List.of(privateSCD), TCompasICDHeader.class);
         //Then
         assertThat(result).isEmpty();
     }
 
     @Test
-    void extractCompasPrivates_when_class_is_not_compas_class_should_throw_exception() {
+    void getCompasPrivates_when_class_is_not_compas_class_should_throw_exception() {
         // Given : setUp
         List<TPrivate> privates = List.of(privateSCD);
         // When & Then
-        assertThatThrownBy(() -> PrivateService.extractCompasPrivates(privates, Object.class)).isInstanceOf(
+        assertThatThrownBy(() -> PrivateService.getCompasPrivates(privates, Object.class)).isInstanceOf(
             NoSuchElementException.class);
     }
 
     @Test
-    void extractCompasPrivates_when_content_not_match_private_type_should_throw_exception() {
+    void getCompasPrivates_when_content_not_match_private_type_should_throw_exception() {
         // Given : setUp
         privateSCD.setType(PrivateEnum.COMPAS_BAY.getPrivateType());
         Class<?> compasClass = PrivateEnum.COMPAS_BAY.getCompasClass();
         List<TPrivate> privates = List.of(privateSCD);
         // When & Then
-        assertThatThrownBy(() -> PrivateService.extractCompasPrivates(privates, compasClass)).isInstanceOf(
+        assertThatThrownBy(() -> PrivateService.getCompasPrivates(privates, compasClass)).isInstanceOf(
             ScdException.class);
     }
 
     @Test
-    void extractCompasPrivates_on_base_element_should_return_privates_value() {
+    void getCompasPrivates_on_base_element_should_return_privates_value() {
         // Given : setUp
         TBaseElement baseElement = new SCL();
         baseElement.getPrivate().add(privateSCD);
         baseElement.getPrivate().add(privateICD);
         // When
-        List<TCompasSclFileType> result = PrivateService.extractCompasPrivates(baseElement, TCompasSclFileType.class);
+        List<TCompasSclFileType> result = PrivateService.getCompasPrivates(baseElement, TCompasSclFileType.class);
         // Then
         assertThat(result)
             .hasSize(2)
@@ -111,20 +111,20 @@ class PrivateServiceTest {
     }
 
     @Test
-    void extractCompasPrivates_on_base_element_should_not_set_private() {
+    void getCompasPrivates_on_base_element_should_not_set_private() {
         // Given
         TBaseElement baseElement = new SCL();
         // When
-        PrivateService.extractCompasPrivates(baseElement, TCompasSclFileType.class);
+        PrivateService.getCompasPrivates(baseElement, TCompasSclFileType.class);
         // Then
         assertThat(baseElement.isSetPrivate()).isFalse();
     }
 
     @Test
-    void extractCompasPrivate_should_return_private_value() {
+    void getCompasPrivate_should_return_private_value() {
         // Given : setUp
         // When
-        Optional<TCompasSclFileType> result = PrivateService.extractCompasPrivate(privateSCD,
+        Optional<TCompasSclFileType> result = PrivateService.getCompasPrivate(privateSCD,
             TCompasSclFileType.class);
         //Then
         assertThat(result).isPresent()
@@ -132,69 +132,34 @@ class PrivateServiceTest {
     }
 
     @Test
-    void extractCompasPrivate_should_return_empty() {
+    void getCompasPrivate_should_return_empty() {
         // Given : setUp
         // When
-        Optional<TCompasBay> result = PrivateService.extractCompasPrivate(privateSCD,
+        Optional<TCompasBay> result = PrivateService.getCompasPrivate(privateSCD,
             TCompasBay.class);
         //Then
         assertThat(result).isNotPresent();
     }
 
     @Test
-    void extractCompasPrivate_should_throw_exception() {
+    void getCompasPrivate_should_throw_exception() {
         // Given : setUp
         privateSCD.getContent().add(objectFactory.createSclFileType(TCompasSclFileType.ICD));
         Class<?> compasClass = PrivateEnum.COMPAS_SCL_FILE_TYPE.getCompasClass();
         // When & Then
-        assertThatThrownBy(() -> PrivateService.extractCompasPrivate(privateSCD, compasClass)).isInstanceOf(
+        assertThatThrownBy(() -> PrivateService.getCompasPrivate(privateSCD, compasClass)).isInstanceOf(
             ScdException.class);
     }
 
     @Test
-    void extractCompasPrivate_on_base_element_should_return_private_value() {
-        // Given : setUp
-        TBaseElement baseElement = new SCL();
-        baseElement.getPrivate().add(privateSCD);
-        // When
-        Optional<TCompasSclFileType> result = PrivateService.extractCompasPrivate(baseElement,
-            TCompasSclFileType.class);
-        //Then
-        assertThat(result).isPresent()
-            .hasValue(TCompasSclFileType.SCD);
-    }
-
-    @Test
-    void extractCompasPrivate_on_base_element_should_return_empty() {
-        // Given
-        TBaseElement baseElement = new SCL();
-        // When
-        Optional<TCompasBay> result = PrivateService.extractCompasPrivate(baseElement,
-            TCompasBay.class);
-        //Then
-        assertThat(result).isNotPresent();
-    }
-
-    @Test
-    void extractCompasPrivate_on_base_element_should_throw_exception() {
-        // Given : setUp
-        TBaseElement baseElement = new SCL();
-        baseElement.getPrivate().add(privateSCD);
-        baseElement.getPrivate().add(privateICD);
-        // When & Then
-        assertThatThrownBy(() -> PrivateService.extractCompasPrivate(baseElement, TCompasSclFileType.class)).isInstanceOf(
-            ScdException.class);
-    }
-
-    @Test
-    void extractCompasICDHeader_should_return_private_value() {
+    void getCompasICDHeader_should_return_private_value() {
         // Given
         privateSCD = objectFactory.createTPrivate();
         privateSCD.setType(PrivateEnum.COMPAS_ICDHEADER.getPrivateType());
         TCompasICDHeader tCompasICDHeader = objectFactory.createTCompasICDHeader();
         privateSCD.getContent().add(objectFactory.createICDHeader(tCompasICDHeader));
         // When
-        Optional<TCompasICDHeader> optionalResult = PrivateService.extractCompasICDHeader(privateSCD);
+        Optional<TCompasICDHeader> optionalResult = PrivateService.getCompasICDHeader(privateSCD);
         //Then
         assertThat(optionalResult).isPresent().get().matches(result -> result == tCompasICDHeader);
     }

@@ -5,7 +5,7 @@
 package org.lfenergy.compas.sct.commons.scl.ied;
 
 import lombok.NonNull;
-import org.apache.commons.lang3.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.ControlBlock;
 import org.lfenergy.compas.sct.commons.dto.DataSetInfo;
@@ -17,12 +17,8 @@ import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * A representation of the model object
@@ -33,7 +29,7 @@ import java.util.stream.Stream;
  * <ol>
  *   <li>Adapter</li>
  *    <ul>
- *      <li>{@link IEDAdapter#streamLDeviceAdapters LDeviceAdapters <em>Returns the value of the <b>LDeviceAdapter </b>containment reference list</em>}</li>
+ *      <li>{@link IEDAdapter#getLDeviceAdapters <em>Returns the value of the <b>LDeviceAdapter </b>containment reference list</em>}</li>
  *      <li>{@link IEDAdapter#getLDeviceAdapterByLdInst <em>Returns the value of the <b>LDeviceAdapter </b>reference object By LDevice Inst</em>}</li>
  *    </ul>
  *   <li>Principal functions</li>
@@ -60,6 +56,7 @@ import java.util.stream.Stream;
  * @see org.lfenergy.compas.scl2007b4.model.TSettingGroups
  * @see <a href="https://github.com/com-pas/compas-sct/issues/3" target="_blank">Issue !3 (Add new IEDs)</a>
  */
+@Slf4j
 public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
 
     /**
@@ -117,28 +114,17 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
     }
 
     /**
-     * Gets All LDevice from current IED as LDeviceAdapter
-     * @return Stream of <em>LDeviceAdapter</em>  object
+     * Gets all LDevices linked to current IED
+     * @return list of <em>LDeviceAdapter</em>
      */
-    public Stream<LDeviceAdapter> streamLDeviceAdapters() {
-        return streamLDevices()
-            .map(tlDevice -> new LDeviceAdapter(this, tlDevice));
-    }
-
-    /**
-     * Gets All LDevice from current IED
-     * @return Stream of <em>TLDevice</em>  object
-     */
-    private Stream<TLDevice> streamLDevices() {
-        if (!currentElem.isSetAccessPoint()){
-            return Stream.empty();
-        }
-        return currentElem.getAccessPoint().stream()
-            .map(TAccessPoint::getServer)
-            .filter(Objects::nonNull)
-            .filter(TServer::isSetLDevice)
-            .map(TServer::getLDevice)
-            .flatMap(List::stream);
+    public List<LDeviceAdapter> getLDeviceAdapters(){
+        return currentElem.getAccessPoint()
+                .stream()
+                .filter(tAccessPoint -> tAccessPoint.getServer() != null)
+                .map(tAccessPoint -> tAccessPoint.getServer().getLDevice())
+                .flatMap(Collection::stream)
+                .map(tlDevice -> new LDeviceAdapter(this,tlDevice))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -146,11 +132,15 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
      * @param ldInst ldInst value of LDevice to get
      * @return optional of <em>LDeviceAdapter</em>  object
      */
-    public Optional<LDeviceAdapter> getLDeviceAdapterByLdInst(String ldInst) {
-        return streamLDevices()
-            .filter(tlDevice -> Utils.equalsOrBothBlank(tlDevice.getInst(), ldInst))
-            .findFirst()
-            .map(tlDevice -> new LDeviceAdapter(this, tlDevice));
+    public Optional<LDeviceAdapter> getLDeviceAdapterByLdInst(String ldInst){
+        return currentElem.getAccessPoint()
+                .stream()
+                .filter(tAccessPoint -> tAccessPoint.getServer() != null)
+                .map(tAccessPoint -> tAccessPoint.getServer().getLDevice())
+                .flatMap(Collection::stream)
+                .filter(tlDevice -> Objects.equals(ldInst,tlDevice.getInst()))
+                .map(tlDevice -> new LDeviceAdapter(this,tlDevice))
+                .findFirst();
     }
 
     /**
@@ -162,20 +152,22 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
      */
     public void updateLDeviceNodesType(Map<String, String> pairOldNewId) throws ScdException {
         // renaming ldName
-        streamLDeviceAdapters().forEach(lDeviceAdapter -> {
+        for(LDeviceAdapter lDeviceAdapter : getLDeviceAdapters()) {
             lDeviceAdapter.updateLDName();
             String lnType = lDeviceAdapter.getCurrentElem().getLN0().getLnType();
-            if (pairOldNewId.containsKey(lnType)) {
+            if(pairOldNewId.containsKey(lnType)){
                 lDeviceAdapter.getCurrentElem().getLN0().setLnType(pairOldNewId.get(lnType));
             }
             lDeviceAdapter.getCurrentElem()
-                .getLN()
-                .forEach(tln -> {
-                    if (pairOldNewId.containsKey(tln.getLnType())) {
-                        tln.setLnType(pairOldNewId.get(tln.getLnType()));
-                    }
-                });
-        });
+                    .getLN()
+                    .stream()
+                    .forEach(tln -> {
+                        if(pairOldNewId.containsKey(tln.getLnType())) {
+                            tln.setLnType(pairOldNewId.get(tln.getLnType()));
+                        }
+                    });
+
+        }
     }
 
     /**
@@ -201,16 +193,20 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
      * @return <em>Boolean</em> value of check result
      */
     public boolean matches(ObjectReference objRef){
-        if (StringUtils.isBlank(getName())
-            || !objRef.getLdName().startsWith(getName())) {
+        if(!objRef.getLdName().startsWith(getName())) {
             return false;
         }
-        String ldInst = objRef.getLdName().substring(getName().length());
-        Optional<LDeviceAdapter> opLD = getLDeviceAdapterByLdInst(ldInst);
+        Optional<TLDevice> opLD = currentElem.getAccessPoint()
+                .stream()
+                .filter(tAccessPoint -> tAccessPoint.getServer() != null)
+                .map(tAccessPoint -> tAccessPoint.getServer().getLDevice())
+                .flatMap(Collection::stream)
+                .filter(tlDevice -> objRef.getLdName().equals(getName() + tlDevice.getInst()))
+                .findFirst();
         if(opLD.isEmpty()) {
             return false;
         }
-        LDeviceAdapter lDeviceAdapter = opLD.get();
+        LDeviceAdapter lDeviceAdapter = new LDeviceAdapter(this,opLD.get());
         if(TLLN0Enum.LLN_0.value().equals(objRef.getLNodeName())) {
             return lDeviceAdapter.getLN0Adapter().matches(objRef);
         }
@@ -242,9 +238,12 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
         if(!signalInfo.isValid()){
             throw new ScdException("Invalid ExtRef signal (pDO,pDA or intAddr))");
         }
-        return streamLDeviceAdapters()
-            .map(lDeviceAdapter -> lDeviceAdapter.getExtRefBinders(signalInfo)).flatMap(List::stream)
-            .collect(Collectors.toList());
+        List<ExtRefBindingInfo> potentialBinders = new ArrayList<>();
+        List<LDeviceAdapter> lDeviceAdapters = getLDeviceAdapters();
+        for (LDeviceAdapter lDeviceAdapter : lDeviceAdapters) {
+            potentialBinders.addAll(lDeviceAdapter.getExtRefBinders(signalInfo));
+        }
+        return potentialBinders;
     }
 
     /**
@@ -351,7 +350,7 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
         controlBlock.validateSecurityEnabledValue(this);
         controlBlock.validateDestination(this.parentAdapter);
 
-        LDeviceAdapter lDeviceAdapter = getLDeviceAdapterByLdInst(controlBlock.getHolderLDInst()).orElseThrow();
+        LDeviceAdapter lDeviceAdapter =getLDeviceAdapterByLdInst(controlBlock.getHolderLDInst()).orElseThrow();
         AbstractLNAdapter<?> lnAdapter =  AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
                 .withLnClass(controlBlock.getHolderLnClass())
