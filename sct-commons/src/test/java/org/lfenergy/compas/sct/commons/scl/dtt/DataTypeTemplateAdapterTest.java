@@ -7,17 +7,21 @@ package org.lfenergy.compas.sct.commons.scl.dtt;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.dto.DTO;
+import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DataTypeTemplateAdapterTest {
@@ -48,10 +52,9 @@ class DataTypeTemplateAdapterTest {
     @Test
     void testAmChildElementRef() {
         SclRootAdapter sclRootAdapter = dataTypeTemplateAdapter.getParentAdapter();
-        assertThrows(
-                IllegalArgumentException.class,
-                () ->new DataTypeTemplateAdapter(sclRootAdapter, new TDataTypeTemplates())
-        );
+        TDataTypeTemplates dtt = new TDataTypeTemplates();
+        assertThatThrownBy(() -> new DataTypeTemplateAdapter(sclRootAdapter, dtt))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -139,11 +142,6 @@ class DataTypeTemplateAdapterTest {
     }
 
     @Test
-    void testImportEnumTypes() {
-
-    }
-
-    @Test
     void testHasSameID() {
         TDAType tdaType1 = new TDAType();
         tdaType1.setId("SAME_ID");
@@ -221,7 +219,29 @@ class DataTypeTemplateAdapterTest {
     }
 
     @Test
-    void testRetrieveSdoOrDO() {
+    void retrieveSdoOrDO_shouldReturnEmptyList() {
+        //Given
+        TSDO tsdo = new TSDO();
+        TBDA tbda = new TBDA();
+        TDA tda = new TDA();
+        List<TUnNaming> list = Arrays.asList(tsdo,tbda,tda);
+        //When Then
+        assertThat(DataTypeTemplateAdapter.retrieveSdoOrDA(list, TDO.class)).isEmpty();
+    }
+
+    @Test
+    void retrieveSdoOrDO_shouldReturnListWithTwoElements() {
+        //Given
+        TSDO tsdo = new TSDO();
+        TDO tdo = new TDO();
+        TBDA tbda1 = new TBDA();
+        TBDA tbda2 = new TBDA();
+        TDA tda = new TDA();
+        List<TUnNaming> list = Arrays.asList(tsdo,tdo,tbda1,tbda2,tda);
+        //When Then
+        assertThat(DataTypeTemplateAdapter.retrieveSdoOrDA(list, TBDA.class))
+                .hasSize(2)
+                .hasOnlyElementsOfType(TBDA.class);
     }
 
     @Test
@@ -248,28 +268,47 @@ class DataTypeTemplateAdapterTest {
         assertTrue(lNodeTypeAdapters.isEmpty());
     }
 
-    @Test
-    void testGenerateDttId() {
+    @ParameterizedTest
+    @CsvSource({"IED_NAME, DTT_ID, IED_NAME_DTT_ID",
+            "IED_NAME, Z6A2chUEHc7a15MvIUbQTVvioCgzOcWlNMfOzNbfjLJaueNf9T2GmQP7ShgYFr3SfYex5HdwvC5tRr9oAp0lmSwtqxx1cHEKL" +
+                    "MgKX7hZuUWCpKYPJ3I1fmE7NVIvVOtB1JsIOSGclfQfLGDEFjFG7vIozpkijZ0ugtZSOZuCavC5v5JL58yHO1RWCpYVdMDp4Jh" +
+                    "ChU4YjhAhVGbOykJi0b4pc0saXoqf0q5imWmXiiuMuq0sc25IVA2v0TmCSxJ, " +
+                    "IED_NAME_Z6A2chUEHc7a15MvIUbQTVvioCgzOcWlNMfOzNbfjLJaueNf9T2GmQP7ShgYFr3SfYex5HdwvC5tRr9oAp0lmSwtqx" +
+                    "x1cHEKLMgKX7hZuUWCpKYPJ3I1fmE7NVIvVOtB1JsIOSGclfQfLGDEFjFG7vIozpkijZ0ugtZSOZuCavC5v5JL58yHO1RWCpYVdM" +
+                    "Dp4JhChU4YjhAhVGbOykJi0b4pc0saXoqf0q5imWmXiiuMuq0sc25IVA"})
+    void generateDttId_shouldReturnIEdNameWithDTTId_whenBothLessThan255(String iedName, String dttId, String newDTTId) {
+        assertThat(dataTypeTemplateAdapter.generateDttId(iedName, dttId)).hasSizeLessThan(256)
+                .isEqualTo(newDTTId);
+
     }
 
     @Test
-    void testImportEnumType() throws Exception {
-        //
+    void importEnumTypes_shouldAddNewEnum_whenDifferentContent() throws Exception {
+        //Given
         DataTypeTemplateAdapter rcvDttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
-
-        DataTypeTemplateAdapter prvDttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
-        int nbEnumType = prvDttAdapter.getEnumTypeAdapters().size();
+        DataTypeTemplateAdapter prvDttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
+        Optional<EnumTypeAdapter> enumTypeAdapter = rcvDttAdapter.getEnumTypeAdapterById("PhaseAngleReferenceKind");
+        int rcvDTTEnumValsSize = enumTypeAdapter.get().getCurrentElem().getEnumVal().size();
+        //When
         rcvDttAdapter.importEnumType("IEDName",prvDttAdapter);
-        assertEquals(nbEnumType,rcvDttAdapter.getEnumTypeAdapters().size());
-
-        prvDttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
-
-        rcvDttAdapter.importEnumType("IEDName",prvDttAdapter);
-        assertTrue(nbEnumType < rcvDttAdapter.getEnumTypeAdapters().size());
-        MarshallerWrapper marshallerWrapper = AbstractDTTLevel.createWrapper();
-        System.out.println(marshallerWrapper.marshall(prvDttAdapter.getParentAdapter().getCurrentElem()));
-        System.out.println(marshallerWrapper.marshall(rcvDttAdapter.getParentAdapter().getCurrentElem()));
+        Optional<EnumTypeAdapter> rcvEnumTypeAdapter = rcvDttAdapter.getEnumTypeAdapterById("PhaseAngleReferenceKind");
+        //Then
+        assertThat(rcvDttAdapter.getEnumTypeAdapters())
+                .hasSize(rcvDTTEnumValsSize + prvDttAdapter.getEnumTypeAdapters().size());
+        assertThat(rcvEnumTypeAdapter.get().getCurrentElem().getEnumVal()).hasSize(rcvDTTEnumValsSize);
     }
+
+    @Test
+    void importEnumTypes_shouldUpdateExistingEnum_whenSameContent() throws Exception {
+        //Given
+        DataTypeTemplateAdapter rcvDttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
+        DataTypeTemplateAdapter prvDttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
+        //When
+        rcvDttAdapter.importEnumType("IEDName",prvDttAdapter);
+        //Then
+        assertThat(rcvDttAdapter.getEnumTypeAdapters()).hasSize(prvDttAdapter.getEnumTypeAdapters().size());
+    }
+
 
     @Test
     void testImportDTT() throws Exception {
@@ -341,33 +380,112 @@ class DataTypeTemplateAdapterTest {
         System.out.println(marshallerWrapper.marshall(rcvDttAdapter.getParentAdapter().getCurrentElem()));
     }
 
-    @Test
-    void testGetBinderResumedDTT() throws Exception {
+    @ParameterizedTest
+    @CsvSource({"A,LN1,No coherence or path between DOType(DO2) and DA(A)",
+            "antRef,LN1,Invalid ExtRef signal: no coherence between pDO(Op.origin) and pDA(antRef)",
+            "antRef.origin.ctlVal,LN_Type1,Unknown LNodeType:LN_Type1"})
+    void getBinderResumedDTT_shouldThrowScdException_whenDONotContainDA(String pDA, String lnType, String message) throws Exception {
+        //Given
         DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
-
-        ExtRefSignalInfo signalInfo = DTO.createExtRefSignalInfo();
+        ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
+        signalInfo.setPLN("PIOC");
         signalInfo.setPDO("Op.origin");
-        signalInfo.setPDA("antRef");
-
-        assertDoesNotThrow(() -> dttAdapter.getBinderResumedDTT("LN1",signalInfo));
-
+        signalInfo.setPDA(pDA);
+        //When Then
+        assertThatThrownBy(() -> dttAdapter.getBinderResumedDTT(lnType,signalInfo))
+                .isInstanceOf(ScdException.class)
+                .hasMessage(message);
     }
 
-    /*@Test
-    void testCheckSdoAndDaLink() throws Exception {
+    @Test
+    void getBinderResumedDTT_shouldThrowScdException_whenLnClassNotMatches() throws Exception {
+        //Given
+        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
+        LNodeTypeAdapter lNodeTypeAdapter = dttAdapter.getLNodeTypeAdapterById("LN1").get();
+        lNodeTypeAdapter.getCurrentElem().unsetLnClass();
+
+        ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
+        signalInfo.setPLN("CSWI");
+        signalInfo.setPDO("Op.origin");
+        signalInfo.setPDA("antRef.origin.ctlVal");
+        //When Then
+        assertThatThrownBy(() -> dttAdapter.getBinderResumedDTT("LN1",signalInfo))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("lnClass is mandatory for LNodeType in DataTemplate : LN1");
+    }
+
+    @Test
+    void getBinderResumedDTT_shouldThrowScdException_whenDOIdNotFound() throws Exception {
+        //Given
         DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
 
-        assertDoesNotThrow(() -> dttAdapter.checkDoAndDaLink("origin","origin"));
-        assertThrows(ScdException.class, () -> dttAdapter.checkDoAndDaLink("f","origin"));
-        assertTrue( dttAdapter.checkDoAndDaLink("origin","d").isEmpty());
-    }*/
+        ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
+        signalInfo.setPLN("PIOC");
+        signalInfo.setPDO("Do");
+        //When Then
+        assertThatThrownBy(() -> dttAdapter.getBinderResumedDTT("LN1",signalInfo))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Unknown doName :Do");
+    }
+
+    @Test
+    void getBinderResumedDTT_shouldReturnBindingInfoWithoutDO_whenSignalPDOEmpty() throws Exception {
+        //Given
+        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
+
+        ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
+        signalInfo.setPLN("PIOC");
+        signalInfo.setPDO(null);
+        //When Then
+        ExtRefBindingInfo bindingInfo = assertDoesNotThrow(() -> dttAdapter.getBinderResumedDTT("LN1",signalInfo));
+        assertThat(bindingInfo)
+                .extracting("lnType", "lnClass")
+                .containsExactlyInAnyOrder("LN1", "PIOC");
+        assertThat(bindingInfo.getDoName()).isNull();
+    }
+
+    @Test
+    void getBinderResumedDTT_shouldReturnBindingInfoWithoutDA_whenSignalPDAEmpty() throws Exception {
+        //Given
+        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
+
+        ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
+        signalInfo.setPLN("PIOC");
+        signalInfo.setPDO("Op.origin");
+        signalInfo.setPDA(null);
+        //When Then
+        ExtRefBindingInfo bindingInfo = assertDoesNotThrow(() -> dttAdapter.getBinderResumedDTT("LN1",signalInfo));
+        assertThat(bindingInfo)
+                .extracting("lnType", "lnClass")
+                .containsExactlyInAnyOrder("LN1", "PIOC");
+        assertThat(bindingInfo.getDoName()).isNotNull();
+        assertThat(bindingInfo.getDaName()).isNull();
+    }
+
+    @Test
+    void getBinderResumedDTT_shouldReturnBindingInfo_whenExist() throws Exception {
+        //Given
+        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
+
+        ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
+        signalInfo.setPLN("PIOC");
+        signalInfo.setPDO("Op.origin");
+        signalInfo.setPDA("antRef.origin.ctlVal");
+        //When Then
+        ExtRefBindingInfo bindingInfo = assertDoesNotThrow(() -> dttAdapter.getBinderResumedDTT("LN1",signalInfo));
+        assertThat(bindingInfo)
+                .extracting("lnType", "lnClass")
+                .containsExactlyInAnyOrder("LN1", "PIOC");
+    }
 
     @Test
     void addPrivate() throws Exception {
+        //Given
         DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
         TPrivate tPrivate = new TPrivate();
         tPrivate.setType("Private Type");
         tPrivate.setSource("Private Source");
+        //When Then
         assertThrows(UnsupportedOperationException.class, () -> dttAdapter.addPrivate(tPrivate));
     }
 

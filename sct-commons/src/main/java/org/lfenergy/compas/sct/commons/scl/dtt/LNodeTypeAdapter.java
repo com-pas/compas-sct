@@ -12,6 +12,7 @@ import org.lfenergy.compas.scl2007b4.model.TLNodeType;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.dto.DoTypeName;
+import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
@@ -229,7 +230,7 @@ public class LNodeTypeAdapter
         if(doTypeAdapter.containsDAWithDAName(doName)){
             return Pair.of(doName,doTypeAdapter);
         }
-        return doTypeAdapter.findPathDoType2DA(daName);
+        return doTypeAdapter.findPathDoTypeToDA(daName);
     }
 
 
@@ -267,7 +268,7 @@ public class LNodeTypeAdapter
             if(adapterPair.getRight().containsDAWithDAName(daTypeName.getName())){
                 lastDoTypeAdapter = adapterPair.getValue();
             } else {
-                adapterPair = adapterPair.getRight().findPathDoType2DA(daTypeName.getName());
+                adapterPair = adapterPair.getRight().findPathDoTypeToDA(daTypeName.getName());
                 lastDoTypeAdapter = adapterPair.getValue();
             }
         }
@@ -342,5 +343,22 @@ public class LNodeTypeAdapter
      */
     public String getId() {
         return currentElem.getId();
+    }
+
+    /**
+     * Find binded DOType info
+     * @param signalInfo
+     * @return DOType info as object contening name, id and adapter
+     * @throws ScdException throws when DO unknown
+     */
+    public DataTypeTemplateAdapter.DOTypeInfo findMatchingDOType(ExtRefSignalInfo signalInfo)  throws ScdException{
+        DoTypeName doName = new DoTypeName(signalInfo.getPDO());
+        String extDoName = doName.getName();
+        String doTypeId = getDOTypeId(extDoName).orElseThrow(() ->
+                new IllegalArgumentException("Unknown doName :" + signalInfo.getPDO()));
+        DOTypeAdapter doTypeAdapter = this.getParentAdapter().getDOTypeAdapterById(doTypeId).orElseThrow(() ->
+                new IllegalArgumentException(String.format("%s: No referenced to DO id : %s, scl file not valid", doName, doTypeId)));
+        doTypeAdapter.checkAndCompleteStructData(doName);
+        return new DataTypeTemplateAdapter.DOTypeInfo(doName, doTypeId, doTypeAdapter);
     }
 }

@@ -5,21 +5,19 @@
 package org.lfenergy.compas.sct.commons.scl.dtt;
 
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.scl2007b4.model.TDO;
-import org.lfenergy.compas.scl2007b4.model.TLNodeType;
-import org.lfenergy.compas.scl2007b4.model.TPrivate;
-import org.lfenergy.compas.sct.commons.dto.DTO;
-import org.lfenergy.compas.sct.commons.dto.DaTypeName;
-import org.lfenergy.compas.sct.commons.dto.DoTypeName;
-import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
+import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.lfenergy.compas.sct.commons.dto.DTO.P_DO;
 
 class LNodeTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TLNodeType> {
     @Override
@@ -148,20 +146,15 @@ class LNodeTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TLNo
     void testCheck() throws Exception {
         DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
         LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getLNodeTypeAdapterById("LN1").get());
-        assertThrows(
-                ScdException.class,
-                () -> lNodeTypeAdapter.check(new DoTypeName(""),new DaTypeName(""))
-        );
-
-        assertThrows(
-                ScdException.class,
-                () -> lNodeTypeAdapter.check(new DoTypeName("do"),new DaTypeName(""))
-        );
-
-        assertThrows(
-                ScdException.class,
-                () -> lNodeTypeAdapter.check(new DoTypeName("do"),new DaTypeName("da"))
-        );
+        DoTypeName doTypeName1 = new DoTypeName("");
+        DaTypeName daTypeName1 = new DaTypeName("");
+        assertThatThrownBy(() -> lNodeTypeAdapter.check(doTypeName1,daTypeName1)).isInstanceOf(ScdException.class);
+        DoTypeName doTypeName2 = new DoTypeName("do");
+        DaTypeName daTypeName2 = new DaTypeName("");
+        assertThatThrownBy(() -> lNodeTypeAdapter.check(doTypeName2,daTypeName2)).isInstanceOf(ScdException.class);
+        DoTypeName doTypeName3 = new DoTypeName("do");
+        DaTypeName daTypeName3 = new DaTypeName("da");
+        assertThatThrownBy(() -> lNodeTypeAdapter.check(doTypeName3,daTypeName3)).isInstanceOf(ScdException.class);
         DoTypeName doTypeName = new DoTypeName("Op.res");
         DaTypeName daTypeName = new DaTypeName("d");
 
@@ -209,4 +202,100 @@ class LNodeTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TLNo
         // Then
         assertThat(result).isEqualTo("LNodeType[@id=\"LN1\" and @lnClass=\"PIOC\"]");
     }
+
+    @Test
+    void checkMatchingDOType_shouldFindOneDO() {
+        //Given
+        ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
+        signalInfo.setPDO("P_DO");
+
+        SclRootAdapter sclRootAdapter = new SclRootAdapter("hID","hVersion","hRevision");
+        sclRootAdapter.getCurrentElem().setDataTypeTemplates(new TDataTypeTemplates());
+        DataTypeTemplateAdapter dttAdapter = assertDoesNotThrow(
+                sclRootAdapter::getDataTypeTemplateAdapter);
+
+        TDO tdo= new TDO();
+        tdo.setName("P_DO");
+        tdo.setType("DO1");
+
+        TDOType tdoType = new TDOType();
+        tdoType.setId("DO1");
+
+        TLNodeType tlNodeType = new TLNodeType();
+        tlNodeType.setId("ID");
+        tlNodeType.getDO().add(tdo);
+        dttAdapter.getCurrentElem().getDOType().add(tdoType);
+
+        dttAdapter.getCurrentElem().getLNodeType().add(tlNodeType);
+        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("ID").get());
+        //When
+        DataTypeTemplateAdapter.DOTypeInfo expectedDoTypeInfo = assertDoesNotThrow(() -> lNodeTypeAdapter.findMatchingDOType(signalInfo));
+        //Then
+        assertThat(expectedDoTypeInfo.getDoTypeId()).isEqualTo("DO1");
+        assertThat(expectedDoTypeInfo.getDoTypeName().getName()).isEqualTo("P_DO");
+        assertThat(expectedDoTypeInfo.getDoTypeAdapter()).isNotNull();
+
+    }
+
+    @Test
+    void checkMatchingDOType_shouldThrowException_whenDOUnknown() {
+        //Given
+        ExtRefSignalInfo signalInfo = DTO.createExtRefSignalInfo();
+
+        SclRootAdapter sclRootAdapter = new SclRootAdapter("hID","hVersion","hRevision");
+        sclRootAdapter.getCurrentElem().setDataTypeTemplates(new TDataTypeTemplates());
+        DataTypeTemplateAdapter dttAdapter = assertDoesNotThrow(
+                sclRootAdapter::getDataTypeTemplateAdapter);
+
+        TDO tdo= new TDO();
+        tdo.setName(P_DO);
+        tdo.setType("DO1");
+
+        TDOType tdoType = new TDOType();
+        tdoType.setId("DO1");
+
+        TLNodeType tlNodeType = new TLNodeType();
+        tlNodeType.setId("ID");
+        tlNodeType.getDO().add(tdo);
+        dttAdapter.getCurrentElem().getDOType().add(tdoType);
+
+        dttAdapter.getCurrentElem().getLNodeType().add(tlNodeType);
+        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("ID").get());
+        //When Then
+        assertThatThrownBy(() -> lNodeTypeAdapter.findMatchingDOType(signalInfo))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Unknown doName :"+P_DO);
+    }
+
+    @Test
+    void checkMatchingDOType_shouldThrowException_whenDONotReferenced() {
+        //Given
+        ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
+        signalInfo.setPDO("P_DO");
+
+        SclRootAdapter sclRootAdapter = new SclRootAdapter("hID","hVersion","hRevision");
+        sclRootAdapter.getCurrentElem().setDataTypeTemplates(new TDataTypeTemplates());
+        DataTypeTemplateAdapter dttAdapter = assertDoesNotThrow(
+                sclRootAdapter::getDataTypeTemplateAdapter);
+
+        TDO tdo= new TDO();
+        tdo.setName("P_DO");
+        tdo.setType("DO2");
+
+        TDOType tdoType = new TDOType();
+        tdoType.setId("DO1");
+
+        TLNodeType tlNodeType = new TLNodeType();
+        tlNodeType.setId("ID");
+        tlNodeType.getDO().add(tdo);
+        dttAdapter.getCurrentElem().getDOType().add(tdoType);
+
+        dttAdapter.getCurrentElem().getLNodeType().add(tlNodeType);
+        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("ID").get());
+        //When Then
+        assertThatThrownBy(() -> lNodeTypeAdapter.findMatchingDOType(signalInfo))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("P_DO: No referenced to DO id : DO2, scl file not valid");
+    }
+
 }

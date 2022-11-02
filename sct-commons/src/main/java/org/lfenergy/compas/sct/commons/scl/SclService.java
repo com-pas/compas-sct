@@ -264,9 +264,7 @@ public class SclService {
                 .build();
 
         // check for signal existence
-        // The below throws exception if the signal doesn't exist
-        //TODO: create method which purpose is only ckecking instead of this one
-        abstractLNAdapter.getExtRefsBySignalInfo(signalInfo);
+        abstractLNAdapter.isExtRefExist(signalInfo);
 
         // find potential binders for the signalInfo
         return sclRootAdapter.streamIEDAdapters()

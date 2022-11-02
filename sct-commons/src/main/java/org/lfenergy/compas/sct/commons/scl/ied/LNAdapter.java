@@ -35,7 +35,7 @@ import java.util.List;
  *
  *      <li>{@link LNAdapter#getExtRefs() <em>Returns the value of the <b>TExtRef </b>containment reference list</em>}</li>
  *      <li>{@link LNAdapter#getExtRefs(ExtRefSignalInfo) <em>Returns the value of the <b>TExtRef </b>containment reference list By <b>ExtRefSignalInfo <b></b></b></em>}</li>
- *      <li>{@link LNAdapter#getExtRefsBySignalInfo(ExtRefSignalInfo) <em>Returns the value of the <b>TExtRef </b>containment reference list By <b>ExtRefSignalInfo </b></em>}</li>
+ *      <li>{@link LNAdapter#isExtRefExist(ExtRefSignalInfo) <em>Returns the value of the <b>TExtRef </b>containment reference list By <b>ExtRefSignalInfo </b></em>}</li>
  *
  *      <li>{@link LNAdapter#getDAI <em>Returns the value of the <b>ResumedDataTemplate </b> containment reference By filter</em>}</li>
  *      <li>{@link LNAdapter#getDAIValues(ResumedDataTemplate) <em>Returns <b>DAI (sGroup, value) </b> containment reference list By <b>ResumedDataTemplate </b> filter</em>}</li>

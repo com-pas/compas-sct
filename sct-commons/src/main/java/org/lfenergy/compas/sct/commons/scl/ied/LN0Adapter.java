@@ -38,7 +38,7 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
  *
  *      <li>{@link LN0Adapter#getExtRefs() <em>Returns the value of the <b>TExtRef </b>containment reference list</em>}</li>
  *      <li>{@link LN0Adapter#getExtRefs(ExtRefSignalInfo) <em>Returns the value of the <b>TExtRef </b>containment reference list By <b>ExtRefSignalInfo <b></b></b></em>}</li>
- *      <li>{@link LN0Adapter#getExtRefsBySignalInfo(ExtRefSignalInfo) <em>Returns the value of the <b>TExtRef </b>containment reference list By <b>ExtRefSignalInfo </b></em>}</li>
+ *      <li>{@link LN0Adapter#isExtRefExist(ExtRefSignalInfo) <em></b>throws exception when specified signal not found in LN target</b></em>}</li>
  *
  *      <li>{@link LN0Adapter#getDAI <em>Returns the value of the <b>ResumedDataTemplate </b> containment reference By filter</em>}</li>
  *      <li>{@link LN0Adapter#getDAIValues(ResumedDataTemplate) <em>Returns <b>DAI (sGroup, value) </b> containment reference list By <b>ResumedDataTemplate </b> filter</em>}</li>

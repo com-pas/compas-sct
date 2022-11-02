@@ -79,30 +79,67 @@ class LNAdapterTest {
     }
 
     @Test
-    void testUpdateExtRefBinders() {
+    void updateExtRefBindingInfo_shouldUpdateBindingInfo_whenBindingInfoNull() {
+        //Given
         ExtRefInfo extRefInfo = DTO.createExtRefInfo();
         TExtRef extRef = ExtRefSignalInfo.initExtRef(extRefInfo.getSignalInfo());
-
         assertNull(extRef.getIedName());
-
         LNAdapter lnAdapter = initLNAdapter(new TLN());
-        extRefInfo.getBindingInfo().setServiceType(null);
-        lnAdapter.updateExtRefBindingInfo(extRef, extRefInfo);
-        assertEquals(extRefInfo.getBindingInfo().getServiceType(), extRefInfo.getSignalInfo().getPServT());
-        assertEquals(extRefInfo.getBindingInfo().getIedName(), extRef.getIedName());
-        assertEquals(extRefInfo.getSourceInfo().getSrcLDInst(), extRef.getSrcLDInst());
-
         extRefInfo.setBindingInfo(null);
         extRefInfo.setSourceInfo(null);
         extRef = ExtRefSignalInfo.initExtRef(extRefInfo.getSignalInfo());
         assertNull(extRef.getIedName());
+        //When
         lnAdapter.updateExtRefBindingInfo(extRef, extRefInfo);
+        //Then
         assertNull(extRef.getIedName());
         assertNull(extRef.getSrcLDInst());
     }
+@Test
+    void updateExtRefBindingInfo_shouldUpdateBindingInfo_whenNotBindingInfoNull() {
+        //Given
+        ExtRefInfo extRefInfo = DTO.createExtRefInfo();
+        TExtRef extRef = ExtRefSignalInfo.initExtRef(extRefInfo.getSignalInfo());
+        assertNull(extRef.getIedName());
+        LNAdapter lnAdapter = initLNAdapter(new TLN());
+        extRefInfo.getBindingInfo().setServiceType(null);
+        //When
+        lnAdapter.updateExtRefBindingInfo(extRef, extRefInfo);
+        //Then
+        assertEquals(extRefInfo.getBindingInfo().getServiceType(), extRefInfo.getSignalInfo().getPServT());
+        assertEquals(extRefInfo.getBindingInfo().getIedName(), extRef.getIedName());
+        assertEquals(extRefInfo.getSourceInfo().getSrcLDInst(), extRef.getSrcLDInst());
+    }
 
     @Test
-    void testUpdateExtRefBindingInfo() throws Exception {
+    void updateExtRefBinders_shouldUpdateExtRefs() throws Exception {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.getLDeviceAdapterByLdInst("LD_INS2").get());
+        LNAdapter lnAdapter = (LNAdapter) AbstractLNAdapter.builder()
+                .withLDeviceAdapter(lDeviceAdapter)
+                .withLnClass("ANCR")
+                .withLnInst("1")
+                .build();
+        ExtRefInfo info = DTO.createExtRefInfo();
+               info.getSignalInfo().setPDO("StrVal.sdo2");
+        info.getSignalInfo().setPDA("antRef.bda1.bda2.bda3");
+        info.getSignalInfo().setIntAddr("INT_ADDR2");
+        info.getSignalInfo().setDesc(null);
+        info.getSignalInfo().setPServT(null);
+        //When Then
+        assertDoesNotThrow(() -> lnAdapter.updateExtRefBinders(info));
+        List<TExtRef> tExtRefs = lnAdapter.getExtRefs(null);
+        assertEquals(1, tExtRefs.size());
+        assertEquals(info.getBindingInfo().getIedName(), tExtRefs.get(0).getIedName());
+
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("extRefInfoAndMessage")
+    void updateExtRefBinders_shouldThrowsException(String testCase, ExtRefInfo info, String expectedMessage) throws Exception {
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
@@ -113,21 +150,32 @@ class LNAdapterTest {
                 .withLnInst("1")
                 .build();
 
+        assertThatThrownBy(() -> lnAdapter.updateExtRefBinders(info))
+                .isInstanceOf(ScdException.class)
+                .hasMessage(expectedMessage);
+    }
+
+    private static Stream<Arguments> extRefInfoAndMessage() {
+        return Stream.of(
+                Arguments.of("whenBindingInfoNotValid",new ExtRefInfo(), "ExtRef mandatory binding data are missing"),
+                Arguments.of("whenNoExtRefFound",DTO.createExtRefInfo(), "Unknown ExtRef [pDO(FACntRs1.res),intAddr(INT_ADDR)] in IED_NAME/LD_INST_H.ANCR")
+        );
+    }
+
+
+    @Test
+    void updateExtRefBinders_shouldUpdateExtRefs_whenManyExtRefMatch() {
+        //Given
+        TExtRef tExtRef = DTO.createExtRef();
+        TInputs inputs = new TInputs();
+        inputs.getExtRef().add(tExtRef);
+        inputs.getExtRef().add(tExtRef);
+        LN0 ln0 = new LN0();
+        ln0.setInputs(inputs);
+        LN0Adapter ln0Adapter = new LN0Adapter(null, ln0);
         ExtRefInfo info = DTO.createExtRefInfo();
-        assertThrows(ScdException.class, () -> lnAdapter.updateExtRefBinders(info));
-
-        info.getSignalInfo().setPDO("StrVal.sdo2");
-        info.getSignalInfo().setPDA("antRef.bda1.bda2.bda3");
-        info.getSignalInfo().setIntAddr("INT_ADDR2");
-        info.getSignalInfo().setDesc(null);
-        info.getSignalInfo().setPServT(null);
-        assertDoesNotThrow(() -> lnAdapter.updateExtRefBinders(info));
-        List<TExtRef> tExtRefs = lnAdapter.getExtRefs(null);
-        assertEquals(1, tExtRefs.size());
-        TExtRef extRef = tExtRefs.get(0);
-
-        assertEquals(info.getBindingInfo().getIedName(), extRef.getIedName());
-
+        //When Then
+        assertDoesNotThrow(() ->ln0Adapter.updateExtRefBinders(info));
     }
 
 

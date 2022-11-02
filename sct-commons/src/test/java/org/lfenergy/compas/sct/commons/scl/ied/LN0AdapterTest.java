@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 
 class LN0AdapterTest {
@@ -103,32 +104,121 @@ class LN0AdapterTest {
     }
 
     @Test
-    void testGetExtRefsBySignalInfo(){
+    void isExtRefExist_shouldThrowScdException_whenNoInputsInLN0() {
+        //Given
         LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
         TLDevice tlDevice = Mockito.mock(TLDevice.class);
         Mockito.when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
         LN0 ln0 = new LN0();
         Mockito.when(tlDevice.getLN0()).thenReturn(ln0);
-        LN0Adapter ln0Adapter = assertDoesNotThrow( () -> new LN0Adapter(lDeviceAdapter,ln0));
+        LN0Adapter ln0Adapter = assertDoesNotThrow(() -> new LN0Adapter(lDeviceAdapter, ln0));
+        ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
+        //When Then
+        assertThatThrownBy(() -> ln0Adapter.isExtRefExist(signalInfo))
+                .isInstanceOf(ScdException.class)
+                .hasMessage("No Inputs for LN or no ExtRef signal to check");
+    }
 
-        List<TExtRef> extRefList = assertDoesNotThrow(()->ln0Adapter.getExtRefsBySignalInfo(new ExtRefSignalInfo()));
-        assertTrue(extRefList.isEmpty());
+    @Test
+    void isExtRefExist_shouldThrowScdException_whenSignalNotValid() {
+        //Given
+        LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
+        TLDevice tlDevice = Mockito.mock(TLDevice.class);
+        Mockito.when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
+        LN0 ln0 = new LN0();
+        TExtRef tExtRef = new TExtRef();
+        TInputs tInputs = new TInputs();
+        tInputs.getExtRef().add(tExtRef);
+        ln0.setInputs(tInputs);
+        Mockito.when(tlDevice.getLN0()).thenReturn(ln0);
+        LN0Adapter ln0Adapter = assertDoesNotThrow(() -> new LN0Adapter(lDeviceAdapter, ln0));
+        ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
+        //When Then
+        assertThatThrownBy(() -> ln0Adapter.isExtRefExist(signalInfo))
+                .isInstanceOf(ScdException.class)
+                .hasMessage("Invalid or missing attributes in ExtRef signal info");
+    }
+
+
+    @Test
+    void isExtRefExist_shouldThrowScdException_whenSignalNull(){
+        //Given
+        LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
+        TLDevice tlDevice = Mockito.mock(TLDevice.class);
+        Mockito.when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
+        LN0 ln0 = new LN0();
+        TInputs tInputs = new TInputs();
+        TExtRef extRef = DTO.createExtRef();
+        tInputs.getExtRef().add(extRef);
+        ln0.setInputs(tInputs);
+        Mockito.when(tlDevice.getLN0()).thenReturn(ln0);
+        LN0Adapter ln0Adapter = assertDoesNotThrow( () -> new LN0Adapter(lDeviceAdapter,ln0));
+        //When Then
+        assertThatThrownBy(() -> ln0Adapter.isExtRefExist(null))
+                .isInstanceOf(ScdException.class)
+                .hasMessage("No Inputs for LN or no ExtRef signal to check");
+    }
+
+    @Test
+    void isExtRefExist_shouldThrowScdException_whenNotExistInTargetLN(){
+        //Given
+        LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
+        TLDevice tlDevice = Mockito.mock(TLDevice.class);
+        Mockito.when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
+        LN0 ln0 = new LN0();
+        TInputs tInputs = new TInputs();
+        TExtRef extRef = DTO.createExtRef();
+        extRef.setPDO("pdo");
+        tInputs.getExtRef().add(extRef);
+        ln0.setInputs(tInputs);
+        Mockito.when(tlDevice.getLN0()).thenReturn(ln0);
+        LN0Adapter ln0Adapter = assertDoesNotThrow(() -> new LN0Adapter(lDeviceAdapter, ln0));
+        ExtRefSignalInfo signalInfo = DTO.createExtRefSignalInfo();
+        //When Then
+        assertThatThrownBy(() -> ln0Adapter.isExtRefExist(signalInfo))
+                .isInstanceOf(ScdException.class)
+                .hasMessage("ExtRef signal does not exist in target LN");
+    }
+
+    @Test
+    void isExtRefExist_shouldNotThrowException_whenExtRefExist() {
+        //Given
+        LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
+        TLDevice tlDevice = Mockito.mock(TLDevice.class);
+        Mockito.when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
+        LN0 ln0 = new LN0();
+        Mockito.when(tlDevice.getLN0()).thenReturn(ln0);
+        LN0Adapter ln0Adapter = assertDoesNotThrow(() -> new LN0Adapter(lDeviceAdapter, ln0));
 
         TInputs tInputs = new TInputs();
         TExtRef extRef = DTO.createExtRef();
         tInputs.getExtRef().add(extRef);
         ln0.setInputs(tInputs);
 
-        extRefList = assertDoesNotThrow(()->ln0Adapter.getExtRefsBySignalInfo(null));
-        assertFalse(extRefList.isEmpty());
+        ExtRefSignalInfo signalInfo = DTO.createExtRefSignalInfo();
+        //When Then
+        assertDoesNotThrow(() -> ln0Adapter.isExtRefExist(signalInfo));
+    }
+
+    @Test
+    void isExtRefExist_shouldNotThrowException_whenExtRefExistWithPDA() {
+        //Given
+        LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
+        TLDevice tlDevice = Mockito.mock(TLDevice.class);
+        Mockito.when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
+        LN0 ln0 = new LN0();
+        Mockito.when(tlDevice.getLN0()).thenReturn(ln0);
+        LN0Adapter ln0Adapter = assertDoesNotThrow(() -> new LN0Adapter(lDeviceAdapter, ln0));
+
+        TInputs tInputs = new TInputs();
+        TExtRef extRef = DTO.createExtRef();
+        tInputs.getExtRef().add(extRef);
+        ln0.setInputs(tInputs);
 
         ExtRefSignalInfo signalInfo = DTO.createExtRefSignalInfo();
-        extRefList = assertDoesNotThrow(()->ln0Adapter.getExtRefsBySignalInfo(signalInfo));
-        assertFalse(extRefList.isEmpty());
-
-        signalInfo.setPDO("Do.papa");
-        extRefList = assertDoesNotThrow(()->ln0Adapter.getExtRefsBySignalInfo(signalInfo));
-        assertTrue(extRefList.isEmpty());
+        signalInfo.setPDA("Da.papa");
+        //When Then
+        assertDoesNotThrow(() -> ln0Adapter.isExtRefExist(signalInfo));
     }
 
     @Test
@@ -359,30 +449,80 @@ class LN0AdapterTest {
     }
 
     @Test
-    void getEnumValue() throws Exception {
+    void getEnumValue_shouldReturnNothing_whenEnumUnknow() throws Exception {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LDSUIED").get());
         LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
-        ResumedDataTemplate filter = new ResumedDataTemplate();
-        filter.setLnClass(ln0Adapter.getLNClass());
-        filter.setLnInst(ln0Adapter.getLNInst());
-        filter.setPrefix(ln0Adapter.getPrefix());
-        filter.setLnType(ln0Adapter.getLnType());
-        filter.setDoName(new DoTypeName("Beh"));
-        DaTypeName daTypeName = new DaTypeName();
-        daTypeName.setName("stVal");
-        daTypeName.setBType(TPredefinedBasicTypeEnum.ENUM);
-        daTypeName.setFc(TFCEnum.ST);
-        daTypeName.setType("BehaviourModeKind");
-        filter.setDaName(daTypeName);
         //When
-        Set<String> enumValues = ln0Adapter.getEnumValues(filter.getType());
+        Set<String> enumValues = ln0Adapter.getEnumValues("Behaviour");
+        //Then
+        assertThat(enumValues).isEmpty();
+    }
+
+    @Test
+    void getEnumValue_shouldReturnEnumValues_whenEnumKnown() throws Exception {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LDSUIED").get());
+        LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
+        //When
+        Set<String> enumValues = ln0Adapter.getEnumValues("BehaviourModeKind");
         //Then
         assertEquals(5, enumValues.size());
         assertThat(enumValues).containsExactlyInAnyOrder("blocked", "test", "test/blocked", "off", "on");
+    }
+
+    @Test
+    void addControlBlock_shouldAddControlBlock_whenReport() throws Exception {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LDSUIED").get());
+        LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
+        ReportControlBlock reportControlBlock = new ReportControlBlock();
+        int reportCBInitSize = ln0Adapter.getCurrentElem().getReportControl().size();
+        //When
+        ln0Adapter.addControlBlock(reportControlBlock);
+        //Then
+        assertThat(ln0Adapter.getCurrentElem().getReportControl()).hasSize(reportCBInitSize+1);
+    }
+
+    @Test
+    void addControlBlock_shouldAddControlBlock_whenGoose() throws Exception {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LDSUIED").get());
+        LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
+        GooseControlBlock gooseControlBlock = new GooseControlBlock();
+        int reportCBInitSize = ln0Adapter.getCurrentElem().getReportControl().size();
+        //When
+        ln0Adapter.addControlBlock(gooseControlBlock);
+        //Then
+        assertThat(ln0Adapter.getCurrentElem().getGSEControl()).hasSize(reportCBInitSize+1);
+    }
+
+    @Test
+    void addControlBlock_shouldAddControlBlock_whenSMV() throws Exception {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LDSUIED").get());
+        LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
+        SMVControlBlock smvControlBlock = new SMVControlBlock();
+        int reportCBInitSize = ln0Adapter.getCurrentElem().getReportControl().size();
+        //When
+        ln0Adapter.addControlBlock(smvControlBlock);
+        //Then
+        assertThat(ln0Adapter.getCurrentElem().getSampledValueControl()).hasSize(reportCBInitSize+1);
     }
 
     @Test
