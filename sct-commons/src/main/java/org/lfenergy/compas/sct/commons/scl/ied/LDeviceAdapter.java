@@ -243,7 +243,6 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
 
     }
 
-
     public Optional<String> getLDeviceStatus() {
         if (!hasLN0()){
             return Optional.empty();
@@ -260,5 +259,14 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
         aLNAdapters.add(getLN0Adapter());
         aLNAdapters.addAll(getLNAdapters());
         return aLNAdapters;
+    }
+
+    public List<SclReportItem> createDataSetAndControlBlocks(){
+        LN0Adapter ln0Adapter = getLN0Adapter();
+        if (!ln0Adapter.hasInputs()){
+            return Collections.emptyList();
+        }
+        return ln0Adapter.getInputsAdapter()
+            .updateAllExtRefDataSetsAndControlBlocks();
     }
 }

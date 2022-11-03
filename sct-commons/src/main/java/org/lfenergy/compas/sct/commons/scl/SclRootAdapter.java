@@ -17,6 +17,8 @@ import org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter;
 
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -242,8 +244,20 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
      * @throws ScdException throws when unknown IED
      */
     public IEDAdapter getIEDAdapterByName(String iedName) throws ScdException {
-        // <IED iedNAme></IED> ; Unmarshaller
-        return new IEDAdapter(this,iedName);
+        return findIedAdapterByName(iedName)
+            .orElseThrow(() -> new ScdException("IED.name '%s' not found in SCD"));
+    }
+
+    /**
+     * Find an IED by name from SCL
+     * @param iedName name of IED to find in SCL
+     * @return <em>Optional<IEDAdapter></em> of the first IED with a matching name
+     */
+    public Optional<IEDAdapter> findIedAdapterByName(String iedName) throws ScdException {
+        return currentElem.getIED().stream()
+            .filter(ied -> Objects.equals(ied.getName(), iedName))
+            .findFirst()
+            .map(ied -> new IEDAdapter(this, ied));
     }
 
     /**

@@ -6,12 +6,18 @@ package org.lfenergy.compas.sct.commons.scl;
 
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.SCL;
+import org.lfenergy.compas.scl2007b4.model.THeader;
+import org.lfenergy.compas.scl2007b4.model.TIED;
 import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
 
@@ -63,5 +69,59 @@ class SclRootAdapterTest {
         sclRootAdapter.addPrivate(tPrivate);
         assertEquals(1, sclRootAdapter.getCurrentElem().getPrivate().size());
         assertIsMarshallable(scd);
+    }
+
+    @Test
+    void getIEDAdapterByName_should_return_ied(){
+        // Given
+        SCL scl = new SCL();
+        scl.setHeader(new THeader());
+        TIED ied = new TIED();
+        ied.setName("IED_NAME");
+        scl.getIED().add(ied);
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scl);
+        // When
+        IEDAdapter resultIed = sclRootAdapter.getIEDAdapterByName("IED_NAME");
+        // Then
+        assertThat(resultIed.getName()).isEqualTo("IED_NAME");
+    }
+
+    @Test
+    void getIEDAdapterByName_should_throw_exception(){
+        // Given
+        SCL scl = new SCL();
+        scl.setHeader(new THeader());
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scl);
+        // When & Then
+        assertThatThrownBy(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"))
+            .isInstanceOf(ScdException.class);
+    }
+
+    @Test
+    void findIEDAdapterByName_should_return_ied(){
+        // Given
+        SCL scl = new SCL();
+        scl.setHeader(new THeader());
+        TIED ied = new TIED();
+        ied.setName("IED_NAME");
+        scl.getIED().add(ied);
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scl);
+        // When
+        Optional<IEDAdapter> resultOptionalIed = sclRootAdapter.findIedAdapterByName("IED_NAME");
+        // Then
+        assertThat(resultOptionalIed).isPresent();
+        assertThat(resultOptionalIed.get().getName()).isEqualTo("IED_NAME");
+    }
+
+    @Test
+    void findIEDAdapterByName_should_return_empty(){
+        // Given
+        SCL scl = new SCL();
+        scl.setHeader(new THeader());
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scl);
+        // When
+        Optional<IEDAdapter> resultOptionalIed = sclRootAdapter.findIedAdapterByName("IED_NAME");
+        // Then
+        assertThat(resultOptionalIed).isEmpty();
     }
 }

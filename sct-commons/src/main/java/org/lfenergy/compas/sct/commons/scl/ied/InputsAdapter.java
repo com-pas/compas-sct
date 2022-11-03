@@ -250,4 +250,23 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
     private LDeviceAdapter getLDeviceAdapter() {
         return parentAdapter.getParentAdapter();
     }
+
+    public List<SclReportItem> updateAllExtRefDataSetsAndControlBlocks() {
+        List<TCompasFlow> compasFlows = PrivateService.extractCompasPrivates(currentElem, TCompasFlow.class);
+        return getExtRefs().stream()
+            //TODO: replace filter below by criteria of issue #93 RSR-389
+            // - Active or Untested i.e /IED/LDevice/LN0/Inputs/Private/compas:Flow @FlowStatus="ACTIVE" OR "UNTESTED"
+            // - AND external to their IED i.e IED/LDevice/LN0/Inputs/ExtRef@iedName is different from /IED@name where the ExtRef resides
+            // - AND ExtRef@iedName @ldInst @lnClass @doName attributes are existing and populated
+            .filter(extRef -> !getMatchingCompasFlows(extRef, compasFlows).isEmpty())
+            .map(this::updateExtRefDataSetsAndControlBlocks)
+            .flatMap(Optional::stream)
+            .collect(Collectors.toList());
+    }
+
+    private Optional<SclReportItem> updateExtRefDataSetsAndControlBlocks(TExtRef extRef) {
+        //TODO: to be implemented in issue #92 RSR-473
+        System.out.println(extRefXPath(extRef.getDesc()));
+        return Optional.empty();
+    }
 }
