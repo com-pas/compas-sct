@@ -31,6 +31,7 @@
                                 <compas:Flow FlowID="7" FlowKind="BAY_INTERNAL" ExtRefiedName="System_Version_IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE" dataStreamKey="ExtRef does not match any LN is source LDevice"/>
                                 <compas:Flow FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="System_Version_IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST22" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE" dataStreamKey="Source LDevice is off for this ExtRef"/>
                                 <compas:Flow FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="System_Version_IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST23" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE" dataStreamKey="Source LDevice is undefined for this ExtRef"/>
+                                <compas:Flow FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="System_Version_IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST24" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE" dataStreamKey="Source LDevice is neither on nor off for this ExtRef"/>
                             </Private>
                             <!-- nominal case -->
                             <ExtRef iedName="System_Version_IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="DoName1" daName="daName1" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113" desc="STAT_LDSUIED_LPDO 1 Sortie_13_BOOLEAN_18_stVal_1"/>
@@ -50,6 +51,8 @@
                             <ExtRef iedName="System_Version_IED_NAME2" ldInst="LD_INST22" lnClass="ANCR" lnInst="1" doName="DoName1" daName="daName1" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113" desc="Source LDevice is off for this ExtRef"/>
                             <!-- source LDevice status is undefined  -->
                             <ExtRef iedName="System_Version_IED_NAME2" ldInst="LD_INST23" lnClass="ANCR" lnInst="1" doName="DoName1" daName="daName1" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113" desc="Source LDevice is undefined for this ExtRef"/>
+                            <!-- source LDevice status is neither on nor off  -->
+                            <ExtRef iedName="System_Version_IED_NAME2" ldInst="LD_INST24" lnClass="ANCR" lnInst="1" doName="DoName1" daName="daName1" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113" desc="Source LDevice is neither on nor off for this ExtRef"/>
                         </Inputs>
                     </LN0>
                 </LDevice>
@@ -131,6 +134,17 @@
                 <!-- source LDevice status is undefined -->
                 <LDevice inst="LD_INST23">
                     <LN0 lnClass="LLN0" inst="" lnType="LNEX1"/>
+                    <LN lnClass="ANCR" inst="1" lnType="lnType"/>
+                </LDevice>
+                <!-- source LDevice status is neither on nor off -->
+                <LDevice inst="LD_INST24">
+                    <LN0 lnClass="LLN0" inst="" lnType="LNEX1">
+                        <DOI name="Mod">
+                            <DAI name="stVal">
+                                <Val>test</Val>
+                            </DAI>
+                        </DOI>
+                    </LN0>
                     <LN lnClass="ANCR" inst="1" lnType="lnType"/>
                 </LDevice>
             </Server>
