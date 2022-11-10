@@ -350,7 +350,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         List<TDataSet> tDataSets = this.getDataSetMatchingExtRefInfo(extRefInfo);
         return getControlBlocks(tDataSets, extRefInfo.getBindingInfo().getServiceType());
     }
-    
+
     /**
      * Gets all Control Blocks from LNode for specified Service Type (GOOSE, SMV and REPORT) and Data Sets
      *

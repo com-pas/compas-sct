@@ -4,11 +4,38 @@
 <!-- // SPDX-License-Identifier: Apache-2.0 -->
 <SCL xmlns="http://www.iec.ch/61850/2003/SCL" xmlns:compas="https://www.lfenergy.org/compas/extension/v1" version="2007" revision="B" release="4">
     <Private type="COMPAS-SclFileType">
-        <compas:SclFileType>SSD</compas:SclFileType>
+        <compas:SclFileType>STD</compas:SclFileType>
     </Private>
     <Header id="HeaderId" version="HeaderVersion" revision="HeaderRevision"/>
+    <Communication>
+        <SubNetwork type="8-MMS" name="RSPACE_PROCESS_NETWORK">
+            <ConnectedAP iedName="ied1" apName="PROCESS_AP">
+                <Address>
+                    <P type="IP">0.0.0.0</P>
+                </Address>
+            </ConnectedAP>
+        </SubNetwork>
+        <SubNetwork type="IP" name="RSPACE_ADMIN_NETWORK">
+            <ConnectedAP iedName="ied1" apName="ADMIN_AP">
+                <Address>
+                    <P type="SyslogIP">Adresse IP du serveur Syslog</P>
+                    <P type="SyslogProt">udp;tcp;tcp/tls</P>
+                    <P type="SyslogCat">Valeur du code de la catégorie des messages</P>
+                    <P type="IP-DATAREPOSITORY">0.0.0.0</P>
+                    <P type="SnmpUserName">Nom d utilisateur pour la connexion</P>
+                    <P type="SnmpAuthProt">none;hmac-128-sha-224;hmac-192-sha-256;hmac-256-sha-384;hmac-384-sha-512</P>
+                    <P type="SnmpAuthKey">Password cle pour l'authentification</P>
+                    <P type="SnmpPrivProt">none;aes-cfb-128;aes-cfb-192;aes-cfb-256</P>
+                    <P type="SnmpPrivKey">Password cle pour la confidentialite</P>
+                </Address>
+            </ConnectedAP>
+        </SubNetwork>
+    </Communication>
     <IED name="ied1">
-        <AccessPoint name="ap1">
+        <Private type="COMPAS-ICDHeader">
+            <compas:ICDHeader IEDType="GTW" IEDinstance="0" BayLabel="SITE1" IEDName="ied1" ICDSystemVersionUUID="IED4d4fe1a8cda64cf88a5ee4176a1a0eef" VendorName="ABC" IEDredundancy="A" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="f8dbc8c1-2db7-4652-a9d6-0b414bdeccfa" headerVersion="01.00.00" headerRevision="01.00.00"/>
+        </Private>
+        <AccessPoint name="PROCESS_AP">
             <Server>
                 <Authentication/>
                 <LDevice inst="lDeviceInst1">
@@ -42,6 +69,7 @@
                 </LDevice>
             </Server>
         </AccessPoint>
+        <AccessPoint name="ADMIN_AP"/>
     </IED>
     <DataTypeTemplates>
         <LNodeType id="lnType0" lnClass="LLN0">
