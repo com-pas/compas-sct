@@ -10,7 +10,6 @@
             <DO name="Op" type="DO2" transient="true"/>
         </LNodeType>
         <DOType cdc="WYE" id="DO1">
-
             <DA fc="DC" name="dataNs" bType="VisString255" count="0">
                 <Val>IEC 61850-7-3:2007B</Val>
                 <ProtNs>IEC 61850-8-1:2003</ProtNs>

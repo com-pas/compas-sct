@@ -5,6 +5,8 @@
 package org.lfenergy.compas.sct.commons.scl.dtt;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.dto.DoTypeName;
@@ -15,6 +17,7 @@ import org.mockito.Mockito;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DOTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter, TDOType> {
@@ -80,18 +83,16 @@ class DOTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter, TDOTyp
 
     @Test
     void testCheckAndCompleteStructData() throws Exception {
+        //Given
         DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
         DOTypeAdapter doTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getDOTypeAdapterById("DO2").get());
         DoTypeName doTypeName = new DoTypeName("Op","origin");
 
         assertDoesNotThrow(() ->doTypeAdapter.checkAndCompleteStructData(doTypeName));
         assertEquals(TPredefinedCDCEnum.WYE,doTypeName.getCdc());
-
-        assertThrows(
-                ScdException.class,
-                () ->doTypeAdapter.checkAndCompleteStructData(new DoTypeName("Op","toto"))
-        );
-
+        DoTypeName doTypeName1 = new DoTypeName("Op","toto");
+        //When Then
+        assertThatThrownBy(() ->doTypeAdapter.checkAndCompleteStructData(doTypeName1)).isInstanceOf(ScdException.class);
     }
 
     @Test
@@ -135,10 +136,10 @@ class DOTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter, TDOTyp
                 AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID
         );
         DOTypeAdapter doTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getDOTypeAdapterById("DO1").get());
-        assertThrows(ScdException.class, () ->  doTypeAdapter.findPathSDO2DA("origin","unknown"));
-        assertThrows(ScdException.class, () ->  doTypeAdapter.findPathSDO2DA("unknown","antRef"));
+        assertThrows(ScdException.class, () ->  doTypeAdapter.findPathSDOToDA("origin","unknown"));
+        assertThrows(ScdException.class, () ->  doTypeAdapter.findPathSDOToDA("unknown","antRef"));
         var pair = assertDoesNotThrow(
-                () -> doTypeAdapter.findPathSDO2DA("origin","antRef")
+                () -> doTypeAdapter.findPathSDOToDA("origin","antRef")
         );
         assertEquals("d",pair.getKey());
         DOTypeAdapter lastDoTypeAdapter = pair.getValue();
@@ -184,5 +185,20 @@ class DOTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter, TDOTyp
         String result = doTypeAdapter.elementXPath();
         // Then
         assertThat(result).isEqualTo("DOType[@id=\"DO1\"]");
+    }
+
+    @ParameterizedTest
+    @CsvSource({"angRef,CF,PhaseAngleReferenceKind", "antRef,ST,DA1"})
+    void getDAByName(String daName, String fc, String type) throws Exception {
+        // Given
+        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(
+                AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
+        DOTypeAdapter doTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getDOTypeAdapterById("DO2").get());
+        // When
+        TDA result = assertDoesNotThrow(() -> doTypeAdapter.getDAByName(daName).get());
+        // Then
+        assertThat(result).isNotNull()
+                .extracting(TDA::getName, TDA::getFc, TDA::getType)
+                .containsExactlyInAnyOrder(daName,TFCEnum.fromValue(fc),type);
     }
 }

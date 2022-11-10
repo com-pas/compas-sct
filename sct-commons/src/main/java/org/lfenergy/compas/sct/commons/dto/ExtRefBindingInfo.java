@@ -8,9 +8,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
-import org.lfenergy.compas.scl2007b4.model.TExtRef;
-import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
-import org.lfenergy.compas.scl2007b4.model.TServiceType;
+import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.scl.dtt.DATypeAdapter;
+import org.lfenergy.compas.sct.commons.scl.dtt.DOTypeAdapter;
+import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 
 import java.util.Comparator;
 import java.util.Objects;
@@ -180,5 +182,30 @@ public class ExtRefBindingInfo implements Comparable<ExtRefBindingInfo> {
                 ", serviceType=" +  sType +
                 '}';
 
+    }
+
+    /**
+     * updates bindingInfo from given data
+     * @param signalInfo contains DAType info to set
+     * @param doTypeInfo contains DOType info leading to DA
+     * @throws ScdException thrown when inconsistency between DOType and DAType
+     */
+    public void updateDAInfos(ExtRefSignalInfo signalInfo, DataTypeTemplateAdapter.DOTypeInfo doTypeInfo) throws ScdException {
+        DaTypeName daTypeName = new DaTypeName(signalInfo.getPDA());
+        String extDaName = daTypeName.getName();
+        DOTypeAdapter lastDoTypeAdapter = doTypeInfo.getDoTypeAdapter();
+        TDA da = lastDoTypeAdapter.getDAByName(extDaName).orElseThrow(() ->
+                new ScdException(String.format("%s: Unknown DA (%s) in DOType (%s) ", doTypeInfo.getDoTypeName(), extDaName, doTypeInfo.getDoTypeId())));
+        if (da.getBType() != TPredefinedBasicTypeEnum.STRUCT && !daTypeName.getStructNames().isEmpty()
+                || da.getBType() == TPredefinedBasicTypeEnum.STRUCT && daTypeName.getStructNames().isEmpty()) {
+            throw new ScdException(String.format("Invalid ExtRef signal: no coherence between pDO(%s) and pDA(%s)",
+                    signalInfo.getPDO(), signalInfo.getPDA()));
+        }
+        String daTypeId = da.getType();
+        DATypeAdapter daTypeAdapter = lastDoTypeAdapter.getParentAdapter().getDATypeAdapterById(daTypeId).orElseThrow(() ->
+                new IllegalArgumentException(String.format("%s: Unknown DA (%s), or no reference to its type", daTypeName, extDaName)));
+        daTypeAdapter.check(daTypeName);
+        daTypeName.setFc(da.getFc());
+        this.daName = daTypeName;
     }
 }

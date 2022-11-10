@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
  * <ol>
  *   <li>Adapter</li>
  *    <ul>
- *      <li>{@link LDeviceAdapter#streamLnAdapters <em>Returns the value of the <b>LNAdapter </b>containment reference list</em>}</li>
  *      <li>{@link LDeviceAdapter#getLN0Adapter <em>Returns the value of the <b>LN0Adapter </b>containment reference list</em>}</li>
  *      <li>{@link LDeviceAdapter#getLNAdapter <em>Returns the value of the <b>LNAdapter </b>reference object By  LNClass, inst and prefix</em>}</li>
  *    </ul>
@@ -182,25 +181,20 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
      */
     public List<ExtRefBindingInfo> getExtRefBinders(ExtRefSignalInfo signalInfo) {
         DataTypeTemplateAdapter dttAdapter = parentAdapter.getParentAdapter().getDataTypeTemplateAdapter();
-        List<ExtRefBindingInfo> potentialBinders = new ArrayList<>();
-
-        List<AbstractLNAdapter<?>> lnAdapters = getLNAdaptersInclundigLN0();
-        for(AbstractLNAdapter<?> lnAdapter : lnAdapters) {
-            String lnType = lnAdapter.getLnType();
-            try {
-                ExtRefBindingInfo extRefBindingInfo = dttAdapter.getBinderResumedDTT(lnType,signalInfo);
-                extRefBindingInfo.setIedName(parentAdapter.getName());
-                extRefBindingInfo.setLdInst(currentElem.getInst());
-                extRefBindingInfo.setLnClass(lnAdapter.getLNClass());
-                extRefBindingInfo.setLnInst(lnAdapter.getLNInst());
-                extRefBindingInfo.setPrefix(lnAdapter.getPrefix());
-
-                potentialBinders.add(extRefBindingInfo);
-            } catch (ScdException e) {
-                log.debug("ExRef filtered out: {}", e.getLocalizedMessage());
-            }
-        }
-        return potentialBinders;
+        return getLNAdaptersInclundigLN0()
+                .stream()
+                .filter(abstractLNAdapter -> StringUtils.isBlank(signalInfo.getPLN()) || abstractLNAdapter.getLNClass().equals(signalInfo.getPLN()))
+                .map(lnAdapter -> {
+                    String lnType = lnAdapter.getLnType();
+                    ExtRefBindingInfo extRefBindingInfo = dttAdapter.getBinderResumedDTT(lnType,signalInfo);
+                    extRefBindingInfo.setIedName(parentAdapter.getName());
+                    extRefBindingInfo.setLdInst(currentElem.getInst());
+                    extRefBindingInfo.setLnClass(lnAdapter.getLNClass());
+                    extRefBindingInfo.setLnInst(lnAdapter.getLNInst());
+                    extRefBindingInfo.setPrefix(lnAdapter.getPrefix());
+                    return extRefBindingInfo;
+                })
+                .collect(Collectors.toList());
     }
 
     /**
