@@ -288,7 +288,7 @@ class SclServiceTest {
         List<ControlBlock<?>>  controlBlocks = SclService.getExtRefSourceInfo(scd, extRefInfo);
 
         //Then
-        assertThat(controlBlocks).hasSize(0);
+        assertThat(controlBlocks).isEmpty();
     }
 
     @Test
@@ -329,8 +329,10 @@ class SclServiceTest {
         extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
 
         //When Then
+        assertThat(extRefInfo.getSignalInfo()).isNull();
         assertThatThrownBy(() -> SclService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class); // signal = null
         extRefInfo.setSignalInfo(new ExtRefSignalInfo());
+        assertThat(extRefInfo.getSignalInfo()).isNotNull();
         assertThatThrownBy(() -> SclService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class);// signal invalid
     }
 
@@ -349,12 +351,14 @@ class SclServiceTest {
         extRefSignalInfo.setPDO("Do21.sdo21");
         extRefInfo.setSignalInfo(extRefSignalInfo);
         //When Then
+        assertThat(extRefInfo.getBindingInfo()).isNull();
         assertThatThrownBy(() -> SclService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class); // binding = null
         extRefInfo.setBindingInfo(new ExtRefBindingInfo());
+        assertThat(extRefInfo.getBindingInfo()).isNotNull();
         assertThatThrownBy(() -> SclService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class);// binding invalid
     }
     @Test
-    void updateExtRefSource_shouldThrowScdException_whenBindingInternalBinding() throws Exception {
+    void updateExtRefSource_shouldThrowScdException_whenBindingInternalByIedName() throws Exception {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
         ExtRefInfo extRefInfo = new ExtRefInfo();
@@ -375,6 +379,60 @@ class SclServiceTest {
         extRefInfo.setBindingInfo(new ExtRefBindingInfo());
         //When Then
         assertThatThrownBy(() -> SclService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class); // CB not allowed
+    }
+
+    @Test
+    void updateExtRefSource_shouldThrowScdException_whenBindingInternaByServiceType() throws Exception {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
+        ExtRefInfo extRefInfo = new ExtRefInfo();
+        extRefInfo.setHolderIEDName("IED_NAME2");
+        extRefInfo.setHolderLDInst("LD_INST21");
+        extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
+
+        ExtRefSignalInfo extRefSignalInfo = new ExtRefSignalInfo();
+        extRefSignalInfo.setIntAddr("INT_ADDR21");
+        extRefSignalInfo.setPDA("da21.bda211.bda212.bda213");
+        extRefSignalInfo.setPDO("Do21.sdo21");
+        extRefInfo.setSignalInfo(extRefSignalInfo);
+
+        ExtRefBindingInfo extRefBindingInfo = new ExtRefBindingInfo();
+        extRefBindingInfo.setIedName("IED_NAME2"); // internal binding
+        extRefBindingInfo.setLdInst("LD_INST12");
+        extRefBindingInfo.setLnClass(TLLN0Enum.LLN_0.value());
+        extRefBindingInfo.setServiceType(TServiceType.POLL);
+        extRefInfo.setBindingInfo(new ExtRefBindingInfo());
+        //When Then
+        assertThatThrownBy(() -> SclService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class); // CB not allowed
+    }
+
+    @Test
+    void updateExtRefSource_shouldThrowScdException_whenSourceInfoNullOrInvalid() throws Exception {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
+        ExtRefInfo extRefInfo = new ExtRefInfo();
+        extRefInfo.setHolderIEDName("IED_NAME2");
+        extRefInfo.setHolderLDInst("LD_INST21");
+        extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
+
+        ExtRefSignalInfo extRefSignalInfo = new ExtRefSignalInfo();
+        extRefSignalInfo.setIntAddr("INT_ADDR21");
+        extRefSignalInfo.setPDA("da21.bda211.bda212.bda213");
+        extRefSignalInfo.setPDO("Do21.sdo21");
+        extRefInfo.setSignalInfo(extRefSignalInfo);
+
+        ExtRefBindingInfo extRefBindingInfo = new ExtRefBindingInfo();
+        extRefBindingInfo.setIedName("IED_NAME1"); // internal binding
+        extRefBindingInfo.setLdInst("LD_INST12");
+        extRefBindingInfo.setLnClass(TLLN0Enum.LLN_0.value());
+        extRefInfo.setBindingInfo(new ExtRefBindingInfo());
+
+        //When Then
+        assertThat(extRefInfo.getSourceInfo()).isNull();
+        assertThatThrownBy(() -> SclService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class); // signal = null
+        extRefInfo.setSourceInfo(new ExtRefSourceInfo());
+        assertThat(extRefInfo.getSourceInfo()).isNotNull();
+        assertThatThrownBy(() -> SclService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class);// signal invalid
     }
     @Test
     void updateExtRefSource_shouldThrowScdException_whenBindingExternalBinding() throws Exception {
@@ -397,14 +455,18 @@ class SclServiceTest {
         extRefBindingInfo.setLnClass(TLLN0Enum.LLN_0.value());
         extRefInfo.setBindingInfo(extRefBindingInfo);
 
-        extRefInfo.setSourceInfo(new ExtRefSourceInfo());
-        extRefInfo.getSourceInfo().setSrcLDInst(extRefInfo.getBindingInfo().getLdInst());
-        extRefInfo.getSourceInfo().setSrcLNClass(extRefInfo.getBindingInfo().getLnClass());
-        extRefInfo.getSourceInfo().setSrcCBName("goose1");
+        ExtRefSourceInfo sourceInfo = new ExtRefSourceInfo();
+        sourceInfo.setSrcLDInst(extRefInfo.getBindingInfo().getLdInst());
+        sourceInfo.setSrcLNClass(extRefInfo.getBindingInfo().getLnClass());
+        sourceInfo.setSrcCBName("goose1");
+        extRefInfo.setSourceInfo(sourceInfo);
 
-        //When Then
+        //When
         TExtRef extRef = assertDoesNotThrow(() -> SclService.updateExtRefSource(scd, extRefInfo));
-        assertEquals(extRefInfo.getSourceInfo().getSrcCBName(), extRef.getSrcCBName());
+        //Then
+        assertThat(extRef.getSrcCBName()).isEqualTo(extRefInfo.getSourceInfo().getSrcCBName());
+        assertThat(extRef.getSrcLDInst()).isEqualTo(extRefInfo.getBindingInfo().getLdInst());
+        assertThat(extRef.getSrcLNClass()).contains(extRefInfo.getBindingInfo().getLnClass());
     }
 
     private ExtRefSignalInfo createSignalInfo(String pDO, String pDA, String intAddr) {
@@ -499,8 +561,9 @@ class SclServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
 
         // when & then
+        ResumedDataTemplate resumedDataTemplate = new ResumedDataTemplate();
         assertThrows(ScdException.class,
-                () -> SclService.getDAI(scd, "IED_NAME1", "UNKNOWNLD", new ResumedDataTemplate(), true));
+                () -> SclService.getDAI(scd, "IED_NAME1", "UNKNOWNLD", resumedDataTemplate, true));
     }
 
     @Test
@@ -716,31 +779,37 @@ class SclServiceTest {
 
     @Test
     void testImportSTDElementsInSCD_Several_STD_Match_Compas_ICDHeader() throws Exception {
+        //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd.xml");
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SCL std1 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
-
-        assertThrows(ScdException.class, () -> SclService.importSTDElementsInSCD(scdRootAdapter, Set.of(std, std1), DTO.comMap));
+        //When Then
+        Set<SCL> stds = Set.of(std, std1);
+        assertThrows(ScdException.class, () -> SclService.importSTDElementsInSCD(scdRootAdapter, stds, DTO.comMap));
         assertIsMarshallable(scd);
     }
 
     @Test
     void testImportSTDElementsInSCD_Compas_ICDHeader_Not_Match() throws Exception {
+        //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd.xml");
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_with_same_ICDSystemVersionUUID.xml");
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
-
-        assertThrows(ScdException.class, ()-> SclService.importSTDElementsInSCD(scdRootAdapter, Set.of(std), DTO.comMap));
+        //When Then
+        Set<SCL> stds = Set.of(std);
+        assertThrows(ScdException.class, ()-> SclService.importSTDElementsInSCD(scdRootAdapter, stds, DTO.comMap));
         assertIsMarshallable(scd);
     }
 
     @Test
     void testImportSTDElementsInSCD_No_STD_Match() throws Exception {
+        //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/ssd.xml");
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
-
-        assertThrows(ScdException.class, ()-> SclService.importSTDElementsInSCD(scdRootAdapter, new HashSet<>(), DTO.comMap));
+       //When Then
+        Set<SCL> stds = new HashSet<>();
+        assertThrows(ScdException.class, ()-> SclService.importSTDElementsInSCD(scdRootAdapter, stds, DTO.comMap));
         assertIsMarshallable(scd);
     }
 

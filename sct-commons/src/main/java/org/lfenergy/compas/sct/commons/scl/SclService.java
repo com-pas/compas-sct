@@ -365,7 +365,7 @@ public class SclService {
         if (bindingInfo == null || !bindingInfo.isValid()) {
             throw new ScdException(INVALID_OR_MISSING_ATTRIBUTES_IN_EXT_REF_BINDING_INFO);
         }
-        if (bindingInfo.getIedName().equals(iedName)) {
+        if (bindingInfo.getIedName().equals(iedName) || TServiceType.POLL.equals(bindingInfo.getServiceType())) {
             throw new ScdException("Internal binding can't have control block");
         }
         ExtRefSourceInfo sourceInfo = extRefInfo.getSourceInfo();
@@ -377,7 +377,7 @@ public class SclService {
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
         LDeviceAdapter lDeviceAdapter = iedAdapter.findLDeviceAdapterByLdInst(ldInst)
                 .orElseThrow(() -> new ScdException(String.format(UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName)));
-        var anLNAdapter = AbstractLNAdapter.builder()
+        AbstractLNAdapter<?> anLNAdapter = AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
                 .withLnClass(lnClass)
                 .withLnInst(lnInst)

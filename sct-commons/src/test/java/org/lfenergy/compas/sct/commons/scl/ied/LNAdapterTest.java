@@ -94,7 +94,8 @@ class LNAdapterTest {
         assertNull(extRef.getIedName());
         assertNull(extRef.getSrcLDInst());
     }
-@Test
+
+    @Test
     void updateExtRefBindingInfo_shouldUpdateBindingInfo_whenNotBindingInfoNull() {
         //Given
         ExtRefInfo extRefInfo = DTO.createExtRefInfo();
@@ -123,7 +124,7 @@ class LNAdapterTest {
                 .withLnInst("1")
                 .build();
         ExtRefInfo info = DTO.createExtRefInfo();
-               info.getSignalInfo().setPDO("StrVal.sdo2");
+        info.getSignalInfo().setPDO("StrVal.sdo2");
         info.getSignalInfo().setPDA("antRef.bda1.bda2.bda3");
         info.getSignalInfo().setIntAddr("INT_ADDR2");
         info.getSignalInfo().setDesc(null);
@@ -156,8 +157,8 @@ class LNAdapterTest {
 
     private static Stream<Arguments> extRefInfoAndMessage() {
         return Stream.of(
-                Arguments.of("whenBindingInfoNotValid",new ExtRefInfo(), "ExtRef mandatory binding data are missing"),
-                Arguments.of("whenNoExtRefFound",DTO.createExtRefInfo(), "Unknown ExtRef [pDO(FACntRs1.res),intAddr(INT_ADDR)] in IED_NAME/LD_INST_H.ANCR")
+                Arguments.of("whenBindingInfoNotValid", new ExtRefInfo(), "ExtRef mandatory binding data are missing"),
+                Arguments.of("whenNoExtRefFound", DTO.createExtRefInfo(), "Unknown ExtRef [pDO(FACntRs1.res),intAddr(INT_ADDR)] in IED_NAME/LD_INST_H.ANCR")
         );
     }
 
@@ -174,12 +175,13 @@ class LNAdapterTest {
         LN0Adapter ln0Adapter = new LN0Adapter(null, ln0);
         ExtRefInfo info = DTO.createExtRefInfo();
         //When Then
-        assertDoesNotThrow(() ->ln0Adapter.updateExtRefBinders(info));
+        assertDoesNotThrow(() -> ln0Adapter.updateExtRefBinders(info));
     }
 
-
     @Test
-    void checkExtRefInfoCoherence() throws Exception {
+    void should_throw_ScdException_when_the_given_binding_info_does_not_match_the_found_TExtRef_binding_info() throws Exception {
+
+        //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-cb/scd_get_cbs_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME1"));
@@ -189,14 +191,28 @@ class LNAdapterTest {
                 .withLnClass(TLLN0Enum.LLN_0.value())
                 .build();
 
-        assertThrows(IllegalArgumentException.class, () -> lnAdapter.checkExtRefInfoCoherence(new ExtRefInfo()));
+        ExtRefInfo extRefInfo = DTO.createExtRefInfo();
 
+        //When
+        //Then
+        assertThrows(ScdException.class, () -> lnAdapter.extractExtRefFromExtRefInfo(extRefInfo));
+    }
+
+    @Test
+    void should_throw_ScdException_when_the_given_binding_info_does_not_refer_to_an_existing_IED_LDevice_and_LNode_in_the_SCL() throws Exception {
+
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-cb/scd_get_cbs_test.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME1"));
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.getLDeviceAdapterByLdInst("LD_INST11"));
+        AbstractLNAdapter<?> lnAdapter = AbstractLNAdapter.builder()
+                .withLDeviceAdapter(lDeviceAdapter)
+                .withLnClass(TLLN0Enum.LLN_0.value())
+                .build();
 
         ExtRefInfo extRefInfo = DTO.createExtRefInfo();
-        extRefInfo.setBindingInfo(null);
         extRefInfo.setSourceInfo(null);
-        assertThrows(ScdException.class, () -> lnAdapter.checkExtRefInfoCoherence(extRefInfo));
-
         extRefInfo.getSignalInfo().setDesc(null);
         extRefInfo.getSignalInfo().setPLN(null);
         extRefInfo.getSignalInfo().setPServT(null);
@@ -204,29 +220,92 @@ class LNAdapterTest {
         extRefInfo.getSignalInfo().setPDO("Do11.sdo11");
         extRefInfo.getSignalInfo().setIntAddr("INT_ADDR11");
 
-        TExtRef extRef = assertDoesNotThrow(() -> lnAdapter.checkExtRefInfoCoherence(extRefInfo));
-        assertEquals(extRefInfo.getSignalInfo().getPDO(), extRef.getPDO());
-
         ExtRefBindingInfo bindingInfo = DTO.createExtRefBindingInfo_Remote();
         extRefInfo.setBindingInfo(bindingInfo);
-        assertThrows(ScdException.class, () -> lnAdapter.checkExtRefInfoCoherence(extRefInfo));
 
+        //When
+        //Then
+        assertThrows(ScdException.class, () -> lnAdapter.extractExtRefFromExtRefInfo(extRefInfo));
+    }
+
+    @Test
+    void should_check_with_success_extRefInfo_coherence() throws Exception {
+
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-cb/scd_get_cbs_test.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1");
+        LDeviceAdapter lDeviceAdapter = iAdapter.getLDeviceAdapterByLdInst("LD_INST11");
+
+        AbstractLNAdapter<?> lnAdapter = AbstractLNAdapter.builder()
+                .withLDeviceAdapter(lDeviceAdapter)
+                .withLnClass(TLLN0Enum.LLN_0.value())
+                .build();
+
+        ExtRefInfo extRefInfo = DTO.createExtRefInfo();
+        extRefInfo.getSignalInfo().setDesc(null);
+        extRefInfo.getSignalInfo().setPLN(null);
+        extRefInfo.getSignalInfo().setPServT(null);
+        extRefInfo.getSignalInfo().setPDA("da11.bda111.bda112.bda113");
+        extRefInfo.getSignalInfo().setPDO("Do11.sdo11");
+        extRefInfo.getSignalInfo().setIntAddr("INT_ADDR11");
+
+        ExtRefBindingInfo bindingInfo = DTO.createExtRefBindingInfo_Remote();
         bindingInfo.setServiceType(null);
         bindingInfo.setIedName("IED_NAME1");
         bindingInfo.setLdInst("LD_INST12");
         bindingInfo.setLnInst("1");
         bindingInfo.setLnClass("ANCR");
         bindingInfo.setPrefix("PR");
-        extRef = assertDoesNotThrow(() -> lnAdapter.checkExtRefInfoCoherence(extRefInfo));
-        assertEquals(extRefInfo.getBindingInfo().getIedName(), extRef.getIedName());
+
+        extRefInfo.setBindingInfo(bindingInfo);
 
         ExtRefSourceInfo sourceInfo = new ExtRefSourceInfo();
-        sourceInfo.setSrcCBName("UNKNOWN_CB");
-        extRefInfo.setSourceInfo(sourceInfo);
-        assertThrows(ScdException.class, () -> lnAdapter.checkExtRefInfoCoherence(extRefInfo));
-
         sourceInfo.setSrcCBName("rpt1");
+        extRefInfo.setSourceInfo(sourceInfo);
+
+        //When
+        //Then
         assertDoesNotThrow(() -> lnAdapter.checkExtRefInfoCoherence(extRefInfo));
+    }
+
+    @Test
+    void should_extract_ExtRef_from_ExtRefInfo() throws Exception {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-cb/scd_get_cbs_test.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1");
+        LDeviceAdapter lDeviceAdapter = iAdapter.getLDeviceAdapterByLdInst("LD_INST11");
+
+        AbstractLNAdapter<?> lnAdapter = AbstractLNAdapter.builder()
+                .withLDeviceAdapter(lDeviceAdapter)
+                .withLnClass(TLLN0Enum.LLN_0.value())
+                .build();
+
+        ExtRefInfo extRefInfo = DTO.createExtRefInfo();
+        extRefInfo.setSourceInfo(null);
+        extRefInfo.getSignalInfo().setDesc(null);
+        extRefInfo.getSignalInfo().setPLN(null);
+        extRefInfo.getSignalInfo().setPServT(null);
+        extRefInfo.getSignalInfo().setPDA("da11.bda111.bda112.bda113");
+        extRefInfo.getSignalInfo().setPDO("Do11.sdo11");
+        extRefInfo.getSignalInfo().setIntAddr("INT_ADDR11");
+
+        ExtRefBindingInfo bindingInfo = DTO.createExtRefBindingInfo_Remote();
+        bindingInfo.setServiceType(null);
+        bindingInfo.setIedName("IED_NAME1");
+        bindingInfo.setLdInst("LD_INST12");
+        bindingInfo.setLnInst("1");
+        bindingInfo.setLnClass("ANCR");
+        bindingInfo.setPrefix("PR");
+
+        extRefInfo.setBindingInfo(bindingInfo);
+
+        //When
+        TExtRef extRef = assertDoesNotThrow(() -> lnAdapter.extractExtRefFromExtRefInfo(extRefInfo));
+
+        //Then
+        assertEquals(extRefInfo.getSignalInfo().getPDO(), extRef.getPDO());
     }
 
     @ParameterizedTest
@@ -288,6 +367,7 @@ class LNAdapterTest {
         //Then
         assertThat(extRef.getSrcCBName()).isEqualTo(extRefInfo.getSourceInfo().getSrcCBName());
         assertThat(extRef.getSrcLDInst()).isEqualTo(extRefInfo.getSourceInfo().getSrcLDInst());
+
         assertThat(extRef.getLnClass().contains(extRefInfo.getSourceInfo().getSrcLNClass())).isTrue();
 
     }
@@ -426,4 +506,25 @@ class LNAdapterTest {
         assertThat(result).isEqualTo("LN[@lnClass=\"LN_CLASS_H\" and @inst=\"1\" and @lnType=\"LN_TYPE\"]");
     }
 
+    @Test
+    void getControlBlocks_should_find_ControlBlock_by_name() throws Exception {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1");
+        LDeviceAdapter lDeviceAdapter = iAdapter.getLDeviceAdapterByLdInst("LD_INST12");
+
+        AbstractLNAdapter<?> lnAdapter = AbstractLNAdapter.builder()
+                .withLDeviceAdapter(lDeviceAdapter)
+                .withLnClass(TLLN0Enum.LLN_0.value())
+                .build();
+        List<TDataSet> tDataSets = lnAdapter.getCurrentElem().getDataSet();
+        //When
+        var tControls = lnAdapter.getControlBlocks(tDataSets, TServiceType.GOOSE);
+       // var tControls = lnAdapter.getControlBlocks("dataset121", TGSEControl.class);
+
+        //Then
+        assertThat(tControls).isNotEmpty()
+                .hasSize(1);
+    }
 }

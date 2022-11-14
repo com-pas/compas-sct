@@ -65,7 +65,7 @@ public class DataSetInfo extends LNodeMetaDataEmbedder{
      * @return Set of DataSetInfo
      */
     public static Set<DataSetInfo> getDataSets(AbstractLNAdapter<? extends TAnyLN> lnAdapter){
-        return lnAdapter.getDataSet(null)
+        return lnAdapter.getDataSetMatchingExtRefInfo(null)
                 .stream().map(DataSetInfo::from).collect(Collectors.toSet());
     }
 
