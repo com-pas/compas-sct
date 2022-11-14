@@ -174,53 +174,45 @@ class SclServiceTest {
     }
 
     @Test
-    void testGetExtRefBinders() throws Exception {
+    void getExtRefBinders_shouldThowScdException_whenExtRefNotExist() throws Exception {
+        //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_binders_test.xml");
 
-        ExtRefSignalInfo signalInfo = createSignalInfo(
-                "Do11.sdo11", "da11.bda111.bda112.bda113", "INT_ADDR11"
-        );
-
-        assertDoesNotThrow(
-                () -> SclService.getExtRefBinders(
-                        scd, "IED_NAME1", "LD_INST11", "LLN0", "", "", signalInfo
-                )
-        );
-
-        assertThrows(
-                ScdException.class,
-                () -> SclService.getExtRefBinders(
-                        scd, "IED_NAME1", "UNKNOWN_LD", "LLN0", "", "", signalInfo
-                )
-        );
+        ExtRefSignalInfo signalInfo = createSignalInfo("Do11.sdo11", "da11.bda111.bda112.bda113", "INT_ADDR11");
+        signalInfo.setPLN("ANCR");
+        //When Then
+        assertThatThrownBy(
+                () -> SclService.getExtRefBinders(scd, "IED_NAME1", "UNKNOWN_LD", "LLN0", "", "", signalInfo))
+                .isInstanceOf(ScdException.class);
     }
 
     @Test
-    void test_getExtRefBinders_should_return_sorted_list() throws Exception {
+    void getExtRefBinders_shouldReturnSortedListBindingInfo_whenExtRefAndDOExist() throws Exception {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_binders_test.xml");
 
         ExtRefSignalInfo signalInfo = createSignalInfo(
                 "Do11.sdo11", "da11.bda111.bda112.bda113", "INT_ADDR11"
         );
+        signalInfo.setPLN("ANCR");
 
         // When
         List<ExtRefBindingInfo> potentialBinders = SclService.getExtRefBinders(scd, "IED_NAME1", "LD_INST11", "LLN0", "", "", signalInfo);
 
         // Then
-        // Not so relevant because we get a single element list from the XML file
+        assertThat(potentialBinders).hasSize(4);
         assertThat(potentialBinders)
                 .extracting(ExtRefBindingInfo::getIedName)
-                .containsExactly("IED_NAME1");
+                .containsExactly("IED_NAME1", "IED_NAME1", "IED_NAME2", "IED_NAME3");
         assertThat(potentialBinders)
                 .extracting(ExtRefBindingInfo::getLdInst)
-                .containsExactly("LD_INST12");
+                .containsExactly("LD_INST11", "LD_INST12", "LD_INST22", "LD_INST31");
         assertThat(potentialBinders)
                 .extracting(ExtRefBindingInfo::getLnClass)
-                .containsExactly("LLN0");
+                .containsExactly("ANCR", "ANCR", "ANCR", "ANCR");
         assertThat(potentialBinders)
                 .extracting(ExtRefBindingInfo::getLnInst)
-                .containsExactly("");
+                .containsExactly("1", "1", "2", "3");
     }
 
     @Test

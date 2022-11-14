@@ -5,11 +5,17 @@
 package org.lfenergy.compas.sct.commons.dto;
 
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.scl2007b4.model.TExtRef;
-import org.lfenergy.compas.scl2007b4.model.TServiceType;
+import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.scl.dtt.DOTypeAdapter;
+import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.lfenergy.compas.sct.commons.dto.DTO.P_DA;
+import static org.lfenergy.compas.sct.commons.dto.DTO.P_DO;
 
 class ExtRefBindingInfoTest {
 
@@ -143,5 +149,82 @@ class ExtRefBindingInfoTest {
 
         // Then
         assertThat(result).isNegative();
+    }
+
+    @Test
+    void findAndUpdateDAInfos_shouldThrowException_whenDAUnknown() {
+        //Given
+        ExtRefBindingInfo bindingInfo = DTO.createExtRefBindingInfo_Source();
+        ExtRefSignalInfo signalInfo = DTO.createExtRefSignalInfo();
+
+        SclRootAdapter sclRootAdapter = new SclRootAdapter("hID","hVersion","hRevision");
+        sclRootAdapter.getCurrentElem().setDataTypeTemplates(new TDataTypeTemplates());
+        DataTypeTemplateAdapter dttAdapter = assertDoesNotThrow(
+                sclRootAdapter::getDataTypeTemplateAdapter);
+
+        TDA tda = new TDA();
+        tda.setName(P_DA);
+        tda.setFc(TFCEnum.CF);
+        tda.setBType(TPredefinedBasicTypeEnum.FLOAT_32);
+
+        TDO tdo= new TDO();
+        tdo.setName(P_DO);
+        tdo.setType("DO1");
+
+        TDOType tdoType = new TDOType();
+        tdoType.setId("DO1");
+        tdoType.getSDOOrDA().add(tda);
+
+        TLNodeType tlNodeType = new TLNodeType();
+        tlNodeType.setId("ID");
+        tlNodeType.getDO().add(tdo);
+        dttAdapter.getCurrentElem().getDOType().add(tdoType);
+        DataTypeTemplateAdapter.DOTypeInfo doTypeInfo = new DataTypeTemplateAdapter.DOTypeInfo(new DoTypeName(P_DO), "ID",
+                dttAdapter.getDOTypeAdapterById("DO1").get());
+        //When Then
+        assertThatThrownBy(() -> bindingInfo.updateDAInfos(signalInfo,doTypeInfo))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(P_DA+": Unknown DA ("+P_DA+"), or no reference to its type");
+    }
+
+    @Test
+    void findAndUpdateDAInfos_shouldThrowException_whenDANotCoherentWithDO() {
+        //Given
+        ExtRefBindingInfo bindingInfo = DTO.createExtRefBindingInfo_Source();
+        ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
+        signalInfo.setPDO("P_DO");
+        signalInfo.setPDA("P_DA");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter("hID","hVersion","hRevision");
+        sclRootAdapter.getCurrentElem().setDataTypeTemplates(new TDataTypeTemplates());
+        DataTypeTemplateAdapter dttAdapter = assertDoesNotThrow(
+                sclRootAdapter::getDataTypeTemplateAdapter);
+
+        TDA tda = new TDA();
+        tda.setName("P_DA");
+        tda.setFc(TFCEnum.CF);
+        tda.setBType(TPredefinedBasicTypeEnum.STRUCT);
+
+        TDO tdo= new TDO();
+        tdo.setName("P_DO");
+        tdo.setType("DO1");
+
+        TDOType tdoType = new TDOType();
+        tdoType.setId("DO1");
+        tdoType.getSDOOrDA().add(tda);
+
+        TLNodeType tlNodeType = new TLNodeType();
+        tlNodeType.setId("ID");
+        tlNodeType.getDO().add(tdo);
+
+        dttAdapter.getCurrentElem().getDOType().add(tdoType);
+        dttAdapter.getCurrentElem().getLNodeType().add(tlNodeType);
+
+        DOTypeAdapter doTypeAdapter = dttAdapter.getDOTypeAdapterById("DO1").get();
+        DataTypeTemplateAdapter.DOTypeInfo doTypeInfo = new DataTypeTemplateAdapter.DOTypeInfo(new DoTypeName("P_DO"),
+                "ID", doTypeAdapter);
+        //When Then
+        assertThatThrownBy(() -> bindingInfo.updateDAInfos(signalInfo,doTypeInfo))
+                .isInstanceOf(ScdException.class)
+                .hasMessage("Invalid ExtRef signal: no coherence between pDO(P_DO) and pDA(P_DA)");
     }
 }

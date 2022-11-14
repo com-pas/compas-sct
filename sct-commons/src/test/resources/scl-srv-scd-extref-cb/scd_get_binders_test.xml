@@ -3,7 +3,7 @@
 <!-- -->
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
-<SCL version="2007" revision="B" release="4" xmlns="http://www.iec.ch/61850/2003/SCL" xmlns:compas="https://www.lfenergy.org/compas/extension/v1">
+<SCL version="2007" revision="B" release="4" xmlns="http://www.iec.ch/61850/2003/SCL">
     <Header id="hId" version="2007" revision="B" toolID="COMPAS"/>
     <IED name="IED_NAME1">
         <AccessPoint name="AP_NAME">
@@ -12,9 +12,10 @@
                 <LDevice inst="LD_INST11" ldName="IED_NAME1LD_INST11">
                     <LN0 lnClass="LLN0" inst="" lnType="LNEX1">
                         <Inputs>
-                            <ExtRef intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
+                            <ExtRef pLN="ANCR" pServT="Report" desc="DESC" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
                         </Inputs>
                     </LN0>
+                    <LN lnClass="ANCR" inst="1" lnType="LN2"/>
                 </LDevice>
                 <LDevice inst="LD_INST12" ldName="IED_NAME1LD_INST12">
                     <LN0 lnClass="LLN0" inst="" lnType="LN1"/>
@@ -45,6 +46,8 @@
                             <ExtRef intAddr="INT_ADDR22" pDO="Do22.sdo22" pDA="da22.bda221.bda222"/>
                         </Inputs>
                     </LN>
+                    <LN lnClass="ANCR" inst="2" lnType="LN2">
+                    </LN>
                 </LDevice>
             </Server>
         </AccessPoint>
@@ -59,6 +62,7 @@
                             <ExtRef intAddr="INT_ADDR31" pDO="Do31.sdo31" pDA="da31.bda311.bda312.bda313"/>
                         </Inputs>
                     </LN0>
+                    <LN lnClass="ANCR" inst="3" lnType="LN2"/>
                 </LDevice>
                 <LDevice inst="LD_INST32" ldName="IED_NAME3LD_INST32">
                     <LN0 lnClass="LLN0" inst="" lnType="IED_NAME3_LN1"/>
@@ -80,6 +84,7 @@
             <DO name="Do11" type="DO11" transient="true"/>
         </LNodeType>
         <LNodeType lnClass="ANCR" id="LN2">
+            <DO name="Do11" type="DO11" transient="true"/>
             <DO name="Do21" type="DO11"/>
             <DO name="Do31" type="DO11"/>
         </LNodeType>

@@ -40,9 +40,7 @@ import java.util.stream.Collectors;
  *      <li>{@link AbstractLNAdapter#getLNodeName <em>Returns the logical node name <b>LNName = prefix + lnClass + lnInst</b></em>}</li>
  *
  *      <li>{@link AbstractLNAdapter#getExtRefs() <em>Returns the value of the <b>TExtRef </b>containment reference list</em>}</li>
- *      <!-- TODO fix conflicts of these functions -->
  *      <li>{@link AbstractLNAdapter#getExtRefs(ExtRefSignalInfo) <em>Returns the value of the <b>TExtRef </b>containment reference list By <b>ExtRefSignalInfo <b></b></b></em>}</li>
- *      <li>{@link AbstractLNAdapter#getExtRefsBySignalInfo(ExtRefSignalInfo) <em>Returns the value of the <b>TExtRef </b>containment reference list By <b>ExtRefSignalInfo </b></em>}</li>
  *
  *      <li>{@link AbstractLNAdapter#getDAI <em>Returns the value of the <b>ResumedDataTemplate </b> containment reference By filter</em>}</li>
  *      <li>{@link AbstractLNAdapter#getDAIValues(ResumedDataTemplate) <em>Returns <b>DAI (sGroup, value) </b> containment reference list By <b>ResumedDataTemplate </b> filter</em>}</li>
@@ -226,30 +224,25 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
     }
 
     /**
-     * Gets all ExtRefs matches specified ExtRef info without PDA attribute
-     *
-     * @param signalInfo ExtRef filter value
-     * @return list of <em>TExtRef</em>
+     * Checks for ExtRef signal existence in target LN
+     * @param signalInfo ExtRef signal data to check
      */
-    public List<TExtRef> getExtRefsBySignalInfo(ExtRefSignalInfo signalInfo) {
-        if (currentElem.getInputs() == null) {
-            return new ArrayList<>();
-        }
-
-        if (signalInfo == null) {
-            return currentElem.getInputs().getExtRef();
+    public void isExtRefExist(ExtRefSignalInfo signalInfo) {
+        if (currentElem.getInputs() == null || signalInfo == null) {
+            throw new ScdException("No Inputs for LN or no ExtRef signal to check");
         }
         if (!signalInfo.isValid()) {
-            throw new IllegalArgumentException("Invalid or missing attributes in ExtRef signal info");
+            throw new ScdException("Invalid or missing attributes in ExtRef signal info");
         }
-        return currentElem.getInputs().getExtRef()
+        boolean extRefExist = currentElem.getInputs().getExtRef()
                 .stream()
-                .filter(tExtRef -> Objects.equals(signalInfo.getDesc(), tExtRef.getDesc()) &&
+                .anyMatch(tExtRef -> Objects.equals(signalInfo.getDesc(), tExtRef.getDesc()) &&
                         Objects.equals(tExtRef.getPDO(), signalInfo.getPDO()) &&
                         Objects.equals(signalInfo.getIntAddr(), tExtRef.getIntAddr()) &&
-                        Objects.equals(signalInfo.getPServT(), tExtRef.getPServT())
-                )
-                .collect(Collectors.toList());
+                        Objects.equals(signalInfo.getPServT(), tExtRef.getPServT()));
+        if(!extRefExist) {
+            throw new ScdException("ExtRef signal does not exist in target LN");
+        }
     }
 
     /**
@@ -357,7 +350,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         List<TDataSet> tDataSets = this.getDataSetMatchingExtRefInfo(extRefInfo);
         return getControlBlocks(tDataSets, extRefInfo.getBindingInfo().getServiceType());
     }
-    
+
     /**
      * Gets all Control Blocks from LNode for specified Service Type (GOOSE, SMV and REPORT) and Data Sets
      *

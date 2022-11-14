@@ -152,16 +152,25 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
             return warningReportItem(extRef, String.format("The signal ExtRef ExtRefldinst does not match any " +
                 "LDevice with same inst attribute in source IED %s", sourceIed.getXPath()));
         }
-        Optional<String> optionalLDeviceStatus = sourceLDevice.getLDeviceStatus();
-        if (optionalLDeviceStatus.isEmpty()) {
+        Optional<String> optionalSourceLDeviceStatus = sourceLDevice.getLDeviceStatus();
+        if (optionalSourceLDeviceStatus.isEmpty()) {
             return fatalReportItem(extRef, String.format("The signal ExtRef source LDevice %s status is undefined",
                 sourceLDevice.getXPath()));
 
-        } else if (OFF.equals(optionalLDeviceStatus.get())) {
-            return warningReportItem(extRef, String.format("The signal ExtRef source LDevice %s status is off",
-                sourceLDevice.getXPath()));
         }
-        return Optional.empty();
+        return optionalSourceLDeviceStatus.map(sourceLDeviceStatus -> {
+            switch (sourceLDeviceStatus) {
+                case OFF:
+                    return SclReportItem.warning(extRefXPath(extRef.getDesc()), String.format("The signal ExtRef source LDevice %s status is off",
+                        sourceLDevice.getXPath()));
+                case ON:
+                    return null;
+                default:
+                    return SclReportItem.fatal(extRefXPath(extRef.getDesc()),
+                        String.format("The signal ExtRef source LDevice %s status is neither \"on\" nor \"off\"",
+                            sourceLDevice.getXPath()));
+            }
+        });
     }
 
     private boolean hasMatchingLN(TExtRef extRef, LDeviceAdapter lDeviceAdapter) {

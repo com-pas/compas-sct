@@ -14,6 +14,7 @@ import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A representation of the model object
@@ -195,13 +196,7 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
      * @return <em>Boolean</em> value of check result
      */
     public boolean containsDAWithDAName(String da){
-        return currentElem.getSDOOrDA()
-                .stream()
-                .filter(unNaming -> unNaming.getClass().equals(TDA.class))
-                .map(TDA.class::cast)
-                .anyMatch(
-                    tda -> tda.getName().equals(da)
-                );
+        return getTdaStream().anyMatch(tda -> tda.getName().equals(da));
     }
 
     /**
@@ -210,10 +205,7 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
      * @return <em>Boolean</em> value of check result
      */
     public boolean containsDAWithEnumTypeId(String enumTypeId) {
-        return currentElem.getSDOOrDA()
-                .stream()
-                .filter(unNaming -> unNaming.getClass().equals(TDA.class))
-                .map(TDA.class::cast)
+        return getTdaStream()
                 .anyMatch(
                         tda -> tda.getBType().equals(TPredefinedBasicTypeEnum.ENUM) &&
                                 tda.getType().equals(enumTypeId)
@@ -227,7 +219,7 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
      * @throws ScdException when inconsistency are found in th SCL's
      *                     DataTypeTemplate (unknown reference for example). Which should normally not happens.
      */
-    Pair<String,DOTypeAdapter> findPathDoType2DA(String daName) throws ScdException {
+    public Pair<String,DOTypeAdapter> findPathDoTypeToDA(String daName) throws ScdException {
         if(containsDAWithDAName(daName)){
             // Attention : Do this check before calling this function
             // It is not interesting to no have the DO/SDO that references this DoType
@@ -266,7 +258,7 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
      * @throws ScdException when inconsistency are found in th SCL's
      *                     DataTypeTemplate (unknown reference for example). Which should normally not happens.
      */
-    Pair<String,DOTypeAdapter> findPathSDO2DA(String sdoName, String daName) throws ScdException {
+    Pair<String,DOTypeAdapter> findPathSDOToDA(String sdoName, String daName) throws ScdException {
         String errMsg = String.format("No coherence or path between DO/SDO(%s) and DA(%s)", sdoName,daName);
         Optional<TSDO> opSdo = getSDOByName(sdoName);
         if(opSdo.isEmpty()) {
@@ -280,7 +272,7 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
         if(doTypeAdapter.containsDAWithDAName(daName)){
             return Pair.of(opSdo.get().getName(),doTypeAdapter);
         }
-        return doTypeAdapter.findPathDoType2DA(daName);
+        return doTypeAdapter.findPathDoTypeToDA(daName);
     }
 
     /**
@@ -289,10 +281,7 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
      * @return <em>Boolean</em> value of check result
      */
     public boolean containsDAStructWithDATypeId(String daTypeId) {
-        return currentElem.getSDOOrDA()
-                .stream()
-                .filter(unNaming -> unNaming.getClass().equals(TDA.class))
-                .map(TDA.class::cast)
+        return getTdaStream()
                 .anyMatch(
                         tda -> TPredefinedBasicTypeEnum.STRUCT.equals(tda.getBType()) &&
                                 tda.getType().equals(daTypeId)
@@ -422,12 +411,30 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
      * @return optional of <em>TDA</em> object or empty if unknown DA name
      */
     public Optional<TDA> getDAByName(String name) {
-        for(TUnNaming tUnNaming : currentElem.getSDOOrDA()){
-            if(tUnNaming.getClass() == TDA.class && ((TDA)tUnNaming).getName().equals(name)){
-                return Optional.of((TDA)tUnNaming);
-            }
+        TDOType tdoType = currentElem;
+        if (!containsDAWithDAName(name)) {
+            tdoType = findPathDoTypeToDA(name)
+                    .getValue()
+                    .getCurrentElem();
         }
-        return Optional.empty();
+        return tdoType.getSDOOrDA()
+                .stream()
+                .filter(unNaming -> unNaming.getClass().equals(TDA.class)
+                        && ((TDA)unNaming).getName().equals(name))
+                .map(TDA.class::cast)
+                .findFirst();
+    }
+
+    /**
+     * Retrieves all TDA in DOType
+     * @return stream of TDA
+     */
+    private Stream<TDA> getTdaStream() {
+        return getCurrentElem()
+                .getSDOOrDA()
+                .stream()
+                .filter(unNaming -> unNaming.getClass().equals(TDA.class))
+                .map(TDA.class::cast);
     }
 
     /**

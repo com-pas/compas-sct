@@ -59,13 +59,36 @@ class LDeviceAdapterTest {
     }
 
     @Test
-    void testGetExtRefBinders() {
+    void getExtRefBinders_shouldReturnExtRefBindingInfo_whenExist() {
+        //Given
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2").get());
         ExtRefSignalInfo signalInfo = DTO.createExtRefSignalInfo();
         signalInfo.setPDO("Do.sdo1");
         signalInfo.setPDA("da.bda1.bda2.bda3");
-
+        //When Then
         assertDoesNotThrow(()-> lDeviceAdapter.getExtRefBinders(signalInfo));
+        assertThat(lDeviceAdapter.getExtRefBinders(signalInfo)).hasSize(1);
+    }
+
+    @Test
+    void getExtRefBinders_shouldReturnEmptyList_whenpLNNotMatch() {
+        //Given
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2").get());
+        ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
+        signalInfo.setPLN("CSWI");
+        //When Then
+        assertDoesNotThrow(()-> lDeviceAdapter.getExtRefBinders(signalInfo));
+        assertThat(lDeviceAdapter.getExtRefBinders(signalInfo)).isEmpty();
+    }
+
+    @Test
+    void getExtRefBinders_shouldReturnEmptyList_whenpLNNotSet() {
+        //Given
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2").get());
+        ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
+        //When Then
+        assertDoesNotThrow(()-> lDeviceAdapter.getExtRefBinders(signalInfo));
+        assertThat(lDeviceAdapter.getExtRefBinders(signalInfo)).hasSize(2);
     }
 
     @Test
