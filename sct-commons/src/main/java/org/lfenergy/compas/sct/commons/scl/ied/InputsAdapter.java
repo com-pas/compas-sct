@@ -5,11 +5,15 @@
 package org.lfenergy.compas.sct.commons.scl.ied;
 
 
+import io.vavr.control.Try;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
+import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.PrivateService;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
@@ -17,8 +21,8 @@ import org.lfenergy.compas.sct.commons.util.FcdaCandidatesHelper;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.lfenergy.compas.sct.commons.util.LDeviceStatus.OFF;
 import static org.lfenergy.compas.sct.commons.util.LDeviceStatus.ON;
@@ -44,6 +48,13 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
     public static final String MESSAGE_SERVICE_TYPE_MISSING_ON_EXTREF = "The signal ExtRef is missing ServiceType attribute";
     public static final String MESSAGE_INVALID_SERVICE_TYPE = "The signal ExtRef ServiceType attribute is unexpected : %s";
     public static final String MESSAGE_IED_IS_MISSING_PRIVATE_COMPAS_BAY_UUID = "IED is missing Private/compas:Bay@UUID attribute";
+
+    @AllArgsConstructor
+    @Getter
+    private static class ResumedDataTemplateAdapter {
+        private final LDeviceAdapter lDeviceAdapter;
+        private final Set<ResumedDataTemplate> resumedDataTemplate;
+    }
 
     /**
      * Constructor
@@ -241,6 +252,14 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         return parentAdapter.getParentAdapter();
     }
 
+    private IEDAdapter getIedAdapter() {
+        return getLDeviceAdapter().getParentAdapter();
+    }
+
+    private SclRootAdapter getSclRootAdapter() {
+        return getIedAdapter().getParentAdapter();
+    }
+
     public List<SclReportItem> updateAllSourceDataSetsAndControlBlocks() {
         List<TCompasFlow> compasFlows = PrivateService.extractCompasPrivates(currentElem, TCompasFlow.class);
         String currentBayUuid = getIedAdapter().getPrivateCompasBay().map(TCompasBay::getUUID).orElse(null);
@@ -270,65 +289,79 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
             && StringUtils.isNotBlank(tExtRef.getDoName());
     }
 
+    public Try<IEDAdapter> findSourceIed(TExtRef extRef) {
+        return getSclRootAdapter()
+            .findIedAdapterByName(extRef.getIedName())
+            .map(Try::success)
+            .orElseGet(() -> Try.failure(new ScdException(extRefXPath(extRef.getDesc()), "Source IED not found in SCD", true)));
+    }
+
+    public Try<ResumedDataTemplateAdapter> findSourceDa(TExtRef extRef, IEDAdapter sourceIed) {
+        return sourceIed.findLDeviceAdapterByLdInst(extRef.getLdInst())
+            .map(Try::success)
+            .orElseGet(() -> Try.failure(new ScdException(extRefXPath(extRef.getDesc()), MESSAGE_SOURCE_LDEVICE_NOT_FOUND, false)))
+            .flatMap(sourceLDevice -> {
+                Set<ResumedDataTemplate> sourceDA = sourceLDevice.findSourceDA(extRef);
+                if (sourceDA.isEmpty()) {
+                    return Try.failure(new ScdException(extRefXPath(extRef.getDesc()), MESSAGE_SOURCE_LN_NOT_FOUND, false));
+                }
+                sourceDA.removeIf(da -> da.getFc() != TFCEnum.ST && da.getFc() != TFCEnum.MX);
+                return Try.success(new ResumedDataTemplateAdapter(sourceLDevice, sourceDA));
+            });
+    }
+
     private Optional<SclReportItem> updateSourceDataSetsAndControlBlocks(TExtRef extRef, String targetBayUuid) {
         if (extRef.getServiceType() == null) {
             return fatalReportItem(extRef, MESSAGE_SERVICE_TYPE_MISSING_ON_EXTREF);
         }
-        Optional<IEDAdapter> optionalSrcIedAdapter = getSclRootAdapter().findIedAdapterByName(extRef.getIedName());
-        if (optionalSrcIedAdapter.isEmpty()) {
-            return fatalReportItem(extRef, "Source IED not found in SCD");
-        }
-        IEDAdapter sourceIed = optionalSrcIedAdapter.get();
-        Optional<String> sourceIedBayUuid = sourceIed.getPrivateCompasBay().map(TCompasBay::getUUID);
-        if (sourceIedBayUuid.isEmpty() || StringUtils.isBlank(sourceIedBayUuid.get())) {
-            return fatalReportItem(extRef, "Source IED is missing Private/compas:Bay@UUID attribute");
-        }
-        //TODO: use isBayInternal in issue #84 RSR-433 and remove print to console
-        boolean isBayInternal = targetBayUuid.equals(sourceIedBayUuid.get());
-        System.out.print("\nExtRef.desc=" + extRef.getDesc());
-        System.out.print(",isBayInternal=" + isBayInternal);
+        return findSourceIed(extRef)
+            .flatMap(sourceIed -> isBayInternal(extRef, targetBayUuid, sourceIed)
+                .flatMap(isBayInternal -> {
+                    System.out.print("\nExtRef.desc=" + extRef.getDesc());
+                    System.out.print(",isBayInternal=" + isBayInternal);
+                    return findSourceDa(extRef, sourceIed)
+                        .flatMap(sourceDa -> printRelevantDa(extRef, sourceDa));
+                })
+            )
+            .map(notUsed -> Optional.<SclReportItem>empty())
+            .getOrElseGet(throwable -> {
+                if (throwable instanceof ScdException) {
+                    return Optional.of(((ScdException) throwable).toSclReportItem());
+                } else {
+                    return Optional.of(new SclReportItem(extRefXPath(extRef.getDesc()), throwable.getMessage(), true));
+                }
+            });
+    }
 
-        Optional<LDeviceAdapter> optionalSourceLDevice = sourceIed.findLDeviceAdapterByLdInst(extRef.getLdInst());
-        if (optionalSourceLDevice.isEmpty()) {
-            return warningReportItem(extRef, String.format(MESSAGE_SOURCE_LDEVICE_NOT_FOUND, sourceIed.getXPath()));
-        }
-        LDeviceAdapter sourceLDevice = optionalSourceLDevice.get();
-        Set<ResumedDataTemplate> sourceDas = sourceLDevice.findSourceDA(extRef);
-        if (sourceDas.isEmpty()) {
-            return warningReportItem(extRef, String.format(MESSAGE_SOURCE_LN_NOT_FOUND, optionalSourceLDevice.get().getXPath()));
-        }
-
-        //TODO: Don't forget to test this in issue #84 RSR-433
-        List<ResumedDataTemplate> mxAndStSources = sourceDas.stream()
-            .filter(da -> da.getFc() == TFCEnum.MX || da.getFc() == TFCEnum.ST).collect(Collectors.toList());
-
-        Stream<ResumedDataTemplate> sourceDaToProcess;
+    private Try<ResumedDataTemplateAdapter> printRelevantDa(TExtRef extRef, ResumedDataTemplateAdapter sourceDa) {
         switch (extRef.getServiceType()) {
             case GOOSE:
             case SMV:
-                sourceDaToProcess = mxAndStSources.stream().filter(FcdaCandidatesHelper.SINGLETON);
+                sourceDa.getResumedDataTemplate().removeIf(Predicate.not(FcdaCandidatesHelper.SINGLETON));
                 break;
             case REPORT:
                 //TODO: In issue RSR-608, replace with mxAndStSources.filter(...)
-                sourceDaToProcess = Stream.empty();
+                sourceDa.getResumedDataTemplate().clear();
                 break;
             case POLL:
             default:
-                return fatalReportItem(extRef, String.format(MESSAGE_INVALID_SERVICE_TYPE, extRef.getServiceType()));
+                return Try.failure(new ScdException(extRefXPath(extRef.getDesc()), String.format(MESSAGE_INVALID_SERVICE_TYPE,
+                    extRef.getServiceType()), true));
         }
-        //TODO: map to FCDA in issue #84 RSR-433 and remove print to console
-        String daToPrint = sourceDaToProcess
+        String daToPrint = sourceDa.getResumedDataTemplate().stream()
             .map(da -> da.getFc() + "#" + da.getDataAttributes())
             .collect(Collectors.joining(","));
         System.out.print("," + (daToPrint.isEmpty() ? "--NO_VALID_SOURCE_DA--" : daToPrint));
-        return Optional.empty();
+        return Try.success(sourceDa);
     }
 
-    private IEDAdapter getIedAdapter() {
-        return getLDeviceAdapter().getParentAdapter();
+    private Try<Boolean> isBayInternal(TExtRef extRef, String targetBayUuid, IEDAdapter sourceIed) {
+        return sourceIed.getPrivateCompasBay()
+            .map(TCompasBay::getUUID)
+            .filter(StringUtils::isNotBlank)
+            .map(sourceIedBayUuid -> Try.success(sourceIedBayUuid.equals(targetBayUuid)))
+            .orElseGet(() -> Try.failure(new ScdException(extRefXPath(extRef.getDesc()), "Source IED is missing Private/compas:Bay@UUID "
+                + "attribute", true)));
     }
 
-    private SclRootAdapter getSclRootAdapter() {
-        return getIedAdapter().getParentAdapter();
-    }
 }
