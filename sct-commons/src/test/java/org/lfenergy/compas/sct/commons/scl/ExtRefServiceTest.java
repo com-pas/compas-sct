@@ -18,13 +18,14 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
-import org.opentest4j.AssertionFailedError;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.findExtRef;
+import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.findLDevice;
 
 class ExtRefServiceTest {
 
@@ -38,7 +39,7 @@ class ExtRefServiceTest {
         TExtRef extRef = findExtRef(sclReport, "IED_NAME1", "LD_INST11", "STAT_LDSUIED_LPDO 1 Sortie_13_BOOLEAN_18_stVal_1");
         assertThat(extRef.getIedName()).isEqualTo("IED_NAME2");
 
-        TInputs inputs = findLDeviceAdapter(sclReport, "IED_NAME1", "LD_INST11")
+        TInputs inputs = findLDevice(sclReport, "IED_NAME1", "LD_INST11")
             .getLN0Adapter()
             .getCurrentElem()
             .getInputs();
@@ -101,8 +102,9 @@ class ExtRefServiceTest {
                             "The signal ExtRef ExtRefldinst does not match any LDevice with same inst attribute in source IED /SCL/IED[@name=\"IED_NAME2\"]"),
                         SclReportItem.warning(
                             "/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]" +
-                                "/LN0/Inputs/ExtRef[@desc=\"ExtRef does not match any LN is source LDevice\"]",
-                            "The signal ExtRef ExtRefldinst does not match any LDevice with same inst attribute in source IED /SCL/IED[@name=\"IED_NAME2\"]"),
+                                "/LN0/Inputs/ExtRef[@desc=\"ExtRef does not match any LN in source LDevice\"]",
+                            "The signal ExtRef lninst, doName or daName does not match any source in LDevice " +
+                                "/SCL/IED[@name=\"IED_NAME2\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST21\"]"),
                         SclReportItem.warning(
                             "/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]" +
                                 "/LN0/Inputs/ExtRef[@desc=\"Source LDevice is off for this ExtRef\"]",
@@ -143,7 +145,7 @@ class ExtRefServiceTest {
         assertThatExtRefBindingInfoIsMissing(findExtRef(sclReport, "IED_NAME1", "LD_INST11", "Match compas:Flow but FlowStatus is INACTIVE"));
         assertThatExtRefBindingInfoIsMissing(findExtRef(sclReport, "IED_NAME1", "LD_INST11", "ExtRef does not match any ICDSystemVersionUUID"));
         assertThatExtRefBindingInfoIsMissing(findExtRef(sclReport, "IED_NAME1", "LD_INST11", "ExtRefldinst does not match any LDevice inst in source IED"));
-        assertThatExtRefBindingInfoIsMissing(findExtRef(sclReport, "IED_NAME1", "LD_INST11", "ExtRef does not match any LN is source LDevice"));
+        assertThatExtRefBindingInfoIsMissing(findExtRef(sclReport, "IED_NAME1", "LD_INST11", "ExtRef does not match any LN in source LDevice"));
         assertThatExtRefBindingInfoIsMissing(findExtRef(sclReport, "IED_NAME1", "LD_INST11", "Source LDevice is off for this ExtRef"));
     }
 
@@ -161,23 +163,6 @@ class ExtRefServiceTest {
         assertThat(extRef.isSetSrcLNClass()).isFalse();
         assertThat(extRef.isSetLnInst()).isFalse();
         assertThat(extRef.isSetSrcCBName()).isFalse();
-    }
-
-    private TExtRef findExtRef(SclReport sclReport, String nameOfIED, String lDeviceInst, String extRefDesc) {
-        return findLDeviceAdapter(sclReport, nameOfIED, lDeviceInst)
-            .getLN0Adapter()
-            .getCurrentElem()
-            .getInputs()
-            .getExtRef().stream().filter(extRef -> extRefDesc.equals(extRef.getDesc()))
-            .findFirst().orElseThrow(
-                () -> new AssertionFailedError(String.format("ExtRef.des=%s not found in IED.name=%s,LDevice.inst=%s", extRefDesc, lDeviceInst, nameOfIED)));
-    }
-
-    private LDeviceAdapter findLDeviceAdapter(SclReport sclReport, String nameOfIED, String lDeviceInst) {
-        return sclReport.getSclRootAdapter()
-            .getIEDAdapterByName(nameOfIED)
-            .getLDeviceAdapterByLdInst(lDeviceInst)
-            .orElseThrow(() -> new AssertionFailedError(String.format("LDevice.inst=%s not found in IED.name=%s", lDeviceInst, nameOfIED)));
     }
 
     @Test

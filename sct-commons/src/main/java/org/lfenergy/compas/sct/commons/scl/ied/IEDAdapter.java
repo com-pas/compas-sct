@@ -13,6 +13,7 @@ import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
+import org.lfenergy.compas.sct.commons.scl.PrivateService;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.util.Utils;
@@ -34,7 +35,8 @@ import java.util.stream.Stream;
  *   <li>Adapter</li>
  *    <ul>
  *      <li>{@link IEDAdapter#streamLDeviceAdapters LDeviceAdapters <em>Returns the value of the <b>LDeviceAdapter </b>containment reference list</em>}</li>
- *      <li>{@link IEDAdapter#getLDeviceAdapterByLdInst <em>Returns the value of the <b>LDeviceAdapter </b>reference object By LDevice Inst</em>}</li>
+ *       <li>{@link IEDAdapter#getLDeviceAdapterByLdInst <em>Returns the value of the <b>LDeviceAdapter </b>reference object By LDevice Inst</em>}</li>
+ *       <li>{@link IEDAdapter#findLDeviceAdapterByLdInst <em>Returns the value of the <b>LDeviceAdapter </b>reference object By LDevice Inst</em>}</li>
  *    </ul>
  *   <li>Principal functions</li>
  *    <ul>
@@ -61,6 +63,8 @@ import java.util.stream.Stream;
  * @see <a href="https://github.com/com-pas/compas-sct/issues/3" target="_blank">Issue !3 (Add new IEDs)</a>
  */
 public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
+
+    private static final String MESSAGE_LDEVICE_INST_NOT_FOUND = "LDevice.inst '%s' not found in IED '%s'";
 
     /**
      * Constructor
@@ -144,11 +148,25 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
     /**
      * Gets LDevice from current IED by ldInst parameter
      * @param ldInst ldInst value of LDevice to get
+     * @return <em>LDeviceAdapter</em> object
+     * @throws ScdException when LDevice is not found
+     */
+    public LDeviceAdapter getLDeviceAdapterByLdInst(String ldInst) throws ScdException {
+        return findLDeviceAdapterByLdInst(ldInst)
+            .orElseThrow(() -> new ScdException(String.format(MESSAGE_LDEVICE_INST_NOT_FOUND, ldInst, getName())));
+    }
+
+    /**
+     * Gets LDevice from current IED by ldInst parameter
+     * @param ldInst ldInst value of LDevice to get
      * @return optional of <em>LDeviceAdapter</em>  object
      */
-    public Optional<LDeviceAdapter> getLDeviceAdapterByLdInst(String ldInst) {
+    public Optional<LDeviceAdapter> findLDeviceAdapterByLdInst(String ldInst) {
+        if (StringUtils.isBlank(ldInst)){
+            return Optional.empty();
+        }
         return streamLDevices()
-            .filter(tlDevice -> Utils.equalsOrBothBlank(tlDevice.getInst(), ldInst))
+            .filter(tlDevice -> ldInst.equals(tlDevice.getInst()))
             .findFirst()
             .map(tlDevice -> new LDeviceAdapter(this, tlDevice));
     }
@@ -206,7 +224,7 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
             return false;
         }
         String ldInst = objRef.getLdName().substring(getName().length());
-        Optional<LDeviceAdapter> opLD = getLDeviceAdapterByLdInst(ldInst);
+        Optional<LDeviceAdapter> opLD = findLDeviceAdapterByLdInst(ldInst);
         if(opLD.isEmpty()) {
             return false;
         }
@@ -281,7 +299,7 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
             throw new ScdException("The capability of IED is not allowing DataSet creation");
         }
 
-        LDeviceAdapter lDeviceAdapter = getLDeviceAdapterByLdInst(dataSetInfo.getHolderLDInst())
+        LDeviceAdapter lDeviceAdapter = findLDeviceAdapterByLdInst(dataSetInfo.getHolderLDInst())
             .orElseThrow(
                 () -> new ScdException(
                     String.format(
@@ -351,7 +369,7 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
         controlBlock.validateSecurityEnabledValue(this);
         controlBlock.validateDestination(this.parentAdapter);
 
-        LDeviceAdapter lDeviceAdapter = getLDeviceAdapterByLdInst(controlBlock.getHolderLDInst()).orElseThrow();
+        LDeviceAdapter lDeviceAdapter = findLDeviceAdapterByLdInst(controlBlock.getHolderLDInst()).orElseThrow();
         AbstractLNAdapter<?> lnAdapter =  AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
                 .withLnClass(controlBlock.getHolderLnClass())
@@ -392,5 +410,13 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
                 .stream()
                 .filter(tPrivate -> tPrivate.getType().equals(privateType))
                 .findFirst();
+    }
+
+    /**
+     * Extract private compas:Bay
+     * @return value of private compas:Bay if present, empty Optional otherwise
+     */
+    public Optional<TCompasBay> getPrivateCompasBay(){
+        return PrivateService.extractCompasPrivate(currentElem, TCompasBay.class);
     }
 }

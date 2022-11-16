@@ -61,6 +61,7 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
     public static final short RELEASE = 4;
     public static final String REVISION = "B";
     public static final String VERSION = "2007";
+    private static final String MESSAGE_IED_NAME_NOT_FOUND = "IED.name '%s' not found in SCD";
 
     /**
      * Constructor
@@ -187,7 +188,7 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
             throw new ScdException("No IED to import from ICD file");
         }
 
-        if(hasIED(iedName)){
+        if(findIedAdapterByName(iedName).isPresent()){
             String msg = "SCL file already contains IED: " + iedName;
             log.error(msg);
             throw new ScdException(msg);
@@ -205,17 +206,6 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
         //add IED
         currentElem.getIED().add(prvIEDAdapter.currentElem);
         return getIEDAdapterByName(iedName);
-    }
-
-    /**
-     * Checks if IED is present in SCL
-     * @param iedName name of IED to find in SCL
-     * @return <em>Boolean</em> value of check result
-     */
-    private boolean hasIED(String iedName) {
-        return currentElem.getIED()
-                .stream()
-                .anyMatch(tied -> tied.getName().equals(iedName));
     }
 
     /**
@@ -245,7 +235,7 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
      */
     public IEDAdapter getIEDAdapterByName(String iedName) throws ScdException {
         return findIedAdapterByName(iedName)
-            .orElseThrow(() -> new ScdException("IED.name '%s' not found in SCD"));
+            .orElseThrow(() -> new ScdException(String.format(MESSAGE_IED_NAME_NOT_FOUND, iedName)));
     }
 
     /**

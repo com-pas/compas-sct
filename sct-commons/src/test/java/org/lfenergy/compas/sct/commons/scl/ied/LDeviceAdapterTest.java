@@ -38,8 +38,8 @@ class LDeviceAdapterTest {
     }
 
     @Test
-    void testUpdateLDName() throws Exception {
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS1").get());
+    void testUpdateLDName() {
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.findLDeviceAdapterByLdInst("LD_INS1").get());
         lDeviceAdapter.updateLDName();
         assertEquals("IED_NAMELD_INS1",lDeviceAdapter.getLdName());
         iAdapter.setIEDName("VERY_VERY_VERY_VERY_VERY_VERY_LONG_IED_NAME");
@@ -50,7 +50,7 @@ class LDeviceAdapterTest {
 
     @Test
     void testGetLNAdapters()  {
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.findLDeviceAdapterByLdInst("LD_INS2").get());
 
         assertEquals(1,lDeviceAdapter.getLNAdapters().size());
 
@@ -61,7 +61,7 @@ class LDeviceAdapterTest {
     @Test
     void getExtRefBinders_shouldReturnExtRefBindingInfo_whenExist() {
         //Given
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.findLDeviceAdapterByLdInst("LD_INS2").get());
         ExtRefSignalInfo signalInfo = DTO.createExtRefSignalInfo();
         signalInfo.setPDO("Do.sdo1");
         signalInfo.setPDA("da.bda1.bda2.bda3");
@@ -73,7 +73,7 @@ class LDeviceAdapterTest {
     @Test
     void getExtRefBinders_shouldReturnEmptyList_whenpLNNotMatch() {
         //Given
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2"));
         ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
         signalInfo.setPLN("CSWI");
         //When Then
@@ -84,7 +84,7 @@ class LDeviceAdapterTest {
     @Test
     void getExtRefBinders_shouldReturnEmptyList_whenpLNNotSet() {
         //Given
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2"));
         ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
         //When Then
         assertDoesNotThrow(()-> lDeviceAdapter.getExtRefBinders(signalInfo));
@@ -92,15 +92,15 @@ class LDeviceAdapterTest {
     }
 
     @Test
-    void testGetExtRefInfo() throws Exception {
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2").get());
+    void testGetExtRefInfo() {
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2"));
         List<ExtRefInfo> extRefInfoList = assertDoesNotThrow(()-> lDeviceAdapter.getExtRefInfo());
         assertEquals(2,extRefInfoList.size());
     }
 
     @Test
-    void TestGetDAI() throws Exception {
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS1").get());
+    void TestGetDAI() {
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS1"));
         var rDtts = lDeviceAdapter.getDAI(new ResumedDataTemplate(),true);
         assertEquals(4,rDtts.size());
 
@@ -111,7 +111,7 @@ class LDeviceAdapterTest {
         rDtts = lDeviceAdapter.getDAI(filter,true);
         assertEquals(4,rDtts.size());
 
-        lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2").get());
+        lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.findLDeviceAdapterByLdInst("LD_INS2").get());
         filter.setLnClass("ANCR");
         filter.setLnInst("1");
         rDtts = lDeviceAdapter.getDAI(filter,true);
@@ -120,7 +120,7 @@ class LDeviceAdapterTest {
 
     @Test
     void addPrivate() {
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2"));
         TPrivate tPrivate = new TPrivate();
         tPrivate.setType("Private Type");
         tPrivate.setSource("Private Source");
@@ -165,7 +165,7 @@ class LDeviceAdapterTest {
     @Test
     void getLNAdaptersInclundigLN0() {
         //Given
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2"));
         //When
         List<AbstractLNAdapter<?>> lnAdapters = lDeviceAdapter.getLNAdaptersInclundigLN0();
         //Then

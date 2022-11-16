@@ -79,9 +79,9 @@ import static org.lfenergy.compas.sct.commons.util.PrivateEnum.COMPAS_ICDHEADER;
 @Slf4j
 public class SclService {
 
-    public static final String UNKNOWN_LDEVICE_S_IN_IED_S = "Unknown LDevice (%s) in IED (%s)";
-    public static final String INVALID_OR_MISSING_ATTRIBUTES_IN_EXT_REF_BINDING_INFO = "Invalid or missing attributes in ExtRef binding info";
-    public static final ObjectFactory objectFactory = new ObjectFactory();
+    private static final String UNKNOWN_LDEVICE_S_IN_IED_S = "Unknown LDevice (%s) in IED (%s)";
+    private static final String INVALID_OR_MISSING_ATTRIBUTES_IN_EXT_REF_BINDING_INFO = "Invalid or missing attributes in ExtRef binding info";
+    private static final ObjectFactory objectFactory = new ObjectFactory();
 
     private SclService() {
         throw new IllegalStateException("SclService class");
@@ -233,7 +233,7 @@ public class SclService {
 
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
-        LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
+        LDeviceAdapter lDeviceAdapter = iedAdapter.findLDeviceAdapterByLdInst(ldInst)
                 .orElseThrow(() -> new ScdException(String.format(UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName)));
         return lDeviceAdapter.getExtRefInfo();
     }
@@ -254,7 +254,7 @@ public class SclService {
     public static List<ExtRefBindingInfo> getExtRefBinders(SCL scd, String iedName, String ldInst, String lnClass, String lnInst, String prefix, ExtRefSignalInfo signalInfo) throws ScdException {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
-        LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
+        LDeviceAdapter lDeviceAdapter = iedAdapter.findLDeviceAdapterByLdInst(ldInst)
                 .orElseThrow(() -> new ScdException(String.format(UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName)));
         AbstractLNAdapter<?> abstractLNAdapter = AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
@@ -289,7 +289,7 @@ public class SclService {
         String ldInst = extRefInfo.getHolderLDInst();
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
-        LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
+        LDeviceAdapter lDeviceAdapter = iedAdapter.findLDeviceAdapterByLdInst(ldInst)
                 .orElseThrow(() -> new ScdException(String.format(UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName)));
 
         AbstractLNAdapter<?> abstractLNAdapter = AbstractLNAdapter.builder()
@@ -330,7 +330,7 @@ public class SclService {
 
         // Get CBs
         IEDAdapter srcIEDAdapter = sclRootAdapter.getIEDAdapterByName(bindingInfo.getIedName());
-        LDeviceAdapter srcLDeviceAdapter = srcIEDAdapter.getLDeviceAdapterByLdInst(extRefInfo.getBindingInfo().getLdInst())
+        LDeviceAdapter srcLDeviceAdapter = srcIEDAdapter.findLDeviceAdapterByLdInst(extRefInfo.getBindingInfo().getLdInst())
                 .orElseThrow();
 
         List<AbstractLNAdapter<?>> aLNAdapters = srcLDeviceAdapter.getLNAdaptersInclundigLN0();
@@ -375,7 +375,7 @@ public class SclService {
 
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
-        LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
+        LDeviceAdapter lDeviceAdapter = iedAdapter.findLDeviceAdapterByLdInst(ldInst)
                 .orElseThrow(() -> new ScdException(String.format(UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName)));
         var anLNAdapter = AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
@@ -401,7 +401,7 @@ public class SclService {
     public static Set<ResumedDataTemplate> getDAI(SCL scd, String iedName, String ldInst, ResumedDataTemplate rDtt, boolean updatable) throws ScdException {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = new IEDAdapter(sclRootAdapter, iedName);
-        LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
+        LDeviceAdapter lDeviceAdapter = iedAdapter.findLDeviceAdapterByLdInst(ldInst)
                 .orElseThrow(() -> new ScdException(String.format(UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName)));
 
         return lDeviceAdapter.getDAI(rDtt, updatable);
@@ -433,7 +433,7 @@ public class SclService {
         }
 
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
-        LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst)
+        LDeviceAdapter lDeviceAdapter = iedAdapter.findLDeviceAdapterByLdInst(ldInst)
                 .orElseThrow(() -> new ScdException(String.format(UNKNOWN_LDEVICE_S_IN_IED_S, ldInst, iedName)));
 
         AbstractLNAdapter<?> lnAdapter = AbstractLNAdapter.builder()

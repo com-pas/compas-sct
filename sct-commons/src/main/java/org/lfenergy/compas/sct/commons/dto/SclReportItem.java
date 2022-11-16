@@ -7,10 +7,12 @@ package org.lfenergy.compas.sct.commons.dto;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
 @EqualsAndHashCode
 @AllArgsConstructor
+@ToString
 public final class SclReportItem {
     private final String xpath;
     private final String message;

@@ -21,6 +21,7 @@
         <sonar.coverage.jacoco.xmlReportPaths>${basedir}/${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
         <sonar.jacoco.excludes>**/scl2007b4/**/*</sonar.jacoco.excludes>
         <assertJ.version>3.22.0</assertJ.version>
+        <opencsv.version>5.6</opencsv.version>
         <mockito.version>4.9.0</mockito.version>
     </properties>
 
@@ -111,6 +112,11 @@
             <artifactId>assertj-core</artifactId>
             <version>${assertJ.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>${opencsv.version}</version>
         </dependency>
     </dependencies>
 

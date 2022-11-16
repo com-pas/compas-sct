@@ -9,6 +9,9 @@
         <Private type="COMPAS-ICDHeader">
             <compas:ICDHeader IEDType="BCU" IEDinstance="11" BayLabel="3THEIX2" IEDName="IED_NAME1" ICDSystemVersionUUID="System_Version_IED_NAME1" VendorName="SCLE SFE" IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
         </Private>
+        <Private type="COMPAS-Bay">
+            <compas:Bay UUID="UuidBay1"/>
+        </Private>
         <AccessPoint name="AP_NAME">
             <Server>
                 <Authentication/>
@@ -21,12 +24,55 @@
                         </DOI>
                         <Inputs>
                             <Private type="COMPAS-Flow">
-                                <compas:Flow FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="System_Version_IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE" dataStreamKey="STAT_LDSUIED_LPDO 1 Sortie_13_BOOLEAN_18_stVal_1"/>
+                                <compas:Flow dataStreamKey="test bay internal" FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE"/>
+                                <compas:Flow dataStreamKey="test bay external" FlowID="1" FlowKind="BAY_EXTERNAL" ExtRefiedName="IED_NAME3" ExtReflnClass="ANCR" ExtRefldinst="LD_INST31" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE"/>
+                                <compas:Flow dataStreamKey="test daName ST" FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE"/>
+                                <compas:Flow dataStreamKey="test daName MX" FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE"/>
+                                <compas:Flow dataStreamKey="test daName BL" FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE"/>
+                                <compas:Flow dataStreamKey="test ServiceType is GOOSE, no daName and DO contains ST and MX, but only ST is FCDA candidate" FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE"/>
+                                <compas:Flow dataStreamKey="test ServiceType is SMV, no daName and DO contains ST and MX, but only ST is FCDA candidate" FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE"/>
+                                <compas:Flow dataStreamKey="test ServiceType is Report" FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE"/>
+                                <compas:Flow dataStreamKey="test no daName and doName with instance number" FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE"/>
+                                <compas:Flow dataStreamKey="test no daName and doName with instance number and SDO" FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE"/>
+                                <compas:Flow dataStreamKey="test ignore internal binding" FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="IED_NAME1" ExtReflnClass="ANCR" ExtRefldinst="LD_INST12" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE"/>
+                                <compas:Flow dataStreamKey="test ignore missing bindings attributes" FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE"/>
                             </Private>
-                            <!-- nominal case -->
-                            <ExtRef iedName="System_Version_IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="DoName1" daName="daName1" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113" desc="STAT_LDSUIED_LPDO 1 Sortie_13_BOOLEAN_18_stVal_1"/>
+                            <!-- bay internal  -->
+                            <ExtRef desc="test bay internal" iedName="IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="DoName" daName="daNameST" serviceType="GOOSE" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
+                            <!-- bay External -->
+                            <ExtRef desc="test bay external" iedName="IED_NAME3" ldInst="LD_INST31" lnClass="ANCR" lnInst="1" doName="DoName" daName="daNameST" serviceType="GOOSE" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
+                            <!-- daName => fc ST -->
+                            <ExtRef desc="test daName ST" iedName="IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="DoName" daName="daNameST" serviceType="GOOSE" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
+                            <!-- daName => fc MX -->
+                            <ExtRef desc="test daName MX" iedName="IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="DoName" daName="daNameMX" serviceType="GOOSE" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
+                            <!-- daName => fc different from MX or ST -->
+                            <ExtRef desc="test daName BL" iedName="IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="DoName" daName="daNameBL" serviceType="GOOSE" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
+                             <!-- ServiceType = GOOSE should keep only FCDA candidates -->
+                            <ExtRef desc="test ServiceType is GOOSE, no daName and DO contains ST and MX, but only ST is FCDA candidate" iedName="IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="OtherDoName" serviceType="GOOSE" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
+                            <!-- ServiceType = SMV should keep only FCDA candidates -->
+                            <ExtRef desc="test ServiceType is SMV, no daName and DO contains ST and MX, but only ST is FCDA candidate" iedName="IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="OtherDoName" serviceType="SMV" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
+                            <!-- ServiceType = Report -->
+                            <ExtRef desc="test ServiceType is Report" iedName="IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="DoName" daName="daNameST" serviceType="Report" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
+                            <!-- doName with instance number => instance number should be ignored when checking FCDA Candidates -->
+                            <ExtRef desc="test no daName and doName with instance number" iedName="IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="DoWithInst1" serviceType="GOOSE" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
+                            <!-- doName with instance number and SDO => instance number should be ignored when checking FCDA Candidates -->
+                            <ExtRef desc="test no daName and doName with instance number and SDO" iedName="IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="DoWithInst2" serviceType="SMV" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
+                            <!-- ignore internal binding (Extref.iedName == IED.name)  -->
+                            <ExtRef desc="test ignore internal binding" iedName="IED_NAME1" ldInst="LD_INST12" lnClass="ANCR" lnInst="1" doName="DoName" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
+                            <!-- ignore missing binding attributes  -->
+                            <ExtRef desc="test ignore missing bindings attributes" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
                         </Inputs>
                     </LN0>
+                </LDevice>
+                <LDevice inst="LD_INST12">
+                    <LN0 lnClass="LLN0" inst="" lnType="LNEX1">
+                        <DOI name="Mod">
+                            <DAI name="stVal">
+                                <Val>on</Val>
+                            </DAI>
+                        </DOI>
+                    </LN0>
+                    <LN lnClass="ANCR" inst="1" lnType="lnType"/>
                 </LDevice>
             </Server>
         </AccessPoint>
@@ -34,6 +80,9 @@
     <IED name="IED_NAME2">
         <Private type="COMPAS-ICDHeader">
             <compas:ICDHeader IEDType="BCU" IEDinstance="22" BayLabel="3THEIX2" IEDName="IED_NAME2" ICDSystemVersionUUID="System_Version_IED_NAME2" VendorName="SCLE SFE" IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+        </Private>
+        <Private type="COMPAS-Bay">
+            <compas:Bay UUID="UuidBay1"/>
         </Private>
         <AccessPoint name="AP_NAME">
             <Server>
@@ -51,18 +100,49 @@
             </Server>
         </AccessPoint>
     </IED>
+    <IED name="IED_NAME3">
+        <Private type="COMPAS-ICDHeader">
+            <compas:ICDHeader IEDType="BCU" IEDinstance="22" BayLabel="3THEIX2" IEDName="IED_NAME3" ICDSystemVersionUUID="System_Version_IED_NAME3" VendorName="SCLE SFE" IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+        </Private>
+        <Private type="COMPAS-Bay">
+            <compas:Bay UUID="UuidBay2"/>
+        </Private>
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LD_INST31">
+                    <LN0 lnClass="LLN0" inst="" lnType="LNEX1">
+                        <DOI name="Mod">
+                            <DAI name="stVal">
+                                <Val>on</Val>
+                            </DAI>
+                        </DOI>
+                    </LN0>
+                    <LN lnClass="ANCR" inst="1" lnType="lnType"/>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
     <DataTypeTemplates>
         <LNodeType lnClass="LLN0" id="LNEX1">
-            <DO name="Mod" type="DO1"/>
+            <DO name="Mod" type="Do0"/>
         </LNodeType>
         <LNodeType lnClass="ANCR" id="lnType">
-            <DO name="DoName1" type="DO2"/>
+            <DO name="DoName" type="Do1"/>
+            <DO name="OtherDoName" type="Do1"/>
+            <DO name="DoWithInst1" type="Do1"/>
+            <DO name="DoWithInst2" type="Do2"/>
         </LNodeType>
-        <DOType cdc="ENC" id="DO1">
+        <DOType cdc="ENC" id="Do0">
             <DA fc="ST" name="stVal" bType="Enum" type="BehaviourModeKind"/>
         </DOType>
-        <DOType cdc="ENC" id="DO2">
-            <DA fc="BL" name="daName1" bType="BOOLEAN"/>
+        <DOType cdc="ENC" id="Do1">
+            <DA fc="ST" name="daNameST" bType="BOOLEAN"/>
+            <DA fc="MX" name="daNameMX" bType="BOOLEAN"/>
+            <DA fc="BL" name="daNameBL" bType="BOOLEAN"/>
+        </DOType>
+        <DOType cdc="ENC" id="Do2">
+            <SDO name="subDo" type="Do1"/>
         </DOType>
         <EnumType id="BehaviourModeKind">
             <EnumVal ord="1">on</EnumVal>

@@ -20,13 +20,12 @@ import org.lfenergy.compas.sct.commons.util.PrivateEnum;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @UtilityClass
 public class ExtRefService {
 
-    public static final String MESSAGE_IED_NAME_NOT_FOUND = "IED.name '%s' not found in SCD";
-    public static final String MESSAGE_LDEVICE_INST_NOT_FOUND = "LDevice.inst '%s' not found in IED '%s'";
-    public static final String MESSAGE_MISSING_IED_NAME_PARAMETER = "IED.name parameter is missing";
+    private static final String MESSAGE_MISSING_IED_NAME_PARAMETER = "IED.name parameter is missing";
 
     /**
      * Updates iedName attribute of all ExtRefs in the Scd.
@@ -103,24 +102,15 @@ public class ExtRefService {
 
     public static SclReport createDataSetAndControlBlocks(SCL scd) {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        List<SclReportItem> sclReportItems = sclRootAdapter.streamIEDAdapters()
-            .flatMap(IEDAdapter::streamLDeviceAdapters)
-            .map(LDeviceAdapter::createDataSetAndControlBlocks)
-            .flatMap(List::stream)
-            .collect(Collectors.toList());
-        return new SclReport(sclRootAdapter, sclReportItems);
+        Stream<LDeviceAdapter> lDeviceAdapters = sclRootAdapter.streamIEDAdapters().flatMap(IEDAdapter::streamLDeviceAdapters);
+        return createDataSetAndControlBlocks(sclRootAdapter, lDeviceAdapters);
     }
 
     public static SclReport createDataSetAndControlBlocks(SCL scd, String targetIedName) {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter = sclRootAdapter.findIedAdapterByName(targetIedName)
-            .orElseThrow(() -> new ScdException(String.format(MESSAGE_IED_NAME_NOT_FOUND, targetIedName)));
+        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(targetIedName);
+        return createDataSetAndControlBlocks(sclRootAdapter, iedAdapter.streamLDeviceAdapters());
 
-        List<SclReportItem> sclReportItems = iedAdapter.streamLDeviceAdapters()
-                    .map(LDeviceAdapter::createDataSetAndControlBlocks)
-                    .flatMap(List::stream)
-                    .collect(Collectors.toList());
-        return new SclReport(sclRootAdapter, sclReportItems);
     }
 
     public static SclReport createDataSetAndControlBlocks(SCL scd, String targetIedName, String targetLDeviceInst) {
@@ -128,12 +118,16 @@ public class ExtRefService {
             throw new ScdException(MESSAGE_MISSING_IED_NAME_PARAMETER);
         }
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter = sclRootAdapter.findIedAdapterByName(targetIedName)
-            .orElseThrow(() -> new ScdException(String.format(MESSAGE_IED_NAME_NOT_FOUND, targetIedName)));
-        LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(targetLDeviceInst)
-            .orElseThrow(() -> new ScdException(String.format(MESSAGE_LDEVICE_INST_NOT_FOUND, targetLDeviceInst, targetIedName)));
+        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(targetIedName);
+        LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(targetLDeviceInst);
+        return createDataSetAndControlBlocks(sclRootAdapter, Stream.of(lDeviceAdapter));
+    }
 
-        List<SclReportItem> sclReportItems = lDeviceAdapter.createDataSetAndControlBlocks();
+    private static SclReport createDataSetAndControlBlocks(SclRootAdapter sclRootAdapter, Stream<LDeviceAdapter> lDeviceAdapters) {
+        List<SclReportItem> sclReportItems = lDeviceAdapters
+            .map(LDeviceAdapter::createDataSetAndControlBlocks)
+            .flatMap(List::stream)
+            .collect(Collectors.toList());
         return new SclReport(sclRootAdapter, sclReportItems);
     }
 }
