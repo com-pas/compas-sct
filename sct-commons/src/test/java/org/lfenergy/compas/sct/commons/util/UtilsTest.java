@@ -4,7 +4,6 @@
 
 package org.lfenergy.compas.sct.commons.util;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -14,6 +13,7 @@ import org.junit.platform.commons.support.ReflectionSupport;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -191,26 +191,36 @@ class UtilsTest {
     }
 
     @ParameterizedTest
-    @MethodSource("equalsOrBothBlankMatchingSource")
+    @MethodSource("provideEqualsOrBothBlankMatchingSource")
     void equalsOrBothBlank_should_be_true(String s1, String s2) {
         // Given : parameters
         // When
         boolean result = Utils.equalsOrBothBlank(s1, s2);
         // Then
-        Assertions.assertThat(result).isTrue();
+        assertThat(result).isTrue();
     }
 
     @ParameterizedTest
-    @MethodSource("equalsOrBothBlankNotMatchingSource")
+    @MethodSource("provideEqualsOrBothBlankNotMatchingSource")
     void equalsOrBothBlank_should_be_false(String s1, String s2) {
         // Given : parameters
         // When
         boolean result = Utils.equalsOrBothBlank(s1, s2);
         // Then
-        Assertions.assertThat(result).isFalse();
+        assertThat(result).isFalse();
     }
 
-    public static Stream<Arguments> equalsOrBothBlankMatchingSource() {
+    @ParameterizedTest
+    @MethodSource("provideRemoveTrailingDigitsSource")
+    void removeTrailingDigits_should_remove_trailing_digits(String input, String expected) {
+        // Given : parameter
+        // When
+        String result = Utils.removeTrailingDigits(input);
+        // Then
+        assertThat(result).isEqualTo(expected);
+    }
+
+    public static Stream<Arguments> provideEqualsOrBothBlankMatchingSource() {
         return Stream.of(
             Arguments.of("a", "a"),
             Arguments.of("", ""),
@@ -225,7 +235,7 @@ class UtilsTest {
         );
     }
 
-    public static Stream<Arguments> equalsOrBothBlankNotMatchingSource() {
+    public static Stream<Arguments> provideEqualsOrBothBlankNotMatchingSource() {
         return Stream.of(
             Arguments.of("a", "b"),
             Arguments.of("a", ""),
@@ -233,7 +243,19 @@ class UtilsTest {
             Arguments.of("a", null),
             Arguments.of("", "a"),
             Arguments.of(" ", "a"),
-            Arguments.of( null, "a")
+            Arguments.of(null, "a")
         );
+    }
+
+    public static Stream<Arguments> provideRemoveTrailingDigitsSource() {
+        return Stream.of(
+            Arguments.of("a", "a"),
+            Arguments.of("a1", "a"),
+            Arguments.of("a123", "a"),
+            Arguments.of("a1b1", "a1b"),
+            Arguments.of("a1b123", "a1b"),
+            Arguments.of("", ""),
+            Arguments.of("1", ""),
+            Arguments.of("123", ""));
     }
 }

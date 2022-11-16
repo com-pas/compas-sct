@@ -61,6 +61,7 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
     public static final short RELEASE = 4;
     public static final String REVISION = "B";
     public static final String VERSION = "2007";
+    public static final String MESSAGE_IED_NAME_NOT_FOUND = "IED.name '%s' not found in SCD";
 
     /**
      * Constructor
@@ -245,7 +246,7 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
      */
     public IEDAdapter getIEDAdapterByName(String iedName) throws ScdException {
         return findIedAdapterByName(iedName)
-            .orElseThrow(() -> new ScdException("IED.name '%s' not found in SCD"));
+            .orElseThrow(() -> new ScdException(String.format(MESSAGE_IED_NAME_NOT_FOUND, iedName)));
     }
 
     /**

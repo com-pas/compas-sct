@@ -52,7 +52,7 @@ class DAITrackerTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.getLDeviceAdapterByLdInst("LD_INS1").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LD_INS1").get());
         AbstractLNAdapter<?> lnAdapter = AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
                 .withLnClass(TLLN0Enum.LLN_0.value())
@@ -66,7 +66,7 @@ class DAITrackerTest {
         DAITracker.MatchResult matchResult = daiTracker.search();
         assertEquals(DAITracker.MatchResult.FULL_MATCH,matchResult);
 
-        lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.getLDeviceAdapterByLdInst("LD_INS2").isPresent() ? iAdapter.getLDeviceAdapterByLdInst("LD_INS2").get() : null);
+        lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LD_INS2").isPresent() ? iAdapter.findLDeviceAdapterByLdInst("LD_INS2").get() : null);
         lnAdapter = AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
                 .withLnClass(TLLN0Enum.LLN_0.value())
@@ -87,7 +87,7 @@ class DAITrackerTest {
         matchResult = daiTracker.search();
         assertEquals(DAITracker.MatchResult.PARTIAL_MATCH,matchResult);
 
-        lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.getLDeviceAdapterByLdInst("LD_INS3").isPresent() ? iAdapter.getLDeviceAdapterByLdInst("LD_INS3").get() : null);
+        lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LD_INS3").isPresent() ? iAdapter.findLDeviceAdapterByLdInst("LD_INS3").get() : null);
         lnAdapter = AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
                 .withLnClass(TLLN0Enum.LLN_0.value())
@@ -130,7 +130,7 @@ class DAITrackerTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/scd_with_dai_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.getLDeviceAdapterByLdInst("LDSUIED").isPresent() ? iAdapter.getLDeviceAdapterByLdInst("LDSUIED").get() : null);
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LDSUIED").isPresent() ? iAdapter.findLDeviceAdapterByLdInst("LDSUIED").get() : null);
         AbstractLNAdapter<?> lnAdapter = AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
                 .withLnClass(TLLN0Enum.LLN_0.value())

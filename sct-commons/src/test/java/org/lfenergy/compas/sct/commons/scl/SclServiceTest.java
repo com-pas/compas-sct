@@ -273,7 +273,7 @@ class SclServiceTest {
         String lnClass = TLLN0Enum.LLN_0.value();
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iedAdapter.getLDeviceAdapterByLdInst(ldInst).get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iedAdapter.findLDeviceAdapterByLdInst(ldInst).get());
         LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
         List<TExtRef> extRefs = ln0Adapter.getExtRefs(null);
         assertFalse(extRefs.isEmpty());
@@ -300,7 +300,7 @@ class SclServiceTest {
         String lnClass = TLLN0Enum.LLN_0.value();
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iedAdapter.getLDeviceAdapterByLdInst(ldInst).get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iedAdapter.findLDeviceAdapterByLdInst(ldInst).get());
         LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
         List<TExtRef> extRefs = ln0Adapter.getExtRefs(null);
         assertFalse(extRefs.isEmpty());
@@ -958,7 +958,7 @@ class SclServiceTest {
     private Optional<TVal> getLDeviceStatusValue(SCL scl, String iedName, String ldInst){
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scl);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
-        Optional<LDeviceAdapter> lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst);
+        Optional<LDeviceAdapter> lDeviceAdapter = iedAdapter.findLDeviceAdapterByLdInst(ldInst);
         LN0Adapter ln0Adapter = lDeviceAdapter.get().getLN0Adapter();
         Optional<DOIAdapter> doiAdapter = ln0Adapter.getDOIAdapters().stream()
                 .filter(doiAdapter1 -> doiAdapter1.getCurrentElem().getName().equals("Mod"))

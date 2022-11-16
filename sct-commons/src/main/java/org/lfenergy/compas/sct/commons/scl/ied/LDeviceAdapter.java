@@ -7,10 +7,7 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.lfenergy.compas.scl2007b4.model.TAccessPoint;
-import org.lfenergy.compas.scl2007b4.model.TLDevice;
-import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
-import org.lfenergy.compas.scl2007b4.model.TServer;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
@@ -267,6 +264,18 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
             return Collections.emptyList();
         }
         return ln0Adapter.getInputsAdapter()
-            .updateAllExtRefDataSetsAndControlBlocks();
+            .updateAllSourceDataSetsAndControlBlocks();
+    }
+
+    public Set<ResumedDataTemplate> findSourceDA(TExtRef extRef) {
+        String extRefLnClass = extRef.getLnClass().stream().findFirst().orElse("");
+        ResumedDataTemplate filter = ResumedDataTemplate.builder()
+            .lnClass(extRefLnClass)
+            .prefix(extRef.getPrefix())
+            .lnInst(extRef.getLnInst())
+            .doName(new DoTypeName(extRef.getDoName()))
+            .daName(new DaTypeName(extRef.getDaName()))
+            .build();
+        return getDAI(filter, false);
     }
 }

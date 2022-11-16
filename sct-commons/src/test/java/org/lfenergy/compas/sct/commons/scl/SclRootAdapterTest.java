@@ -94,7 +94,8 @@ class SclRootAdapterTest {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scl);
         // When & Then
         assertThatThrownBy(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"))
-            .isInstanceOf(ScdException.class);
+            .isInstanceOf(ScdException.class)
+            .hasMessage("IED.name 'IED_NAME' not found in SCD");
     }
 
     @Test

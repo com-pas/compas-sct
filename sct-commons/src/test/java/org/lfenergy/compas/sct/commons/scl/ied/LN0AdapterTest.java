@@ -100,7 +100,7 @@ class LN0AdapterTest {
         Mockito.when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
         LN0 ln0 = new LN0();
         Mockito.when(tlDevice.getLN0()).thenReturn(ln0);
-        LN0Adapter ln0Adapter = assertDoesNotThrow( () -> new LN0Adapter(lDeviceAdapter,ln0));
+        assertDoesNotThrow( () -> new LN0Adapter(lDeviceAdapter,ln0));
     }
 
     @Test
@@ -364,7 +364,7 @@ class LN0AdapterTest {
         SCL scd = SclTestMarshaller.getSCLFromFile(SCD_IED_U_TEST);
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS1").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.findLDeviceAdapterByLdInst("LD_INS1").get());
         LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
         DoTypeName doTypeName = new DoTypeName("Do.sdo1.d");
         DaTypeName daTypeName = new DaTypeName("antRef.bda1.bda2.bda3");
@@ -426,7 +426,7 @@ class LN0AdapterTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LDSUIED").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.findLDeviceAdapterByLdInst("LDSUIED").get());
         LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
         ResumedDataTemplate filter = new ResumedDataTemplate();
         filter.setLnClass(ln0Adapter.getLNClass());
@@ -454,7 +454,7 @@ class LN0AdapterTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LDSUIED").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LDSUIED"));
         LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
         //When
         Set<String> enumValues = ln0Adapter.getEnumValues("Behaviour");
@@ -468,7 +468,7 @@ class LN0AdapterTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LDSUIED").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.findLDeviceAdapterByLdInst("LDSUIED").get());
         LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
         //When
         Set<String> enumValues = ln0Adapter.getEnumValues("BehaviourModeKind");
@@ -483,7 +483,7 @@ class LN0AdapterTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LDSUIED").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LDSUIED"));
         LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
         ReportControlBlock reportControlBlock = new ReportControlBlock();
         int reportCBInitSize = ln0Adapter.getCurrentElem().getReportControl().size();
@@ -499,7 +499,7 @@ class LN0AdapterTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LDSUIED").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LDSUIED"));
         LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
         GooseControlBlock gooseControlBlock = new GooseControlBlock();
         int reportCBInitSize = ln0Adapter.getCurrentElem().getReportControl().size();
@@ -515,7 +515,7 @@ class LN0AdapterTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LDSUIED").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LDSUIED"));
         LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
         SMVControlBlock smvControlBlock = new SMVControlBlock();
         int reportCBInitSize = ln0Adapter.getCurrentElem().getReportControl().size();

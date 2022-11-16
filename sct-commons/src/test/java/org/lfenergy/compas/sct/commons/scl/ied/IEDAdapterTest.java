@@ -20,9 +20,11 @@ import org.mockito.Mockito;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
 
@@ -67,11 +69,51 @@ class IEDAdapterTest {
     }
 
     @Test
-    void testGetLDeviceAdapterByLdInst() throws Exception {
+    void findLDeviceAdapterByLdInst_should_return_LDevice() throws Exception {
+        // Given
         SCL scd = SclTestMarshaller.getSCLFromFile(SCD_IED_U_TEST);
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iAdapter = assertDoesNotThrow( () -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
-        assertTrue(iAdapter.getLDeviceAdapterByLdInst("LD_INS1").isPresent());
+        IEDAdapter iAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
+        // When
+        Optional<LDeviceAdapter> result = iAdapter.findLDeviceAdapterByLdInst("LD_INS1");
+        // Then
+        assertThat(result.map(LDeviceAdapter::getInst)).hasValue("LD_INS1");
+    }
+
+    @Test
+    void findLDeviceAdapterByLdInst_when_not_found_should_return_empty_optional() throws Exception {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile(SCD_IED_U_TEST);
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
+        // When
+        Optional<LDeviceAdapter> result = iAdapter.findLDeviceAdapterByLdInst("NOT_EXISTING");
+        // Then
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void getLDeviceAdapterByLdInst_should_return_LDevice() throws Exception {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile(SCD_IED_U_TEST);
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
+        // When
+        LDeviceAdapter result = iAdapter.getLDeviceAdapterByLdInst("LD_INS1");
+        // Then
+        assertThat(result.getInst()).isEqualTo("LD_INS1");
+    }
+
+    @Test
+    void getLDeviceAdapterByLdInst_when_not_found_should_throw_exception() throws Exception {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile(SCD_IED_U_TEST);
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
+        // When & Then
+        assertThatThrownBy(() -> iAdapter.getLDeviceAdapterByLdInst("NOT_EXISTING"))
+            .isInstanceOf(ScdException.class)
+            .hasMessage("LDevice.inst 'NOT_EXISTING' not found in IED 'IED_NAME'");
     }
 
     @Test

@@ -5,6 +5,8 @@
 package org.lfenergy.compas.sct.commons.dto;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedCDCEnum;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -114,4 +116,16 @@ class DoTypeNameTest {
         // then
         assertThat(do2).isEqualTo(do1);
     }
+
+    @ParameterizedTest
+    @CsvSource({"do1,do", "do,do", "do1.sdo1,do.sdo1", "do.sdo1,do.sdo1"})
+    void toStringWithoutInst_when_instance_is_present_should_return_without_instance_number(String input, String expected) {
+        // given : nothing
+        DoTypeName do1 = createDo(input, TPredefinedCDCEnum.DPS);
+        // when
+        String result = do1.toStringWithoutInst();
+        // then
+        assertThat(result).isEqualTo(expected);
+    }
+
 }
