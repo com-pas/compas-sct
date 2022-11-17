@@ -20,10 +20,17 @@ import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.util.FcdaCandidatesHelper;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static io.vavr.API.*;
+import static io.vavr.Predicates.isIn;
+import static io.vavr.Predicates.isNull;
+import static org.lfenergy.compas.scl2007b4.model.TServiceType.*;
 import static org.lfenergy.compas.sct.commons.util.LDeviceStatus.OFF;
 import static org.lfenergy.compas.sct.commons.util.LDeviceStatus.ON;
 
@@ -290,10 +297,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
     }
 
     public Try<IEDAdapter> findSourceIed(TExtRef extRef) {
-        return getSclRootAdapter()
-            .findIedAdapterByName(extRef.getIedName())
-            .map(Try::success)
-            .orElseGet(() -> Try.failure(new ScdException(extRefXPath(extRef.getDesc()), "Source IED not found in SCD", true)));
+        return Try.of(() -> getSclRootAdapter().getIEDAdapterByName(extRef.getIedName()));
     }
 
     public Try<ResumedDataTemplateAdapter> findSourceDa(TExtRef extRef, IEDAdapter sourceIed) {
@@ -311,19 +315,13 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
     }
 
     private Optional<SclReportItem> updateSourceDataSetsAndControlBlocks(TExtRef extRef, String targetBayUuid) {
-        if (extRef.getServiceType() == null) {
-            return fatalReportItem(extRef, MESSAGE_SERVICE_TYPE_MISSING_ON_EXTREF);
-        }
         return findSourceIed(extRef)
             .flatMap(sourceIed -> isBayInternal(extRef, targetBayUuid, sourceIed)
-                .flatMap(isBayInternal -> {
-                    System.out.print("\nExtRef.desc=" + extRef.getDesc());
-                    System.out.print(",isBayInternal=" + isBayInternal);
-                    return findSourceDa(extRef, sourceIed)
-                        .flatMap(sourceDa -> printRelevantDa(extRef, sourceDa));
-                })
+                .flatMap(isBayInternal -> findSourceDa(extRef, sourceIed)
+                    .flatMap(sourceDa -> printRelevantDa(extRef, sourceDa))
+                    .map(notUsed1 -> Optional.<SclReportItem>empty())
+                )
             )
-            .map(notUsed -> Optional.<SclReportItem>empty())
             .getOrElseGet(throwable -> {
                 if (throwable instanceof ScdException) {
                     return Optional.of(((ScdException) throwable).toSclReportItem());
@@ -334,32 +332,33 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
     }
 
     private Try<ResumedDataTemplateAdapter> printRelevantDa(TExtRef extRef, ResumedDataTemplateAdapter sourceDa) {
-        switch (extRef.getServiceType()) {
-            case GOOSE:
-            case SMV:
-                sourceDa.getResumedDataTemplate().removeIf(Predicate.not(FcdaCandidatesHelper.SINGLETON));
-                break;
-            case REPORT:
-                //TODO: In issue RSR-608, replace with mxAndStSources.filter(...)
-                sourceDa.getResumedDataTemplate().clear();
-                break;
-            case POLL:
-            default:
-                return Try.failure(new ScdException(extRefXPath(extRef.getDesc()), String.format(MESSAGE_INVALID_SERVICE_TYPE,
-                    extRef.getServiceType()), true));
-        }
-        String daToPrint = sourceDa.getResumedDataTemplate().stream()
-            .map(da -> da.getFc() + "#" + da.getDataAttributes())
-            .collect(Collectors.joining(","));
-        System.out.print("," + (daToPrint.isEmpty() ? "--NO_VALID_SOURCE_DA--" : daToPrint));
-        return Try.success(sourceDa);
+        Try<Void> sideEffect = Match(extRef.getServiceType()).of(
+            Case($(isIn(GOOSE, SMV)), o -> Try.runRunnable(() -> sourceDa.getResumedDataTemplate().removeIf(Predicate.not(FcdaCandidatesHelper.SINGLETON)))),
+            //TODO: In issue RSR-608, replace with mxAndStSources.filter(...)
+            Case($(REPORT), o -> Try.runRunnable(() -> sourceDa.getResumedDataTemplate().clear())),
+            Case($(isNull()), o -> Try.failure(new ScdException(extRefXPath(extRef.getDesc()), MESSAGE_SERVICE_TYPE_MISSING_ON_EXTREF, true))),
+            Case($(), o -> Try.failure(new ScdException(extRefXPath(extRef.getDesc()), String.format(MESSAGE_INVALID_SERVICE_TYPE, o), true)))
+        );
+        return sideEffect.andThen(() -> {
+                String daToPrint = sourceDa.getResumedDataTemplate().stream()
+                    .map(da -> da.getFc() + "#" + da.getDataAttributes())
+                    .collect(Collectors.joining(","));
+                System.out.print("," + (daToPrint.isEmpty() ? "--NO_VALID_SOURCE_DA--" : daToPrint));
+            })
+            .map(unused -> sourceDa);
     }
 
     private Try<Boolean> isBayInternal(TExtRef extRef, String targetBayUuid, IEDAdapter sourceIed) {
         return sourceIed.getPrivateCompasBay()
             .map(TCompasBay::getUUID)
             .filter(StringUtils::isNotBlank)
-            .map(sourceIedBayUuid -> Try.success(sourceIedBayUuid.equals(targetBayUuid)))
+            .map(sourceIedBayUuid -> {
+                boolean isBayInternal = sourceIedBayUuid.equals(targetBayUuid);
+                System.out.print("\nExtRef.desc=" + extRef.getDesc());
+                System.out.print(",isBayInternal=" + isBayInternal);
+                return isBayInternal;
+            })
+            .map(Try::success)
             .orElseGet(() -> Try.failure(new ScdException(extRefXPath(extRef.getDesc()), "Source IED is missing Private/compas:Bay@UUID "
                 + "attribute", true)));
     }
