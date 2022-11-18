@@ -26,9 +26,11 @@
                             <Private type="COMPAS-Flow">
                                 <compas:Flow dataStreamKey="ExtRef is missing ServiceType attribute" FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE"/>
                                 <compas:Flow dataStreamKey="ExtRef is ServiceType Poll" FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE"/>
+                                <compas:Flow dataStreamKey="ExtRef is ServiceType Report with malformed desc attribute" FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE"/>
                             </Private>
                             <ExtRef desc="ExtRef is missing ServiceType attribute" iedName="IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="DoName1" daName="daName1" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
                             <ExtRef desc="ExtRef is ServiceType Poll" serviceType="Poll" iedName="IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="DoName1" daName="daName1" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
+                            <ExtRef desc="ExtRef is ServiceType Report with malformed desc attribute" serviceType="Report" iedName="IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="DoName1" daName="daName1" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
                         </Inputs>
                     </LN0>
                 </LDevice>
