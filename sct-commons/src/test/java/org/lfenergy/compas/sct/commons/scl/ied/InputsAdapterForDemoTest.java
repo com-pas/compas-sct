@@ -113,7 +113,9 @@ class InputsAdapterForDemoTest {
             Arguments.of(named("should ignore binding internal to IED",
                 new String[]{"test ignore internal binding"})),
             Arguments.of(named("should ignore extref with missing binding attributes",
-                new String[]{"test ignore missing bindings attributes"}))
+                new String[]{"test ignore missing bindings attributes"})),
+            Arguments.of(named("should ignore extref when compas:Flow.FlowStatus is neither ACTIVE nor UNTESTED",
+                new String[]{"test ignore when compas:Flow.FlowStatus is neither ACTIVE nor UNTESTED"}))
         );
     }
 }

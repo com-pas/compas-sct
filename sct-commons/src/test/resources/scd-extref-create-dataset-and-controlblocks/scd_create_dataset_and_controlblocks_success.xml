@@ -36,6 +36,7 @@
                                 <compas:Flow dataStreamKey="test no daName and doName with instance number and SDO" FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE"/>
                                 <compas:Flow dataStreamKey="test ignore internal binding" FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="IED_NAME1" ExtReflnClass="ANCR" ExtRefldinst="LD_INST12" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE"/>
                                 <compas:Flow dataStreamKey="test ignore missing bindings attributes" FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE"/>
+                                <compas:Flow dataStreamKey="test ignore when compas:Flow.FlowStatus is neither ACTIVE nor UNTESTED" FlowID="1" FlowKind="BAY_EXTERNAL" ExtRefiedName="IED_NAME3" ExtReflnClass="ANCR" ExtRefldinst="LD_INST31" ExtReflnInst="1" ExtRefprefix="" FlowStatus="INACTIVE"/>
                             </Private>
                             <!-- bay internal  -->
                             <ExtRef desc="test bay internal" iedName="IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="DoName" daName="daNameST" serviceType="GOOSE" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
@@ -61,6 +62,9 @@
                             <ExtRef desc="test ignore internal binding" iedName="IED_NAME1" ldInst="LD_INST12" lnClass="ANCR" lnInst="1" doName="DoName" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
                             <!-- ignore missing binding attributes  -->
                             <ExtRef desc="test ignore missing bindings attributes" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
+                            <!-- ignore when compas:Flow.FlowStatus is INACTIVE -->
+                            <ExtRef desc="test ignore when compas:Flow.FlowStatus is neither ACTIVE nor UNTESTED" iedName="IED_NAME3" ldInst="LD_INST31" lnClass="ANCR" lnInst="1" doName="DoName" daName="daNameST" serviceType="GOOSE" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
+
                         </Inputs>
                     </LN0>
                 </LDevice>
