@@ -140,6 +140,14 @@ public final class Utils {
             || (StringUtils.isBlank(s1) && StringUtils.isBlank(s2));
     }
 
+    /**
+     * Remove all digits at the end of the string, if any
+     * @param s input string
+     * @return s without digits at the end.
+     * Guarantees that the last character of the return value is not a digit.
+     * If s is composed only of digits, the result is an empty string
+     * @see Character#isDigit(int)
+     */
     public static String removeTrailingDigits(String s) {
         Objects.requireNonNull(s);
         if (s.isEmpty()) {
@@ -150,5 +158,21 @@ public final class Utils {
             digitsPos--;
         }
         return s.substring(0, digitsPos);
+    }
+
+    /**
+     * Split string s using regexDelimiter into an array, and return element at given index.
+     * @param s string to split
+     * @param regexDelimiter delimiter
+     * @param index index of the element in the split array (0 being the first element).
+     *              If index is a negative integer, position is counted from the end (-1 behind the last element).
+     * @return the element at position index in the split array, or null if index is out of bound
+     * @see String#split(String)
+     */
+    public static String extractField(String s, String regexDelimiter, int index) {
+        Objects.requireNonNull(s);
+        String[] split = s.split(regexDelimiter);
+        int column = index < 0 ? split.length + index : index;
+        return 0 <= column && column < split.length ? split[column] : null;
     }
 }

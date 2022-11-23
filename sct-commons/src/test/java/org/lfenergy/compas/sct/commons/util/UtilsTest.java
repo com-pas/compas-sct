@@ -200,26 +200,6 @@ class UtilsTest {
         assertThat(result).isTrue();
     }
 
-    @ParameterizedTest
-    @MethodSource("provideEqualsOrBothBlankNotMatchingSource")
-    void equalsOrBothBlank_should_be_false(String s1, String s2) {
-        // Given : parameters
-        // When
-        boolean result = Utils.equalsOrBothBlank(s1, s2);
-        // Then
-        assertThat(result).isFalse();
-    }
-
-    @ParameterizedTest
-    @MethodSource("provideRemoveTrailingDigitsSource")
-    void removeTrailingDigits_should_remove_trailing_digits(String input, String expected) {
-        // Given : parameter
-        // When
-        String result = Utils.removeTrailingDigits(input);
-        // Then
-        assertThat(result).isEqualTo(expected);
-    }
-
     public static Stream<Arguments> provideEqualsOrBothBlankMatchingSource() {
         return Stream.of(
             Arguments.of("a", "a"),
@@ -235,6 +215,16 @@ class UtilsTest {
         );
     }
 
+    @ParameterizedTest
+    @MethodSource("provideEqualsOrBothBlankNotMatchingSource")
+    void equalsOrBothBlank_should_be_false(String s1, String s2) {
+        // Given : parameters
+        // When
+        boolean result = Utils.equalsOrBothBlank(s1, s2);
+        // Then
+        assertThat(result).isFalse();
+    }
+
     public static Stream<Arguments> provideEqualsOrBothBlankNotMatchingSource() {
         return Stream.of(
             Arguments.of("a", "b"),
@@ -247,6 +237,16 @@ class UtilsTest {
         );
     }
 
+    @ParameterizedTest
+    @MethodSource("provideRemoveTrailingDigitsSource")
+    void removeTrailingDigits_should_remove_trailing_digits(String input, String expected) {
+        // Given : parameter
+        // When
+        String result = Utils.removeTrailingDigits(input);
+        // Then
+        assertThat(result).isEqualTo(expected);
+    }
+
     public static Stream<Arguments> provideRemoveTrailingDigitsSource() {
         return Stream.of(
             Arguments.of("a", "a"),
@@ -257,5 +257,30 @@ class UtilsTest {
             Arguments.of("", ""),
             Arguments.of("1", ""),
             Arguments.of("123", ""));
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideExtractField")
+    void extractField_should(String s, int index, String expected) {
+        //Given : parameters
+        //When
+        String result = Utils.extractField(s, "_", index);
+        //Then
+        assertThat(result).isEqualTo(expected);
+    }
+
+    public static Stream<Arguments> provideExtractField() {
+        return Stream.of(
+            Arguments.of("a", 0, "a"),
+            Arguments.of("a", -1, "a"),
+            Arguments.of("a_b", 0, "a"),
+            Arguments.of("a_b", 1, "b"),
+            Arguments.of("a_b", -1, "b"),
+            Arguments.of("a_b", -2, "a"),
+            Arguments.of("a_b_c", -2, "b"),
+            Arguments.of("a", 1, null),
+            Arguments.of("a", -2, null),
+            Arguments.of("a_b_c", -4, null)
+        );
     }
 }

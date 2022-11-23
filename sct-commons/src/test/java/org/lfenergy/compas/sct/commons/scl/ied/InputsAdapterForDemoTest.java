@@ -95,11 +95,10 @@ class InputsAdapterForDemoTest {
                         + "ST#OtherDoName.daNameST",
                     "ExtRef.desc=test ServiceType is SMV, no daName and DO contains ST and MX, but only ST is FCDA candidate,isBayInternal=true,"
                         + "ST#OtherDoName.daNameST"})),
-            //TODO: issue 608 will change this
             Arguments.of(named("for Report, should ignore source DA",
                 new String[]{
-                    "ExtRef.desc=test ServiceType is Report,isBayInternal=true,"
-                        + NO_VALID_SOURCE_DA})),
+                    "ExtRef.desc=test ServiceType is Report_daReportST_1,isBayInternal=true,"
+                        + "ST#DoName.daReportST"})),
             Arguments.of(named("should ignore instance number when checking FCDA Candidate file",
                 new String[]{
                     "ExtRef.desc=test no daName and doName with instance number,isBayInternal=true,"

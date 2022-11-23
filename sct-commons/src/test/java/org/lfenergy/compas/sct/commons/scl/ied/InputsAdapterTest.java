@@ -88,7 +88,10 @@ class InputsAdapterTest {
                 "The signal ExtRef is missing ServiceType attribute"),
             SclReportItem.fatal("/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]/LN0/Inputs/" +
                     "ExtRef[@desc=\"ExtRef is ServiceType Poll\"]",
-                "The signal ExtRef ServiceType attribute is unexpected : POLL")
+                "The signal ExtRef ServiceType attribute is unexpected : POLL"),
+            SclReportItem.fatal("/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]/LN0/Inputs/" +
+                    "ExtRef[@desc=\"ExtRef is ServiceType Report with malformed desc attribute\"]",
+                "ExtRef.serviceType=Report but ExtRef.desc attribute is malformed")
         );
     }
 

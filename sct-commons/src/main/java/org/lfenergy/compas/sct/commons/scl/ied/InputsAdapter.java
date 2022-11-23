@@ -17,8 +17,8 @@ import org.lfenergy.compas.sct.commons.util.FcdaCandidates;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.lfenergy.compas.sct.commons.util.LDeviceStatus.OFF;
 import static org.lfenergy.compas.sct.commons.util.LDeviceStatus.ON;
@@ -44,6 +44,9 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
     private static final String MESSAGE_SERVICE_TYPE_MISSING_ON_EXTREF = "The signal ExtRef is missing ServiceType attribute";
     private static final String MESSAGE_INVALID_SERVICE_TYPE = "The signal ExtRef ServiceType attribute is unexpected : %s";
     private static final String MESSAGE_IED_IS_MISSING_PRIVATE_COMPAS_BAY_UUID = "IED is missing Private/compas:Bay@UUID attribute";
+    private static final String MESSAGE_REPORT_EXTREF_DESC_MALFORMED = "ExtRef.serviceType=Report but ExtRef.desc attribute is malformed";
+    private static final int EXTREF_DESC_DA_NAME_POSITION = -2;
+    private static final String EXTREF_DESC_DELIMITER = "_";
 
     /**
      * Constructor
@@ -296,29 +299,34 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
             return warningReportItem(extRef, String.format(MESSAGE_SOURCE_LN_NOT_FOUND, optionalSourceLDevice.get().getXPath()));
         }
 
-        //TODO: Don't forget to test this in issue #84 RSR-433
-        List<ResumedDataTemplate> mxAndStSources = sourceDas.stream()
-            .filter(da -> da.getFc() == TFCEnum.MX || da.getFc() == TFCEnum.ST).toList();
-
-        Stream<ResumedDataTemplate> sourceDaToProcess;
-        switch (extRef.getServiceType()) {
-            case GOOSE:
-            case SMV:
-                sourceDaToProcess = mxAndStSources.stream().filter(FcdaCandidates.SINGLETON::contains);
-                break;
-            case REPORT:
-                //TODO: In issue RSR-608, replace with mxAndStSources.filter(...)
-                sourceDaToProcess = Stream.empty();
-                break;
-            case POLL:
-            default:
-                return fatalReportItem(extRef, String.format(MESSAGE_INVALID_SERVICE_TYPE, extRef.getServiceType()));
-        }
+        Optional<SclReportItem> sclReportItem = removeFilteredSourceDas(extRef, sourceDas);
         //TODO: map to FCDA in issue #84 RSR-433 and remove print to console
-        String daToPrint = sourceDaToProcess
+        String daToPrint = sourceDas.stream()
             .map(da -> da.getFc() + "#" + da.getDataAttributes())
             .collect(Collectors.joining(","));
         System.out.print("," + (daToPrint.isEmpty() ? "--NO_VALID_SOURCE_DA--" : daToPrint));
+        return sclReportItem;
+    }
+
+    private Optional<SclReportItem> removeFilteredSourceDas(TExtRef extRef, final Set<ResumedDataTemplate> sourceDas) {
+        //TODO: Don't forget to test this in issue #84 RSR-433
+        sourceDas.removeIf(da -> da.getFc() != TFCEnum.MX && da.getFc() != TFCEnum.ST);
+        return switch (extRef.getServiceType()) {
+            case GOOSE, SMV -> {
+                sourceDas.removeIf(Predicate.not(FcdaCandidates.SINGLETON::contains));
+                yield Optional.empty();
+            }
+            case REPORT -> filterReportSourceDa(extRef, sourceDas);
+            default -> fatalReportItem(extRef, String.format(MESSAGE_INVALID_SERVICE_TYPE, extRef.getServiceType()));
+        };
+    }
+
+    private Optional<SclReportItem> filterReportSourceDa(TExtRef extRef, Set<ResumedDataTemplate> sourceDas) {
+        String daName = Utils.extractField(extRef.getDesc(), EXTREF_DESC_DELIMITER, EXTREF_DESC_DA_NAME_POSITION);
+        if (StringUtils.isBlank(daName)) {
+            return fatalReportItem(extRef, MESSAGE_REPORT_EXTREF_DESC_MALFORMED);
+        }
+        sourceDas.removeIf(resumedDataTemplate -> !resumedDataTemplate.getDaName().toString().equals(daName));
         return Optional.empty();
     }
 
