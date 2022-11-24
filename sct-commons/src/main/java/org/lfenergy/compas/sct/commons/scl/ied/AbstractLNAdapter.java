@@ -579,7 +579,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         } else {
             binderIEDAdapter = getCurrentIed();
         }
-        LDeviceAdapter binderLDAdapter = binderIEDAdapter.getLDeviceAdapterByLdInst(binderLdInst)
+        LDeviceAdapter binderLDAdapter = binderIEDAdapter.findLDeviceAdapterByLdInst(binderLdInst)
                 .orElseThrow(
                         () -> new ScdException(
                                 String.format("Unknown LDevice (%s) in IED (%s)", binderLdInst, binderIedName)

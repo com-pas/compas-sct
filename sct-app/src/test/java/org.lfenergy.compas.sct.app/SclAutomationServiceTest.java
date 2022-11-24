@@ -146,7 +146,7 @@ class SclAutomationServiceTest {
         // Then
         LN0 ln0 = expectedSCD.streamIEDAdapters()
                 .findFirst()
-                .map(iedAdapter -> iedAdapter.getLDeviceAdapterByLdInst("lDeviceInst1").orElseThrow())
+                .map(iedAdapter -> iedAdapter.findLDeviceAdapterByLdInst("lDeviceInst1").orElseThrow())
                 .map(LDeviceAdapter::getLN0Adapter)
                 .map(SclElementAdapter::getCurrentElem)
                 .orElseThrow(() -> new RuntimeException("Test shouldn't fail here, please check your XML input file"));

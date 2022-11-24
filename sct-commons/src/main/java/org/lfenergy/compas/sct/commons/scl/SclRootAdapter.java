@@ -17,6 +17,8 @@ import org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter;
 
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -59,6 +61,7 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
     public static final short RELEASE = 4;
     public static final String REVISION = "B";
     public static final String VERSION = "2007";
+    private static final String MESSAGE_IED_NAME_NOT_FOUND = "IED.name '%s' not found in SCD";
 
     /**
      * Constructor
@@ -185,7 +188,7 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
             throw new ScdException("No IED to import from ICD file");
         }
 
-        if(hasIED(iedName)){
+        if(findIedAdapterByName(iedName).isPresent()){
             String msg = "SCL file already contains IED: " + iedName;
             log.error(msg);
             throw new ScdException(msg);
@@ -203,17 +206,6 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
         //add IED
         currentElem.getIED().add(prvIEDAdapter.currentElem);
         return getIEDAdapterByName(iedName);
-    }
-
-    /**
-     * Checks if IED is present in SCL
-     * @param iedName name of IED to find in SCL
-     * @return <em>Boolean</em> value of check result
-     */
-    private boolean hasIED(String iedName) {
-        return currentElem.getIED()
-                .stream()
-                .anyMatch(tied -> tied.getName().equals(iedName));
     }
 
     /**
@@ -242,8 +234,20 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
      * @throws ScdException throws when unknown IED
      */
     public IEDAdapter getIEDAdapterByName(String iedName) throws ScdException {
-        // <IED iedNAme></IED> ; Unmarshaller
-        return new IEDAdapter(this,iedName);
+        return findIedAdapterByName(iedName)
+            .orElseThrow(() -> new ScdException(String.format(MESSAGE_IED_NAME_NOT_FOUND, iedName)));
+    }
+
+    /**
+     * Find an IED by name from SCL
+     * @param iedName name of IED to find in SCL
+     * @return <em>Optional<IEDAdapter></em> of the first IED with a matching name
+     */
+    public Optional<IEDAdapter> findIedAdapterByName(String iedName) throws ScdException {
+        return currentElem.getIED().stream()
+            .filter(ied -> Objects.equals(ied.getName(), iedName))
+            .findFirst()
+            .map(ied -> new IEDAdapter(this, ied));
     }
 
     /**

@@ -45,6 +45,8 @@ import java.util.List;
 @NoArgsConstructor
 @EqualsAndHashCode
 public class DataTypeName {
+    protected static final String DELIMITER = ".";
+
     protected String name = ""; // dataName or DataAttributeName
 
     private List<String> structNames = new ArrayList<>(); // [.DataName[…]] or [.DAComponentName[ ….]]
@@ -98,13 +100,8 @@ public class DataTypeName {
      */
     @Override
     public String toString(){
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(name);
-        for(String sName : structNames){
-            stringBuilder.append('.');
-            stringBuilder.append(sName);
-        }
-        return stringBuilder.toString();
+        return name
+            + (getStructNames().isEmpty() ? StringUtils.EMPTY : DELIMITER + String.join(DELIMITER, getStructNames()));
     }
 
     /**

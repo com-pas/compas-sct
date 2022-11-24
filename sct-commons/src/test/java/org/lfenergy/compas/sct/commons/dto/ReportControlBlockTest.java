@@ -86,7 +86,7 @@ class ReportControlBlockTest {
         LNAdapter lnAdapter = Mockito.mock(LNAdapter.class);
 
         Mockito.when(sclRootAdapter.getIEDAdapterByName(ArgumentMatchers.anyString())).thenReturn(iedAdapter);
-        Mockito.when(iedAdapter.getLDeviceAdapterByLdInst(ArgumentMatchers.anyString()))
+        Mockito.when(iedAdapter.findLDeviceAdapterByLdInst(ArgumentMatchers.anyString()))
                 .thenReturn(Optional.of(lDeviceAdapter));
         Mockito.when(
                 lDeviceAdapter.getLNAdapter(
@@ -101,7 +101,7 @@ class ReportControlBlockTest {
         reportControlBlock.getIedNames().get(0).getLnClass().clear();
         assertDoesNotThrow(() -> reportControlBlock.validateDestination(sclRootAdapter));
 
-        Mockito.when(iedAdapter.getLDeviceAdapterByLdInst(ArgumentMatchers.anyString()))
+        Mockito.when(iedAdapter.findLDeviceAdapterByLdInst(ArgumentMatchers.anyString()))
                 .thenReturn(Optional.empty());
         assertThrows(ScdException.class, () -> reportControlBlock.validateDestination(sclRootAdapter));
     }
