@@ -82,7 +82,7 @@ public class DoTypeName extends DataTypeName {
      * Same as toString() without the instance of the DO.
      * Only the DO can have an instance number (not the SDO).
      * Prerequisites: A non instanced DO never ends with digits.
-     *
+     * Patate
      * @return Same as DataTypeName#toString(), without the digits at the end of the DO if any.
      * @see DataTypeName#toString()
      */
