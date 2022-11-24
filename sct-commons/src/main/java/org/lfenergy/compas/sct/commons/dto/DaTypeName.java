@@ -50,7 +50,7 @@ public class DaTypeName extends DataTypeName{
 
     /**
      * Constructor
-     * @param daName input
+     * @param daName input Blabla
      */
     public DaTypeName(String daName) {
         super(daName);
