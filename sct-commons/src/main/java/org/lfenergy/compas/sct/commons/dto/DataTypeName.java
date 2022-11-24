@@ -53,7 +53,7 @@ public class DataTypeName {
 
     /**
      * Create DataTypeName object from DataName by constructor
-     * @param dataName string containing DA/DO names
+     * @param dataName string containing DA/DO names Blabla
      */
     public DataTypeName(String dataName){
         if(dataName == null) return;
