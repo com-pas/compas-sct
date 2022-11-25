@@ -45,7 +45,7 @@ class ConnectedAPAdapterTest {
     }
 
     @Test
-    void addPrivate() throws Exception {
+    void addPrivate() {
         ConnectedAPAdapter connectedAPAdapter = subNetworkAdapter.getConnectedAPAdapter(DTO.HOLDER_IED_NAME, DTO.AP_NAME);
         TPrivate tPrivate = new TPrivate();
         tPrivate.setType("Private Type");

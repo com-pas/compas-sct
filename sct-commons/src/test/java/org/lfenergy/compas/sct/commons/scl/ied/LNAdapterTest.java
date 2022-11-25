@@ -12,7 +12,6 @@ import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import org.lfenergy.compas.sct.commons.scl.dtt.AbstractDTTLevel;
 import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.mockito.Mockito;
@@ -363,7 +362,6 @@ class LNAdapterTest {
         tVal.setValue("newValue");
         rDtt.setDaiValues(List.of(tVal));
         assertDoesNotThrow(() -> lnAdapter.updateDAI(rDtt));
-        MarshallerWrapper marshallerWrapper = AbstractDTTLevel.createWrapper();
 
         lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LD_INS2").get());
         AbstractLNAdapter<?> lnAdapter2 = AbstractLNAdapter.builder()
@@ -375,7 +373,7 @@ class LNAdapterTest {
         assertTrue(rDtt.isUpdatable());
         assertDoesNotThrow(() -> lnAdapter2.updateDAI(rDtt));
 
-        System.out.println(marshallerWrapper.marshall(scd));
+        System.out.println(MarshallerWrapper.marshall(scd));
 
     }
 

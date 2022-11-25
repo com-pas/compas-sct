@@ -14,6 +14,7 @@ import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ied.*;
+import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.*;
@@ -26,7 +27,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDa;
 import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDo;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
-import static org.lfenergy.compas.sct.commons.testhelpers.marshaller.SclTestMarshaller.createWrapper;
 import static org.lfenergy.compas.sct.commons.util.PrivateEnum.COMPAS_SCL_FILE_TYPE;
 
 class SclServiceTest {
@@ -700,8 +700,8 @@ class SclServiceTest {
     void testImportSTDElementsInSCD_with_Multiple_STD() throws Exception {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd_lnode_with_many_compas_icdheader.xml");
         SCL std0 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
-        SCL std1 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_SITESITE1GTW1.xml");
-        SCL std2 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_SITESITE1GTW2.xml");
+        SCL std1 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_SITESITE1SCU1.xml");
+        SCL std2 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_SITESITE1SCU2.xml");
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
 
         SclRootAdapter expectedScdAdapter = assertDoesNotThrow( () -> SclService.importSTDElementsInSCD(
@@ -835,11 +835,11 @@ class SclServiceTest {
         // Given
         assertTrue(getLDeviceStatusValue(scl, "IedName1", "LDSUIED").isPresent());
         assertEquals("off", getLDeviceStatusValue(scl, "IedName1", "LDSUIED").get().getValue());
-        String before = createWrapper().marshall(scl);
+        String before = MarshallerWrapper.marshall(scl);
         // When
         SclReport sclReport = SclService.updateLDeviceStatus(scl);
         // Then
-        String after = createWrapper().marshall(sclReport.getSclRootAdapter().getCurrentElem());
+        String after = MarshallerWrapper.marshall(sclReport.getSclRootAdapter().getCurrentElem());
         assertFalse(sclReport.isSuccess());
         assertThat(sclReport.getSclReportItems())
                 .hasSize(1)
@@ -888,11 +888,11 @@ class SclServiceTest {
         assertEquals("off", getLDeviceStatusValue(scl, "IedName1", "LDSUIED").get().getValue());
         assertEquals("on", getLDeviceStatusValue(scl, "IedName2", "LDSUIED").get().getValue());
         assertFalse(getLDeviceStatusValue(scl, "IedName3", "LDSUIED").isPresent());
-        String before = createWrapper().marshall(scl);
+        String before = MarshallerWrapper.marshall(scl);
         // When
         SclReport sclReport = SclService.updateLDeviceStatus(scl);
         // Then
-        String after = createWrapper().marshall(sclReport.getSclRootAdapter().getCurrentElem());
+        String after = MarshallerWrapper.marshall(sclReport.getSclRootAdapter().getCurrentElem());
         assertFalse(sclReport.isSuccess());
         assertThat(sclReport.getSclReportItems())
                 .hasSize(3)

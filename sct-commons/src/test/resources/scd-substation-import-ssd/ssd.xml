@@ -12,7 +12,7 @@
 			<Voltage unit="V" multiplier="k">0</Voltage>
 			<Bay name="BAY_1">
 				<Private type="COMPAS-Bay">
-					<compas:Bay BayCodif="TG00000001" UUID="9cd6f05b-1bbd-4ba3-86c5-41c99103e06d" Version="1" MainLabel="SITE1" SecondLabel="SITE-TGENE" NumBay="7" ZoneNumber="N/A"/>
+					<compas:Bay BayCodif="TG00000001" UUID="9cd6f05b-1bbd-4ba3-86c5-41c99103e06d" Version="1" MainShortLabel="SITE1" SecondLabel="SITE-TGENE" NumBay="7"/>
 				</Private>
 				<Private type="COMPAS-Criteria">
 					<compas:Criteria ObjectID="9cd6f05b-1bbd-4ba3-86c5-41c99103e06d" CriteriaAssociationID="CriteriaAssociationID"/>
@@ -23,7 +23,7 @@
 					</Private>
 					<LNode iedName="None" ldInst="LDGW" lnClass="LLN0">
 						<Private type="COMPAS-ICDHeader">
-							<compas:ICDHeader IEDType="GTW" IEDinstance="3" BayLabel="SITE1" IEDName="SITESITE1GTW0" ICDSystemVersionUUID="b4f8089e-4170-47f1-b6ad-dd1f50885518" VendorName="RTE" IEDredundancy="A" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="f8dbc8c1-2db7-4652-a9d6-0b414bdeccfa" headerVersion="01.00.00" headerRevision="01.00.00"/>
+							<compas:ICDHeader IEDType="SCU" IEDinstance="3" BayLabel="SITE1" IEDName="SITESITE1SCU0" ICDSystemVersionUUID="b4f8089e-4170-47f1-b6ad-dd1f50885518" VendorName="RTE" IEDredundancy="A" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="f8dbc8c1-2db7-4652-a9d6-0b414bdeccfa" headerVersion="01.00.00" headerRevision="01.00.00"/>
 						</Private>
 					</LNode>
 				</Function>
@@ -40,7 +40,7 @@
 			<Voltage unit="V" multiplier="k">90</Voltage>
 			<Bay name="BAY_2">
 				<Private type="COMPAS-Bay">
-					<compas:Bay BayCodif="CB00001101" UUID="4214a755-3420-42ed-ac2d-766c5149b58a" Version="1" MainLabel="BAY2" SecondLabel="SITE-P41-SS1.12" NumBay="1" ZoneNumber="N/A"/>
+					<compas:Bay BayCodif="CB00001101" UUID="4214a755-3420-42ed-ac2d-766c5149b58a" Version="1" MainShortLabel="BAY2" SecondLabel="SITE-P41-SS1.12" NumBay="1"/>
 				</Private>
 				<Private type="COMPAS-Criteria">
 					<compas:Criteria ObjectID="4214a755-3420-42ed-ac2d-766c5149b58a" CriteriaAssociationID="CriteriaAssociationID"/>
@@ -64,7 +64,7 @@
 			</Bay>
 			<Bay name="BAY_3">
 				<Private type="COMPAS-Bay">
-					<compas:Bay xmlns:compas="https://www.lfenergy.org/compas/extension/v1" BayCodif="RT00000001" UUID="319859a3-cdce-49ae-8b3a-d462ea7b4803" Version="1" MainLabel="BAY3" SecondLabel="SITE-P41-Y41141" NumBay="3" ZoneNumber="1"/>
+					<compas:Bay xmlns:compas="https://www.lfenergy.org/compas/extension/v1" BayCodif="RT00000001" UUID="319859a3-cdce-49ae-8b3a-d462ea7b4803" Version="1" MainShortLabel="BAY3" SecondLabel="SITE-P41-Y41141" NumBay="3"/>
 				</Private>
 			</Bay>
 		</VoltageLevel>
