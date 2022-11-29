@@ -34,7 +34,7 @@
             <compas:SystemVersion MainSystemVersion="01.00" MinorSystemVersion="009.001.001"/>
         </Private>
         <Private type="COMPAS-ICDHeader">
-            <compas:ICDHeader IEDType="GTW" ICDSystemVersionUUID="b4f8089e-4170-47f1-b6ad-dd1f50885518" VendorName="RTE" IEDredundancy="A" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="f8dbc8c1-2db7-4652-a9d6-0b414bdeccfa" headerVersion="01.00.00" headerRevision="01.00.00"/>
+            <compas:ICDHeader IEDType="SCU" ICDSystemVersionUUID="b4f8089e-4170-47f1-b6ad-dd1f50885518" VendorName="RTE" IEDredundancy="A" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="f8dbc8c1-2db7-4652-a9d6-0b414bdeccfa" headerVersion="01.00.00" headerRevision="01.00.00"/>
         </Private>
         <Services nameLength="64">
             <ConfLNs fixPrefix="true" fixLnInst="true"/>

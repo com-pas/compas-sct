@@ -14,7 +14,7 @@
             <Voltage unit="V" multiplier="k">0</Voltage>
             <Bay name="BAY_1">
                 <Private type="COMPAS-Bay">
-                    <compas:Bay BayCodif="TG00000001" UUID="9cd6f05b-1bbd-4ba3-86c5-41c99103e06d" Version="1" MainLabel="SITE1" SecondLabel="SITE-TGENE" NumBay="7" ZoneNumber="N/A"/>
+                    <compas:Bay BayCodif="TG00000001" UUID="9cd6f05b-1bbd-4ba3-86c5-41c99103e06d" Version="1" MainShortLabel="SITE1" SecondLabel="SITE-TGENE" NumBay="7"/>
                 </Private>
                 <Private type="COMPAS-Criteria">
                     <compas:Criteria ObjectID="9cd6f05b-1bbd-4ba3-86c5-41c99103e06d" CriteriaAssociationID="CriteriaAssociationID"/>
@@ -25,13 +25,13 @@
                     </Private>
                     <LNode iedName="None" ldInst="LDGW" lnClass="LLN0">
                         <Private type="COMPAS-ICDHeader">
-                            <compas:ICDHeader IEDType="GTW" IEDinstance="0" BayLabel="SITE1" IEDName="SITESITE1GTW0" ICDSystemVersionUUID="IED4d4fe1a8cda64cf88a5ee4176a1a0eef" VendorName="RTE" IEDredundancy="A" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="f8dbc8c1-2db7-4652-a9d6-0b414bdeccfa" headerVersion="01.00.00" headerRevision="01.00.00"/>
+                            <compas:ICDHeader IEDType="SCU" IEDinstance="0" BayLabel="SITE1" IEDName="SITESITE1SCU0" ICDSystemVersionUUID="IED4d4fe1a8cda64cf88a5ee4176a1a0eef" VendorName="RTE" IEDredundancy="A" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="f8dbc8c1-2db7-4652-a9d6-0b414bdeccfa" headerVersion="01.00.00" headerRevision="01.00.00"/>
                         </Private>
                         <Private type="COMPAS-ICDHeader">
-                            <compas:ICDHeader IEDType="GTW" IEDinstance="1" BayLabel="SITE1" IEDName="SITESITE1GTW1" ICDSystemVersionUUID="53a72621-4f96-4cc5-b1da-3171c1705bea" VendorName="RTE" IEDredundancy="B" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="f8dbc8c1-2db7-4652-a9d6-0b414bdeccfa" headerVersion="01.00.00" headerRevision="01.00.00"/>
+                            <compas:ICDHeader IEDType="SCU" IEDinstance="1" BayLabel="SITE1" IEDName="SITESITE1SCU1" ICDSystemVersionUUID="53a72621-4f96-4cc5-b1da-3171c1705bea" VendorName="RTE" IEDredundancy="B" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="f8dbc8c1-2db7-4652-a9d6-0b414bdeccfa" headerVersion="01.00.00" headerRevision="01.00.00"/>
                         </Private>
                         <Private type="COMPAS-ICDHeader">
-                            <compas:ICDHeader IEDType="GTW" IEDinstance="2" BayLabel="SITE1" IEDName="SITESITE1GTW2" ICDSystemVersionUUID="03d7e1c7-d490-4768-a968-23c7a42cca28" VendorName="RTE" IEDredundancy="C" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="f8dbc8c1-2db7-4652-a9d6-0b414bdeccfa" headerVersion="01.00.00" headerRevision="01.00.00"/>
+                            <compas:ICDHeader IEDType="SCU" IEDinstance="2" BayLabel="SITE1" IEDName="SITESITE1SCU2" ICDSystemVersionUUID="03d7e1c7-d490-4768-a968-23c7a42cca28" VendorName="RTE" IEDredundancy="C" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="f8dbc8c1-2db7-4652-a9d6-0b414bdeccfa" headerVersion="01.00.00" headerRevision="01.00.00"/>
                         </Private>
                     </LNode>
                 </Function>
