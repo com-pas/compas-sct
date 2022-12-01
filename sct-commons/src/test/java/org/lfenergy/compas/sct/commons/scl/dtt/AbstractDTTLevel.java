@@ -4,12 +4,11 @@
 
 package org.lfenergy.compas.sct.commons.scl.dtt;
 
-import org.apache.commons.io.IOUtils;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TDataTypeTemplates;
-import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.mockito.Mockito;
 
 
@@ -26,7 +25,7 @@ public abstract class AbstractDTTLevel<P extends SclElementAdapter, T> {
     }
 
     protected static DataTypeTemplateAdapter initDttAdapterFromFile(String fileName) throws Exception {
-        SCL scd = AbstractDTTLevel.getSCLFromFile(fileName);
+        SCL scd = SclTestMarshaller.getSCLFromFile(fileName);
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         return new DataTypeTemplateAdapter(
                 sclRootAdapter,
@@ -43,15 +42,4 @@ public abstract class AbstractDTTLevel<P extends SclElementAdapter, T> {
     }
     protected abstract void completeInit() ;
 
-    public static SCL getSCLFromFile(String filename) throws Exception {
-        MarshallerWrapper marshallerWrapper = createWrapper();
-        byte[] rawXml = IOUtils.resourceToByteArray(filename);
-        return marshallerWrapper.unmarshall(rawXml,SCL.class);
-    }
-
-    public static MarshallerWrapper createWrapper() {
-        return MarshallerWrapper.builder()
-                .withProperties("classpath:scl_schema.yml")
-                .build();
-    }
 }

@@ -60,38 +60,6 @@ class LN0AdapterTest {
         LN0 ln01 = new LN0();
         assertThrows(IllegalArgumentException.class,  () -> new LN0Adapter(lDeviceAdapter, ln01));
     }
-
-    @Test
-    void testLookUpControlBlocksByDataSetRef(){
-        LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
-        TLDevice tlDevice = Mockito.mock(TLDevice.class);
-        Mockito.when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
-        LN0 ln0 = new LN0();
-        Mockito.when(tlDevice.getLN0()).thenReturn(ln0);
-        LN0Adapter ln0Adapter = assertDoesNotThrow( () -> new LN0Adapter(lDeviceAdapter,ln0));
-        // GSE LookUp
-        TGSEControl tgseControl = new TGSEControl();
-        String dataSetRef = "DATASET_REF";
-        tgseControl.setDatSet(dataSetRef);
-        ln0.getGSEControl().add(tgseControl);
-
-        assertFalse(ln0Adapter.lookUpControlBlocksByDataSetRef(dataSetRef,TGSEControl.class).isEmpty());
-
-        // SMV LookUp
-        TSampledValueControl sampledValueControl = new TSampledValueControl();
-        sampledValueControl.setDatSet(dataSetRef);
-        ln0.getSampledValueControl().add(sampledValueControl);
-
-        assertFalse(ln0Adapter.lookUpControlBlocksByDataSetRef(dataSetRef,TSampledValueControl.class).isEmpty());
-
-        // SMV LookUp
-        TReportControl reportControl = new TReportControl();
-        reportControl.setDatSet(dataSetRef);
-        ln0.getReportControl().add(reportControl);
-
-        assertFalse(ln0Adapter.lookUpControlBlocksByDataSetRef(dataSetRef,TReportControl.class).isEmpty());
-    }
-
     // AbstractLNAdapter class test
     @Test
     void containsFCDA() {
@@ -232,7 +200,7 @@ class LN0AdapterTest {
 
         TDataSet tDataSet = new TDataSet();
         ln0.getDataSet().add(tDataSet);
-        List<TDataSet> tDataSets = ln0Adapter.getDataSet(null);
+        List<TDataSet> tDataSets = ln0Adapter.getDataSetMatchingExtRefInfo(null);
         assertFalse(tDataSets.isEmpty());
 
         ExtRefInfo extRefInfo = DTO.createExtRefInfo();
@@ -241,11 +209,11 @@ class LN0AdapterTest {
 
         TFCDA tfcda = new TFCDA();
         tDataSet.getFCDA().add(tfcda);
-        tDataSets = ln0Adapter.getDataSet(extRefInfo);
+        tDataSets = ln0Adapter.getDataSetMatchingExtRefInfo(extRefInfo);
         assertTrue(tDataSets.isEmpty());
 
-        Mockito.doReturn(true).when(extRefInfo).matchFCDA(ArgumentMatchers.any(TFCDA.class));
-        tDataSets = ln0Adapter.getDataSet(extRefInfo);
+        Mockito.doReturn(true).when(extRefInfo).checkMatchingFCDA(ArgumentMatchers.any(TFCDA.class));
+        tDataSets = ln0Adapter.getDataSetMatchingExtRefInfo(extRefInfo);
         assertFalse(tDataSets.isEmpty());
     }
 
@@ -260,41 +228,38 @@ class LN0AdapterTest {
         LN0 ln0 = new LN0();
         Mockito.when(tlDevice.getLN0()).thenReturn(ln0);
         LN0Adapter ln0Adapter = assertDoesNotThrow( () -> new LN0Adapter(lDeviceAdapter,ln0));
+        TGSEControl tgseControl = new TGSEControl();
+        tgseControl.setDatSet("GSE_REF");
+        TSampledValueControl tSampledValueControl = new TSampledValueControl();
+        tSampledValueControl.setDatSet("SMV_REF");
+        TReportControl tReportControl = new TReportControl();
+        tReportControl.setDatSet("RPT_REF");
+        ln0Adapter.getCurrentElem().getGSEControl().add(tgseControl);
+        ln0Adapter.getCurrentElem().getSampledValueControl().add(tSampledValueControl);
+        ln0Adapter.getCurrentElem().getReportControl().add(tReportControl);
 
+        TDataSet tDataSetGSE = new TDataSet();
+        tDataSetGSE.setName(DTO.CB_DATASET_REF);
 
-
-        TDataSet tDataSet = new TDataSet();
-        tDataSet.setName(DTO.CB_DATASET_REF);
-
-        List<ControlBlock<?>> controlBlocks = ln0Adapter.getControlBlocks(List.of(tDataSet),null);
+        List<ControlBlock<?>> controlBlocks = ln0Adapter.getControlBlocks(List.of(tDataSetGSE),null);
         assertTrue(controlBlocks.isEmpty());
 
-        ln0Adapter = Mockito.spy(ln0Adapter);
-        Mockito.doReturn(List.of(new TGSEControl()))
-                .when(ln0Adapter)
-                .lookUpControlBlocksByDataSetRef(
-                        ArgumentMatchers.anyString(),ArgumentMatchers.eq(TGSEControl.class)
-                );
+        tDataSetGSE.setName("GSE_REF");
+        TDataSet tDataSetSMV = new TDataSet();
+        tDataSetSMV.setName("SMV_REF");
+        TDataSet tDataSetRPT = new TDataSet();
+        tDataSetRPT.setName("RPT_REF");
 
-        Mockito.doReturn(List.of(new TSampledValueControl()))
-                .when(ln0Adapter)
-                .lookUpControlBlocksByDataSetRef(
-                        ArgumentMatchers.anyString(),ArgumentMatchers.eq(TSampledValueControl.class)
-                );
+        List<TDataSet> tDataSets = List.of(tDataSetGSE, tDataSetSMV, tDataSetRPT);
 
-        Mockito.doReturn(List.of(new TReportControl()))
-                .when(ln0Adapter)
-                .lookUpControlBlocksByDataSetRef(
-                        ArgumentMatchers.anyString(),ArgumentMatchers.eq(TReportControl.class)
-                );
-        controlBlocks = ln0Adapter.getControlBlocks(List.of(tDataSet),TServiceType.REPORT);
-        assertEquals(1,controlBlocks.size());
-        controlBlocks = ln0Adapter.getControlBlocks(List.of(tDataSet),TServiceType.SMV);
-        assertEquals(1,controlBlocks.size());
-        controlBlocks = ln0Adapter.getControlBlocks(List.of(tDataSet),TServiceType.GOOSE);
-        assertEquals(1,controlBlocks.size());
-        controlBlocks = ln0Adapter.getControlBlocks(List.of(tDataSet),null);
-        assertEquals(3,controlBlocks.size());
+        controlBlocks = ln0Adapter.getControlBlocks(tDataSets,TServiceType.REPORT);
+        assertThat(controlBlocks).hasSize(1);
+        controlBlocks = ln0Adapter.getControlBlocks(tDataSets,TServiceType.SMV);
+        assertThat(controlBlocks).hasSize(1);
+        controlBlocks = ln0Adapter.getControlBlocks(tDataSets,TServiceType.GOOSE);
+        assertThat(controlBlocks).hasSize(1);
+        controlBlocks = ln0Adapter.getControlBlocks(tDataSets,null);
+        assertThat(controlBlocks).hasSize(3);
     }
 
     @Test
@@ -313,13 +278,13 @@ class LN0AdapterTest {
 
         ExtRefInfo extRefBindingInfo = DTO.createExtRefInfo();
         Mockito.doReturn(List.of(new TDataSet()))
-                .when(ln0Adapter).getDataSet(ArgumentMatchers.any(ExtRefInfo.class));
+                .when(ln0Adapter).getDataSetMatchingExtRefInfo(ArgumentMatchers.any(ExtRefInfo.class));
 
         Mockito.doReturn(List.of(new ReportControlBlock()))
                 .when(ln0Adapter).getControlBlocks(
                     ArgumentMatchers.any(List.class),ArgumentMatchers.any(TServiceType.class));
 
-        List<ControlBlock<?>> controlBlocks =  ln0Adapter.getControlSetByExtRefInfo(extRefBindingInfo);
+        List<ControlBlock<?>> controlBlocks =  ln0Adapter.getControlBlocksForMatchingFCDA(extRefBindingInfo);
         assertFalse(controlBlocks.isEmpty());
         assertEquals(TServiceType.REPORT,controlBlocks.get(0).getServiceType());
     }

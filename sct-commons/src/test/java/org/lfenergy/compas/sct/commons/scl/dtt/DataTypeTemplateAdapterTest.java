@@ -340,9 +340,8 @@ class DataTypeTemplateAdapterTest {
         assertTrue(nbLNodeType < rcvDttAdapter.getLNodeTypeAdapters().size());
         assertFalse(mapOldNewId.isEmpty());
 
-        MarshallerWrapper marshallerWrapper = AbstractDTTLevel.createWrapper();
-        System.out.println(marshallerWrapper.marshall(rcvDttAdapter.getParentAdapter().getCurrentElem()));
-        System.out.println(marshallerWrapper.marshall(prvDttAdapter.getParentAdapter().getCurrentElem()));
+        System.out.println(MarshallerWrapper.marshall(rcvDttAdapter.getParentAdapter().getCurrentElem()));
+        System.out.println(MarshallerWrapper.marshall(prvDttAdapter.getParentAdapter().getCurrentElem()));
     }
 
     @Test
@@ -358,9 +357,8 @@ class DataTypeTemplateAdapterTest {
         rcvDttAdapter.importDOType("IEDName",prvDttAdapter);
         assertTrue(nbDOType < rcvDttAdapter.getDOTypeAdapters().size());
 
-        MarshallerWrapper marshallerWrapper = AbstractDTTLevel.createWrapper();
-        System.out.println(marshallerWrapper.marshall(rcvDttAdapter.getParentAdapter().getCurrentElem()));
-        System.out.println(marshallerWrapper.marshall(prvDttAdapter.getParentAdapter().getCurrentElem()));
+        System.out.println(MarshallerWrapper.marshall(rcvDttAdapter.getParentAdapter().getCurrentElem()));
+        System.out.println(MarshallerWrapper.marshall(prvDttAdapter.getParentAdapter().getCurrentElem()));
     }
 
     @Test
@@ -375,9 +373,8 @@ class DataTypeTemplateAdapterTest {
 
         rcvDttAdapter.importDAType("IEDName",prvDttAdapter);
         assertTrue(nbDAType < rcvDttAdapter.getDATypeAdapters().size());
-        MarshallerWrapper marshallerWrapper = AbstractDTTLevel.createWrapper();
-        System.out.println(marshallerWrapper.marshall(prvDttAdapter.getParentAdapter().getCurrentElem()));
-        System.out.println(marshallerWrapper.marshall(rcvDttAdapter.getParentAdapter().getCurrentElem()));
+        System.out.println(MarshallerWrapper.marshall(prvDttAdapter.getParentAdapter().getCurrentElem()));
+        System.out.println(MarshallerWrapper.marshall(rcvDttAdapter.getParentAdapter().getCurrentElem()));
     }
 
     @ParameterizedTest

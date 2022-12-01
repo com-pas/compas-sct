@@ -29,7 +29,7 @@
                     </LN0>
                     <LN prefix="PR" lnClass="ANCR" inst="1" lnType="LN12">
                         <DataSet name="dataset122">
-                            <FCDA fc="ST"/>
+                            <FCDA fc="ST" ldInst="LD_INST12" lnClass="ANCR" prefix="PR" lnInst="1" daName="da11.bda111.bda112.bda113" doName="Do11.sdo11"/>
                         </DataSet>
                         <ReportControl name="rpt1" confRev="1" datSet="dataset122" rptID="r1">
                             <OptFields/>

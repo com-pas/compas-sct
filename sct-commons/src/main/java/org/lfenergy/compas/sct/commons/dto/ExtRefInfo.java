@@ -6,13 +6,8 @@ package org.lfenergy.compas.sct.commons.dto;
 
 
 import lombok.*;
-import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.scl2007b4.model.TFCDA;
-import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
-import org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter;
-
-import java.util.Objects;
 /**
  * A representation of the model object <em><b>ExtRef</b></em>.
  *
@@ -75,48 +70,6 @@ public class ExtRefInfo extends LNodeMetaDataEmbedder{
         return extRefInfo;
     }
 
-    /**
-     * Check match between FCDA and ExtRef information (for binding)
-     * @param tfcda FCDA data object
-     * @return match state
-     */
-    //TODO  this method should be checked, return if parameter tested are not present in FCDA even if two object are different
-    public boolean matchFCDA(@NonNull TFCDA tfcda){
-        boolean returnValue = true;
-        if(AbstractLNAdapter.isFCDANull(tfcda)) {
-            returnValue = false;
-        }
-
-        if(tfcda.getLdInst() != null &&
-                (bindingInfo == null || !tfcda.getLdInst().equals(bindingInfo.getLdInst()))){
-            returnValue = false;
-        }
-        if (!tfcda.getLnClass().isEmpty() &&
-                ( bindingInfo == null || !tfcda.getLnClass().contains(bindingInfo.getLnClass())) ){
-            returnValue = false;
-        }
-
-        boolean isLN0 = tfcda.getLnClass().contains(TLLN0Enum.LLN_0.value());
-        if (!isLN0 && tfcda.getLnInst() != null &&
-                (bindingInfo == null || !tfcda.getLnInst().equals(bindingInfo.getLnInst()))) {
-            returnValue = false;
-        }
-        if (!isLN0 && !StringUtils.isBlank(tfcda.getPrefix()) &&
-                (bindingInfo == null || !tfcda.getPrefix().equals(bindingInfo.getPrefix()))) {
-            returnValue = false;
-        }
-
-        if(!StringUtils.isBlank(tfcda.getDoName()) &&
-                (signalInfo == null || !Objects.equals(signalInfo.getPDO(),tfcda.getDoName())) ){
-            returnValue = false;
-        }
-
-        if(!StringUtils.isBlank(tfcda.getDaName()) &&
-                (signalInfo == null || !Objects.equals(signalInfo.getPDA(),tfcda.getDaName())) ){
-            returnValue = false;
-        }
-        return returnValue;
-    }
     /**
      * Check matching between FCDA and ExtRef information (for external binding)
      * Check is done for parameter lDInst(mandatory), lNClass(mandatory), lNInst, prefix doName as pDO(mandatory) and daName as pDA

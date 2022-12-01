@@ -37,19 +37,36 @@
         <sonar.coverage.exclusions>sct-coverage/**</sonar.coverage.exclusions>
         <aggregate.report.dir>../sct-coverage/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>
         <sonar.coverage.jacoco.xmlReportPaths>${basedir}/${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
-        <scl-extension.version>0.9.1</scl-extension.version>
+        <compas-core.version>0.12.0</compas-core.version>
         <compas-scl-xsd.version>0.0.4</compas-scl-xsd.version>
         <maven.plugin.javadoc>3.4.1</maven.plugin.javadoc>
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
         <junit-version>5.9.0</junit-version>
+        <logback-classic.version>1.4.5</logback-classic.version>
+        <assertj.version>3.22.0</assertj.version>
+        <lombok.version>1.18.24</lombok.version>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.lfenergy.compas.core</groupId>
+            <artifactId>scl2007b4</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.lfenergy.compas.core</groupId>
+            <artifactId>scl-extension</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+    </dependencies>
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>1.18.24</version>
+                <version>${lombok.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
@@ -72,12 +89,12 @@
             <dependency>
                 <groupId>org.lfenergy.compas.core</groupId>
                 <artifactId>scl2007b4</artifactId>
-                <version>0.2.1</version>
+                <version>${compas-core.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.lfenergy.compas.core</groupId>
                 <artifactId>scl-extension</artifactId>
-                <version>${scl-extension.version}</version>
+                <version>${compas-core.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.lfenergy.compas.xsd</groupId>
@@ -87,24 +104,15 @@
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
-                <version>1.2.6</version>
+                <version>${logback-classic.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
-    <dependencies>
-        <dependency>
-            <groupId>org.lfenergy.compas.core</groupId>
-            <artifactId>scl2007b4</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.lfenergy.compas.core</groupId>
-            <artifactId>scl-extension</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-        </dependency>
-    </dependencies>
     <modules>
         <module>sct-commons</module>
         <module>sct-coverage</module>
@@ -123,12 +131,16 @@
                 <plugin>
                     <groupId>org.lfenergy.compas.core</groupId>
                     <artifactId>scl-extension</artifactId>
-                    <version>${scl-extension.version}</version>
+                    <version>${compas-core.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.8.1</version>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>

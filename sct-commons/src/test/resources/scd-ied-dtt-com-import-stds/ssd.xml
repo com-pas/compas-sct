@@ -16,7 +16,7 @@
                 <Function name="FUNCTION_1">
                     <LNode iedName="None" ldInst="LDGW" lnClass="LLN0">
                         <Private type="COMPAS-ICDHeader">
-                            <compas:ICDHeader IEDType="GTW" IEDinstance="0" BayLabel="SITE1" IEDName="ied1" ICDSystemVersionUUID="IED4d4fe1a8cda64cf88a5ee4176a1a0eef" VendorName="ABC" IEDredundancy="A" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="f8dbc8c1-2db7-4652-a9d6-0b414bdeccfa" headerVersion="01.00.00" headerRevision="01.00.00"/>
+                            <compas:ICDHeader IEDType="SCU" IEDinstance="0" BayLabel="SITE1" IEDName="ied1" ICDSystemVersionUUID="IED4d4fe1a8cda64cf88a5ee4176a1a0eef" VendorName="ABC" IEDredundancy="A" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="f8dbc8c1-2db7-4652-a9d6-0b414bdeccfa" headerVersion="01.00.00" headerRevision="01.00.00"/>
                         </Private>
                     </LNode>
                 </Function>

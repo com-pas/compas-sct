@@ -19,7 +19,7 @@
 			<Voltage unit="V" multiplier="k">0</Voltage>
 			<Bay name="BAY_1">
 				<Private type="COMPAS-Bay">
-					<compas:Bay BayCodif="TG00000001" UUID="9cd6f05b-1bbd-4ba3-86c5-41c99103e06d" Version="1" MainLabel="SITE1" SecondLabel="SITE-TGENE" NumBay="7" />
+					<compas:Bay BayCodif="TG00000001" UUID="9cd6f05b-1bbd-4ba3-86c5-41c99103e06d" Version="1" MainShortLabel="SITE1" SecondLabel="SITE-TGENE" NumBay="7" />
 				</Private>
 				<Private type="COMPAS-Criteria">
 					<compas:Criteria ObjectID="9cd6f05b-1bbd-4ba3-86c5-41c99103e06d" CriteriaAssociationID="CriteriaAssociationID" />

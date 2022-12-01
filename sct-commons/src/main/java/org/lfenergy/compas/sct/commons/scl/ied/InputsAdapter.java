@@ -249,12 +249,17 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         return getExtRefs().stream()
             .filter(this::areBindingAttributesPresent)
             .filter(this::isExternalBound)
-            //TODO: replace filter below by criteria of issue #93 RSR-389
-            // - Active or Untested i.e /IED/LDevice/LN0/Inputs/Private/compas:Flow @FlowStatus="ACTIVE" OR "UNTESTED"
-            .filter(extRef -> !getMatchingCompasFlows(extRef, compasFlows).isEmpty())
+            .filter(extRef -> matchingCompasFlowIsActiveOrUntested(extRef, compasFlows))
             .map(extRef -> updateSourceDataSetsAndControlBlocks(extRef, currentBayUuid))
             .flatMap(Optional::stream)
             .toList();
+    }
+
+    private boolean matchingCompasFlowIsActiveOrUntested(TExtRef extRef, List<TCompasFlow> compasFlows) {
+        return getMatchingCompasFlows(extRef, compasFlows).stream().findFirst()
+            .map(TCompasFlow::getFlowStatus)
+            .filter(flowStatus -> flowStatus == TCompasFlowStatus.ACTIVE || flowStatus == TCompasFlowStatus.UNTESTED)
+            .isPresent();
     }
 
     private boolean isExternalBound(TExtRef tExtRef) {
@@ -300,7 +305,9 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         }
 
         Optional<SclReportItem> sclReportItem = removeFilteredSourceDas(extRef, sourceDas);
-        //TODO: map to FCDA in issue #84 RSR-433 and remove print to console
+        //TODO: #83 follow-up : grouping ExtRef by serviceType, iedName, ldInst, isBayInternal, and DA@fc
+        // will be done by calculating DataSet Name in #84 RSR-433
+        // TODO: map to FCDA in issue #84 RSR-433 and remove print to console
         String daToPrint = sourceDas.stream()
             .map(da -> da.getFc() + "#" + da.getDataAttributes())
             .collect(Collectors.joining(","));
