@@ -19,6 +19,7 @@ import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -45,10 +46,8 @@ import java.util.stream.Collectors;
  *      <li>{@link AbstractLNAdapter#getDAI <em>Returns the value of the <b>ResumedDataTemplate </b> containment reference By filter</em>}</li>
  *      <li>{@link AbstractLNAdapter#getDAIValues(ResumedDataTemplate) <em>Returns <b>DAI (sGroup, value) </b> containment reference list By <b>ResumedDataTemplate </b> filter</em>}</li>
  *
- *      <li>{@link AbstractLNAdapter#getDataSet(ExtRefInfo)  <em>Returns the value of the <b>TDataSet </b>containment reference list By <b>ExtRefInfo</b> </em>}</li>
  *      <li>{@link AbstractLNAdapter#getDataSetByRef(String) <em>Returns the value of the <b>TDataSet </b>object reference By the value of the <b>name </b>attribute </em>}</li>
  *
- *      <li>{@link AbstractLNAdapter#getControlSetByExtRefInfo(ExtRefInfo) <em>Returns the value of the <b>ControlBlock </b>containment reference list By <b>ExtRefInfo</b> </em>}</li>
  *      <li>{@link AbstractLNAdapter#getControlBlocks(List, TServiceType) <em>Returns the value of the <b>ControlBlock </b>containment reference list that match <b>datSet </b> value of given <b>TDataSet</b> </em>}</li>
  *      <li>{@link AbstractLNAdapter#addPrivate <em>Add <b>TPrivate </b>under this object</em>}</li>
  *      <li>{@link AbstractLNAdapter#removeAllControlBlocksAndDatasets() <em>Remove all <b>ControlBlock</b></em>}</li>
@@ -89,7 +88,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
 
     protected abstract Class<T> getElementClassType();
 
-    public abstract String getLNClass() ;
+    public abstract String getLNClass();
 
     public abstract String getLNInst();
 
@@ -217,6 +216,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
 
     /**
      * Check whether the LN has an Inputs node
+     *
      * @return true if the LN has an Inputs node
      */
     public boolean hasInputs() {
@@ -225,6 +225,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
 
     /**
      * Checks for ExtRef signal existence in target LN
+     *
      * @param signalInfo ExtRef signal data to check
      */
     public void isExtRefExist(ExtRefSignalInfo signalInfo) {
@@ -240,7 +241,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                         Objects.equals(tExtRef.getPDO(), signalInfo.getPDO()) &&
                         Objects.equals(signalInfo.getIntAddr(), tExtRef.getIntAddr()) &&
                         Objects.equals(signalInfo.getPServT(), tExtRef.getPServT()));
-        if(!extRefExist) {
+        if (!extRefExist) {
             throw new ScdException("ExtRef signal does not exist in target LN");
         }
     }
@@ -325,22 +326,6 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
     }
 
     /**
-     * Gets Control Blocks of LN specified in <em>extRefInfo</em>
-     *
-     * @param extRefInfo ExtRef signal data for which Control Blocks should be found
-     * @return list of <em>ControlBlock</em> object as ControlBlocks of LNode
-     */
-    public List<ControlBlock<?>> getControlSetByExtRefInfo(ExtRefInfo extRefInfo) {
-        List<TDataSet> tDataSets = this.getDataSet(extRefInfo);
-        return getControlBlocks(tDataSets, extRefInfo.getBindingInfo().getServiceType());
-    }
-      public List<ControlBlock<?>> getControlSet(ExtRefInfo extRefInfo) {
-        List<TDataSet> tDataSets = this.getDataSetMatchingExtRefInfo(extRefInfo);
-        return getControlBlocks(tDataSets,extRefInfo.getBindingInfo().getServiceType());
-    }
-
-
-    /**
      * Gets Control Blocks matching FCDA compatible with specified in <em>extRefInfo</em>
      *
      * @param extRefInfo ExtRef signal data for which Control Blocks should be found (contain binding info to match with FCDA)
@@ -359,91 +344,84 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      * @return list of <em>ControlBlock</em> objects
      */
     protected List<ControlBlock<?>> getControlBlocks(List<TDataSet> tDataSets, TServiceType serviceType) {
-        List<ControlBlock<?>> controlBlocks = new ArrayList<>();
-        List<?> tControls;
-
-        LNodeMetaData metaData = LNodeMetaData.from(this);
-
+        /*List<ControlBlock<?>> controlBlocks = new ArrayList<>();
         for (TDataSet tDataSet : tDataSets) {
-            if (isLN0() && (serviceType == null || serviceType == TServiceType.GOOSE)) {
-                tControls = this.lookUpControlBlocksByDataSetRef(tDataSet.getName(), TGSEControl.class);
-                controlBlocks.addAll(
-                        tControls.stream()
-                                .map(tgseControl -> {
-                                    var g = new GooseControlBlock((TGSEControl) tgseControl);
-                                    g.setMetaData(metaData);
-                                    return g;
-                                })
-                                .collect(Collectors.toList())
-                );
-            }
+            controlBlocks.addAll(getControlBlocksByDataSetRef(tDataSet.getName(), serviceType));
+        }*/
+        return tDataSets.stream().map(tDataSet -> getControlBlocksByDataSetRef(tDataSet.getName(), serviceType)).flatMap(Collection::stream).toList();
 
-            if (isLN0() && (serviceType == null || serviceType == TServiceType.SMV)) {
-
-                tControls = this.lookUpControlBlocksByDataSetRef(tDataSet.getName(), TSampledValueControl.class);
-                controlBlocks.addAll(
-                        tControls.stream()
-                                .map(sampledValueControl -> {
-                                    var s = new SMVControlBlock((TSampledValueControl) sampledValueControl);
-                                    s.setMetaData(metaData);
-                                    return s;
-                                })
-                                .collect(Collectors.toList())
-                );
-            }
-
-            if (serviceType == null || serviceType == TServiceType.REPORT) {
-                tControls = this.lookUpControlBlocksByDataSetRef(tDataSet.getName(), TReportControl.class);
-                controlBlocks.addAll(
-                        tControls.stream()
-                                .map(reportControl -> {
-                                    var r = new ReportControlBlock((TReportControl) reportControl);
-                                    r.setMetaData(metaData);
-                                    return r;
-                                })
-                                .collect(Collectors.toList())
-                );
-            }
-        }
-        return controlBlocks;
     }
 
     /**
-     * Gets Control Blocks for specified Data Set reference
-     *
-     * @param dataSetRef Data Set for which Control Blocks are needed
-     * @param cls        class type of Control Block (GOOSE, SMV and REPORT)
-     * @param <T>        inference type
-     * @return List of Control Blocks corresponding to cls
+     * finds all Control Blocks by dataSetRef and a Service Type (GOOSE, SampleValue, Report) or all Service Types.
+     * @param dataSetRef DatSet value searched
+     * @param serviceType service type to be filtered
+     * @return all Control Blocks matching dataSetRef and a Service Type or all Service Types
      */
-    protected <T> List<? extends TControl> lookUpControlBlocksByDataSetRef(@NonNull String dataSetRef, Class<T> cls) {
-        List<? extends TControl> ls = new ArrayList<>();
+    private List<ControlBlock<?>> getControlBlocksByDataSetRef(String dataSetRef, TServiceType serviceType) {
+        Stream<ControlBlock<?>> streamGSEControl = Stream.empty();
+        Stream<ControlBlock<?>> streamSMVControl = Stream.empty();
+        Stream<ControlBlock<?>> streamReportControl = Stream.empty();
+        LNodeMetaData metaData = LNodeMetaData.from(this);
+        if (isLN0() && (serviceType == null || serviceType == TServiceType.GOOSE)) {
+            streamGSEControl = getTControlsByType(TGSEControl.class)
+                    .stream()
+                    .filter(tControl -> dataSetRef.equals(tControl.getDatSet()))
+                    .map(tgseControl -> {
+                                GooseControlBlock gseCbl = new GooseControlBlock((TGSEControl) tgseControl);
+                                gseCbl.setMetaData(metaData);
+                                return gseCbl;});
+
+        }
+        if (isLN0() && (serviceType == null || serviceType == TServiceType.SMV)) {
+            streamSMVControl =  getTControlsByType(TSampledValueControl.class)
+                    .stream()
+                    .filter(tControl -> dataSetRef.equals(tControl.getDatSet()))
+                    .map(sampledValueControl -> {
+                        SMVControlBlock smvCbl = new SMVControlBlock((TSampledValueControl) sampledValueControl);
+                        smvCbl.setMetaData(metaData);
+                        return smvCbl;});
+        }
+        if (serviceType == null || serviceType == TServiceType.REPORT) {
+            streamReportControl = getTControlsByType(TReportControl.class)
+                    .stream()
+                    .filter(tControl -> dataSetRef.equals(tControl.getDatSet()))
+                            .map(reportControl -> {
+                                ReportControlBlock rptCbl = new ReportControlBlock((TReportControl) reportControl);
+                                rptCbl.setMetaData(metaData);
+                                return rptCbl; });
+        }
+        return Stream.concat(Stream.concat(streamGSEControl,streamSMVControl),streamReportControl).toList();
+    }
+
+    /**
+     *  finds all Control Blocks by Service Type (GOOSE, SampleValue, Report).
+     * @param cls Type of Control Block
+     * @return all Control Blocks matching a Service Type
+     * @param <V> inference parameter for Type of Control Block to find
+     */
+    private <V> List<? extends TControl> getTControlsByType(Class<V> cls) {
+        List<? extends TControl> tControls = new ArrayList<>();
         if (TGSEControl.class.equals(cls) && isLN0()) {
-            ls = ((LN0) currentElem).getGSEControl();
+            tControls = ((LN0) currentElem).getGSEControl();
         } else if (TSampledValueControl.class.equals(cls) && isLN0()) {
-            ls = ((LN0) currentElem).getSampledValueControl();
+            tControls = ((LN0) currentElem).getSampledValueControl();
         } else if (TReportControl.class.equals(cls)) {
-            ls = currentElem.getReportControl();
+            tControls = currentElem.getReportControl();
         }
-
-        return ls.stream()
-                .map(TControl.class::cast)
-                .filter(tControl -> dataSetRef.equals(tControl.getDatSet()))
-                .collect(Collectors.toList());
+        return tControls;
     }
 
     /**
-     * Checks if FCDA is null
-     *
-     * @param tfcda FCDA to check
-     * @return <em>Boolean</em> value of check result
+     * Checks if LN contains a Control block with specified name
+     * @param cbName name of Control Block searched
+     * @return true if there is at one control Block matches, otherwise false
      */
-    //TODO  check method should be checked, why nullability is checked only for this parameters
-    public static boolean isFCDANull(TFCDA tfcda){
-        return Objects.isNull(tfcda.getLdInst()) &&
-                tfcda.getLnClass().isEmpty() &&
-                Objects.isNull(tfcda.getFc());
-
+    private boolean isCBKnown(String cbName) {
+        return isLN0()
+                && ( ((LN0) currentElem).getGSEControl().stream().anyMatch(tgse -> tgse.getName().equals(cbName)) ||
+                ((LN0) currentElem).getSampledValueControl().stream().anyMatch(tsmv -> tsmv.getName().equals(cbName)))
+                || currentElem.getReportControl().stream().anyMatch(trpt -> trpt.getName().equals(cbName));
     }
 
     /**
@@ -469,33 +447,23 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         }
     }
 
-    public List<TDataSet> getDataSet(ExtRefInfo filter) {
-        if (filter == null || filter.getSignalInfo() == null || filter.getBindingInfo() == null) {
+    /**
+     * retrieves all DataSets for which at least one FCDA matches with data given in ExtRefInfo for external binding
+     *
+     * @param filter contains data for external binding which should match with FCDAs values
+     * @return list of Data for which at least one FCDA matches with filter datas
+     */
+    public List<TDataSet> getDataSetMatchingExtRefInfo(ExtRefInfo filter) {
+        if (filter == null) {
             return currentElem.getDataSet();
         }
-
-        return currentElem.getDataSet()
-                .stream()
-                .filter(tDataSet -> tDataSet.getFCDA()
-                        .stream()
-                        .anyMatch(filter::matchFCDA)
-                )
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * retrieves all DataSets for which at least one FCDA mathches with data given in ExtRefInfo for external binding
-     * @param filter contains data for external binding which should match with FCDAs values
-     * @return list of Data for which at least one FCDA mathches with filter datas
-     */
-    public List<TDataSet> getDataSetMatchingExtRefInfo(ExtRefInfo filter){
         return currentElem.getDataSet()
                 .stream()
                 .filter(tDataSet -> tDataSet.getFCDA()
                         .stream()
                         .anyMatch(filter::checkMatchingFCDA)
                 )
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -510,11 +478,14 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         ExtRefSourceInfo sourceInfo = extRefInfo.getSourceInfo();
         ExtRefBindingInfo bindingInfo = extRefInfo.getBindingInfo();
 
-        if (signalInfo == null || bindingInfo == null || sourceInfo == null) {
+        if (signalInfo == null || bindingInfo == null || sourceInfo == null || StringUtils.isBlank(sourceInfo.getSrcCBName())) {
             throw new IllegalArgumentException("ExtRef information (signal, binding, source) are missing");
         }
 
-        TExtRef extRef = checkExtRefInfoCoherence(extRefInfo);
+        checkExtRefInfoCoherence(extRefInfo);
+
+        TExtRef extRef = extractExtRefFromExtRefInfo(extRefInfo);
+
         updateExtRefBindingInfo(extRef, extRefInfo);
 
         return extRef;
@@ -527,45 +498,16 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      * ControlBlock info),it verifies that the CB and dataset it points to, exists within and existing binder IED.
      *
      * @param extRefInfo ExtRef information (signal, binding and source info)
-     * @return TExtRef that matches the signal info
-     * @throws IllegalArgumentException when no given signal info
-     * @throws ScdException             throws exception if
-     *                                  <ul>
-     *                                      <li> given signal info or it doesn't match any TExtRef in this LNode</li>
-     *                                      <li> the given binding info doesn't match the found TExtRef's binding info.</li>
-     *                                      <li> the given binding info doesn't refer to an exiting IED, LDevice and LNode in the SCL</li>
-     *                                      <li> given source info references unknown control block</li>
-     *                                  </ul>
+     * @throws ScdException throws exception if
+     *                      <ul>
+     *                          <li> the given binding info doesn't match the found TExtRef's binding info.</li>
+     *                          <li> the given binding info doesn't refer to an existing IED, LDevice and LNode in the SCL</li>
+     *                          <li> given source info references unknown control block</li>
+     *                      </ul>
      */
-    public TExtRef checkExtRefInfoCoherence(@NonNull ExtRefInfo extRefInfo) throws ScdException {
-        ExtRefSignalInfo signalInfo = extRefInfo.getSignalInfo();
+    public void checkExtRefInfoCoherence(ExtRefInfo extRefInfo) {
+
         ExtRefBindingInfo bindingInfo = extRefInfo.getBindingInfo();
-        if (signalInfo == null) {
-            log.error("Coherence checking needs at least a signal info");
-            throw new IllegalArgumentException("Coherence checking needs at least a signal info");
-        }
-
-        String holderIedName = extRefInfo.getHolderIEDName(); // parent (IED) of parent (LD) can be used here
-        String holderLdInst = extRefInfo.getHolderLDInst(); // parent (LD) can be use here
-        List<TExtRef> extRefs = getExtRefs(signalInfo);
-        if (extRefs.isEmpty()) {
-            String msg = String.format("Unknown TExtRef with signal info [pDO(%s),intAddr(%s)] in %s%s/%s%s%s",
-                    signalInfo.getPDO(), signalInfo.getIntAddr(), holderIedName, holderLdInst,
-                    getPrefix(), getLNClass(), getLNInst());
-            log.error(msg);
-            throw new ScdException(msg);
-        }
-
-        TExtRef extRef = extRefs.get(0); // to be refined : what's the criteria for ExtRef's uniqueness
-        if (bindingInfo == null) {
-            return extRef;
-        }
-
-        if (!bindingInfo.isWrappedIn(extRef)) {
-            String msg = "No relation between binding info and the matched TExtRef";
-            log.error(msg);
-            throw new ScdException(msg);
-        }
 
         String binderIedName = bindingInfo.getIedName();
         String binderLdInst = bindingInfo.getLdInst();
@@ -574,44 +516,82 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         String binderLnPrefix = bindingInfo.getPrefix();
 
         IEDAdapter binderIEDAdapter;
-        if(!binderIedName.equals( getCurrentIed().getName())){ // external binding
+
+        if (!binderIedName.equals(getCurrentIed().getName())) {
             binderIEDAdapter = getCurrentScd().getIEDAdapterByName(binderIedName);
         } else {
             binderIEDAdapter = getCurrentIed();
         }
-        LDeviceAdapter binderLDAdapter = binderIEDAdapter.findLDeviceAdapterByLdInst(binderLdInst)
+        LDeviceAdapter binderLDeviceAdapter = binderIEDAdapter.findLDeviceAdapterByLdInst(binderLdInst)
                 .orElseThrow(
                         () -> new ScdException(
                                 String.format("Unknown LDevice (%s) in IED (%s)", binderLdInst, binderIedName)
                         )
                 );
-        AbstractLNAdapter<?> anLNAdapter = AbstractLNAdapter.builder()
-                .withLDeviceAdapter(binderLDAdapter)
-                .withLnClass(binderLnClass)
-                .withLnInst(binderLnInst)
-                .withLnPrefix(binderLnPrefix)
-                .build();
-
-        boolean isCoherent;
 
         ExtRefSourceInfo sourceInfo = extRefInfo.getSourceInfo();
-        if (sourceInfo == null || sourceInfo.isNull()) { // to be refined : what to do here functionally ?
-            return extRef;
+        List<AbstractLNAdapter<?>> aLNAdapters = getPossibleSourceLNAdapters(binderLDeviceAdapter, sourceInfo);
+
+        boolean isCBKnown = aLNAdapters.stream()
+                .anyMatch(abstractLNAdapter -> abstractLNAdapter.isCBKnown(extRefInfo.getSourceInfo().getSrcCBName()));
+
+        if (!isCBKnown) {
+            String msg = String.format("Unknown control block %s in Ied: %s / LdInst: %s / LnPrefix: %s LnClass: %s LnInst: %s",
+                    extRefInfo.getSourceInfo().getSrcCBName(), binderIedName, binderLdInst, binderLnPrefix, binderLnClass, binderLnInst);
+            log.error(msg);
+            throw new ScdException(msg);
+
         }
-        List<ControlBlock<?>> cbs = anLNAdapter.getControlSetByExtRefInfo(extRefInfo);
-        isCoherent = !cbs.isEmpty() && cbs.stream()
-                .anyMatch(controlBlock -> controlBlock.getName().equals(sourceInfo.getSrcCBName()));
-        if(!isCoherent){
-            String msg = String.format("Unknown control block %s in %s%s/%s%s%s",
-                    sourceInfo.getSrcCBName(), binderIedName,binderLdInst,
-                    binderLnPrefix , binderLnClass, binderLnInst);
+    }
+
+    /**
+     * Gets all possible LNs for given source info
+      * @param binderLDeviceAdapter LDevice in which LNs are searched
+     * @param sourceInfo binding LN info
+     * @return list of LNAdapters matching SourceInfo
+     */
+    private List<AbstractLNAdapter<?>> getPossibleSourceLNAdapters(LDeviceAdapter binderLDeviceAdapter, ExtRefSourceInfo sourceInfo) {
+        List<AbstractLNAdapter<?>> aLNAdapters = new ArrayList<>();
+        if(StringUtils.isBlank(sourceInfo.getSrcLNClass())){
+            aLNAdapters.addAll(binderLDeviceAdapter.getLNAdaptersInclundigLN0());
+        } else {
+            if(TLLN0Enum.LLN_0.value().equals(sourceInfo.getSrcLNClass())){
+                aLNAdapters.add(binderLDeviceAdapter.getLN0Adapter());
+            } else {
+                aLNAdapters.add(binderLDeviceAdapter.getLNAdapter(sourceInfo.getSrcLNClass(), sourceInfo.getSrcLNInst(), sourceInfo.getSrcPrefix()));
+            }
+        }
+        return aLNAdapters;
+    }
+
+    /**
+     * Finds ExtRef from LN
+     * @param extRefInfo  ExtRef information (signal, binding and source info)
+     * @return TExtRef matching given
+     */
+    public TExtRef extractExtRefFromExtRefInfo(@NonNull ExtRefInfo extRefInfo) {
+
+        ExtRefSignalInfo signalInfo = extRefInfo.getSignalInfo();
+        List<TExtRef> extRefs = getExtRefs(signalInfo);
+
+        if (extRefs.isEmpty()) {
+            String holderIedName = extRefInfo.getHolderIEDName(); // parent (IED) of parent (LD) can be used here
+            String holderLdInst = extRefInfo.getHolderLDInst(); // parent (LD) can be use here
+            String msg = String.format("Unknown TExtRef with signal info [pDO(%s),intAddr(%s)] in %s%s/%s%s%s",
+                    signalInfo.getPDO(), signalInfo.getIntAddr(), holderIedName, holderLdInst,
+                    getPrefix(), getLNClass(), getLNInst());
             log.error(msg);
             throw new ScdException(msg);
         }
-
+        TExtRef extRef = extRefs.get(0);// to be refined : what's the criteria for ExtRef's uniqueness
+        ExtRefBindingInfo bindingInfo = extRefInfo.getBindingInfo();
+        if (!bindingInfo.isWrappedIn(extRef)) {
+            String msg = "No relation between binding info and the matched TExtRef";
+            log.error(msg);
+            throw new ScdException(msg);
+        }
         return extRef;
     }
-
 
     /**
      * Returns a list of resumed DataTypeTemplate for DataAttribute (updatable or not)
@@ -693,6 +673,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
 
     /**
      * Gets root Scd
+     *
      * @return <em>SclRootAdapter</em> object
      */
     protected SclRootAdapter getCurrentScd() {
@@ -701,6 +682,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
 
     /**
      * Gets SCL DataTypeTemplate
+     *
      * @return <em>DataTypeTemplateAdapter</em> object
      */
     public DataTypeTemplateAdapter getDataTypeTemplateAdapter() {
