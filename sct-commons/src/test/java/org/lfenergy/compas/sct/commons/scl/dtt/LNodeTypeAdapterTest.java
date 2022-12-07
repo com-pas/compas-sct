@@ -207,7 +207,7 @@ class LNodeTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TLNo
     void checkMatchingDOType_shouldFindOneDO() {
         //Given
         ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
-        signalInfo.setPDO("P_DO");
+        signalInfo.setPDO("P_DO12");
 
         SclRootAdapter sclRootAdapter = new SclRootAdapter("hID","hVersion","hRevision");
         sclRootAdapter.getCurrentElem().setDataTypeTemplates(new TDataTypeTemplates());
@@ -232,7 +232,7 @@ class LNodeTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TLNo
         DataTypeTemplateAdapter.DOTypeInfo expectedDoTypeInfo = assertDoesNotThrow(() -> lNodeTypeAdapter.findMatchingDOType(signalInfo));
         //Then
         assertThat(expectedDoTypeInfo.getDoTypeId()).isEqualTo("DO1");
-        assertThat(expectedDoTypeInfo.getDoTypeName().getName()).isEqualTo("P_DO");
+        assertThat(expectedDoTypeInfo.getDoTypeName().getName()).isEqualTo("P_DO12");
         assertThat(expectedDoTypeInfo.getDoTypeAdapter()).isNotNull();
 
     }
