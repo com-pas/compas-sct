@@ -14,6 +14,7 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
+import org.lfenergy.compas.sct.commons.util.ServiceSettingsType;
 import org.mockito.Mockito;
 
 import java.util.HashMap;
@@ -172,23 +173,40 @@ class IEDAdapterTest {
         assertTrue(iAdapter.matches(objectReference));
     }
 
+    @Test
+    void createDataSet_should_create_when_DataSetInfo_is_complete() throws Exception {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
+
+        TDataSet tDataSet = new TDataSet();
+        tDataSet.setName("dataset");
+        TFCDA tfcda = new TFCDA();
+        tfcda.setFc(TFCEnum.ST);
+        tfcda.getLnClass().add("LLN0");
+        tDataSet.getFCDA().add(tfcda);
+        DataSetInfo dataSetInfo = DataSetInfo.from(tDataSet);
+        dataSetInfo.setHolderIEDName("IED_NAME");
+        dataSetInfo.setHolderLDInst("LD_INS2");
+        dataSetInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
+        assertIsMarshallable(scd);
+
+        // When
+        iedAdapter.createDataSet(dataSetInfo, ServiceSettingsType.GSE);
+
+        // Then
+        assertThat(iedAdapter.getLDeviceAdapterByLdInst("LD_INS2").getLN0Adapter().getDataSetByRef("dataset"))
+            .isPresent();
+        assertIsMarshallable(scd);
+    }
 
     @Test
-    void testCreateDataSet() throws Exception {
+    void createDataSet_should_throw_ScdException_when_DataSetInfo_is_incomplete() throws Exception {
+        // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
-
-        assertThrows(ScdException.class, () -> iAdapter.createDataSet(new DataSetInfo()));
-
-        TServices tServices = new TServices();
-        iAdapter.getCurrentElem().setServices(tServices);
-        assertFalse(iAdapter.hasDataSetCreationCapability());
-
-        TLogSettings tLogSettings = new TLogSettings();
-        tServices.setLogSettings(tLogSettings);
-        tLogSettings.setDatSet(TServiceSettingsEnum.CONF);
-        assertTrue(iAdapter.hasDataSetCreationCapability());
 
         TDataSet tDataSet = new TDataSet();
         tDataSet.setName("dataset");
@@ -197,82 +215,44 @@ class IEDAdapterTest {
         tDataSet.getFCDA().add(tfcda);
         DataSetInfo dataSetInfo = DataSetInfo.from(tDataSet);
         dataSetInfo.setHolderIEDName("IED_NAME");
-        assertThrows(ScdException.class, () -> iAdapter.createDataSet(dataSetInfo));
-        dataSetInfo.setHolderLDInst("LD_INS2");
-        dataSetInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
-        assertDoesNotThrow(() -> iAdapter.createDataSet(dataSetInfo));
 
-        assertIsMarshallable(scd);
+        // When & Then
+        assertThatThrownBy(() -> iAdapter.createDataSet(dataSetInfo, ServiceSettingsType.GSE))
+            .isInstanceOf(ScdException.class);
     }
 
     @Test
-    void testHasDataSetCreationCapability() throws Exception {
+    void createDataSet_should_throw_ScdException_when_DataSetInfo_is_empty() throws Exception {
+        // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
+        IEDAdapter iAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
+        DataSetInfo dataSetInfo = new DataSetInfo();
 
-        assertFalse(iAdapter.hasDataSetCreationCapability());
-
-        TServices tServices = new TServices();
-        iAdapter.getCurrentElem().setServices(tServices);
-        assertFalse(iAdapter.hasDataSetCreationCapability());
-
-        TLogSettings tLogSettings = new TLogSettings();
-        tServices.setLogSettings(tLogSettings);
-        tLogSettings.setDatSet(TServiceSettingsEnum.CONF);
-        assertTrue(iAdapter.hasDataSetCreationCapability());
-        tLogSettings.setDatSet(TServiceSettingsEnum.DYN);
-        assertTrue(iAdapter.hasDataSetCreationCapability());
-        tLogSettings.setDatSet(TServiceSettingsEnum.FIX);
-        assertFalse(iAdapter.hasDataSetCreationCapability());
-
-        TGSESettings tgseSettings = new TGSESettings();
-        tServices.setGSESettings(tgseSettings);
-
-        tgseSettings.setDatSet(TServiceSettingsEnum.CONF);
-        assertTrue(iAdapter.hasDataSetCreationCapability());
-        tgseSettings.setDatSet(TServiceSettingsEnum.DYN);
-        assertTrue(iAdapter.hasDataSetCreationCapability());
-        tgseSettings.setDatSet(TServiceSettingsEnum.FIX);
-        assertFalse(iAdapter.hasDataSetCreationCapability());
-
-        TReportSettings reportSettings = new TReportSettings();
-        tServices.setReportSettings(reportSettings);
-
-        reportSettings.setDatSet(TServiceSettingsEnum.CONF);
-        assertTrue(iAdapter.hasDataSetCreationCapability());
-        reportSettings.setDatSet(TServiceSettingsEnum.DYN);
-        assertTrue(iAdapter.hasDataSetCreationCapability());
-        reportSettings.setDatSet(TServiceSettingsEnum.FIX);
-        assertFalse(iAdapter.hasDataSetCreationCapability());
-
-
-        TSMVSettings tsmvSettings = new TSMVSettings();
-        tServices.setSMVSettings(tsmvSettings);
-
-        tsmvSettings.setDatSet(TServiceSettingsEnum.CONF);
-        assertTrue(iAdapter.hasDataSetCreationCapability());
-        tsmvSettings.setDatSet(TServiceSettingsEnum.DYN);
-        assertTrue(iAdapter.hasDataSetCreationCapability());
-        tsmvSettings.setDatSet(TServiceSettingsEnum.FIX);
-        assertFalse(iAdapter.hasDataSetCreationCapability());
-
+        // When & Then
+        assertThatThrownBy(() -> iAdapter.createDataSet(dataSetInfo, ServiceSettingsType.GSE))
+            .isInstanceOf(ScdException.class);
     }
 
     @Test
     void createControlBlock() throws Exception {
-
+        // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
-
+        IEDAdapter iedAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
         ReportControlBlock controlBlock = new ReportControlBlock();
+        controlBlock.setId("CBID1");
         controlBlock.setName("rpt");
         controlBlock.setConfRev(2L);
-
+        controlBlock.setDataSetRef("dataSet");
         controlBlock.setHolderIEDName("IED_NAME");
-        controlBlock.setHolderIEDName("IED_NAME");
-        controlBlock.setHolderIEDName("IED_NAME");
+        controlBlock.setHolderLDInst("LD_INS2");
+        controlBlock.setHolderLnClass("ANCR");
+        controlBlock.setHolderLnInst("1");
+        controlBlock.setOptFields(new TReportControl.OptFields());
+        // When
+        iedAdapter.createControlBlock(controlBlock, ServiceSettingsType.GSE);
+        // Then
         assertIsMarshallable(scd);
     }
 
