@@ -8,7 +8,6 @@ import lombok.NonNull;
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.ControlBlock;
-import org.lfenergy.compas.sct.commons.dto.DataSetInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
@@ -44,7 +43,6 @@ import java.util.stream.Stream;
  *      <li>{@link IEDAdapter#getServices Returns the value of the <b>Service </b>object</em>}</li>
  *      <li>{@link IEDAdapter#getPrivateHeader <em>Returns the value of the <b>TPrivate </b>containment reference list</em>}</li>
  *      <li>{@link IEDAdapter#getExtRefBinders <em>Returns the value of the <b>ExtRefBindingInfo </b>containment reference list By <b>ExtRefSignalInfo</b></em>}</li>
- *      <li>{@link IEDAdapter#createDataSet <em>Add <b>DataSetInfo </b> describing the children <b>TDataSet </b> that can be created under <b>TAnyLN</b></em>}</li>
  *      <li>{@link IEDAdapter#createControlBlock <em>Add <b>ControlBlock </b> describing the children <b>TControlBlock </b> that can be created under <b>TAnyLN</b></em>}</li>
  *      <li>{@link IEDAdapter#addPrivate <em>Add <b>TPrivate </b>under this object</em>}</li>
  *      <li>{@link IEDAdapter#updateLDeviceNodesType <em>Update <b>Type </b> describing the value of the children <b>TAnyLN</b></em>}</li>
@@ -305,33 +303,6 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
     }
 
     /**
-     * Adds Data Set in specified LNode in current IED
-     *
-     * @param dataSetInfo Data Set data to add (and LNode path)
-     * @param serviceSettingsType Type of DataSet to create
-     * @throws ScdException throws when IED is not able to add DataSet
-     */
-    public void createDataSet(DataSetInfo dataSetInfo, ServiceSettingsType serviceSettingsType) throws ScdException {
-        LDeviceAdapter lDeviceAdapter = findLDeviceAdapterByLdInst(dataSetInfo.getHolderLDInst())
-                .orElseThrow(
-                        () -> new ScdException(
-                                String.format(
-                                        "Unknow LDevice(%s) in IED(%s)", dataSetInfo.getHolderLDInst(), currentElem.getName())
-                        )
-                );
-        if (!lDeviceAdapter.hasDataSetCreationCapability(serviceSettingsType)) {
-            throw new ScdException("The AccessPoint does not have capability to create DataSet of type " + serviceSettingsType.toString());
-        }
-        AbstractLNAdapter<?> lNodeAdapter = AbstractLNAdapter.builder()
-                .withLDeviceAdapter(lDeviceAdapter)
-                .withLnClass(dataSetInfo.getHolderLnClass())
-                .withLnInst(dataSetInfo.getHolderLnInst())
-                .withLnPrefix(dataSetInfo.getHolderLnPrefix())
-                .build();
-        lNodeAdapter.addDataSet(dataSetInfo);
-    }
-
-    /**
      * Creates Control Block in specified LNode in current IED
      *
      * @param controlBlock Control Block data to add (and LNode path)
@@ -366,7 +337,7 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
             );
         }
 
-        if (lnAdapter.getDataSetByRef(controlBlock.getDataSetRef()).isEmpty()) {
+        if (lnAdapter.getDataSetByName(controlBlock.getDataSetRef()).isEmpty()) {
             throw new ScdException(
                     String.format(
                             "Control block %s references unknown dataSet in LNode %s%s%s",

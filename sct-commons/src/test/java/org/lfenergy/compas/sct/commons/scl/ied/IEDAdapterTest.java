@@ -7,7 +7,6 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.DTO;
-import org.lfenergy.compas.sct.commons.dto.DataSetInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.dto.ReportControlBlock;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
@@ -171,67 +170,6 @@ class IEDAdapterTest {
         objectReference = new ObjectReference("IED_NAMELD_INS2/ANCR1.dataSet");
         objectReference.init();
         assertTrue(iAdapter.matches(objectReference));
-    }
-
-    @Test
-    void createDataSet_should_create_when_DataSetInfo_is_complete() throws Exception {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
-
-        TDataSet tDataSet = new TDataSet();
-        tDataSet.setName("dataset");
-        TFCDA tfcda = new TFCDA();
-        tfcda.setFc(TFCEnum.ST);
-        tfcda.getLnClass().add("LLN0");
-        tDataSet.getFCDA().add(tfcda);
-        DataSetInfo dataSetInfo = DataSetInfo.from(tDataSet);
-        dataSetInfo.setHolderIEDName("IED_NAME");
-        dataSetInfo.setHolderLDInst("LD_INS2");
-        dataSetInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
-        assertIsMarshallable(scd);
-
-        // When
-        iedAdapter.createDataSet(dataSetInfo, ServiceSettingsType.GSE);
-
-        // Then
-        assertThat(iedAdapter.getLDeviceAdapterByLdInst("LD_INS2").getLN0Adapter().getDataSetByRef("dataset"))
-            .isPresent();
-        assertIsMarshallable(scd);
-    }
-
-    @Test
-    void createDataSet_should_throw_ScdException_when_DataSetInfo_is_incomplete() throws Exception {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
-
-        TDataSet tDataSet = new TDataSet();
-        tDataSet.setName("dataset");
-        TFCDA tfcda = new TFCDA();
-        tfcda.setFc(TFCEnum.ST);
-        tDataSet.getFCDA().add(tfcda);
-        DataSetInfo dataSetInfo = DataSetInfo.from(tDataSet);
-        dataSetInfo.setHolderIEDName("IED_NAME");
-
-        // When & Then
-        assertThatThrownBy(() -> iAdapter.createDataSet(dataSetInfo, ServiceSettingsType.GSE))
-            .isInstanceOf(ScdException.class);
-    }
-
-    @Test
-    void createDataSet_should_throw_ScdException_when_DataSetInfo_is_empty() throws Exception {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
-        DataSetInfo dataSetInfo = new DataSetInfo();
-
-        // When & Then
-        assertThatThrownBy(() -> iAdapter.createDataSet(dataSetInfo, ServiceSettingsType.GSE))
-            .isInstanceOf(ScdException.class);
     }
 
     @Test

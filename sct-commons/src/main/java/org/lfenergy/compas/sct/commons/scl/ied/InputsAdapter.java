@@ -10,15 +10,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
+import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.PrivateService;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.util.FcdaCandidates;
+import org.lfenergy.compas.sct.commons.util.ServiceSettingsType;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import static org.lfenergy.compas.sct.commons.util.LDeviceStatus.OFF;
 import static org.lfenergy.compas.sct.commons.util.LDeviceStatus.ON;
@@ -84,22 +85,22 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
             return List.of(getLDeviceAdapter().buildFatalReportItem("The LDevice status is undefined"));
         }
         String lDeviceStatus = optionalLDeviceStatus.get();
-        switch (lDeviceStatus) {
-            case ON:
+        return switch (lDeviceStatus) {
+            case ON -> {
                 List<TCompasFlow> compasFlows = PrivateService.extractCompasPrivates(currentElem, TCompasFlow.class);
-                return getExtRefs().stream()
+                yield getExtRefs().stream()
                     .filter(tExtRef -> StringUtils.isNotBlank(tExtRef.getIedName()) && StringUtils.isNotBlank(tExtRef.getDesc()))
                     .map(extRef ->
                         updateExtRefIedName(extRef, compasFlows, icdSystemVersionToIed.get(extRef.getIedName())))
                     .flatMap(Optional::stream)
                     .toList();
-            case OFF:
+            }
+            case OFF -> {
                 getExtRefs().forEach(this::clearBinding);
-                return Collections.emptyList();
-            default:
-                return List.of(getLDeviceAdapter()
-                    .buildFatalReportItem("The LDevice status is neither \"on\" nor \"off\""));
-        }
+                yield Collections.emptyList();
+            }
+            default -> List.of(getLDeviceAdapter().buildFatalReportItem("The LDevice status is neither \"on\" nor \"off\""));
+        };
     }
 
     /**
@@ -289,10 +290,8 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         if (sourceIedBayUuid.isEmpty()) {
             return fatalReportItem(extRef, "Source IED is missing Private/compas:Bay@UUID attribute");
         }
-        //TODO: use isBayInternal in issue #84 RSR-433 and remove print to console
+
         boolean isBayInternal = targetBayUuid.equals(sourceIedBayUuid.get());
-        System.out.print("\nExtRef.desc=" + extRef.getDesc());
-        System.out.print(",isBayInternal=" + isBayInternal);
 
         Optional<LDeviceAdapter> optionalSourceLDevice = sourceIed.findLDeviceAdapterByLdInst(extRef.getLdInst());
         if (optionalSourceLDevice.isEmpty()) {
@@ -305,30 +304,56 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         }
 
         Optional<SclReportItem> sclReportItem = removeFilteredSourceDas(extRef, sourceDas);
-        //TODO: #83 follow-up : grouping ExtRef by serviceType, iedName, ldInst, isBayInternal, and DA@fc
-        // will be done by calculating DataSet Name in #84 RSR-433
-        // TODO: map to FCDA in issue #84 RSR-433 and remove print to console
-        String daToPrint = sourceDas.stream()
-            .map(da -> da.getFc() + "#" + da.getDataAttributes())
-            .collect(Collectors.joining(","));
-        System.out.print("," + (daToPrint.isEmpty() ? "--NO_VALID_SOURCE_DA--" : daToPrint));
-        return sclReportItem;
+        if (sclReportItem.isPresent()) {
+            return sclReportItem;
+        }
+
+        try {
+            sourceDas.forEach(sourceDa -> {
+                String dataSetName = generateDataSetName(extRef, sourceDa, isBayInternal);
+                ServiceSettingsType serviceSettingsType = ServiceSettingsType.fromTServiceType(extRef.getServiceType());
+                DataSetAdapter dataSet = sourceLDevice.getLN0Adapter().createDataSetIfNotExists(dataSetName, serviceSettingsType);
+                createFCDAInDataSet(extRef, sourceDa, dataSet);
+            });
+        } catch (ScdException e) {
+            // ScdException can be thrown if AccessPoint does not have DataSet creation capability
+            log.error(e.getMessage(), e);
+            return fatalReportItem(extRef, "Could not create DataSet for this ExtRef : " + e.getMessage());
+        }
+        return Optional.empty();
+    }
+
+    private static String generateDataSetName(TExtRef extRef, ResumedDataTemplate sourceDa, boolean isBayInternal) {
+        return "DS_" + extRef.getLdInst() + "_"
+            + switch (extRef.getServiceType()) {
+            case GOOSE -> "G" + ((sourceDa.getFc() == TFCEnum.ST) ? "S" : "M");
+            case SMV -> "SV";
+            case REPORT -> (sourceDa.getFc() == TFCEnum.ST) ? "DQC" : "CYC";
+            case POLL -> throw new IllegalArgumentException("only GOOSE, SMV and REPORT ServiceType are allowed");
+        }
+            + (isBayInternal ? "I" : "E");
+    }
+
+    private static void createFCDAInDataSet(TExtRef extRef, ResumedDataTemplate sourceDa, DataSetAdapter dataSet) {
+        dataSet.createFCDAIfNotExists(extRef.getLdInst(), extRef.getPrefix(), extRef.getLnClass().stream().findFirst().orElse(null), extRef.getLnInst(),
+            sourceDa.getDoRef(),
+            (extRef.getServiceType() == TServiceType.REPORT ? null : sourceDa.getDaRef()),
+            sourceDa.getFc());
     }
 
     private Optional<SclReportItem> removeFilteredSourceDas(TExtRef extRef, final Set<ResumedDataTemplate> sourceDas) {
-        //TODO: Don't forget to test this in issue #84 RSR-433
         sourceDas.removeIf(da -> da.getFc() != TFCEnum.MX && da.getFc() != TFCEnum.ST);
         return switch (extRef.getServiceType()) {
             case GOOSE, SMV -> {
                 sourceDas.removeIf(Predicate.not(FcdaCandidates.SINGLETON::contains));
                 yield Optional.empty();
             }
-            case REPORT -> filterReportSourceDa(extRef, sourceDas);
+            case REPORT -> removeFilterSourceDaForReport(extRef, sourceDas);
             default -> fatalReportItem(extRef, String.format(MESSAGE_INVALID_SERVICE_TYPE, extRef.getServiceType()));
         };
     }
 
-    private Optional<SclReportItem> filterReportSourceDa(TExtRef extRef, Set<ResumedDataTemplate> sourceDas) {
+    private Optional<SclReportItem> removeFilterSourceDaForReport(TExtRef extRef, Set<ResumedDataTemplate> sourceDas) {
         String daName = Utils.extractField(extRef.getDesc(), EXTREF_DESC_DELIMITER, EXTREF_DESC_DA_NAME_POSITION);
         if (StringUtils.isBlank(daName)) {
             return fatalReportItem(extRef, MESSAGE_REPORT_EXTREF_DESC_MALFORMED);

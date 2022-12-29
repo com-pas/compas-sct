@@ -4,19 +4,19 @@
 
 package org.lfenergy.compas.sct.commons.scl;
 
+import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.lfenergy.compas.scl2007b4.model.SCL;
-import org.lfenergy.compas.scl2007b4.model.TCompasFlow;
-import org.lfenergy.compas.scl2007b4.model.TExtRef;
-import org.lfenergy.compas.scl2007b4.model.TInputs;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.SclReport;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.scl.ied.DataSetAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
+import org.lfenergy.compas.sct.commons.testhelpers.FCDARecord;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.Optional;
@@ -24,8 +24,8 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.findExtRef;
-import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.findLDevice;
+import static org.lfenergy.compas.scl2007b4.model.TFCEnum.ST;
+import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
 
 class ExtRefServiceTest {
 
@@ -204,8 +204,27 @@ class ExtRefServiceTest {
         // When
         SclReport sclReport = ExtRefService.createDataSetAndControlBlocks(scd);
         // Then
-        //TODO: This is only the first part. Test will be updated in issue #84
         assertThat(sclReport.getSclReportItems()).isEmpty();
+        assertThat(streamAllDataSets(sclReport.getSclRootAdapter())).hasSize(6);
+
+        // Check dataSet names
+        findDataSet(sclReport.getSclRootAdapter(), "IED_NAME2", "LD_INST21", "DS_LD_INST21_CYCI");
+        findDataSet(sclReport.getSclRootAdapter(), "IED_NAME2", "LD_INST21", "DS_LD_INST21_DQCI");
+        findDataSet(sclReport.getSclRootAdapter(), "IED_NAME2", "LD_INST21", "DS_LD_INST21_GMI");
+        findDataSet(sclReport.getSclRootAdapter(), "IED_NAME2", "LD_INST21", "DS_LD_INST21_SVI");
+        findDataSet(sclReport.getSclRootAdapter(), "IED_NAME3", "LD_INST31", "DS_LD_INST31_GSE");
+        findDataSet(sclReport.getSclRootAdapter(), "IED_NAME2", "LD_INST21", "DS_LD_INST21_GSI");
+
+        // Check one DataSet content
+        DataSetAdapter aDataSet = findDataSet(sclReport.getSclRootAdapter(), "IED_NAME2", "LD_INST21", "DS_LD_INST21_GSI");
+        assertThat(aDataSet.getCurrentElem().getFCDA()).hasSize(4);
+        assertThat(aDataSet.getCurrentElem().getFCDA().stream().map(FCDARecord::toFCDARecord))
+            .containsExactly(
+                new FCDARecord("LD_INST21", "ANCR", "1", "", "DoName", "daNameST", ST),
+                new FCDARecord("LD_INST21", "ANCR", "1", "", "DoWithInst1", "daNameST", ST),
+                new FCDARecord("LD_INST21", "ANCR", "1", "", "DoWithInst2.subDo", "daNameST", ST),
+                new FCDARecord("LD_INST21", "ANCR", "1", "", "OtherDoName", "daNameST", ST)
+            );
     }
 
     @Test
@@ -215,8 +234,19 @@ class ExtRefServiceTest {
         // When
         SclReport sclReport = ExtRefService.createDataSetAndControlBlocks(scd, "IED_NAME1");
         // Then
-        //TODO: This is only the first part. Test will be updated in issue #84
         assertThat(sclReport.getSclReportItems()).isEmpty();
+        assertThat(streamAllDataSets(sclReport.getSclRootAdapter())).hasSize(6);
+    }
+
+    @Test
+    void createDataSetAndControlBlocks_when_targetIedName_is_provided_and_no_ext_ref_should_do_nothing() throws Exception {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
+        // When
+        SclReport sclReport = ExtRefService.createDataSetAndControlBlocks(scd, "IED_NAME2");
+        // Then
+        assertThat(sclReport.getSclReportItems()).isEmpty();
+        assertThat(streamAllDataSets(sclReport.getSclRootAdapter())).isEmpty();
     }
 
     @Test
@@ -292,6 +322,26 @@ class ExtRefServiceTest {
             .findFirst();
         assertThat(optionalLDeviceAdapter).isPresent();
         return optionalLDeviceAdapter.get();
+    }
+
+    @Test
+    void updateAllSourceDataSetsAndControlBlocks_should_sort_FCDA_inside_DataSet_and_avoid_duplicates() throws Exception {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success_test_fcda_sort.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        // When
+        SclReport sclReport = ExtRefService.createDataSetAndControlBlocks(scd);
+        // Then
+        assertThat(sclReport.getSclReportItems()).isEmpty();
+        DataSetAdapter dataSetAdapter = findDataSet(sclRootAdapter, "IED_NAME2", "LD_INST21", "DS_LD_INST21_GSI");
+        assertThat(dataSetAdapter.getCurrentElem().getFCDA())
+            .map(TFCDA::getLnInst, TFCDA::getDoName)
+            .containsExactly(
+                Tuple.tuple("1", "FirstDo"),
+                Tuple.tuple("1", "SecondDo"),
+                Tuple.tuple("1", "ThirdDo"),
+                Tuple.tuple("02", "FirstDo")
+            );
     }
 
 }

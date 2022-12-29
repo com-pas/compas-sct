@@ -5,13 +5,15 @@
 package org.lfenergy.compas.sct.commons.testhelpers;
 
 import lombok.experimental.UtilityClass;
+import org.lfenergy.compas.scl2007b4.model.TDataSet;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.sct.commons.dto.SclReport;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.InputsAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.LN0Adapter;
+import org.lfenergy.compas.sct.commons.scl.ied.*;
 import org.opentest4j.AssertionFailedError;
+
+import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Provides static methods to quickly retrieve SCL elements, to be used in writing tests.
@@ -20,7 +22,7 @@ import org.opentest4j.AssertionFailedError;
  */
 @UtilityClass
 public class SclHelper {
-    private static LDeviceAdapter findLDevice(SclRootAdapter sclRootAdapter, String iedName, String ldInst) {
+    public static LDeviceAdapter findLDevice(SclRootAdapter sclRootAdapter, String iedName, String ldInst) {
         return sclRootAdapter.findIedAdapterByName(iedName)
             .orElseThrow(() -> new AssertionFailedError(String.format("IED.name=%s not found", iedName))).findLDeviceAdapterByLdInst(ldInst).orElseThrow(() -> new AssertionFailedError(String.format("LDevice.inst=%s not found in IED.name=%s", ldInst, iedName)));
     }
@@ -55,4 +57,28 @@ public class SclHelper {
         return findLDevice(sclReport.getSclRootAdapter(), iedName, ldInst);
     }
 
+    public static LN0Adapter findLn0(SclRootAdapter sclRootAdapter, String iedName, String ldInst) {
+        LDeviceAdapter lDevice = findLDevice(sclRootAdapter, iedName, ldInst);
+        if (!lDevice.hasLN0()) {
+            throw new AssertionFailedError(String.format("LN0 not found in IED.name=%s,LDevice.inst=%s", iedName, ldInst));
+        }
+        return lDevice.getLN0Adapter();
+    }
+
+    public static DataSetAdapter findDataSet(SclRootAdapter sclRootAdapter, String iedName, String ldInst, String dataSetName) {
+        LN0Adapter ln0 = findLn0(sclRootAdapter, iedName, ldInst);
+        return ln0.findDataSetByName(dataSetName)
+            .orElseThrow(() -> new AssertionFailedError(String.format("DataSet.name=%s not found id in IED.name=%s,LDevice.inst=%s,LN0",
+                dataSetName, iedName, ldInst)));
+    }
+
+    public static Stream<TDataSet> streamAllDataSets(SclRootAdapter sclRootAdapter) {
+        return sclRootAdapter
+            .streamIEDAdapters()
+            .flatMap(IEDAdapter::streamLDeviceAdapters)
+            .filter(LDeviceAdapter::hasLN0)
+            .map(LDeviceAdapter::getLN0Adapter)
+            .map(ln0Adapter -> ln0Adapter.getCurrentElem().getDataSet())
+            .flatMap(List::stream);
+    }
 }

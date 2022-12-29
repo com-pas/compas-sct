@@ -53,7 +53,7 @@ public class ExtRefService {
             .filter(LN0Adapter::hasInputs)
             .map(LN0Adapter::getInputsAdapter)
             .map(inputsAdapter -> inputsAdapter.updateAllExtRefIedNames(icdSystemVersionToIed))
-            .flatMap(List::stream).collect(Collectors.toList());
+            .flatMap(List::stream).toList();
 
         return new SclReport(sclRootAdapter, extRefErrors);
     }
@@ -79,7 +79,7 @@ public class ExtRefService {
                     return null;
                 }
             ).filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private static List<SclReportItem> checkIedUnityOfIcdSystemVersionUuid(SclRootAdapter sclRootAdapter) {
@@ -97,7 +97,7 @@ public class ExtRefService {
                     .collect(Collectors.joining(", ")),
                 "/IED/Private/compas:ICDHeader[@ICDSystemVersionUUID] must be unique" +
                     " but the same ICDSystemVersionUUID was found on several IED."))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     public static SclReport createDataSetAndControlBlocks(SCL scd) {
@@ -127,7 +127,7 @@ public class ExtRefService {
         List<SclReportItem> sclReportItems = lDeviceAdapters
             .map(LDeviceAdapter::createDataSetAndControlBlocks)
             .flatMap(List::stream)
-            .collect(Collectors.toList());
+            .toList();
         return new SclReport(sclRootAdapter, sclReportItems);
     }
 }

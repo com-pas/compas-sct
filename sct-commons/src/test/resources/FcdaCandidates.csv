@@ -9,6 +9,10 @@ ANCR;OtherDoName;daNameST;ST
 ANCR;DoWithInst;daNameST;ST
 ANCR;DoWithInst.subDo;daNameST;ST
 
+ANCR;FirstDo;daNameST;ST
+ANCR;SecondDo;daNameST;ST
+ANCR;ThirdDo;daNameST;ST
+
 LPHD;PhyHealth;stVal;ST
 LPHD;PhyHealth;q;ST
 LPHD;PhyHealth;t;ST
