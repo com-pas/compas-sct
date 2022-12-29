@@ -168,7 +168,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         return currentElem.getDOI()
                 .stream()
                 .map(tdoi -> new DOIAdapter(this, tdoi))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     boolean isLN0() {
@@ -211,7 +211,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                                 Objects.equals(filter.getPDA(), tExtRef.getPDA()) &&
                                 Objects.equals(filter.getIntAddr(), tExtRef.getIntAddr()) &&
                                 Objects.equals(filter.getPServT(), tExtRef.getPServT()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -344,11 +344,9 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      * @return list of <em>ControlBlock</em> objects
      */
     protected List<ControlBlock<?>> getControlBlocks(List<TDataSet> tDataSets, TServiceType serviceType) {
-        /*List<ControlBlock<?>> controlBlocks = new ArrayList<>();
-        for (TDataSet tDataSet : tDataSets) {
-            controlBlocks.addAll(getControlBlocksByDataSetRef(tDataSet.getName(), serviceType));
-        }*/
-        return tDataSets.stream().map(tDataSet -> getControlBlocksByDataSetRef(tDataSet.getName(), serviceType)).flatMap(Collection::stream).toList();
+        return tDataSets.stream()
+                .map(tDataSet -> getControlBlocksByDataSetRef(tDataSet.getName(), serviceType))
+                .flatMap(Collection::stream).toList();
 
     }
 
@@ -432,19 +430,15 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      */
     public boolean hasControlBlock(ControlBlock<? extends ControlBlock> controlBlock) {
 
-        switch (controlBlock.getServiceType()) {
-            case REPORT:
-                return currentElem.getReportControl().stream()
-                        .anyMatch(control -> control.getName().equals(controlBlock.getName()));
-            case GOOSE:
-                return isLN0() && ((LN0) currentElem).getGSEControl().stream()
-                        .anyMatch(control -> control.getName().equals(controlBlock.getName()));
-            case SMV:
-                return isLN0() && ((LN0) currentElem).getSampledValueControl().stream()
-                        .anyMatch(reportControl -> reportControl.getName().equals(controlBlock.getName()));
-            default:
-                return false;
-        }
+        return switch (controlBlock.getServiceType()) {
+            case REPORT -> currentElem.getReportControl().stream()
+                    .anyMatch(control -> control.getName().equals(controlBlock.getName()));
+            case GOOSE -> isLN0() && ((LN0) currentElem).getGSEControl().stream()
+                    .anyMatch(control -> control.getName().equals(controlBlock.getName()));
+            case SMV -> isLN0() && ((LN0) currentElem).getSampledValueControl().stream()
+                    .anyMatch(reportControl -> reportControl.getName().equals(controlBlock.getName()));
+            default -> false;
+        };
     }
 
     /**
@@ -619,7 +613,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         resumedDTTs.forEach(this::overrideAttributesFromDAI);
 
         if (updatableOnly) {
-            return resumedDTTs.stream().filter(ResumedDataTemplate::isUpdatable).collect(Collectors.toList());
+            return resumedDTTs.stream().filter(ResumedDataTemplate::isUpdatable).toList();
         } else {
             return resumedDTTs;
         }
@@ -880,7 +874,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         TDataSet tDataSet = new TDataSet();
         tDataSet.setName(dataSetInfo.getName());
         tDataSet.getFCDA().addAll(
-                dataSetInfo.getFCDAInfos().stream().map(FCDAInfo::getFCDA).collect(Collectors.toList())
+                dataSetInfo.getFCDAInfos().stream().map(FCDAInfo::getFCDA).toList()
         );
         currentElem.getDataSet().add(tDataSet);
 

@@ -15,7 +15,6 @@ import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * A representation of the model object
@@ -142,7 +141,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
         return currentElem.getLN()
                 .stream()
                 .map(tln -> new LNAdapter(this,tln))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -191,7 +190,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
                     extRefBindingInfo.setPrefix(lnAdapter.getPrefix());
                     return extRefBindingInfo;
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
