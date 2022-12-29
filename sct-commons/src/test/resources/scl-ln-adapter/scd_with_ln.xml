@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- SPDX-FileCopyrightText: 2022 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+<SCL version="2007" revision="B" release="4" xmlns="http://www.iec.ch/61850/2003/SCL" xmlns:compas="https://www.lfenergy.org/compas/extension/v1">
+    <Header id="hId" version="2007" revision="B" toolID="COMPAS"/>
+    <!-- has dataset creation capability -->
+    <IED name="IED_NAME1">
+        <Private type="COMPAS-ICDHeader">
+            <compas:ICDHeader IEDType="BCU" IEDinstance="11" BayLabel="3THEIX2" IEDName="IED_NAME1" ICDSystemVersionUUID="System_Version_IED_NAME1" VendorName="SCLE SFE" IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+        </Private>
+        <Private type="COMPAS-Bay">
+            <compas:Bay UUID="UuidBay1"/>
+        </Private>
+        <Services>
+            <GSESettings datSet="Conf"/>
+        </Services>
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LD_INST11" ldName="IED_NAME1LD_INST11">
+                    <LN0 lnClass="LLN0" inst="" lnType="LNEX1"/>
+                </LDevice>
+                <LDevice inst="LD_INST12">
+                    <LN0 lnClass="LLN0" inst="" lnType="LNEX1">
+                        <DataSet name="existingDataSet">
+                            <FCDA fc="ST"/>
+                        </DataSet>
+                    </LN0>
+                </LDevice>
+            </Server>
+            <Services>
+                <GSESettings datSet="Conf"/>
+                <SMVSettings datSet="Conf">
+                    <SamplesPerSec>5</SamplesPerSec>
+                </SMVSettings>
+                <ReportSettings datSet="Conf"/>
+            </Services>
+        </AccessPoint>
+    </IED>
+    <!-- missing dataset creation capability -->
+    <IED name="IED_NAME2">
+        <Private type="COMPAS-ICDHeader">
+            <compas:ICDHeader IEDType="BCU" IEDinstance="21" BayLabel="3THEIX2" IEDName="IED_NAME2" ICDSystemVersionUUID="System_Version_IED_NAME2" VendorName="SCLE SFE" IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+        </Private>
+        <Private type="COMPAS-Bay">
+            <compas:Bay UUID="UuidBay1"/>
+        </Private>
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LD_INST21" ldName="IED_NAME2LD_INST21">
+                    <LN0 lnClass="LLN0" inst="" lnType="LNEX1"/>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
+    <DataTypeTemplates>
+        <LNodeType lnClass="LLN0" id="LNEX1">
+            <DO name="Mod" type="Do0"/>
+        </LNodeType>
+        <DOType cdc="ENC" id="Do0">
+            <DA fc="ST" name="stVal" bType="Enum" type="BehaviourModeKind"/>
+        </DOType>
+        <EnumType id="BehaviourModeKind">
+            <EnumVal ord="1">on</EnumVal>
+            <EnumVal ord="2">off</EnumVal>
+            <EnumVal ord="3">test</EnumVal>
+        </EnumType>
+    </DataTypeTemplates>
+</SCL>

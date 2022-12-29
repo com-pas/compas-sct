@@ -17,6 +17,7 @@ import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.mockito.Mockito;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -64,17 +65,31 @@ class LNAdapterTest {
     }
 
     @Test
-    void testFindDataSetByRef() {
+    void findDataSetByName_should_return_dataset() {
+        // Given
         TLN tln = new TLN();
         LNAdapter lnAdapter = initLNAdapter(tln);
-
-        assertTrue(lnAdapter.findDataSetByRef(DTO.CB_DATASET_REF).isEmpty());
         TDataSet tDataSet = new TDataSet();
         tDataSet.setName(DTO.CB_DATASET_REF);
         tln.getDataSet().add(tDataSet);
+        // Then
+        Optional<DataSetAdapter> foundDataSet = lnAdapter.findDataSetByName(DTO.CB_DATASET_REF);
+        // When
+        assertThat(foundDataSet).isPresent();
+    }
 
-        assertTrue(lnAdapter.findDataSetByRef(DTO.CB_DATASET_REF).isPresent());
-
+    @Test
+    void findDataSetByName_when_not_found_should_return_empty() {
+        // Given
+        TLN tln = new TLN();
+        LNAdapter lnAdapter = initLNAdapter(tln);
+        TDataSet tDataSet = new TDataSet();
+        tDataSet.setName(DTO.CB_DATASET_REF);
+        tln.getDataSet().add(tDataSet);
+        // Then
+        Optional<DataSetAdapter> foundDataSet = lnAdapter.findDataSetByName("Non existent dataset");
+        // When
+        assertThat(foundDataSet).isEmpty();
     }
 
     @Test

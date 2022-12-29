@@ -7,6 +7,7 @@ package org.lfenergy.compas.sct.commons.util;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -16,9 +17,12 @@ public final class Utils {
 
     private static final String LEAVING_PREFIX = "<<< Leaving: ::";
     private static final String ENTERING_PREFIX = ">>> Entering: ::";
+    private static final int S1_CONSIDERED_EQUALS_TO_S2 = 0;
+    private static final int S1_LOWER_THAN_S2 = -1;
+    private static final int S1_GREATER_THAN_S2 = 1;
 
     /**
-     * Private Controlller, should not be instanced
+     * Private Constructor, should not be instanced
      */
     private Utils() {
         throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
@@ -128,7 +132,7 @@ public final class Utils {
 
     /**
      * Checks if strings are equals or both blank.
-     * Blank means : null, empty string or whitespaces only string.
+     * Blank means : null, empty string or whitespaces (as defined by {@link Character#isWhitespace(char)}) only string.
      *
      * @param s1 first string
      * @param s2 seconde string
@@ -138,6 +142,37 @@ public final class Utils {
     public static boolean equalsOrBothBlank(String s1, String s2) {
         return Objects.equals(s1, s2)
             || (StringUtils.isBlank(s1) && StringUtils.isBlank(s2));
+    }
+
+    /**
+     * Comparator for String
+     * Difference with {@link String#compare(CharSequence, CharSequence)} is that
+     * blank strings are considered equals and inferior to any not blank String.
+     * Blank means : null, empty string or whitespaces (as defined by {@link Character#isWhitespace(char)}) only string.
+     * Note: this comparator imposes orderings that are inconsistent with equals.
+     *
+     * @param s1 first String to compare
+     * @param s2 second String to compare
+     * @return when s1 and s2 are not blank, same result as {@link String#compare(CharSequence, CharSequence)},
+     *  zero when s1 and s2 are both blanks, negative integer when s1 is blank and s2 is not, positive integer when s1 is not blank but s2 is.
+     * @see java.util.Comparator#compare(Object, Object)
+     * @see org.apache.commons.lang3.StringUtils#isBlank(CharSequence)
+     * @see java.util.Comparator#nullsFirst(Comparator)
+     */
+    public static int blanksFirstComparator(String s1, String s2) {
+        if (StringUtils.isBlank(s1)){
+            if (StringUtils.isBlank(s2)){
+                return S1_CONSIDERED_EQUALS_TO_S2;
+            } else {
+                return S1_LOWER_THAN_S2;
+            }
+        } else {
+            if (StringUtils.isBlank(s2)){
+                return S1_GREATER_THAN_S2;
+            } else {
+                return s1.compareTo(s2);
+            }
+        }
     }
 
     /**
@@ -174,5 +209,9 @@ public final class Utils {
         String[] split = s.split(regexDelimiter);
         int column = index < 0 ? split.length + index : index;
         return 0 <= column && column < split.length ? split[column] : null;
+    }
+
+    public static String nullIfBlank(String s) {
+        return StringUtils.isBlank(s) ? null : s;
     }
 }
