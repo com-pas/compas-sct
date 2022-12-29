@@ -938,4 +938,5 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         tExtRef.setSrcLNInst(null);
         tExtRef.unsetSrcLNClass();
     }
+
 }

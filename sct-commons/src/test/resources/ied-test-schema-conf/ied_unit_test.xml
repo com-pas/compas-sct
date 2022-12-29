@@ -7,7 +7,6 @@
 
     <IED name="IED_NAME">
         <AccessPoint name="AP_NAME">
-
             <Server>
                 <Authentication/>
                 <LDevice inst="LD_INS1">
@@ -27,20 +26,19 @@
                                 </SDI>
                                 <!-- <DAI name="da1" valImport="true"></DAI> --> <!-- [Do.sdo1] && [da1] AIE AIE AIE -->
                             </SDI>
-                            <DAI name="da2" valImport="true"></DAI> <!-- a RootDAI -->
+                            <DAI name="da2" valImport="true"/> <!-- a RootDAI -->
                         </DOI>
                     </LN0>
                 </LDevice>
                 <LDevice inst="LD_INS2">
                     <LN0 lnType="LNO1" lnClass="LLN0" inst="">
-
                         <Inputs>
                             <ExtRef intAddr="INT_ADDR1" pDO="Do1.sdo1" pDA="da"/>
                         </Inputs>
                     </LN0>
                     <LN lnType="LNO2" lnClass="ANCR" inst="1">
                         <DataSet name="dataSet">
-                            <FCDA fc="ST"/>
+                            <FCDA fc="ST" lnClass="LLN0"/>
                         </DataSet>
                         <DOI name="StrVal"/>
                         <Inputs>
@@ -62,6 +60,7 @@
                 <SettingGroups>
                     <ConfSG/>
                 </SettingGroups>
+                <GSESettings datSet="Conf" cbName="Conf"/>
             </Services>
         </AccessPoint>
     </IED>
