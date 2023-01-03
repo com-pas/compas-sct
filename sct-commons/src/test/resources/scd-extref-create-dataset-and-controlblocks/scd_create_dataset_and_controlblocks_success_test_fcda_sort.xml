@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- SPDX-FileCopyrightText: 2022 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+<SCL version="2007" revision="B" release="4" xmlns="http://www.iec.ch/61850/2003/SCL" xmlns:compas="https://www.lfenergy.org/compas/extension/v1">
+    <Header id="hId" version="2007" revision="B" toolID="COMPAS"/>
+    <IED name="IED_NAME1">
+        <Private type="COMPAS-ICDHeader">
+            <compas:ICDHeader IEDType="BCU" IEDinstance="11" BayLabel="3THEIX2" IEDName="IED_NAME1" ICDSystemVersionUUID="System_Version_IED_NAME1" VendorName="SCLE SFE" IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+        </Private>
+        <Private type="COMPAS-Bay">
+            <compas:Bay UUID="UuidBay1"/>
+        </Private>
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LD_INST11" ldName="IED_NAME1LD_INST11">
+                    <LN0 lnClass="LLN0" inst="" lnType="LNEX1">
+                        <DOI name="Mod">
+                            <DAI name="stVal">
+                                <Val>on</Val>
+                            </DAI>
+                        </DOI>
+                        <Inputs>
+                            <Private type="COMPAS-Flow">
+                                <compas:Flow dataStreamKey="test fcda should be second" FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE"/>
+                                <compas:Flow dataStreamKey="test fcda should be fourth (same doName as first but lnInst is greater)" FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="02" ExtRefprefix="" FlowStatus="ACTIVE"/>
+                                <compas:Flow dataStreamKey="test fcda should be first" FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE"/>
+                                <compas:Flow dataStreamKey="test fcda should be third" FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE"/>
+                            </Private>
+                            <ExtRef desc="test fcda should be second" iedName="IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="SecondDo" daName="daNameST" serviceType="GOOSE" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
+                            <ExtRef desc="test fcda should be fourth (same doName as first but lnInst is greater)" iedName="IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="02" doName="FirstDo" daName="daNameST" serviceType="GOOSE" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
+                            <ExtRef desc="test fcda should be first" iedName="IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="FirstDo" daName="daNameST" serviceType="GOOSE" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
+                            <ExtRef desc="test fcda should be third" iedName="IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="ThirdDo" daName="daNameST" serviceType="GOOSE" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
+                        </Inputs>
+                    </LN0>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
+    <IED name="IED_NAME2">
+        <Private type="COMPAS-ICDHeader">
+            <compas:ICDHeader IEDType="BCU" IEDinstance="22" BayLabel="3THEIX2" IEDName="IED_NAME2" ICDSystemVersionUUID="System_Version_IED_NAME2" VendorName="SCLE SFE" IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+        </Private>
+        <Private type="COMPAS-Bay">
+            <compas:Bay UUID="UuidBay1"/>
+        </Private>
+        <Services>
+            <GSESettings datSet="Conf"/>
+        </Services>
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LD_INST21">
+                    <LN0 lnClass="LLN0" inst="" lnType="LNEX1">
+                        <DOI name="Mod">
+                            <DAI name="stVal">
+                                <Val>on</Val>
+                            </DAI>
+                        </DOI>
+                    </LN0>
+                    <LN lnClass="ANCR" inst="1" lnType="lnType"/>
+                    <LN lnClass="ANCR" inst="02" lnType="lnType"/>
+                </LDevice>
+            </Server>
+            <Services>
+                <GSESettings datSet="Conf"/>
+                <SMVSettings datSet="Conf">
+                    <SamplesPerSec>5</SamplesPerSec>
+                </SMVSettings>
+                <ReportSettings datSet="Conf"/>
+            </Services>
+        </AccessPoint>
+    </IED>
+    <IED name="IED_NAME3">
+        <Private type="COMPAS-ICDHeader">
+            <compas:ICDHeader IEDType="BCU" IEDinstance="22" BayLabel="3THEIX2" IEDName="IED_NAME3" ICDSystemVersionUUID="System_Version_IED_NAME3" VendorName="SCLE SFE" IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+        </Private>
+        <Private type="COMPAS-Bay">
+            <compas:Bay UUID="UuidBay1"/>
+        </Private>
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LD_INST31">
+                    <LN0 lnClass="LLN0" inst="" lnType="LNEX1">
+                        <DOI name="Mod">
+                            <DAI name="stVal">
+                                <Val>on</Val>
+                            </DAI>
+                        </DOI>
+                        <Inputs>
+                            <Private type="COMPAS-Flow">
+                                <compas:Flow dataStreamKey="test duplicated fcda (same as first)" FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE"/>
+                            </Private>
+                            <ExtRef desc="test duplicated fcda (same as first)" iedName="IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="FirstDo" daName="daNameST" serviceType="GOOSE" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
+                        </Inputs>
+                    </LN0>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
+    <DataTypeTemplates>
+        <LNodeType lnClass="LLN0" id="LNEX1">
+            <DO name="Mod" type="Do0"/>
+        </LNodeType>
+        <LNodeType lnClass="ANCR" id="lnType">
+            <DO name="FirstDo" type="Do1"/>
+            <DO name="SecondDo" type="Do1"/>
+            <DO name="ThirdDo" type="Do1"/>
+        </LNodeType>
+        <DOType cdc="ENC" id="Do0">
+            <DA fc="ST" name="stVal" bType="Enum" type="BehaviourModeKind"/>
+        </DOType>
+        <DOType cdc="ENC" id="Do1">
+            <DA fc="ST" name="daNameST" bType="BOOLEAN"/>
+            <DA fc="MX" name="daNameMX" bType="BOOLEAN"/>
+            <DA fc="BL" name="daNameBL" bType="BOOLEAN"/>
+        </DOType>
+        <DOType cdc="ENC" id="Do2">
+            <SDO name="subDo" type="Do1"/>
+        </DOType>
+        <EnumType id="BehaviourModeKind">
+            <EnumVal ord="1">on</EnumVal>
+            <EnumVal ord="2">off</EnumVal>
+            <EnumVal ord="3">test</EnumVal>
+        </EnumType>
+    </DataTypeTemplates>
+</SCL>

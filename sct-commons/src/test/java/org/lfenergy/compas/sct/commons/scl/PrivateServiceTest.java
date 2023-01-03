@@ -17,13 +17,12 @@ import javax.xml.bind.JAXBElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 class PrivateServiceTest {
 
@@ -285,4 +284,270 @@ class PrivateServiceTest {
         assertThat(baseElement.isSetPrivate()).isFalse();
     }
 
+    @Test
+    void createMapICDSystemVersionUuidAndSTDFile_Should_return_empty_map_when_no_ICDSystemVersionUUID() {
+        //Given
+        SCL scl1 = new SCL();
+        TIED tied1 = new TIED();
+        TCompasICDHeader compasICDHeader1 = new TCompasICDHeader();
+        TPrivate tPrivate1 =  PrivateService.createPrivate(compasICDHeader1);
+        tied1.getPrivate().add(tPrivate1);
+        scl1.getIED().add(tied1);
+
+        //When
+        Map<String, PrivateService.PrivateLinkedToSTDs> stringSCLMap = PrivateService.createMapICDSystemVersionUuidAndSTDFile(Set.of(scl1));
+
+        //Then
+        assertThat(stringSCLMap.keySet()).isEmpty();
+
+    }
+
+    @Test
+    void createMapICDSystemVersionUuidAndSTDFile_Should_return_map_with_two_lines() {
+        //Given
+        SCL scl1 = new SCL();
+        SCL scl2 = new SCL();
+        SCL scl3 = new SCL();
+        TIED tied1 = new TIED();
+        TIED tied2 = new TIED();
+        TIED tied3 = new TIED();
+        TCompasICDHeader compasICDHeader1 = new TCompasICDHeader();
+        compasICDHeader1.setICDSystemVersionUUID("UUID-1");
+        TCompasICDHeader compasICDHeader2 = new TCompasICDHeader();
+        compasICDHeader2.setICDSystemVersionUUID("UUID-2");
+        TCompasICDHeader compasICDHeader3 = new TCompasICDHeader();
+        compasICDHeader3.setICDSystemVersionUUID("UUID-2");
+        TPrivate tPrivate1 =  PrivateService.createPrivate(compasICDHeader1);
+        TPrivate tPrivate2 =  PrivateService.createPrivate(compasICDHeader2);
+        TPrivate tPrivate3 =  PrivateService.createPrivate(compasICDHeader3);
+        tied1.getPrivate().add(tPrivate1);
+        tied2.getPrivate().add(tPrivate2);
+        tied3.getPrivate().add(tPrivate3);
+        scl1.getIED().add(tied1);
+        scl2.getIED().add(tied2);
+        scl3.getIED().add(tied3);
+
+        //When
+        Map<String, PrivateService.PrivateLinkedToSTDs> stringSCLMap = PrivateService.createMapICDSystemVersionUuidAndSTDFile(Set.of(scl1,scl2,scl3));
+
+        //Then
+        assertThat(stringSCLMap.keySet()).hasSize(2).containsExactly("UUID-1", "UUID-2");
+        assertThat(stringSCLMap.get("UUID-2").stdList()).hasSize(2);
+    }
+
+    @Test
+    void checkSTDCorrespondanceWithLNodeCompasICDHeadershoul_throw_scdEception(){
+        //Given
+        TCompasICDHeader compasICDHeader1 = new TCompasICDHeader();
+        compasICDHeader1.setICDSystemVersionUUID("UUID-1");
+        TCompasICDHeader compasICDHeader2 = new TCompasICDHeader();
+        compasICDHeader2.setICDSystemVersionUUID("UUID-2");
+        compasICDHeader2.setHeaderId("ID-2");
+        compasICDHeader2.setHeaderVersion("VER-2");
+        compasICDHeader2.setHeaderRevision("REV-2");
+        TPrivate tPrivate1 =  PrivateService.createPrivate(compasICDHeader1);
+        TPrivate tPrivate2 =  PrivateService.createPrivate(compasICDHeader2);
+
+
+        PrivateService.PrivateLinkedToSTDs privateLinkedToSTDs1 = new PrivateService.PrivateLinkedToSTDs(tPrivate1,Collections.singletonList(new SCL()));
+        PrivateService.PrivateLinkedToSTDs privateLinkedToSTDs2 = new PrivateService.PrivateLinkedToSTDs(tPrivate2, Arrays.asList(new SCL(), new SCL()));
+
+
+        Map<String, PrivateService.PrivateLinkedToSTDs> stringSCLMap = new HashMap<>();
+        stringSCLMap.put("UUID-1", privateLinkedToSTDs1);
+        stringSCLMap.put("UUID-2", privateLinkedToSTDs2);
+
+        //When Then
+        assertThatThrownBy(() -> PrivateService.checkSTDCorrespondanceWithLNodeCompasICDHeader(stringSCLMap))
+                .isInstanceOf(ScdException.class)
+                .hasMessage("There are several STD files corresponding to headerId = ID-2 headerVersion = VER-2 headerRevision = REV-2 and ICDSystemVersionUUID = UUID-2");
+
+    }
+
+    @Test
+    void checkSTDCorrespondanceWithLNodeCompasICDHeader_should_pass(){
+        //Given
+        TCompasICDHeader compasICDHeader1 = new TCompasICDHeader();
+        compasICDHeader1.setICDSystemVersionUUID("UUID-1");
+        TCompasICDHeader compasICDHeader2 = new TCompasICDHeader();
+        compasICDHeader2.setICDSystemVersionUUID("UUID-2");
+        TPrivate tPrivate1 =  PrivateService.createPrivate(compasICDHeader1);
+        TPrivate tPrivate2 =  PrivateService.createPrivate(compasICDHeader2);
+
+
+        PrivateService.PrivateLinkedToSTDs privateLinkedToSTDs1 = new PrivateService.PrivateLinkedToSTDs(tPrivate1,Collections.singletonList(new SCL()));
+        PrivateService.PrivateLinkedToSTDs privateLinkedToSTDs2 = new PrivateService.PrivateLinkedToSTDs(tPrivate2, Collections.singletonList(new SCL()));
+
+
+        Map<String, PrivateService.PrivateLinkedToSTDs> stringSCLMap = new HashMap<>();
+        stringSCLMap.put("UUID-1", privateLinkedToSTDs1);
+        stringSCLMap.put("UUID-2", privateLinkedToSTDs2);
+
+        //When Then
+        assertDoesNotThrow(() -> PrivateService.checkSTDCorrespondanceWithLNodeCompasICDHeader(stringSCLMap));
+
+    }
+
+    @Test
+    void stdCheckFormatExceptionMessage_should_return_formatted_message_with_Private_data() {
+        //Given
+        TCompasICDHeader compasICDHeader = new TCompasICDHeader();
+        compasICDHeader.setHeaderId("ID-1");
+        compasICDHeader.setHeaderVersion("VER-1");
+        compasICDHeader.setICDSystemVersionUUID("UUID-1");
+        TPrivate tPrivate =  PrivateService.createPrivate(compasICDHeader);
+
+        //When
+        String message = PrivateService.stdCheckFormatExceptionMessage(tPrivate);
+
+        //Then
+        assertThat(message).isEqualTo("headerId = ID-1 headerVersion = VER-1 headerRevision = null and ICDSystemVersionUUID = UUID-1");
+
+    }
+
+    @Test
+    void createMapIEDNameAndPrivate_should_return_map_of_three_items() {
+        //Given
+        SCL scl = new SCL();
+        TLNode tlNode1 = new TLNode();
+        TLNode tlNode2 = new TLNode();
+        TLNode tlNode3 = new TLNode();
+        TCompasICDHeader compasICDHeader1 = new TCompasICDHeader();
+        compasICDHeader1.setIEDName("IED-1");
+        TCompasICDHeader compasICDHeader2 = new TCompasICDHeader();
+        compasICDHeader2.setIEDName("IED-2");
+        TCompasICDHeader compasICDHeader3 = new TCompasICDHeader();
+        compasICDHeader3.setIEDName("IED-3");
+        TPrivate tPrivate1 =  PrivateService.createPrivate(compasICDHeader1);
+        TPrivate tPrivate2 =  PrivateService.createPrivate(compasICDHeader2);
+        TPrivate tPrivate3 =  PrivateService.createPrivate(compasICDHeader3);
+        tlNode1.getPrivate().add(tPrivate1);
+        tlNode2.getPrivate().add(tPrivate2);
+        tlNode3.getPrivate().add(tPrivate3);
+        TFunction tFunction = new TFunction();
+        tFunction.getLNode().addAll(Arrays.asList(tlNode1, tlNode2, tlNode3));
+        TBay tBay = new TBay();
+        tBay.getFunction().add(tFunction);
+        TVoltageLevel tVoltageLevel = new TVoltageLevel();
+        tVoltageLevel.getBay().add(tBay);
+        TSubstation tSubstation = new TSubstation();
+        tSubstation.getVoltageLevel().add(tVoltageLevel);
+        scl.getSubstation().add(tSubstation);
+
+        //When
+        SclRootAdapter sclRootAdapter = SclService.initScl(Optional.empty(), "hv", "hr");
+        sclRootAdapter.setCurrentElem(scl);
+        Stream<TPrivate> tPrivateStream = PrivateService.createMapIEDNameAndPrivate(sclRootAdapter);
+
+        //Then
+        assertThat(tPrivateStream.toList()).hasSize(3)
+                .extracting(tPrivate -> PrivateService.extractCompasICDHeader(tPrivate).get().getIEDName())
+                .containsExactlyInAnyOrder("IED-1", "IED-2", "IED-3");
+    }
+
+    @Test
+    void createMapIEDNameAndPrivate_should_return_empty_map_when_no_compasicdheader_present_under_substation() {
+        //Given
+        SCL scl = new SCL();
+        TLNode tlNode1 = new TLNode();
+        TCompasBay compasBay = new TCompasBay();
+        compasBay.setUUID("UUID");
+        TPrivate tPrivate1 =  PrivateService.createPrivate(compasBay);
+        tlNode1.getPrivate().add(tPrivate1);
+        TFunction tFunction = new TFunction();
+        tFunction.getLNode().add(tlNode1);
+        TBay tBay = new TBay();
+        tBay.getFunction().add(tFunction);
+        TVoltageLevel tVoltageLevel = new TVoltageLevel();
+        tVoltageLevel.getBay().add(tBay);
+        TSubstation tSubstation = new TSubstation();
+        tSubstation.getVoltageLevel().add(tVoltageLevel);
+        scl.getSubstation().add(tSubstation);
+
+        //When
+        SclRootAdapter sclRootAdapter = SclService.initScl(Optional.empty(), "hv", "hr");
+        sclRootAdapter.setCurrentElem(scl);
+        Stream<TPrivate> tPrivateStream = PrivateService.createMapIEDNameAndPrivate(sclRootAdapter);
+
+        //Then
+        assertThat(tPrivateStream.toList()).isEmpty();
+    }
+
+    @Test
+    void comparePrivateCompasICDHeaders_should_return_true_equality_not_check_for_IEDNane_BayLabel_IEDinstance() {
+        // Given
+        TCompasICDHeader compasICDHeader1 = new TCompasICDHeader();
+        compasICDHeader1.setIEDName("IED-1");
+        compasICDHeader1.setBayLabel("BAY-1");
+        compasICDHeader1.setIEDinstance("1");
+        TCompasICDHeader compasICDHeader2 = new TCompasICDHeader();
+        TPrivate tPrivate1 =  PrivateService.createPrivate(compasICDHeader1);
+        TPrivate tPrivate2 =  PrivateService.createPrivate(compasICDHeader2);
+
+        // When
+        boolean result = PrivateService.comparePrivateCompasICDHeaders(tPrivate1,tPrivate2);
+        // Then
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    void comparePrivateCompasICDHeaders_should_return_false_equality_not_check_for_IEDNane_BayLabel_IEDinstance() {
+        // Given
+        TCompasICDHeader compasICDHeader1 = new TCompasICDHeader();
+        compasICDHeader1.setIEDName("IED-1");
+        compasICDHeader1.setBayLabel("BAY-1");
+        compasICDHeader1.setIEDinstance("1");
+        compasICDHeader1.setICDSystemVersionUUID("UUID-1");
+        TCompasICDHeader compasICDHeader2 = new TCompasICDHeader();
+        compasICDHeader2.setICDSystemVersionUUID("UUID-2");
+        TPrivate tPrivate1 =  PrivateService.createPrivate(compasICDHeader1);
+        TPrivate tPrivate2 =  PrivateService.createPrivate(compasICDHeader2);
+
+        // When
+        boolean result = PrivateService.comparePrivateCompasICDHeaders(tPrivate1,tPrivate2);
+        // Then
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void comparePrivateCompasICDHeaders_should_return_true() {
+        // Given
+        TCompasICDHeader compasICDHeader1 = new TCompasICDHeader();
+        compasICDHeader1.setIEDName("IED-1");
+        compasICDHeader1.setBayLabel("BAY-1");
+        compasICDHeader1.setIEDinstance("1");
+        compasICDHeader1.setICDSystemVersionUUID("UUID-1");
+        TCompasICDHeader compasICDHeader2 = new TCompasICDHeader();
+        compasICDHeader2.setICDSystemVersionUUID("UUID-1");
+        TPrivate tPrivate1 =  PrivateService.createPrivate(compasICDHeader1);
+        TPrivate tPrivate2 =  PrivateService.createPrivate(compasICDHeader2);
+
+        // When
+        boolean result = PrivateService.comparePrivateCompasICDHeaders(tPrivate1,tPrivate2);
+        // Then
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    void copyCompasICDHeaderFromLNodePrivateIntoSTDPrivate() {
+        // Given
+        TCompasICDHeader stdCompasICDHeader = new TCompasICDHeader();
+        stdCompasICDHeader.setICDSystemVersionUUID("UUID-1");
+        TCompasICDHeader lNodeCompasICDHeader = new TCompasICDHeader();
+        lNodeCompasICDHeader.setICDSystemVersionUUID("UUID-2");
+        lNodeCompasICDHeader.setIEDName("IED-1");
+        lNodeCompasICDHeader.setBayLabel("BAY-1");
+        lNodeCompasICDHeader.setIEDinstance("1");
+        TPrivate stdTPrivate =  PrivateService.createPrivate(stdCompasICDHeader);
+        TPrivate lNodePrivate =  PrivateService.createPrivate(lNodeCompasICDHeader);
+
+        // When
+        assertThat(stdTPrivate).isNotEqualTo(lNodePrivate);
+        PrivateService.copyCompasICDHeaderFromLNodePrivateIntoSTDPrivate(stdTPrivate,lNodePrivate);
+        // Then
+        TCompasICDHeader result = PrivateService.extractCompasICDHeader(stdTPrivate).get();
+        assertThat(result).extracting(TCompasICDHeader::getICDSystemVersionUUID, TCompasICDHeader::getIEDName,
+                TCompasICDHeader::getIEDinstance, TCompasICDHeader::getBayLabel)
+                .containsExactlyInAnyOrder("UUID-2", "IED-1", "1", "BAY-1");
+    }
 }

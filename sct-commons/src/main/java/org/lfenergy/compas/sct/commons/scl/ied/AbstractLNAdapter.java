@@ -16,6 +16,7 @@ import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.EnumTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
+import org.lfenergy.compas.sct.commons.util.ServiceSettingsType;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -46,7 +47,7 @@ import java.util.stream.Stream;
  *      <li>{@link AbstractLNAdapter#getDAI <em>Returns the value of the <b>ResumedDataTemplate </b> containment reference By filter</em>}</li>
  *      <li>{@link AbstractLNAdapter#getDAIValues(ResumedDataTemplate) <em>Returns <b>DAI (sGroup, value) </b> containment reference list By <b>ResumedDataTemplate </b> filter</em>}</li>
  *
- *      <li>{@link AbstractLNAdapter#getDataSetByRef(String) <em>Returns the value of the <b>TDataSet </b>object reference By the value of the <b>name </b>attribute </em>}</li>
+ *      <li>{@link AbstractLNAdapter#getDataSetByName(String) <em>Returns the value of the <b>TDataSet </b>object reference By the value of the <b>name </b>attribute </em>}</li>
  *
  *      <li>{@link AbstractLNAdapter#getControlBlocks(List, TServiceType) <em>Returns the value of the <b>ControlBlock </b>containment reference list that match <b>datSet </b> value of given <b>TDataSet</b> </em>}</li>
  *      <li>{@link AbstractLNAdapter#addPrivate <em>Add <b>TPrivate </b>under this object</em>}</li>
@@ -140,11 +141,12 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         }
     }
 
-    public Optional<TDataSet> findDataSetByRef(String dataSetRef) {
+    public Optional<DataSetAdapter> findDataSetByName(String dataSetName) {
         return currentElem.getDataSet()
                 .stream()
-                .filter(tDataSet -> Objects.equals(tDataSet.getName(), dataSetRef))
-                .findFirst();
+                .filter(tDataSet -> Objects.equals(tDataSet.getName(), dataSetName))
+                .findFirst()
+                .map(dataSet -> new DataSetAdapter(this, dataSet));
     }
 
     public DOIAdapter getDOIAdapterByName(String doiName) throws ScdException {
@@ -168,7 +170,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         return currentElem.getDOI()
                 .stream()
                 .map(tdoi -> new DOIAdapter(this, tdoi))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     boolean isLN0() {
@@ -211,7 +213,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                                 Objects.equals(filter.getPDA(), tExtRef.getPDA()) &&
                                 Objects.equals(filter.getIntAddr(), tExtRef.getIntAddr()) &&
                                 Objects.equals(filter.getPServT(), tExtRef.getPServT()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -344,12 +346,9 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      * @return list of <em>ControlBlock</em> objects
      */
     protected List<ControlBlock<?>> getControlBlocks(List<TDataSet> tDataSets, TServiceType serviceType) {
-        /*List<ControlBlock<?>> controlBlocks = new ArrayList<>();
-        for (TDataSet tDataSet : tDataSets) {
-            controlBlocks.addAll(getControlBlocksByDataSetRef(tDataSet.getName(), serviceType));
-        }*/
-        return tDataSets.stream().map(tDataSet -> getControlBlocksByDataSetRef(tDataSet.getName(), serviceType)).flatMap(Collection::stream).toList();
-
+        return tDataSets.stream()
+            .map(tDataSet -> getControlBlocksByDataSetRef(tDataSet.getName(), serviceType))
+            .flatMap(Collection::stream).toList();
     }
 
     /**
@@ -432,19 +431,15 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      */
     public boolean hasControlBlock(ControlBlock<? extends ControlBlock> controlBlock) {
 
-        switch (controlBlock.getServiceType()) {
-            case REPORT:
-                return currentElem.getReportControl().stream()
-                        .anyMatch(control -> control.getName().equals(controlBlock.getName()));
-            case GOOSE:
-                return isLN0() && ((LN0) currentElem).getGSEControl().stream()
-                        .anyMatch(control -> control.getName().equals(controlBlock.getName()));
-            case SMV:
-                return isLN0() && ((LN0) currentElem).getSampledValueControl().stream()
-                        .anyMatch(reportControl -> reportControl.getName().equals(controlBlock.getName()));
-            default:
-                return false;
-        }
+        return switch (controlBlock.getServiceType()) {
+            case REPORT -> currentElem.getReportControl().stream()
+                    .anyMatch(control -> control.getName().equals(controlBlock.getName()));
+            case GOOSE -> isLN0() && ((LN0) currentElem).getGSEControl().stream()
+                    .anyMatch(control -> control.getName().equals(controlBlock.getName()));
+            case SMV -> isLN0() && ((LN0) currentElem).getSampledValueControl().stream()
+                    .anyMatch(reportControl -> reportControl.getName().equals(controlBlock.getName()));
+            default -> false;
+        };
     }
 
     /**
@@ -619,7 +614,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         resumedDTTs.forEach(this::overrideAttributesFromDAI);
 
         if (updatableOnly) {
-            return resumedDTTs.stream().filter(ResumedDataTemplate::isUpdatable).collect(Collectors.toList());
+            return resumedDTTs.stream().filter(ResumedDataTemplate::isUpdatable).toList();
         } else {
             return resumedDTTs;
         }
@@ -662,13 +657,21 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
     }
 
     /**
+     * Gets linked LDevice as parent
+     *
+     * @return <em>IEDAdapter</em> object
+     */
+    private LDeviceAdapter getCurrentLDevice() {
+        return this.parentAdapter;
+    }
+
+    /**
      * Gets linked IED as parent
      *
      * @return <em>IEDAdapter</em> object
      */
     private IEDAdapter getCurrentIed() {
-        LDeviceAdapter lDeviceAdapter = this.parentAdapter;
-        return lDeviceAdapter.getParentAdapter();
+        return getCurrentLDevice().getParentAdapter();
     }
 
     /**
@@ -860,30 +863,15 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
     /**
      * Gets Data Set in LNode by its name
      *
-     * @param dataSetRef Data Set name
+     * @param dataSetName Data Set name
      * @return optional of <em>DataSetInfo</em>
      */
-    public Optional<DataSetInfo> getDataSetByRef(String dataSetRef) {
+    public Optional<DataSetInfo> getDataSetByName(String dataSetName) {
         return currentElem.getDataSet()
                 .stream()
-                .filter(tDataSet -> tDataSet.getName().equals(dataSetRef))
+                .filter(tDataSet -> tDataSet.getName().equals(dataSetName))
                 .map(DataSetInfo::from)
                 .findFirst();
-    }
-
-    /**
-     * Adds Data Set to LNode Data Sets
-     *
-     * @param dataSetInfo data's of Data Set to add
-     */
-    public void addDataSet(DataSetInfo dataSetInfo) {
-        TDataSet tDataSet = new TDataSet();
-        tDataSet.setName(dataSetInfo.getName());
-        tDataSet.getFCDA().addAll(
-                dataSetInfo.getFCDAInfos().stream().map(FCDAInfo::getFCDA).collect(Collectors.toList())
-        );
-        currentElem.getDataSet().add(tDataSet);
-
     }
 
     /**
@@ -943,5 +931,27 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         tExtRef.setSrcPrefix(null);
         tExtRef.setSrcLNInst(null);
         tExtRef.unsetSrcLNClass();
+    }
+
+    /**
+     * Adds DataSet in specified LNode in current IED/AccessPoint.
+     * The AccessPoint must have DataSet creation capabilities
+     *
+     * @param dataSetName Name of the dataSet
+     * @param serviceSettingsType GOOSE, SMV or REPORT service type
+     * @throws ScdException throws when IED does not have DataSet creation capabilities
+     * @see LDeviceAdapter#hasDataSetCreationCapability
+     */
+    public DataSetAdapter createDataSetIfNotExists(String dataSetName, ServiceSettingsType serviceSettingsType) {
+        return findDataSetByName(dataSetName).orElseGet(() -> {
+            if (!getCurrentLDevice().hasDataSetCreationCapability(serviceSettingsType)) {
+                throw new ScdException("IED/AccessPoint does not have capability to create DataSet of type %s in %s"
+                    .formatted(serviceSettingsType, getXPath()));
+            }
+            TDataSet newDataSet = new TDataSet();
+            newDataSet.setName(dataSetName);
+            currentElem.getDataSet().add(newDataSet);
+            return new DataSetAdapter(this, newDataSet);
+        });
     }
 }

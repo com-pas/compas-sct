@@ -94,7 +94,7 @@ public class FCDAInfo {
         }
 
         if(doName != null && doName.isDefined()){
-            tfcda.setDaName(doName.toString());
+            tfcda.setDoName(doName.toString());
         }
 
         if(daName != null && daName.isDefined()){

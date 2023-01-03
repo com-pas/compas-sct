@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Named.named;
 
 
 class UtilsTest {
@@ -282,5 +283,78 @@ class UtilsTest {
             Arguments.of("a", -2, null),
             Arguments.of("a_b_c", -4, null)
         );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideBlankFirstComparatorSource")
+    void blankFirstComparator_should_be_false(String s1, String s2, int expectedResult) {
+        // Given : parameters
+        // When
+        int result = Utils.blanksFirstComparator(s1, s2);
+        // Then
+        assertThat(Integer.signum(result)).isEqualTo(Integer.signum(expectedResult));
+    }
+
+    public static Stream<Arguments> provideBlankFirstComparatorSource() {
+        final int EQUALS = 0;
+        final int GREATER_THAN = 1;
+        final int LOWER_THAN = -1;
+
+        return Stream.of(
+            // Standard String.compare when not blank
+            Arguments.of("a", "a", EQUALS),
+            Arguments.of("a", "b", LOWER_THAN),
+            Arguments.of("b", "a", GREATER_THAN),
+
+            // Blank equality
+            Arguments.of(" ", " ", EQUALS),
+            Arguments.of(" ", null, EQUALS),
+            Arguments.of(" ", "", EQUALS),
+            Arguments.of("", " ", EQUALS),
+            Arguments.of("", null, EQUALS),
+            Arguments.of("", "", EQUALS),
+            Arguments.of(null, " ", EQUALS),
+            Arguments.of(null, null, EQUALS),
+            Arguments.of(null, "", EQUALS),
+
+            // Not blank compared to blank
+            Arguments.of("a", " ", GREATER_THAN),
+            Arguments.of(" ", "a", LOWER_THAN),
+            Arguments.of(" ", "b", LOWER_THAN), // transitivity " " < "a" && "a" < "b" => " " < "b"
+            Arguments.of("a", "", GREATER_THAN),
+            Arguments.of("", "a", LOWER_THAN),
+            Arguments.of("", "b", LOWER_THAN), // transitivity "" < "a" && "a" < "b" => "" < "b"
+            Arguments.of("a", null, GREATER_THAN),
+            Arguments.of(null, "a", LOWER_THAN),
+            Arguments.of(null, "b", LOWER_THAN)  // transitivity null < "a" && "a" < "b" => null < "b"
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideNullIfBlankSource")
+    void nullIfBlank_when_input_is_blank_should_return_null(String input){
+        // Given : Parameter
+        // When
+        String result = Utils.nullIfBlank(input);
+        // Then
+        assertThat(result).isNull();
+    }
+
+    public static Stream<Arguments> provideNullIfBlankSource() {
+        return Stream.of(
+            Arguments.of(named("null", null)),
+            Arguments.of(""),
+            Arguments.of(" ")
+        );
+    }
+
+    @Test
+    void nullIfBlank_when_input_is_not_blank_should_return_same_string(){
+        // Given
+        String input = "a";
+        // When
+        String result = Utils.nullIfBlank(input);
+        // Then
+        assertThat(result).isEqualTo(input);
     }
 }

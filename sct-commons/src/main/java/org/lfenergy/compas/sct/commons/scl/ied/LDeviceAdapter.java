@@ -12,10 +12,10 @@ import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
+import org.lfenergy.compas.sct.commons.util.ServiceSettingsType;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * A representation of the model object
@@ -73,6 +73,23 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
                 .map(TServer::getLDevice)
                 .flatMap(Collection::stream)
                 .anyMatch(tlDevice -> currentElem.getInst().equals(tlDevice.getInst()));
+    }
+
+    public TAccessPoint getAccessPoint(){
+        return parentAdapter.getCurrentElem().getAccessPoint()
+            .stream()
+            .filter(accessPoint ->
+                Optional.ofNullable(accessPoint.getServer())
+                    .filter(TServer::isSetLDevice)
+                    .map(TServer::getLDevice)
+                    .stream()
+                    .flatMap(List::stream)
+                    .map(TLDevice::getInst)
+                    .anyMatch(inst -> inst.equals(currentElem.getInst()))
+            )
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException(String.format("LDevice.inst='%s' not found in parent IED.name='%s'", currentElem.getInst(),
+                parentAdapter.getName())));
     }
 
     @Override
@@ -142,7 +159,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
         return currentElem.getLN()
                 .stream()
                 .map(tln -> new LNAdapter(this,tln))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -191,7 +208,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
                     extRefBindingInfo.setPrefix(lnAdapter.getPrefix());
                     return extRefBindingInfo;
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -214,7 +231,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
      * Gets a list of summarized DataTypeTemplate for DataAttribute DAIs (updatableOnly or not)
      * @param rDtt reference resumed DataTypeTemplate (used as filter)
      * @param updatableOnly true to retrieve only updatableOnly DAIs, false to retrieve all DAIs
-     * @return List of <em>ResumedDataTemplate</em> (updatableOnly or not)
+     * @return Set of <em>ResumedDataTemplate</em> (updatableOnly or not)
      * @throws ScdException SCD illegal arguments exception
      */
     public Set<ResumedDataTemplate> getDAI(ResumedDataTemplate rDtt, boolean updatableOnly) throws ScdException {
@@ -277,5 +294,57 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
             .daName(new DaTypeName(extRef.getDaName()))
             .build();
         return getDAI(filter, false);
+    }
+
+    /**
+     * Checks if parent AccessPoint has DataSet creation capability
+     *
+     * @param serviceSettingsType the type of DataSet we want to check for creation capability.
+     * @return true if parent AccessPoint has the capability, false otherwise
+     */
+    protected boolean hasDataSetCreationCapability(ServiceSettingsType serviceSettingsType) {
+        Objects.requireNonNull(serviceSettingsType);
+        TAccessPoint accessPoint = getAccessPoint();
+        if (!accessPoint.isSetServices()) {
+            return false;
+        }
+        TServices services = accessPoint.getServices();
+        return switch (serviceSettingsType) {
+            case REPORT -> services.isSetReportSettings() && hasDatSetConfOrDyn(services.getReportSettings());
+            case GSE -> services.isSetGSESettings() && hasDatSetConfOrDyn(services.getGSESettings());
+            case SMV -> services.isSetSMVSettings() && hasDatSetConfOrDyn(services.getSMVSettings());
+            case LOG -> services.isSetLogSettings() && hasDatSetConfOrDyn(services.getLogSettings());
+        };
+    }
+
+    private boolean hasDatSetConfOrDyn(TServiceSettings tServiceSettings) {
+        return tServiceSettings.isSetDatSet()
+            && (TServiceSettingsEnum.CONF.equals(tServiceSettings.getDatSet()) || TServiceSettingsEnum.DYN.equals(tServiceSettings.getDatSet()));
+    }
+
+    /**
+     * Checks if parent AccessPoint has ControlBlock creation capability
+     *
+     * @param serviceSettingsType the type of ControlBlock we want to check for creation capability.
+     * @return true if parent AccessPoint has the capability, false otherwise
+     */
+    protected boolean hasControlBlockCreationCapability(ServiceSettingsType serviceSettingsType) {
+        Objects.requireNonNull(serviceSettingsType);
+        TAccessPoint accessPoint = getAccessPoint();
+        if (!accessPoint.isSetServices()) {
+            return false;
+        }
+        TServices services = accessPoint.getServices();
+        return switch (serviceSettingsType) {
+            case REPORT -> services.isSetReportSettings() && hasCBNameConf(services.getReportSettings());
+            case GSE -> services.isSetGSESettings() && hasCBNameConf(services.getGSESettings());
+            case SMV -> services.isSetSMVSettings() && hasCBNameConf(services.getSMVSettings());
+            case LOG -> services.isSetLogSettings() && hasCBNameConf(services.getLogSettings());
+        };
+    }
+
+    private boolean hasCBNameConf(TServiceSettings tServiceSettings) {
+        return tServiceSettings.isSetCbName()
+            && (TServiceSettingsNoDynEnum.CONF.equals(tServiceSettings.getCbName()));
     }
 }

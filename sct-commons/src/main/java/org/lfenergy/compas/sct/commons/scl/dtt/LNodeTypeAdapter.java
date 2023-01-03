@@ -147,7 +147,7 @@ public class LNodeTypeAdapter
     public Optional<String> getDOTypeId(String doName){
         return currentElem.getDO()
                 .stream()
-                .filter(tdo -> doName.equals(tdo.getName()))
+                .filter(tdo -> doName.equals(Utils.removeTrailingDigits(tdo.getName())))
                 .map(TDO::getType)
                 .findFirst();
     }
@@ -314,9 +314,7 @@ public class LNodeTypeAdapter
             rDtt.getDoName().setName(doAdapter.getCurrentElem().getName());
 
             opRDtt = doTypeAdapter.getResumedDTTByDaName(daTypeName, rDtt);
-            if(opRDtt.isPresent()){
-                rDtts.add(opRDtt.get());
-            }
+            opRDtt.ifPresent(rDtts::add);
         }
         return rDtts;
     }
@@ -347,13 +345,13 @@ public class LNodeTypeAdapter
 
     /**
      * Find binded DOType info
-     * @param signalInfo
+     * @param signalInfo extRef signal info for binding
      * @return DOType info as object contening name, id and adapter
      * @throws ScdException throws when DO unknown
      */
     public DataTypeTemplateAdapter.DOTypeInfo findMatchingDOType(ExtRefSignalInfo signalInfo)  throws ScdException{
         DoTypeName doName = new DoTypeName(signalInfo.getPDO());
-        String extDoName = doName.getName();
+        String extDoName = Utils.removeTrailingDigits(doName.getName());
         String doTypeId = getDOTypeId(extDoName).orElseThrow(() ->
                 new IllegalArgumentException("Unknown doName :" + signalInfo.getPDO()));
         DOTypeAdapter doTypeAdapter = this.getParentAdapter().getDOTypeAdapterById(doTypeId).orElseThrow(() ->

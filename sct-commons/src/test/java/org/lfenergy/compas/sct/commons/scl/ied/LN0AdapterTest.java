@@ -10,6 +10,7 @@ import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
+import org.lfenergy.compas.sct.commons.util.ServiceSettingsType;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
@@ -20,6 +21,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.findLn0;
 
 class LN0AdapterTest {
 
@@ -521,4 +523,47 @@ class LN0AdapterTest {
             .isPresent()
             .hasValue("test");
     }
+
+    @Test
+    void createDataSetIfNotExists_should_create_dataSet() throws Exception {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
+        LN0Adapter ln0 = findLn0(new SclRootAdapter(scd), "IED_NAME1", "LD_INST11");
+        assertThat(ln0.getCurrentElem().getDataSet()).isEmpty();
+        // When
+        DataSetAdapter newDataSet = ln0.createDataSetIfNotExists("newDataSet", ServiceSettingsType.GSE);
+        // Then
+        assertThat(newDataSet.getCurrentElem().getName()).isEqualTo("newDataSet");
+        assertThat(newDataSet.getParentAdapter().getParentAdapter().getInst()).isEqualTo("LD_INST11");
+        assertThat(ln0.getCurrentElem().getDataSet())
+            .map(TDataSet::getName)
+            .containsExactly("newDataSet");
+    }
+
+    @Test
+    void createDataSetIfNotExists_when_dataset_exists_should_not_create_dataset() throws Exception {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
+        LN0Adapter ln0 = findLn0(new SclRootAdapter(scd), "IED_NAME1", "LD_INST12");
+        assertThat(ln0.getCurrentElem().getDataSet()).hasSize(1);
+        // When
+        DataSetAdapter newDataSet = ln0.createDataSetIfNotExists("existingDataSet", ServiceSettingsType.GSE);
+        // Then
+        assertThat(ln0.getCurrentElem().getDataSet()).hasSize(1)
+            .map(TDataSet::getName)
+            .containsExactly("existingDataSet");
+        assertThat(newDataSet.getCurrentElem().getName()).isEqualTo("existingDataSet");
+        assertThat(newDataSet.getParentAdapter().getParentAdapter().getInst()).isEqualTo("LD_INST12");
+    }
+
+    @Test
+    void createDataSetIfNotExists_when_ied_does_not_have_creation_capabilities_should_throw_exception() throws Exception {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
+        LN0Adapter ln0 = findLn0(new SclRootAdapter(scd), "IED_NAME2", "LD_INST21");
+        // When & Then
+        assertThatThrownBy(() -> ln0.createDataSetIfNotExists("existingDataSet", ServiceSettingsType.GSE))
+            .isInstanceOf(ScdException.class);
+    }
+
 }
