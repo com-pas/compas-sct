@@ -159,7 +159,9 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      * @return list of LNode ExtRefs elements
      */
     public List<TExtRef> getExtRefs() {
-        return getExtRefs(null);
+        List<TExtRef> tExtRefs =  getExtRefs(null);
+        if(tExtRefs == null || tExtRefs.isEmpty()) return Collections.emptyList();
+        else return tExtRefs;
     }
 
     /**
@@ -961,14 +963,25 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
 
     public ControlBlockAdapter createControlBlockIfNotExists(String cbName, String id, String datSet, ControlBlockEnum controlBlockEnum) {
         return findControlBlock(cbName, controlBlockEnum)
-            .orElseGet(() -> addControlBlock(
-                    switch (controlBlockEnum) {
-                        case GSE -> new GooseControlBlock(cbName, id, datSet);
-                        case SAMPLED_VALUE -> new SMVControlBlock(cbName, id, datSet);
-                        case REPORT -> new ReportControlBlock(cbName, id, datSet);
-                        default -> throw new IllegalArgumentException("Unsupported ControlBlock Type " + controlBlockEnum);
-                    }
-                )
-            );
+                .orElseGet(() -> addControlBlock(
+                                switch (controlBlockEnum) {
+                                    case GSE -> new GooseControlBlock(cbName, id, datSet);
+                                    case SAMPLED_VALUE -> new SMVControlBlock(cbName, id, datSet);
+                                    case REPORT -> new ReportControlBlock(cbName, id, datSet);
+                                    default -> throw new IllegalArgumentException("Unsupported ControlBlock Type " + controlBlockEnum);
+                                }
+                        )
+                );
+    }
+
+    public List<TFCDA> getFCDAs(TExtRef tExtRef){
+        TControl tControl1 = getTControlsByType(AccessPointAdapter.getControlTypeClass(tExtRef.getServiceType())).stream()
+                .filter(tControl -> tExtRef.getSrcCBName() != null && tExtRef.getSrcCBName().equals(tControl.getName()))
+                        .findFirst().orElseThrow(() -> new ScdException(String.format("DataSet linked with Control Block %s not found", tExtRef.getSrcCBName())));
+       return getCurrentElem().getDataSet().stream()
+                .filter(tDataSet -> tDataSet.getName().equals(tControl1.getDatSet()))
+                .map(TDataSet::getFCDA)
+                .flatMap(Collection::stream)
+                .toList();
     }
 }

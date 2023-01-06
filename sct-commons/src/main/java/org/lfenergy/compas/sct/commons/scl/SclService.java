@@ -234,10 +234,10 @@ public class SclService {
 
     /**
      * Create LDevice
-     * @param scd
-     * @param iedName
-     * @param ldInst
-     * @return
+     * @param scd SCL file in which LDevice should be found
+     * @param iedName name of IED in which LDevice is localized
+     * @param ldInst LdInst of LDevice for which adapter is created
+     * @return created LDevice adapter
      */
     private static LDeviceAdapter createLDeviceAdapter(SCL scd, String iedName, String ldInst) {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -571,5 +571,23 @@ public class SclService {
         sclReport.getSclReportItems().addAll(errors);
         sclReport.setSclRootAdapter(sclRootAdapter);
         return sclReport;
+    }
+
+    /**
+     * Checks Control Blocks, DataSets and FCDA number limitation into Access Points
+     * @param scd SCL file for which LDevice should be activated or deactivated
+     * @return SclReport Object that contain SCL file and set of errors
+     */
+    public static SclReport analyzeDataGroups(SCL scd) {
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        List<SclReportItem> sclReportItems = sclRootAdapter.streamIEDAdapters()
+                .map(iedAdapter -> {
+                    List<SclReportItem> list = new ArrayList<>();
+                    list.addAll(iedAdapter.checkDataGroupCoherence());
+                    list.addAll(iedAdapter.checkBindingDataGroupCoherence());
+                    return list;
+                }).flatMap(Collection::stream).toList();
+
+        return new SclReport(sclRootAdapter, sclReportItems);
     }
 }
