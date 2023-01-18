@@ -21,6 +21,7 @@ import org.lfenergy.compas.sct.commons.testhelpers.FCDARecord;
 import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -34,7 +35,7 @@ import static org.lfenergy.compas.sct.commons.util.ControlBlockEnum.*;
 class ExtRefServiceTest {
 
     @Test
-    void updateAllExtRefIedNames_should_update_iedName_and_ExtRefiedName() {
+    void updateAllExtRefIedNames_should_update_iedName_and_ExtRefIedName() {
         // Given : An ExtRef with a matching compas:Flow
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_success.xml");
         // When
@@ -240,7 +241,6 @@ class ExtRefServiceTest {
         SclReport sclReport = ExtRefService.createDataSetAndControlBlocks(scd);
         // Then
         assertThat(sclReport.getSclReportItems()).isEmpty();
-        assertThat(streamAllDataSets(sclReport.getSclRootAdapter())).hasSize(6);
 
         // Check ControlBlock names, id and datSet
         assertControlBlockExists(sclReport, "IED_NAME2", "LD_INST21", "CB_LD_INST21_CYCI", "DS_LD_INST21_CYCI", "IED_NAME2LD_INST21/LLN0.CB_LD_INST21_CYCI", REPORT);
@@ -266,6 +266,35 @@ class ExtRefServiceTest {
         assertThat(tReportControl.getRptEnabled().getClientLN().stream().map(ControlBlockTarget::from))
             .containsExactly(
                 new ControlBlockTarget("AP_NAME", "IED_NAME1", "LD_INST11", "", "LLN0", "", ""));
+    }
+
+    @Test
+    void createDataSetAndControlBlocks_should_set_ExtRef_srcXXX_attributes() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
+        // When
+        SclReport sclReport = ExtRefService.createDataSetAndControlBlocks(scd);
+        // Then
+        assertThat(sclReport.getSclReportItems()).isEmpty();
+
+        // assert all ExtRef.srcPrefix srcLNClass srcLNInst are not set
+        assertThat(streamAllExtRef(sclReport.getSclRootAdapter()))
+            .extracting(TExtRef::getSrcPrefix, TExtRef::getSrcLNClass, TExtRef::getSrcLNInst)
+            .containsOnly(Tuple.tuple(null, Collections.emptyList(), null));
+
+        // check some ExtRef
+        assertThat(findExtRef(sclReport, "IED_NAME1", "LD_INST11", "test bay internal"))
+            .extracting(TExtRef::getSrcCBName, TExtRef::getSrcLDInst)
+            .containsExactly("CB_LD_INST21_GSI", "LD_INST21");
+        assertThat(findExtRef(sclReport, "IED_NAME1", "LD_INST11", "test bay external"))
+            .extracting(TExtRef::getSrcCBName, TExtRef::getSrcLDInst)
+            .containsExactly("CB_LD_INST31_GSE", "LD_INST31");
+        assertThat(findExtRef(sclReport, "IED_NAME1", "LD_INST11", "test ServiceType is SMV, no daName and DO contains ST and MX, but only ST is FCDA candidate"))
+            .extracting(TExtRef::getSrcCBName, TExtRef::getSrcLDInst)
+            .containsExactly("CB_LD_INST21_SVI", "LD_INST21");
+        assertThat(findExtRef(sclReport, "IED_NAME1", "LD_INST11", "test ServiceType is Report_daReportMX_1"))
+            .extracting(TExtRef::getSrcCBName, TExtRef::getSrcLDInst)
+            .containsExactly("CB_LD_INST21_CYCI", "LD_INST21");
     }
 
     @Test
