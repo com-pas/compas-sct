@@ -170,7 +170,7 @@ import it in the temporary SCD file
 </SCL>
 ```
 Operations can now be realized and validated on this minimal file (which has the same structure as an ICD file). 
-Any validation on the minimal file guaranties a valid integration of those chunks into the large file.
+Any validation on the minimal file guarantees a valid integration of those chunks into the large file.
 
 > **WARNING:** This concern only update/creation operations on SCL file.
 
