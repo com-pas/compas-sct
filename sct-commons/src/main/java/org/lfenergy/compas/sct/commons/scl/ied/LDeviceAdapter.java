@@ -12,7 +12,7 @@ import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
-import org.lfenergy.compas.sct.commons.util.ServiceSettingsType;
+import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
@@ -173,7 +173,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
     public LNAdapter getLNAdapter(String lnClass, String lnInst, String prefix) throws ScdException {
         return currentElem.getLN()
                 .stream()
-                .filter(tln -> tln.getLnClass().contains(lnClass)
+                .filter(tln -> Utils.lnClassEquals(tln.getLnClass(), lnClass)
                     && tln.getInst().equals(lnInst)
                     && Utils.equalsOrBothBlank(prefix, tln.getPrefix()))
                 .map(tln -> new LNAdapter(this,tln))
@@ -195,8 +195,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
      */
     public List<ExtRefBindingInfo> getExtRefBinders(ExtRefSignalInfo signalInfo) {
         DataTypeTemplateAdapter dttAdapter = parentAdapter.getParentAdapter().getDataTypeTemplateAdapter();
-        return getLNAdaptersInclundigLN0()
-                .stream()
+        return getLNAdaptersIncludingLN0().stream()
                 .filter(abstractLNAdapter -> StringUtils.isBlank(signalInfo.getPLN()) || abstractLNAdapter.getLNClass().equals(signalInfo.getPLN()))
                 .map(lnAdapter -> {
                     String lnType = lnAdapter.getLnType();
@@ -217,7 +216,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
      */
     public List<ExtRefInfo> getExtRefInfo() {
         List<ExtRefInfo> extRefInfos = new ArrayList<>();
-        List<AbstractLNAdapter<?>> lnAdapters = getLNAdaptersInclundigLN0();
+        List<AbstractLNAdapter<?>> lnAdapters = getLNAdaptersIncludingLN0();
         LogicalNodeOptions logicalNodeOptions = new LogicalNodeOptions();
         logicalNodeOptions.setWithExtRef(true);
         for(AbstractLNAdapter<?> lnAdapter : lnAdapters) {
@@ -237,7 +236,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
     public Set<ResumedDataTemplate> getDAI(ResumedDataTemplate rDtt, boolean updatableOnly) throws ScdException {
         List<AbstractLNAdapter<?>> lnAdapters = new ArrayList<>();
         if(StringUtils.isBlank(rDtt.getLnClass())){
-            lnAdapters = getLNAdaptersInclundigLN0();
+            lnAdapters = getLNAdaptersIncludingLN0();
         } else if(rDtt.getLnClass().equals(TLLN0Enum.LLN_0.value())){
             lnAdapters.add(getLN0Adapter());
         } else {
@@ -268,7 +267,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
      * Gets all LN of LDevice including LN0
      * @return list of all LN of LDevice
      */
-    public List<AbstractLNAdapter<?>> getLNAdaptersInclundigLN0() {
+    public List<AbstractLNAdapter<?>> getLNAdaptersIncludingLN0() {
         List<AbstractLNAdapter<?>> aLNAdapters = new ArrayList<>();
         aLNAdapters.add(getLN0Adapter());
         aLNAdapters.addAll(getLNAdapters());
@@ -299,20 +298,20 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
     /**
      * Checks if parent AccessPoint has DataSet creation capability
      *
-     * @param serviceSettingsType the type of DataSet we want to check for creation capability.
+     * @param controlBlockEnum the type of DataSet we want to check for creation capability.
      * @return true if parent AccessPoint has the capability, false otherwise
      */
-    protected boolean hasDataSetCreationCapability(ServiceSettingsType serviceSettingsType) {
-        Objects.requireNonNull(serviceSettingsType);
+    protected boolean hasDataSetCreationCapability(ControlBlockEnum controlBlockEnum) {
+        Objects.requireNonNull(controlBlockEnum);
         TAccessPoint accessPoint = getAccessPoint();
         if (!accessPoint.isSetServices()) {
             return false;
         }
         TServices services = accessPoint.getServices();
-        return switch (serviceSettingsType) {
+        return switch (controlBlockEnum) {
             case REPORT -> services.isSetReportSettings() && hasDatSetConfOrDyn(services.getReportSettings());
             case GSE -> services.isSetGSESettings() && hasDatSetConfOrDyn(services.getGSESettings());
-            case SMV -> services.isSetSMVSettings() && hasDatSetConfOrDyn(services.getSMVSettings());
+            case SAMPLED_VALUE -> services.isSetSMVSettings() && hasDatSetConfOrDyn(services.getSMVSettings());
             case LOG -> services.isSetLogSettings() && hasDatSetConfOrDyn(services.getLogSettings());
         };
     }
@@ -325,20 +324,20 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
     /**
      * Checks if parent AccessPoint has ControlBlock creation capability
      *
-     * @param serviceSettingsType the type of ControlBlock we want to check for creation capability.
+     * @param controlBlockEnum the type of ControlBlock we want to check for creation capability.
      * @return true if parent AccessPoint has the capability, false otherwise
      */
-    protected boolean hasControlBlockCreationCapability(ServiceSettingsType serviceSettingsType) {
-        Objects.requireNonNull(serviceSettingsType);
+    protected boolean hasControlBlockCreationCapability(ControlBlockEnum controlBlockEnum) {
+        Objects.requireNonNull(controlBlockEnum);
         TAccessPoint accessPoint = getAccessPoint();
         if (!accessPoint.isSetServices()) {
             return false;
         }
         TServices services = accessPoint.getServices();
-        return switch (serviceSettingsType) {
+        return switch (controlBlockEnum) {
             case REPORT -> services.isSetReportSettings() && hasCBNameConf(services.getReportSettings());
             case GSE -> services.isSetGSESettings() && hasCBNameConf(services.getGSESettings());
-            case SMV -> services.isSetSMVSettings() && hasCBNameConf(services.getSMVSettings());
+            case SAMPLED_VALUE -> services.isSetSMVSettings() && hasCBNameConf(services.getSMVSettings());
             case LOG -> services.isSetLogSettings() && hasCBNameConf(services.getLogSettings());
         };
     }

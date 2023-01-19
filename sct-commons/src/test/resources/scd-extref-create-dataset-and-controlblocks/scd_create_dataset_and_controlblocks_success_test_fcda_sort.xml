@@ -65,11 +65,11 @@
                 </LDevice>
             </Server>
             <Services>
-                <GSESettings datSet="Conf"/>
-                <SMVSettings datSet="Conf">
+                <GSESettings datSet="Conf" cbName="Conf"/>
+                <SMVSettings datSet="Conf" cbName="Conf">
                     <SamplesPerSec>5</SamplesPerSec>
                 </SMVSettings>
-                <ReportSettings datSet="Conf"/>
+                <ReportSettings datSet="Conf" cbName="Conf"/>
             </Services>
         </AccessPoint>
     </IED>

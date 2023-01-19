@@ -98,7 +98,7 @@ public class DataSetAdapter extends SclElementAdapter<AbstractLNAdapter<? extend
             .filter(tfcda ->
                 Objects.equals(ldInst, tfcda.getLdInst())
                     && equalsOrBothBlank(prefix, tfcda.getPrefix())
-                    && tfcda.getLnClass().contains(lnClass)
+                    && Utils.lnClassEquals(tfcda.getLnClass(), lnClass)
                     && equalsOrBothBlank(lnInst, tfcda.getLnInst())
                     && Objects.equals(doName, tfcda.getDoName())
                     && Objects.equals(fc, tfcda.getFc())

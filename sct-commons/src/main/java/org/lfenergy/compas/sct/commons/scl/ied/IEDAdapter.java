@@ -7,7 +7,6 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 import lombok.NonNull;
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.dto.ControlBlock;
 import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
@@ -15,7 +14,6 @@ import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.PrivateService;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import org.lfenergy.compas.sct.commons.util.ServiceSettingsType;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.List;
@@ -43,7 +41,6 @@ import java.util.stream.Stream;
  *      <li>{@link IEDAdapter#getServices Returns the value of the <b>Service </b>object</em>}</li>
  *      <li>{@link IEDAdapter#getPrivateHeader <em>Returns the value of the <b>TPrivate </b>containment reference list</em>}</li>
  *      <li>{@link IEDAdapter#getExtRefBinders <em>Returns the value of the <b>ExtRefBindingInfo </b>containment reference list By <b>ExtRefSignalInfo</b></em>}</li>
- *      <li>{@link IEDAdapter#createControlBlock <em>Add <b>ControlBlock </b> describing the children <b>TControlBlock </b> that can be created under <b>TAnyLN</b></em>}</li>
  *      <li>{@link IEDAdapter#addPrivate <em>Add <b>TPrivate </b>under this object</em>}</li>
  *      <li>{@link IEDAdapter#updateLDeviceNodesType <em>Update <b>Type </b> describing the value of the children <b>TAnyLN</b></em>}</li>
  *    </ul>
@@ -300,55 +297,6 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
 
         TServices srv = accessPoint.getServices();
         return srv != null && srv.getSettingGroups() != null && srv.getSettingGroups().getConfSG() != null;
-    }
-
-    /**
-     * Creates Control Block in specified LNode in current IED
-     *
-     * @param controlBlock Control Block data to add (and LNode path)
-     * @param serviceSettingsType Type of ControlBlock to create
-     * @return created <em>ControlBlock</em> object
-     * @throws ScdException throws when inconsistency between given ControlBlock and IED configuration
-     */
-    public ControlBlock<? extends ControlBlock> createControlBlock(ControlBlock<? extends ControlBlock> controlBlock, ServiceSettingsType serviceSettingsType)
-        throws ScdException {
-
-        controlBlock.validateCB();
-        controlBlock.validateSecurityEnabledValue(this);
-        controlBlock.validateDestination(this.parentAdapter);
-
-        LDeviceAdapter lDeviceAdapter = findLDeviceAdapterByLdInst(controlBlock.getHolderLDInst()).orElseThrow();
-        if (!lDeviceAdapter.hasControlBlockCreationCapability(serviceSettingsType)) {
-            throw new ScdException("The AccessPoint does not have capability to create ControlBlock of type " + serviceSettingsType.toString());
-        }
-        AbstractLNAdapter<?> lnAdapter = AbstractLNAdapter.builder()
-                .withLDeviceAdapter(lDeviceAdapter)
-                .withLnClass(controlBlock.getHolderLnClass())
-                .withLnInst(controlBlock.getHolderLnInst())
-                .withLnPrefix(controlBlock.getHolderLnPrefix())
-                .build();
-
-        if (lnAdapter.hasControlBlock(controlBlock)) {
-            throw new ScdException(
-                    String.format(
-                            "Control block %s already exist in LNode %s%s%s",
-                            controlBlock.getName(), lnAdapter.getPrefix(), lnAdapter.getLNClass(), lnAdapter.getLNInst()
-                    )
-            );
-        }
-
-        if (lnAdapter.getDataSetByName(controlBlock.getDataSetRef()).isEmpty()) {
-            throw new ScdException(
-                    String.format(
-                            "Control block %s references unknown dataSet in LNode %s%s%s",
-                            controlBlock.getName(), lnAdapter.getPrefix(), lnAdapter.getLNClass(), lnAdapter.getLNInst()
-                    )
-            );
-        }
-        lnAdapter.addControlBlock(controlBlock);
-
-        return controlBlock;
-
     }
 
     /**

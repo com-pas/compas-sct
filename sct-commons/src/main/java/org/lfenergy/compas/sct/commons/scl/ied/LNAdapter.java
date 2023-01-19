@@ -86,8 +86,7 @@ public class LNAdapter extends AbstractLNAdapter<TLN>{
      */
     @Override
     public String getLNClass() {
-
-        if(!currentElem.getLnClass().isEmpty()){
+        if(currentElem.isSetLnClass()){
             return currentElem.getLnClass().get(0);
         }
         return null;

@@ -5,23 +5,17 @@
 package org.lfenergy.compas.sct.commons.dto;
 
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.scl2007b4.model.TGSEControl;
-import org.lfenergy.compas.scl2007b4.model.TGSESettings;
-import org.lfenergy.compas.scl2007b4.model.TMcSecurity;
-import org.lfenergy.compas.scl2007b4.model.TPredefinedTypeOfSecurityEnum;
-import org.lfenergy.compas.scl2007b4.model.TProtocol;
-import org.lfenergy.compas.scl2007b4.model.TServiceType;
-import org.lfenergy.compas.scl2007b4.model.TServices;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 
 import java.util.UUID;
+import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.*;
 
 class GooseControlBlockTest {
     private static final String ID = UUID.randomUUID().toString();
@@ -30,85 +24,192 @@ class GooseControlBlockTest {
     private static final String DESC = "DESCRIPTION";
 
     @Test
-    void testInit(){
+    void constructor_should_fill_default_values() {
+        // Given : NAME, DATASET_REF, ID constants
+        // When
+        GooseControlBlock gooseControlBlock = new GooseControlBlock(NAME, ID, DATASET_REF);
+        // Then
+        assertThat(gooseControlBlock)
+            .extracting(ControlBlock::getName, ControlBlock::getDataSetRef, ControlBlock::getId, GooseControlBlock::isFixedOffs, ControlBlock::getConfRev,
+                GooseControlBlock::getSecurityEnable)
+            .containsExactly(NAME, DATASET_REF, ID, false, 10000L, TPredefinedTypeOfSecurityEnum.NONE);
+    }
+
+    @Test
+    void constructor_should_copy_all_data_from_TGSEControl() {
+        // Given
+        TGSEControl tgseControl = new TGSEControl();
+        tgseControl.setName(NAME);
+        tgseControl.setDatSet(DATASET_REF);
+        tgseControl.setAppID(ID);
+        tgseControl.setConfRev(5L);
+        tgseControl.setDesc(DESC);
+        tgseControl.setFixedOffs(true);
+        tgseControl.getIEDName().add(new TControlWithIEDName.IEDName());
+        tgseControl.setProtocol(new TProtocol());
+
+        // When
+        GooseControlBlock gooseControlBlock = new GooseControlBlock(tgseControl);
+        // Then
+        assertThat(gooseControlBlock)
+            .extracting(ControlBlock::getName,
+                ControlBlock::getDataSetRef,
+                ControlBlock::getId,
+                ControlBlock::getConfRev,
+                ControlBlock::getDesc,
+                GooseControlBlock::isFixedOffs,
+                GooseControlBlock::getSecurityEnable)
+            .containsExactly(NAME, DATASET_REF, ID, 5L, DESC, true, TPredefinedTypeOfSecurityEnum.NONE);
+        assertThat(gooseControlBlock.getTargets()).hasSize(1);
+        assertThat(gooseControlBlock.getProtocol()).isNotNull();
+    }
+
+    @Test
+    void getServiceType_should_return_GOOSE() {
+        // Given
+        GooseControlBlock gooseControlBlock = new GooseControlBlock(NAME, ID, DATASET_REF);
+        // When
+        TServiceType serviceType = gooseControlBlock.getServiceType();
+        // Then
+        assertThat(serviceType).isEqualTo(TServiceType.GOOSE);
+    }
+
+    @Test
+    void getControlBlockEnum_should_return_GSE() {
+        // Given
+        GooseControlBlock gooseControlBlock = new GooseControlBlock(NAME, ID, DATASET_REF);
+        // When
+        ControlBlockEnum controlBlockEnum = gooseControlBlock.getControlBlockEnum();
+        // Then
+        assertThat(controlBlockEnum).isEqualTo(ControlBlockEnum.GSE);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideCorrectValueForValidateSecurityEnabledValue")
+    void validateSecurityEnabledValue_should_not_throw_exception(TServices tServices, TPredefinedTypeOfSecurityEnum securityEnable) {
+        // Given
         GooseControlBlock gooseControlBlock = create();
-        assertAll("INIT",
-                () -> assertEquals(ID,gooseControlBlock.getId()),
-                () -> assertEquals(DATASET_REF,gooseControlBlock.getDataSetRef()),
-                () -> assertEquals(NAME,gooseControlBlock.getName()),
-                () -> assertEquals(DESC,gooseControlBlock.getDesc()),
-                () -> assertNotNull(gooseControlBlock.getProtocol()),
-                () -> assertEquals("PROTO",gooseControlBlock.getProtocol().getValue()),
-                () -> assertTrue(gooseControlBlock.getProtocol().isMustUnderstand()),
-                () -> assertEquals(TPredefinedTypeOfSecurityEnum.NONE,gooseControlBlock.getSecurityEnable())
+        gooseControlBlock.setSecurityEnable(securityEnable);
+        // When & Then
+        assertThatCode(() -> gooseControlBlock.validateSecurityEnabledValue(tServices))
+            .doesNotThrowAnyException();
+    }
+
+    private static Stream<Arguments> provideCorrectValueForValidateSecurityEnabledValue() {
+        TServices nullGSESettings = new TServices();
+        TServices nullMcSecurity = new TServices();
+        nullMcSecurity.setGSESettings(new TGSESettings());
+
+        return Stream.of(
+            Arguments.of(null, TPredefinedTypeOfSecurityEnum.NONE),
+            Arguments.of(nullGSESettings, TPredefinedTypeOfSecurityEnum.NONE),
+            Arguments.of(nullMcSecurity, TPredefinedTypeOfSecurityEnum.NONE),
+            Arguments.of(newTServices(true, false), TPredefinedTypeOfSecurityEnum.NONE),
+            Arguments.of(newTServices(true, false), TPredefinedTypeOfSecurityEnum.SIGNATURE),
+            Arguments.of(newTServices(false, true), TPredefinedTypeOfSecurityEnum.NONE),
+            Arguments.of(newTServices(true, true), TPredefinedTypeOfSecurityEnum.NONE),
+            Arguments.of(newTServices(true, true), TPredefinedTypeOfSecurityEnum.SIGNATURE),
+            Arguments.of(newTServices(true, true), TPredefinedTypeOfSecurityEnum.SIGNATURE_AND_ENCRYPTION)
         );
     }
 
-    @Test
-    void testGetClassType() {
-        GooseControlBlock gooseControlBlock = new GooseControlBlock();
-        assertEquals(GooseControlBlock.class, gooseControlBlock.getClassType());
-    }
-
-    @Test
-    void testGetServiceType() {
-        GooseControlBlock gooseControlBlock = new GooseControlBlock();
-        assertEquals(TServiceType.GOOSE, gooseControlBlock.getServiceType());
-    }
-
-    @Test
-    void testValidateSecurityEnabledValue() {
+    @ParameterizedTest
+    @MethodSource("provideInvalidValueForValidateSecurityEnabledValue")
+    void validateSecurityEnabledValue_should_throw_exception(TServices tServices, TPredefinedTypeOfSecurityEnum securityEnable) {
+        // Given
         GooseControlBlock gooseControlBlock = create();
+        gooseControlBlock.setSecurityEnable(securityEnable);
+        // When & Then
+        assertThatThrownBy(() -> gooseControlBlock.validateSecurityEnabledValue(tServices))
+            .isInstanceOf(ScdException.class);
+    }
 
-        assertThrows(ScdException.class, () ->gooseControlBlock.validateSecurityEnabledValue((TServices) null));
+    private static Stream<Arguments> provideInvalidValueForValidateSecurityEnabledValue() {
+        TServices nullGSESettings = new TServices();
+        TServices nullMcSecurity = new TServices();
+        nullMcSecurity.setGSESettings(new TGSESettings());
 
-        final TServices tServices = new TServices();
-        assertThrows(ScdException.class, () -> gooseControlBlock.validateSecurityEnabledValue(tServices));
+        return Stream.of(
+            Arguments.of(null, TPredefinedTypeOfSecurityEnum.SIGNATURE),
+            Arguments.of(null, TPredefinedTypeOfSecurityEnum.SIGNATURE_AND_ENCRYPTION),
+            Arguments.of(nullGSESettings, TPredefinedTypeOfSecurityEnum.SIGNATURE),
+            Arguments.of(nullGSESettings, TPredefinedTypeOfSecurityEnum.SIGNATURE_AND_ENCRYPTION),
+            Arguments.of(nullMcSecurity, TPredefinedTypeOfSecurityEnum.SIGNATURE),
+            Arguments.of(nullMcSecurity, TPredefinedTypeOfSecurityEnum.SIGNATURE_AND_ENCRYPTION),
+            Arguments.of(newTServices(false, false), TPredefinedTypeOfSecurityEnum.SIGNATURE),
+            Arguments.of(newTServices(false, false), TPredefinedTypeOfSecurityEnum.SIGNATURE_AND_ENCRYPTION),
+            Arguments.of(newTServices(true, false), TPredefinedTypeOfSecurityEnum.SIGNATURE_AND_ENCRYPTION),
+            Arguments.of(newTServices(false, true), TPredefinedTypeOfSecurityEnum.SIGNATURE),
+            Arguments.of(newTServices(false, true), TPredefinedTypeOfSecurityEnum.SIGNATURE_AND_ENCRYPTION)
+        );
+    }
+
+    public static TServices newTServices(boolean isSignature, boolean isEncryption){
+        TServices tServices = new TServices();
         tServices.setGSESettings(new TGSESettings());
-        assertThrows(ScdException.class, () -> gooseControlBlock.validateSecurityEnabledValue(tServices));
         tServices.getGSESettings().setMcSecurity(new TMcSecurity());
-        assertDoesNotThrow(() -> gooseControlBlock.validateSecurityEnabledValue(tServices));
-        tServices.getGSESettings().getMcSecurity().setSignature(false);
-        gooseControlBlock.setSecurityEnable(TPredefinedTypeOfSecurityEnum.SIGNATURE);
-        assertThrows(ScdException.class, () -> gooseControlBlock.validateSecurityEnabledValue(tServices));
-        tServices.getGSESettings().getMcSecurity().setSignature(true);
-        assertDoesNotThrow(() -> gooseControlBlock.validateSecurityEnabledValue(tServices));
-
+        tServices.getGSESettings().getMcSecurity().setSignature(isSignature);
+        tServices.getGSESettings().getMcSecurity().setEncryption(isEncryption);
+        return tServices;
     }
 
     @Test
-    void ShouldReturnOKWhenCreateControlBlock() {
-        GooseControlBlock gooseControlBlock = create();
-        TGSEControl tgseControl = gooseControlBlock.createControlBlock();
-        assertAll("CREATE CB",
-                () -> assertEquals(ID,tgseControl.getAppID()),
-                () -> assertEquals(DATASET_REF,tgseControl.getDatSet()),
-                () -> assertEquals(NAME,tgseControl.getName()),
-                () -> assertEquals(10000,tgseControl.getConfRev()),
-                () -> assertEquals(DESC,tgseControl.getDesc())
-        );
+    void toTControl_should_return_TGSEControl() {
+        // Given
+        GooseControlBlock gooseControlBlock = new GooseControlBlock(NAME, ID, DATASET_REF);
+        gooseControlBlock.setConfRev(5L);
+        gooseControlBlock.setFixedOffs(false);
+        TProtocol protocol = new TProtocol();
+        protocol.setValue("PROTO");
+        protocol.setMustUnderstand(true);
+        gooseControlBlock.setProtocol(protocol);
+        gooseControlBlock.setDesc(DESC);
+        gooseControlBlock.setType(TGSEControlTypeEnum.GSSE);
+        gooseControlBlock.setSecurityEnable(TPredefinedTypeOfSecurityEnum.SIGNATURE_AND_ENCRYPTION);
+        gooseControlBlock.getTargets().add(
+            new ControlBlockTarget("AP_REF", DTO.HOLDER_LD_INST, "", DTO.HOLDER_LN_INST, DTO.HOLDER_LN_CLASS, DTO.HOLDER_LN_PREFIX));
 
-        GooseControlBlock gooseControlBlock1 = new GooseControlBlock(tgseControl);
-        assertAll("INIT",
-                () -> assertEquals(ID,gooseControlBlock1.getId()),
-                () -> assertEquals(DATASET_REF,gooseControlBlock1.getDataSetRef()),
-                () -> assertEquals(NAME,gooseControlBlock1.getName()),
-                () -> assertEquals(DESC,gooseControlBlock1.getDesc()),
-                () -> assertNotNull(gooseControlBlock1.getProtocol()),
-                () -> assertEquals("PROTO",gooseControlBlock1.getProtocol().getValue()),
-                () -> assertTrue(gooseControlBlock1.getProtocol().isMustUnderstand()),
-                () -> assertEquals(TPredefinedTypeOfSecurityEnum.NONE,gooseControlBlock1.getSecurityEnable())
-        );
+        // When
+        TGSEControl tgseControl = gooseControlBlock.toTControl();
+        // Then
+        assertThat(tgseControl)
+            .extracting(TControl::getName, TControl::getDatSet, TGSEControl::getAppID, TControlWithIEDName::getConfRev, TGSEControl::isFixedOffs,
+                TUnNaming::getDesc, TGSEControl::getType, TGSEControl::getSecurityEnable)
+            .containsExactly(NAME, DATASET_REF, ID, 5L, false, DESC, TGSEControlTypeEnum.GSSE, TPredefinedTypeOfSecurityEnum.SIGNATURE_AND_ENCRYPTION);
+        assertThat(tgseControl.getProtocol())
+            .extracting(TProtocol::getValue, TProtocol::isMustUnderstand)
+            .containsExactly("PROTO", true);
+        assertThat(tgseControl.getIEDName()).hasSize(1);
     }
 
+    @Test
+    void addToLN_should_add_ControlBlock_to_given_LN0() {
+        // Given
+        GooseControlBlock gooseControlBlock = new GooseControlBlock(NAME, ID, DATASET_REF);
+        TLN0 ln0 = new TLN0();
+        // When
+        TGSEControl tgseControl = gooseControlBlock.addToLN(ln0);
+        // Then
+        assertThat(ln0.getGSEControl()).hasSize(1)
+            .first()
+            .isSameAs(tgseControl);
+        assertThat(tgseControl).extracting(TControl::getName, TControl::getDatSet, TGSEControl::getAppID)
+            .containsExactly(NAME, DATASET_REF, ID);
+    }
+
+    @Test
+    void addToLN_when_parameter_is_LN_should_throw_exception() {
+        // Given
+        GooseControlBlock gooseControlBlock = new GooseControlBlock(NAME, ID, DATASET_REF);
+        TLN ln = new TLN();
+        // When & Then
+        assertThatThrownBy(() -> gooseControlBlock.addToLN(ln))
+            .isInstanceOf(IllegalArgumentException.class);
+    }
 
     private GooseControlBlock create(){
-        GooseControlBlock gooseControlBlock = new GooseControlBlock();
-
-        gooseControlBlock.setId(ID);
-        gooseControlBlock.setDataSetRef(DATASET_REF);
+        GooseControlBlock gooseControlBlock = new GooseControlBlock(NAME, ID, DATASET_REF);
         gooseControlBlock.setConfRev(1L);
-        gooseControlBlock.setName(NAME);
 
         gooseControlBlock.setFixedOffs(false);
         TProtocol protocol = new TProtocol();
