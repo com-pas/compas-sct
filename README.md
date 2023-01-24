@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
 [![Slack](https://raw.githubusercontent.com/com-pas/compas-architecture/master/public/LFEnergy-slack.svg)](http://lfenergy.slack.com/)
 
 # System Configuration Tool (SCT) components
-The SCT tool is a library for generating SCD (System Confifuration Description) files based on IEC 61850 standard.
+The SCT tool is a library for generating SCD (System Configuration Description) files based on IEC 61850 standard.
 The code is written with Java (POJO) and is based on Chain of Responsability pattern.
 It's architecture is modular and is composed by 3 modules (sct-app, sct-commons and sct-data).
 The main feature is to generate a SCD file from SSD (Substation Specification Description) and STD (System Template definition) files.
