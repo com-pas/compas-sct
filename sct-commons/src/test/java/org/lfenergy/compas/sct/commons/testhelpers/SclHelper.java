@@ -147,4 +147,13 @@ public class SclHelper {
             .map(LDeviceAdapter::getLN0Adapter);
     }
 
+    public static Stream<TExtRef> streamAllExtRef(SclRootAdapter sclRootAdapter) {
+        return streamAllLn0Adapters(sclRootAdapter)
+            .filter(AbstractLNAdapter::hasInputs)
+            .map(LN0Adapter::getInputsAdapter)
+            .map(InputsAdapter::getCurrentElem)
+            .map(TInputs::getExtRef)
+            .flatMap(List::stream);
+    }
+
 }

@@ -50,7 +50,7 @@ class InputsAdapterTest {
     }
 
     @Test
-    void updateAllSourceDataSetsAndControlBlocks_should_report_Target_Ied_missing_Private_compasBay_errors() throws Exception {
+    void updateAllSourceDataSetsAndControlBlocks_should_report_Target_Ied_missing_Private_compasBay_errors() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_ied_errors.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -65,7 +65,7 @@ class InputsAdapterTest {
     }
 
     @Test
-    void updateAllSourceDataSetsAndControlBlocks_should_report_Source_Ied_missing_Private_compasBay_errors() throws Exception {
+    void updateAllSourceDataSetsAndControlBlocks_should_report_Source_Ied_missing_Private_compasBay_errors() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_ied_errors.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -81,7 +81,7 @@ class InputsAdapterTest {
     }
 
     @Test
-    void updateAllSourceDataSetsAndControlBlocks_should_report_ExtRef_attribute_missing() throws Exception {
+    void updateAllSourceDataSetsAndControlBlocks_should_report_ExtRef_attribute_missing() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_extref_errors.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -103,7 +103,7 @@ class InputsAdapterTest {
     }
 
     @Test
-    void updateAllSourceDataSetsAndControlBlocks_should_succeed() throws Exception {
+    void updateAllSourceDataSetsAndControlBlocks_should_succeed() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -118,7 +118,7 @@ class InputsAdapterTest {
     @ParameterizedTest
     @MethodSource("provideCreateFCDA")
     void updateAllSourceDataSetsAndControlBlocks_should_create_dataset_and_fcda_for_valid_extRef(String extRefDesc, String dataSetPath,
-                                                                                                 List<FCDARecord> expectedFcda) throws Exception {
+                                                                                                 List<FCDARecord> expectedFcda) {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -195,7 +195,7 @@ class InputsAdapterTest {
 
     @ParameterizedTest
     @MethodSource("provideDoNotCreateFCDA")
-    void updateAllSourceDataSetsAndControlBlocks_should_not_create_FCDA_when_no_valid_source_Da_found(String extRefDesc) throws Exception {
+    void updateAllSourceDataSetsAndControlBlocks_should_not_create_FCDA_when_no_valid_source_Da_found(String extRefDesc) {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -225,7 +225,7 @@ class InputsAdapterTest {
     }
 
     @Test
-    void updateAllSourceDataSetsAndControlBlocks_when_AceessPoint_does_not_have_dataset_creation_capability_should_report_error() throws Exception {
+    void updateAllSourceDataSetsAndControlBlocks_when_AceessPoint_does_not_have_dataset_creation_capability_should_report_error() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -238,7 +238,7 @@ class InputsAdapterTest {
         // Then
         assertThat(sclReportItems).hasSize(1)
             .first().extracting(SclReportItem::getMessage).asString()
-            .startsWith("Could not create DataSet for this ExtRef : IED/AccessPoint does not have capability to create DataSet of type GSE");
+            .startsWith("Could not create DataSet or ControlBlock for this ExtRef : IED/AccessPoint does not have capability to create DataSet of type GSE");
     }
 
     private static InputsAdapter keepOnlyThisExtRef(SclRootAdapter sclRootAdapter, String extRefDesc) {
