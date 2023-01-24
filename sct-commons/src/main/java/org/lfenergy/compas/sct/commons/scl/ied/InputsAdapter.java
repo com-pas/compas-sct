@@ -14,8 +14,8 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.PrivateService;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 import org.lfenergy.compas.sct.commons.util.FcdaCandidates;
-import org.lfenergy.compas.sct.commons.util.ServiceSettingsType;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
@@ -241,6 +241,10 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         return parentAdapter.getParentAdapter();
     }
 
+    private AbstractLNAdapter<?> getLNAdapter(){
+        return parentAdapter;
+    }
+
     public List<SclReportItem> updateAllSourceDataSetsAndControlBlocks() {
         List<TCompasFlow> compasFlows = PrivateService.extractCompasPrivates(currentElem, TCompasFlow.class);
         String currentBayUuid = getIedAdapter().getPrivateCompasBay().map(TCompasBay::getUUID).orElse(null);
@@ -310,21 +314,39 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
 
         try {
             sourceDas.forEach(sourceDa -> {
-                String dataSetName = generateDataSetName(extRef, sourceDa, isBayInternal);
-                ServiceSettingsType serviceSettingsType = ServiceSettingsType.fromTServiceType(extRef.getServiceType());
-                DataSetAdapter dataSet = sourceLDevice.getLN0Adapter().createDataSetIfNotExists(dataSetName, serviceSettingsType);
-                createFCDAInDataSet(extRef, sourceDa, dataSet);
+                String datasetSuffix = generateDataSetSuffix(extRef, sourceDa, isBayInternal);
+                createDataSetWithFCDA(extRef, sourceLDevice, sourceDa, datasetSuffix);
+                createControlBlockWithTarget(extRef, sourceLDevice, sourceDa, datasetSuffix);
             });
         } catch (ScdException e) {
-            // ScdException can be thrown if AccessPoint does not have DataSet creation capability
+            // ScdException can be thrown if AccessPoint does not have DataSet/ControlBlock creation capability
             log.error(e.getMessage(), e);
             return fatalReportItem(extRef, "Could not create DataSet for this ExtRef : " + e.getMessage());
         }
         return Optional.empty();
     }
 
-    private static String generateDataSetName(TExtRef extRef, ResumedDataTemplate sourceDa, boolean isBayInternal) {
-        return "DS_" + extRef.getLdInst() + "_"
+    private void createDataSetWithFCDA(TExtRef extRef, LDeviceAdapter sourceLDevice, ResumedDataTemplate sourceDa, String datasetSuffix) {
+        DataSetAdapter dataSetAdapter = sourceLDevice.getLN0Adapter().createDataSetIfNotExists("DS_" + datasetSuffix, ControlBlockEnum.from(extRef.getServiceType()));
+        String fcdaDaName = extRef.getServiceType() == TServiceType.REPORT ? null : sourceDa.getDaRef();
+        String fcdaLnClass = extRef.getLnClass().stream().findFirst().orElse(null);
+        dataSetAdapter.createFCDAIfNotExists(extRef.getLdInst(), extRef.getPrefix(), fcdaLnClass, extRef.getLnInst(),
+            sourceDa.getDoRef(), fcdaDaName, sourceDa.getFc());
+    }
+
+    private void createControlBlockWithTarget(TExtRef extRef, LDeviceAdapter sourceLDevice, ResumedDataTemplate sourceDa, String datasetSuffix) {
+        String cbName = "CB_" + datasetSuffix;
+        String cbId = generateControlBlockId(cbName, sourceLDevice.getLdName(), getParentAdapter());
+        ControlBlockAdapter controlBlockAdapter = sourceLDevice.getLN0Adapter().createControlBlockIfNotExists(cbName, cbId, "DS_" + datasetSuffix, ControlBlockEnum.from(extRef.getServiceType()));
+        if (sourceDa.getFc() != TFCEnum.ST && controlBlockAdapter.getCurrentElem() instanceof TReportControl tReportControl){
+            tReportControl.getTrgOps().setDchg(false);
+            tReportControl.getTrgOps().setQchg(false);
+        }
+        controlBlockAdapter.addTargetIfNotExists(getLNAdapter());
+    }
+
+    private static String generateDataSetSuffix(TExtRef extRef, ResumedDataTemplate sourceDa, boolean isBayInternal) {
+        return extRef.getLdInst() + "_"
             + switch (extRef.getServiceType()) {
             case GOOSE -> "G" + ((sourceDa.getFc() == TFCEnum.ST) ? "S" : "M");
             case SMV -> "SV";
@@ -334,11 +356,14 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
             + (isBayInternal ? "I" : "E");
     }
 
-    private static void createFCDAInDataSet(TExtRef extRef, ResumedDataTemplate sourceDa, DataSetAdapter dataSet) {
-        dataSet.createFCDAIfNotExists(extRef.getLdInst(), extRef.getPrefix(), extRef.getLnClass().stream().findFirst().orElse(null), extRef.getLnInst(),
-            sourceDa.getDoRef(),
-            (extRef.getServiceType() == TServiceType.REPORT ? null : sourceDa.getDaRef()),
-            sourceDa.getFc());
+    private String generateControlBlockId(String cbName, String sourceLDName, AbstractLNAdapter<?> targetLn) {
+        return Utils.emptyIfBlank(sourceLDName)
+            + "/"
+            + Utils.emptyIfBlank(targetLn.getPrefix())
+            + Objects.requireNonNullElse(targetLn.getLNClass(), "")
+            + Utils.emptyIfBlank(targetLn.getLNInst())
+            + "."
+            + cbName;
     }
 
     private Optional<SclReportItem> removeFilteredSourceDas(TExtRef extRef, final Set<ResumedDataTemplate> sourceDas) {

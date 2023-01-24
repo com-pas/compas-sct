@@ -16,7 +16,7 @@ import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.EnumTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
-import org.lfenergy.compas.sct.commons.util.ServiceSettingsType;
+import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -113,34 +113,6 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 .collect(Collectors.toSet());
     }
 
-    /**
-     * Add given ControlBlock to LNode
-     *
-     * @param controlBlock ControlBlock to add
-     * @throws ScdException throws when the ControlBlock type is unknown
-     */
-    protected void addControlBlock(ControlBlock<?> controlBlock) throws ScdException {
-
-        switch (controlBlock.getServiceType()) {
-            case REPORT:
-                currentElem.getReportControl().add(controlBlock.createControlBlock());
-                break;
-            case GOOSE:
-                if (isLN0()) {
-                    ((LN0) currentElem).getGSEControl().add(controlBlock.createControlBlock());
-                }
-                break;
-            case SMV:
-                if (isLN0()) {
-                    ((LN0) currentElem).getSampledValueControl().add(controlBlock.createControlBlock());
-                }
-                break;
-            default:
-                throw new ScdException("Unknown control block type : " + controlBlock.getServiceType());
-
-        }
-    }
-
     public Optional<DataSetAdapter> findDataSetByName(String dataSetName) {
         return currentElem.getDataSet()
                 .stream()
@@ -150,7 +122,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
     }
 
     public DOIAdapter getDOIAdapterByName(String doiName) throws ScdException {
-        String iedName = getCurrentIed().getName();
+        String iedName = getParentIed().getName();
         String ldInst = parentAdapter.getInst();
         return currentElem.getDOI()
                 .stream()
@@ -333,7 +305,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      * @param extRefInfo ExtRef signal data for which Control Blocks should be found (contain binding info to match with FCDA)
      * @return list of <em>ControlBlock</em> object as ControlBlocks of LNode matching FCDA and ExtRef
      */
-    public List<ControlBlock<?>> getControlBlocksForMatchingFCDA(@NonNull ExtRefInfo extRefInfo) {
+    public List<ControlBlock> getControlBlocksForMatchingFCDA(@NonNull ExtRefInfo extRefInfo) {
         List<TDataSet> tDataSets = this.getDataSetMatchingExtRefInfo(extRefInfo);
         return getControlBlocks(tDataSets, extRefInfo.getBindingInfo().getServiceType());
     }
@@ -345,7 +317,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      * @param serviceType Service Type of Control Blocks needed
      * @return list of <em>ControlBlock</em> objects
      */
-    protected List<ControlBlock<?>> getControlBlocks(List<TDataSet> tDataSets, TServiceType serviceType) {
+    protected List<ControlBlock> getControlBlocks(List<TDataSet> tDataSets, TServiceType serviceType) {
         return tDataSets.stream()
             .map(tDataSet -> getControlBlocksByDataSetRef(tDataSet.getName(), serviceType))
             .flatMap(Collection::stream).toList();
@@ -357,10 +329,10 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      * @param serviceType service type to be filtered
      * @return all Control Blocks matching dataSetRef and a Service Type or all Service Types
      */
-    private List<ControlBlock<?>> getControlBlocksByDataSetRef(String dataSetRef, TServiceType serviceType) {
-        Stream<ControlBlock<?>> streamGSEControl = Stream.empty();
-        Stream<ControlBlock<?>> streamSMVControl = Stream.empty();
-        Stream<ControlBlock<?>> streamReportControl = Stream.empty();
+    private List<ControlBlock> getControlBlocksByDataSetRef(String dataSetRef, TServiceType serviceType) {
+        Stream<ControlBlock> streamGSEControl = Stream.empty();
+        Stream<ControlBlock> streamSMVControl = Stream.empty();
+        Stream<ControlBlock> streamReportControl = Stream.empty();
         LNodeMetaData metaData = LNodeMetaData.from(this);
         if (isLN0() && (serviceType == null || serviceType == TServiceType.GOOSE)) {
             streamGSEControl = getTControlsByType(TGSEControl.class)
@@ -399,16 +371,15 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      * @return all Control Blocks matching a Service Type
      * @param <V> inference parameter for Type of Control Block to find
      */
-    private <V> List<? extends TControl> getTControlsByType(Class<V> cls) {
-        List<? extends TControl> tControls = new ArrayList<>();
+    public  <V> List<? extends TControl> getTControlsByType(Class<V> cls) {
         if (TGSEControl.class.equals(cls) && isLN0()) {
-            tControls = ((LN0) currentElem).getGSEControl();
+            return ((LN0) currentElem).getGSEControl();
         } else if (TSampledValueControl.class.equals(cls) && isLN0()) {
-            tControls = ((LN0) currentElem).getSampledValueControl();
+            return ((LN0) currentElem).getSampledValueControl();
         } else if (TReportControl.class.equals(cls)) {
-            tControls = currentElem.getReportControl();
+            return currentElem.getReportControl();
         }
-        return tControls;
+        throw new IllegalArgumentException("Unsupported ControlBlock " + cls.getSimpleName());
     }
 
     /**
@@ -424,22 +395,15 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
     }
 
     /**
-     * Checks if specified Control Block is present in LNode
+     * Checks if specified Control Block is present in LN
      *
-     * @param controlBlock Control Block to check
-     * @return <em>Boolean</em> value of check result
+     * @param cbName name of the control block to look for
+     * @param controlBlockEnum type of control block to look for
+     * @return true if a ControlBlock of type controlBlockEnum named cbName exists in LN, else false
      */
-    public boolean hasControlBlock(ControlBlock<? extends ControlBlock> controlBlock) {
-
-        return switch (controlBlock.getServiceType()) {
-            case REPORT -> currentElem.getReportControl().stream()
-                    .anyMatch(control -> control.getName().equals(controlBlock.getName()));
-            case GOOSE -> isLN0() && ((LN0) currentElem).getGSEControl().stream()
-                    .anyMatch(control -> control.getName().equals(controlBlock.getName()));
-            case SMV -> isLN0() && ((LN0) currentElem).getSampledValueControl().stream()
-                    .anyMatch(reportControl -> reportControl.getName().equals(controlBlock.getName()));
-            default -> false;
-        };
+    public boolean hasControlBlock(String cbName, ControlBlockEnum controlBlockEnum){
+        return getTControlsByType(controlBlockEnum.getControlBlockClass()).stream()
+            .anyMatch(control -> control.getName().equals(cbName));
     }
 
     /**
@@ -512,10 +476,10 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
 
         IEDAdapter binderIEDAdapter;
 
-        if (!binderIedName.equals(getCurrentIed().getName())) {
+        if (!binderIedName.equals(getParentIed().getName())) {
             binderIEDAdapter = getCurrentScd().getIEDAdapterByName(binderIedName);
         } else {
-            binderIEDAdapter = getCurrentIed();
+            binderIEDAdapter = getParentIed();
         }
         LDeviceAdapter binderLDeviceAdapter = binderIEDAdapter.findLDeviceAdapterByLdInst(binderLdInst)
                 .orElseThrow(
@@ -548,7 +512,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
     private List<AbstractLNAdapter<?>> getPossibleSourceLNAdapters(LDeviceAdapter binderLDeviceAdapter, ExtRefSourceInfo sourceInfo) {
         List<AbstractLNAdapter<?>> aLNAdapters = new ArrayList<>();
         if(StringUtils.isBlank(sourceInfo.getSrcLNClass())){
-            aLNAdapters.addAll(binderLDeviceAdapter.getLNAdaptersInclundigLN0());
+            aLNAdapters.addAll(binderLDeviceAdapter.getLNAdaptersIncludingLN0());
         } else {
             if(TLLN0Enum.LLN_0.value().equals(sourceInfo.getSrcLNClass())){
                 aLNAdapters.add(binderLDeviceAdapter.getLN0Adapter());
@@ -638,7 +602,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                         } else {
                             rDtt.setValImport(false);
                             log.warn("Inconsistency in the SCD file - DAI {} with fc={} must have a sGroup attribute",
-                                    rDtt.getObjRef(getCurrentIed().getName(), parentAdapter.getInst()), rDtt.getDaName().getFc());
+                                    rDtt.getObjRef(getParentIed().getName(), parentAdapter.getInst()), rDtt.getDaName().getFc());
                         }
                     } else if (tdai.isSetValImport()) {
                         rDtt.setValImport(tdai.isValImport());
@@ -652,7 +616,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      * @return <em>Boolean</em> value of check result
      */
     private boolean iedHasConfSG() {
-        IEDAdapter iedAdapter = getCurrentIed();
+        IEDAdapter iedAdapter = getParentIed();
         return iedAdapter.isSettingConfig(this.parentAdapter.getInst());
     }
 
@@ -661,7 +625,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      *
      * @return <em>IEDAdapter</em> object
      */
-    private LDeviceAdapter getCurrentLDevice() {
+    public LDeviceAdapter getParentLDevice() {
         return this.parentAdapter;
     }
 
@@ -670,8 +634,8 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      *
      * @return <em>IEDAdapter</em> object
      */
-    private IEDAdapter getCurrentIed() {
-        return getCurrentLDevice().getParentAdapter();
+    public IEDAdapter getParentIed() {
+        return getParentLDevice().getParentAdapter();
     }
 
     /**
@@ -680,7 +644,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      * @return <em>SclRootAdapter</em> object
      */
     protected SclRootAdapter getCurrentScd() {
-        return getCurrentIed().getParentAdapter();
+        return getParentIed().getParentAdapter();
     }
 
     /**
@@ -694,7 +658,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
 
 
     /**
-     * Checks fro DAI if Setting Group value is set correctly
+     * Checks from DAI if Setting Group value is set correctly
      *
      * @param tdai DAI for which check is done
      * @return <em>Boolean</em> value of check result
@@ -938,20 +902,73 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      * The AccessPoint must have DataSet creation capabilities
      *
      * @param dataSetName Name of the dataSet
-     * @param serviceSettingsType GOOSE, SMV or REPORT service type
+     * @param controlBlockEnum GOOSE, SMV or REPORT service type
      * @throws ScdException throws when IED does not have DataSet creation capabilities
      * @see LDeviceAdapter#hasDataSetCreationCapability
      */
-    public DataSetAdapter createDataSetIfNotExists(String dataSetName, ServiceSettingsType serviceSettingsType) {
+    public DataSetAdapter createDataSetIfNotExists(String dataSetName, ControlBlockEnum controlBlockEnum) {
         return findDataSetByName(dataSetName).orElseGet(() -> {
-            if (!getCurrentLDevice().hasDataSetCreationCapability(serviceSettingsType)) {
+            if (!getParentLDevice().hasDataSetCreationCapability(controlBlockEnum)) {
                 throw new ScdException("IED/AccessPoint does not have capability to create DataSet of type %s in %s"
-                    .formatted(serviceSettingsType, getXPath()));
+                    .formatted(controlBlockEnum, getXPath()));
             }
             TDataSet newDataSet = new TDataSet();
             newDataSet.setName(dataSetName);
             currentElem.getDataSet().add(newDataSet);
             return new DataSetAdapter(this, newDataSet);
         });
+    }
+
+    /**
+     * Creates Control Block in specified LNode in current IED
+     *
+     * @param controlBlock Control Block data to add to this LN
+     * @return created <em>ControlBlockAdapter</em> object
+     * @throws ScdException throws when inconsistency between given ControlBlock and IED configuration
+     */
+    public ControlBlockAdapter addControlBlock(ControlBlock controlBlock) {
+
+        controlBlock.validateCB();
+        controlBlock.validateSecurityEnabledValue(getParentIed());
+
+        if (!getParentLDevice().hasControlBlockCreationCapability(controlBlock.getControlBlockEnum())) {
+            throw new ScdException("Cannot create ControlBlock %s %s because IED/AccessPoint does not have capability to create ControlBlock of type %s in %s"
+                .formatted(controlBlock.getClass().getSimpleName(), controlBlock.getName(), controlBlock.getControlBlockEnum(), getXPath()));
+        }
+
+        if (hasControlBlock(controlBlock.getName(), controlBlock.getControlBlockEnum())) {
+            throw new ScdException("Cannot create ControlBlock %s %s because it already exists in %s"
+                .formatted(controlBlock.getClass().getSimpleName(), controlBlock.getName(), getXPath())
+            );
+        }
+
+        if (this.getDataSetByName(controlBlock.getDataSetRef()).isEmpty()) {
+            throw new ScdException("Cannot create ControlBlock %s %s because target DataSet %s does not exists in %s"
+                .formatted(controlBlock.getClass().getSimpleName(), controlBlock.getName(), controlBlock.getDataSetRef(), getXPath())
+            );
+        }
+
+        TControl tControl = controlBlock.addToLN(this.currentElem);
+        return new ControlBlockAdapter(this, tControl);
+    }
+
+    public Optional<ControlBlockAdapter> findControlBlock(String name, ControlBlockEnum controlBlockEnum) {
+        return getTControlsByType(controlBlockEnum.getControlBlockClass()).stream()
+                .filter(tReportControl -> name.equals(tReportControl.getName()))
+                .findFirst()
+                .map(tControl -> new ControlBlockAdapter(this, tControl));
+    }
+
+    public ControlBlockAdapter createControlBlockIfNotExists(String cbName, String id, String datSet, ControlBlockEnum controlBlockEnum) {
+        return findControlBlock(cbName, controlBlockEnum)
+            .orElseGet(() -> addControlBlock(
+                    switch (controlBlockEnum) {
+                        case GSE -> new GooseControlBlock(cbName, id, datSet);
+                        case SAMPLED_VALUE -> new SMVControlBlock(cbName, id, datSet);
+                        case REPORT -> new ReportControlBlock(cbName, id, datSet);
+                        default -> throw new IllegalArgumentException("Unsupported ControlBlock Type " + controlBlockEnum);
+                    }
+                )
+            );
     }
 }

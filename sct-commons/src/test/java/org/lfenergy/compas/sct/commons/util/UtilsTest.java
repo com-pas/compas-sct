@@ -331,7 +331,7 @@ class UtilsTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideNullIfBlankSource")
+    @MethodSource("provideBlankStrings")
     void nullIfBlank_when_input_is_blank_should_return_null(String input){
         // Given : Parameter
         // When
@@ -340,7 +340,7 @@ class UtilsTest {
         assertThat(result).isNull();
     }
 
-    public static Stream<Arguments> provideNullIfBlankSource() {
+    public static Stream<Arguments> provideBlankStrings() {
         return Stream.of(
             Arguments.of(named("null", null)),
             Arguments.of(""),
@@ -356,5 +356,84 @@ class UtilsTest {
         String result = Utils.nullIfBlank(input);
         // Then
         assertThat(result).isEqualTo(input);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideBlankStrings")
+    void emptyIfBlank_when_input_is_blank_should_return_null(String input){
+        // Given : Parameter
+        // When
+        String result = Utils.emptyIfBlank(input);
+        // Then
+        assertThat(result).isEmpty();
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideLnClassEqualsSourceResultTrue")
+    void lnClassEquals_when_input_matches_should_return_true(List<String> lnClass1, String lnClass2){
+        // Given : Parameter
+        // When
+        boolean result = Utils.lnClassEquals(lnClass1, lnClass2);
+        // Then
+        assertThat(result).isTrue();
+    }
+
+    public static Stream<Arguments> provideLnClassEqualsSourceResultTrue() {
+        List<String> listWithNull = new ArrayList<>();
+        listWithNull.add(null);
+        return Stream.of(
+            Arguments.of(null, null),
+            Arguments.of(null, ""),
+            Arguments.of(null, " "),
+            Arguments.of(Collections.emptyList(), null),
+            Arguments.of(Collections.emptyList(), ""),
+            Arguments.of(Collections.emptyList(), " "),
+            Arguments.of(listWithNull, null),
+            Arguments.of(listWithNull, ""),
+            Arguments.of(listWithNull, " "),
+            Arguments.of(List.of(""), null),
+            Arguments.of(List.of(""), ""),
+            Arguments.of(List.of(""), " "),
+            Arguments.of(List.of(" "), null),
+            Arguments.of(List.of(" "), ""),
+            Arguments.of(List.of(" "), " "),
+            Arguments.of(List.of("ANCR"), "ANCR")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideLnClassEqualsSourceResultFalse")
+    void lnClassEquals_when_input_matches_should_return_false(List<String> lnClass1, String lnClass2){
+        // Given : Parameter
+        // When
+        boolean result = Utils.lnClassEquals(lnClass1, lnClass2);
+        // Then
+        assertThat(result).isFalse();
+    }
+
+    public static Stream<Arguments> provideLnClassEqualsSourceResultFalse() {
+        List<String> listWithNull = new ArrayList<>();
+        listWithNull.add(null);
+        return Stream.of(
+            Arguments.of(List.of("ANCR"), null),
+            Arguments.of(List.of("ANCR"), ""),
+            Arguments.of(List.of("ANCR"), " "),
+            Arguments.of(Collections.emptyList(), "ANCR"),
+            Arguments.of(listWithNull, "ANCR"),
+            Arguments.of(List.of(""), "ANCR"),
+            Arguments.of(List.of(" "), "ANCR"),
+            Arguments.of(List.of("ANCR"), "PVOC"),
+            Arguments.of(List.of("PVOC"), "ANCR")
+        );
+    }
+
+    @Test
+    void lnClassEquals_when_lnClass_has_more_than_one_value_should_throw_exception(){
+        // Given
+        List<String> lnClass1 = List.of("ANCR", "PVOC");
+        String lnClass2 = "ANCR";
+        // When & Then
+        assertThatThrownBy(() -> Utils.lnClassEquals(lnClass1, lnClass2))
+            .isInstanceOf(IllegalArgumentException.class);
     }
 }

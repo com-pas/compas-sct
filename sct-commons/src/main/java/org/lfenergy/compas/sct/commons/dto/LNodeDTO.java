@@ -208,28 +208,26 @@ public class LNodeDTO {
     /**
      * Adds Control Block to LNode Control Blocks
      * @param controlBlock input
-     * @param <T> Control Block type (GooseControlBlock, SMVControlBlock, ReportControlBlock)
      */
-    public <T extends ControlBlock> void addControlBlock(ControlBlock<T> controlBlock) {
-        if (GooseControlBlock.class.equals(controlBlock.getClassType())) {
-            gooseControlBlocks.add((GooseControlBlock) controlBlock);
+    public void addControlBlock(ControlBlock controlBlock) {
+        if (controlBlock instanceof GooseControlBlock gooseControlBlock) {
+            gooseControlBlocks.add(gooseControlBlock);
         }
 
-        if (SMVControlBlock.class.equals(controlBlock.getClassType())) {
-            smvControlBlocks.add((SMVControlBlock) controlBlock);
+        if (controlBlock instanceof SMVControlBlock smvControlBlock) {
+            smvControlBlocks.add(smvControlBlock);
         }
 
-        if (ReportControlBlock.class.equals(controlBlock.getClassType())) {
-            reportControlBlocks.add((ReportControlBlock) controlBlock);
+        if (controlBlock instanceof ReportControlBlock reportControlBlock) {
+            reportControlBlocks.add(reportControlBlock);
         }
     }
 
     /**
      * Adds lis of Control Block to LNode Control Blocks
      * @param controlBlockInfoList input
-     * @param <T> Control Block type (GooseControlBlock, SMVControlBlock, ReportControlBlock)
      */
-    public <T extends ControlBlock> void addAllControlBlocks(List< ControlBlock<T> > controlBlockInfoList){
+    public void addAllControlBlocks(List<ControlBlock> controlBlockInfoList){
         controlBlockInfoList.forEach(this::addControlBlock);
     }
 

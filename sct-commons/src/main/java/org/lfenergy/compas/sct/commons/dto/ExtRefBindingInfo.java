@@ -13,6 +13,7 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.dtt.DATypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DOTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
+import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.Comparator;
 import java.util.Objects;
@@ -139,7 +140,7 @@ public class ExtRefBindingInfo implements Comparable<ExtRefBindingInfo> {
                 Objects.equals(ldInst, tExtRef.getLdInst()) &&
                 Objects.equals(prefix, tExtRef.getPrefix()) &&
                 Objects.equals(lnInst, tExtRef.getLnInst()) &&
-                tExtRef.getLnClass().contains(lnClass) &&
+                Utils.lnClassEquals(tExtRef.getLnClass(), lnClass) &&
                 (tExtRef.getServiceType() == null || Objects.equals(serviceType, tExtRef.getServiceType()));
     }
 

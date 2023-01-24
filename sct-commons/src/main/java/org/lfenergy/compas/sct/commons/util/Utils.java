@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -211,7 +212,45 @@ public final class Utils {
         return 0 <= column && column < split.length ? split[column] : null;
     }
 
+    /**
+     * return null if input string is blank.
+     * Blank means : null, empty string or whitespaces (as defined by {@link Character#isWhitespace(char)}) only string.
+     * @param s string to split
+     * @return null if input string is blank, else s parameter
+     */
     public static String nullIfBlank(String s) {
         return StringUtils.isBlank(s) ? null : s;
+    }
+
+    /**
+     * return empty String (i.e "") if input string is blank.
+     * Blank means : null, empty string or whitespaces (as defined by {@link Character#isWhitespace(char)}) only string.
+     * @param s string to split
+     * @return empty string (i.e "") if input string is blank, else s parameter
+     */
+    public static String emptyIfBlank(String s) {
+        return StringUtils.isBlank(s) ? "" : s;
+    }
+
+    /**
+     * Check if lnClass as List os the same as lnClass as a String.
+     * For some reason, xjc plugin generates a List&lt;String&gt; instead of a String for the lnClass attribute.
+     * When marshalling an XML file, lnClass is represented as a List with a single element.
+     * @param lnClass1 lnClass attribute value represented as a list
+     * @param lnClass2 lnClass attribute value represented as a String
+     * @return true if lnClass2 is blank and lnClass1 is either null, empty or contains a blank String.
+     *         true if lnClass2 is not blank and lnClass1 contains lnClass2.
+     *         false otherwise.
+     * Blank means : null, empty string or whitespaces (as defined by {@link Character#isWhitespace(char)}) only string.
+     * @throws IllegalArgumentException when lnClass1 contains more than one element
+     */
+    public static boolean lnClassEquals(List<String> lnClass1, String lnClass2){
+        if (lnClass1 == null || lnClass1.isEmpty()){
+            return StringUtils.isBlank(lnClass2);
+        }
+        if (lnClass1.size() > 1){
+            throw new IllegalArgumentException("lnClass can only have a single value but got : [%s] " + String.join(",", lnClass1));
+        }
+        return equalsOrBothBlank(lnClass1.get(0), lnClass2);
     }
 }

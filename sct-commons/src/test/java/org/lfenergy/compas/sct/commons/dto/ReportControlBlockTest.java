@@ -4,20 +4,16 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.LNAdapter;
-import org.mockito.ArgumentMatchers;
+import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 import org.mockito.Mockito;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ReportControlBlockTest {
@@ -26,37 +22,156 @@ class ReportControlBlockTest {
     private static final String DATASET_REF = "DATASET_REF";
     private static final String NAME = "NAME";
     private static final String DESC = "DESCRIPTION";
-    private static final String RPT_DESC = "RPT DESCRIPTION";
-    private static final String RPT_TEXT = "RPT TEXT";
 
     @Test
-    void testGetClassType() {
-        ReportControlBlock reportControlBlock = new ReportControlBlock();
-        assertEquals(ReportControlBlock.class, reportControlBlock.getClassType());
+    void constructor_should_fill_default_values() {
+        // Given : NAME, DATASET_REF, ID constants
+        // When
+        ReportControlBlock reportControlBlock = new ReportControlBlock(NAME, ID, DATASET_REF);
+        // Then
+        assertThat(reportControlBlock)
+            .extracting(ControlBlock::getName, ControlBlock::getDataSetRef, ControlBlock::getId, ControlBlock::getConfRev,
+                ReportControlBlock::isBuffered, ReportControlBlock::getBufTime, ReportControlBlock::isIndexed, ReportControlBlock::getIntgPd)
+            .containsExactly(NAME, DATASET_REF, ID, 1L, true, 0L, true, 60000L);
+
+        assertThat(reportControlBlock.getTrgOps())
+            .extracting(TTrgOps::isDchg, TTrgOps::isQchg, TTrgOps::isPeriod, TTrgOps::isGi)
+            .containsOnly(true);
+        assertThat(reportControlBlock.getTrgOps().isDupd()).isFalse();
+
+        assertThat(reportControlBlock.getOptFields())
+            .extracting(TReportControl.OptFields::isSeqNum, TReportControl.OptFields::isTimeStamp, TReportControl.OptFields::isDataSet, TReportControl.OptFields::isReasonCode,
+                TReportControl.OptFields::isDataRef, TReportControl.OptFields::isEntryID, TReportControl.OptFields::isConfigRef)
+            .containsOnly(false);
+        assertThat(reportControlBlock.getOptFields().isBufOvfl()).isTrue();
+
+    }
+
+    @Test
+    void constructor_should_copy_all_data_from_TReportControl() {
+        // Given
+        /*
+        optFields
+            rptEnabled
+            trgOps
+
+         */
+        TReportControl tReportControl = createTReportControl();
+        // When
+        ReportControlBlock reportControlBlock = new ReportControlBlock(tReportControl);
+        // Then
+        assertThat(reportControlBlock)
+            .extracting(ControlBlock::getName, ControlBlock::getDataSetRef, ControlBlock::getId, ControlBlock::getConfRev,
+                ReportControlBlock::isBuffered, ReportControlBlock::getBufTime, ReportControlBlock::isIndexed, ReportControlBlock::getIntgPd)
+            .containsExactly(NAME, DATASET_REF, ID, 5L, false, 1L, false, 1L);
+
+        assertThat(reportControlBlock.getOptFields())
+            .extracting(TReportControl.OptFields::isSeqNum, TReportControl.OptFields::isTimeStamp, TReportControl.OptFields::isDataSet, TReportControl.OptFields::isReasonCode,
+                TReportControl.OptFields::isDataRef, TReportControl.OptFields::isEntryID, TReportControl.OptFields::isConfigRef, TReportControl.OptFields::isBufOvfl)
+            .containsOnly(false);
+
+        assertThat(reportControlBlock.getTrgOps())
+            .extracting(TTrgOps::isDchg, TTrgOps::isQchg, TTrgOps::isPeriod, TTrgOps::isGi, TTrgOps::isDupd)
+            .containsOnly(false);
+    }
+
+    @Test
+    void getServiceType_should_return_REPORT() {
+        // Given
+        ReportControlBlock reportControlBlock = new ReportControlBlock(NAME, ID, DATASET_REF);
+        // When
+        TServiceType serviceType = reportControlBlock.getServiceType();
+        // Then
+        assertThat(serviceType).isEqualTo(TServiceType.REPORT);
+    }
+
+    @Test
+    void getControlBlockEnum_should_return_REPORT() {
+        // Given
+        ReportControlBlock reportControlBlock = new ReportControlBlock(NAME, ID, DATASET_REF);
+        // When
+        ControlBlockEnum controlBlockEnum = reportControlBlock.getControlBlockEnum();
+        // Then
+        assertThat(controlBlockEnum).isEqualTo(ControlBlockEnum.REPORT);
+    }
+
+    @Test
+    void toTControl_should_return_TReportControl() {
+        // Given
+        ReportControlBlock reportControlBlock = createReportControlBlock();
+
+        // When
+        TReportControl tReportControl = reportControlBlock.toTControl();
+        // Then
+        assertThat(tReportControl)
+            .extracting(TControl::getName, TControl::getDatSet, TReportControl::getRptID, TReportControl::getConfRev, TUnNaming::getDesc,
+                TReportControl::isBuffered, TReportControl::getBufTime, TReportControl::isIndexed, TControlWithTriggerOpt::getIntgPd)
+            .containsExactly(NAME, DATASET_REF, ID, 5L, DESC, false, 1L, false, 1L);
+        assertThat(tReportControl.getOptFields())
+            .extracting(TReportControl.OptFields::isSeqNum, TReportControl.OptFields::isTimeStamp, TReportControl.OptFields::isDataSet, TReportControl.OptFields::isReasonCode,
+                TReportControl.OptFields::isDataRef, TReportControl.OptFields::isEntryID, TReportControl.OptFields::isConfigRef, TReportControl.OptFields::isBufOvfl)
+            .containsOnly(false);
+
+        assertThat(tReportControl.getTrgOps())
+            .extracting(TTrgOps::isDchg, TTrgOps::isQchg, TTrgOps::isPeriod, TTrgOps::isGi, TTrgOps::isDupd)
+            .containsOnly(false);
+    }
+
+    @Test
+    void addToLN_should_add_ControlBlock_to_given_LN0() {
+        // Given
+        ReportControlBlock reportControlBlock = new ReportControlBlock(NAME, ID, DATASET_REF);
+        TLN0 ln0 = new TLN0();
+        // When
+        TReportControl tReportControl = reportControlBlock.addToLN(ln0);
+        // Then
+        assertThat(ln0.getReportControl()).hasSize(1)
+            .first()
+            .isSameAs(tReportControl);
+        assertThat(tReportControl).extracting(TControl::getName, TControl::getDatSet, TReportControl::getRptID)
+            .containsExactly(NAME, DATASET_REF, ID);
+    }
+
+    @Test
+    void addToLN_should_add_ControlBlock_to_given_LN() {
+        // Given
+        ReportControlBlock reportControlBlock = new ReportControlBlock(NAME, ID, DATASET_REF);
+        TLN ln = new TLN();
+        // When
+        TReportControl tReportControl = reportControlBlock.addToLN(ln);
+        // Then
+        assertThat(ln.getReportControl()).hasSize(1)
+            .first()
+            .isSameAs(tReportControl);
+        assertThat(tReportControl).extracting(TControl::getName, TControl::getDatSet, TReportControl::getRptID)
+            .containsExactly(NAME, DATASET_REF, ID);
     }
 
     @Test
     void testGetServiceType() {
-        ReportControlBlock reportControlBlock = new ReportControlBlock();
+        ReportControlBlock reportControlBlock = new ReportControlBlock(NAME, ID, DATASET_REF);
         assertEquals(TServiceType.REPORT, reportControlBlock.getServiceType());
     }
 
     @Test
     void testValidateCB() {
-        ReportControlBlock reportControlBlock = create();
+        ReportControlBlock reportControlBlock = createReportControlBlock();
         assertDoesNotThrow(reportControlBlock::validateCB);
 
         reportControlBlock.setDataSetRef(null);
         assertDoesNotThrow(reportControlBlock::validateCB);
 
-        assertFalse(reportControlBlock.getIedNames().isEmpty());
-        reportControlBlock.getIedNames().get(0).setValue(null);
+        assertFalse(reportControlBlock.getTargets().isEmpty());
+        reportControlBlock.getTargets().set(0,
+            new ControlBlockTarget("AP_REF", null, DTO.HOLDER_LD_INST, DTO.HOLDER_LN_INST, DTO.HOLDER_LN_CLASS, DTO.HOLDER_LN_PREFIX));
         assertThrows(ScdException.class, reportControlBlock::validateCB);
 
-        reportControlBlock.getIedNames().get(0).setValue("");
+        reportControlBlock.getTargets().set(0,
+            new ControlBlockTarget("AP_REF", "", DTO.HOLDER_LD_INST, DTO.HOLDER_LN_INST, DTO.HOLDER_LN_CLASS, DTO.HOLDER_LN_PREFIX));
         assertThrows(ScdException.class, reportControlBlock::validateCB);
 
-        reportControlBlock.getIedNames().get(0).setLdInst("");
+        reportControlBlock.getTargets().set(0,
+            new ControlBlockTarget("AP_REF", DTO.HOLDER_LD_INST, "", DTO.HOLDER_LN_INST, DTO.HOLDER_LN_CLASS, DTO.HOLDER_LN_PREFIX));
         assertThrows(ScdException.class, reportControlBlock::validateCB);
 
         reportControlBlock.setDataSetRef("");
@@ -68,48 +183,16 @@ class ReportControlBlockTest {
         reportControlBlock.setName("");
         assertThrows(ScdException.class, reportControlBlock::validateCB);
 
-
         reportControlBlock.setId(null);
         assertThrows(ScdException.class, reportControlBlock::validateCB);
 
         reportControlBlock.setId("");
         assertThrows(ScdException.class, reportControlBlock::validateCB);
-
-
     }
-
-    @Test
-    void testValidateDestination() throws ScdException {
-        SclRootAdapter sclRootAdapter = Mockito.mock(SclRootAdapter.class);
-        IEDAdapter iedAdapter = Mockito.mock(IEDAdapter.class);
-        LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
-        LNAdapter lnAdapter = Mockito.mock(LNAdapter.class);
-
-        Mockito.when(sclRootAdapter.getIEDAdapterByName(ArgumentMatchers.anyString())).thenReturn(iedAdapter);
-        Mockito.when(iedAdapter.findLDeviceAdapterByLdInst(ArgumentMatchers.anyString()))
-                .thenReturn(Optional.of(lDeviceAdapter));
-        Mockito.when(
-                lDeviceAdapter.getLNAdapter(
-                        ArgumentMatchers.anyString(),ArgumentMatchers.anyString(),ArgumentMatchers.anyString()
-                )
-        ).thenReturn(lnAdapter);
-
-        ReportControlBlock reportControlBlock = create();
-        assertDoesNotThrow(() -> reportControlBlock.validateDestination(sclRootAdapter));
-
-        assertFalse(reportControlBlock.getIedNames().isEmpty());
-        reportControlBlock.getIedNames().get(0).getLnClass().clear();
-        assertDoesNotThrow(() -> reportControlBlock.validateDestination(sclRootAdapter));
-
-        Mockito.when(iedAdapter.findLDeviceAdapterByLdInst(ArgumentMatchers.anyString()))
-                .thenReturn(Optional.empty());
-        assertThrows(ScdException.class, () -> reportControlBlock.validateDestination(sclRootAdapter));
-    }
-
 
     @Test
     void testGetControlBlockServiceSetting(){
-        ReportControlBlock reportControlBlock = create();
+        ReportControlBlock reportControlBlock = createReportControlBlock();
         assertEquals(TServiceSettingsNoDynEnum.FIX, reportControlBlock.getControlBlockServiceSetting(null));
 
         TServices tServices = Mockito.mock(TServices.class);
@@ -123,101 +206,52 @@ class ReportControlBlockTest {
     }
 
     @Test
-    void testValidateSecurityEnabledValue() {
-        ReportControlBlock reportControlBlock = new ReportControlBlock();
-        IEDAdapter iedAdapter = Mockito.mock(IEDAdapter.class);
-        Mockito.when(iedAdapter.getServices()).thenReturn(new TServices());
-        assertDoesNotThrow(() -> reportControlBlock.validateSecurityEnabledValue(iedAdapter));
+    void validateSecurityEnabledValue_should_do_nothing() {
+        // Given
+        ReportControlBlock reportControlBlock = new ReportControlBlock(NAME, ID, DATASET_REF);
+        // When & Then
+        Assertions.assertThatCode(() -> reportControlBlock.validateSecurityEnabledValue(new TServices()))
+            .doesNotThrowAnyException();
     }
 
-    @Test
-    void testCreateControlBlock() {
-        TReportControl tReportControl = create().createControlBlock();
-        assertAll("CREATE CB",
-                () -> assertEquals(ID,tReportControl.getRptID()),
-                () -> assertEquals(DATASET_REF,tReportControl.getDatSet()),
-                () -> assertEquals(NAME,tReportControl.getName()),
-                () -> assertEquals(1,tReportControl.getConfRev()),
-                () -> assertEquals(DESC,tReportControl.getDesc())
-        );
-
-        ReportControlBlock reportControlBlock = new ReportControlBlock(tReportControl);
-        assertAll("INIT : " + reportControlBlock,
-                () -> assertEquals(ID,reportControlBlock.getId()),
-                () -> assertEquals(DATASET_REF,reportControlBlock.getDataSetRef()),
-                () -> assertEquals(NAME,reportControlBlock.getName()),
-                () -> assertEquals(DESC,reportControlBlock.getDesc()),
-                () -> assertNotNull(reportControlBlock.getOptFields()),
-                () -> assertNotNull(reportControlBlock.getRptEnabled()),
-                () -> assertEquals(TPredefinedTypeOfSecurityEnum.NONE,reportControlBlock.getSecurityEnable())
-        );
-    }
-
-    @Test
-    void testCast(){
-        Object cb  = new ReportControlBlock();
-        ReportControlBlock rpt = new ReportControlBlock();
-        assertEquals(ReportControlBlock.class, rpt.cast(cb).getClass());
-        assertThrows(UnsupportedOperationException.class, () -> rpt.cast(new SMVControlBlock()).getClass());
-    }
-
-    @Test
-    void testTClientLN2IEDName(){
-        TClientLN clientLN = Mockito.mock(TClientLN.class);
-        Mockito.when(clientLN.getIedName()).thenReturn(DTO.HOLDER_IED_NAME);
-        Mockito.when(clientLN.getApRef()).thenReturn("AP_REF");
-        Mockito.when(clientLN.getLdInst()).thenReturn(DTO.HOLDER_LD_INST);
-        Mockito.when(clientLN.getLnInst()).thenReturn(DTO.HOLDER_LN_INST);
-        Mockito.when(clientLN.getPrefix()).thenReturn(DTO.HOLDER_LN_PREFIX);
-        Mockito.when(clientLN.getLnClass()).thenReturn(List.of(DTO.HOLDER_LN_CLASS));
-
-        TControlWithIEDName.IEDName iedName = ReportControlBlock.toIEDName(clientLN);
-        assertEquals(clientLN.getApRef(),iedName.getApRef());
-    }
-
-
-    private ReportControlBlock create(){
-        ReportControlBlock reportControlBlock = new ReportControlBlock();
-        reportControlBlock.setId(ID);
-        reportControlBlock.setDataSetRef(DATASET_REF);
-        reportControlBlock.setConfRev(1L);
-        reportControlBlock.setName(NAME);
-        reportControlBlock.setBuffered(true);
-        reportControlBlock.setIndexed(true);
-        reportControlBlock.setIntgPd(1000);
-
-        reportControlBlock.setOptFields(createOptFields());
-        reportControlBlock.setRptEnabled(createTRptEnabled());
+    private static ReportControlBlock createReportControlBlock() {
+        ReportControlBlock reportControlBlock = new ReportControlBlock(NAME, ID, DATASET_REF);
+        reportControlBlock.setConfRev(5L);
         reportControlBlock.setDesc(DESC);
-
-        TControlWithIEDName.IEDName iedName = new TControlWithIEDName.IEDName();
-        iedName.setLdInst(DTO.HOLDER_LD_INST);
-        iedName.setLnInst(DTO.HOLDER_LN_INST);
-        iedName.setPrefix(DTO.HOLDER_LN_PREFIX);
-        iedName.setApRef("AP_REF");
-        iedName.getLnClass().add(DTO.HOLDER_LN_CLASS);
-        iedName.setValue(DTO.HOLDER_IED_NAME);
-        reportControlBlock.getIedNames().add(iedName);
+        reportControlBlock.setBuffered(false);
+        reportControlBlock.setBufTime(1L);
+        reportControlBlock.setIndexed(false);
+        reportControlBlock.setIntgPd(1L);
+        TReportControl.OptFields optFields = new TReportControl.OptFields();
+        optFields.setBufOvfl(false);
+        reportControlBlock.setOptFields(optFields);
+        TTrgOps trgOps = new TTrgOps();
+        trgOps.setGi(false);
+        reportControlBlock.setTrgOps(trgOps);
+        reportControlBlock.setRptEnabledMax(10L);
+        reportControlBlock.getTargets().add(new ControlBlockTarget("apRef", "iedName", "ldInst", "lnInst", "lnClass", "prefix", "desc"));
         return reportControlBlock;
     }
 
-    private TRptEnabled createTRptEnabled() {
-        TRptEnabled rptEnabled = new TRptEnabled();
-
-        rptEnabled.setDesc(RPT_DESC);
-        rptEnabled.setMax(2L);
-        TText tText = new TText();
-        tText.setSource(RPT_TEXT);
-        rptEnabled.setText(tText);
-
-        return rptEnabled;
-    }
-
-    private TReportControl.OptFields createOptFields(){
+    private static TReportControl createTReportControl() {
+        TReportControl tReportControl = new TReportControl();
+        tReportControl.setName(NAME);
+        tReportControl.setDatSet(DATASET_REF);
+        tReportControl.setRptID(ID);
+        tReportControl.setConfRev(5L);
+        tReportControl.setDesc(DESC);
+        tReportControl.setBuffered(false);
+        tReportControl.setBufTime(1L);
+        tReportControl.setIndexed(false);
+        tReportControl.setIntgPd(1L);
         TReportControl.OptFields optFields = new TReportControl.OptFields();
-        optFields.setBufOvfl(true);
-        optFields.setBufOvfl(true);
-        optFields.setDataRef(true);
-        return optFields;
+        optFields.setBufOvfl(false);
+        tReportControl.setOptFields(optFields);
+        TTrgOps trgOps = new TTrgOps();
+        trgOps.setGi(false);
+        tReportControl.setTrgOps(trgOps);
+        tReportControl.setRptEnabled(new TRptEnabled());
+        tReportControl.getRptEnabled().setMax(10L);
+        return tReportControl;
     }
 }

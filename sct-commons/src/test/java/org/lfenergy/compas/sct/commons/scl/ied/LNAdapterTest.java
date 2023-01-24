@@ -43,9 +43,6 @@ class LNAdapterTest {
         assertEquals(DTO.HOLDER_LN_PREFIX, lnAdapter.getPrefix());
         assertTrue(lnAdapter.getCurrentElem().getReportControl().isEmpty());
 
-        assertDoesNotThrow(() -> lnAdapter.addControlBlock(new ReportControlBlock()));
-        assertFalse(lnAdapter.getCurrentElem().getReportControl().isEmpty());
-
         assertThrows(IllegalArgumentException.class, () -> new LNAdapter(lnAdapter.getParentAdapter(), new TLN()));
     }
 
@@ -127,7 +124,7 @@ class LNAdapterTest {
     }
 
     @Test
-    void updateExtRefBinders_shouldUpdateExtRefs() throws Exception {
+    void updateExtRefBinders_shouldUpdateExtRefs() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -154,7 +151,7 @@ class LNAdapterTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("extRefInfoAndMessage")
-    void updateExtRefBinders_shouldThrowsException(String testCase, ExtRefInfo info, String expectedMessage) throws Exception {
+    void updateExtRefBinders_shouldThrowsException(String testCase, ExtRefInfo info, String expectedMessage) {
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
@@ -194,7 +191,7 @@ class LNAdapterTest {
     }
 
     @Test
-    void should_throw_ScdException_when_the_given_binding_info_does_not_match_the_found_TExtRef_binding_info() throws Exception {
+    void should_throw_ScdException_when_the_given_binding_info_does_not_match_the_found_TExtRef_binding_info() {
 
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-cb/scd_get_cbs_test.xml");
@@ -214,7 +211,7 @@ class LNAdapterTest {
     }
 
     @Test
-    void should_throw_ScdException_when_the_given_binding_info_does_not_refer_to_an_existing_IED_LDevice_and_LNode_in_the_SCL() throws Exception {
+    void should_throw_ScdException_when_the_given_binding_info_does_not_refer_to_an_existing_IED_LDevice_and_LNode_in_the_SCL() {
 
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-cb/scd_get_cbs_test.xml");
@@ -244,7 +241,7 @@ class LNAdapterTest {
     }
 
     @Test
-    void should_check_with_success_extRefInfo_coherence() throws Exception {
+    void should_check_with_success_extRefInfo_coherence() {
 
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-cb/scd_get_cbs_test.xml");
@@ -285,7 +282,7 @@ class LNAdapterTest {
     }
 
     @Test
-    void should_extract_ExtRef_from_ExtRefInfo() throws Exception {
+    void should_extract_ExtRef_from_ExtRefInfo() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-cb/scd_get_cbs_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -325,7 +322,7 @@ class LNAdapterTest {
 
     @ParameterizedTest
     @MethodSource("provideIncompleteExtRefInfo")
-    void should_throw_exception_when_trying_update_extRefSource_with_wrong_arguments(ExtRefInfo incompleteExtrefInfo) throws Exception {
+    void should_throw_exception_when_trying_update_extRefSource_with_wrong_arguments(ExtRefInfo incompleteExtrefInfo) {
 
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-cb/scd_get_cbs_test.xml");
@@ -363,7 +360,7 @@ class LNAdapterTest {
     }
 
     @Test
-    void testUpdateExtRefSource() throws Exception {
+    void testUpdateExtRefSource() {
 
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-cb/scd_get_cbs_test.xml");
@@ -437,7 +434,7 @@ class LNAdapterTest {
     }
 
     @Test
-    void testUpdateDAI() throws Exception {
+    void testUpdateDAI() {
         ResumedDataTemplate rDtt = new ResumedDataTemplate();
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -473,7 +470,7 @@ class LNAdapterTest {
     }
 
     @Test
-    void testGetDAI() throws Exception {
+    void testGetDAI() {
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/scd_with_dai_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
@@ -496,7 +493,7 @@ class LNAdapterTest {
     }
 
     @Test
-    void addPrivate() throws Exception {
+    void addPrivate() {
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/scd_with_dai_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
@@ -522,7 +519,7 @@ class LNAdapterTest {
     }
 
     @Test
-    void getControlBlocks_should_find_ControlBlock_by_name() throws Exception {
+    void getControlBlocks_should_find_ControlBlock_by_name() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);

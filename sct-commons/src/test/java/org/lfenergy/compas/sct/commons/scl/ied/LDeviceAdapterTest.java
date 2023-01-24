@@ -20,7 +20,7 @@ import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
-import org.lfenergy.compas.sct.commons.util.ServiceSettingsType;
+import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,14 +28,14 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.lfenergy.compas.sct.commons.util.ServiceSettingsType.*;
+import static org.lfenergy.compas.sct.commons.util.ControlBlockEnum.*;
 
 class LDeviceAdapterTest {
 
     private IEDAdapter iAdapter;
 
     @BeforeEach
-    public void init() throws Exception {
+    public void init() {
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
@@ -148,7 +148,7 @@ class LDeviceAdapterTest {
     }
 
     @Test
-    void getLDeviceStatus_should_succeed() throws Exception {
+    void getLDeviceStatus_should_succeed() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_with_extref_errors.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -171,7 +171,7 @@ class LDeviceAdapterTest {
         //Given
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2"));
         //When
-        List<AbstractLNAdapter<?>> lnAdapters = lDeviceAdapter.getLNAdaptersInclundigLN0();
+        List<AbstractLNAdapter<?>> lnAdapters = lDeviceAdapter.getLNAdaptersIncludingLN0();
         //Then
         assertThat(lnAdapters)
                 .hasSize(2)
@@ -181,7 +181,7 @@ class LDeviceAdapterTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideHasDataSetCreationCapabilityTrue")
-    void hasDataSetCreationCapability_should_return_true_when_attribute_exists(String testCase, TServices tServices, ServiceSettingsType serviceSettingsType) throws Exception {
+    void hasDataSetCreationCapability_should_return_true_when_attribute_exists(String testCase, TServices tServices, ControlBlockEnum controlBlockEnum) {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -189,7 +189,7 @@ class LDeviceAdapterTest {
         iedAdapter.getCurrentElem().getAccessPoint().get(0).setServices(tServices);
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst("LD_INS1");
         // When
-        boolean hasCapability = lDeviceAdapter.hasDataSetCreationCapability(serviceSettingsType);
+        boolean hasCapability = lDeviceAdapter.hasDataSetCreationCapability(controlBlockEnum);
         //Then
         assertThat(hasCapability).isTrue();
     }
@@ -242,15 +242,15 @@ class LDeviceAdapterTest {
             Arguments.of("AccessPoint has creation capability when GseSetting.datSet=DYN", tServicesGseDyn, GSE),
             Arguments.of("AccessPoint has creation capability when ReportSetting.datSet=CONF", tServicesReportConf, REPORT),
             Arguments.of("AccessPoint has creation capability when ReportSetting.datSet=DYN", tServicesReportDyn, REPORT),
-            Arguments.of("AccessPoint has creation capability when SmvSetting.datSet=CONF", tServicesSmvConf, SMV),
-            Arguments.of("AccessPoint has creation capability when SmvSetting.datSet=DYN", tServicesSmvDyn, SMV)
+            Arguments.of("AccessPoint has creation capability when SmvSetting.datSet=CONF", tServicesSmvConf, SAMPLED_VALUE),
+            Arguments.of("AccessPoint has creation capability when SmvSetting.datSet=DYN", tServicesSmvDyn, SAMPLED_VALUE)
         );
     }
 
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideHasDataSetCreationCapabilityFalse")
-    void hasDataSetCreationCapability_should_return_false_when_wrong_attribute(String testCase, TServices tServices, ServiceSettingsType serviceSettingsType) throws Exception {
+    void hasDataSetCreationCapability_should_return_false_when_wrong_attribute(String testCase, TServices tServices, ControlBlockEnum controlBlockEnum) {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -259,7 +259,7 @@ class LDeviceAdapterTest {
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst("LD_INS1");
 
         // When
-        boolean hasCapability = lDeviceAdapter.hasDataSetCreationCapability(serviceSettingsType);
+        boolean hasCapability = lDeviceAdapter.hasDataSetCreationCapability(controlBlockEnum);
         //Then
         assertThat(hasCapability).isFalse();
     }
@@ -289,14 +289,14 @@ class LDeviceAdapterTest {
             Arguments.of("AccessPoint has no creation capability when LogSetting.datSet=FIX", tServicesLogFix, LOG),
             Arguments.of("AccessPoint has no creation capability when GseSetting.datSet=FIX", tServicesGseFix, GSE),
             Arguments.of("AccessPoint has no creation capability when ReportSetting.datSet=FIX", tServicesReportFix, REPORT),
-            Arguments.of("AccessPoint has no creation capability when SmvSetting.datSet=FIX", tServicesSmvFix, SMV)
+            Arguments.of("AccessPoint has no creation capability when SmvSetting.datSet=FIX", tServicesSmvFix, SAMPLED_VALUE)
         );
     }
 
 
     @ParameterizedTest
-    @EnumSource(ServiceSettingsType.class)
-    void hasDataSetCreationCapability_should_return_false_when_no_existing_services_attribute(ServiceSettingsType serviceSettingsType) throws Exception {
+    @EnumSource(ControlBlockEnum.class)
+    void hasDataSetCreationCapability_should_return_false_when_no_existing_services_attribute(ControlBlockEnum controlBlockEnum) {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -305,13 +305,13 @@ class LDeviceAdapterTest {
         iedAdapter.getCurrentElem().getAccessPoint().get(0).setServices(new TServices());
 
         // When
-        boolean hasCapability = lDeviceAdapter.hasDataSetCreationCapability(serviceSettingsType);
+        boolean hasCapability = lDeviceAdapter.hasDataSetCreationCapability(controlBlockEnum);
         //Then
         assertThat(hasCapability).isFalse();
     }
 
     @Test
-    void hasDataSetCreationCapability_should_throw_exception_when_parameter_is_null() throws Exception {
+    void hasDataSetCreationCapability_should_throw_exception_when_parameter_is_null() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -327,7 +327,7 @@ class LDeviceAdapterTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideHasControlBlockCreationCapabilityTrue")
-    void hasControlBlockCreationCapability_should_return_true_when_attribute_exists(String testCase, TServices tServices, ServiceSettingsType serviceSettingsType) throws Exception {
+    void hasControlBlockCreationCapability_should_return_true_when_attribute_exists(String testCase, TServices tServices, ControlBlockEnum controlBlockEnum) {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -335,7 +335,7 @@ class LDeviceAdapterTest {
         iedAdapter.getCurrentElem().getAccessPoint().get(0).setServices(tServices);
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst("LD_INS1");
         // When
-        boolean hasCapability = lDeviceAdapter.hasControlBlockCreationCapability(serviceSettingsType);
+        boolean hasCapability = lDeviceAdapter.hasControlBlockCreationCapability(controlBlockEnum);
         //Then
         assertThat(hasCapability).isTrue();
     }
@@ -366,13 +366,13 @@ class LDeviceAdapterTest {
             Arguments.of("AccessPoint has creation capability when LogSetting.cbName=CONF", tServicesLogConf, LOG),
             Arguments.of("AccessPoint has creation capability when GseSetting.cbName=CONF", tServicesGseConf, GSE),
             Arguments.of("AccessPoint has creation capability when ReportSetting.cbName=CONF", tServicesReportConf, REPORT),
-            Arguments.of("AccessPoint has creation capability when SmvSetting.cbName=CONF", tServicesSmvConf, SMV)
+            Arguments.of("AccessPoint has creation capability when SmvSetting.cbName=CONF", tServicesSmvConf, SAMPLED_VALUE)
         );
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideHasControlBlockCreationCapabilityFalse")
-    void hasControlBlockCreationCapability_should_return_false_when_wrong_attribute(String testCase, TServices tServices, ServiceSettingsType serviceSettingsType) throws Exception {
+    void hasControlBlockCreationCapability_should_return_false_when_wrong_attribute(String testCase, TServices tServices, ControlBlockEnum controlBlockEnum) {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -381,7 +381,7 @@ class LDeviceAdapterTest {
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst("LD_INS1");
 
         // When
-        boolean hasCapability = lDeviceAdapter.hasControlBlockCreationCapability(serviceSettingsType);
+        boolean hasCapability = lDeviceAdapter.hasControlBlockCreationCapability(controlBlockEnum);
         //Then
         assertThat(hasCapability).isFalse();
     }
@@ -411,13 +411,13 @@ class LDeviceAdapterTest {
             Arguments.of("AccessPoint has no creation capability when LogSetting.cbName=FIX", tServicesLogFix, LOG),
             Arguments.of("AccessPoint has no creation capability when GseSetting.cbName=FIX", tServicesGseFix, GSE),
             Arguments.of("AccessPoint has no creation capability when ReportSetting.cbName=FIX", tServicesReportFix, REPORT),
-            Arguments.of("AccessPoint has no creation capability when SmvSetting.cbName=FIX", tServicesSmvFix, SMV)
+            Arguments.of("AccessPoint has no creation capability when SmvSetting.cbName=FIX", tServicesSmvFix, SAMPLED_VALUE)
         );
     }
 
     @ParameterizedTest
-    @EnumSource(ServiceSettingsType.class)
-    void hasControlBlockCreationCapability_should_return_false_when_no_existing_services_attribute(ServiceSettingsType serviceSettingsType) throws Exception {
+    @EnumSource(ControlBlockEnum.class)
+    void hasControlBlockCreationCapability_should_return_false_when_no_existing_services_attribute(ControlBlockEnum controlBlockEnum) {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -426,13 +426,13 @@ class LDeviceAdapterTest {
         iedAdapter.getCurrentElem().getAccessPoint().get(0).setServices(new TServices());
 
         // When
-        boolean hasCapability = lDeviceAdapter.hasControlBlockCreationCapability(serviceSettingsType);
+        boolean hasCapability = lDeviceAdapter.hasControlBlockCreationCapability(controlBlockEnum);
         //Then
         assertThat(hasCapability).isFalse();
     }
 
     @Test
-    void hasControlBlockCreationCapability_should_throw_exception_when_parameter_is_null() throws Exception {
+    void hasControlBlockCreationCapability_should_throw_exception_when_parameter_is_null() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);

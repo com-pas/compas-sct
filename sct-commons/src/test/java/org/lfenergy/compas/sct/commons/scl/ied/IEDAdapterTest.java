@@ -5,15 +5,16 @@
 package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.scl2007b4.model.SCL;
+import org.lfenergy.compas.scl2007b4.model.TIED;
+import org.lfenergy.compas.scl2007b4.model.TPrivate;
+import org.lfenergy.compas.scl2007b4.model.TServices;
 import org.lfenergy.compas.sct.commons.dto.DTO;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
-import org.lfenergy.compas.sct.commons.dto.ReportControlBlock;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
-import org.lfenergy.compas.sct.commons.util.ServiceSettingsType;
 import org.mockito.Mockito;
 
 import java.util.HashMap;
@@ -25,7 +26,6 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
 
 class IEDAdapterTest {
 
@@ -56,7 +56,7 @@ class IEDAdapterTest {
     }
 
     @Test
-    void streamLDeviceAdapters_should_return_all_lDevices() throws Exception {
+    void streamLDeviceAdapters_should_return_all_lDevices() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile(SCD_IED_U_TEST);
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -68,7 +68,7 @@ class IEDAdapterTest {
     }
 
     @Test
-    void findLDeviceAdapterByLdInst_should_return_LDevice() throws Exception {
+    void findLDeviceAdapterByLdInst_should_return_LDevice() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile(SCD_IED_U_TEST);
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -80,7 +80,7 @@ class IEDAdapterTest {
     }
 
     @Test
-    void findLDeviceAdapterByLdInst_when_not_found_should_return_empty_optional() throws Exception {
+    void findLDeviceAdapterByLdInst_when_not_found_should_return_empty_optional() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile(SCD_IED_U_TEST);
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -92,7 +92,7 @@ class IEDAdapterTest {
     }
 
     @Test
-    void getLDeviceAdapterByLdInst_should_return_LDevice() throws Exception {
+    void getLDeviceAdapterByLdInst_should_return_LDevice() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile(SCD_IED_U_TEST);
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -104,7 +104,7 @@ class IEDAdapterTest {
     }
 
     @Test
-    void getLDeviceAdapterByLdInst_when_not_found_should_throw_exception() throws Exception {
+    void getLDeviceAdapterByLdInst_when_not_found_should_throw_exception() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile(SCD_IED_U_TEST);
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -116,7 +116,7 @@ class IEDAdapterTest {
     }
 
     @Test
-    void testUpdateLDeviceNodesType() throws Exception {
+    void testUpdateLDeviceNodesType() {
 
         SCL scd = SclTestMarshaller.getSCLFromFile(SCD_IED_U_TEST);
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -133,7 +133,7 @@ class IEDAdapterTest {
     }
 
     @Test
-    void testGetExtRefBinders() throws Exception {
+    void testGetExtRefBinders() {
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
@@ -147,7 +147,7 @@ class IEDAdapterTest {
     }
 
     @Test
-    void TestIsSettingConfig() throws Exception {
+    void TestIsSettingConfig() {
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
@@ -158,7 +158,7 @@ class IEDAdapterTest {
     }
 
     @Test
-    void testMatches() throws Exception {
+    void testMatches() {
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
@@ -170,28 +170,6 @@ class IEDAdapterTest {
         objectReference = new ObjectReference("IED_NAMELD_INS2/ANCR1.dataSet");
         objectReference.init();
         assertTrue(iAdapter.matches(objectReference));
-    }
-
-    @Test
-    void createControlBlock() throws Exception {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
-        ReportControlBlock controlBlock = new ReportControlBlock();
-        controlBlock.setId("CBID1");
-        controlBlock.setName("rpt");
-        controlBlock.setConfRev(2L);
-        controlBlock.setDataSetRef("dataSet");
-        controlBlock.setHolderIEDName("IED_NAME");
-        controlBlock.setHolderLDInst("LD_INS2");
-        controlBlock.setHolderLnClass("ANCR");
-        controlBlock.setHolderLnInst("1");
-        controlBlock.setOptFields(new TReportControl.OptFields());
-        // When
-        iedAdapter.createControlBlock(controlBlock, ServiceSettingsType.GSE);
-        // Then
-        assertIsMarshallable(scd);
     }
 
     @Test

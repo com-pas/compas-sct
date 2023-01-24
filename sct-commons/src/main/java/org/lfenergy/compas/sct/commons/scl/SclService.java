@@ -315,7 +315,7 @@ public class SclService {
      * @return list of <em>ControlBlock</em> object as ControlBlocks of LNode specified in <em>extRefInfo</em>
      * @throws ScdException throws when mandatory data of ExtRef are missing
      */
-    public static List<ControlBlock<?>> getExtRefSourceInfo(SCL scd, ExtRefInfo extRefInfo) throws ScdException {
+    public static List<ControlBlock> getExtRefSourceInfo(SCL scd, ExtRefInfo extRefInfo) throws ScdException {
 
         ExtRefSignalInfo signalInfo = extRefInfo.getSignalInfo();
         if (!signalInfo.isValid()) {
@@ -338,7 +338,7 @@ public class SclService {
         LDeviceAdapter srcLDeviceAdapter = srcIEDAdapter.findLDeviceAdapterByLdInst(extRefInfo.getBindingInfo().getLdInst())
                 .orElseThrow();
 
-        List<AbstractLNAdapter<?>> aLNAdapters = srcLDeviceAdapter.getLNAdaptersInclundigLN0();
+        List<AbstractLNAdapter<?>> aLNAdapters = srcLDeviceAdapter.getLNAdaptersIncludingLN0();
 
         return aLNAdapters.stream()
                 .map(abstractLNAdapter1 -> abstractLNAdapter1.getControlBlocksForMatchingFCDA(extRefInfo))

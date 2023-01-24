@@ -39,6 +39,7 @@
                                 <compas:Flow dataStreamKey="test ignore internal binding" FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="IED_NAME1" ExtReflnClass="ANCR" ExtRefldinst="LD_INST12" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE"/>
                                 <compas:Flow dataStreamKey="test ignore missing bindings attributes" FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE"/>
                                 <compas:Flow dataStreamKey="test ignore when compas:Flow.FlowStatus is neither ACTIVE nor UNTESTED" FlowID="1" FlowKind="BAY_EXTERNAL" ExtRefiedName="IED_NAME3" ExtReflnClass="ANCR" ExtRefldinst="LD_INST31" ExtReflnInst="1" ExtRefprefix="" FlowStatus="INACTIVE"/>
+                                <compas:Flow dataStreamKey="test daName without BDA" FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="2" ExtRefprefix="" FlowStatus="ACTIVE"/>
                             </Private>
                             <!-- bay internal  -->
                             <ExtRef desc="test bay internal" iedName="IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="DoName" daName="daNameST" serviceType="GOOSE" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
@@ -70,7 +71,8 @@
                             <ExtRef desc="test ignore missing bindings attributes" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
                             <!-- ignore when compas:Flow.FlowStatus is INACTIVE -->
                             <ExtRef desc="test ignore when compas:Flow.FlowStatus is neither ACTIVE nor UNTESTED" iedName="IED_NAME3" ldInst="LD_INST31" lnClass="ANCR" lnInst="1" doName="DoName" daName="daNameST" serviceType="GOOSE" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
-
+                            <!-- test daName with BDA  -->
+                            <ExtRef desc="test daName without BDA" iedName="IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="2" doName="ColPosA" serviceType="GOOSE" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
                         </Inputs>
                     </LN0>
                 </LDevice>
@@ -97,7 +99,7 @@
         <AccessPoint name="AP_NAME">
             <Server>
                 <Authentication/>
-                <LDevice inst="LD_INST21">
+                <LDevice inst="LD_INST21" ldName="IED_NAME2LD_INST21">
                     <LN0 lnClass="LLN0" inst="" lnType="LNEX1">
                         <DOI name="Mod">
                             <DAI name="stVal">
@@ -106,14 +108,15 @@
                         </DOI>
                     </LN0>
                     <LN lnClass="ANCR" inst="1" lnType="lnType"/>
+                    <LN lnClass="ANCR" inst="2" lnType="lnType2"/>
                 </LDevice>
             </Server>
             <Services>
-                <GSESettings datSet="Conf"/>
-                <SMVSettings datSet="Conf">
+                <GSESettings datSet="Conf" cbName="Conf"/>
+                <SMVSettings datSet="Conf" cbName="Conf">
                     <SamplesPerSec>5</SamplesPerSec>
                 </SMVSettings>
-                <ReportSettings datSet="Conf"/>
+                <ReportSettings datSet="Conf" cbName="Conf"/>
             </Services>
         </AccessPoint>
     </IED>
@@ -124,13 +127,10 @@
         <Private type="COMPAS-Bay">
             <compas:Bay UUID="UuidBay2"/>
         </Private>
-        <Services>
-            <GSESettings datSet="Conf"/>
-        </Services>
         <AccessPoint name="AP_NAME">
             <Server>
                 <Authentication/>
-                <LDevice inst="LD_INST31">
+                <LDevice inst="LD_INST31" ldName="IED_NAME3LD_INST31">
                     <LN0 lnClass="LLN0" inst="" lnType="LNEX1">
                         <DOI name="Mod">
                             <DAI name="stVal">
@@ -142,11 +142,11 @@
                 </LDevice>
             </Server>
             <Services>
-                <GSESettings datSet="Conf"/>
-                <SMVSettings datSet="Conf">
+                <GSESettings datSet="Conf" cbName="Conf"/>
+                <SMVSettings datSet="Conf" cbName="Conf">
                     <SamplesPerSec>5</SamplesPerSec>
                 </SMVSettings>
-                <ReportSettings datSet="Conf"/>
+                <ReportSettings datSet="Conf" cbName="Conf"/>
             </Services>
         </AccessPoint>
     </IED>
@@ -159,6 +159,10 @@
             <DO name="OtherDoName" type="Do1"/>
             <DO name="DoWithInst1" type="Do1"/>
             <DO name="DoWithInst2" type="Do2"/>
+        </LNodeType>
+        <LNodeType lnClass="ANCR" id="lnType2">
+            <DO name="PotAlm" type="Do3"/>
+            <DO name="ColPosA" type="Do4"/>
         </LNodeType>
         <DOType cdc="ENC" id="Do0">
             <DA fc="ST" name="stVal" bType="Enum" type="BehaviourModeKind"/>
@@ -173,6 +177,17 @@
         <DOType cdc="ENC" id="Do2">
             <SDO name="subDo" type="Do1"/>
         </DOType>
+        <DOType cdc="ENC" id="Do3">
+            <DA fc="ST" name="stVal" bType="BOOLEAN"/>
+            <DA fc="ST" name="q" bType="BOOLEAN"/>
+            <DA fc="ST" name="t" bType="BOOLEAN"/>
+        </DOType>
+        <DOType cdc="ENC" id="Do4">
+            <DA fc="MX" name="instMag" bType="Struct" type="bda1"/>
+        </DOType>
+        <DAType id="bda1">
+            <BDA name="i" bType="BOOLEAN"/>
+        </DAType>
         <EnumType id="BehaviourModeKind">
             <EnumVal ord="1">on</EnumVal>
             <EnumVal ord="2">off</EnumVal>
