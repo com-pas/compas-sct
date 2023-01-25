@@ -52,7 +52,7 @@ class SclServiceTest {
     }
 
     @Test
-    void testAddIED() throws Exception {
+    void testAddIED() {
 
         SclRootAdapter sclRootAdapter = new SclRootAdapter("hId", SclRootAdapter.VERSION, SclRootAdapter.REVISION);
         SCL scd = sclRootAdapter.getCurrentElem();
@@ -67,7 +67,7 @@ class SclServiceTest {
     }
 
     @Test
-    void testAddSubnetworks() throws Exception {
+    void testAddSubnetworks() {
         SclRootAdapter sclRootAdapter = new SclRootAdapter("hId", SclRootAdapter.VERSION, SclRootAdapter.REVISION);
         SCL scd = sclRootAdapter.getCurrentElem();
         assertNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
@@ -88,7 +88,7 @@ class SclServiceTest {
     }
 
     @Test
-    void testAddSubnetworksWithoutCommunicationTagInIcd() throws Exception {
+    void testAddSubnetworksWithoutCommunicationTagInIcd() {
         SclRootAdapter sclRootAdapter = new SclRootAdapter("hId", SclRootAdapter.VERSION, SclRootAdapter.REVISION);
         SCL scd = sclRootAdapter.getCurrentElem();
         assertNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
@@ -102,7 +102,7 @@ class SclServiceTest {
     }
 
     @Test
-    void testAddSubnetworksWithFilledCommunication() throws Exception {
+    void testAddSubnetworksWithFilledCommunication() {
         SclRootAdapter sclRootAdapter = new SclRootAdapter("hId", SclRootAdapter.VERSION, SclRootAdapter.REVISION);
         SCL scd = sclRootAdapter.getCurrentElem();
         assertNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
@@ -118,7 +118,7 @@ class SclServiceTest {
     }
 
     @Test
-    void testAddSubnetworksWithoutImportingIcdAddressAndPhysConn() throws Exception {
+    void testAddSubnetworksWithoutImportingIcdAddressAndPhysConn() {
         SclRootAdapter sclRootAdapter = new SclRootAdapter("hId", SclRootAdapter.VERSION, SclRootAdapter.REVISION);
         SCL scd = sclRootAdapter.getCurrentElem();
         assertNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
@@ -135,7 +135,7 @@ class SclServiceTest {
 
 
     @Test
-    void testGetSubnetwork() throws Exception {
+    void testGetSubnetwork() {
         SclRootAdapter sclRootAdapter = new SclRootAdapter("hId", SclRootAdapter.VERSION, SclRootAdapter.REVISION);
         SCL scd = sclRootAdapter.getCurrentElem();
         assertNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
@@ -158,7 +158,7 @@ class SclServiceTest {
     }
 
     @Test
-    void testGetExtRefInfo() throws Exception {
+    void testGetExtRefInfo() {
         SclRootAdapter sclRootAdapter = new SclRootAdapter("hId", SclRootAdapter.VERSION, SclRootAdapter.REVISION);
         SCL scd = sclRootAdapter.getCurrentElem();
         assertNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
@@ -174,7 +174,7 @@ class SclServiceTest {
     }
 
     @Test
-    void getExtRefBinders_shouldThowScdException_whenExtRefNotExist() throws Exception {
+    void getExtRefBinders_shouldThowScdException_whenExtRefNotExist() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_binders_test.xml");
 
@@ -187,7 +187,7 @@ class SclServiceTest {
     }
 
     @Test
-    void getExtRefBinders_shouldReturnSortedListBindingInfo_whenExtRefAndDOExist() throws Exception {
+    void getExtRefBinders_shouldReturnSortedListBindingInfo_whenExtRefAndDOExist() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_binders_test.xml");
 
@@ -216,7 +216,7 @@ class SclServiceTest {
     }
 
     @Test
-    void testUpdateExtRefBinders() throws Exception {
+    void testUpdateExtRefBinders() {
         SclRootAdapter sclRootAdapter = new SclRootAdapter("hId", SclRootAdapter.VERSION, SclRootAdapter.REVISION);
         SCL scd = sclRootAdapter.getCurrentElem();
         assertNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
@@ -265,7 +265,7 @@ class SclServiceTest {
     }
 
     @Test
-    void getExtRefSourceInfo_shouldReturnEmptyList_whenExtRefMatchNoFCDA() throws Exception {
+    void getExtRefSourceInfo_shouldReturnEmptyList_whenExtRefMatchNoFCDA() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
         String iedName = "IED_NAME2";
@@ -285,14 +285,14 @@ class SclServiceTest {
         extRefInfo.setHolderLnClass(lnClass);
 
         //When
-        List<ControlBlock<?>>  controlBlocks = SclService.getExtRefSourceInfo(scd, extRefInfo);
+        List<ControlBlock>  controlBlocks = SclService.getExtRefSourceInfo(scd, extRefInfo);
 
         //Then
         assertThat(controlBlocks).isEmpty();
     }
 
     @Test
-    void getExtRefSourceInfo_shouldReturnListOfControlBlocks_whenExtRefMatchFCDA() throws Exception {
+    void getExtRefSourceInfo_shouldReturnListOfControlBlocks_whenExtRefMatchFCDA() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/issue_175_scd_get_cbs_test.xml");
         String iedName = "IED_NAME2";
@@ -312,7 +312,7 @@ class SclServiceTest {
         extRefInfo.setHolderLnClass(lnClass);
 
         //When
-        List<ControlBlock<?>> controlBlocks = SclService.getExtRefSourceInfo(scd, extRefInfo);
+        List<ControlBlock> controlBlocks = SclService.getExtRefSourceInfo(scd, extRefInfo);
 
         //Then
         assertThat(controlBlocks).hasSize(1);
@@ -320,7 +320,7 @@ class SclServiceTest {
     }
 
     @Test
-    void updateExtRefSource_shouldThrowScdException_whenSignalInfoNullOrInvalid() throws Exception {
+    void updateExtRefSource_shouldThrowScdException_whenSignalInfoNullOrInvalid() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
         ExtRefInfo extRefInfo = new ExtRefInfo();
@@ -337,7 +337,7 @@ class SclServiceTest {
     }
 
     @Test
-    void updateExtRefSource_shouldThrowScdException_whenBindingInfoNullOrInvalid() throws Exception {
+    void updateExtRefSource_shouldThrowScdException_whenBindingInfoNullOrInvalid() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
         ExtRefInfo extRefInfo = new ExtRefInfo();
@@ -358,7 +358,7 @@ class SclServiceTest {
         assertThatThrownBy(() -> SclService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class);// binding invalid
     }
     @Test
-    void updateExtRefSource_shouldThrowScdException_whenBindingInternalByIedName() throws Exception {
+    void updateExtRefSource_shouldThrowScdException_whenBindingInternalByIedName() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
         ExtRefInfo extRefInfo = new ExtRefInfo();
@@ -382,7 +382,7 @@ class SclServiceTest {
     }
 
     @Test
-    void updateExtRefSource_shouldThrowScdException_whenBindingInternaByServiceType() throws Exception {
+    void updateExtRefSource_shouldThrowScdException_whenBindingInternaByServiceType() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
         ExtRefInfo extRefInfo = new ExtRefInfo();
@@ -407,7 +407,7 @@ class SclServiceTest {
     }
 
     @Test
-    void updateExtRefSource_shouldThrowScdException_whenSourceInfoNullOrInvalid() throws Exception {
+    void updateExtRefSource_shouldThrowScdException_whenSourceInfoNullOrInvalid() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
         ExtRefInfo extRefInfo = new ExtRefInfo();
@@ -435,7 +435,7 @@ class SclServiceTest {
         assertThatThrownBy(() -> SclService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class);// signal invalid
     }
     @Test
-    void updateExtRefSource_shouldThrowScdException_whenBindingExternalBinding() throws Exception {
+    void updateExtRefSource_shouldThrowScdException_whenBindingExternalBinding() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
         ExtRefInfo extRefInfo = new ExtRefInfo();
@@ -487,7 +487,7 @@ class SclServiceTest {
     }
 
     @Test
-    void getDAI_should_return_all_dai() throws Exception {
+    void getDAI_should_return_all_dai() {
         // given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
 
@@ -524,7 +524,7 @@ class SclServiceTest {
     }
 
     @Test
-    void getDAI_should_aggregate_attribute_from_DAI() throws Exception {
+    void getDAI_should_aggregate_attribute_from_DAI() {
         // given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_test_aggregate_DAI.xml");
 
@@ -556,7 +556,7 @@ class SclServiceTest {
     }
 
     @Test
-    void getDAI_when_LDevice_not_found_should_throw_exception() throws Exception {
+    void getDAI_when_LDevice_not_found_should_throw_exception() {
         // given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
 
@@ -567,7 +567,7 @@ class SclServiceTest {
     }
 
     @Test
-    void getDAI_should_filter_updatable_DA() throws Exception {
+    void getDAI_should_filter_updatable_DA() {
         // given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_test_updatable_DAI.xml");
 
@@ -599,7 +599,7 @@ class SclServiceTest {
     }
 
     @Test
-    void getDAI_should_filter_updatable_BDA() throws Exception {
+    void getDAI_should_filter_updatable_BDA() {
         // given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_test_updatable_DAI.xml");
 
@@ -641,7 +641,7 @@ class SclServiceTest {
     }
 
     @Test
-    void getDAI_should_filter_updatable_DA_with_sGroup_Val() throws Exception {
+    void getDAI_should_filter_updatable_DA_with_sGroup_Val() {
         // given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_test_updatable_DAI.xml");
 
@@ -660,7 +660,7 @@ class SclServiceTest {
     }
 
     @Test
-    void getDAI_should_filter_updatable_DA_with_sGroup_Val_without_ConfSg() throws Exception {
+    void getDAI_should_filter_updatable_DA_with_sGroup_Val_without_ConfSg() {
         // given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_test_updatable_DAI.xml");
 
@@ -714,7 +714,7 @@ class SclServiceTest {
     }
 
     @Test
-    void testUpdateDAI() throws Exception {
+    void testUpdateDAI() {
         ResumedDataTemplate rDtt = new ResumedDataTemplate();
         rDtt.setLnType("unknownID");
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
@@ -735,7 +735,7 @@ class SclServiceTest {
     }
 
     @Test
-    void testGetEnumTypeElements() throws Exception {
+    void testGetEnumTypeElements() {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
         assertThrows(ScdException.class, () -> SclService.getEnumTypeElements(scd, "unknwnID"));
 
@@ -746,7 +746,7 @@ class SclServiceTest {
     }
 
     @Test
-    void testImportSTDElementsInSCD() throws Exception {
+    void testImportSTDElementsInSCD() {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd.xml");
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
@@ -760,7 +760,7 @@ class SclServiceTest {
     }
 
     @Test
-    void testImportSTDElementsInSCD_with_Multiple_STD() throws Exception {
+    void testImportSTDElementsInSCD_with_Multiple_STD() {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd_lnode_with_many_compas_icdheader.xml");
         SCL std0 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SCL std1 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_SITESITE1SCU1.xml");
@@ -778,7 +778,7 @@ class SclServiceTest {
     }
 
     @Test
-    void testImportSTDElementsInSCD_Several_STD_Match_Compas_ICDHeader() throws Exception {
+    void testImportSTDElementsInSCD_Several_STD_Match_Compas_ICDHeader() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd.xml");
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
@@ -791,7 +791,7 @@ class SclServiceTest {
     }
 
     @Test
-    void testImportSTDElementsInSCD_Compas_ICDHeader_Not_Match() throws Exception {
+    void testImportSTDElementsInSCD_Compas_ICDHeader_Not_Match() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd.xml");
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_with_same_ICDSystemVersionUUID.xml");
@@ -803,7 +803,7 @@ class SclServiceTest {
     }
 
     @Test
-    void testImportSTDElementsInSCD_No_STD_Match() throws Exception {
+    void testImportSTDElementsInSCD_No_STD_Match() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/ssd.xml");
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
@@ -814,15 +814,15 @@ class SclServiceTest {
     }
 
     @Test
-    void removeControlBlocksAndDatasetAndExtRefSrc_should_remove_controlBlocks_and_Dataset_on_ln0() throws Exception {
+    void removeControlBlocksAndDatasetAndExtRefSrc_should_remove_controlBlocks_and_Dataset_on_ln0() {
         // Given
         SCL scl = SclTestMarshaller.getSCLFromFile("/scl-remove-controlBlocks-dataSet-extRefSrc/scl-with-control-blocks.xml");
         // When
         SclService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scl);
         // Then
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scl);
-        List<LDeviceAdapter> lDevices = scdRootAdapter.streamIEDAdapters().flatMap(IEDAdapter::streamLDeviceAdapters).collect(Collectors.toList());
-        List<LN0> ln0s = lDevices.stream().map(LDeviceAdapter::getLN0Adapter).map(LN0Adapter::getCurrentElem).collect(Collectors.toList());
+        List<LDeviceAdapter> lDevices = scdRootAdapter.streamIEDAdapters().flatMap(IEDAdapter::streamLDeviceAdapters).toList();
+        List<LN0> ln0s = lDevices.stream().map(LDeviceAdapter::getLN0Adapter).map(LN0Adapter::getCurrentElem).toList();
         assertThat(ln0s)
                 .isNotEmpty()
                 .noneMatch(TAnyLN::isSetDataSet)
@@ -834,7 +834,7 @@ class SclServiceTest {
     }
 
     @Test
-    void removeControlBlocksAndDatasetAndExtRefSrc_should_remove_controlBlocks_and_Dataset_on_ln() throws Exception {
+    void removeControlBlocksAndDatasetAndExtRefSrc_should_remove_controlBlocks_and_Dataset_on_ln() {
         // Given
         SCL scl = SclTestMarshaller.getSCLFromFile("/scl-remove-controlBlocks-dataSet-extRefSrc/scl-with-control-blocks.xml");
         // When
@@ -854,7 +854,7 @@ class SclServiceTest {
     }
 
     @Test
-    void removeControlBlocksAndDatasetAndExtRefSrc_should_remove_srcXXX_attributes_on_ExtRef() throws Exception {
+    void removeControlBlocksAndDatasetAndExtRefSrc_should_remove_srcXXX_attributes_on_ExtRef() {
         // Given
         SCL scl = SclTestMarshaller.getSCLFromFile("/scl-remove-controlBlocks-dataSet-extRefSrc/scl-with-control-blocks.xml");
         // When
@@ -877,7 +877,7 @@ class SclServiceTest {
         assertIsMarshallable(scl);
     }
 
-    private static Stream<Arguments> sclProviderMissingRequiredObjects() throws Exception {
+    private static Stream<Arguments> sclProviderMissingRequiredObjects() {
         SCL scl1 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_KO_MissingBeh.scd");
         SCL scl2 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_KO_MissingLDevicePrivate.scd");
         SCL scl3 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_KO_MissingLDevicePrivateAttribute.scd");
@@ -918,7 +918,7 @@ class SclServiceTest {
         assertEquals(before, after);
     }
 
-    private static Stream<Arguments> sclProviderBasedLDeviceStatus() throws Exception {
+    private static Stream<Arguments> sclProviderBasedLDeviceStatus() {
         SCL scl1 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_LD_STATUS_ACTIVE.scd");
         SCL scl2 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_LD_STATUS_UNTESTED.scd");
         SCL scl3 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test1_LD_STATUS_INACTIVE.scd");
@@ -974,7 +974,7 @@ class SclServiceTest {
     }
 
     @Test
-    void updateLDeviceStatus_shouldReturnReportWithError_WhenAllLDeviceInactive_Test2() throws Exception {
+    void updateLDeviceStatus_shouldReturnReportWithError_WhenAllLDeviceInactive_Test2() {
         // Given
         SCL scl = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test2_LD_STATUS_INACTIVE.scd");
         assertEquals("off", getLDeviceStatusValue(scl, "IedName1", "LDSUIED").get().getValue());
@@ -999,7 +999,7 @@ class SclServiceTest {
 
 
     @Test
-    void updateLDeviceStatus_shouldReturnUpdatedFile() throws Exception {
+    void updateLDeviceStatus_shouldReturnUpdatedFile() {
         // Given
         SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_Template.scd");
         assertTrue(getLDeviceStatusValue(givenScl, "IedName1", "LDSUIED").isPresent());

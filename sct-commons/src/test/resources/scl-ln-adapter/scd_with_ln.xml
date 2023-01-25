@@ -31,11 +31,11 @@
                 </LDevice>
             </Server>
             <Services>
-                <GSESettings datSet="Conf"/>
-                <SMVSettings datSet="Conf">
+                <GSESettings datSet="Conf" cbName="Conf"/>
+                <SMVSettings datSet="Conf" cbName="Conf">
                     <SamplesPerSec>5</SamplesPerSec>
                 </SMVSettings>
-                <ReportSettings datSet="Conf"/>
+                <ReportSettings datSet="Conf" cbName="Conf"/>
             </Services>
         </AccessPoint>
     </IED>
@@ -52,12 +52,16 @@
                 <Authentication/>
                 <LDevice inst="LD_INST21" ldName="IED_NAME2LD_INST21">
                     <LN0 lnClass="LLN0" inst="" lnType="LNEX1"/>
+                    <LN lnClass="ANCR" prefix="prefix" inst="1" lnType="LNEX2"/>
                 </LDevice>
             </Server>
         </AccessPoint>
     </IED>
     <DataTypeTemplates>
         <LNodeType lnClass="LLN0" id="LNEX1">
+            <DO name="Mod" type="Do0"/>
+        </LNodeType>
+        <LNodeType lnClass="ANCR" id="LNEX2">
             <DO name="Mod" type="Do0"/>
         </LNodeType>
         <DOType cdc="ENC" id="Do0">

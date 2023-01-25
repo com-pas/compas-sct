@@ -7,8 +7,10 @@ package org.lfenergy.compas.sct.commons.testhelpers;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.assertj.core.api.Assertions;
 import org.lfenergy.compas.core.commons.exception.CompasErrorCode;
 import org.lfenergy.compas.core.commons.exception.CompasException;
+import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -83,7 +85,7 @@ public class MarshallerWrapper {
             } catch (JAXBException | SAXException | ParserConfigurationException exp) {
                 var message = "Error creating JAXB Marshaller and Unmarshaller.";
                 log.error(message, exp);
-                throw new CompasException(CompasErrorCode.CREATION_ERROR_CODE, message);
+                throw new CompasException(CompasErrorCode.CREATION_ERROR_CODE, message, exp);
             }
         }
         return singleton;
@@ -124,6 +126,10 @@ public class MarshallerWrapper {
         }
         InputSource inputSource = new InputSource(url.toString());
         return new SAXSource(xmlReader, inputSource);
+    }
+
+    public static void assertValidateXmlSchema(SCL scl){
+        Assertions.assertThatNoException().isThrownBy(() -> marshall(scl));
     }
 
 }

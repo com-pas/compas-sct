@@ -5,36 +5,47 @@
 package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
-import org.lfenergy.compas.sct.commons.util.ServiceSettingsType;
-import org.mockito.ArgumentMatchers;
+import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 import org.mockito.Mockito;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Named.named;
+import static org.lfenergy.compas.scl2007b4.model.TSampledValueControl.SmvOpts;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.findLn0;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class LN0AdapterTest {
 
     private static final String SCD_IED_U_TEST = "/ied-test-schema-conf/ied_unit_test.xml";
+    private static final String CB_NAME = "cbName";
 
     @Test
     void testAmChildElementRef() throws ScdException {
-        LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
-        TLDevice tlDevice = Mockito.mock(TLDevice.class);
-        Mockito.when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
+        LDeviceAdapter lDeviceAdapter = mock(LDeviceAdapter.class);
+        TLDevice tlDevice = mock(TLDevice.class);
+        when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
         LN0 ln0 = new LN0();
         ln0.setLnType("LT1");
-        Mockito.when(tlDevice.getLN0()).thenReturn(ln0);
+        when(tlDevice.getLN0()).thenReturn(ln0);
         LN0Adapter ln0Adapter = assertDoesNotThrow( () -> new LN0Adapter(lDeviceAdapter,ln0));
 
         assertEquals(LN0.class,ln0Adapter.getElementClassType());
@@ -51,36 +62,28 @@ class LN0AdapterTest {
         assertTrue(ln0Adapter.getCurrentElem().getSampledValueControl().isEmpty());
         assertTrue(ln0Adapter.getCurrentElem().getReportControl().isEmpty());
 
-        ln0Adapter.addControlBlock(new ReportControlBlock());
-        ln0Adapter.addControlBlock(new SMVControlBlock());
-        ln0Adapter.addControlBlock(new GooseControlBlock());
-
-        assertFalse(ln0Adapter.getCurrentElem().getGSEControl().isEmpty());
-        assertFalse(ln0Adapter.getCurrentElem().getSampledValueControl().isEmpty());
-        assertFalse(ln0Adapter.getCurrentElem().getReportControl().isEmpty());
-
         LN0 ln01 = new LN0();
         assertThrows(IllegalArgumentException.class,  () -> new LN0Adapter(lDeviceAdapter, ln01));
     }
+
     // AbstractLNAdapter class test
     @Test
     void containsFCDA() {
-        LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
-        TLDevice tlDevice = Mockito.mock(TLDevice.class);
-        Mockito.when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
+        LDeviceAdapter lDeviceAdapter = mock(LDeviceAdapter.class);
+        TLDevice tlDevice = mock(TLDevice.class);
+        when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
         LN0 ln0 = new LN0();
-        Mockito.when(tlDevice.getLN0()).thenReturn(ln0);
+        when(tlDevice.getLN0()).thenReturn(ln0);
         assertDoesNotThrow( () -> new LN0Adapter(lDeviceAdapter,ln0));
     }
-
     @Test
     void isExtRefExist_shouldThrowScdException_whenNoInputsInLN0() {
         //Given
-        LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
-        TLDevice tlDevice = Mockito.mock(TLDevice.class);
-        Mockito.when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
+        LDeviceAdapter lDeviceAdapter = mock(LDeviceAdapter.class);
+        TLDevice tlDevice = mock(TLDevice.class);
+        when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
         LN0 ln0 = new LN0();
-        Mockito.when(tlDevice.getLN0()).thenReturn(ln0);
+        when(tlDevice.getLN0()).thenReturn(ln0);
         LN0Adapter ln0Adapter = assertDoesNotThrow(() -> new LN0Adapter(lDeviceAdapter, ln0));
         ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
         //When Then
@@ -92,15 +95,15 @@ class LN0AdapterTest {
     @Test
     void isExtRefExist_shouldThrowScdException_whenSignalNotValid() {
         //Given
-        LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
-        TLDevice tlDevice = Mockito.mock(TLDevice.class);
-        Mockito.when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
+        LDeviceAdapter lDeviceAdapter = mock(LDeviceAdapter.class);
+        TLDevice tlDevice = mock(TLDevice.class);
+        when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
         LN0 ln0 = new LN0();
         TExtRef tExtRef = new TExtRef();
         TInputs tInputs = new TInputs();
         tInputs.getExtRef().add(tExtRef);
         ln0.setInputs(tInputs);
-        Mockito.when(tlDevice.getLN0()).thenReturn(ln0);
+        when(tlDevice.getLN0()).thenReturn(ln0);
         LN0Adapter ln0Adapter = assertDoesNotThrow(() -> new LN0Adapter(lDeviceAdapter, ln0));
         ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
         //When Then
@@ -113,15 +116,15 @@ class LN0AdapterTest {
     @Test
     void isExtRefExist_shouldThrowScdException_whenSignalNull(){
         //Given
-        LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
-        TLDevice tlDevice = Mockito.mock(TLDevice.class);
-        Mockito.when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
+        LDeviceAdapter lDeviceAdapter = mock(LDeviceAdapter.class);
+        TLDevice tlDevice = mock(TLDevice.class);
+        when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
         LN0 ln0 = new LN0();
         TInputs tInputs = new TInputs();
         TExtRef extRef = DTO.createExtRef();
         tInputs.getExtRef().add(extRef);
         ln0.setInputs(tInputs);
-        Mockito.when(tlDevice.getLN0()).thenReturn(ln0);
+        when(tlDevice.getLN0()).thenReturn(ln0);
         LN0Adapter ln0Adapter = assertDoesNotThrow( () -> new LN0Adapter(lDeviceAdapter,ln0));
         //When Then
         assertThatThrownBy(() -> ln0Adapter.isExtRefExist(null))
@@ -132,16 +135,16 @@ class LN0AdapterTest {
     @Test
     void isExtRefExist_shouldThrowScdException_whenNotExistInTargetLN(){
         //Given
-        LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
-        TLDevice tlDevice = Mockito.mock(TLDevice.class);
-        Mockito.when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
+        LDeviceAdapter lDeviceAdapter = mock(LDeviceAdapter.class);
+        TLDevice tlDevice = mock(TLDevice.class);
+        when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
         LN0 ln0 = new LN0();
         TInputs tInputs = new TInputs();
         TExtRef extRef = DTO.createExtRef();
         extRef.setPDO("pdo");
         tInputs.getExtRef().add(extRef);
         ln0.setInputs(tInputs);
-        Mockito.when(tlDevice.getLN0()).thenReturn(ln0);
+        when(tlDevice.getLN0()).thenReturn(ln0);
         LN0Adapter ln0Adapter = assertDoesNotThrow(() -> new LN0Adapter(lDeviceAdapter, ln0));
         ExtRefSignalInfo signalInfo = DTO.createExtRefSignalInfo();
         //When Then
@@ -150,14 +153,14 @@ class LN0AdapterTest {
                 .hasMessage("ExtRef signal does not exist in target LN");
     }
 
-    @Test
+     @Test
     void isExtRefExist_shouldNotThrowException_whenExtRefExist() {
         //Given
-        LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
-        TLDevice tlDevice = Mockito.mock(TLDevice.class);
-        Mockito.when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
+        LDeviceAdapter lDeviceAdapter = mock(LDeviceAdapter.class);
+        TLDevice tlDevice = mock(TLDevice.class);
+        when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
         LN0 ln0 = new LN0();
-        Mockito.when(tlDevice.getLN0()).thenReturn(ln0);
+        when(tlDevice.getLN0()).thenReturn(ln0);
         LN0Adapter ln0Adapter = assertDoesNotThrow(() -> new LN0Adapter(lDeviceAdapter, ln0));
 
         TInputs tInputs = new TInputs();
@@ -173,11 +176,11 @@ class LN0AdapterTest {
     @Test
     void isExtRefExist_shouldNotThrowException_whenExtRefExistWithPDA() {
         //Given
-        LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
-        TLDevice tlDevice = Mockito.mock(TLDevice.class);
-        Mockito.when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
+        LDeviceAdapter lDeviceAdapter = mock(LDeviceAdapter.class);
+        TLDevice tlDevice = mock(TLDevice.class);
+        when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
         LN0 ln0 = new LN0();
-        Mockito.when(tlDevice.getLN0()).thenReturn(ln0);
+        when(tlDevice.getLN0()).thenReturn(ln0);
         LN0Adapter ln0Adapter = assertDoesNotThrow(() -> new LN0Adapter(lDeviceAdapter, ln0));
 
         TInputs tInputs = new TInputs();
@@ -193,11 +196,11 @@ class LN0AdapterTest {
 
     @Test
     void testGetDataSetWith(){
-        LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
-        TLDevice tlDevice = Mockito.mock(TLDevice.class);
-        Mockito.when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
+        LDeviceAdapter lDeviceAdapter = mock(LDeviceAdapter.class);
+        TLDevice tlDevice = mock(TLDevice.class);
+        when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
         LN0 ln0 = new LN0();
-        Mockito.when(tlDevice.getLN0()).thenReturn(ln0);
+        when(tlDevice.getLN0()).thenReturn(ln0);
         LN0Adapter ln0Adapter = assertDoesNotThrow( () -> new LN0Adapter(lDeviceAdapter,ln0));
 
         TDataSet tDataSet = new TDataSet();
@@ -214,21 +217,21 @@ class LN0AdapterTest {
         tDataSets = ln0Adapter.getDataSetMatchingExtRefInfo(extRefInfo);
         assertTrue(tDataSets.isEmpty());
 
-        Mockito.doReturn(true).when(extRefInfo).checkMatchingFCDA(ArgumentMatchers.any(TFCDA.class));
+        Mockito.doReturn(true).when(extRefInfo).checkMatchingFCDA(any(TFCDA.class));
         tDataSets = ln0Adapter.getDataSetMatchingExtRefInfo(extRefInfo);
         assertFalse(tDataSets.isEmpty());
     }
 
     @Test
     void testGetControlBlocks(){
-        LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
-        IEDAdapter iedAdapter = Mockito.mock(IEDAdapter.class);
-        TLDevice tlDevice = Mockito.mock(TLDevice.class);
-        Mockito.when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
-        Mockito.when(lDeviceAdapter.getParentAdapter()).thenReturn(iedAdapter);
-        Mockito.when(iedAdapter.getName()).thenReturn("IED_NAME");
+        LDeviceAdapter lDeviceAdapter = mock(LDeviceAdapter.class);
+        IEDAdapter iedAdapter = mock(IEDAdapter.class);
+        TLDevice tlDevice = mock(TLDevice.class);
+        when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
+        when(lDeviceAdapter.getParentAdapter()).thenReturn(iedAdapter);
+        when(iedAdapter.getName()).thenReturn("IED_NAME");
         LN0 ln0 = new LN0();
-        Mockito.when(tlDevice.getLN0()).thenReturn(ln0);
+        when(tlDevice.getLN0()).thenReturn(ln0);
         LN0Adapter ln0Adapter = assertDoesNotThrow( () -> new LN0Adapter(lDeviceAdapter,ln0));
         TGSEControl tgseControl = new TGSEControl();
         tgseControl.setDatSet("GSE_REF");
@@ -243,7 +246,7 @@ class LN0AdapterTest {
         TDataSet tDataSetGSE = new TDataSet();
         tDataSetGSE.setName(DTO.CB_DATASET_REF);
 
-        List<ControlBlock<?>> controlBlocks = ln0Adapter.getControlBlocks(List.of(tDataSetGSE),null);
+        List<ControlBlock> controlBlocks = ln0Adapter.getControlBlocks(List.of(tDataSetGSE),null);
         assertTrue(controlBlocks.isEmpty());
 
         tDataSetGSE.setName("GSE_REF");
@@ -268,10 +271,10 @@ class LN0AdapterTest {
     void testGetControlSetByBindingInfo(){
 
         LN0 ln0 = new LN0();
-        LN0Adapter ln0Adapter = Mockito.mock(LN0Adapter.class);
+        LN0Adapter ln0Adapter = mock(LN0Adapter.class);
         ln0Adapter = Mockito.spy(ln0Adapter);
 
-        Mockito.when(ln0Adapter.getCurrentElem()).thenReturn(ln0);
+        when(ln0Adapter.getCurrentElem()).thenReturn(ln0);
 
         TInputs tInputs = new TInputs();
         TExtRef extRef = DTO.createExtRef();
@@ -280,13 +283,13 @@ class LN0AdapterTest {
 
         ExtRefInfo extRefBindingInfo = DTO.createExtRefInfo();
         Mockito.doReturn(List.of(new TDataSet()))
-                .when(ln0Adapter).getDataSetMatchingExtRefInfo(ArgumentMatchers.any(ExtRefInfo.class));
+                .when(ln0Adapter).getDataSetMatchingExtRefInfo(any(ExtRefInfo.class));
 
-        Mockito.doReturn(List.of(new ReportControlBlock()))
+        Mockito.doReturn(List.of(new ReportControlBlock("rpt", "rptID", "rptDatSet")))
                 .when(ln0Adapter).getControlBlocks(
-                    ArgumentMatchers.any(List.class),ArgumentMatchers.any(TServiceType.class));
+                    any(List.class), any(TServiceType.class));
 
-        List<ControlBlock<?>> controlBlocks =  ln0Adapter.getControlBlocksForMatchingFCDA(extRefBindingInfo);
+        List<ControlBlock> controlBlocks =  ln0Adapter.getControlBlocksForMatchingFCDA(extRefBindingInfo);
         assertFalse(controlBlocks.isEmpty());
         assertEquals(TServiceType.REPORT,controlBlocks.get(0).getServiceType());
     }
@@ -305,15 +308,15 @@ class LN0AdapterTest {
 
     @Test
     void testGetDOIAdapterByName(){
-        IEDAdapter iedAdapter = Mockito.mock(IEDAdapter.class);
+        IEDAdapter iedAdapter = mock(IEDAdapter.class);
         TIED tied = new TIED();
-        Mockito.when(iedAdapter.getCurrentElem()).thenReturn(tied);
-        Mockito.when(iedAdapter.getName()).thenReturn("IED_NAME");
-        LDeviceAdapter lDeviceAdapter = Mockito.mock(LDeviceAdapter.class);
+        when(iedAdapter.getCurrentElem()).thenReturn(tied);
+        when(iedAdapter.getName()).thenReturn("IED_NAME");
+        LDeviceAdapter lDeviceAdapter = mock(LDeviceAdapter.class);
         TLDevice tlDevice = new TLDevice();
-        Mockito.when(lDeviceAdapter.amChildElementRef()).thenReturn(true);
-        Mockito.when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
-        Mockito.when(lDeviceAdapter.getParentAdapter()).thenReturn(iedAdapter);
+        when(lDeviceAdapter.amChildElementRef()).thenReturn(true);
+        when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
+        when(lDeviceAdapter.getParentAdapter()).thenReturn(iedAdapter);
 
         LN0 ln0 = new LN0();
         tlDevice.setLN0(ln0);
@@ -327,7 +330,7 @@ class LN0AdapterTest {
     }
 
     @Test
-    void testFindMatch() throws Exception {
+    void testFindMatch() {
         SCL scd = SclTestMarshaller.getSCLFromFile(SCD_IED_U_TEST);
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
@@ -343,34 +346,53 @@ class LN0AdapterTest {
         assertFalse(ln0Adapter.findMatch(doTypeName2,daTypeName).isPresent());
     }
 
+    @ParameterizedTest
+    @EnumSource(value = ControlBlockEnum.class, mode = EnumSource.Mode.EXCLUDE, names = "LOG")
+    void hasControlBlock_should_return_true(ControlBlockEnum controlBlockEnum) {
+        // Given
+        IEDAdapter iedAdapter = mock(IEDAdapter.class);
+        LDeviceAdapter lDeviceAdapter = mock(LDeviceAdapter.class);
+        when(lDeviceAdapter.getParentAdapter()).thenReturn(iedAdapter);
+        TLDevice tlDevice = mock(TLDevice.class);
+        when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
+        when(lDeviceAdapter.hasDataSetCreationCapability(any())).thenReturn(true);
+        when(lDeviceAdapter.hasControlBlockCreationCapability(any())).thenReturn(true);
+
+        LN0 ln0 = new LN0();
+        ln0.getLnClass().add(TLLN0Enum.LLN_0.value());
+        when(tlDevice.getLN0()).thenReturn(ln0);
+        LN0Adapter ln0Adapter = new LN0Adapter(lDeviceAdapter, ln0);
+        ln0Adapter.createDataSetIfNotExists("datSet", controlBlockEnum);
+        ln0Adapter.createControlBlockIfNotExists(CB_NAME, "id", "datSet", controlBlockEnum);
+
+        // When
+        boolean found = ln0Adapter.hasControlBlock(CB_NAME, controlBlockEnum);
+        // Then
+        assertThat(found).isTrue();
+    }
+
     @Test
-    void testHasControlBlockAndAddControlBlock() {
-        LN0 tln = new LN0();
-        tln.getLnClass().add(TLLN0Enum.LLN_0.value());
-        LN0Adapter lnAdapter = new LN0Adapter(null,tln);
+    void hasControlBlock_when_wrong_controlBlockEnum_should_return_false() {
+        // Given
+        IEDAdapter iedAdapter = mock(IEDAdapter.class);
+        LDeviceAdapter lDeviceAdapter = mock(LDeviceAdapter.class);
+        when(lDeviceAdapter.getParentAdapter()).thenReturn(iedAdapter);
+        TLDevice tlDevice = mock(TLDevice.class);
+        when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
+        when(lDeviceAdapter.hasDataSetCreationCapability(any())).thenReturn(true);
+        when(lDeviceAdapter.hasControlBlockCreationCapability(any())).thenReturn(true);
 
-        ReportControlBlock controlBlock = new ReportControlBlock();
-        controlBlock.setName("rpt");
-        controlBlock.setConfRev(2L);
-        assertDoesNotThrow(()->lnAdapter.addControlBlock(controlBlock));
-        assertTrue(lnAdapter.hasControlBlock(controlBlock));
+        LN0 ln0 = new LN0();
+        ln0.getLnClass().add(TLLN0Enum.LLN_0.value());
+        when(tlDevice.getLN0()).thenReturn(ln0);
+        LN0Adapter ln0Adapter = new LN0Adapter(lDeviceAdapter, ln0);
+        ln0Adapter.createDataSetIfNotExists("datSet", ControlBlockEnum.GSE);
+        ln0Adapter.createControlBlockIfNotExists(CB_NAME, "id", "datSet", ControlBlockEnum.GSE);
 
-        GooseControlBlock gooseControlBlock = new GooseControlBlock();
-        gooseControlBlock.setName("gse");
-        gooseControlBlock.setId("g1");
-        assertDoesNotThrow(()->lnAdapter.addControlBlock(gooseControlBlock));
-        assertTrue(lnAdapter.hasControlBlock(gooseControlBlock));
-
-        SMVControlBlock smvControlBlock = new SMVControlBlock();
-        smvControlBlock.setName("smv");
-        smvControlBlock.setId("s1");
-        assertDoesNotThrow(()->lnAdapter.addControlBlock(smvControlBlock));
-        assertTrue(lnAdapter.hasControlBlock(smvControlBlock));
-
-        ControlBlock<?> controlBlock1 = Mockito.mock(ReportControlBlock.class);
-        Mockito.when(controlBlock1.getServiceType()).thenReturn(TServiceType.POLL);
-        assertThrows(ScdException.class,()->lnAdapter.addControlBlock(controlBlock1));
-
+        // When
+        boolean found = ln0Adapter.hasControlBlock(CB_NAME, ControlBlockEnum.SAMPLED_VALUE);
+        // Then
+        assertThat(found).isFalse();
     }
 
     @Test
@@ -388,7 +410,7 @@ class LN0AdapterTest {
 
 
     @Test
-    void testGetDAI() throws Exception {
+    void testGetDAI() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -416,7 +438,7 @@ class LN0AdapterTest {
     }
 
     @Test
-    void getEnumValue_shouldReturnNothing_whenEnumUnknow() throws Exception {
+    void getEnumValue_shouldReturnNothing_whenEnumUnknow() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -430,7 +452,7 @@ class LN0AdapterTest {
     }
 
     @Test
-    void getEnumValue_shouldReturnEnumValues_whenEnumKnown() throws Exception {
+    void getEnumValue_shouldReturnEnumValues_whenEnumKnown() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -444,15 +466,33 @@ class LN0AdapterTest {
         assertThat(enumValues).containsExactlyInAnyOrder("blocked", "test", "test/blocked", "off", "on");
     }
 
-    @Test
-    void addControlBlock_shouldAddControlBlock_whenReport() throws Exception {
+    @ParameterizedTest
+    @MethodSource("provideControlBlocks")
+    void addControlBlock_should_add_ControlBlock(ControlBlock controlBlock) {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LDSUIED"));
         LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
-        ReportControlBlock reportControlBlock = new ReportControlBlock();
+        ln0Adapter.createDataSetIfNotExists(controlBlock.getDataSetRef(), controlBlock.getControlBlockEnum());
+        int initialControlBlockCount = ln0Adapter.getTControlsByType(controlBlock.getControlBlockEnum().getControlBlockClass()).size();
+        //When
+        ln0Adapter.addControlBlock(controlBlock);
+        //Then
+        assertThat(ln0Adapter.getTControlsByType(controlBlock.getControlBlockEnum().getControlBlockClass())).hasSize(initialControlBlockCount + 1);
+    }
+
+    @Test
+    void addControlBlock_should_add_ReportControlBlock() {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LDSUIED"));
+        LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
+        ln0Adapter.createDataSetIfNotExists("rptDatSet", ControlBlockEnum.REPORT);
+        ReportControlBlock reportControlBlock = new ReportControlBlock("rpt", "rptID", "rptDatSet");
         int reportCBInitSize = ln0Adapter.getCurrentElem().getReportControl().size();
         //When
         ln0Adapter.addControlBlock(reportControlBlock);
@@ -461,35 +501,115 @@ class LN0AdapterTest {
     }
 
     @Test
-    void addControlBlock_shouldAddControlBlock_whenGoose() throws Exception {
+    void addControlBlock_should_add_GooseControlBlock() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LDSUIED"));
         LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
-        GooseControlBlock gooseControlBlock = new GooseControlBlock();
+        ln0Adapter.createDataSetIfNotExists("datSet", ControlBlockEnum.GSE);
+        GooseControlBlock gooseControlBlock = new GooseControlBlock("gse", "gseID", "datSet");
         int reportCBInitSize = ln0Adapter.getCurrentElem().getReportControl().size();
+
         //When
         ln0Adapter.addControlBlock(gooseControlBlock);
         //Then
-        assertThat(ln0Adapter.getCurrentElem().getGSEControl()).hasSize(reportCBInitSize+1);
+        assertThat(ln0Adapter.getCurrentElem().getGSEControl()).hasSize(reportCBInitSize + 1);
     }
 
     @Test
-    void addControlBlock_shouldAddControlBlock_whenSMV() throws Exception {
+    void addControlBlock_should_add_SMVControlBlock() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LDSUIED"));
         LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
-        SMVControlBlock smvControlBlock = new SMVControlBlock();
+        ln0Adapter.createDataSetIfNotExists("smvDatSet", ControlBlockEnum.SAMPLED_VALUE);
+        SMVControlBlock smvControlBlock = new SMVControlBlock("smv", "smvID", "smvDatSet");
         int reportCBInitSize = ln0Adapter.getCurrentElem().getReportControl().size();
         //When
         ln0Adapter.addControlBlock(smvControlBlock);
         //Then
         assertThat(ln0Adapter.getCurrentElem().getSampledValueControl()).hasSize(reportCBInitSize+1);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideControlBlocks")
+    void addControlBlock_when_accessPoint_does_not_have_capability_should_throw_exception(ControlBlock controlBlock) {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LDSUIED"));
+        LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
+        ln0Adapter.createDataSetIfNotExists("dataSet", ControlBlockEnum.REPORT);
+        ln0Adapter.getParentLDevice().getAccessPoint().setServices(new TServices());
+        //When & Then
+        assertThatThrownBy(() -> ln0Adapter.addControlBlock(controlBlock))
+            .isInstanceOf(ScdException.class)
+            .hasMessageContaining("because IED/AccessPoint does not have capability to create ControlBlock");
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideControlBlocks")
+    void addControlBlock_when_controlBlock_already_exists_should_throw_exception(ControlBlock controlBlock) {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LDSUIED"));
+        LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
+        ln0Adapter.createDataSetIfNotExists("dataSet", ControlBlockEnum.REPORT);
+        ln0Adapter.addControlBlock(controlBlock);
+        //When & Then
+        assertThatThrownBy(() -> ln0Adapter.addControlBlock(controlBlock))
+            .isInstanceOf(ScdException.class)
+            .hasMessageContaining("because it already exists");
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideControlBlocks")
+    void addControlBlock_when_dataSet_does_not_exist_should_throw_exception(ControlBlock controlBlock) {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LDSUIED"));
+        LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
+        //When & Then
+        assertThatThrownBy(() -> ln0Adapter.addControlBlock(controlBlock))
+            .isInstanceOf(ScdException.class)
+            .hasMessageContaining("because target DataSet dataSet does not exists");
+    }
+
+    private static Stream<Arguments> provideControlBlocks(){
+        return Stream.of(
+            Arguments.of(named("ReportControlBlock", new ReportControlBlock("name", "id", "dataSet"))),
+            Arguments.of(named("GooseControlBlock", new GooseControlBlock("name", "id", "dataSet"))),
+            Arguments.of(named("SMVControlBlock", new SMVControlBlock("name", "id", "dataSet")))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideGetTControlsByType")
+    void getTControlsByType_should_return_LN0_list_of_controls_for_this_class(Class<? extends TControl> tControlClass, Function<LN0, List<?>> getter) {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        LN0Adapter ln0Adapter = findLn0(new SclRootAdapter(scd), "IED4d4fe1a8cda64cf88a5ee4176a1a0eef", "LDSUIED");
+        // When
+        List<? extends TControl> controlList = ln0Adapter.getTControlsByType(tControlClass);
+        // Then
+        assertThat(controlList).isSameAs(getter.apply(ln0Adapter.getCurrentElem()));
+    }
+
+    private static Stream<Arguments> provideGetTControlsByType(){
+        return Stream.of(
+            Arguments.of(TGSEControl.class, (Function<LN0, List<TGSEControl>>) LN0::getGSEControl),
+            Arguments.of(TSampledValueControl.class, (Function<LN0, List<TSampledValueControl>>) LN0::getSampledValueControl),
+            Arguments.of(TReportControl.class, (Function<LN0, List<TReportControl>>) LN0::getReportControl)
+        );
     }
 
     @Test
@@ -505,7 +625,7 @@ class LN0AdapterTest {
     }
 
     @Test
-    void getLDeviceStatus_should_succeed() throws Exception {
+    void getLDeviceStatus_should_succeed() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_with_extref_errors.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -525,13 +645,13 @@ class LN0AdapterTest {
     }
 
     @Test
-    void createDataSetIfNotExists_should_create_dataSet() throws Exception {
+    void createDataSetIfNotExists_should_create_dataSet() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
         LN0Adapter ln0 = findLn0(new SclRootAdapter(scd), "IED_NAME1", "LD_INST11");
         assertThat(ln0.getCurrentElem().getDataSet()).isEmpty();
         // When
-        DataSetAdapter newDataSet = ln0.createDataSetIfNotExists("newDataSet", ServiceSettingsType.GSE);
+        DataSetAdapter newDataSet = ln0.createDataSetIfNotExists("newDataSet", ControlBlockEnum.GSE);
         // Then
         assertThat(newDataSet.getCurrentElem().getName()).isEqualTo("newDataSet");
         assertThat(newDataSet.getParentAdapter().getParentAdapter().getInst()).isEqualTo("LD_INST11");
@@ -541,13 +661,13 @@ class LN0AdapterTest {
     }
 
     @Test
-    void createDataSetIfNotExists_when_dataset_exists_should_not_create_dataset() throws Exception {
+    void createDataSetIfNotExists_when_dataset_exists_should_not_create_dataset() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
         LN0Adapter ln0 = findLn0(new SclRootAdapter(scd), "IED_NAME1", "LD_INST12");
         assertThat(ln0.getCurrentElem().getDataSet()).hasSize(1);
         // When
-        DataSetAdapter newDataSet = ln0.createDataSetIfNotExists("existingDataSet", ServiceSettingsType.GSE);
+        DataSetAdapter newDataSet = ln0.createDataSetIfNotExists("existingDataSet", ControlBlockEnum.GSE);
         // Then
         assertThat(ln0.getCurrentElem().getDataSet()).hasSize(1)
             .map(TDataSet::getName)
@@ -557,13 +677,98 @@ class LN0AdapterTest {
     }
 
     @Test
-    void createDataSetIfNotExists_when_ied_does_not_have_creation_capabilities_should_throw_exception() throws Exception {
+    void createDataSetIfNotExists_when_ied_does_not_have_creation_capabilities_should_throw_exception() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
         LN0Adapter ln0 = findLn0(new SclRootAdapter(scd), "IED_NAME2", "LD_INST21");
         // When & Then
-        assertThatThrownBy(() -> ln0.createDataSetIfNotExists("existingDataSet", ServiceSettingsType.GSE))
+        assertThatThrownBy(() -> ln0.createDataSetIfNotExists("existingDataSet", ControlBlockEnum.GSE))
             .isInstanceOf(ScdException.class);
+    }
+
+    @Test
+    void createControlBlockIfNotExists_should_create_GSEControl() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
+        LN0Adapter sourceLn0 = findLn0(new SclRootAdapter(scd), "IED_NAME1", "LD_INST11");
+        assertThat(sourceLn0.getCurrentElem().getDataSet()).isEmpty();
+        final String NEW_DATASET_NAME = "newDataSet";
+        final String NEW_CB_NAME = "newControlBlock";
+        final String NEW_CB_ID = "newControlBlockId";
+        sourceLn0.createDataSetIfNotExists(NEW_DATASET_NAME, ControlBlockEnum.GSE);
+        // When
+        sourceLn0.createControlBlockIfNotExists(NEW_CB_NAME, NEW_CB_ID, NEW_DATASET_NAME, ControlBlockEnum.GSE);
+        // Then
+        assertThat(sourceLn0.getCurrentElem().getGSEControl())
+            .hasSize(1)
+        .first().extracting(TControl::getName, TGSEControl::getAppID, TControl::getDatSet,
+                TGSEControl::getType, TGSEControl::isFixedOffs, TGSEControl::getSecurityEnable, TControlWithIEDName::getConfRev)
+                .containsExactly(NEW_CB_NAME, NEW_CB_ID, NEW_DATASET_NAME,
+                    TGSEControlTypeEnum.GOOSE, false, TPredefinedTypeOfSecurityEnum.NONE, 10000L);
+    }
+
+    @Test
+    void createControlBlockIfNotExists_should_create_SampledValueControl() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
+        LN0Adapter sourceLn0 = findLn0(new SclRootAdapter(scd), "IED_NAME1", "LD_INST11");
+        assertThat(sourceLn0.getCurrentElem().getDataSet()).isEmpty();
+        final String NEW_DATASET_NAME = "newDataSet";
+        final String NEW_CB_NAME = "newControlBlock";
+        final String NEW_CB_ID = "newControlBlockId";
+        sourceLn0.createDataSetIfNotExists(NEW_DATASET_NAME, ControlBlockEnum.SAMPLED_VALUE);
+        // When
+        sourceLn0.createControlBlockIfNotExists(NEW_CB_NAME, NEW_CB_ID, NEW_DATASET_NAME, ControlBlockEnum.SAMPLED_VALUE);
+        // Then
+        assertThat(sourceLn0.getCurrentElem().getSampledValueControl())
+            .hasSize(1);
+        TSampledValueControl tSampledValueControl = sourceLn0.getCurrentElem().getSampledValueControl().get(0);
+        assertThat(tSampledValueControl)
+            .extracting(TControl::getName, TSampledValueControl::getSmvID, TControl::getDatSet,
+                TSampledValueControl::isMulticast, TSampledValueControl::getSmpRate, TSampledValueControl::getNofASDU, TSampledValueControl::getSmpMod, TSampledValueControl::getSecurityEnable,
+                TControlWithIEDName::getConfRev)
+            .containsExactly(NEW_CB_NAME, NEW_CB_ID, NEW_DATASET_NAME,
+                true, 4800L, 2L, TSmpMod.SMP_PER_SEC, TPredefinedTypeOfSecurityEnum.NONE, 10000L);
+        assertThat(tSampledValueControl.getSmvOpts())
+            .extracting(SmvOpts::isRefreshTime, SmvOpts::isSampleSynchronized, SmvOpts::isSampleRate, SmvOpts::isDataSet,
+                SmvOpts::isSecurity, SmvOpts::isTimestamp)
+            .containsExactly(false, true, true, false, false, false);
+    }
+
+    @Test
+    void createControlBlockIfNotExists_should_create_ReportControl() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
+        LN0Adapter sourceLn0 = findLn0(new SclRootAdapter(scd), "IED_NAME1", "LD_INST11");
+
+        assertThat(sourceLn0.getCurrentElem().getDataSet()).isEmpty();
+        final String NEW_DATASET_NAME = "newDataSet";
+        final String NEW_CB_NAME = "newControlBlock";
+        final String NEW_CB_ID = "newControlBlockId";
+        sourceLn0.createDataSetIfNotExists(NEW_DATASET_NAME, ControlBlockEnum.REPORT);
+        // When
+        sourceLn0.createControlBlockIfNotExists(NEW_CB_NAME, NEW_CB_ID, NEW_DATASET_NAME, ControlBlockEnum.REPORT);
+        // Then
+        assertThat(sourceLn0.getCurrentElem().getReportControl())
+            .hasSize(1);
+        TReportControl tReportControl = sourceLn0.getCurrentElem().getReportControl().get(0);
+        assertThat(tReportControl)
+            .extracting(TControl::getName, TReportControl::getRptID, TControl::getDatSet,
+                TReportControl::isBuffered, TReportControl::getBufTime, TReportControl::isIndexed, TControlWithTriggerOpt::getIntgPd, TReportControl::getConfRev)
+            .containsExactly(NEW_CB_NAME, NEW_CB_ID, NEW_DATASET_NAME,
+                true, 0L, true, 60000L, 1L);
+
+        assertThat(tReportControl.getTrgOps())
+            .extracting(TTrgOps::isDchg, TTrgOps::isQchg, TTrgOps::isPeriod, TTrgOps::isGi)
+            .containsOnly(true);
+        assertThat(tReportControl.getTrgOps().isDupd()).isFalse();
+
+        assertThat(tReportControl.getOptFields())
+            .extracting(TReportControl.OptFields::isSeqNum, TReportControl.OptFields::isTimeStamp, TReportControl.OptFields::isDataSet,
+                TReportControl.OptFields::isReasonCode, TReportControl.OptFields::isDataRef, TReportControl.OptFields::isEntryID,
+                TReportControl.OptFields::isConfigRef)
+            .containsOnly(false);
+        assertThat(tReportControl.getOptFields().isBufOvfl()).isTrue();
     }
 
 }

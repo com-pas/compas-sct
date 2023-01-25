@@ -14,8 +14,8 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.PrivateService;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 import org.lfenergy.compas.sct.commons.util.FcdaCandidates;
-import org.lfenergy.compas.sct.commons.util.ServiceSettingsType;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
@@ -42,12 +42,26 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         "LDevice with same inst attribute in source IED %s";
     private static final String MESSAGE_SOURCE_LN_NOT_FOUND = "The signal ExtRef lninst, doName or daName does not match any " +
         "source in LDevice %s";
-    private static final String MESSAGE_SERVICE_TYPE_MISSING_ON_EXTREF = "The signal ExtRef is missing ServiceType attribute";
+    private static final String MESSAGE_SERVICE_TYPE_MISSING = "The signal ExtRef is missing ServiceType attribute";
     private static final String MESSAGE_INVALID_SERVICE_TYPE = "The signal ExtRef ServiceType attribute is unexpected : %s";
-    private static final String MESSAGE_IED_IS_MISSING_PRIVATE_COMPAS_BAY_UUID = "IED is missing Private/compas:Bay@UUID attribute";
-    private static final String MESSAGE_REPORT_EXTREF_DESC_MALFORMED = "ExtRef.serviceType=Report but ExtRef.desc attribute is malformed";
+    private static final String MESSAGE_IED_MISSING_COMPAS_BAY_UUID = "IED is missing Private/compas:Bay@UUID attribute";
+    private static final String MESSAGE_EXTREF_DESC_MALFORMED = "ExtRef.serviceType=Report but ExtRef.desc attribute is malformed";
+    private static final String MESSAGE_LDEVICE_STATUS_UNDEFINED = "The LDevice status is undefined";
+    private static final String MESSAGE_LDEVICE_STATUS_NEITHER_ON_NOR_OFF = "The LDevice status is neither \"on\" nor \"off\"";
+    private static final String MESSAGE_EXTREF_IEDNAME_DOES_NOT_MATCH_ANY_SYSTEM_VERSION_UUID = "The signal ExtRef iedName does not match any " +
+        "IED/Private/compas:ICDHeader@ICDSystemVersionUUID";
+    private static final String MESSAGE_SOURCE_LDEVICE_STATUS_UNDEFINED = "The signal ExtRef source LDevice %s status is undefined";
+    private static final String MESSAGE_SOURCE_LDEVICE_STATUS_NEITHER_ON_NOR_OFF = "The signal ExtRef source LDevice %s status is neither \"on\" nor \"off\"";
+    private static final String MESSAGE_SOURCE_LDEVICE_STATUS_OFF = "The signal ExtRef source LDevice %s status is off";
+    private static final String MESSAGE_SOURCE_IED_NOT_FOUND = "Source IED not found in SCD";
+    private static final String MESSAGE_SOURCE_IED_MISSING_COMPAS_BAY_UUID = "Source IED is missing Private/compas:Bay@UUID attribute";
+    private static final String MESSAGE_UNABLE_TO_CREATE_DATASET_OR_CONTROLBLOCK = "Could not create DataSet or ControlBlock for this ExtRef : ";
+    private static final String MESSAGE_POLL_SERVICE_TYPE_NOT_SUPPORTED = "only GOOSE, SMV and REPORT ServiceType are allowed";
+
     private static final int EXTREF_DESC_DA_NAME_POSITION = -2;
-    private static final String EXTREF_DESC_DELIMITER = "_";
+    private static final String ATTRIBUTE_VALUE_SEPARATOR = "_";
+    private static final String DATASET_NAME_PREFIX = "DS" + ATTRIBUTE_VALUE_SEPARATOR;
+    private static final String CONTROLBLOCK_NAME_PREFIX = "CB" + ATTRIBUTE_VALUE_SEPARATOR;
 
     /**
      * Constructor
@@ -82,7 +96,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
     public List<SclReportItem> updateAllExtRefIedNames(Map<String, IEDAdapter> icdSystemVersionToIed) {
         Optional<String> optionalLDeviceStatus = getLDeviceAdapter().getLDeviceStatus();
         if (optionalLDeviceStatus.isEmpty()) {
-            return List.of(getLDeviceAdapter().buildFatalReportItem("The LDevice status is undefined"));
+            return List.of(getLDeviceAdapter().buildFatalReportItem(MESSAGE_LDEVICE_STATUS_UNDEFINED));
         }
         String lDeviceStatus = optionalLDeviceStatus.get();
         return switch (lDeviceStatus) {
@@ -99,7 +113,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
                 getExtRefs().forEach(this::clearBinding);
                 yield Collections.emptyList();
             }
-            default -> List.of(getLDeviceAdapter().buildFatalReportItem("The LDevice status is neither \"on\" nor \"off\""));
+            default -> List.of(getLDeviceAdapter().buildFatalReportItem(MESSAGE_LDEVICE_STATUS_NEITHER_ON_NOR_OFF));
         };
     }
 
@@ -148,8 +162,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
 
     private Optional<SclReportItem> validateExtRefSource(TExtRef extRef, IEDAdapter sourceIed) {
         if (sourceIed == null) {
-            return warningReportItem(extRef, "The signal ExtRef iedName does not match any " +
-                "IED/Private/compas:ICDHeader@ICDSystemVersionUUID");
+            return warningReportItem(extRef, MESSAGE_EXTREF_IEDNAME_DOES_NOT_MATCH_ANY_SYSTEM_VERSION_UUID);
         }
         Optional<LDeviceAdapter> optionalSourceLDevice = sourceIed.findLDeviceAdapterByLdInst(extRef.getLdInst());
         if (optionalSourceLDevice.isEmpty()) {
@@ -161,16 +174,16 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         }
         Optional<String> optionalSourceLDeviceStatus = sourceLDevice.getLDeviceStatus();
         if (optionalSourceLDeviceStatus.isEmpty()) {
-            return fatalReportItem(extRef, String.format("The signal ExtRef source LDevice %s status is undefined",
+            return fatalReportItem(extRef, String.format(MESSAGE_SOURCE_LDEVICE_STATUS_UNDEFINED,
                 sourceLDevice.getXPath()));
         }
         return optionalSourceLDeviceStatus.map(sourceLDeviceStatus ->
             switch (sourceLDeviceStatus) {
-                case OFF -> SclReportItem.warning(extRefXPath(extRef.getDesc()), String.format("The signal ExtRef source LDevice %s status is off",
+                case OFF -> SclReportItem.warning(extRefXPath(extRef.getDesc()), String.format(MESSAGE_SOURCE_LDEVICE_STATUS_OFF,
                     sourceLDevice.getXPath()));
                 case ON -> null;
                 default -> SclReportItem.fatal(extRefXPath(extRef.getDesc()),
-                    String.format("The signal ExtRef source LDevice %s status is neither \"on\" nor \"off\"",
+                    String.format(MESSAGE_SOURCE_LDEVICE_STATUS_NEITHER_ON_NOR_OFF,
                         sourceLDevice.getXPath()));
             });
     }
@@ -241,11 +254,15 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         return parentAdapter.getParentAdapter();
     }
 
+    private AbstractLNAdapter<?> getLNAdapter(){
+        return parentAdapter;
+    }
+
     public List<SclReportItem> updateAllSourceDataSetsAndControlBlocks() {
         List<TCompasFlow> compasFlows = PrivateService.extractCompasPrivates(currentElem, TCompasFlow.class);
         String currentBayUuid = getIedAdapter().getPrivateCompasBay().map(TCompasBay::getUUID).orElse(null);
         if (StringUtils.isBlank(currentBayUuid)) {
-            return List.of(getIedAdapter().buildFatalReportItem(MESSAGE_IED_IS_MISSING_PRIVATE_COMPAS_BAY_UUID));
+            return List.of(getIedAdapter().buildFatalReportItem(MESSAGE_IED_MISSING_COMPAS_BAY_UUID));
         }
         return getExtRefs().stream()
             .filter(this::areBindingAttributesPresent)
@@ -277,18 +294,18 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
 
     private Optional<SclReportItem> updateSourceDataSetsAndControlBlocks(TExtRef extRef, String targetBayUuid) {
         if (extRef.getServiceType() == null) {
-            return fatalReportItem(extRef, MESSAGE_SERVICE_TYPE_MISSING_ON_EXTREF);
+            return fatalReportItem(extRef, MESSAGE_SERVICE_TYPE_MISSING);
         }
         Optional<IEDAdapter> optionalSrcIedAdapter = getSclRootAdapter().findIedAdapterByName(extRef.getIedName());
         if (optionalSrcIedAdapter.isEmpty()) {
-            return fatalReportItem(extRef, "Source IED not found in SCD");
+            return fatalReportItem(extRef, MESSAGE_SOURCE_IED_NOT_FOUND);
         }
         IEDAdapter sourceIed = optionalSrcIedAdapter.get();
         Optional<String> sourceIedBayUuid = sourceIed.getPrivateCompasBay()
             .map(TCompasBay::getUUID)
             .filter(StringUtils::isNotBlank);
         if (sourceIedBayUuid.isEmpty()) {
-            return fatalReportItem(extRef, "Source IED is missing Private/compas:Bay@UUID attribute");
+            return fatalReportItem(extRef, MESSAGE_SOURCE_IED_MISSING_COMPAS_BAY_UUID);
         }
 
         boolean isBayInternal = targetBayUuid.equals(sourceIedBayUuid.get());
@@ -310,35 +327,69 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
 
         try {
             sourceDas.forEach(sourceDa -> {
-                String dataSetName = generateDataSetName(extRef, sourceDa, isBayInternal);
-                ServiceSettingsType serviceSettingsType = ServiceSettingsType.fromTServiceType(extRef.getServiceType());
-                DataSetAdapter dataSet = sourceLDevice.getLN0Adapter().createDataSetIfNotExists(dataSetName, serviceSettingsType);
-                createFCDAInDataSet(extRef, sourceDa, dataSet);
+                String datasetSuffix = generateDataSetSuffix(extRef, sourceDa, isBayInternal);
+                String dataSetName = DATASET_NAME_PREFIX + datasetSuffix;
+                String cbName = CONTROLBLOCK_NAME_PREFIX + datasetSuffix;
+                createDataSetWithFCDA(extRef, sourceLDevice, sourceDa, dataSetName);
+                createControlBlockWithTarget(extRef, sourceLDevice, sourceDa, cbName, dataSetName);
+                setExtRefSrcAttributes(extRef, cbName);
             });
         } catch (ScdException e) {
-            // ScdException can be thrown if AccessPoint does not have DataSet creation capability
+            // ScdException can be thrown if AccessPoint does not have DataSet/ControlBlock creation capability
             log.error(e.getMessage(), e);
-            return fatalReportItem(extRef, "Could not create DataSet for this ExtRef : " + e.getMessage());
+            return fatalReportItem(extRef, MESSAGE_UNABLE_TO_CREATE_DATASET_OR_CONTROLBLOCK + e.getMessage());
         }
         return Optional.empty();
     }
 
-    private static String generateDataSetName(TExtRef extRef, ResumedDataTemplate sourceDa, boolean isBayInternal) {
-        return "DS_" + extRef.getLdInst() + "_"
+    private void createDataSetWithFCDA(TExtRef extRef, LDeviceAdapter sourceLDevice, ResumedDataTemplate sourceDa, String dataSetName) {
+        DataSetAdapter dataSetAdapter = sourceLDevice.getLN0Adapter().createDataSetIfNotExists(dataSetName, ControlBlockEnum.from(extRef.getServiceType()));
+        String fcdaDaName = extRef.getServiceType() == TServiceType.REPORT ? null : sourceDa.getDaRef();
+        String fcdaLnClass = extRef.getLnClass().stream().findFirst().orElse(null);
+        dataSetAdapter.createFCDAIfNotExists(extRef.getLdInst(), extRef.getPrefix(), fcdaLnClass, extRef.getLnInst(),
+            sourceDa.getDoRef(),
+            fcdaDaName,
+            sourceDa.getFc());
+    }
+
+    private void createControlBlockWithTarget(TExtRef extRef, LDeviceAdapter sourceLDevice, ResumedDataTemplate sourceDa, String cbName, String datSet) {
+        String cbId = generateControlBlockId(cbName, sourceLDevice.getLdName(), getParentAdapter());
+        ControlBlockAdapter controlBlockAdapter = sourceLDevice.getLN0Adapter().createControlBlockIfNotExists(cbName, cbId, datSet, ControlBlockEnum.from(extRef.getServiceType()));
+        if (sourceDa.getFc() != TFCEnum.ST && controlBlockAdapter.getCurrentElem() instanceof TReportControl tReportControl){
+            tReportControl.getTrgOps().setDchg(false);
+            tReportControl.getTrgOps().setQchg(false);
+        }
+        controlBlockAdapter.addTargetIfNotExists(getLNAdapter());
+    }
+
+    private void setExtRefSrcAttributes(TExtRef extRef, String cbName) {
+        extRef.setSrcCBName(cbName);
+        extRef.setSrcLDInst(extRef.getLdInst());
+        // srcPrefix, srcLNInst and srcLNClass are set to empty because ControlBlock is created in LN0
+        extRef.setSrcPrefix(null);
+        extRef.setSrcLNInst(null);
+        extRef.unsetSrcLNClass();
+    }
+
+    private static String generateDataSetSuffix(TExtRef extRef, ResumedDataTemplate sourceDa, boolean isBayInternal) {
+        return extRef.getLdInst() + ATTRIBUTE_VALUE_SEPARATOR
             + switch (extRef.getServiceType()) {
             case GOOSE -> "G" + ((sourceDa.getFc() == TFCEnum.ST) ? "S" : "M");
             case SMV -> "SV";
             case REPORT -> (sourceDa.getFc() == TFCEnum.ST) ? "DQC" : "CYC";
-            case POLL -> throw new IllegalArgumentException("only GOOSE, SMV and REPORT ServiceType are allowed");
+            case POLL -> throw new IllegalArgumentException(MESSAGE_POLL_SERVICE_TYPE_NOT_SUPPORTED);
         }
             + (isBayInternal ? "I" : "E");
     }
 
-    private static void createFCDAInDataSet(TExtRef extRef, ResumedDataTemplate sourceDa, DataSetAdapter dataSet) {
-        dataSet.createFCDAIfNotExists(extRef.getLdInst(), extRef.getPrefix(), extRef.getLnClass().stream().findFirst().orElse(null), extRef.getLnInst(),
-            sourceDa.getDoRef(),
-            (extRef.getServiceType() == TServiceType.REPORT ? null : sourceDa.getDaRef()),
-            sourceDa.getFc());
+    private String generateControlBlockId(String cbName, String sourceLDName, AbstractLNAdapter<?> targetLn) {
+        return Utils.emptyIfBlank(sourceLDName)
+            + "/"
+            + Utils.emptyIfBlank(targetLn.getPrefix())
+            + Objects.requireNonNullElse(targetLn.getLNClass(), "")
+            + Utils.emptyIfBlank(targetLn.getLNInst())
+            + "."
+            + cbName;
     }
 
     private Optional<SclReportItem> removeFilteredSourceDas(TExtRef extRef, final Set<ResumedDataTemplate> sourceDas) {
@@ -354,9 +405,9 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
     }
 
     private Optional<SclReportItem> removeFilterSourceDaForReport(TExtRef extRef, Set<ResumedDataTemplate> sourceDas) {
-        String daName = Utils.extractField(extRef.getDesc(), EXTREF_DESC_DELIMITER, EXTREF_DESC_DA_NAME_POSITION);
+        String daName = Utils.extractField(extRef.getDesc(), ATTRIBUTE_VALUE_SEPARATOR, EXTREF_DESC_DA_NAME_POSITION);
         if (StringUtils.isBlank(daName)) {
-            return fatalReportItem(extRef, MESSAGE_REPORT_EXTREF_DESC_MALFORMED);
+            return fatalReportItem(extRef, MESSAGE_EXTREF_DESC_MALFORMED);
         }
         sourceDas.removeIf(resumedDataTemplate -> !resumedDataTemplate.getDaName().toString().equals(daName));
         return Optional.empty();

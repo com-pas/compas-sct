@@ -39,10 +39,10 @@ class LNodeDTOTest {
         );
         lNodeDTO.addResumedDataTemplate(ResumedDataTemplate.builder().daName(new DaTypeName("da1")).build());
         lNodeDTO.addExtRefInfo(new ExtRefInfo());
-        lNodeDTO.addControlBlock(new ReportControlBlock());
+        lNodeDTO.addControlBlock(new ReportControlBlock("rpt", "rptID", "rptDatSet"));
         lNodeDTO.addDataSet(new DataSetInfo());
 
-        lNodeDTO.addAllControlBlocks(List.of(new SMVControlBlock()));
+        lNodeDTO.addAllControlBlocks(List.of(new SMVControlBlock("smv", "smvID", "smvDatSet")));
         lNodeDTO.addAllDatSets(List.of(new DataSetInfo()));
         lNodeDTO.addAllExtRefInfo(List.of(new ExtRefInfo()));
         lNodeDTO.addAllResumedDataTemplate(List.of(ResumedDataTemplate.builder().daName(new DaTypeName("da2")).build()));

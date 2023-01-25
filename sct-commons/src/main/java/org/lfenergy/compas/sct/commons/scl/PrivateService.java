@@ -14,7 +14,6 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 import static org.lfenergy.compas.sct.commons.util.PrivateEnum.COMPAS_ICDHEADER;
 
@@ -58,7 +57,7 @@ public final class PrivateService {
             .map(TAnyContentFromOtherNamespace::getContent).flatMap(List::stream)
             .filter(JAXBElement.class::isInstance).map(JAXBElement.class::cast)
             .filter(Predicate.not(JAXBElement::isNil))
-            .map(JAXBElement::getValue).collect(toList());
+            .map(JAXBElement::getValue).toList();
 
         List<T> result = new ArrayList<>();
         for (Object compasElement : compasElements) {
