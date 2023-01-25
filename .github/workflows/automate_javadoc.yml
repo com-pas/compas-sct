@@ -17,7 +17,7 @@ jobs:
     steps:
       # Use develop as base branch to generate javadoc
       - name: Setup Environment
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           distribution: 'zulu'
           java-version: '17'
