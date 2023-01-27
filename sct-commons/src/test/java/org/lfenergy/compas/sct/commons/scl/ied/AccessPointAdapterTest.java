@@ -18,11 +18,8 @@ import org.lfenergy.compas.sct.commons.util.ServicesConfigEnum;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AccessPointAdapterTest {
 
@@ -41,8 +38,8 @@ class AccessPointAdapterTest {
         //When
         AccessPointAdapter accessPointAdapter = new AccessPointAdapter(iAdapter, iAdapter.getCurrentElem().getAccessPoint().get(0));
         //Then
-        assertTrue(accessPointAdapter.amChildElementRef());
-        assertNotNull(accessPointAdapter.getCurrentElem().getServices());
+        assertThat(accessPointAdapter.amChildElementRef()).isTrue();
+        assertThat(accessPointAdapter.getCurrentElem().getServices()).isNotNull();
     }
 
     @ParameterizedTest
@@ -182,9 +179,9 @@ class AccessPointAdapterTest {
         iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getClientServices().setMaxAttributes(11L);
         AccessPointAdapter accessPointAdapter = new AccessPointAdapter(iedAdapter, iedAdapter.getCurrentElem().getAccessPoint().get(0));
         String message = "Too much FCDA";
-        Set<TExtRef> tExtRefs = accessPointAdapter.getAllCoherentExtRefForAnalyze().tExtRefSet();
+        List<TExtRef> tExtRefs = accessPointAdapter.getAllCoherentExtRefForAnalyze().tExtRefs();
         //When
-       Optional<SclReportItem> sclReportItem  = accessPointAdapter.checkLimitationForBindedIEDFCDAs(tExtRefs,message);
+        Optional<SclReportItem> sclReportItem = accessPointAdapter.checkLimitationForBoundIEDFCDAs(tExtRefs, message);
 
         //Then
         assertThat(sclReportItem).isEmpty();
@@ -198,11 +195,11 @@ class AccessPointAdapterTest {
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1");
         AccessPointAdapter accessPointAdapter = new AccessPointAdapter(iedAdapter, iedAdapter.getCurrentElem().getAccessPoint().get(0));
         accessPointAdapter.getCurrentElem().getServices().getClientServices().setMaxAttributes(4L);
-        Set<TExtRef> tExtRefs = accessPointAdapter.getAllCoherentExtRefForAnalyze().tExtRefSet();
+        List<TExtRef> tExtRefs = accessPointAdapter.getAllCoherentExtRefForAnalyze().tExtRefs();
         String message = "Too much FCDA for IED_NAME1";
 
         //When
-        Optional<SclReportItem> sclReportItem  = accessPointAdapter.checkLimitationForBindedIEDFCDAs(tExtRefs,message);
+        Optional<SclReportItem> sclReportItem = accessPointAdapter.checkLimitationForBoundIEDFCDAs(tExtRefs, message);
 
         //Then
         assertThat(sclReportItem).isPresent()
@@ -218,9 +215,9 @@ class AccessPointAdapterTest {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1");
         AccessPointAdapter accessPointAdapter = new AccessPointAdapter(iedAdapter, iedAdapter.getCurrentElem().getAccessPoint().get(0));
-        Set<TExtRef> tExtRefs = accessPointAdapter.getAllCoherentExtRefForAnalyze().tExtRefSet();
+        List<TExtRef> tExtRefs = accessPointAdapter.getAllCoherentExtRefForAnalyze().tExtRefs();
         //When
-        List<SclReportItem> sclReportItems = accessPointAdapter.checkLimitationForBindedIEDControls(tExtRefs);
+        List<SclReportItem> sclReportItems = accessPointAdapter.checkLimitationForBoundIEDControls(tExtRefs);
 
         //Then
         assertThat(sclReportItems).hasSize(3)
@@ -241,9 +238,9 @@ class AccessPointAdapterTest {
         iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getClientServices().setMaxReports(2L);
         iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getClientServices().setMaxSMV(2L);
         AccessPointAdapter accessPointAdapter = new AccessPointAdapter(iedAdapter, iedAdapter.getCurrentElem().getAccessPoint().get(0));
-        Set<TExtRef> tExtRefs = accessPointAdapter.getAllCoherentExtRefForAnalyze().tExtRefSet();
+        List<TExtRef> tExtRefs = accessPointAdapter.getAllCoherentExtRefForAnalyze().tExtRefs();
         //When
-        List<SclReportItem> sclReportItems = accessPointAdapter.checkLimitationForBindedIEDControls(tExtRefs);
+        List<SclReportItem> sclReportItems = accessPointAdapter.checkLimitationForBoundIEDControls(tExtRefs);
 
         //Then
         assertThat(sclReportItems).isEmpty();

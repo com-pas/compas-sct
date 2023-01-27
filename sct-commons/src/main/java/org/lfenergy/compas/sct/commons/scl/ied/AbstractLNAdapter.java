@@ -159,9 +159,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      * @return list of LNode ExtRefs elements
      */
     public List<TExtRef> getExtRefs() {
-        List<TExtRef> tExtRefs =  getExtRefs(null);
-        if(tExtRefs == null || tExtRefs.isEmpty()) return Collections.emptyList();
-        else return tExtRefs;
+        return getExtRefs(null);
     }
 
     /**
@@ -974,12 +972,18 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 );
     }
 
+     /**
+     * Finds all FCDAs in DataSet of Control Block feeding ExtRef
+     * @param tExtRef Fed ExtRef
+     * @return list of all FCDA in DataSet of Control Block
+     */
     public List<TFCDA> getFCDAs(TExtRef tExtRef){
-        TControl tControl1 = getTControlsByType(AccessPointAdapter.getControlTypeClass(tExtRef.getServiceType())).stream()
-                .filter(tControl -> tExtRef.getSrcCBName() != null && tExtRef.getSrcCBName().equals(tControl.getName()))
-                        .findFirst().orElseThrow(() -> new ScdException(String.format("DataSet linked with Control Block %s not found", tExtRef.getSrcCBName())));
+        TControl tControl = getTControlsByType(ControlBlockEnum.from(tExtRef.getServiceType()).getControlBlockClass()).stream()
+                .filter(tCtrl -> tExtRef.getSrcCBName() != null && tExtRef.getSrcCBName().equals(tCtrl.getName()))
+                .findFirst().orElseThrow(() ->
+                        new ScdException(String.format("Control Block %s not found in %s", tExtRef.getSrcCBName(), getXPath())));
        return getCurrentElem().getDataSet().stream()
-                .filter(tDataSet -> tDataSet.getName().equals(tControl1.getDatSet()))
+                .filter(tDataSet -> tDataSet.getName().equals(tControl.getDatSet()))
                 .map(TDataSet::getFCDA)
                 .flatMap(Collection::stream)
                 .toList();

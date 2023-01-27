@@ -352,9 +352,9 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
                     AccessPointAdapter accessPointAdapter = new AccessPointAdapter(this, tAccessPoint);
                     AccessPointAdapter.ExtRefAnalyzeRecord extRefAnalyzeRecord = accessPointAdapter.getAllCoherentExtRefForAnalyze();
                     List<SclReportItem> sclReportItems = new ArrayList<>(extRefAnalyzeRecord.sclReportItems());
-                    accessPointAdapter.checkLimitationForBindedIEDFCDAs(extRefAnalyzeRecord.tExtRefSet(), "There are too much FCDA for the Client IED " + getName())
-                     .ifPresent(sclReportItems::add);
-                    sclReportItems.addAll(accessPointAdapter.checkLimitationForBindedIEDControls(extRefAnalyzeRecord.tExtRefSet()));
+                    accessPointAdapter.checkLimitationForBoundIEDFCDAs(extRefAnalyzeRecord.tExtRefs(), "There are too much FCDA for the Client IED " + getName())
+                            .ifPresent(sclReportItems::add);
+                    sclReportItems.addAll(accessPointAdapter.checkLimitationForBoundIEDControls(extRefAnalyzeRecord.tExtRefs()));
                     return sclReportItems;
                 }).flatMap(List::stream).toList();
 
