@@ -9,6 +9,7 @@ import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
@@ -284,8 +285,7 @@ class SclServiceTest {
         extRefInfo.setHolderLnClass(lnClass);
 
         //When
-
-        List<ControlBlock>  controlBlocks = SclService.getExtRefSourceInfo(scd, extRefInfo);
+        List<ControlBlock> controlBlocks = SclService.getExtRefSourceInfo(scd, extRefInfo);
 
         //Then
         assertThat(controlBlocks).isEmpty();
@@ -893,10 +893,10 @@ class SclServiceTest {
         Tuple[] scl4Errors = new Tuple[]{Tuple.tuple("The LDevice doesn't have a DO @name='Mod'",
                 "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0")};
         return Stream.of(
-                Arguments.of("MissingDOBeh",scl1, scl1Errors),
-                Arguments.of("MissingLDevicePrivate",scl2, scl2Errors),
-                Arguments.of("MissingLDevicePrivateAttribute",scl3, scl3Errors),
-                Arguments.of("MissingDOMod",scl4, scl4Errors)
+                Arguments.of("MissingDOBeh", scl1, scl1Errors),
+                Arguments.of("MissingLDevicePrivate", scl2, scl2Errors),
+                Arguments.of("MissingLDevicePrivateAttribute", scl3, scl3Errors),
+                Arguments.of("MissingDOMod", scl4, scl4Errors)
         );
     }
 
@@ -1027,25 +1027,81 @@ class SclServiceTest {
     }
 
     private Optional<TVal> getLDeviceStatusValue(SCL scl, String iedName, String ldInst) {
+        return getValFromDaiName(scl, iedName, ldInst, "Mod", "stVal");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @CsvSource({
+            "Test update setSrcRef Value,LD_WITH_1_InRef,InRef2,setSrcRef,IED_NAME1LD_WITH_1_InRef/PRANCR1.Do11.sdo11",
+            "Test update setSrcCB Value,LD_WITH_1_InRef,InRef2,setSrcCB,IED_NAME1LD_WITH_1_InRef/prefixANCR1.GSE1",
+            "Test update setSrcRef Value,LD_WITH_3_InRef,InRef3,setSrcRef,IED_NAME1LD_WITH_3_InRef/PRANCR1.Do11.sdo11",
+            "Test update setSrcCB Value,LD_WITH_3_InRef,InRef3,setSrcCB,IED_NAME1LD_WITH_3_InRef/prefixANCR1.GSE1",
+            "Test update setTstRef Value,LD_WITH_3_InRef,InRef3,setTstRef,IED_NAME1LD_WITH_3_InRef/PRANCR1.Do11.sdo11",
+            "Test update setTstCB Value,LD_WITH_3_InRef,InRef3,setTstCB,IED_NAME1LD_WITH_3_InRef/prefixANCR3.GSE3"
+    })
+    void updateDoInRef_shouldReturnUpdatedFile(String testName, String ldInst, String doName, String daName, String expected) {
+        // Given
+        SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_issue_231_test_ok.xml");
+
+        // When
+        SclReport sclReport = SclService.updateDoInRef(givenScl);
+
+        // Then
+        assertThat(sclReport.isSuccess()).isTrue();
+        assertThat(getValFromDaiName(sclReport.getSclRootAdapter().getCurrentElem(), "IED_NAME1", ldInst, doName, daName)
+                .map(TVal::getValue))
+                .hasValue(expected);
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @CsvSource({
+            "Test with only 1 ExtRef should not update srcTstCB,LD_WITH_1_InRef,InRef2,setTstRef",
+            "Test with only 1 ExtRef should not update setTstCB Value,LD_WITH_1_InRef,InRef2,setTstCB"
+    })
+    void updateDoInRef_should_not_update_tst_DAI_When_only_1_ExtRef(String testName, String ldInst, String doName, String daName) {
+        // Given
+        SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_issue_231_test_ok.xml");
+
+        // When
+        SclReport sclReport = SclService.updateDoInRef(givenScl);
+
+        // Then
+        assertThat(sclReport.isSuccess()).isTrue();
+        assertThat(getValFromDaiName(sclReport.getSclRootAdapter().getCurrentElem(), "IED_NAME1", ldInst, doName, daName)).isNotPresent();
+    }
+
+    @Test
+    void updateDoInRef_shouldReturnReportWithError_when_ExtRef_not_coherent() {
+        // Given
+        SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_issue_231_test_ko.xml");
+
+        // When
+        SclReport sclReport = SclService.updateDoInRef(givenScl);
+
+        // Then
+        assertThat(sclReport.isSuccess()).isTrue();
+        assertThat(sclReport.getSclReportItems()).isNotEmpty();
+        assertThat(sclReport.getSclReportItems()).hasSize(4);
+    }
+
+    private Optional<TVal> getValFromDaiName(SCL scl, String iedName, String ldInst, String doiName, String daiName) {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scl);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
         Optional<LDeviceAdapter> lDeviceAdapter = iedAdapter.findLDeviceAdapterByLdInst(ldInst);
         LN0Adapter ln0Adapter = lDeviceAdapter.get().getLN0Adapter();
         Optional<DOIAdapter> doiAdapter = ln0Adapter.getDOIAdapters().stream()
-                .filter(doiAdapter1 -> doiAdapter1.getCurrentElem().getName().equals("Mod"))
+                .filter(doiAdapter1 -> doiAdapter1.getCurrentElem().getName().equals(doiName))
                 .findFirst();
-        if (doiAdapter.isEmpty()) return Optional.empty();
-        return doiAdapter.get().getCurrentElem().getSDIOrDAI().stream()
+        return doiAdapter.flatMap(adapter -> adapter.getCurrentElem().getSDIOrDAI().stream()
                 .filter(tUnNaming -> tUnNaming.getClass().equals(TDAI.class))
                 .map(TDAI.class::cast)
-                .filter(tdai -> tdai.getName().equals("stVal"))
+                .filter(tdai -> tdai.getName().equals(daiName) && !tdai.getVal().isEmpty())
                 .map(tdai -> tdai.getVal().get(0))
-                .findFirst();
+                .findFirst());
     }
 
-
     @Test
-    void analyzeDataGroups_should_success() throws Exception {
+    void analyzeDataGroups_should_success() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_binded_ied_controls_fcda.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -1062,7 +1118,7 @@ class SclServiceTest {
     }
 
     @Test
-    void analyzeDataGroups_should_return_errors_messages() throws Exception {
+    void analyzeDataGroups_should_return_errors_messages() {
 
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_binded_ied_controls_fcda.xml");
