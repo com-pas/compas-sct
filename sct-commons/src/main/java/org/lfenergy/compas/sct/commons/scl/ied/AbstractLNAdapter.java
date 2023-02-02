@@ -961,14 +961,31 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
 
     public ControlBlockAdapter createControlBlockIfNotExists(String cbName, String id, String datSet, ControlBlockEnum controlBlockEnum) {
         return findControlBlock(cbName, controlBlockEnum)
-            .orElseGet(() -> addControlBlock(
-                    switch (controlBlockEnum) {
-                        case GSE -> new GooseControlBlock(cbName, id, datSet);
-                        case SAMPLED_VALUE -> new SMVControlBlock(cbName, id, datSet);
-                        case REPORT -> new ReportControlBlock(cbName, id, datSet);
-                        default -> throw new IllegalArgumentException("Unsupported ControlBlock Type " + controlBlockEnum);
-                    }
-                )
-            );
+                .orElseGet(() -> addControlBlock(
+                                switch (controlBlockEnum) {
+                                    case GSE -> new GooseControlBlock(cbName, id, datSet);
+                                    case SAMPLED_VALUE -> new SMVControlBlock(cbName, id, datSet);
+                                    case REPORT -> new ReportControlBlock(cbName, id, datSet);
+                                    default -> throw new IllegalArgumentException("Unsupported ControlBlock Type " + controlBlockEnum);
+                                }
+                        )
+                );
+    }
+
+     /**
+     * Finds all FCDAs in DataSet of Control Block feeding ExtRef
+     * @param tExtRef Fed ExtRef
+     * @return list of all FCDA in DataSet of Control Block
+     */
+    public List<TFCDA> getFCDAs(TExtRef tExtRef){
+        TControl tControl = getTControlsByType(ControlBlockEnum.from(tExtRef.getServiceType()).getControlBlockClass()).stream()
+                .filter(tCtrl -> tExtRef.getSrcCBName() != null && tExtRef.getSrcCBName().equals(tCtrl.getName()))
+                .findFirst().orElseThrow(() ->
+                        new ScdException(String.format("Control Block %s not found in %s", tExtRef.getSrcCBName(), getXPath())));
+       return getCurrentElem().getDataSet().stream()
+                .filter(tDataSet -> tDataSet.getName().equals(tControl.getDatSet()))
+                .map(TDataSet::getFCDA)
+                .flatMap(Collection::stream)
+                .toList();
     }
 }

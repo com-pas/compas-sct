@@ -750,25 +750,112 @@ class LN0AdapterTest {
         sourceLn0.createControlBlockIfNotExists(NEW_CB_NAME, NEW_CB_ID, NEW_DATASET_NAME, ControlBlockEnum.REPORT);
         // Then
         assertThat(sourceLn0.getCurrentElem().getReportControl())
-            .hasSize(1);
+                .hasSize(1);
         TReportControl tReportControl = sourceLn0.getCurrentElem().getReportControl().get(0);
         assertThat(tReportControl)
-            .extracting(TControl::getName, TReportControl::getRptID, TControl::getDatSet,
-                TReportControl::isBuffered, TReportControl::getBufTime, TReportControl::isIndexed, TControlWithTriggerOpt::getIntgPd, TReportControl::getConfRev)
-            .containsExactly(NEW_CB_NAME, NEW_CB_ID, NEW_DATASET_NAME,
-                true, 0L, true, 60000L, 1L);
+                .extracting(TControl::getName, TReportControl::getRptID, TControl::getDatSet,
+                        TReportControl::isBuffered, TReportControl::getBufTime, TReportControl::isIndexed, TControlWithTriggerOpt::getIntgPd, TReportControl::getConfRev)
+                .containsExactly(NEW_CB_NAME, NEW_CB_ID, NEW_DATASET_NAME,
+                        true, 0L, true, 60000L, 1L);
 
         assertThat(tReportControl.getTrgOps())
-            .extracting(TTrgOps::isDchg, TTrgOps::isQchg, TTrgOps::isPeriod, TTrgOps::isGi)
-            .containsOnly(true);
+                .extracting(TTrgOps::isDchg, TTrgOps::isQchg, TTrgOps::isPeriod, TTrgOps::isGi)
+                .containsOnly(true);
         assertThat(tReportControl.getTrgOps().isDupd()).isFalse();
 
         assertThat(tReportControl.getOptFields())
-            .extracting(TReportControl.OptFields::isSeqNum, TReportControl.OptFields::isTimeStamp, TReportControl.OptFields::isDataSet,
-                TReportControl.OptFields::isReasonCode, TReportControl.OptFields::isDataRef, TReportControl.OptFields::isEntryID,
-                TReportControl.OptFields::isConfigRef)
-            .containsOnly(false);
+                .extracting(TReportControl.OptFields::isSeqNum, TReportControl.OptFields::isTimeStamp, TReportControl.OptFields::isDataSet,
+                        TReportControl.OptFields::isReasonCode, TReportControl.OptFields::isDataRef, TReportControl.OptFields::isEntryID,
+                        TReportControl.OptFields::isConfigRef)
+                .containsOnly(false);
         assertThat(tReportControl.getOptFields().isBufOvfl()).isTrue();
+    }
+
+    @Test
+    void getFCDAs_should_return_list_of_FCDAs() {
+
+        TFCDA tfcda = new TFCDA();
+        tfcda.setFc(TFCEnum.CF);
+        TFCDA tfcda1 = new TFCDA();
+        tfcda1.setFc(TFCEnum.CF);
+        TFCDA tfcda2 = new TFCDA();
+        tfcda2.setFc(TFCEnum.CF);
+
+        TDataSet tDataSet1 = new TDataSet();
+        tDataSet1.setName("gse_dat_set");
+        tDataSet1.getFCDA().addAll(List.of(tfcda,tfcda1));
+
+        TDataSet tDataSet2 = new TDataSet();
+        tDataSet2.setName("smv_dat_set");
+        tDataSet2.getFCDA().add(tfcda2);
+
+        TGSEControl gseCB = new TGSEControl();
+        gseCB.setName("gse1");
+        gseCB.setDatSet("gse_dat_set");
+        TSampledValueControl smvCB = new TSampledValueControl();
+        smvCB.setName("smv1");
+        smvCB.setDatSet("smv_dat_set");
+
+        LN0 ln0 = new LN0();
+        ln0.getDataSet().addAll(List.of(tDataSet1, tDataSet2));
+        ln0.getGSEControl().add(gseCB);
+        ln0.getSampledValueControl().add(smvCB);
+        LN0Adapter ln0Adapter = new LN0Adapter(null, ln0);
+
+        TExtRef tExtRef = new TExtRef();
+        tExtRef.setSrcCBName("gse1");
+        tExtRef.setServiceType(TServiceType.GOOSE);
+
+        //When
+        List<TFCDA> result = ln0Adapter.getFCDAs(tExtRef);
+
+        //Then
+        assertThat(result).hasSize(2)
+                .containsExactlyInAnyOrder(tfcda, tfcda1);
+
+    }
+
+    @Test
+    void getFCDAs_should_return_empty_list_of_FCDAs() {
+
+        TDataSet tDataSet2 = new TDataSet();
+        tDataSet2.setName("smv_dat_set");
+
+        TSampledValueControl smvCB = new TSampledValueControl();
+        smvCB.setName("smv1");
+        smvCB.setDatSet("smv_dat_set");
+
+        LN0 ln0 = new LN0();
+        ln0.getDataSet().add(tDataSet2);
+        ln0.getSampledValueControl().add(smvCB);
+        LN0Adapter ln0Adapter = new LN0Adapter(null, ln0);
+
+        TExtRef tExtRef = new TExtRef();
+        tExtRef.setSrcCBName("smv1");
+        tExtRef.setServiceType(TServiceType.SMV);
+
+        //When
+        List<TFCDA> result = ln0Adapter.getFCDAs(tExtRef);
+
+        //Then
+        assertThat(result).isEmpty();
+
+    }
+
+    @Test
+    void getFCDAs_should_throw_Exception_when_DataSet_not_present() {
+
+        LN0 ln0 = new LN0();
+        LN0Adapter ln0Adapter = new LN0Adapter(null, ln0);
+
+        TExtRef tExtRef = new TExtRef();
+        tExtRef.setSrcCBName("smv1");
+        tExtRef.setServiceType(TServiceType.SMV);
+
+        //When Then
+        assertThatThrownBy(() -> ln0Adapter.getFCDAs(tExtRef))
+                .isInstanceOf(ScdException.class)
+                .hasMessage("Control Block smv1 not found in /LN0");
     }
 
 }
