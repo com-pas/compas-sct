@@ -793,6 +793,17 @@ class SclServiceTest {
     }
 
     @Test
+    void test_importSTDElementsInSCD_should_not_throw_exception_when_SCD_file_contains_same_ICDHeader_in_two_different_functions() {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd_with_same_compas_icd_header_in_different_functions.xml");
+        SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
+        //When Then
+        assertDoesNotThrow(() -> SclService.importSTDElementsInSCD(scdRootAdapter, Set.of(std), DTO.comMap));
+        assertIsMarshallable(scd);
+    }
+
+    @Test
     void testImportSTDElementsInSCD_Compas_ICDHeader_Not_Match() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd.xml");
