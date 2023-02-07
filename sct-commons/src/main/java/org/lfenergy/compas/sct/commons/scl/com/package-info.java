@@ -3,9 +3,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * <h3>scl.com is a group of services for operating on
+ * <h2>scl.com is a group of services for operating on
  *  {@link org.lfenergy.compas.scl2007b4.model.TCommunication Communication} object
- * </h3>
+ * </h2>
  * @see org.lfenergy.compas.scl2007b4.model.TCommunication
  * @see org.lfenergy.compas.scl2007b4.model.TSubNetwork
  * @see org.lfenergy.compas.scl2007b4.model.TConnectedAP

@@ -3,9 +3,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * <h3>scl.header is a group of services for operating on
+ * <h2>scl.header is a group of services for operating on
  *  {@link org.lfenergy.compas.scl2007b4.model.THeader Header} object
- *  </h3>
+ *  </h2>
  * @see org.lfenergy.compas.scl2007b4.model.THeader
  * @see org.lfenergy.compas.scl2007b4.model.THitem
  * @see <a href="https://github.com/com-pas/compas-sct/issues/6" target="_blank">Issue !6</a>
