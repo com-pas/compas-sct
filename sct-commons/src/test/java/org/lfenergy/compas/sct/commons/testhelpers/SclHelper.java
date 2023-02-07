@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newConnectedAp;
 
 /**
  * Provides static methods to quickly retrieve SCL elements, to be used in writing tests.
@@ -25,9 +26,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @UtilityClass
 public class SclHelper {
-    public static LDeviceAdapter findLDevice(SclRootAdapter sclRootAdapter, String iedName, String ldInst) {
+
+    public static IEDAdapter findIed(SclRootAdapter sclRootAdapter, String iedName) {
         return sclRootAdapter.findIedAdapterByName(iedName)
-            .orElseThrow(() -> new AssertionFailedError(String.format("IED.name=%s not found", iedName))).findLDeviceAdapterByLdInst(ldInst).orElseThrow(() -> new AssertionFailedError(String.format("LDevice.inst=%s not found in IED.name=%s", ldInst, iedName)));
+            .orElseThrow(() -> new AssertionFailedError(String.format("IED.name=%s not found", iedName)));
+    }
+
+    public static LDeviceAdapter findLDevice(SclRootAdapter sclRootAdapter, String iedName, String ldInst) {
+        return findIed(sclRootAdapter, iedName).findLDeviceAdapterByLdInst(ldInst).orElseThrow(() -> new AssertionFailedError(String.format("LDevice.inst=%s not found in IED.name=%s", ldInst, iedName)));
     }
 
     public static InputsAdapter findInputs(SclRootAdapter sclRootAdapter, String iedName, String ldInst) {
@@ -158,5 +164,47 @@ public class SclHelper {
 
     public static String getDaiValue(AbstractLNAdapter<?> ln, String doiName, String daiName) {
         return ln.getDOIAdapterByName(doiName).getDataAdapterByName(daiName).getCurrentElem().getVal().get(0).getValue();
+    }
+
+    public static Stream<String> streamAllConnectedApGseP(SCL scd, String pType) {
+        return scd.getCommunication().getSubNetwork().stream()
+            .map(TSubNetwork::getConnectedAP)
+            .flatMap(List::stream)
+            .map(TConnectedAP::getGSE)
+            .flatMap(List::stream)
+            .map(TControlBlock::getAddress)
+            .map(TAddress::getP)
+            .flatMap(List::stream)
+            .filter(tp -> pType.equals(tp.getType()))
+            .map(TP::getValue);
+    }
+
+    public static TConnectedAP addConnectedAp(SCL scd, String subNetworkName, String apName, String iedName) {
+        scd.setCommunication(new TCommunication());
+        TSubNetwork subNetwork = new TSubNetwork();
+        subNetwork.setName(subNetworkName);
+        scd.getCommunication().getSubNetwork().add(subNetwork);
+        TConnectedAP connectedAP = newConnectedAp(iedName, apName);
+        subNetwork.getConnectedAP().add(connectedAP);
+        return connectedAP;
+    }
+
+    public static SclRootAdapter createSclRootAdapterWithIed(String iedName) {
+        SCL scl = new SCL();
+        scl.setHeader(new THeader());
+        TIED ied = new TIED();
+        ied.setName(iedName);
+        scl.getIED().add(ied);
+        return new SclRootAdapter(scl);
+    }
+
+    public static SclRootAdapter createSclRootWithConnectedAp(String iedName, String apName) {
+        SclRootAdapter sclRootAdapter = createSclRootAdapterWithIed(iedName);
+        SCL scl = sclRootAdapter.getCurrentElem();
+        scl.setCommunication(new TCommunication());
+        TSubNetwork subNetwork = new TSubNetwork();
+        scl.getCommunication().getSubNetwork().add(subNetwork);
+        subNetwork.getConnectedAP().add(newConnectedAp(iedName, apName));
+        return sclRootAdapter;
     }
 }

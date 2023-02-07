@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.findLn;
 
 class LNAdapterTest {
 
@@ -650,4 +651,34 @@ class LNAdapterTest {
         assertThat(tControls).isNotEmpty()
                 .hasSize(1);
     }
+
+    @Test
+    void getTControlsByType_should_return_list_of_report_control_blocks() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        LNAdapter lnAdapter= findLn(new SclRootAdapter(scd), "IED4d4fe1a8cda64cf88a5ee4176a1a0eef", "LDSUIED", "LPAI", "1", null);
+        // When
+        List<TReportControl> tControlsByType = lnAdapter.getTControlsByType(TReportControl.class);
+        // Then
+        assertThat(tControlsByType).isSameAs(lnAdapter.getCurrentElem().getReportControl());
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideGetTControlsByTypeException")
+    void getTControlsByType_should_throw_when_unsupported_controlBlock_for_ln(Class<? extends TControl> tControlClass) {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        LNAdapter lnAdapter= findLn(new SclRootAdapter(scd), "IED4d4fe1a8cda64cf88a5ee4176a1a0eef", "LDSUIED", "LPAI", "1", null);
+        // When & Then
+        assertThatThrownBy(() -> lnAdapter.getTControlsByType(tControlClass))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    private static Stream<Arguments> provideGetTControlsByTypeException() {
+        return Stream.of(
+                Arguments.of(TGSEControl.class),
+                Arguments.of(TSampledValueControl.class)
+        );
+    }
+
 }

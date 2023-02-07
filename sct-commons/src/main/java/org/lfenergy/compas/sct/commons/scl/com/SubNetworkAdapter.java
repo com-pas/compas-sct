@@ -9,11 +9,12 @@ import org.lfenergy.compas.scl2007b4.model.TConnectedAP;
 import org.lfenergy.compas.scl2007b4.model.TSubNetwork;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
+import org.lfenergy.compas.sct.commons.util.SclConstructorHelper;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 /**
  * A representation of the model object
@@ -72,9 +73,7 @@ public class SubNetworkAdapter extends SclElementAdapter<CommunicationAdapter, T
                 .orElse(null);
 
         if(tConnectedAP == null){
-            tConnectedAP = new TConnectedAP();
-            tConnectedAP.setApName(apName);
-            tConnectedAP.setIedName(iedName);
+            tConnectedAP = SclConstructorHelper.newConnectedAp(iedName, apName);
             currentElem.getConnectedAP().add(tConnectedAP);
         }
         return new ConnectedAPAdapter(this,tConnectedAP);
@@ -104,28 +103,40 @@ public class SubNetworkAdapter extends SclElementAdapter<CommunicationAdapter, T
         return currentElem.getConnectedAP()
                 .stream()
                 .map(ap -> new ConnectedAPAdapter(this,ap))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
      * Gets ConnectedAP from Subnetwork
+     *
      * @param iedName IED name
-     * @param apName AccessPoint name
+     * @param apName  AccessPoint name
      * @return the <em><b>ConnectedAPAdapter</b></em> object
-     * @throws ScdException
+     * @throws ScdException when ConnectedAP not found
      */
     public ConnectedAPAdapter getConnectedAPAdapter(String iedName, String apName) throws ScdException {
-        return currentElem.getConnectedAP()
-                .stream()
-                .filter(ap -> ap.getIedName().equals(iedName) && ap.getApName().equals(apName))
-                .map(ap -> new ConnectedAPAdapter(this,ap))
-                .findFirst()
-                .orElseThrow(
-                    () -> new ScdException(
-                        String.format(
-                            "Unknown connected AP (%s,%s) for subnetwork %s", iedName, apName, getName()
-                        )
+        return findConnectedAPAdapter(iedName, apName)
+            .orElseThrow(
+                () -> new ScdException(
+                    String.format(
+                        "Unknown connected AP (%s,%s) for subnetwork %s", iedName, apName, getName()
                     )
-                );
+                )
+            );
+    }
+
+    /**
+     * Find ConnectedAP from Subnetwork
+     *
+     * @param iedName IED name
+     * @param apName  AccessPoint name
+     * @return the <em><b>ConnectedAPAdapter</b></em> object
+     */
+    public Optional<ConnectedAPAdapter> findConnectedAPAdapter(String iedName, String apName) throws ScdException {
+        return currentElem.getConnectedAP()
+            .stream()
+            .filter(ap -> ap.getIedName().equals(iedName) && ap.getApName().equals(apName))
+            .map(ap -> new ConnectedAPAdapter(this, ap))
+            .findFirst();
     }
 }

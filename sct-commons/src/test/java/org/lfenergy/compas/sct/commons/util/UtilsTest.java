@@ -7,7 +7,9 @@ package org.lfenergy.compas.sct.commons.util;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.commons.support.ReflectionSupport;
 
 import java.util.*;
@@ -435,5 +437,111 @@ class UtilsTest {
         // When & Then
         assertThatThrownBy(() -> Utils.lnClassEquals(lnClass1, lnClass2))
             .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void sequence_should_return_range_of_numbers(){
+        // Given
+        long startInclusive = 1;
+        long endInclusive = 3;
+        // When
+        PrimitiveIterator.OfLong result = Utils.sequence(startInclusive, endInclusive);
+        // Then
+        assertThat(result.next()).isEqualTo(1);
+        assertThat(result.next()).isEqualTo(2);
+        assertThat(result.next()).isEqualTo(3);
+        assertThat(result.hasNext()).isFalse();
+        assertThatThrownBy(result::nextLong).isInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
+    void sequence_should_return_empty_iterator(){
+        // Given
+        long startInclusive = 1;
+        long endInclusive = 0;
+        // When
+        PrimitiveIterator.OfLong result = Utils.sequence(startInclusive, endInclusive);
+        // Then
+        assertThat(result.hasNext()).isFalse();
+        assertThatThrownBy(result::nextLong).isInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
+    void sequence_should_throw_exception_when_MAX_VALUE(){
+        // Given
+        long startInclusive = 1;
+        long endInclusive = Long.MAX_VALUE;
+        // When & Then
+        assertThatThrownBy(() -> Utils.sequence(startInclusive, endInclusive))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("End cannot exceed Long.MAX_VALUE - 1");
+    }
+
+    @Test
+    void macAddressSequence_should_return_range_of_macAddresses(){
+        // Given
+        String startInclusive = "01-0C-CD-01-00-FE";
+        String endInclusive = "01-0C-CD-01-01-01";
+        // When
+        Iterator<String> result = Utils.macAddressSequence(startInclusive, endInclusive);
+        // Then
+        assertThat(result.next()).isEqualTo("01-0C-CD-01-00-FE");
+        assertThat(result.next()).isEqualTo("01-0C-CD-01-00-FF");
+        assertThat(result.next()).isEqualTo("01-0C-CD-01-01-00");
+        assertThat(result.next()).isEqualTo("01-0C-CD-01-01-01");
+        assertThat(result.hasNext()).isFalse();
+        assertThatThrownBy(result::next).isInstanceOf(NoSuchElementException.class);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"0x123456789ABC,12-34-56-78-9A-BC", "0xAA,00-00-00-00-00-AA"})
+    void longToMacAddress_should_convert_long_to_mac_address(long macAddress, String expected){
+        // Given : parameter
+        // When
+        String result = Utils.longToMacAddress(macAddress);
+        // Then
+        assertThat(result.toUpperCase()).isEqualTo(expected);
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"-1,macAddress must be a positive integer but got : -1", // Negative number
+        "281474976710656,macAddress cannot exceed 281474976710655 but got : 281474976710656", //FF-FF-FF-FF-FF-FF
+        "9223372036854775807,macAddress cannot exceed 281474976710655 but got : 9223372036854775807"}) //Long MAX_VALUE
+    void longToMacAddress_when_long_out_of_range_should_throw_exception(long macAddress, String expectedMessage){
+        // Given : parameter
+        // When & Then
+        assertThatThrownBy(() -> Utils.longToMacAddress(macAddress))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage(expectedMessage);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"00-00-00-00-00-00,0", "12-34-56-78-9A-BC,20015998343868", "FF-FF-FF-FF-FF-FF,281474976710655",
+    "11:ab:FF:01:c8:2A,19430415386666"})
+    void macAddressToLong_should_convert_mac_address_to_long(String macAddress, long expected){
+        // Given : parameters
+        // When
+        long result = Utils.macAddressToLong(macAddress);
+        // Then
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "123", "AB-CD", "FF_FF_FF_FF_FF_FF", "LK-JI-HG-FE-DC-AB", "AB-AB-AB-AB-AB-AB-AB"})
+    void macAddressToLong_when_malformed_macAddress_should_throw_exception(String macAddress){
+        // Given : parameters
+        // When & Then
+        assertThatThrownBy(() -> Utils.macAddressToLong(macAddress))
+            .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"0,6,000000", "255,1,FF", "255,2,FF", "255,3,0FF", "10,2,0A"})
+    void toHex_should_return_hexadecimal(long number, int length, String expected){
+        // Given
+        // When
+        String result = Utils.toHex(number, length);
+        // Then
+        assertThat(result).isEqualTo(expected);
     }
 }

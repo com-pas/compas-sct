@@ -18,7 +18,11 @@ import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.util.ServicesConfigEnum;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
@@ -325,20 +329,18 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
      * @return empty list if all IED respect limits, otherwise list of errors
      */
     public List<SclReportItem> checkDataGroupCoherence() {
-       return currentElem.getAccessPoint().stream()
-                .map(tAccessPoint -> {
-                    AccessPointAdapter accessPointAdapter = new AccessPointAdapter(this, tAccessPoint);
-                    List<SclReportItem> sclReportItems = new ArrayList<>(accessPointAdapter.checkFCDALimitations());
-                    accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.DATASET, "There are too much DataSets for the IED")
-                            .ifPresent(sclReportItems::add);
-                    accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.REPORT, "There are too much Report Control Blocks for the IED")
-                            .ifPresent(sclReportItems::add);
-                    accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.GSE,  "There are too much GOOSE Control Blocks for the IED")
-                            .ifPresent(sclReportItems::add);
-                    accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.SMV, "There are too much SMV Control Blocks for the IED")
-                            .ifPresent(sclReportItems::add);
-                    return sclReportItems;
-                }).flatMap(Collection::stream)
+        return streamAccessPointAdapters()
+                .flatMap(accessPointAdapter ->
+                        Stream.concat(
+                            accessPointAdapter.checkFCDALimitations().stream(),
+                            Stream.of(
+                                accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.DATASET),
+                                accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.REPORT),
+                                accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.GSE),
+                                accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.SMV))
+                            .flatMap(Optional::stream)
+                        )
+                )
                 .toList();
     }
 
@@ -346,21 +348,37 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
      * Checks if Controls and FCDAs of source IEDs respect config limitation
      * @return empty list if all IED respect limits, otherwise list of errors
      */
-    public List<SclReportItem>  checkBindingDataGroupCoherence() {
-      return  currentElem.getAccessPoint().stream()
-                .map(tAccessPoint -> {
-                    AccessPointAdapter accessPointAdapter = new AccessPointAdapter(this, tAccessPoint);
+    public List<SclReportItem> checkBindingDataGroupCoherence() {
+       return streamAccessPointAdapters()
+                .flatMap(accessPointAdapter -> {
                     AccessPointAdapter.ExtRefAnalyzeRecord extRefAnalyzeRecord = accessPointAdapter.getAllCoherentExtRefForAnalyze();
-                    List<SclReportItem> sclReportItems = new ArrayList<>(extRefAnalyzeRecord.sclReportItems());
-                    accessPointAdapter.checkLimitationForBoundIEDFCDAs(extRefAnalyzeRecord.tExtRefs(), "There are too much FCDA for the Client IED " + getName())
-                            .ifPresent(sclReportItems::add);
-                    sclReportItems.addAll(accessPointAdapter.checkLimitationForBoundIEDControls(extRefAnalyzeRecord.tExtRefs()));
-                    return sclReportItems;
-                }).flatMap(List::stream).toList();
-
+                    return Stream.of(
+                            extRefAnalyzeRecord.sclReportItems().stream(),
+                            accessPointAdapter.checkLimitationForBoundIedFcdas(extRefAnalyzeRecord.tExtRefs()).stream(),
+                            accessPointAdapter.checkLimitationForBoundIEDControls(extRefAnalyzeRecord.tExtRefs()).stream())
+                        .flatMap(Function.identity());
+                }).toList();
     }
 
+    private Stream<AccessPointAdapter> streamAccessPointAdapters() {
+        return currentElem.getAccessPoint().stream()
+            .map(tAccessPoint -> new AccessPointAdapter(this, tAccessPoint));
+    }
 
+    /**
+     * Get value of private type COMPAS-ICDHeader
+     * @return COMPAS-ICDHeader private value if present, else empty Optional
+     */
+    public Optional<TCompasICDHeader> getCompasICDHeader() {
+        return PrivateService.extractCompasPrivate(currentElem, TCompasICDHeader.class);
+    }
 
+    /**
+     * Get value of private type COMPAS-SystemVersion
+     * @return COMPAS-SystemVersion private value if present, else empty Optional
+     */
+    public Optional<TCompasSystemVersion> getCompasSystemVersion() {
+        return PrivateService.extractCompasPrivate(currentElem, TCompasSystemVersion.class);
+    }
 
 }

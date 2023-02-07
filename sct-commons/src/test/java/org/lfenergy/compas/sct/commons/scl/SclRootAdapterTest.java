@@ -6,11 +6,11 @@ package org.lfenergy.compas.sct.commons.scl;
 
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.SCL;
-import org.lfenergy.compas.scl2007b4.model.THeader;
-import org.lfenergy.compas.scl2007b4.model.TIED;
 import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.scl.com.ConnectedAPAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
+import org.lfenergy.compas.sct.commons.testhelpers.SclHelper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.Optional;
@@ -46,7 +46,7 @@ class SclRootAdapterTest {
     }
 
     @Test
-    void addIED() throws Exception {
+    void addIED() {
 
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/add_ied_test.xml");
         SCL icd1 = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/icd1_to_add_test.xml");
@@ -62,7 +62,7 @@ class SclRootAdapterTest {
     }
 
     @Test
-    void addPrivate() throws Exception {
+    void addPrivate() {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/add_ied_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         TPrivate tPrivate = new TPrivate();
@@ -77,7 +77,7 @@ class SclRootAdapterTest {
     @Test
     void getIEDAdapterByName_should_return_ied(){
         // Given
-        SclRootAdapter sclRootAdapter = createSclRootAdapterWithIed("IED_NAME");
+        SclRootAdapter sclRootAdapter = SclHelper.createSclRootAdapterWithIed("IED_NAME");
         // When
         IEDAdapter resultIed = sclRootAdapter.getIEDAdapterByName("IED_NAME");
         // Then
@@ -87,7 +87,7 @@ class SclRootAdapterTest {
     @Test
     void getIEDAdapterByName_should_throw_exception(){
         // Given
-        SclRootAdapter sclRootAdapter = createSclRootAdapterWithIed("IED_NAME");
+        SclRootAdapter sclRootAdapter = SclHelper.createSclRootAdapterWithIed("IED_NAME");
         // When & Then
         assertThatThrownBy(() -> sclRootAdapter.getIEDAdapterByName("NON_EXISTING_IED"))
             .isInstanceOf(ScdException.class)
@@ -97,7 +97,7 @@ class SclRootAdapterTest {
     @Test
     void findIEDAdapterByName_should_return_ied(){
         // Given
-        SclRootAdapter sclRootAdapter = createSclRootAdapterWithIed("IED_NAME");
+        SclRootAdapter sclRootAdapter = SclHelper.createSclRootAdapterWithIed("IED_NAME");
         // When
         Optional<IEDAdapter> resultOptionalIed = sclRootAdapter.findIedAdapterByName("IED_NAME");
         // Then
@@ -108,19 +108,32 @@ class SclRootAdapterTest {
     @Test
     void findIEDAdapterByName_should_return_empty(){
         // Given
-        SclRootAdapter sclRootAdapter = createSclRootAdapterWithIed("IED_NAME");
+        SclRootAdapter sclRootAdapter = SclHelper.createSclRootAdapterWithIed("IED_NAME");
         // When
         Optional<IEDAdapter> resultOptionalIed = sclRootAdapter.findIedAdapterByName("NON_EXISTING_IED");
         // Then
         assertThat(resultOptionalIed).isEmpty();
     }
 
-    private SclRootAdapter createSclRootAdapterWithIed(String iedName) {
-        SCL scl = new SCL();
-        scl.setHeader(new THeader());
-        TIED ied = new TIED();
-        ied.setName(iedName);
-        scl.getIED().add(ied);
-        return new SclRootAdapter(scl);
+    @Test
+    void findConnectedApAdapter_should_return_adapter(){
+        // Given
+        SclRootAdapter sclRootAdapter = SclHelper.createSclRootWithConnectedAp("iedName", "apName");
+        // When
+        Optional<ConnectedAPAdapter> result = sclRootAdapter.findConnectedApAdapter("iedName", "apName");
+        // Then
+        assertThat(result).get().extracting(ConnectedAPAdapter::getIedName, ConnectedAPAdapter::getApName)
+            .containsExactly("iedName", "apName");
     }
+
+    @Test
+    void findConnectedApAdapter_should_return_empty(){
+        // Given
+        SclRootAdapter sclRootAdapter = SclHelper.createSclRootWithConnectedAp("iedName", "apName");
+        // When
+        Optional<ConnectedAPAdapter> result = sclRootAdapter.findConnectedApAdapter("iedName2", "apName2");
+        // Then
+        assertThat(result).isEmpty();
+    }
+
 }

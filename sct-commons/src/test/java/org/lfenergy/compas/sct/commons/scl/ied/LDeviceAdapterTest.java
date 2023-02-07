@@ -63,6 +63,17 @@ class LDeviceAdapterTest {
     }
 
     @Test
+    void findLnAdapter_should_return_adapter(){
+        // Given
+        LDeviceAdapter lDeviceAdapter = iAdapter.findLDeviceAdapterByLdInst("LD_INS2").get();
+        // When
+        Optional<LNAdapter> lnAdapter = lDeviceAdapter.findLnAdapter("ANCR", "1", null);
+        // Then
+        assertThat(lnAdapter).get().extracting(LNAdapter::getLNClass, LNAdapter::getLNInst, LNAdapter::getPrefix)
+            .containsExactly("ANCR", "1", "");
+    }
+
+    @Test
     void getExtRefBinders_shouldReturnExtRefBindingInfo_whenExist() {
         //Given
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.findLDeviceAdapterByLdInst("LD_INS2").get());

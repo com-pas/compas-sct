@@ -171,13 +171,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
      * @throws ScdException thros when specified LNode not found in current IED
      */
     public LNAdapter getLNAdapter(String lnClass, String lnInst, String prefix) throws ScdException {
-        return currentElem.getLN()
-                .stream()
-                .filter(tln -> Utils.lnClassEquals(tln.getLnClass(), lnClass)
-                    && tln.getInst().equals(lnInst)
-                    && Utils.equalsOrBothBlank(prefix, tln.getPrefix()))
-                .map(tln -> new LNAdapter(this,tln))
-                .findFirst()
+        return findLnAdapter(lnClass, lnInst, prefix)
                 .orElseThrow(
                         ()-> new ScdException(
                             String.format(
@@ -185,6 +179,27 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
                             )
                         );
 
+    }
+
+    /**
+     * Find a specific LN from current LDevice
+     * @param lnClass LNode lnClass value
+     * @param lnInst LNode lnInst value
+     * @param prefix LNode prefix value
+     * @return <em>LNAdapter</em> object
+     * @throws ScdException thros when specified LNode not found in current IED
+     */
+    public Optional<LNAdapter> findLnAdapter(String lnClass, String lnInst, String prefix) {
+        if (!currentElem.isSetLN()){
+            return Optional.empty();
+        }
+        return currentElem.getLN()
+            .stream()
+            .filter(tln -> Utils.lnClassEquals(tln.getLnClass(), lnClass)
+                && tln.getInst().equals(lnInst)
+                && Utils.equalsOrBothBlank(prefix, tln.getPrefix()))
+            .map(tln -> new LNAdapter(this, tln))
+            .findFirst();
     }
 
     /**
@@ -234,13 +249,13 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
      * @throws ScdException SCD illegal arguments exception
      */
     public Set<ResumedDataTemplate> getDAI(ResumedDataTemplate rDtt, boolean updatableOnly) throws ScdException {
-        List<AbstractLNAdapter<?>> lnAdapters = new ArrayList<>();
+        List<? extends AbstractLNAdapter<?>> lnAdapters;
         if(StringUtils.isBlank(rDtt.getLnClass())){
             lnAdapters = getLNAdaptersIncludingLN0();
         } else if(rDtt.getLnClass().equals(TLLN0Enum.LLN_0.value())){
-            lnAdapters.add(getLN0Adapter());
+            lnAdapters =  hasLN0() ? Collections.singletonList(getLN0Adapter()) : Collections.emptyList();
         } else {
-            lnAdapters.add(getLNAdapter(rDtt.getLnClass(),rDtt.getLnInst(),rDtt.getPrefix()));
+            lnAdapters = findLnAdapter(rDtt.getLnClass(),rDtt.getLnInst(),rDtt.getPrefix()).stream().toList();
         }
 
         Set<ResumedDataTemplate> resumedDataTemplateSet =  new HashSet<>();
