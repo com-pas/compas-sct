@@ -502,7 +502,7 @@ public class SclService {
         PrivateService.checkSTDCorrespondanceWithLNodeCompasICDHeader(mapICDSystemVersionUuidAndSTDFile);
         // List all Private and remove duplicated one with same iedName
         //For each Private.ICDSystemVersionUUID and Private.iedName find STD File
-        PrivateService.createMapIEDNameAndPrivate(scdRootAdapter).forEach(tPrivate -> {
+        PrivateService.streamIcdHeaderPrivatesWithDistinctIEDName(scdRootAdapter).forEach(tPrivate -> {
             String iedName = PrivateService.extractCompasICDHeader(tPrivate).get().getIEDName();
             String icdSysVerUuid = PrivateService.extractCompasICDHeader(tPrivate).map(TCompasICDHeader::getICDSystemVersionUUID)
                     .orElseThrow(() -> new ScdException(ICD_SYSTEM_VERSION_UUID + " is not present in COMPAS-ICDHeader in LNode")
