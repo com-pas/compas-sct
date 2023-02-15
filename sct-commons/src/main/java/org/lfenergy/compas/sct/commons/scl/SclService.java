@@ -234,9 +234,10 @@ public class SclService {
 
     /**
      * Create LDevice
-     * @param scd SCL file in which LDevice should be found
+     *
+     * @param scd     SCL file in which LDevice should be found
      * @param iedName name of IED in which LDevice is localized
-     * @param ldInst LdInst of LDevice for which adapter is created
+     * @param ldInst  LdInst of LDevice for which adapter is created
      * @return created LDevice adapter
      */
     private static LDeviceAdapter createLDeviceAdapter(SCL scd, String iedName, String ldInst) {
@@ -504,8 +505,8 @@ public class SclService {
         PrivateService.createMapIEDNameAndPrivate(scdRootAdapter).forEach(tPrivate -> {
             String iedName = PrivateService.extractCompasICDHeader(tPrivate).get().getIEDName();
             String icdSysVerUuid = PrivateService.extractCompasICDHeader(tPrivate).map(TCompasICDHeader::getICDSystemVersionUUID)
-                .orElseThrow(() -> new ScdException(ICD_SYSTEM_VERSION_UUID + " is not present in COMPAS-ICDHeader in LNode")
-            );
+                    .orElseThrow(() -> new ScdException(ICD_SYSTEM_VERSION_UUID + " is not present in COMPAS-ICDHeader in LNode")
+                    );
             if (!mapICDSystemVersionUuidAndSTDFile.containsKey(icdSysVerUuid))
                 throw new ScdException("There is no STD file found corresponding to " + PrivateService.stdCheckFormatExceptionMessage(tPrivate));
             // import /ied /dtt in Scd
@@ -575,6 +576,7 @@ public class SclService {
 
     /**
      * Checks Control Blocks, DataSets and FCDA number limitation into Access Points
+     *
      * @param scd SCL file for which LDevice should be activated or deactivated
      * @return SclReport Object that contain SCL file and set of errors
      */
@@ -588,6 +590,23 @@ public class SclService {
                     return list;
                 }).flatMap(Collection::stream).toList();
 
+        return new SclReport(sclRootAdapter, sclReportItems);
+    }
+
+    /**
+     * Update DAIs of DO InRef in all LN0 of the SCD using matching ExtRef information.
+     *
+     * @param scd SCL file for which DOs InRef should be updated with matching ExtRef information
+     * @return SclReport Object that contain SCL file and set of errors
+     */
+    public static SclReport updateDoInRef(SCL scd) {
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        List<SclReportItem> sclReportItems = sclRootAdapter.streamIEDAdapters()
+                .flatMap(IEDAdapter::streamLDeviceAdapters)
+                .map(LDeviceAdapter::getLN0Adapter)
+                .map(LN0Adapter::updateDoInRef)
+                .flatMap(List::stream)
+                .toList();
         return new SclReport(sclRootAdapter, sclReportItems);
     }
 }
