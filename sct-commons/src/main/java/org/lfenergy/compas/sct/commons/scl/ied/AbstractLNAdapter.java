@@ -705,46 +705,40 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         DAITracker.MatchResult matchResult = daiTracker.search();
         AbstractDAIAdapter<?> daiAdapter = null;
         IDataParentAdapter doiOrSdoiAdapter;
-        if (matchResult == DAITracker.MatchResult.FULL_MATCH) {
-            // update
-            daiAdapter = (AbstractDAIAdapter) daiTracker.getBdaiOrDaiAdapter();
-            if ((daiAdapter.isValImport() != null && daiAdapter.isValImport()) ||
-                    (daiAdapter.isValImport() == null && rDtt.isUpdatable())) {
-                daiAdapter.update(daTypeName.getDaiValues());
-                return;
-            } else {
-                throw new ScdException(String.format("DAI (%s -%s) cannot be updated", doTypeName, daTypeName));
-            }
-        }
 
-        if (rDtt.isUpdatable()) {
+        if (!rDtt.isUpdatable())
+            return;
+
+        if (rDtt.isUpdatable() && matchResult == DAITracker.MatchResult.FULL_MATCH) {
+            daiAdapter = (AbstractDAIAdapter) daiTracker.getBdaiOrDaiAdapter();
+        } else {
             doiOrSdoiAdapter = daiTracker.getDoiOrSdoiAdapter();
-            int idx = daiTracker.getIndexDoType();
+            int indexDoType = daiTracker.getIndexDoType();
             int doSz = doTypeName.getStructNames().size();
             if (matchResult == DAITracker.MatchResult.FAILED) {
                 doiOrSdoiAdapter = addDOI(doTypeName.getName());
-                idx = 0;
-            } else if (idx == -1) {
-                idx = 0;
-            } else if (idx == doSz - 1) {
-                idx = doSz;
+                indexDoType = 0;
+            } else if (indexDoType == -1) {
+                indexDoType = 0;
+            } else if (indexDoType == doSz - 1) {
+                indexDoType = doSz;
             }
-            for (int i = idx; i < doSz; ++i) {
+            for (int i = indexDoType; i < doSz; ++i) {
                 String sdoName = doTypeName.getStructNames().get(i);
                 doiOrSdoiAdapter = doiOrSdoiAdapter.addSDOI(sdoName);
             }
 
             IDataParentAdapter daiOrBdaiAdapter = daiTracker.getDoiOrSdoiAdapter();
-            idx = daiTracker.getIndexDaType();
+            int indexDaType = daiTracker.getIndexDaType();
             int daSz = daTypeName.getStructNames().size();
-            if (idx <= -1) {
-                idx = 0;
-            } else if (idx == daSz - 1) {
-                idx = daSz;
+            if (indexDaType <= -1) {
+                indexDaType = 0;
+            } else if (indexDaType == daSz - 1) {
+                indexDaType = daSz;
             }
-            for (int i = idx; i < daSz; ++i) {
+            for (int i = indexDaType; i < daSz; ++i) {
                 String bdaName = daTypeName.getStructNames().get(i);
-                if (idx == 0) {
+                if (indexDaType == 0) {
                     daiOrBdaiAdapter = doiOrSdoiAdapter.addSDOI(daTypeName.getName());
                 } else if (i == daSz - 1) {
                     daiAdapter = daiOrBdaiAdapter.addDAI(bdaName, rDtt.isUpdatable());
@@ -755,9 +749,8 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
             if (daiAdapter == null) {
                 daiAdapter = doiOrSdoiAdapter.addDAI(daTypeName.getName(), rDtt.isUpdatable());
             }
-
-            daiAdapter.update(daTypeName.getDaiValues());
         }
+        daiAdapter.update(daTypeName.getDaiValues());
     }
 
     /**

@@ -55,9 +55,9 @@ class DOIAdapterTest {
         DOIAdapter.DAIAdapter daiAdapter = initInnerDAIAdapter("Do", "angRef");
 
         // Then
-        assertNull(daiAdapter.isValImport());
+        assertThat(daiAdapter.getCurrentElem().isSetValImport()).isFalse();
         daiAdapter.setValImport(true);
-        assertTrue(daiAdapter.isValImport());
+        assertThat(daiAdapter.getCurrentElem().isSetValImport()).isTrue();
 
         // test tree map
         assertThatThrownBy(() -> daiAdapter.getDataAdapterByName(TOTO)).isInstanceOf(UnsupportedOperationException.class);
