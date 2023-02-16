@@ -9,17 +9,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
+import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.PrivateService;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.util.ServicesConfigEnum;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -320,4 +319,48 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
     public Optional<TCompasBay> getPrivateCompasBay() {
         return PrivateService.extractCompasPrivate(currentElem, TCompasBay.class);
     }
+
+    /**
+     * Checks if Controls, DataSets and FCDAs of IED respect config limitation
+     * @return empty list if all IED respect limits, otherwise list of errors
+     */
+    public List<SclReportItem> checkDataGroupCoherence() {
+       return currentElem.getAccessPoint().stream()
+                .map(tAccessPoint -> {
+                    AccessPointAdapter accessPointAdapter = new AccessPointAdapter(this, tAccessPoint);
+                    List<SclReportItem> sclReportItems = new ArrayList<>(accessPointAdapter.checkFCDALimitations());
+                    accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.DATASET, "There are too much DataSets for the IED")
+                            .ifPresent(sclReportItems::add);
+                    accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.REPORT, "There are too much Report Control Blocks for the IED")
+                            .ifPresent(sclReportItems::add);
+                    accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.GSE,  "There are too much GOOSE Control Blocks for the IED")
+                            .ifPresent(sclReportItems::add);
+                    accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.SMV, "There are too much SMV Control Blocks for the IED")
+                            .ifPresent(sclReportItems::add);
+                    return sclReportItems;
+                }).flatMap(Collection::stream)
+                .toList();
+    }
+
+    /**
+     * Checks if Controls and FCDAs of source IEDs respect config limitation
+     * @return empty list if all IED respect limits, otherwise list of errors
+     */
+    public List<SclReportItem>  checkBindingDataGroupCoherence() {
+      return  currentElem.getAccessPoint().stream()
+                .map(tAccessPoint -> {
+                    AccessPointAdapter accessPointAdapter = new AccessPointAdapter(this, tAccessPoint);
+                    AccessPointAdapter.ExtRefAnalyzeRecord extRefAnalyzeRecord = accessPointAdapter.getAllCoherentExtRefForAnalyze();
+                    List<SclReportItem> sclReportItems = new ArrayList<>(extRefAnalyzeRecord.sclReportItems());
+                    accessPointAdapter.checkLimitationForBoundIEDFCDAs(extRefAnalyzeRecord.tExtRefs(), "There are too much FCDA for the Client IED " + getName())
+                            .ifPresent(sclReportItems::add);
+                    sclReportItems.addAll(accessPointAdapter.checkLimitationForBoundIEDControls(extRefAnalyzeRecord.tExtRefs()));
+                    return sclReportItems;
+                }).flatMap(List::stream).toList();
+
+    }
+
+
+
+
 }

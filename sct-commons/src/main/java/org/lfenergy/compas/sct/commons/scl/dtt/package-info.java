@@ -3,9 +3,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * <h3>scl.dtt is a group of services for operating on
+ * <h2>scl.dtt is a group of services for operating on
  *  {@link org.lfenergy.compas.scl2007b4.model.TDataTypeTemplates DataTypeTemplates} object
- *  </h3>
+ *  </h2>
  * @see org.lfenergy.compas.scl2007b4.model.TLNodeType
  * @see org.lfenergy.compas.scl2007b4.model.TDOType
  * @see org.lfenergy.compas.scl2007b4.model.TDAType

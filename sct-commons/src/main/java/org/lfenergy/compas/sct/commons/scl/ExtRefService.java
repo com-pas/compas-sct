@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 public class ExtRefService {
 
     private static final String MESSAGE_MISSING_IED_NAME_PARAMETER = "IED.name parameter is missing";
+    private static final String CLIENT_IED_NAME = "The Client IED ";
 
     /**
      * Updates iedName attribute of all ExtRefs in the Scd.

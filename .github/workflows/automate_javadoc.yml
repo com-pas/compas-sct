@@ -1,27 +1,29 @@
-# SPDX-FileCopyrightText: 2022 RTE FRANCE
+# SPDX-FileCopyrightText: 2022 2023 RTE FRANCE
 #
 # SPDX-License-Identifier: Apache-2.0
 name: Continuous Deployment - JavaDocs
 
 on:
-  push:
-    branches:
-      - 'feat/javadoc'
+  pull_request_target:
+    types: [ labeled, closed ]
+
 jobs:
   build:
+    if: ${{  github.event.pull_request.base.ref == 'develop' && github.actor != 'dependabot[bot]' && github.event.pull_request.merged && contains(github.event.pull_request.labels.*.name, 'javadoc') }}
     name: Java Docs
     runs-on: ubuntu-latest
     env:
-      from_branch: feat/javadoc
-      target_branch: feat/117_Documentation_SCD_Generation_Process
+      DEPLOYMENT_BRANCH: gh-pages
+      DEPENDABOT_BRANCH: dependabot/javadoc-${{ github.head_ref || github.ref_name }}-${{ github.event.pull_request.number }}
     steps:
-      # Use develop as base branch to generate javadoc
-      - name: Setup Environment
+      - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
           java-version: '17'
-          ref: ${{ env.target_branch }}
 
       - name: Create custom Maven Settings.xml
         uses: whelk-io/maven-settings-xml-action@v21
@@ -33,6 +35,8 @@ jobs:
         run: |
           git config --global user.name '${{ secrets.CONFIG_CI_USER_NAME }}'
           git config --global user.email '${{ secrets.CONFIG_CI_USER_EMAIL }}'
+          git config pull.rebase false
+          git fetch origin ${{ env.DEPLOYMENT_BRANCH }}
 
       - name: Import GPG key
         id: import_gpg
@@ -42,27 +46,25 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
 
-      - name: Prepare Pull Request branch
+      # Take note that your GitHub Pages site is currently being built from the /docs folder in the DEPLOYMENT_BRANCH branch.
+      - name: Prepare Pull Request branch & commit files
         run: |
           mvn -s custom_maven_settings.xml clean javadoc:aggregate -P javadoc
           mkdir -p docs/javadoc
           yes | cp -Rf target/site/apidocs/* docs/javadoc/
-          git checkout -b ${{ env.from_branch }}-pull-request
+          git checkout -b temp
+          git add docs/javadoc/
+          git commit -m "[dependabot/javadoc/temp]: update javadoc"
+          git checkout ${{ env.DEPLOYMENT_BRANCH }}
+          git clean -fdx
+          git checkout -b ${{ env.DEPENDABOT_BRANCH }}
+          git cherry-pick -n -X theirs temp
+          git commit -m "[dependabot/javadoc]: update javadoc"
+          git checkout ${{ env.DEPLOYMENT_BRANCH }}
+          git merge ${{ env.DEPENDABOT_BRANCH }}
 
-      # Note that will fail if branch already exists.
       - name: Push Git Branch
         uses: ad-m/github-push-action@v0.6.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ env.from_branch }}-pull-request
-
-      # Note that will silently fail if PR already exists.
-      - name: Create Pull Request
-        uses: repo-sync/pull-request@v2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          source_branch: ${{ env.from_branch }}-pull-request
-          destination_branch: ${{ env.target_branch }}
-          pr_title: "Docs: Update Java docs repository"
-          pr_body: "Automatically created from CI workflow"
-          pr_label: "documentation,javadoc"
+          branch: ${{ env.DEPLOYMENT_BRANCH }}

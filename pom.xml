@@ -218,7 +218,6 @@
                         <configuration>
                             <doctitle>${javadoc.title}</doctitle>
                             <doclint>${javadoc.lint}</doclint>
-                            <additionalJOption>--no-module-directories</additionalJOption>
                         </configuration>
                     </plugin>
                 </plugins>

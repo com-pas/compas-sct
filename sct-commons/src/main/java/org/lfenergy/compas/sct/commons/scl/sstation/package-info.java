@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 /**
- * <h3>scl.sstation is a group of services for operating on
+ * <h2>scl.sstation is a group of services for operating on
  *  {@link org.lfenergy.compas.scl2007b4.model.TSubstation Substation} object
- *  </h3>
+ *  </h2>
  * @see org.lfenergy.compas.scl2007b4.model.TVoltageLevel
  * @see org.lfenergy.compas.scl2007b4.model.TFunction
  * @see org.lfenergy.compas.scl2007b4.model.TBay
