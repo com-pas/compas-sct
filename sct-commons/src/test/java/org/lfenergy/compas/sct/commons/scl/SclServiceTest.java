@@ -9,7 +9,6 @@ import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
@@ -133,6 +132,7 @@ class SclServiceTest {
         String marshalledScd = assertIsMarshallable(scd);
         assertThat(marshalledScd).doesNotContain("<Address>", "PhysConn");
     }
+
 
     @Test
     void testGetSubnetwork() {
@@ -285,7 +285,7 @@ class SclServiceTest {
         extRefInfo.setHolderLnClass(lnClass);
 
         //When
-        List<ControlBlock> controlBlocks = SclService.getExtRefSourceInfo(scd, extRefInfo);
+        List<ControlBlock>  controlBlocks = SclService.getExtRefSourceInfo(scd, extRefInfo);
 
         //Then
         assertThat(controlBlocks).isEmpty();
@@ -357,7 +357,6 @@ class SclServiceTest {
         assertThat(extRefInfo.getBindingInfo()).isNotNull();
         assertThatThrownBy(() -> SclService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class);// binding invalid
     }
-
     @Test
     void updateExtRefSource_shouldThrowScdException_whenBindingInternalByIedName() {
         //Given
@@ -435,7 +434,6 @@ class SclServiceTest {
         assertThat(extRefInfo.getSourceInfo()).isNotNull();
         assertThatThrownBy(() -> SclService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class);// signal invalid
     }
-
     @Test
     void updateExtRefSource_shouldThrowScdException_whenBindingExternalBinding() {
         //Given
@@ -753,7 +751,7 @@ class SclServiceTest {
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
 
-        SclRootAdapter expectedScdAdapter = assertDoesNotThrow(() -> SclService.importSTDElementsInSCD(
+        SclRootAdapter expectedScdAdapter = assertDoesNotThrow( () -> SclService.importSTDElementsInSCD(
                 scdRootAdapter, Set.of(std), DTO.comMap));
         assertThat(expectedScdAdapter.getCurrentElem().getIED()).hasSize(1);
         assertThat(expectedScdAdapter.getCurrentElem().getDataTypeTemplates()).hasNoNullFieldsOrProperties();
@@ -769,13 +767,13 @@ class SclServiceTest {
         SCL std2 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_SITESITE1SCU2.xml");
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
 
-        SclRootAdapter expectedScdAdapter = assertDoesNotThrow(() -> SclService.importSTDElementsInSCD(
+        SclRootAdapter expectedScdAdapter = assertDoesNotThrow( () -> SclService.importSTDElementsInSCD(
                 scdRootAdapter, Set.of(std0, std1, std2), DTO.comMap));
         assertThat(expectedScdAdapter.getCurrentElem().getIED()).hasSize(3);
         assertThat(expectedScdAdapter.getCurrentElem().getDataTypeTemplates()).hasNoNullFieldsOrProperties();
         assertThat(expectedScdAdapter.getCurrentElem().getCommunication().getSubNetwork()).hasSize(2);
-        assertThat(expectedScdAdapter.getCurrentElem().getCommunication().getSubNetwork().get(0).getConnectedAP()).hasSizeBetween(1, 3);
-        assertThat(expectedScdAdapter.getCurrentElem().getCommunication().getSubNetwork().get(1).getConnectedAP()).hasSizeBetween(1, 3);
+        assertThat(expectedScdAdapter.getCurrentElem().getCommunication().getSubNetwork().get(0).getConnectedAP()).hasSizeBetween(1,3);
+        assertThat(expectedScdAdapter.getCurrentElem().getCommunication().getSubNetwork().get(1).getConnectedAP()).hasSizeBetween(1,3);
         assertIsMarshallable(scd);
     }
 
@@ -793,17 +791,6 @@ class SclServiceTest {
     }
 
     @Test
-    void test_importSTDElementsInSCD_should_not_throw_exception_when_SCD_file_contains_same_ICDHeader_in_two_different_functions() {
-        //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd_with_same_compas_icd_header_in_different_functions.xml");
-        SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
-        SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
-        //When Then
-        assertDoesNotThrow(() -> SclService.importSTDElementsInSCD(scdRootAdapter, Set.of(std), DTO.comMap));
-        assertIsMarshallable(scd);
-    }
-
-    @Test
     void testImportSTDElementsInSCD_Compas_ICDHeader_Not_Match() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd.xml");
@@ -811,7 +798,7 @@ class SclServiceTest {
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
         //When Then
         Set<SCL> stds = Set.of(std);
-        assertThrows(ScdException.class, () -> SclService.importSTDElementsInSCD(scdRootAdapter, stds, DTO.comMap));
+        assertThrows(ScdException.class, ()-> SclService.importSTDElementsInSCD(scdRootAdapter, stds, DTO.comMap));
         assertIsMarshallable(scd);
     }
 
@@ -820,9 +807,9 @@ class SclServiceTest {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/ssd.xml");
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
-        //When Then
+       //When Then
         Set<SCL> stds = new HashSet<>();
-        assertThrows(ScdException.class, () -> SclService.importSTDElementsInSCD(scdRootAdapter, stds, DTO.comMap));
+        assertThrows(ScdException.class, ()-> SclService.importSTDElementsInSCD(scdRootAdapter, stds, DTO.comMap));
         assertIsMarshallable(scd);
     }
 
@@ -904,10 +891,10 @@ class SclServiceTest {
         Tuple[] scl4Errors = new Tuple[]{Tuple.tuple("The LDevice doesn't have a DO @name='Mod'",
                 "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0")};
         return Stream.of(
-                Arguments.of("MissingDOBeh", scl1, scl1Errors),
-                Arguments.of("MissingLDevicePrivate", scl2, scl2Errors),
-                Arguments.of("MissingLDevicePrivateAttribute", scl3, scl3Errors),
-                Arguments.of("MissingDOMod", scl4, scl4Errors)
+                Arguments.of("MissingDOBeh",scl1, scl1Errors),
+                Arguments.of("MissingLDevicePrivate",scl2, scl2Errors),
+                Arguments.of("MissingLDevicePrivateAttribute",scl3, scl3Errors),
+                Arguments.of("MissingDOMod",scl4, scl4Errors)
         );
     }
 
@@ -936,21 +923,21 @@ class SclServiceTest {
         SCL scl2 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_LD_STATUS_UNTESTED.scd");
         SCL scl3 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test1_LD_STATUS_INACTIVE.scd");
         Tuple[] scl1Errors = new Tuple[]{Tuple.tuple("The LDevice cannot be set to 'off' but has not been selected into SSD.",
-                "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
+                        "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
                 Tuple.tuple("The LDevice cannot be set to 'on' but has been selected into SSD.",
                         "/SCL/IED[@name=\"IedName2\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
                 Tuple.tuple("The LDevice cannot be activated or desactivated because its BehaviourKind Enum contains NOT 'on' AND NOT 'off'.",
                         "/SCL/IED[@name=\"IedName3\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"
                 )};
         Tuple[] scl2Errors = new Tuple[]{Tuple.tuple("The LDevice cannot be set to 'off' but has not been selected into SSD.",
-                "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
+                        "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
                 Tuple.tuple("The LDevice cannot be set to 'on' but has been selected into SSD.",
                         "/SCL/IED[@name=\"IedName2\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
                 Tuple.tuple("The LDevice cannot be activated or desactivated because its BehaviourKind Enum contains NOT 'on' AND NOT 'off'.",
                         "/SCL/IED[@name=\"IedName3\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"
                 )};
         Tuple[] scl3Errors = new Tuple[]{Tuple.tuple("The LDevice is not qualified into STD but has been selected into SSD.",
-                "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
+                        "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
                 Tuple.tuple("The LDevice cannot be set to 'on' but has been selected into SSD.",
                         "/SCL/IED[@name=\"IedName2\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
                 Tuple.tuple("The LDevice cannot be activated or desactivated because its BehaviourKind Enum contains NOT 'on' AND NOT 'off'.",
@@ -1037,173 +1024,21 @@ class SclServiceTest {
         assertEquals("off", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName3", "LDSUIED").get().getValue());
     }
 
-    @Test
-    void updateLDeviceStatus_shouldReturnUpdatedFile_when_DAI_Mod_DO_stVal_whatever_it_is_updatable_or_not() {
-        // Given
-        SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue_165_enhance_68_Test_Dai_Updatable.scd");
-        assertThat(getLDeviceStatusValue(givenScl, "IedName1", "LDSUIED"))
-                .map(TVal::getValue)
-                .hasValue("off");
-        assertThat(getLDeviceStatusValue(givenScl, "IedName2", "LDSUIED"))
-                .map(TVal::getValue)
-                .hasValue("on");
-        assertThat(getLDeviceStatusValue(givenScl, "IedName3", "LDSUIED"))
-                .map(TVal::getValue)
-                .isNotPresent();
-        assertThat(getLDeviceStatusValue(givenScl, "IedName4", "LDSUIED"))
-                .map(TVal::getValue)
-                .hasValue("on");
-        assertThat(getLDeviceStatusValue(givenScl, "IedName5", "LDSUIED"))
-                .map(TVal::getValue)
-                .hasValue("on");
-
-        // When
-        SclReport sclReport = SclService.updateLDeviceStatus(givenScl);
-
-        // Then
-        assertThat(sclReport.isSuccess()).isTrue();
-        assertThat(getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName1", "LDSUIED"))
-                .map(TVal::getValue)
-                .hasValue("on");
-
-        assertThat(getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName2", "LDSUIED"))
-                .map(TVal::getValue)
-                .hasValue("off");
-
-        assertThat(getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName3", "LDSUIED"))
-                .map(TVal::getValue)
-                .hasValue("off");
-
-        assertThat(getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName4", "LDSUIED"))
-                .map(TVal::getValue)
-                .hasValue("off");
-
-        assertThat(getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName5", "LDSUIED"))
-                .map(TVal::getValue)
-                .hasValue("off");
-    }
-
-    private Optional<TVal> getLDeviceStatusValue(SCL scl, String iedName, String ldInst) {
-        return getValFromDaiName(scl, iedName, ldInst, "Mod", "stVal");
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @CsvSource({
-            "Test update setSrcRef Value,LD_WITH_1_InRef,InRef2,setSrcRef,IED_NAME1LD_WITH_1_InRef/PRANCR1.Do11.sdo11",
-            "Test update setSrcCB Value,LD_WITH_1_InRef,InRef2,setSrcCB,IED_NAME1LD_WITH_1_InRef/prefixANCR1.GSE1",
-            "Test update setSrcRef Value,LD_WITH_3_InRef,InRef3,setSrcRef,IED_NAME1LD_WITH_3_InRef/PRANCR1.Do11.sdo11",
-            "Test update setSrcCB Value,LD_WITH_3_InRef,InRef3,setSrcCB,IED_NAME1LD_WITH_3_InRef/prefixANCR1.GSE1",
-            "Test update setTstRef Value,LD_WITH_3_InRef,InRef3,setTstRef,IED_NAME1LD_WITH_3_InRef/PRANCR1.Do11.sdo11",
-            "Test update setTstCB Value,LD_WITH_3_InRef,InRef3,setTstCB,IED_NAME1LD_WITH_3_InRef/prefixANCR3.GSE3"
-    })
-    void updateDoInRef_shouldReturnUpdatedFile(String testName, String ldInst, String doName, String daName, String expected) {
-        // Given
-        SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_issue_231_test_ok.xml");
-
-        // When
-        SclReport sclReport = SclService.updateDoInRef(givenScl);
-
-        // Then
-        assertThat(sclReport.isSuccess()).isTrue();
-        assertThat(getValFromDaiName(sclReport.getSclRootAdapter().getCurrentElem(), "IED_NAME1", ldInst, doName, daName)
-                .map(TVal::getValue))
-                .hasValue(expected);
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @CsvSource({
-            "Test with only 1 ExtRef should not update srcTstCB,LD_WITH_1_InRef,InRef2,setTstRef",
-            "Test with only 1 ExtRef should not update setTstCB Value,LD_WITH_1_InRef,InRef2,setTstCB"
-    })
-    void updateDoInRef_should_not_update_tst_DAI_When_only_1_ExtRef(String testName, String ldInst, String doName, String daName) {
-        // Given
-        SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_issue_231_test_ok.xml");
-
-        // When
-        SclReport sclReport = SclService.updateDoInRef(givenScl);
-
-        // Then
-        assertThat(sclReport.isSuccess()).isTrue();
-        assertThat(getValFromDaiName(sclReport.getSclRootAdapter().getCurrentElem(), "IED_NAME1", ldInst, doName, daName)).isNotPresent();
-    }
-
-    @Test
-    void updateDoInRef_shouldReturnReportWithError_when_ExtRef_not_coherent() {
-        // Given
-        SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_issue_231_test_ko.xml");
-
-        // When
-        SclReport sclReport = SclService.updateDoInRef(givenScl);
-
-        // Then
-        assertThat(sclReport.isSuccess()).isTrue();
-        assertThat(sclReport.getSclReportItems()).isNotEmpty();
-        assertThat(sclReport.getSclReportItems()).hasSize(4);
-    }
-
-    private Optional<TVal> getValFromDaiName(SCL scl, String iedName, String ldInst, String doiName, String daiName) {
+    private Optional<TVal> getLDeviceStatusValue(SCL scl, String iedName, String ldInst){
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scl);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
         Optional<LDeviceAdapter> lDeviceAdapter = iedAdapter.findLDeviceAdapterByLdInst(ldInst);
         LN0Adapter ln0Adapter = lDeviceAdapter.get().getLN0Adapter();
         Optional<DOIAdapter> doiAdapter = ln0Adapter.getDOIAdapters().stream()
-                .filter(doiAdapter1 -> doiAdapter1.getCurrentElem().getName().equals(doiName))
+                .filter(doiAdapter1 -> doiAdapter1.getCurrentElem().getName().equals("Mod"))
                 .findFirst();
-        return doiAdapter.flatMap(adapter -> adapter.getCurrentElem().getSDIOrDAI().stream()
+        if(doiAdapter.isEmpty()) return Optional.empty();
+        return doiAdapter.get().getCurrentElem().getSDIOrDAI().stream()
                 .filter(tUnNaming -> tUnNaming.getClass().equals(TDAI.class))
                 .map(TDAI.class::cast)
-                .filter(tdai -> tdai.getName().equals(daiName) && !tdai.getVal().isEmpty())
+                .filter(tdai -> tdai.getName().equals("stVal"))
                 .map(tdai -> tdai.getVal().get(0))
-                .findFirst());
+                .findFirst();
     }
-
-    @Test
-    void analyzeDataGroups_should_success() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_binded_ied_controls_fcda.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter1 = sclRootAdapter.getIEDAdapterByName("IED_NAME1");
-        iedAdapter1.getCurrentElem().getAccessPoint().get(0).getServices().getClientServices().setMaxAttributes(9L);
-        iedAdapter1.getCurrentElem().getAccessPoint().get(0).getServices().getClientServices().setMaxGOOSE(3L);
-        iedAdapter1.getCurrentElem().getAccessPoint().get(0).getServices().getClientServices().setMaxSMV(2L);
-        iedAdapter1.getCurrentElem().getAccessPoint().get(0).getServices().getClientServices().setMaxReports(1L);
-        // When
-        SclReport sclReport = SclService.analyzeDataGroups(scd);
-        //Then
-        assertThat(sclReport.getSclReportItems()).isEmpty();
-
-    }
-
-    @Test
-    void analyzeDataGroups_should_return_errors_messages() {
-
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_binded_ied_controls_fcda.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME2");
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getConfDataSet().setMaxAttributes(1L);
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getConfDataSet().setMax(3L);
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getSMVsc().setMax(1L);
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getGOOSE().setMax(2L);
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getConfReportControl().setMax(0L);
-        // When
-        SclReport sclReport = SclService.analyzeDataGroups(scd);
-        //Then
-        assertThat(sclReport.getSclReportItems()).hasSize(11)
-                .extracting(SclReportItem::getMessage)
-                .containsExactlyInAnyOrder(
-                        "There are too much FCDA for the Client IED IED_NAME1",
-                                "The Client IED IED_NAME1 subscribes to too much GOOSE Control Blocks.",
-                                "The Client IED IED_NAME1 subscribes to too much REPORT Control Blocks.",
-                                "The Client IED IED_NAME1 subscribes to too much SMV Control Blocks.",
-                                "There are too much FCDA for the DataSet DATASET6 for the LDevice LD_INST21 in IED IED_NAME2",
-                                "There are too much FCDA for the DataSet DATASET6 for the LDevice LD_INST22 in IED IED_NAME2",
-                                "There are too much FCDA for the DataSet DATASET5 for the LDevice LD_INST22 in IED IED_NAME2",
-                                "There are too much DataSets for the IED IED_NAME2",
-                                "There are too much Report Control Blocks for the IED IED_NAME2",
-                                "There are too much GOOSE Control Blocks for the IED IED_NAME2",
-                                "There are too much SMV Control Blocks for the IED IED_NAME2");
-    }
-
 
 }

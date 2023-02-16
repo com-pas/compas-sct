@@ -437,7 +437,7 @@ class PrivateServiceTest {
         //When
         SclRootAdapter sclRootAdapter = SclService.initScl(Optional.empty(), "hv", "hr");
         sclRootAdapter.setCurrentElem(scl);
-        Stream<TPrivate> tPrivateStream = PrivateService.streamIcdHeaderPrivatesWithDistinctIEDName(sclRootAdapter);
+        Stream<TPrivate> tPrivateStream = PrivateService.createMapIEDNameAndPrivate(sclRootAdapter);
 
         //Then
         assertThat(tPrivateStream.toList()).hasSize(3)
@@ -467,7 +467,7 @@ class PrivateServiceTest {
         //When
         SclRootAdapter sclRootAdapter = SclService.initScl(Optional.empty(), "hv", "hr");
         sclRootAdapter.setCurrentElem(scl);
-        Stream<TPrivate> tPrivateStream = PrivateService.streamIcdHeaderPrivatesWithDistinctIEDName(sclRootAdapter);
+        Stream<TPrivate> tPrivateStream = PrivateService.createMapIEDNameAndPrivate(sclRootAdapter);
 
         //Then
         assertThat(tPrivateStream.toList()).isEmpty();

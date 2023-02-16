@@ -3,6 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * <h2>sct-app is a group of automation services</h2>
+ * <h3>sct-app is a group of automation services</h3>
  */
 package org.lfenergy.compas.sct.app;

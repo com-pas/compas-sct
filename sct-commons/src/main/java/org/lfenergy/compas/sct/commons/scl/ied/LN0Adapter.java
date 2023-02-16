@@ -61,7 +61,6 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
  *      <b>LDName</b> = "name" attribute of IEDName element + "inst" attribute of LDevice element
  *      <b>LNName</b> = "prefix" + "lnClass" + "lnInst"
  *  </pre>
- *
  * @see org.lfenergy.compas.scl2007b4.model.TLN0
  * @see org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter
  */
@@ -71,22 +70,17 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
     public static final DaTypeName STVAL_DA_TYPE_NAME = new DaTypeName(STVAL);
     public static final DoTypeName BEHAVIOUR_DO_TYPE_NAME = new DoTypeName(BEHAVIOUR_DO_NAME);
     public static final DaTypeName BEHAVIOUR_DA_TYPE_NAME = getDaTypeNameForBeh();
-    private static final String DAI_NAME_PURPOSE = "purpose";
-    private static final String INREF_PREFIX = "InRef";
-
     /**
      * Constructor
-     *
      * @param parentAdapter Parent container reference
-     * @param ln0           Current reference
+     * @param ln0 Current reference
      */
     public LN0Adapter(LDeviceAdapter parentAdapter, LN0 ln0) {
-        super(parentAdapter, ln0);
+        super(parentAdapter,ln0);
     }
 
     /**
      * Check if node is child of the reference node
-     *
      * @return link parent child existence
      */
     @Override
@@ -102,7 +96,6 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
 
     /**
      * Gets current LN0 class type
-     *
      * @return <em>LN0.class</em>
      */
     @Override
@@ -112,7 +105,6 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
 
     /**
      * Gets LNClass enum value of current LNO
-     *
      * @return LNClass value
      */
     public String getLNClass() {
@@ -121,7 +113,6 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
 
     /**
      * Gets LNInst value of current LN0
-     *
      * @return <em>""</em>
      */
     @Override
@@ -131,7 +122,6 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
 
     /**
      * Gets Prefix value of current LN0
-     *
      * @return <em>""</em>
      */
     @Override
@@ -141,22 +131,19 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
 
     /**
      * Gets Inputs node as an adapter
-     *
      * @return an InputsAdapter
      */
-    public InputsAdapter getInputsAdapter() {
+    public InputsAdapter getInputsAdapter(){
         return new InputsAdapter(this, currentElem.getInputs());
     }
 
-    /**
-     * Checks if given attibrute corresponds to DataSet or ReportControl or SMVControl or GSEControl in current LN0
-     *
+    /** Checks if given attibrute corresponds to DataSet or ReportControl or SMVControl or GSEControl in current LN0
      * @param dataAttribute attribute to check
      * @return <em>Boolean</em> value of check result
      */
     @Override
-    protected boolean matchesDataAttributes(String dataAttribute) {
-        return super.matchesDataAttributes(dataAttribute) ||
+    protected  boolean matchesDataAttributes(String dataAttribute){
+        return  super.matchesDataAttributes(dataAttribute) ||
                 currentElem.getSampledValueControl().stream().anyMatch(smp -> smp.getName().equals(dataAttribute)) ||
                 currentElem.getGSEControl().stream().anyMatch(gse -> gse.getName().equals(dataAttribute));
     }
@@ -191,7 +178,6 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
 
     /**
      * Verify and update LDevice status in parent Node
-     *
      * @param iedNameLDeviceInstList pair of Ied name and LDevice inst attributes
      * @return Set of Errors
      */
@@ -200,7 +186,7 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
         final String iedName = getParentAdapter().getParentAdapter().getName();
         final String ldInst = getParentAdapter().getInst();
         ResumedDataTemplate daiBehFilter = createDaiFilter(BEHAVIOUR_DO_TYPE_NAME, BEHAVIOUR_DA_TYPE_NAME);
-        List<ResumedDataTemplate> daiBehList = getDAI(daiBehFilter, false);
+            List<ResumedDataTemplate> daiBehList = getDAI(daiBehFilter, false);
         if (daiBehList.isEmpty()) {
             return Optional.of(buildFatalReportItem("The LDevice doesn't have a DO @name='Beh' OR its associated DA@fc='ST' AND DA@name='stVal'"));
         }
@@ -220,13 +206,13 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
         ResumedDataTemplate newDaModToSetInLN0 = optionalModStVal.get();
         String initialValue = newDaModToSetInLN0.findFirstValue().orElse("");
         lDeviceActivation.checkLDeviceActivationStatus(iedName, ldInst, compasLDeviceStatus, enumValues);
-        if (lDeviceActivation.isUpdatable()) {
-            if (!initialValue.equals(lDeviceActivation.getNewVal())) {
+        if(lDeviceActivation.isUpdatable()){
+            if(!initialValue.equals(lDeviceActivation.getNewVal())) {
                 newDaModToSetInLN0.setVal(lDeviceActivation.getNewVal());
                 updateDAI(newDaModToSetInLN0);
             }
-        } else {
-            if (lDeviceActivation.getErrorMessage() != null) {
+        }else {
+            if(lDeviceActivation.getErrorMessage() != null) {
                 return Optional.of(buildFatalReportItem(lDeviceActivation.getErrorMessage()));
             }
         }
@@ -235,13 +221,13 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
 
     public Optional<String> getLDeviceStatus() {
         return getDaiModStVal()
-                .flatMap(ResumedDataTemplate::findFirstValue);
+            .flatMap(ResumedDataTemplate::findFirstValue);
     }
 
     private Optional<ResumedDataTemplate> getDaiModStVal() {
         ResumedDataTemplate daiModFilter = createDaiFilter(MOD_DO_TYPE_NAME, STVAL_DA_TYPE_NAME);
         return getDAI(daiModFilter, false).stream()
-                .findFirst();
+            .findFirst();
     }
 
     private static DaTypeName getDaTypeNameForBeh() {
@@ -250,29 +236,5 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
         daTypeNameBeh.setBType(TPredefinedBasicTypeEnum.ENUM);
         daTypeNameBeh.setFc(TFCEnum.ST);
         return daTypeNameBeh;
-    }
-
-    /**
-     * Update DAIs of DO InRef in all LN0 of the SCD using matching ExtRef information.
-     *
-     * @return A list of SclReport Objects that contain errors
-     */
-    public List<SclReportItem> updateDoInRef() {
-        return getDOIAdapters().stream()
-                .filter(doiAdapter -> doiAdapter.getCurrentElem().isSetName()
-                        && doiAdapter.getCurrentElem().getName().startsWith(INREF_PREFIX)
-                        && doiAdapter.findDataAdapterByName(DAI_NAME_PURPOSE).isPresent())
-                .map(doiAdapter -> doiAdapter.getDataAdapterByName(DAI_NAME_PURPOSE).getCurrentElem().getVal().stream()
-                        .findFirst()
-                        .map(tVal -> doiAdapter.updateDaiFromExtRef(getExtRefsByDesc(tVal.getValue())))
-                        .orElse(Optional.of(SclReportItem.warning(getXPath(), "The DOI %s can't be bound with an ExtRef".formatted(getXPath())))))
-                .flatMap(Optional::stream)
-                .toList();
-    }
-
-    private List<TExtRef> getExtRefsByDesc(String desc) {
-        return getExtRefs().stream()
-                .filter(tExtRef -> tExtRef.isSetDesc() && tExtRef.getDesc().contains(desc))
-                .toList();
     }
 }

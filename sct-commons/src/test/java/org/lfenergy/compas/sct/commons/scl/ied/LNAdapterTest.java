@@ -4,7 +4,6 @@
 
 package org.lfenergy.compas.sct.commons.scl.ied;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -21,7 +20,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 
 class LNAdapterTest {
@@ -380,7 +380,7 @@ class LNAdapterTest {
         assertThat(extRef.getSrcCBName()).isEqualTo(extRefInfo.getSourceInfo().getSrcCBName());
         assertThat(extRef.getSrcLDInst()).isEqualTo(extRefInfo.getSourceInfo().getSrcLDInst());
 
-        assertThat(extRef.getLnClass()).contains(extRefInfo.getSourceInfo().getSrcLNClass());
+        assertThat(extRef.getLnClass().contains(extRefInfo.getSourceInfo().getSrcLNClass())).isTrue();
 
     }
 
@@ -434,8 +434,7 @@ class LNAdapterTest {
     }
 
     @Test
-    void updateDAI_should_throw_ScdException_when_ResumedDataTemplate_is_empty() {
-        // Given
+    void testUpdateDAI() {
         ResumedDataTemplate rDtt = new ResumedDataTemplate();
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -446,138 +445,28 @@ class LNAdapterTest {
                 .withLnClass(TLLN0Enum.LLN_0.value())
                 .build();
 
-        // When Then
-        assertThatThrownBy(() -> lnAdapter.updateDAI(rDtt))
-                .isInstanceOf(ScdException.class)
-                .hasMessage("Cannot update undefined DAI");
-    }
-
-    @Test
-    void updateDAI_should_throw_ScdException_when_ResumedDataTemplate_DA_name_is_not_defined() {
-        // Given
-        ResumedDataTemplate rDtt = new ResumedDataTemplate();
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LD_INS1").get());
-        AbstractLNAdapter<?> lnAdapter = AbstractLNAdapter.builder()
-                .withLDeviceAdapter(lDeviceAdapter)
-                .withLnClass(TLLN0Enum.LLN_0.value())
-                .build();
+        assertThrows(ScdException.class, () -> lnAdapter.updateDAI(rDtt));
         DoTypeName doTypeName = new DoTypeName("Do.sdo1.d");
         rDtt.setDoName(doTypeName);
-
-        // When Then
-        assertThatThrownBy(() -> lnAdapter.updateDAI(rDtt))
-                .isInstanceOf(ScdException.class)
-                .hasMessage("Cannot update undefined DAI");
-    }
-
-    @Test
-    @Disabled(value = "Disable while bug #241 is not fixed")
-    /**
-     * @see <a href="https://github.com/com-pas/compas-sct/issues/241" target="_blank">Issue !241 (UpdateDAI Val does not produce subelements (SDI) as expected)</a>
-     */
-    void updateDAI_should_not_update_DAI_Val_when_DTT_Fc_not_defined() {
-        // Given
-        ResumedDataTemplate rDtt = new ResumedDataTemplate();
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LD_INS1").get());
-        LN0Adapter lnAdapter = (LN0Adapter) AbstractLNAdapter.builder()
-                .withLDeviceAdapter(lDeviceAdapter)
-                .withLnClass(TLLN0Enum.LLN_0.value())
-                .build();
-
-        rDtt.setDoName(new DoTypeName("Do.sdo1.d"));
+        assertThrows(ScdException.class, () -> lnAdapter.updateDAI(rDtt));
         rDtt.setDaName(new DaTypeName("antRef.bda1.bda2.bda3"));
         TVal tVal = new TVal();
         tVal.setValue("newValue");
         rDtt.setDaiValues(List.of(tVal));
+        assertDoesNotThrow(() -> lnAdapter.updateDAI(rDtt));
 
-        // When
-        lnAdapter.updateDAI(rDtt);
-
-        // Then
-        SDIAdapter.DAIAdapter daiAdapter = lnAdapter
-                .getDOIAdapterByName("Do")
-                .getStructuredDataAdapterByName("sdo1")
-                .getStructuredDataAdapterByName("d")
-                .getStructuredDataAdapterByName("bda1")
-                .getStructuredDataAdapterByName("bda2")
-                .getStructuredDataAdapterByName("bda3")
-                .getDataAdapterByName("antRef");
-
-        assertThat(daiAdapter.getCurrentElem().getVal().get(0).getValue()).isEqualTo("Completed-diff");
-
-        System.out.println(MarshallerWrapper.marshall(scd));
-    }
-
-    @Test
-    @Disabled(value = "Disable while bug #241 is not fixed")
-    /**
-     * @see <a href="https://github.com/com-pas/compas-sct/issues/241" target="_blank">Issue !241 (UpdateDAI Val does not produce subelements (SDI) as expected)</a>
-     */
-    void updateDAI_should_update_DAI_values_when_data_updatable() {
-        // Given
-        ResumedDataTemplate rDtt = new ResumedDataTemplate();
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LD_INS2").get());
-        LN0Adapter lnAdapter = (LN0Adapter) AbstractLNAdapter.builder()
+        lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LD_INS2").get());
+        AbstractLNAdapter<?> lnAdapter2 = AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
                 .withLnClass(TLLN0Enum.LLN_0.value())
                 .build();
-
-        rDtt.setDoName(new DoTypeName("Do.sdo1.d"));
-        rDtt.setDaName(new DaTypeName("antRef.bda1.bda2.bda3"));
-        TVal tVal = new TVal();
-        tVal.setValue("newValue");
         rDtt.setValImport(true);
         rDtt.setFc(TFCEnum.SE);
-        assertThat(rDtt.isUpdatable()).isTrue();
-        rDtt.setDaiValues(List.of(tVal));
-
-        // When
-        lnAdapter.updateDAI(rDtt);
-
-        // Then
-        SDIAdapter.DAIAdapter daiAdapter = lnAdapter
-                .getDOIAdapterByName("Do")
-                .getStructuredDataAdapterByName("sdo1")
-                .getStructuredDataAdapterByName("d")
-                .getStructuredDataAdapterByName("antRef")
-                .getStructuredDataAdapterByName("bda1")
-                .getStructuredDataAdapterByName("bda2")
-                .getDataAdapterByName("bda3");
-
-        assertThat(daiAdapter.getCurrentElem().getVal().get(0).getValue()).isEqualTo("newValue");
+        assertTrue(rDtt.isUpdatable());
+        assertDoesNotThrow(() -> lnAdapter2.updateDAI(rDtt));
 
         System.out.println(MarshallerWrapper.marshall(scd));
-    }
 
-    @Test
-    void updateDAI_should_not_update_DAI_values_when_not_updatable() {
-        // Given
-        ResumedDataTemplate rDtt = new ResumedDataTemplate();
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LD_INS1").get());
-        LN0Adapter lnAdapter = (LN0Adapter) AbstractLNAdapter.builder()
-                .withLDeviceAdapter(lDeviceAdapter)
-                .withLnClass(TLLN0Enum.LLN_0.value())
-                .build();
-
-        rDtt.setDoName(new DoTypeName("Do.sdo1.d"));
-        rDtt.setDaName(new DaTypeName("antRef.bda1.bda2.bda3"));
-        rDtt.setValImport(false);
-
-        // When Then
-        assertThat(rDtt.isUpdatable()).isFalse();
-        assertThatCode(() -> lnAdapter.updateDAI(rDtt)).doesNotThrowAnyException();
     }
 
     @Test

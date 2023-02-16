@@ -156,7 +156,4 @@ public class SclHelper {
             .flatMap(List::stream);
     }
 
-    public static String getDaiValue(AbstractLNAdapter<?> ln, String doiName, String daiName) {
-        return ln.getDOIAdapterByName(doiName).getDataAdapterByName(daiName).getCurrentElem().getVal().get(0).getValue();
-    }
 }

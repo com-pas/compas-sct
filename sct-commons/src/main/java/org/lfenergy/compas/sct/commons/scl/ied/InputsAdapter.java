@@ -420,5 +420,4 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
     private SclRootAdapter getSclRootAdapter() {
         return getIedAdapter().getParentAdapter();
     }
-
 }

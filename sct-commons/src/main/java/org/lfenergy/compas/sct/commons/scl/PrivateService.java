@@ -12,7 +12,6 @@ import org.lfenergy.compas.sct.commons.util.PrivateEnum;
 import javax.xml.bind.JAXBElement;
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
@@ -299,12 +298,12 @@ public final class PrivateService {
 
 
     /**
-     * Creates stream of Private for all Privates COMPAS-ICDHeader in /Substation of SCL
+     * Creates map of IEDName and related Private for all Privates COMPAS-ICDHeader in /Substation of SCL
      *
      * @param scdRootAdapter SCL file in which Private should be found
-     * @return stream of COMPAS-ICDHeader Private
+     * @return map of Private and its IEDName parameter
      */
-    public static Stream<TPrivate> streamIcdHeaderPrivatesWithDistinctIEDName(SclRootAdapter scdRootAdapter) {
+    public static Stream<TPrivate> createMapIEDNameAndPrivate(SclRootAdapter scdRootAdapter) {
         return scdRootAdapter.getCurrentElem().getSubstation().get(0).getVoltageLevel().stream()
                 .map(TVoltageLevel::getBay).flatMap(Collection::stream)
                 .map(TBay::getFunction).flatMap(Collection::stream)
@@ -312,10 +311,8 @@ public final class PrivateService {
                 .map(TLNode::getPrivate).flatMap(Collection::stream)
                 .filter(tPrivate ->
                         tPrivate.getType().equals(COMPAS_ICDHEADER.getPrivateType())
-                                && PrivateService.extractCompasICDHeader(tPrivate).map(TCompasICDHeader::getIEDName).isPresent())
-                .collect(Collectors.groupingBy(tPrivate -> PrivateService.extractCompasICDHeader(tPrivate).get().getIEDName()))
-                .values().stream()
-                .map(tPrivates -> tPrivates.get(0));
+                                && PrivateService.extractCompasICDHeader(tPrivate).isPresent()
+                                && PrivateService.extractCompasICDHeader(tPrivate).get().getIEDName() != null);
     }
 
 

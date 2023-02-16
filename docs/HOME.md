@@ -39,7 +39,7 @@ Technical Steering Committee [CoMPAS-tsc@lists.lfenergy.org](mailto:CoMPAS-tsc@l
 By contributing to the CoMPAS project, you accept and agree to the following terms and conditions for your present and future contributions submitted to CoMPAS.
 
 All contributions to this project are licensed under the license stipulated at the corresponding sub-repository. 
-Except where otherwise explicitly indicated, CoMPAS is an open source project licensed under the [Apache License, version 2.0](http://www.apache.org/licenses/LICENSE-2.0/).
+Except where otherwise explicitely indicated, CoMPAS is an open source project licensed under the [Apache License, version 2.0](http://www.apache.org/licenses/LICENSE-2.0/).
 
 The project requires the use of the [Developer Certificate of Origin (DCO)](https://developercertificate.org/). 
 The DCO is a legally binding statement asserting that you are you have the right to submit your contribution and to license it under the project's applicable license.
@@ -64,21 +64,21 @@ Note that checks will be performed during the integration in order to require th
 
 ## Community refinements
 
-Every Monday there is a CoMPAS Community Refinement at 10AM CET. The event is available at the CoMPAS mailing list [calendar](https://lists.lfenergy.org/g/CoMPAS/calendar) and can be subscribed to.
+Every monday there is a CoMPAS Community Refinement at 10AM CET. The event is available at the CoMPAS mailing list [calendar](https://lists.lfenergy.org/g/CoMPAS/calendar) and can be subscribed to.
 
 ### Prepared topics
 
-Every Friday before the refinement meeting on Monday, all topics are published on the #compas channel on our [LFEnergy Slack](https://lfenergy.slack.com/).
+Every friday before the refinement meeting on Monday, all topics are published on the #compas channel on our [LFEnergy Slack](https://lfenergy.slack.com/).
 
 ### Add your own topics
 
-Everybody can suggest topics for the refinement. To do this, join the [LFEnergy Slack](https://lfenergy.slack.com/) if not already, and put your topics in the #compas channel. You can just do this by writing a message like "I want to add something to the refinement this Monday, namely..." or add a comment to the already prepared topics if available (see [Prepared topics](#prepared-topics)).
+Everybody can suggest topics for the refinement. To do this, join the [LFEnergy Slack](https://lfenergy.slack.com/) if not already, and put your topics in the #compas channel. You can just do this by writing a message like "I want to add something to the refinement this monday, namely..." or add a comment to the already prepared topics if available (see [Prepared topics](#prepared-topics)).
 
 ### Reporting Bugs and Suggesting Enhancements
 
 Bugs and enhancement suggestions are tracked as [GitHub issues](https://guides.github.com/features/issues/). Create an issue in the repository where it belongs (an issue about the CIM to IEC 61850 mapping belongs in the [CIM Mapping repository](https://github.com/com-pas/compas-cim-mapping) for example) and provide the following information by filling in the template, which is either an issue or a bug.
 
-When an issue is created, it is automatically being added to the `To do` column of the specific repository. This means it's added, but not yet refined. Every Monday at 10AM CET, there is a Community Refinement (see our mailing list [calendar](https://lists.lfenergy.org/g/CoMPAS/calendar), everybody can join) where issues are being discussed that are not refined yet. Your issue is one of them.
+When an issue is created, it is automatically being added to the `To do` column of the specific repository. This means it's added, but not yet refined. Every monday at 10AM CET, there is a Community Refinement (see our mailing list [calendar](https://lists.lfenergy.org/g/CoMPAS/calendar), everybody can join) where issues are being discussed that are not refined yet. Your issue is one of them.
 Once it's accepted and refined, it goes to the `Ready for development` column and it's ready to be implemented/fixed.
 
 Before creating bug reports or suggesting enhancement, please **perform a [cursory search](https://github.com/search?q=+is%3Aissue+user%3Acom-pas)** 
@@ -118,8 +118,8 @@ Continuous integration is set up to run on all branches automatically and will o
 ### Tools to contribute
 
 Continuous integration is setup automatically on all contributions. However, it's faster to iterate locally to fix problems than waiting for the status checks to finish. 
-There are many tools that can be used to do the verifications that are enforced by all status checks. The most simple and universal tool is Maven, but IDE integrations 
-can be used to get more immediate feedback. Most of the team uses IntelliJ IDEA, but others IDEs can be used, for example the Eclipse IDE.
+There are many tools that can be used to do the verifications that are enforced by all status checks. The most simple and universal tool is maven, but IDE integrations 
+can be used to get more immediate feedback. Most of the team uses IntelliJ IDEA, but others IDEs can be used, for exemple the Eclipse IDE.
 
 ### Definition of Done
 
@@ -147,7 +147,7 @@ On the [developing](https://com-pas.github.io/contributing/DEVELOPING.html) page
 
 #### Open Community Calls
 
-It's good to know that every other Monday, we are having a so called Open Community Call. Everyone participating in the CoMPAS project can join 
+It's good to know that every other monday, we are having a so called Open Community Call. Everyone participating in the CoMPAS project can join 
 and talk about and ask question about the CoMPAS project.
 
 When the Open Community Calls are taking place, can be found at the [General CoMPAS mailing list calendar](https://lists.lfenergy.org/g/CoMPAS/calendar).
@@ -167,7 +167,7 @@ A good (open source) project requires documentation. We have two places for our 
 
 ##### LF Energy Wiki
 
-LF Energy has it's own [CoMPAS specific Wiki](https://wiki.lfenergy.org/display/HOME/CoMPAS). This is the place for documentation 
+LF Energy has it's own [CoMPAS specific Wiki](https://wiki.lfenergy.org/display/HOME/CoMPAS). This is the place for documenation 
 about CoMPAS in general (like roadmap and the community call agendas).
 
 #### Architecture and technologies
@@ -178,7 +178,7 @@ please check the source code (duh!) and our [CoMPAS Architecture Github Pages](h
 ### Copyright and Licensing
 
 Copyright and license information is done on per-file basis. We use the specification of [REUSE](https://reuse.software/spec/)
-to ensure that copyright information of the project is clear and can be analyzed in an automated fashion.
+to ensure that copyright information of the project is clear and can be analuzed in an automated fashion.
 
 Every source code repository within CoMPAS has a Github Action for checking against the REUSE specification.
 

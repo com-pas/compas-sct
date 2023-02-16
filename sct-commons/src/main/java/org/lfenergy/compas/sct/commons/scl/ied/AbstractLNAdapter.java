@@ -705,40 +705,46 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         DAITracker.MatchResult matchResult = daiTracker.search();
         AbstractDAIAdapter<?> daiAdapter = null;
         IDataParentAdapter doiOrSdoiAdapter;
-
-        if (!rDtt.isUpdatable())
-            return;
-
-        if (rDtt.isUpdatable() && matchResult == DAITracker.MatchResult.FULL_MATCH) {
+        if (matchResult == DAITracker.MatchResult.FULL_MATCH) {
+            // update
             daiAdapter = (AbstractDAIAdapter) daiTracker.getBdaiOrDaiAdapter();
-        } else {
+            if ((daiAdapter.isValImport() != null && daiAdapter.isValImport()) ||
+                    (daiAdapter.isValImport() == null && rDtt.isUpdatable())) {
+                daiAdapter.update(daTypeName.getDaiValues());
+                return;
+            } else {
+                throw new ScdException(String.format("DAI (%s -%s) cannot be updated", doTypeName, daTypeName));
+            }
+        }
+
+        if (rDtt.isUpdatable()) {
             doiOrSdoiAdapter = daiTracker.getDoiOrSdoiAdapter();
-            int indexDoType = daiTracker.getIndexDoType();
+            int idx = daiTracker.getIndexDoType();
             int doSz = doTypeName.getStructNames().size();
             if (matchResult == DAITracker.MatchResult.FAILED) {
                 doiOrSdoiAdapter = addDOI(doTypeName.getName());
-                indexDoType = 0;
-            } else if (indexDoType == -1) {
-                indexDoType = 0;
-            } else if (indexDoType == doSz - 1) {
-                indexDoType = doSz;
+                idx = 0;
+            } else if (idx == -1) {
+                idx = 0;
+            } else if (idx == doSz - 1) {
+                idx = doSz;
             }
-            for (int i = indexDoType; i < doSz; ++i) {
+            for (int i = idx; i < doSz; ++i) {
                 String sdoName = doTypeName.getStructNames().get(i);
                 doiOrSdoiAdapter = doiOrSdoiAdapter.addSDOI(sdoName);
             }
 
             IDataParentAdapter daiOrBdaiAdapter = daiTracker.getDoiOrSdoiAdapter();
-            int indexDaType = daiTracker.getIndexDaType();
+            idx = daiTracker.getIndexDaType();
             int daSz = daTypeName.getStructNames().size();
-            if (indexDaType <= -1) {
-                indexDaType = 0;
-            } else if (indexDaType == daSz - 1) {
-                indexDaType = daSz;
+            if (idx <= -1) {
+                idx = 0;
+            } else if (idx == daSz - 1) {
+                idx = daSz;
             }
-            for (int i = indexDaType; i < daSz; ++i) {
+            for (int i = idx; i < daSz; ++i) {
                 String bdaName = daTypeName.getStructNames().get(i);
-                if (indexDaType == 0) {
+                if (idx == 0) {
                     daiOrBdaiAdapter = doiOrSdoiAdapter.addSDOI(daTypeName.getName());
                 } else if (i == daSz - 1) {
                     daiAdapter = daiOrBdaiAdapter.addDAI(bdaName, rDtt.isUpdatable());
@@ -749,8 +755,9 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
             if (daiAdapter == null) {
                 daiAdapter = doiOrSdoiAdapter.addDAI(daTypeName.getName(), rDtt.isUpdatable());
             }
+
+            daiAdapter.update(daTypeName.getDaiValues());
         }
-        daiAdapter.update(daTypeName.getDaiValues());
     }
 
     /**
@@ -954,31 +961,14 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
 
     public ControlBlockAdapter createControlBlockIfNotExists(String cbName, String id, String datSet, ControlBlockEnum controlBlockEnum) {
         return findControlBlock(cbName, controlBlockEnum)
-                .orElseGet(() -> addControlBlock(
-                                switch (controlBlockEnum) {
-                                    case GSE -> new GooseControlBlock(cbName, id, datSet);
-                                    case SAMPLED_VALUE -> new SMVControlBlock(cbName, id, datSet);
-                                    case REPORT -> new ReportControlBlock(cbName, id, datSet);
-                                    default -> throw new IllegalArgumentException("Unsupported ControlBlock Type " + controlBlockEnum);
-                                }
-                        )
-                );
-    }
-
-     /**
-     * Finds all FCDAs in DataSet of Control Block feeding ExtRef
-     * @param tExtRef Fed ExtRef
-     * @return list of all FCDA in DataSet of Control Block
-     */
-    public List<TFCDA> getFCDAs(TExtRef tExtRef){
-        TControl tControl = getTControlsByType(ControlBlockEnum.from(tExtRef.getServiceType()).getControlBlockClass()).stream()
-                .filter(tCtrl -> tExtRef.getSrcCBName() != null && tExtRef.getSrcCBName().equals(tCtrl.getName()))
-                .findFirst().orElseThrow(() ->
-                        new ScdException(String.format("Control Block %s not found in %s", tExtRef.getSrcCBName(), getXPath())));
-       return getCurrentElem().getDataSet().stream()
-                .filter(tDataSet -> tDataSet.getName().equals(tControl.getDatSet()))
-                .map(TDataSet::getFCDA)
-                .flatMap(Collection::stream)
-                .toList();
+            .orElseGet(() -> addControlBlock(
+                    switch (controlBlockEnum) {
+                        case GSE -> new GooseControlBlock(cbName, id, datSet);
+                        case SAMPLED_VALUE -> new SMVControlBlock(cbName, id, datSet);
+                        case REPORT -> new ReportControlBlock(cbName, id, datSet);
+                        default -> throw new IllegalArgumentException("Unsupported ControlBlock Type " + controlBlockEnum);
+                    }
+                )
+            );
     }
 }

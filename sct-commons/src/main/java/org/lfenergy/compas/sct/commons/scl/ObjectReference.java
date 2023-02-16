@@ -6,10 +6,7 @@ package org.lfenergy.compas.sct.commons.scl;
 
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
-import org.lfenergy.compas.scl2007b4.model.TExtRef;
-import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
-import org.lfenergy.compas.sct.commons.dto.ExtrefTarget;
-import org.lfenergy.compas.sct.commons.util.Utils;
+
 
 /**
  * A representation of the model object
@@ -41,7 +38,7 @@ public class ObjectReference {
     private static final String MALFORMED_OBJ_REF = "Malformed ObjRef : %s" ;
 
     private final String reference;
-    //IEDNameLDInst
+    //IEDName.LDInst
     private String ldName;
     //LNPrefixLNClassLNInst
     private String lNodeName;
@@ -52,30 +49,14 @@ public class ObjectReference {
         init();
     }
 
-    public ObjectReference(TExtRef extRef, ExtrefTarget target) {
-        this.ldName = extRef.getIedName() + extRef.getLdInst();
-        if(target.equals(ExtrefTarget.SRC_REF)) {
-            this.lNodeName = Utils.emptyIfBlank(extRef.getPrefix())
-                    + (extRef.isSetLnClass() ? extRef.getLnClass().get(0): TLLN0Enum.LLN_0.value())
-                    + Utils.emptyIfBlank(extRef.getLnInst());
-            this.dataAttributes = Utils.emptyIfBlank(extRef.getDoName());
-        }
-        if(target.equals(ExtrefTarget.SRC_CB)) {
-            this.lNodeName = Utils.emptyIfBlank(extRef.getSrcPrefix())
-                    + (extRef.isSetSrcLNClass() ? extRef.getSrcLNClass().get(0): TLLN0Enum.LLN_0.value())
-                    + Utils.emptyIfBlank(extRef.getSrcLNInst());
-            this.dataAttributes = Utils.emptyIfBlank(extRef.getSrcCBName());
-        }
-        this.reference = this.ldName + "/" + this.lNodeName + "." + this.dataAttributes;
-    }
-
     public final void init(){
-        String[] objRefPart = reference.split("/");
+        String refCopy = reference;
+        String[] objRefPart = reference.split("[/]");
         if(objRefPart.length != 2 || StringUtils.isBlank(objRefPart[0]) || StringUtils.isBlank(objRefPart[1])){
             throw new IllegalArgumentException(String.format(MALFORMED_OBJ_REF, reference));
         }
         ldName = objRefPart[0];
-        String refCopy = objRefPart[1];
+        refCopy = objRefPart[1];
         objRefPart = refCopy.split("[.]", 2);
         if(objRefPart.length != 2 || StringUtils.isBlank(objRefPart[0]) || StringUtils.isBlank(objRefPart[1])){
             throw new IllegalArgumentException(String.format(MALFORMED_OBJ_REF, reference));
