@@ -169,6 +169,80 @@
 		<AccessPoint name="ADMIN_AP" />
 	</IED>
 
+	<IED name="IedName4" type="Valeur définie par le fournisseur" manufacturer="ADU" configVersion="ADU" originalSclVersion="2007" originalSclRevision="B" originalSclRelease="4" owner="ADU">
+        <Private type="RTE-IEDType">SAMU</Private>
+        <Private type="COMPAS-IEDType">SAMU</Private>
+        <Private type="COMPAS-SystemVersion">
+            <compas:SystemVersion MainSystemVersion="01.00" MinorSystemVersion="009.001.001" />
+        </Private>
+        <Private type="COMPAS-ICDHeader">
+            <compas:ICDHeader ICDSystemVersionUUID="IED4d4fe1a8cda64cf88a5ee4176a1a0eef" IEDType="SAMU" IEDinstance="3" IEDName="IedName2" VendorName="RTE" IEDmodel="ICDfromModeling" IEDredundancy="A" BayLabel="SITE1" hwRev="01.00.00" swRev="01.00.00" headerId="cacfa2df-bdb2-47a7-b7ea-07916586ebdd" headerVersion="01.00.00" headerRevision="01.00.00"></compas:ICDHeader>
+        </Private>
+        <AccessPoint name="PROCESS_AP">
+            <Server>
+                <Authentication />
+                <LDevice inst="LDSUIED" ldName="IedName2LDSUIED" desc="IED Monitoring Function">
+                    <Private type="COMPAS-LDevice">
+                        <compas:LDevice xmlns:compas="https://www.lfenergy.org/compas/extension/v1" LDeviceID="IedName2LDSUIED" LDeviceStatus="INACTIVE"/>
+                    </Private>
+                    <LN0 lnClass="LLN0" inst="" lnType="LNType2" desc="Logical node zero">
+                        <DOI name="NamPlt">
+                            <DAI name="swRev">
+                                <Val>01.00.000</Val>
+                            </DAI>
+                            <DAI name="configRev">
+                                <Val>01.00.000</Val>
+                            </DAI>
+                        </DOI>
+                        <DOI name="Mod">
+                            <DAI name="stVal" valImport="true">
+                                <Val>on</Val>
+                            </DAI>
+                        </DOI>
+                    </LN0>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+        <AccessPoint name="ADMIN_AP" />
+    </IED>
+
+    <IED name= "IedName5" type="Valeur définie par le fournisseur" manufacturer="ADU" configVersion="ADU" originalSclVersion="2007" originalSclRevision="B" originalSclRelease="4" owner="ADU">
+        <Private type="RTE-IEDType">SAMU</Private>
+        <Private type="COMPAS-IEDType">SAMU</Private>
+        <Private type="COMPAS-SystemVersion">
+            <compas:SystemVersion MainSystemVersion="01.00" MinorSystemVersion="009.001.001" />
+        </Private>
+        <Private type="COMPAS-ICDHeader">
+            <compas:ICDHeader ICDSystemVersionUUID="IED4d4fe1a8cda64cf88a5ee4176a1a0eef" IEDType="SAMU" IEDinstance="3" IEDName="IedName2" VendorName="RTE" IEDmodel="ICDfromModeling" IEDredundancy="A" BayLabel="SITE1" hwRev="01.00.00" swRev="01.00.00" headerId="cacfa2df-bdb2-47a7-b7ea-07916586ebdd" headerVersion="01.00.00" headerRevision="01.00.00"></compas:ICDHeader>
+        </Private>
+        <AccessPoint name="PROCESS_AP">
+            <Server>
+                <Authentication />
+                <LDevice inst="LDSUIED" ldName="IedName2LDSUIED" desc="IED Monitoring Function">
+                    <Private type="COMPAS-LDevice">
+                        <compas:LDevice xmlns:compas="https://www.lfenergy.org/compas/extension/v1" LDeviceID="IedName2LDSUIED" LDeviceStatus="INACTIVE"/>
+                    </Private>
+                    <LN0 lnClass="LLN0" inst="" lnType="LNType2" desc="Logical node zero">
+                        <DOI name="NamPlt">
+                            <DAI name="swRev">
+                                <Val>01.00.000</Val>
+                            </DAI>
+                            <DAI name="configRev">
+                                <Val>01.00.000</Val>
+                            </DAI>
+                        </DOI>
+                        <DOI name="Mod">
+                            <DAI name="stVal" valImport="false">
+                                <Val>on</Val>
+                            </DAI>
+                        </DOI>
+                    </LN0>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+        <AccessPoint name="ADMIN_AP" />
+    </IED>
+
 	<DataTypeTemplates>
 		<LNodeType lnClass="LLN0" id="LNType1">
 			<DO name="NamPlt" type="DO1" transient="false" />

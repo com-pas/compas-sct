@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- SPDX-FileCopyrightText: 2021 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+<SCL version="2007" revision="B" release="4" xmlns="http://www.iec.ch/61850/2003/SCL">
+    <Header id="hId" version="2007" revision="B" toolID="COMPAS"/>
+    <IED name="IED_NAME1">
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LD_INST11" ldName="IED_NAME1LD_INST11">
+                    <LN0 lnClass="LLN0" inst="" lnType="LNEX1">
+                        <Inputs>
+                            <ExtRef srcCBName="goose1" srcLDInst="LD_INST22" srcLNClass="LLN0" iedName="IED_NAME2" ldInst="LD_INST22" serviceType="GOOSE" desc="a"/>
+                            <ExtRef srcCBName="smv2" srcLDInst="LD_INST22" srcLNClass="LLN0" iedName="IED_NAME2" ldInst="LD_INST22"  desc="b"/>
+                            <ExtRef srcCBName="rpt1" srcLDInst="LD_INST22" srcLNClass="ANCR" srcLNInst="1" iedName="IED_NAME2" ldInst="LD_INST22" pDO="Do22" serviceType="Report" desc="c"/>
+                        </Inputs>
+                    </LN0>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
+    <DataTypeTemplates>
+        <LNodeType lnClass="LLN0" id="LNEX1">
+            <DO name="Do22" type="DO12"/>
+            <DO name="Do32" type="DO12"/>
+        </LNodeType>
+        <LNodeType lnClass="LLN0" id="LN11">
+            <DO name="Do22" type="DO12"/>
+            <DO name="Do32" type="DO12"/>
+        </LNodeType>
+        <LNodeType lnClass="LLN0" id="LNEX2">
+            <DO name="Do22" type="DO12"/>
+            <DO name="Do32" type="DO12"/>
+        </LNodeType>
+        <LNodeType lnClass="ANCR" id="LN12">
+            <DO name="Do22" type="DO12"/>
+            <DO name="Do32" type="DO12"/>
+        </LNodeType>
+        <DOType id="DO12" cdc="WYE">
+        </DOType>
+    </DataTypeTemplates>
+</SCL>

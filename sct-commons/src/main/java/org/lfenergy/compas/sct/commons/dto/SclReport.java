@@ -39,5 +39,4 @@ public class SclReport {
     public boolean isSuccess() {
         return sclReportItems.stream().noneMatch(SclReportItem::isFatal);
     }
-
 }

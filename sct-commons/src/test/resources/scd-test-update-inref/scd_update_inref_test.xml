@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- SPDX-FileCopyrightText: 2021 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+<SCL version="2007" revision="B" release="4" xmlns="http://www.iec.ch/61850/2003/SCL">
+    <Header id="hId" version="2007" revision="B" toolID="COMPAS"/>
+    <IED name="IED_NAME1">
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <!-- Case when No InRef in LDevice-->
+                <LDevice inst="LD_WITHOUT_InRef" ldName="IED_NAME1LD_INST11">
+                    <LN0 lnClass="LLN0" inst="" lnType="LN11">
+                        <DOI name="InRef1">
+                            <DAI name="purpose">
+                                <Val>LD_WITHOUT_InRef_DOI_InRef1</Val>
+                            </DAI>
+                        </DOI>
+                    </LN0>
+                </LDevice>
+
+                <!-- Case with only 1 InRef corresponding to ExtRef -->
+                <LDevice inst="LD_WITH_1_InRef" ldName="IED_NAME1LD_INST12">
+                    <LN0 lnClass="LLN0" inst="" lnType="LN11">
+                        <DOI name="InRef2">
+                            <DAI name="purpose">
+                                <Val>LD_WITH_1_InRef_DOI_InRef2</Val>
+                            </DAI>
+                            <DAI name="setSrcRef" valKind="RO" valImport="false"/>
+                            <DAI name="setSrcCB" valKind="RO" valImport="true">
+                                <Val>OLD_VAL</Val>
+                            </DAI>
+                            <DAI name="setTstRef" valKind="RO" valImport="false"/>
+                            <DAI name="setTstCB" valKind="RO" valImport="false"/>
+                        </DOI>
+                        <Inputs>
+                            <ExtRef iedName="IED_NAME1" desc="LD_WITH_1_InRef_DOI_InRef2_1" ldInst="LD_WITH_1_InRef"
+                                    lnClass="ANCR" lnInst="1" prefix="PR" intAddr="INT_ADDR11" pDO="Do11.sdo11"
+                                    doName="Do11.sdo11" srcLDInst="LD22" srcCBName="GSE1" srcPrefix="prefix"
+                                    srcLNClass="ANCR" srcLNInst="1"/>
+                        </Inputs>
+                    </LN0>
+                </LDevice>
+
+                <!-- Case with 3 ExtRef matching the InRef -->
+                <LDevice inst="LD_WITH_3_InRef" ldName="IED_NAME1LD_INST12">
+                    <LN0 lnClass="LLN0" inst="" lnType="LN11">
+                        <DOI name="InRef3">
+                            <DAI name="purpose">
+                                <Val>LD_WITH_3_InRef_DOI_InRef3</Val>
+                            </DAI>
+                            <DAI name="setSrcRef" valKind="RO" valImport="true"/>
+                            <DAI name="setSrcCB" valKind="RO" valImport="false">
+                                <Val>OLD_VAL</Val>
+                            </DAI>
+                            <DAI name="setTstRef" valKind="RO" valImport="false"/>
+                            <DAI name="setTstCB" valKind="RO" valImport="false">
+                                <Val>OLD_VAL</Val>
+                            </DAI>
+                        </DOI>
+                        <Inputs>
+                            <ExtRef iedName="IED_NAME1" desc="LD_WITH_3_InRef_DOI_InRef3_SOME_TEXT_1" ldInst="LD_WITH_3_InRef" lnClass="ANCR" lnInst="1" prefix="PR" intAddr="INT_ADDR11" pDO="Do11.sdo11" doName="Do11.sdo11" srcLDInst="LD22" srcCBName="GSE1" srcPrefix="prefix" srcLNClass="ANCR" srcLNInst="1"/>
+                            <ExtRef iedName="IED_NAME1" desc="LD_WITH_3_InRef_DOI_InRef3_SOME_TEXT_2" ldInst="LD_WITH_3_InRef" lnClass="ANCR" lnInst="1" prefix="PR" intAddr="INT_ADDR11" pDO="Do11.sdo11" doName="Do11.sdo11" srcLDInst="LD22" srcCBName="GSE2" srcPrefix="prefix" srcLNClass="ANCR" srcLNInst="2"/>
+                            <ExtRef iedName="IED_NAME1" desc="LD_WITH_3_InRef_DOI_InRef3_SOME_TEXT_3" ldInst="LD_WITH_3_InRef" lnClass="ANCR" lnInst="1" prefix="PR" intAddr="INT_ADDR11" pDO="Do11.sdo11" doName="Do11.sdo11" srcLDInst="LD22" srcCBName="GSE3" srcPrefix="prefix" srcLNClass="ANCR" srcLNInst="3"/>
+                        </Inputs>
+                    </LN0>
+                </LDevice>
+
+                <!-- Case with ExtRef.desc suffix not ending with "_1" -->
+                <LDevice inst="LD_WITH_1_Bad_InRef" ldName="IED_NAME1LD_INST12">
+                    <LN0 lnClass="LLN0" inst="" lnType="LN11">
+                        <DOI name="InRef4">
+                            <DAI name="purpose">
+                                <Val>LD_WITH_1_Bad_InRef_DOI_InRef4</Val>
+                            </DAI>
+                            <DAI name="setSrcRef" valKind="RO" valImport="true"/>
+                            <DAI name="setSrcCB" valKind="RO" valImport="false">
+                                <Val>OLD_VAL</Val>
+                            </DAI>
+                            <DAI name="setTstRef" valKind="RO" valImport="false"/>
+                            <DAI name="setTstCB" valKind="RO" valImport="false"/>
+                        </DOI>
+                        <Inputs>
+                            <ExtRef iedName="IED_NAME1" desc="LD_WITH_1_Bad_InRef_DOI_InRef4_5" ldInst="LD_WITH_1_InRef" lnClass="ANCR" lnInst="1" prefix="PR" intAddr="INT_ADDR11" pDO="Do11.sdo11" doName="Do11.sdo11"/>
+                        </Inputs>
+                    </LN0>
+                </LDevice>
+
+                <!-- Case with ExtRef.desc with 2 suffix ending with "_1" -->
+                <LDevice inst="LD_WITH_2_InRef_same_SUFFIX" ldName="IED_NAME1LD_INST12">
+                    <LN0 lnClass="LLN0" inst="" lnType="LN11">
+                        <DOI name="InRef5">
+                            <DAI name="purpose">
+                                <Val>LD_WITH_1_Bad_InRef_DOI_InRef5</Val>
+                            </DAI>
+                            <DAI name="setSrcRef" valKind="RO" valImport="true"/>
+                            <DAI name="setSrcCB" valKind="RO" valImport="false">
+                                <Val>OLD_VAL</Val>
+                            </DAI>
+                            <DAI name="setTstRef" valKind="RO" valImport="false"/>
+                            <DAI name="setTstCB" valKind="RO" valImport="false"/>
+                        </DOI>
+                        <Inputs>
+                            <ExtRef iedName="IED_NAME1" desc="LD_WITH_2_InRef_same_SUFFIX_DOI_InRef5_1" ldInst="LD_WITH_1_InRef" lnClass="ANCR" lnInst="1" prefix="PR" intAddr="INT_ADDR11" pDO="Do11.sdo11" doName="Do11.sdo11"/>
+                            <ExtRef iedName="IED_NAME1" desc="LD_WITH_2_InRef_same_SUFFIX_DOI_InRef5_1" ldInst="LD_WITH_1_InRef" lnClass="ANCR" lnInst="1" prefix="PR" intAddr="INT_ADDR11" pDO="Do11.sdo11" doName="Do11.sdo11"/>
+                        </Inputs>
+                    </LN0>
+                </LDevice>
+
+                <!-- Case without DAI.name set to "purpose" -->
+                <LDevice inst="LD_Without_purpose" ldName="IED_NAME1LD_INST12">
+                    <LN0 lnClass="LLN0" inst="" lnType="LN11">
+                        <DOI name="InRef6">
+                            <DAI name="setSrcRef" valKind="RO" valImport="true"/>
+                            <DAI name="setSrcCB" valKind="RO" valImport="false">
+                                <Val>OLD_VAL</Val>
+                            </DAI>
+                            <DAI name="setTstRef" valKind="RO" valImport="false"/>
+                            <DAI name="setTstCB" valKind="RO" valImport="false"/>
+                        </DOI>
+                        <Inputs>
+                            <ExtRef iedName="IED_NAME1" desc="LD_Without_purpose_DOI_InRef6_1" ldInst="LD_WITH_1_InRef" lnClass="ANCR" lnInst="1" prefix="PR" intAddr="INT_ADDR11" pDO="Do11.sdo11" doName="Do11.sdo11"/>
+                        </Inputs>
+                    </LN0>
+                </LDevice>
+
+                <!-- Case with only 1 InRef corresponding to ExtRef without srcCbName -->
+                <LDevice inst="LD_WITH_1_InRef_without_cbName" ldName="IED_NAME1LD_INST12">
+                    <LN0 lnClass="LLN0" inst="" lnType="LN11">
+                        <DOI name="InRef7">
+                            <DAI name="purpose">
+                                <Val>LD_WITH_1_InRef_without_cbName_DOI_InRef7</Val>
+                            </DAI>
+                            <DAI name="setSrcRef" valKind="RO" valImport="false"/>
+                            <DAI name="setSrcCB" valKind="RO" valImport="true">
+                                <Val>OLD_VAL</Val>
+                            </DAI>
+                            <DAI name="setTstRef" valKind="RO" valImport="false"/>
+                            <DAI name="setTstCB" valKind="RO" valImport="false"/>
+                        </DOI>
+                        <Inputs>
+                            <ExtRef iedName="IED_NAME1" desc="LD_WITH_1_InRef_without_cbName_DOI_InRef7_1"
+                                    ldInst="LD_WITH_1_InRef" lnClass="ANCR" lnInst="1" prefix="PR" intAddr="INT_ADDR11"
+                                    pDO="Do11.sdo11" doName="Do11.sdo11" srcLDInst="LD22" srcPrefix="prefix"
+                                    srcLNClass="ANCR" srcLNInst="1"/>
+                        </Inputs>
+                    </LN0>
+                </LDevice>
+
+                <!-- Case where DAI purpose without Val -->
+                <LDevice inst="LD_Without_Val_in_DAI_purpose" ldName="IED_NAME1LD_INST12">
+                    <LN0 lnClass="LLN0" inst="" lnType="LN11">
+                        <DOI name="InRef8">
+                            <DAI name="purpose"/>
+                            <DAI name="setSrcRef" valKind="RO" valImport="true"/>
+                        </DOI>
+                    </LN0>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
+    <DataTypeTemplates>
+        <LNodeType lnClass="LLN0" id="LN11">
+            <DO name="Do11" type="DO11" transient="true"/>
+        </LNodeType>
+        <LNodeType lnClass="ANCR" id="LN12">
+            <DO name="Do21" type="DO11"/>
+        </LNodeType>
+        <DOType cdc="WYE" id="DO11">
+            <SDO name="sdo11" type="DO12"/>
+        </DOType>
+        <DOType cdc="WYE" id="DO12">
+            <SDO name="sdo11" type="DO12"/>
+        </DOType>
+    </DataTypeTemplates>
+</SCL>

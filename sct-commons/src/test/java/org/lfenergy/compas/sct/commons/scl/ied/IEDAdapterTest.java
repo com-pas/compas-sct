@@ -5,12 +5,10 @@
 package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.scl2007b4.model.SCL;
-import org.lfenergy.compas.scl2007b4.model.TIED;
-import org.lfenergy.compas.scl2007b4.model.TPrivate;
-import org.lfenergy.compas.scl2007b4.model.TServices;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.DTO;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
+import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
@@ -26,6 +24,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 class IEDAdapterTest {
 
@@ -174,8 +173,8 @@ class IEDAdapterTest {
 
     @Test
     void addPrivate() {
-        SclRootAdapter sclRootAdapter = Mockito.mock(SclRootAdapter.class);
-        SCL scl = Mockito.mock(SCL.class);
+        SclRootAdapter sclRootAdapter = mock(SclRootAdapter.class);
+        SCL scl = mock(SCL.class);
         Mockito.when(sclRootAdapter.getCurrentElem()).thenReturn(scl);
         TIED tied = new TIED();
         Mockito.when(scl.getIED()).thenReturn(List.of(tied));
@@ -191,8 +190,8 @@ class IEDAdapterTest {
     @Test
     void elementXPath() {
         // Given
-        SclRootAdapter sclRootAdapter = Mockito.mock(SclRootAdapter.class);
-        SCL scl = Mockito.mock(SCL.class);
+        SclRootAdapter sclRootAdapter = mock(SclRootAdapter.class);
+        SCL scl = mock(SCL.class);
         Mockito.when(sclRootAdapter.getCurrentElem()).thenReturn(scl);
         TIED tied = new TIED();
         tied.setName("iedName");
@@ -204,4 +203,77 @@ class IEDAdapterTest {
         assertThat(result).isEqualTo("IED[@name=\"iedName\"]");
     }
 
+    @Test
+    void checkDataGroupCoherence_should_succed_no_error_message() throws Exception {
+        //Given
+        IEDAdapter iedAdapter = provideIEDForCheckLimitationForIED();
+        //When
+        List<SclReportItem> sclReportItems = iedAdapter.checkDataGroupCoherence();
+        //Then
+        assertThat(sclReportItems).isEmpty();
+    }
+
+    @Test
+    void checkDataGroupCoherence_should_fail_five_error_message() throws Exception {
+        //Given
+        IEDAdapter iedAdapter = provideIEDForCheckLimitationForIED();
+        iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getConfDataSet().setMaxAttributes(2L);
+        iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getConfDataSet().setMax(5L);
+        iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getSMVsc().setMax(2L);
+        iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getGOOSE().setMax(2L);
+        iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getConfReportControl().setMax(0L);
+        //When
+        List<SclReportItem> sclReportItems = iedAdapter.checkDataGroupCoherence();
+        //Then
+        assertThat(sclReportItems).hasSize(5)
+                .extracting(SclReportItem::getMessage)
+                .containsExactlyInAnyOrder("There are too much FCDA for the DataSet DATASET6 for the LDevice LD_INST21 in IED IED_NAME",
+                        "There are too much DataSets for the IED IED_NAME",
+                        "There are too much Report Control Blocks for the IED IED_NAME",
+                        "There are too much GOOSE Control Blocks for the IED IED_NAME",
+                        "There are too much SMV Control Blocks for the IED IED_NAME");
+    }
+
+    @Test
+    void checkBindingDataGroupCoherence_should_succed_no_error_message() throws Exception {
+        //Given
+        IEDAdapter iedAdapter = provideIEDForCheckLimitationForBindedIED();
+        TClientServices tClientServices = iedAdapter.getParentAdapter().getIEDAdapterByName("IED_NAME1").getCurrentElem().getAccessPoint().get(0).getServices().getClientServices();
+        tClientServices.setMaxAttributes(11L);
+        tClientServices.setMaxGOOSE(5L);
+        tClientServices.setMaxReports(2L);
+        tClientServices.setMaxSMV(2L);
+        //When
+        List<SclReportItem> sclReportItems = iedAdapter.checkBindingDataGroupCoherence();
+        //Then
+        assertThat(sclReportItems).isEmpty();
+    }
+
+    @Test
+    void checkBindingDataGroupCoherence_should_fail_five_error_message() throws Exception {
+        //Given
+        IEDAdapter iedAdapter = provideIEDForCheckLimitationForBindedIED();
+        //When
+        List<SclReportItem> sclReportItems = iedAdapter.checkBindingDataGroupCoherence();
+        //Then
+        assertThat(sclReportItems).hasSize(4)
+                .extracting(SclReportItem::getMessage)
+                .containsExactlyInAnyOrder("There are too much FCDA for the Client IED IED_NAME1",
+                        "The Client IED IED_NAME1 subscribes to too much SMV Control Blocks.",
+                        "The Client IED IED_NAME1 subscribes to too much REPORT Control Blocks.",
+                        "The Client IED IED_NAME1 subscribes to too much GOOSE Control Blocks.");
+
+    }
+
+    public static IEDAdapter provideIEDForCheckLimitationForBindedIED() throws Exception {
+        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_binded_ied_controls_fcda.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        return sclRootAdapter.getIEDAdapterByName("IED_NAME1");
+    }
+
+    public static IEDAdapter provideIEDForCheckLimitationForIED() throws Exception {
+        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_ied_controls_dataset.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        return sclRootAdapter.getIEDAdapterByName("IED_NAME");
+    }
 }
