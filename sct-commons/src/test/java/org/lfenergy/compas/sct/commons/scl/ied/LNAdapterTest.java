@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.scl.ied;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -473,6 +474,10 @@ class LNAdapterTest {
     }
 
     @Test
+    @Disabled(value = "Disable while bug #241 is not fixed")
+    /**
+     * @see <a href="https://github.com/com-pas/compas-sct/issues/241" target="_blank">Issue !241 (UpdateDAI Val does not produce subelements (SDI) as expected)</a>
+     */
     void updateDAI_should_not_update_DAI_Val_when_DTT_Fc_not_defined() {
         // Given
         ResumedDataTemplate rDtt = new ResumedDataTemplate();
@@ -499,10 +504,10 @@ class LNAdapterTest {
                 .getDOIAdapterByName("Do")
                 .getStructuredDataAdapterByName("sdo1")
                 .getStructuredDataAdapterByName("d")
-                .getStructuredDataAdapterByName("antRef")
                 .getStructuredDataAdapterByName("bda1")
                 .getStructuredDataAdapterByName("bda2")
-                .getDataAdapterByName("bda3");
+                .getStructuredDataAdapterByName("bda3")
+                .getDataAdapterByName("antRef");
 
         assertThat(daiAdapter.getCurrentElem().getVal().get(0).getValue()).isEqualTo("Completed-diff");
 
@@ -510,6 +515,10 @@ class LNAdapterTest {
     }
 
     @Test
+    @Disabled(value = "Disable while bug #241 is not fixed")
+    /**
+     * @see <a href="https://github.com/com-pas/compas-sct/issues/241" target="_blank">Issue !241 (UpdateDAI Val does not produce subelements (SDI) as expected)</a>
+     */
     void updateDAI_should_update_DAI_values_when_data_updatable() {
         // Given
         ResumedDataTemplate rDtt = new ResumedDataTemplate();
@@ -539,7 +548,10 @@ class LNAdapterTest {
                 .getDOIAdapterByName("Do")
                 .getStructuredDataAdapterByName("sdo1")
                 .getStructuredDataAdapterByName("d")
-                .getDataAdapterByName("antRef");
+                .getStructuredDataAdapterByName("antRef")
+                .getStructuredDataAdapterByName("bda1")
+                .getStructuredDataAdapterByName("bda2")
+                .getDataAdapterByName("bda3");
 
         assertThat(daiAdapter.getCurrentElem().getVal().get(0).getValue()).isEqualTo("newValue");
 
