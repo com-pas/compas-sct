@@ -5,14 +5,14 @@
 package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.lfenergy.compas.scl2007b4.model.TDAI;
+import org.lfenergy.compas.scl2007b4.model.TDOI;
 import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.scl2007b4.model.TVal;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
+import org.lfenergy.compas.sct.commons.util.CommonConstants;
 
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * A representation of the model object
@@ -35,9 +35,6 @@ import java.util.stream.Stream;
  *      <li>{@link AbstractDAIAdapter#addPrivate(TPrivate) <em>Add <b>TPrivate </b> under this object</em>}</li>
  *    </ul>
  *   <li>Checklist functions</li>
- *    <ul>
- *      <li>{@link AbstractDAIAdapter#isValImport <em>Check value Of <b>valImport </b> attribute</em>}</li>
- *    </ul>
  * </ol>
  *
  * @see org.lfenergy.compas.scl2007b4.model.TDAI
@@ -88,13 +85,11 @@ public abstract class AbstractDAIAdapter<P extends SclElementAdapter> extends Sc
         currentElem.setValImport(b);
     }
 
-    /**
-     * Cheks <em>ValImport</em> boolean value
-     *
-     * @return <em>Boolean</em> value of <em>ValImport</em> if define or <em>null</em>
-     */
-    public Boolean isValImport() {
-        return currentElem.isSetValImport() ? currentElem.isValImport() : null;
+    private boolean isDOModDAstVal() {
+        if (parentAdapter.getCurrentElem() instanceof final TDOI tdoi) {
+            return currentElem.getName().equals(CommonConstants.STVAL) && tdoi.getName().equals(CommonConstants.MOD_DO_NAME);
+        }
+        return false;
     }
 
     public AbstractDAIAdapter<? extends SclElementAdapter> update(Map<Long, String> daiValues) throws ScdException {
@@ -116,28 +111,31 @@ public abstract class AbstractDAIAdapter<P extends SclElementAdapter> extends Sc
      * @throws ScdException throws when DAI for which SGroup should be updated is not updatable
      */
     public void update(Long sGroup, String val) throws ScdException {
-        if (currentElem.isSetValImport() && !currentElem.isValImport()) {
+        if (!isDOModDAstVal() && currentElem.isSetValImport() && !currentElem.isValImport()) {
             String msg = String.format(
-                    "DAI(%s) cannot be updated : valImport(false)", currentElem.getName()
+                    "DAI(%s) cannot be updated : valImport(false) %s", currentElem.getName(), getXPath()
             );
             throw new ScdException(msg);
         }
-        Stream<TVal> tValStream = currentElem.getVal().stream();
         if (sGroup != null && sGroup != 0) {
-            Optional<TVal> tVal = tValStream.filter(tValElem -> tValElem.isSetSGroup() &&
-                            sGroup.equals(tValElem.getSGroup()))
-                    .findFirst();
-            if (tVal.isPresent()) {
-                tVal.get().setValue(val);
-            } else {
-                TVal newTVal = new TVal();
-                newTVal.setValue(val);
-                newTVal.setSGroup(sGroup);
-                currentElem.getVal().add(newTVal);
-            }
+            updateSGroupVal(sGroup, val);
         } else {
             updateVal(val);
         }
+    }
+
+    private void updateSGroupVal(Long sGroup, String val) {
+        currentElem.getVal().stream()
+                .filter(tValElem -> tValElem.isSetSGroup() && sGroup.equals(tValElem.getSGroup()))
+                .findFirst()
+                .orElseGet(
+                        () -> {
+                            TVal newTVal = new TVal();
+                            newTVal.setSGroup(sGroup);
+                            currentElem.getVal().add(newTVal);
+                            return newTVal;
+                        })
+                .setValue(val);
     }
 
     public void updateVal(String s) {

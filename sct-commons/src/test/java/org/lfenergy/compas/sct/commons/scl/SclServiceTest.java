@@ -1037,6 +1037,52 @@ class SclServiceTest {
         assertEquals("off", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName3", "LDSUIED").get().getValue());
     }
 
+    @Test
+    void updateLDeviceStatus_shouldReturnUpdatedFile_when_DAI_Mod_DO_stVal_whatever_it_is_updatable_or_not() {
+        // Given
+        SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue_165_enhance_68_Test_Dai_Updatable.scd");
+        assertThat(getLDeviceStatusValue(givenScl, "IedName1", "LDSUIED"))
+                .map(TVal::getValue)
+                .hasValue("off");
+        assertThat(getLDeviceStatusValue(givenScl, "IedName2", "LDSUIED"))
+                .map(TVal::getValue)
+                .hasValue("on");
+        assertThat(getLDeviceStatusValue(givenScl, "IedName3", "LDSUIED"))
+                .map(TVal::getValue)
+                .isNotPresent();
+        assertThat(getLDeviceStatusValue(givenScl, "IedName4", "LDSUIED"))
+                .map(TVal::getValue)
+                .hasValue("on");
+        assertThat(getLDeviceStatusValue(givenScl, "IedName5", "LDSUIED"))
+                .map(TVal::getValue)
+                .hasValue("on");
+
+        // When
+        SclReport sclReport = SclService.updateLDeviceStatus(givenScl);
+
+        // Then
+        assertThat(sclReport.isSuccess()).isTrue();
+        assertThat(getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName1", "LDSUIED"))
+                .map(TVal::getValue)
+                .hasValue("on");
+
+        assertThat(getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName2", "LDSUIED"))
+                .map(TVal::getValue)
+                .hasValue("off");
+
+        assertThat(getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName3", "LDSUIED"))
+                .map(TVal::getValue)
+                .hasValue("off");
+
+        assertThat(getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName4", "LDSUIED"))
+                .map(TVal::getValue)
+                .hasValue("off");
+
+        assertThat(getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName5", "LDSUIED"))
+                .map(TVal::getValue)
+                .hasValue("off");
+    }
+
     private Optional<TVal> getLDeviceStatusValue(SCL scl, String iedName, String ldInst) {
         return getValFromDaiName(scl, iedName, ldInst, "Mod", "stVal");
     }
