@@ -73,7 +73,7 @@ class AccessPointAdapterTest {
     }
 
     @Test
-    void checkFCDALimitations_should_succed_no_error_message() throws Exception {
+    void checkFCDALimitations_should_succed_no_error_message() {
         //Given
         AccessPointAdapter accessPointAdapter = provideAPForCheckLimitationForIED();
         //When
@@ -83,7 +83,7 @@ class AccessPointAdapterTest {
     }
 
     @Test
-    void checkFCDALimitations_should_fail_with_one_error_messages() throws Exception {
+    void checkFCDALimitations_should_fail_with_one_error_messages() {
         //Given
         AccessPointAdapter accessPointAdapter = provideAPForCheckLimitationForIED();
         accessPointAdapter.getCurrentElem().getServices().getConfDataSet().setMaxAttributes(2L);
@@ -95,7 +95,7 @@ class AccessPointAdapterTest {
                 .containsExactlyInAnyOrder("There are too much FCDA for the DataSet DATASET6 for the LDevice LD_INST21 in IED IED_NAME");
     }
     @Test
-    void checkFCDALimitations_should_fail_with_four_error_messages() throws Exception {
+    void checkFCDALimitations_should_fail_with_four_error_messages() {
         //Given
         AccessPointAdapter accessPointAdapter = provideAPForCheckLimitationForIED();
         accessPointAdapter.getCurrentElem().getServices().getConfDataSet().setMaxAttributes(1L);
@@ -112,7 +112,7 @@ class AccessPointAdapterTest {
 
 
     @Test
-    void checkControlsLimitation_should_fail_for_dataset_with_one_error_messages() throws Exception {
+    void checkControlsLimitation_should_fail_for_dataset_with_one_error_messages() {
         //Given
         AccessPointAdapter accessPointAdapter = provideAPForCheckLimitationForIED();
         accessPointAdapter.getCurrentElem().getServices().getConfDataSet().setMax(5L);
@@ -125,7 +125,7 @@ class AccessPointAdapterTest {
     }
 
     @Test
-    void checkControlsLimitation_should_fail_for_smv_with_one_error_messages() throws Exception {
+    void checkControlsLimitation_should_fail_for_smv_with_one_error_messages() {
         //Given
         AccessPointAdapter accessPointAdapter = provideAPForCheckLimitationForIED();
         accessPointAdapter.getCurrentElem().getServices().getSMVsc().setMax(2L);
@@ -138,7 +138,7 @@ class AccessPointAdapterTest {
     }
 
     @Test
-    void checkControlsLimitation_should_fail_for_goose_with_one_error_messages() throws Exception {
+    void checkControlsLimitation_should_fail_for_goose_with_one_error_messages() {
         //Given
         AccessPointAdapter accessPointAdapter = provideAPForCheckLimitationForIED();
         accessPointAdapter.getCurrentElem().getServices().getGOOSE().setMax(2L);
@@ -151,7 +151,7 @@ class AccessPointAdapterTest {
     }
 
     @Test
-    void checkControlsLimitation_should_fail_for_report_with_one_error_messages() throws Exception {
+    void checkControlsLimitation_should_fail_for_report_with_one_error_messages() {
         //Given
         AccessPointAdapter accessPointAdapter = provideAPForCheckLimitationForIED();
         accessPointAdapter.getCurrentElem().getServices().getConfReportControl().setMax(0L);
@@ -163,7 +163,7 @@ class AccessPointAdapterTest {
                 .get().extracting(SclReportItem::getMessage).isEqualTo(message +" IED_NAME");
     }
 
-    public static AccessPointAdapter provideAPForCheckLimitationForIED() throws Exception {
+    public static AccessPointAdapter provideAPForCheckLimitationForIED() {
         SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_ied_controls_dataset.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
@@ -171,7 +171,55 @@ class AccessPointAdapterTest {
     }
 
     @Test
-    void checkLimitationForBindedIEDFCDAs_should_success_no_error() throws Exception {
+    void checkControlsLimitation_should_succeed_when_ConfReportControl_is_missing() {
+        //Given
+        AccessPointAdapter accessPointAdapter = provideAPForCheckLimitationForIED();
+        accessPointAdapter.getCurrentElem().getServices().setConfReportControl(null);
+        String message = "Too much Report Control for";
+        //When
+        Optional<SclReportItem> sclReportItem = accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.REPORT,message);
+        //Then
+        assertThat(sclReportItem).isEmpty();
+    }
+
+    @Test
+    void checkControlsLimitation_should_succeed_when_GOOSE_is_missing() {
+        //Given
+        AccessPointAdapter accessPointAdapter = provideAPForCheckLimitationForIED();
+        accessPointAdapter.getCurrentElem().getServices().setGOOSE(null);
+        String message = "Too much GSE Control for";
+        //When
+        Optional<SclReportItem> sclReportItem = accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.GSE,message);
+        //Then
+        assertThat(sclReportItem).isEmpty();
+    }
+
+    @Test
+    void checkControlsLimitation_should_succeed_when_ConfDataSet_is_missing() {
+        //Given
+        AccessPointAdapter accessPointAdapter = provideAPForCheckLimitationForIED();
+        accessPointAdapter.getCurrentElem().getServices().setConfDataSet(null);
+        String message = "Too much DATASET for";
+        //When
+        Optional<SclReportItem> sclReportItem = accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.DATASET,message);
+        //Then
+        assertThat(sclReportItem).isEmpty();
+    }
+
+    @Test
+    void checkControlsLimitation_should_succeed_when_Services_is_missing() {
+        //Given
+        AccessPointAdapter accessPointAdapter = provideAPForCheckLimitationForIED();
+        accessPointAdapter.getCurrentElem().setServices(null);
+        String message = "Too much SMV Control for";
+        //When
+        Optional<SclReportItem> sclReportItem = accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.SMV,message);
+        //Then
+        assertThat(sclReportItem).isEmpty();
+    }
+
+    @Test
+    void checkLimitationForBindedIEDFCDAs_should_success_no_error() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_binded_ied_controls_fcda.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -188,7 +236,7 @@ class AccessPointAdapterTest {
     }
 
     @Test
-    void checkLimitationForBindedIEDFCDAs_should_fail_one_error_message() throws Exception {
+    void checkLimitationForBindedIEDFCDAs_should_fail_one_error_message() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_binded_ied_controls_fcda.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -209,7 +257,7 @@ class AccessPointAdapterTest {
     }
 
     @Test
-    void checkLimitationForBindedIEDControls_should_fail_three_error_messages() throws Exception {
+    void checkLimitationForBindedIEDControls_should_fail_three_error_messages() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_binded_ied_controls_fcda.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -228,7 +276,7 @@ class AccessPointAdapterTest {
     }
 
     @Test
-    void checkLimitationForBindedIEDControls_should_succed_no_error_message() throws Exception {
+    void checkLimitationForBindedIEDControls_should_succed_no_error_message() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_binded_ied_controls_fcda.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -247,7 +295,7 @@ class AccessPointAdapterTest {
     }
 
     @Test
-    void getAllCoherentExtRefForAnalyze_succed() throws Exception {
+    void getAllCoherentExtRefForAnalyze_succed() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_binded_ied_controls_fcda.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -262,7 +310,7 @@ class AccessPointAdapterTest {
     }
 
     @Test
-    void getAllCoherentExtRefForAnalyze_fail_with_one_error() throws Exception {
+    void getAllCoherentExtRefForAnalyze_fail_with_one_error() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_coherent_extRefs.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);

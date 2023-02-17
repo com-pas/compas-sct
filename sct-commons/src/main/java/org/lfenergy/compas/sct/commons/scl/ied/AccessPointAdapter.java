@@ -145,25 +145,28 @@ public class AccessPointAdapter extends SclElementAdapter<IEDAdapter, TAccessPoi
     }
 
     /**
-     * Gets max number authorized in configuration of each element DataSets, FCDAs, Control Blocks) into an AccessPoint
+     * Gets max number authorized in configuration of each element (DataSets, FCDAs, Control Blocks) into an AccessPoint
      *
      * @param servicesConfigEnum element type
      * @return max number authorized by config
      */
     private long getMaxInstanceAuthorized(ServicesConfigEnum servicesConfigEnum) {
-        if (currentElem.getServices() == null || currentElem.getServices().getConfDataSet() == null)
+        if (currentElem.getServices() == null)
             return MAX_OCCURRENCE_NO_LIMIT_VALUE;
         TServices tServices = currentElem.getServices();
 
         return switch (servicesConfigEnum) {
             case DATASET ->
-                    tServices.getConfDataSet().isSetMax() ? tServices.getConfDataSet().getMax() : MAX_OCCURRENCE_NO_LIMIT_VALUE;
+                    tServices.isSetConfDataSet() && tServices.getConfDataSet().isSetMax() ?
+                        tServices.getConfDataSet().getMax() : MAX_OCCURRENCE_NO_LIMIT_VALUE;
             case FCDA ->
-                    tServices.getConfDataSet().isSetMaxAttributes() ? tServices.getConfDataSet().getMaxAttributes() : MAX_OCCURRENCE_NO_LIMIT_VALUE;
+                    tServices.isSetConfDataSet() && tServices.getConfDataSet().isSetMaxAttributes() ?
+                        tServices.getConfDataSet().getMaxAttributes() : MAX_OCCURRENCE_NO_LIMIT_VALUE;
             case REPORT ->
-                    tServices.getConfReportControl().isSetMax() ? tServices.getConfReportControl().getMax() : MAX_OCCURRENCE_NO_LIMIT_VALUE;
-            case GSE -> tServices.getGOOSE().isSetMax() ? tServices.getGOOSE().getMax() : MAX_OCCURRENCE_NO_LIMIT_VALUE;
-            case SMV -> tServices.getSMVsc().isSetMax() ? tServices.getSMVsc().getMax() : MAX_OCCURRENCE_NO_LIMIT_VALUE;
+                tServices.isSetConfReportControl() && tServices.getConfReportControl().isSetMax() ?
+                    tServices.getConfReportControl().getMax() : MAX_OCCURRENCE_NO_LIMIT_VALUE;
+            case GSE -> tServices.isSetGOOSE() && tServices.getGOOSE().isSetMax() ? tServices.getGOOSE().getMax() : MAX_OCCURRENCE_NO_LIMIT_VALUE;
+            case SMV -> tServices.isSetSMVsc() && tServices.getSMVsc().isSetMax() ? tServices.getSMVsc().getMax() : MAX_OCCURRENCE_NO_LIMIT_VALUE;
         };
     }
 
