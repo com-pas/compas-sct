@@ -6,13 +6,12 @@ package org.lfenergy.compas.sct.commons.util;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
 public final class Utils {
 
@@ -21,6 +20,8 @@ public final class Utils {
     private static final int S1_CONSIDERED_EQUALS_TO_S2 = 0;
     private static final int S1_LOWER_THAN_S2 = -1;
     private static final int S1_GREATER_THAN_S2 = 1;
+    private static final long MAC_ADDRESS_MAX_VALUE = 0xFFFFFFFFFFFFL;
+    private static final Pattern MAC_ADDRESS_PATTERN = Pattern.compile("[0-9A-F]{2}([-:][0-9A-F]{2}){5}", Pattern.CASE_INSENSITIVE);
 
     /**
      * Private Constructor, should not be instanced
@@ -252,5 +253,104 @@ public final class Utils {
             throw new IllegalArgumentException("lnClass can only have a single value but got : [%s] " + String.join(",", lnClass1));
         }
         return equalsOrBothBlank(lnClass1.get(0), lnClass2);
+    }
+
+    /**
+     * Create a new Iterator that provides all ordered long value in the given range
+     * @param startInclusive the first long in the range (inclusive)
+     * @param endInclusive the last long in the range (inclusive). Cannot exceed Long.MAX_VALUE - 1.
+     * @return new Iterator. When endInclusive < startInclusive, return an empty iterator.
+     */
+    public static PrimitiveIterator.OfLong sequence(long startInclusive, long endInclusive) {
+        if (endInclusive >= Long.MAX_VALUE){
+            throw new IllegalArgumentException("End cannot exceed Long.MAX_VALUE - 1");
+        }
+        return LongStream.range(startInclusive, endInclusive + 1).iterator();
+    }
+
+    /**
+     * Create a new Iterator that provides all ordered MAC-Addresses value included in given range.
+     * See macAddressToLong for the format of MAC-Addresses range,
+     * and see longToMacAddress for the format of MAC-Addresses output
+     * @param startInclusive the first MAC-Address in the range (inclusive)
+     * @param endInclusive the last MAC-Address in the range (inclusive)
+     * @return new Iterator
+     *
+     * @see Utils#macAddressToLong(String)
+     * @see Utils#longToMacAddress(long)
+     */
+    public static Iterator<String> macAddressSequence(String startInclusive, String endInclusive) {
+        PrimitiveIterator.OfLong iterator = sequence(macAddressToLong(startInclusive), macAddressToLong(endInclusive));
+        return new Iterator<>() {
+            @Override
+            public boolean hasNext() {
+                return iterator.hasNext();
+            }
+
+            @Override
+            public String next() {
+                return longToMacAddress(iterator.next());
+            }
+        };
+    }
+
+    /**
+     * Converts long representation of a MAC-Address, by converting it to hexadecimal and separating every 2 characters by a hyphen(-).
+     * See macAddressToLong for the reversing method.
+     * @param macAddress a long between 0 and 0xFFFFFFFFFFFF
+     * @return MAC address separated by hyphens(-). Letters are uppercase (A to F)
+     *
+     * @see Utils#macAddressToLong(String)
+     */
+    public static String longToMacAddress(long macAddress){
+        if (macAddress < 0){
+            throw new IllegalArgumentException("macAddress must be a positive integer but got : %d".formatted(macAddress));
+        }
+        if (macAddress > MAC_ADDRESS_MAX_VALUE){
+            throw new IllegalArgumentException("macAddress cannot exceed %d but got : %d".formatted(MAC_ADDRESS_MAX_VALUE, macAddress));
+        }
+        String macText = toHex(macAddress, 12);
+        return
+            macText.substring(0, 2) + "-"
+            + macText.substring(2, 4) + "-"
+            + macText.substring(4, 6) + "-"
+            + macText.substring(6, 8) + "-"
+            + macText.substring(8, 10) + "-"
+            + macText.substring(10, 12);
+    }
+
+    /**
+     * Converts a MAC-Address to its long representation, by concatenating the digits and converting it from hexadecimal to long.
+     * See longToMacAddress for the reversing method.
+     * @param macAddress macAddress should be 6 groups of 2 hexadecimal digits (0 to 9 and A to F or a to f) separated by hyphens(–) or
+     *                   colons(:)
+     * @return long between 0 and 0xFFFFFFFFFFFF representing this MAC-Address
+     *
+     * @see Utils#longToMacAddress(long)
+     */
+    public static long macAddressToLong(String macAddress){
+        if (!MAC_ADDRESS_PATTERN.matcher(macAddress).matches()) {
+            throw new IllegalArgumentException(("macAddress should be 6 groups of 2 hexadecimal digits (0 to 9 and A to F) separated by hyphens(–) "
+                + "or colons(:), but got : %s").formatted(macAddress));
+        }
+        String hex = macAddress.substring(0, 2)
+            + macAddress.substring(3, 5)
+            + macAddress.substring(6, 8)
+            + macAddress.substring(9, 11)
+            + macAddress.substring(12, 14)
+            + macAddress.substring(15, 17);
+        return Long.valueOf(hex, 16);
+    }
+
+    /**
+     * Convert number to hexadecimal, with uppercase letters (A to F) and a minimum length (using left padding with zero when necessary).
+     * @param number number to be converted in hexadecimal
+     * @param length minimum length of resulting string.
+     *               When hexadecimal form of number does not reach length, left padding with "0" is done.
+     * @return hexadecimal, with uppercase letters (A to F) and minimum length of length.
+     * Note that the length of return value can exceed "length" parameter when number hexadecimal form is longer than "length" parameter.
+     */
+    public static String toHex(long number, int length) {
+        return StringUtils.leftPad(Long.toHexString(number).toUpperCase(), length, "0");
     }
 }

@@ -73,7 +73,7 @@ class AccessPointAdapterTest {
     }
 
     @Test
-    void checkFCDALimitations_should_succed_no_error_message() {
+    void checkFCDALimitations_should_succeed_no_error_message() {
         //Given
         AccessPointAdapter accessPointAdapter = provideAPForCheckLimitationForIED();
         //When
@@ -92,7 +92,7 @@ class AccessPointAdapterTest {
         //Then
         assertThat(sclReportItems).hasSize(1)
                 .extracting(SclReportItem::getMessage)
-                .containsExactlyInAnyOrder("There are too much FCDA for the DataSet DATASET6 for the LDevice LD_INST21 in IED IED_NAME");
+                .containsExactlyInAnyOrder("There are too much FCDA for the DataSet dataset6 for the LDevice LD_INST21 in IED IED_NAME: 3 > 2 max");
     }
     @Test
     void checkFCDALimitations_should_fail_with_four_error_messages() {
@@ -104,10 +104,10 @@ class AccessPointAdapterTest {
         //Then
         assertThat(sclReportItems).hasSize(4)
                 .extracting(SclReportItem::getMessage)
-                .containsExactlyInAnyOrder("There are too much FCDA for the DataSet DATASET3 for the LDevice LD_INST21 in IED IED_NAME",
-                        "There are too much FCDA for the DataSet DATASET6 for the LDevice LD_INST21 in IED IED_NAME",
-                        "There are too much FCDA for the DataSet DATASET6 for the LDevice LD_INST22 in IED IED_NAME",
-                        "There are too much FCDA for the DataSet DATASET5 for the LDevice LD_INST22 in IED IED_NAME");
+                .containsExactlyInAnyOrder("There are too much FCDA for the DataSet dataset3 for the LDevice LD_INST21 in IED IED_NAME: 2 > 1 max",
+                        "There are too much FCDA for the DataSet dataset6 for the LDevice LD_INST21 in IED IED_NAME: 3 > 1 max",
+                        "There are too much FCDA for the DataSet dataset6 for the LDevice LD_INST22 in IED IED_NAME: 2 > 1 max",
+                        "There are too much FCDA for the DataSet dataset5 for the LDevice LD_INST22 in IED IED_NAME: 2 > 1 max");
     }
 
 
@@ -116,12 +116,11 @@ class AccessPointAdapterTest {
         //Given
         AccessPointAdapter accessPointAdapter = provideAPForCheckLimitationForIED();
         accessPointAdapter.getCurrentElem().getServices().getConfDataSet().setMax(5L);
-        String message = "Too much DataSet for";
         //When
-        Optional<SclReportItem> sclReportItem = accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.DATASET,message);
+        Optional<SclReportItem> sclReportItem = accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.DATASET);
         //Then
         assertThat(sclReportItem).isPresent()
-                .get().extracting(SclReportItem::getMessage).isEqualTo(message +" IED_NAME");
+                .get().extracting(SclReportItem::getMessage).isEqualTo("There are too much DataSets for the IED IED_NAME: 6 > 5 max");
     }
 
     @Test
@@ -129,12 +128,11 @@ class AccessPointAdapterTest {
         //Given
         AccessPointAdapter accessPointAdapter = provideAPForCheckLimitationForIED();
         accessPointAdapter.getCurrentElem().getServices().getSMVsc().setMax(2L);
-        String message = "Too much SMV Control for";
         //When
-        Optional<SclReportItem> sclReportItem = accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.SMV,message);
+        Optional<SclReportItem> sclReportItem = accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.SMV);
         //Then
         assertThat(sclReportItem).isPresent()
-                .get().extracting(SclReportItem::getMessage).isEqualTo(message +" IED_NAME");
+                .get().extracting(SclReportItem::getMessage).isEqualTo("There are too much SMV Control Blocks for the IED IED_NAME: 3 > 2 max");
     }
 
     @Test
@@ -142,12 +140,11 @@ class AccessPointAdapterTest {
         //Given
         AccessPointAdapter accessPointAdapter = provideAPForCheckLimitationForIED();
         accessPointAdapter.getCurrentElem().getServices().getGOOSE().setMax(2L);
-        String message = "Too much Goose Control for";
         //When
-        Optional<SclReportItem> sclReportItem = accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.GSE,message);
+        Optional<SclReportItem> sclReportItem = accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.GSE);
         //Then
         assertThat(sclReportItem).isPresent()
-                .get().extracting(SclReportItem::getMessage).isEqualTo(message +" IED_NAME");
+                .get().extracting(SclReportItem::getMessage).isEqualTo("There are too much GOOSE Control Blocks for the IED IED_NAME: 3 > 2 max");
     }
 
     @Test
@@ -155,12 +152,11 @@ class AccessPointAdapterTest {
         //Given
         AccessPointAdapter accessPointAdapter = provideAPForCheckLimitationForIED();
         accessPointAdapter.getCurrentElem().getServices().getConfReportControl().setMax(0L);
-        String message = "Too much Report Control for";
         //When
-        Optional<SclReportItem> sclReportItem = accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.REPORT,message);
+        Optional<SclReportItem> sclReportItem = accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.REPORT);
         //Then
         assertThat(sclReportItem).isPresent()
-                .get().extracting(SclReportItem::getMessage).isEqualTo(message +" IED_NAME");
+                .get().extracting(SclReportItem::getMessage).isEqualTo("There are too much Report Control Blocks for the IED IED_NAME: 1 > 0 max");
     }
 
     public static AccessPointAdapter provideAPForCheckLimitationForIED() {
@@ -175,9 +171,8 @@ class AccessPointAdapterTest {
         //Given
         AccessPointAdapter accessPointAdapter = provideAPForCheckLimitationForIED();
         accessPointAdapter.getCurrentElem().getServices().setConfReportControl(null);
-        String message = "Too much Report Control for";
         //When
-        Optional<SclReportItem> sclReportItem = accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.REPORT,message);
+        Optional<SclReportItem> sclReportItem = accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.REPORT);
         //Then
         assertThat(sclReportItem).isEmpty();
     }
@@ -187,9 +182,8 @@ class AccessPointAdapterTest {
         //Given
         AccessPointAdapter accessPointAdapter = provideAPForCheckLimitationForIED();
         accessPointAdapter.getCurrentElem().getServices().setGOOSE(null);
-        String message = "Too much GSE Control for";
         //When
-        Optional<SclReportItem> sclReportItem = accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.GSE,message);
+        Optional<SclReportItem> sclReportItem = accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.GSE);
         //Then
         assertThat(sclReportItem).isEmpty();
     }
@@ -199,9 +193,8 @@ class AccessPointAdapterTest {
         //Given
         AccessPointAdapter accessPointAdapter = provideAPForCheckLimitationForIED();
         accessPointAdapter.getCurrentElem().getServices().setConfDataSet(null);
-        String message = "Too much DATASET for";
         //When
-        Optional<SclReportItem> sclReportItem = accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.DATASET,message);
+        Optional<SclReportItem> sclReportItem = accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.DATASET);
         //Then
         assertThat(sclReportItem).isEmpty();
     }
@@ -211,55 +204,52 @@ class AccessPointAdapterTest {
         //Given
         AccessPointAdapter accessPointAdapter = provideAPForCheckLimitationForIED();
         accessPointAdapter.getCurrentElem().setServices(null);
-        String message = "Too much SMV Control for";
         //When
-        Optional<SclReportItem> sclReportItem = accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.SMV,message);
+        Optional<SclReportItem> sclReportItem = accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.SMV);
         //Then
         assertThat(sclReportItem).isEmpty();
     }
 
     @Test
-    void checkLimitationForBindedIEDFCDAs_should_success_no_error() {
+    void checkLimitationForBoundIEDFCDAs_should_success_no_error() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_binded_ied_controls_fcda.xml");
+        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1");
         iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getClientServices().setMaxAttributes(11L);
         AccessPointAdapter accessPointAdapter = new AccessPointAdapter(iedAdapter, iedAdapter.getCurrentElem().getAccessPoint().get(0));
-        String message = "Too much FCDA";
         List<TExtRef> tExtRefs = accessPointAdapter.getAllCoherentExtRefForAnalyze().tExtRefs();
         //When
-        Optional<SclReportItem> sclReportItem = accessPointAdapter.checkLimitationForBoundIEDFCDAs(tExtRefs, message);
+        Optional<SclReportItem> sclReportItem = accessPointAdapter.checkLimitationForBoundIedFcdas(tExtRefs);
 
         //Then
         assertThat(sclReportItem).isEmpty();
     }
 
     @Test
-    void checkLimitationForBindedIEDFCDAs_should_fail_one_error_message() {
+    void checkLimitationForBoundIEDFCDAs_should_fail_one_error_message() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_binded_ied_controls_fcda.xml");
+        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1");
         AccessPointAdapter accessPointAdapter = new AccessPointAdapter(iedAdapter, iedAdapter.getCurrentElem().getAccessPoint().get(0));
         accessPointAdapter.getCurrentElem().getServices().getClientServices().setMaxAttributes(4L);
         List<TExtRef> tExtRefs = accessPointAdapter.getAllCoherentExtRefForAnalyze().tExtRefs();
-        String message = "Too much FCDA for IED_NAME1";
 
         //When
-        Optional<SclReportItem> sclReportItem = accessPointAdapter.checkLimitationForBoundIEDFCDAs(tExtRefs, message);
+        Optional<SclReportItem> sclReportItem = accessPointAdapter.checkLimitationForBoundIedFcdas(tExtRefs);
 
         //Then
         assertThat(sclReportItem).isPresent()
                 .get()
                 .extracting(SclReportItem::getMessage)
-                .isEqualTo(message);
+                .isEqualTo("The Client IED IED_NAME1 subscribes to too much FCDA: 9 > 4 max");
     }
 
     @Test
-    void checkLimitationForBindedIEDControls_should_fail_three_error_messages() {
+    void checkLimitationForBoundIEDControls_should_fail_three_error_messages() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_binded_ied_controls_fcda.xml");
+        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1");
         AccessPointAdapter accessPointAdapter = new AccessPointAdapter(iedAdapter, iedAdapter.getCurrentElem().getAccessPoint().get(0));
@@ -270,15 +260,15 @@ class AccessPointAdapterTest {
         //Then
         assertThat(sclReportItems).hasSize(3)
                 .extracting(SclReportItem::getMessage)
-                .containsExactlyInAnyOrder("The Client IED IED_NAME1 subscribes to too much GOOSE Control Blocks.",
-                        "The Client IED IED_NAME1 subscribes to too much SMV Control Blocks.",
-                        "The Client IED IED_NAME1 subscribes to too much REPORT Control Blocks.");
+                .containsExactlyInAnyOrder("The Client IED IED_NAME1 subscribes to too much GOOSE Control Blocks: 3 > 2 max",
+                        "The Client IED IED_NAME1 subscribes to too much SMV Control Blocks: 2 > 1 max",
+                        "The Client IED IED_NAME1 subscribes to too much Report Control Blocks: 1 > 0 max");
     }
 
     @Test
-    void checkLimitationForBindedIEDControls_should_succed_no_error_message() {
+    void checkLimitationForBoundIEDControls_should_succeed_no_error_message() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_binded_ied_controls_fcda.xml");
+        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1");
         iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getClientServices().setMaxAttributes(11L);
@@ -295,9 +285,9 @@ class AccessPointAdapterTest {
     }
 
     @Test
-    void getAllCoherentExtRefForAnalyze_succed() {
+    void getAllCoherentExtRefForAnalyze_succeed() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_binded_ied_controls_fcda.xml");
+        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1");
         AccessPointAdapter accessPointAdapter = new AccessPointAdapter(iedAdapter, iedAdapter.getCurrentElem().getAccessPoint().get(0));
@@ -324,3 +314,4 @@ class AccessPointAdapterTest {
                 .asList().hasSize(1);
     }
 }
+

@@ -258,30 +258,5 @@ class InputsAdapterTest {
         foundInputsAdapter.getCurrentElem().getExtRef().removeIf(Predicate.not(extref -> extRefDesc.equals(extref.getDesc())));
         return foundInputsAdapter;
     }
-   /* @Test
-    void checkSourceDataGroupCoherence_should_fail_one_error_messages() throws Exception {
-        //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_coherent_extRefs.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        InputsAdapter inputsAdapter = keepOnlyThisExtRef(sclRootAdapter, "a");
-        //When
-        List<SclReportItem> sclReportItems = inputsAdapter.checkSourceDataGroupCoherence();
-        //Then
-        assertThat(sclReportItems).hasSize(1)
-                .extracting(SclReportItem::getMessage)
-                .containsExactlyInAnyOrder("The Client IED IED_NAME1 subscribes to much GOOSE Control Blocks.");
-    }
 
-    @Test
-    void checkSourceDataGroupCoherence_should_succed_no_error_message() throws Exception {
-        //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_coherent_extRefs.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        InputsAdapter inputsAdapter = keepOnlyThisExtRef(sclRootAdapter, "a");
-        sclRootAdapter.getIEDAdapterByName("IED_NAME1").getCurrentElem().getAccessPoint().get(0).getServices().getClientServices().setMaxGOOSE(1L);
-        //When
-        List<SclReportItem> sclReportItems = inputsAdapter.checkSourceDataGroupCoherence();
-        //Then
-        assertThat(sclReportItems).isEmpty();
-    }*/
 }

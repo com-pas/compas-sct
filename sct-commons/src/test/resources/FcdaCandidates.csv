@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2022 RTE FRANCE
 #
 # SPDX-License-Identifier: Apache-2.0
-# !!! WARNING !!! The 5 first lines are skipped
+
 FCDA.lnClass;FCDA.doName;FCDA.daName;FCDA.fc
 ANCR;DoName;daNameST;ST
 ANCR;DoName;daNameMX;MX

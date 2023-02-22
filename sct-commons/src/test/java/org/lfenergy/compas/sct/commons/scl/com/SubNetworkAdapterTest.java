@@ -4,6 +4,8 @@
 
 package org.lfenergy.compas.sct.commons.scl.com;
 
+import org.assertj.core.api.Assertions;
+import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -13,6 +15,9 @@ import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.scl2007b4.model.TSubNetwork;
 import org.lfenergy.compas.sct.commons.dto.DTO;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+
+import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -51,20 +56,63 @@ class SubNetworkAdapterTest {
         assertEquals(1,subNetworkAdapter.getCurrentElem().getConnectedAP().size());
     }
 
+    @Test
+    void getConnectedAPAdapters_should_return_all_ConnectedAP() {
+        // Given
+        SubNetworkAdapter subNetworkAdapter = new SubNetworkAdapter(null, new TSubNetwork());
+        subNetworkAdapter.addConnectedAP(DTO.HOLDER_IED_NAME, DTO.AP_NAME);
+        subNetworkAdapter.addConnectedAP(DTO.HOLDER_IED_NAME_2, DTO.AP_NAME_2);
+        // When
+        List<ConnectedAPAdapter> connectedAPAdapter = subNetworkAdapter.getConnectedAPAdapters();
+        // Then
+        assertThat(connectedAPAdapter).extracting(ConnectedAPAdapter::getIedName, ConnectedAPAdapter::getApName)
+            .containsExactly(
+                Tuple.tuple(DTO.HOLDER_IED_NAME, DTO.AP_NAME),
+                Tuple.tuple(DTO.HOLDER_IED_NAME_2, DTO.AP_NAME_2)
+            );
+    }
 
     @Test
-    void getConnectedAPAdapters() {
+    void getConnectedAPAdapter_should_get_element() {
+        // Given
         SubNetworkAdapter subNetworkAdapter = new SubNetworkAdapter(null, new TSubNetwork());
-        assertTrue(subNetworkAdapter.getCurrentElem().getConnectedAP().isEmpty());
         subNetworkAdapter.addConnectedAP(DTO.HOLDER_IED_NAME,DTO.AP_NAME);
-        assertEquals(1,subNetworkAdapter.getConnectedAPAdapters().size());
+        // When
+        ConnectedAPAdapter connectedAPAdapter = subNetworkAdapter.getConnectedAPAdapter(DTO.HOLDER_IED_NAME, DTO.AP_NAME);
+        // Then
+        assertThat(connectedAPAdapter).extracting(ConnectedAPAdapter::getIedName, ConnectedAPAdapter::getApName)
+                .containsExactly(DTO.HOLDER_IED_NAME, DTO.AP_NAME);
+    }
 
-        assertDoesNotThrow( () -> subNetworkAdapter.getConnectedAPAdapter(DTO.HOLDER_IED_NAME,DTO.AP_NAME));
+    @Test
+    void getConnectedAPAdapter_when_not_found_should_throw_exception() {
+        // Given
+        SubNetworkAdapter subNetworkAdapter = new SubNetworkAdapter(null, new TSubNetwork());
+        // When & Then
+        Assertions.assertThatThrownBy(() -> subNetworkAdapter.getConnectedAPAdapter(DTO.HOLDER_IED_NAME, DTO.AP_NAME))
+            .isInstanceOf(ScdException.class);
+    }
 
-        assertThrows(
-                ScdException.class,
-                () -> subNetworkAdapter.getConnectedAPAdapter(DTO.HOLDER_IED_NAME,DTO.AP_NAME + "1")
-        );
+    @Test
+    void findConnectedAPAdapter_should_get_element() {
+        // Given
+        SubNetworkAdapter subNetworkAdapter = new SubNetworkAdapter(null, new TSubNetwork());
+        subNetworkAdapter.addConnectedAP(DTO.HOLDER_IED_NAME,DTO.AP_NAME);
+        // When
+        Optional<ConnectedAPAdapter> connectedAPAdapter = subNetworkAdapter.findConnectedAPAdapter(DTO.HOLDER_IED_NAME, DTO.AP_NAME);
+        // Then
+        assertThat(connectedAPAdapter).get().extracting(ConnectedAPAdapter::getIedName, ConnectedAPAdapter::getApName)
+                .containsExactly(DTO.HOLDER_IED_NAME, DTO.AP_NAME);
+    }
+
+    @Test
+    void findConnectedAPAdapter_when_not_found_shouldreturn_empty() {
+        // Given
+        SubNetworkAdapter subNetworkAdapter = new SubNetworkAdapter(null, new TSubNetwork());
+        // When
+        Optional<ConnectedAPAdapter> connectedAPAdapter = subNetworkAdapter.findConnectedAPAdapter(DTO.HOLDER_IED_NAME, DTO.AP_NAME);
+        // Then
+        assertThat(connectedAPAdapter).isEmpty();
     }
 
     @Test
