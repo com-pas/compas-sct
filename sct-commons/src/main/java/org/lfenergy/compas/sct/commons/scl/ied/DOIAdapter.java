@@ -14,7 +14,6 @@ import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 
@@ -189,7 +188,7 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
                         .updateVal(createInRefValTestString(tExtRefMin));
             }
 
-            Optional<TExtRef> tExtRefMaxOptional = tExtRefs.stream().max(Comparator.comparingInt(o -> Integer.parseInt(Objects.requireNonNull(Utils.extractField(o.getDesc(), "_", -1)))));
+            Optional<TExtRef> tExtRefMaxOptional = tExtRefs.stream().max(EXTREF_DESC_SUFFIX_COMPARATOR);
             if (tExtRefMaxOptional.isPresent() && extractDescSuffix(tExtRefMaxOptional.get().getDesc()) > 1) {
                 TExtRef tExtRefMax = tExtRefMaxOptional.get();
                 findDataAdapterByName(DA_NAME_SET_TST_REF)

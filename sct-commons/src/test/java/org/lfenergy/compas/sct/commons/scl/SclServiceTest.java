@@ -1108,6 +1108,7 @@ class SclServiceTest {
         assertThat(getValFromDaiName(sclReport.getSclRootAdapter().getCurrentElem(), "IED_NAME1", ldInst, doName, daName)
                 .map(TVal::getValue))
                 .hasValue(expected);
+        assertIsMarshallable(sclReport.getSclRootAdapter().getCurrentElem());
     }
 
     @ParameterizedTest(name = "{0}")
