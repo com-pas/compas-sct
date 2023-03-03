@@ -14,6 +14,7 @@ import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 
@@ -208,7 +209,7 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
     }
 
     private static int extractDescSuffix(String desc) throws NumberFormatException {
-        return Integer.parseInt(Utils.extractField(desc, "_", -1));
+        return Integer.parseInt(Objects.requireNonNull(Utils.extractField(desc, "_", -1)));
     }
 
     private String createInRefValNominalString(TExtRef extRef) {

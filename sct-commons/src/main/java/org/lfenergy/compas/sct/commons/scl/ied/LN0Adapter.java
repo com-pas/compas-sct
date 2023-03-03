@@ -264,15 +264,16 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
                         && doiAdapter.findDataAdapterByName(DAI_NAME_PURPOSE).isPresent())
                 .map(doiAdapter -> doiAdapter.getDataAdapterByName(DAI_NAME_PURPOSE).getCurrentElem().getVal().stream()
                         .findFirst()
-                        .map(tVal -> doiAdapter.updateDaiFromExtRef(getExtRefsByDesc(tVal.getValue())))
+                        .map(tVal -> doiAdapter.updateDaiFromExtRef(getBoundExtRefsByDesc(tVal.getValue())))
                         .orElse(Optional.of(SclReportItem.warning(getXPath(), "The DOI %s can't be bound with an ExtRef".formatted(getXPath())))))
                 .flatMap(Optional::stream)
                 .toList();
     }
 
-    private List<TExtRef> getExtRefsByDesc(String desc) {
+    private List<TExtRef> getBoundExtRefsByDesc(String desc) {
         return getExtRefs().stream()
-                .filter(tExtRef -> tExtRef.isSetDesc() && tExtRef.getDesc().contains(desc))
+                .filter(tExtRef -> tExtRef.isSetIedName() && tExtRef.isSetLdInst() && tExtRef.isSetLnClass() && tExtRef.isSetDoName() &&
+                        tExtRef.isSetDesc() && tExtRef.getDesc().contains(desc))
                 .toList();
     }
 }
