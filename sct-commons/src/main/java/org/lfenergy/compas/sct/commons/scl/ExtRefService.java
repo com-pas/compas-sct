@@ -19,15 +19,16 @@ import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LN0Adapter;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
-import org.lfenergy.compas.sct.commons.util.ControlBlockNetworkSettingsCsvHelper;
 import org.lfenergy.compas.sct.commons.util.PrivateEnum;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
-import java.io.Reader;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.NetworkRanges;
+import static org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.RangesPerCbType;
 
 @UtilityClass
 public class ExtRefService {
@@ -160,27 +161,6 @@ public class ExtRefService {
     }
 
     /**
-     * Shortcut for {@link ExtRefService#configureNetworkForAllControlBlocks(SCL, ControlBlockNetworkSettings, long, long, String, String, ControlBlockEnum)}
-     * using a CSV file to provide ControlBlockNetworkSettings.
-     *
-     * @param scd           input SCD object. The object will be modified with the new DataGSESet and SMV elements
-     * @param csvSource     a Reader for the CSV file, as specified in {@link ControlBlockNetworkSettingsCsvHelper}.
-     * @param appIdMin      range start for APPID (inclusive)
-     * @param appIdMax      range end for APPID (inclusive)
-     * @param macAddressMin range start for MAC-Addresses (inclusive). Ex: "01-0C-CD-01-00-00"
-     * @param macAddressMax range end for MAC-Addresses (inclusive). Ex: "01-0C-CD-01-01-FF"
-     * @return a report with all the errors encountered
-     * @see ControlBlockNetworkSettingsCsvHelper
-     * @see ControlBlockNetworkSettings
-     * @see ExtRefService#configureNetworkForAllControlBlocks(SCL, ControlBlockNetworkSettings, long, long, String, String, ControlBlockEnum)
-     */
-    public static SclReport configureNetworkForAllControlBlocks(SCL scd, Reader csvSource,
-                                                                long appIdMin, long appIdMax, String macAddressMin, String macAddressMax, ControlBlockEnum controlBlockEnum) {
-        ControlBlockNetworkSettings controlBlockNetworkSettings = new ControlBlockNetworkSettingsCsvHelper(csvSource);
-        return configureNetworkForAllControlBlocks(scd, controlBlockNetworkSettings, appIdMin, appIdMax, macAddressMin, macAddressMax, controlBlockEnum);
-    }
-
-    /**
      * Configure the network for all the ControlBlocks.
      * Create (or update if already existing) these elements
      * - the Communication/SubNetwork/ConnectedAP/GSE element, for the GSEControl blocks
@@ -188,31 +168,37 @@ public class ExtRefService {
      *
      * @param scd                         input SCD object. The object will be modified with the new DataGSESet and SMV elements
      * @param controlBlockNetworkSettings a method tha gives the network configuration information for a given ControlBlock
-     * @param appIdMin                    range start for APPID (inclusive)
-     * @param appIdMax                    range end for APPID (inclusive)
-     * @param macAddressMin               range start for MAC-Addresses (inclusive). Ex: "01-0C-CD-01-00-00"
-     * @param macAddressMax               range end for MAC-Addresses (inclusive). Ex: "01-0C-CD-01-01-FF"
+     * @param rangesPerCbType             provide NetworkRanges for GSEControl and SampledValueControl. NetworkRanges contains :
+     *                                    start-end app APPID range (long value), start-end MAC-Addresses (Mac-Addresses values: Ex: "01-0C-CD-01-01-FF")
      * @return a report with all the errors encountered
      * @see Utils#macAddressToLong(String) for the expected MAC address format
      * @see ControlBlockNetworkSettings
+     * @see ControlBlockNetworkSettings.RangesPerCbType
+     * @see ControlBlockNetworkSettings.NetworkRanges
      */
     public static SclReport configureNetworkForAllControlBlocks(SCL scd, ControlBlockNetworkSettings controlBlockNetworkSettings,
-                                                                long appIdMin, long appIdMax, String macAddressMin, String macAddressMax, ControlBlockEnum controlBlockEnum) {
-        PrimitiveIterator.OfLong appIdIterator = Utils.sequence(appIdMin, appIdMax);
-        Iterator<String> macAddressIterator = Utils.macAddressSequence(macAddressMin, macAddressMax);
+                                                                RangesPerCbType rangesPerCbType) {
+        List<SclReportItem> sclReportItems = new ArrayList<>();
+        sclReportItems.addAll(configureNetworkForControlBlocks(scd, controlBlockNetworkSettings, rangesPerCbType.gse(), ControlBlockEnum.GSE));
+        sclReportItems.addAll(configureNetworkForControlBlocks(scd, controlBlockNetworkSettings, rangesPerCbType.sampledValue(), ControlBlockEnum.SAMPLED_VALUE));
+        return new SclReport(new SclRootAdapter(scd), sclReportItems);
+    }
+
+    private static List<SclReportItem> configureNetworkForControlBlocks(SCL scd, ControlBlockNetworkSettings controlBlockNetworkSettings,
+                                                                        NetworkRanges networkRanges, ControlBlockEnum controlBlockEnum) {
+        PrimitiveIterator.OfLong appIdIterator = Utils.sequence(networkRanges.appIdStart(), networkRanges.appIdEnd());
+        Iterator<String> macAddressIterator = Utils.macAddressSequence(networkRanges.macAddressStart(), networkRanges.macAddressEnd());
 
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        List<SclReportItem> sclReportItems =
-                sclRootAdapter.streamIEDAdapters()
-                        .flatMap(iedAdapter ->
-                                iedAdapter.streamLDeviceAdapters()
-                                        .filter(LDeviceAdapter::hasLN0)
-                                        .map(LDeviceAdapter::getLN0Adapter)
-                                        .flatMap(ln0Adapter -> ln0Adapter.streamControlBlocks(controlBlockEnum))
-                                        .map(controlBlockAdapter -> configureControlBlockNetwork(controlBlockNetworkSettings, appIdIterator, macAddressIterator, controlBlockAdapter)))
-                        .flatMap(Optional::stream)
-                        .toList();
-        return new SclReport(sclRootAdapter, sclReportItems);
+        return sclRootAdapter.streamIEDAdapters()
+                .flatMap(iedAdapter ->
+                        iedAdapter.streamLDeviceAdapters()
+                                .filter(LDeviceAdapter::hasLN0)
+                                .map(LDeviceAdapter::getLN0Adapter)
+                                .flatMap(ln0Adapter -> ln0Adapter.streamControlBlocks(controlBlockEnum))
+                                .map(controlBlockAdapter -> configureControlBlockNetwork(controlBlockNetworkSettings, appIdIterator, macAddressIterator, controlBlockAdapter)))
+                .flatMap(Optional::stream)
+                .toList();
     }
 
     private static Optional<SclReportItem> configureControlBlockNetwork(ControlBlockNetworkSettings controlBlockNetworkSettings, PrimitiveIterator.OfLong appIdIterator, Iterator<String> macAddressIterator, ControlBlockAdapter controlBlockAdapter) {
