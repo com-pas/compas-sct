@@ -72,12 +72,20 @@
     <DataTypeTemplates>
         <LNodeType lnClass="LLN0" id="LN11">
             <DO name="Do11" type="DO11" transient="true"/>
+            <DO name="InRef2" type="INREFTYPE"/>
         </LNodeType>
         <LNodeType lnClass="ANCR" id="LN12">
             <DO name="Do21" type="DO11"/>
         </LNodeType>
         <DOType cdc="WYE" id="DO11">
             <SDO name="sdo11" type="DO12"/>
+        </DOType>
+        <DOType id="INREFTYPE" cdc="ORG">
+            <DA name="setSrcRef" bType="ObjRef" fc="SP"/>
+            <DA name="setTstRef" bType="ObjRef" fc="SP"/>
+            <DA name="setSrcCB" bType="ObjRef" fc="SP"/>
+            <DA name="setTstCB" bType="ObjRef" fc="SP"/>
+            <DA name="purpose" bType="VisString255" fc="DC"/>
         </DOType>
         <DOType cdc="WYE" id="DO12">
             <SDO name="sdo11" type="DO12"/>
