@@ -12,7 +12,7 @@
     </Communication>
     <IED name="IED_NAME1">
         <Private type="COMPAS-ICDHeader">
-            <compas:ICDHeader ICDSystemVersionUUID="System_Version_IED_NAME1" IEDType="BCU" IEDinstance="11" IEDName="IED_NAME1" VendorName="SCLE SFE" IEDmodel="ARKENS-SV1120-HGAAA-EB5" IEDredundancy="A" BayLabel="3THEIX2" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+            <compas:ICDHeader ICDSystemVersionUUID="System_Version_IED_NAME1" IEDType="BCU" IEDSubstationinstance="11" IEDName="IED_NAME1" VendorName="SCLE SFE" IEDmodel="ARKENS-SV1120-HGAAA-EB5" IEDredundancy="A" BayLabel="3THEIX2" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
         </Private>
         <Private type="COMPAS-Bay">
             <compas:Bay UUID="UuidBay1"/>
@@ -50,7 +50,7 @@
     </IED>
     <IED name="IED_NAME2">
         <Private type="COMPAS-ICDHeader">
-            <compas:ICDHeader ICDSystemVersionUUID="System_Version_IED_NAME2" IEDType="BCU" IEDinstance="22" IEDName="IED_NAME2" VendorName="SCLE SFE" IEDmodel="ARKENS-SV1120-HGAAA-EB5" IEDredundancy="A" BayLabel="3THEIX2" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+            <compas:ICDHeader ICDSystemVersionUUID="System_Version_IED_NAME2" IEDType="BCU" IEDSubstationinstance="22" IEDName="IED_NAME2" VendorName="SCLE SFE" IEDmodel="ARKENS-SV1120-HGAAA-EB5" IEDredundancy="A" BayLabel="3THEIX2" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
         </Private>
         <Private type="COMPAS-SystemVersion">
             <compas:SystemVersion MainSystemVersion="01.00" MinorSystemVersion="009.001.001"/>
@@ -103,7 +103,7 @@
     </IED>
     <IED name="IED_NAME3">
         <Private type="COMPAS-ICDHeader">
-            <compas:ICDHeader ICDSystemVersionUUID="System_Version_IED_NAME3" IEDType="BCU" IEDinstance="22" IEDName="IED_NAME3" VendorName="SCLE SFE" IEDmodel="ARKENS-SV1120-HGAAA-EB5" IEDredundancy="A" BayLabel="3THEIX2" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+            <compas:ICDHeader ICDSystemVersionUUID="System_Version_IED_NAME3" IEDType="BCU" IEDSubstationinstance="22" IEDName="IED_NAME3" VendorName="SCLE SFE" IEDmodel="ARKENS-SV1120-HGAAA-EB5" IEDredundancy="A" BayLabel="3THEIX2" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
         </Private>
         <Private type="COMPAS-SystemVersion">
             <compas:SystemVersion MainSystemVersion="01.00" MinorSystemVersion="009.001.001"/>

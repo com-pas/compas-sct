@@ -17,6 +17,7 @@ import javax.xml.bind.JAXBElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -479,7 +480,7 @@ class PrivateServiceTest {
         TCompasICDHeader compasICDHeader1 = new TCompasICDHeader();
         compasICDHeader1.setIEDName("IED-1");
         compasICDHeader1.setBayLabel("BAY-1");
-        compasICDHeader1.setIEDinstance("1");
+        compasICDHeader1.setIEDSubstationinstance(BigInteger.ONE);
         TCompasICDHeader compasICDHeader2 = new TCompasICDHeader();
         TPrivate tPrivate1 =  PrivateService.createPrivate(compasICDHeader1);
         TPrivate tPrivate2 =  PrivateService.createPrivate(compasICDHeader2);
@@ -496,7 +497,7 @@ class PrivateServiceTest {
         TCompasICDHeader compasICDHeader1 = new TCompasICDHeader();
         compasICDHeader1.setIEDName("IED-1");
         compasICDHeader1.setBayLabel("BAY-1");
-        compasICDHeader1.setIEDinstance("1");
+        compasICDHeader1.setIEDSubstationinstance(BigInteger.ONE);
         compasICDHeader1.setICDSystemVersionUUID("UUID-1");
         TCompasICDHeader compasICDHeader2 = new TCompasICDHeader();
         compasICDHeader2.setICDSystemVersionUUID("UUID-2");
@@ -515,7 +516,7 @@ class PrivateServiceTest {
         TCompasICDHeader compasICDHeader1 = new TCompasICDHeader();
         compasICDHeader1.setIEDName("IED-1");
         compasICDHeader1.setBayLabel("BAY-1");
-        compasICDHeader1.setIEDinstance("1");
+        compasICDHeader1.setIEDSubstationinstance(BigInteger.ONE);
         compasICDHeader1.setICDSystemVersionUUID("UUID-1");
         TCompasICDHeader compasICDHeader2 = new TCompasICDHeader();
         compasICDHeader2.setICDSystemVersionUUID("UUID-1");
@@ -537,17 +538,17 @@ class PrivateServiceTest {
         lNodeCompasICDHeader.setICDSystemVersionUUID("UUID-2");
         lNodeCompasICDHeader.setIEDName("IED-1");
         lNodeCompasICDHeader.setBayLabel("BAY-1");
-        lNodeCompasICDHeader.setIEDinstance("1");
+        lNodeCompasICDHeader.setIEDSubstationinstance(BigInteger.ONE);
         TPrivate stdTPrivate =  PrivateService.createPrivate(stdCompasICDHeader);
         TPrivate lNodePrivate =  PrivateService.createPrivate(lNodeCompasICDHeader);
+        assertThat(stdTPrivate).isNotEqualTo(lNodePrivate);
 
         // When
-        assertThat(stdTPrivate).isNotEqualTo(lNodePrivate);
         PrivateService.copyCompasICDHeaderFromLNodePrivateIntoSTDPrivate(stdTPrivate,lNodePrivate);
         // Then
         TCompasICDHeader result = PrivateService.extractCompasICDHeader(stdTPrivate).get();
         assertThat(result).extracting(TCompasICDHeader::getICDSystemVersionUUID, TCompasICDHeader::getIEDName,
-                TCompasICDHeader::getIEDinstance, TCompasICDHeader::getBayLabel)
-                .containsExactlyInAnyOrder("UUID-2", "IED-1", "1", "BAY-1");
+                TCompasICDHeader::getIEDSubstationinstance, TCompasICDHeader::getBayLabel)
+                .containsExactlyInAnyOrder("UUID-2", "IED-1", BigInteger.ONE, "BAY-1");
     }
 }
