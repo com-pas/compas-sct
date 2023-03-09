@@ -999,4 +999,31 @@ class LN0AdapterTest {
                 .isEqualTo(expectedTstCB);
         assertThat(sclReportItems).isEmpty();
     }
+
+    @Test
+    void streamControlBlocks_should_return_all_GSEControlBlocks(){
+        // Given
+        IEDAdapter iedAdapter = mock(IEDAdapter.class);
+        TLDevice tlDevice = new TLDevice();
+        LDeviceAdapter lDeviceAdapter = mock(LDeviceAdapter.class);
+        when(lDeviceAdapter.hasDataSetCreationCapability(any())).thenReturn(true);
+        when(lDeviceAdapter.hasControlBlockCreationCapability(any())).thenReturn(true);
+        when(lDeviceAdapter.getParentAdapter()).thenReturn(iedAdapter);
+        LN0 ln0 = new LN0();
+        tlDevice.setLN0(ln0);
+        when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
+        LN0Adapter ln0Adapter = new LN0Adapter(lDeviceAdapter, ln0);
+        ln0Adapter.createDataSetIfNotExists("datSet1", ControlBlockEnum.GSE);
+        ln0Adapter.createDataSetIfNotExists("datSet2", ControlBlockEnum.SAMPLED_VALUE);
+        ln0Adapter.createControlBlockIfNotExists("cbNameGSE", "cbId1", "datSet1", ControlBlockEnum.GSE);
+        ln0Adapter.createControlBlockIfNotExists("cbNameSMV", "cbId2", "datSet2", ControlBlockEnum.SAMPLED_VALUE);
+        // When
+        Stream<ControlBlockAdapter> result = ln0Adapter.streamControlBlocks(ControlBlockEnum.GSE);
+        // Then
+        assertThat(result)
+            .hasSize(1)
+            .extracting(ControlBlockAdapter::getName)
+            .containsExactly("cbNameGSE");
+    }
+
 }

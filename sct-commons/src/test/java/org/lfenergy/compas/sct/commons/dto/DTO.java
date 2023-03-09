@@ -18,6 +18,7 @@ public class DTO {
     /*                   ConnectedAPDTO              */
     /*-----------------------------------------------*/
     public static final String AP_NAME = "AP_NAME";
+    public static final String AP_NAME_2 = "AP_NAME_2";
 
     public static ConnectedApDTO createCapDTO() {
 
@@ -32,6 +33,7 @@ public class DTO {
     /*                   ExtRefInfo                  */
     /*-----------------------------------------------*/
     public static final String HOLDER_IED_NAME = "IED_NAME";
+    public static final String HOLDER_IED_NAME_2 = "IED_NAME_2";
     public static final String HOLDER_LD_INST = "LD_INST_H";
     public static final String HOLDER_LN_INST = "1";
     public static final String HOLDER_LN_CLASS = "LN_CLASS_H";

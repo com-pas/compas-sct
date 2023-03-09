@@ -189,7 +189,7 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
                         .updateVal(createInRefValTestString(tExtRefMin));
             }
 
-            Optional<TExtRef> tExtRefMaxOptional = tExtRefs.stream().max(Comparator.comparingInt(o -> Integer.parseInt(Objects.requireNonNull(Utils.extractField(o.getDesc(), "_", -1)))));
+            Optional<TExtRef> tExtRefMaxOptional = tExtRefs.stream().max(EXTREF_DESC_SUFFIX_COMPARATOR);
             if (tExtRefMaxOptional.isPresent() && extractDescSuffix(tExtRefMaxOptional.get().getDesc()) > 1) {
                 TExtRef tExtRefMax = tExtRefMaxOptional.get();
                 findDataAdapterByName(DA_NAME_SET_TST_REF)
@@ -209,7 +209,7 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
     }
 
     private static int extractDescSuffix(String desc) throws NumberFormatException {
-        return Integer.parseInt(Utils.extractField(desc, "_", -1));
+        return Integer.parseInt(Objects.requireNonNull(Utils.extractField(desc, "_", -1)));
     }
 
     private String createInRefValNominalString(TExtRef extRef) {

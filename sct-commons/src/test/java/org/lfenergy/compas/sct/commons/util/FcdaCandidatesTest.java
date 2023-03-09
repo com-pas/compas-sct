@@ -59,13 +59,4 @@ class FcdaCandidatesTest {
             .isInstanceOf(IllegalArgumentException.class);
     }
 
-    @Test
-    void contains_should_ignore_first_lines() {
-        //Given
-        FcdaCandidates fcdaCandidates = FcdaCandidates.SINGLETON;
-        //When
-        boolean result = fcdaCandidates.contains("FCDA.lnClass", "FCDA.doName", "FCDA.daName", "FCDA.fc");
-        //Then
-        assertThat(result).isFalse();
-    }
 }

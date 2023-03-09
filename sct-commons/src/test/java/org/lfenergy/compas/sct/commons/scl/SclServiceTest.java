@@ -1108,14 +1108,18 @@ class SclServiceTest {
         assertThat(getValFromDaiName(sclReport.getSclRootAdapter().getCurrentElem(), "IED_NAME1", ldInst, doName, daName)
                 .map(TVal::getValue))
                 .hasValue(expected);
+        assertIsMarshallable(sclReport.getSclRootAdapter().getCurrentElem());
     }
 
     @ParameterizedTest(name = "{0}")
     @CsvSource({
             "Test with only 1 ExtRef should not update srcTstCB,LD_WITH_1_InRef,InRef2,setTstRef",
-            "Test with only 1 ExtRef should not update setTstCB Value,LD_WITH_1_InRef,InRef2,setTstCB"
+            "Test with only 1 ExtRef should not update setTstCB Value,LD_WITH_1_InRef,InRef2,setTstCB",
+            "Test with only 1 ExtRef should not update DO when IedName not present,LD_WITH_1_InRef_ExtRef_Without_IedName,InRef4,setSrcRef",
+            "Test with only 1 ExtRef should not update DO when LdInst not present,LD_WITH_1_InRef_ExtRef_Without_LdInst,InRef5,setSrcRef",
+            "Test with only 1 ExtRef should not update DO when lnClass not present,LD_WITH_1_InRef_ExtRef_Without_LnClass,InRef6,setSrcRef"
     })
-    void updateDoInRef_should_not_update_tst_DAI_When_only_1_ExtRef(String testName, String ldInst, String doName, String daName) {
+    void updateDoInRef_should_not_update_DAI(String testName, String ldInst, String doName, String daName) {
         // Given
         SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_issue_231_test_ok.xml");
 
@@ -1160,7 +1164,7 @@ class SclServiceTest {
     @Test
     void analyzeDataGroups_should_success() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_binded_ied_controls_fcda.xml");
+        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter1 = sclRootAdapter.getIEDAdapterByName("IED_NAME1");
         iedAdapter1.getCurrentElem().getAccessPoint().get(0).getServices().getClientServices().setMaxAttributes(9L);
@@ -1178,7 +1182,7 @@ class SclServiceTest {
     void analyzeDataGroups_should_return_errors_messages() {
 
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_binded_ied_controls_fcda.xml");
+        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME2");
         iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getConfDataSet().setMaxAttributes(1L);
@@ -1192,17 +1196,17 @@ class SclServiceTest {
         assertThat(sclReport.getSclReportItems()).hasSize(11)
                 .extracting(SclReportItem::getMessage)
                 .containsExactlyInAnyOrder(
-                        "There are too much FCDA for the Client IED IED_NAME1",
-                                "The Client IED IED_NAME1 subscribes to too much GOOSE Control Blocks.",
-                                "The Client IED IED_NAME1 subscribes to too much REPORT Control Blocks.",
-                                "The Client IED IED_NAME1 subscribes to too much SMV Control Blocks.",
-                                "There are too much FCDA for the DataSet DATASET6 for the LDevice LD_INST21 in IED IED_NAME2",
-                                "There are too much FCDA for the DataSet DATASET6 for the LDevice LD_INST22 in IED IED_NAME2",
-                                "There are too much FCDA for the DataSet DATASET5 for the LDevice LD_INST22 in IED IED_NAME2",
-                                "There are too much DataSets for the IED IED_NAME2",
-                                "There are too much Report Control Blocks for the IED IED_NAME2",
-                                "There are too much GOOSE Control Blocks for the IED IED_NAME2",
-                                "There are too much SMV Control Blocks for the IED IED_NAME2");
+                                "The Client IED IED_NAME1 subscribes to too much FCDA: 9 > 8 max",
+                                "The Client IED IED_NAME1 subscribes to too much GOOSE Control Blocks: 3 > 2 max",
+                                "The Client IED IED_NAME1 subscribes to too much Report Control Blocks: 1 > 0 max",
+                                "The Client IED IED_NAME1 subscribes to too much SMV Control Blocks: 2 > 1 max",
+                                "There are too much FCDA for the DataSet dataset6 for the LDevice LD_INST21 in IED IED_NAME2: 2 > 1 max",
+                                "There are too much FCDA for the DataSet dataset6 for the LDevice LD_INST22 in IED IED_NAME2: 2 > 1 max",
+                                "There are too much FCDA for the DataSet dataset5 for the LDevice LD_INST22 in IED IED_NAME2: 2 > 1 max",
+                                "There are too much DataSets for the IED IED_NAME2: 6 > 3 max",
+                                "There are too much Report Control Blocks for the IED IED_NAME2: 1 > 0 max",
+                                "There are too much GOOSE Control Blocks for the IED IED_NAME2: 3 > 2 max",
+                                "There are too much SMV Control Blocks for the IED IED_NAME2: 3 > 1 max");
     }
 
 

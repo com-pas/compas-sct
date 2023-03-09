@@ -371,15 +371,15 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      * @return all Control Blocks matching a Service Type
      * @param <V> inference parameter for Type of Control Block to find
      */
-    public  <V> List<? extends TControl> getTControlsByType(Class<V> cls) {
+    public  <V extends TControl> List<V> getTControlsByType(Class<V> cls) {
         if (TGSEControl.class.equals(cls) && isLN0()) {
-            return ((LN0) currentElem).getGSEControl();
+            return (List<V>) ((LN0) currentElem).getGSEControl();
         } else if (TSampledValueControl.class.equals(cls) && isLN0()) {
-            return ((LN0) currentElem).getSampledValueControl();
+            return (List<V>) ((LN0) currentElem).getSampledValueControl();
         } else if (TReportControl.class.equals(cls)) {
-            return currentElem.getReportControl();
+            return (List<V>) currentElem.getReportControl();
         }
-        throw new IllegalArgumentException("Unsupported ControlBlock " + cls.getSimpleName());
+        throw new IllegalArgumentException("Unsupported ControlBlock %s for %s element".formatted(cls.getSimpleName(), elementXPath()));
     }
 
     /**
@@ -950,6 +950,11 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 .filter(tReportControl -> name.equals(tReportControl.getName()))
                 .findFirst()
                 .map(tControl -> new ControlBlockAdapter(this, tControl));
+    }
+
+    public Stream<ControlBlockAdapter> streamControlBlocks(ControlBlockEnum controlBlockEnum) {
+        return getTControlsByType(controlBlockEnum.getControlBlockClass()).stream()
+            .map(tControl -> new ControlBlockAdapter(this, tControl));
     }
 
     public ControlBlockAdapter createControlBlockIfNotExists(String cbName, String id, String datSet, ControlBlockEnum controlBlockEnum) {

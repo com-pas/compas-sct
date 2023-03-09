@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.com.CommunicationAdapter;
+import org.lfenergy.compas.sct.commons.scl.com.ConnectedAPAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
@@ -291,4 +292,20 @@ public class SclRootAdapter extends SclElementAdapter<SclRootAdapter, SCL> {
         throw new ScdException("Invalid ObjRef: " + val);
     }
 
+    /**
+     * Find a ConnectedAp element withe given iedName and apName
+     * @param iedName iedName
+     * @param apName apName
+     * @return the first ConnectedAp which match the given iedName and apName, or empty Optional if none found
+     */
+    public Optional<ConnectedAPAdapter> findConnectedApAdapter(String iedName, String apName) {
+        if (!currentElem.isSetCommunication()) {
+            return Optional.empty();
+        }
+        CommunicationAdapter communicationAdapter = new CommunicationAdapter(this, currentElem.getCommunication());
+        return communicationAdapter.getSubNetworkAdapters().stream()
+            .map(subNetworkAdapter -> subNetworkAdapter.findConnectedAPAdapter(iedName, apName))
+            .flatMap(Optional::stream)
+            .findFirst();
+    }
 }

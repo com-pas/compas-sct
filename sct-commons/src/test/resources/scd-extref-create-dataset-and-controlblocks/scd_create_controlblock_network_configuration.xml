@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- SPDX-FileCopyrightText: 2023 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<SCL version="2007" revision="B" release="4" xmlns="http://www.iec.ch/61850/2003/SCL" xmlns:compas="https://www.lfenergy.org/compas/extension/v1">
+    <Header id="hId" version="2007" revision="B" toolID="COMPAS"/>
+    <Communication>
+        <SubNetwork type="IP" name="SUBNETWORK1">
+            <ConnectedAP iedName="IED_NAME2" apName="AP_NAME"/>
+            <ConnectedAP iedName="IED_NAME3" apName="AP_NAME"/>
+        </SubNetwork>
+    </Communication>
+    <IED name="IED_NAME1">
+        <Private type="COMPAS-ICDHeader">
+            <compas:ICDHeader ICDSystemVersionUUID="System_Version_IED_NAME1" IEDType="BCU" IEDSubstationinstance="11" IEDName="IED_NAME1" VendorName="SCLE SFE" IEDmodel="ARKENS-SV1120-HGAAA-EB5" IEDredundancy="A" BayLabel="3THEIX2" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+        </Private>
+        <Private type="COMPAS-Bay">
+            <compas:Bay UUID="UuidBay1"/>
+        </Private>
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LD_INST11" ldName="IED_NAME1LD_INST11">
+                    <LN0 lnClass="LLN0" inst="" lnType="LNEX1">
+                        <DOI name="Mod">
+                            <DAI name="stVal">
+                                <Val>on</Val>
+                            </DAI>
+                        </DOI>
+                        <Inputs>
+                            <Private type="COMPAS-Flow">
+                                <compas:Flow dataStreamKey="GSE test bay internal" ExtRefiedName="IED_NAME2" ExtRefldinst="LD_INST21" ExtRefprefix="" ExtReflnClass="ANCR" ExtReflnInst="1" FlowID="1" FlowStatus="ACTIVE" FlowKind="BAY_INTERNAL"/>
+                                <compas:Flow dataStreamKey="GSE test bay external" ExtRefiedName="IED_NAME3" ExtRefldinst="LD_INST31" ExtRefprefix="" ExtReflnClass="ANCR" ExtReflnInst="1" FlowID="1" FlowStatus="ACTIVE" FlowKind="BAY_EXTERNAL"/>
+                                <compas:Flow dataStreamKey="GSE test bay internal MX" ExtRefiedName="IED_NAME2" ExtRefldinst="LD_INST21" ExtRefprefix="" ExtReflnClass="ANCR" ExtReflnInst="1" FlowID="1" FlowStatus="ACTIVE" FlowKind="BAY_INTERNAL"/>
+                                <compas:Flow dataStreamKey="SMV test bay internal" ExtRefiedName="IED_NAME2" ExtRefldinst="LD_INST21" ExtRefprefix="" ExtReflnClass="ANCR" ExtReflnInst="1" FlowID="1" FlowStatus="ACTIVE" FlowKind="BAY_INTERNAL"/>
+                                <compas:Flow dataStreamKey="SMV test bay external" ExtRefiedName="IED_NAME3" ExtRefldinst="LD_INST31" ExtRefprefix="" ExtReflnClass="ANCR" ExtReflnInst="1" FlowID="1" FlowStatus="ACTIVE" FlowKind="BAY_EXTERNAL"/>
+                                <compas:Flow dataStreamKey="SMV test bay internal MX" ExtRefiedName="IED_NAME2" ExtRefldinst="LD_INST21" ExtRefprefix="" ExtReflnClass="ANCR" ExtReflnInst="1" FlowID="1" FlowStatus="ACTIVE" FlowKind="BAY_INTERNAL"/>
+                            </Private>
+                            <ExtRef iedName="IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="DoName" daName="daNameST" intAddr="INT_ADDR11" serviceType="GOOSE" srcLDInst="LD_INST21" srcCBName="CB_LD_INST21_GSI" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113" desc="GSE test bay internal"/>
+                            <ExtRef iedName="IED_NAME3" ldInst="LD_INST31" lnClass="ANCR" lnInst="1" doName="DoName" daName="daNameST" intAddr="INT_ADDR11" serviceType="GOOSE" srcLDInst="LD_INST31" srcCBName="CB_LD_INST31_GSE" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113" desc="GSE test bay external"/>
+                            <ExtRef iedName="IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="DoName" daName="daNameMX" intAddr="INT_ADDR11" serviceType="GOOSE" srcLDInst="LD_INST21" srcCBName="CB_LD_INST21_GMI" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113" desc="GSE test bay internal MX"/>
+                            <ExtRef iedName="IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="DoName" daName="daNameST" intAddr="INT_ADDR11" serviceType="SMV" srcLDInst="LD_INST21" srcCBName="CB_LD_INST21_SVI" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113" desc="SMV test bay internal"/>
+                            <ExtRef iedName="IED_NAME3" ldInst="LD_INST31" lnClass="ANCR" lnInst="1" doName="DoName" daName="daNameST" intAddr="INT_ADDR11" serviceType="SMV" srcLDInst="LD_INST31" srcCBName="CB_LD_INST31_SVE" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113" desc="SMV test bay external"/>
+                            <ExtRef iedName="IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="DoName" daName="daNameMX" intAddr="INT_ADDR11" serviceType="SMV" srcLDInst="LD_INST21" srcCBName="CB_LD_INST21_SVI" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113" desc="SMV test bay internal MX"/>
+                        </Inputs>
+                    </LN0>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
+    <IED name="IED_NAME2">
+        <Private type="COMPAS-ICDHeader">
+            <compas:ICDHeader ICDSystemVersionUUID="System_Version_IED_NAME2" IEDType="BCU" IEDSubstationinstance="22" IEDName="IED_NAME2" VendorName="SCLE SFE" IEDmodel="ARKENS-SV1120-HGAAA-EB5" IEDredundancy="A" BayLabel="3THEIX2" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+        </Private>
+        <Private type="COMPAS-SystemVersion">
+            <compas:SystemVersion MainSystemVersion="01.00" MinorSystemVersion="009.001.001"/>
+        </Private>
+        <Private type="COMPAS-Bay">
+            <compas:Bay UUID="UuidBay1"/>
+        </Private>
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LD_INST21" ldName="IED_NAME2LD_INST21">
+                    <LN0 lnClass="LLN0" inst="" lnType="LNEX1">
+                        <DataSet name="DS_LD_INST21_GSI">
+                            <FCDA ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="DoName" daName="daNameST" fc="ST"/>
+                        </DataSet>
+                        <DataSet name="DS_LD_INST21_GMI">
+                            <FCDA ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="DoName" daName="daNameMX" fc="MX"/>
+                        </DataSet>
+                        <DataSet name="DS_LD_INST21_SVI">
+                            <FCDA ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="DoName" daName="daNameMX" fc="MX"/>
+                            <FCDA ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="DoName" daName="daNameST" fc="ST"/>
+                        </DataSet>
+                        <DOI name="Mod">
+                            <DAI name="stVal">
+                                <Val>on</Val>
+                            </DAI>
+                        </DOI>
+                        <GSEControl type="GOOSE" appID="IED_NAME2LD_INST21/LLN0.CB_LD_INST21_GSI" fixedOffs="false" securityEnable="None" confRev="10000" name="CB_LD_INST21_GSI" datSet="DS_LD_INST21_GSI">
+                            <IEDName apRef="AP_NAME" ldInst="LD_INST11" lnClass="LLN0">IED_NAME1</IEDName>
+                        </GSEControl>
+                        <GSEControl type="GOOSE" appID="IED_NAME2LD_INST21/LLN0.CB_LD_INST21_GMI" fixedOffs="false" securityEnable="None" confRev="10000" name="CB_LD_INST21_GMI" datSet="DS_LD_INST21_GMI">
+                            <IEDName apRef="AP_NAME" ldInst="LD_INST11" lnClass="LLN0">IED_NAME1</IEDName>
+                        </GSEControl>
+                        <SampledValueControl smvID="IED_NAME2LD_INST21/LLN0.CB_LD_INST21_SVI" multicast="true" smpRate="4800" nofASDU="2" smpMod="SmpPerSec" securityEnable="None" confRev="10000" name="CB_LD_INST21_SVI" datSet="DS_LD_INST21_SVI">
+                            <IEDName apRef="AP_NAME" ldInst="LD_INST11" lnClass="LLN0">IED_NAME1</IEDName>
+                            <SmvOpts refreshTime="false" sampleSynchronized="true" sampleRate="true" dataSet="false" security="false" timestamp="false" synchSourceId="false"/>
+                        </SampledValueControl>
+                    </LN0>
+                    <LN lnClass="ANCR" inst="1" lnType="lnType"/>
+                </LDevice>
+            </Server>
+            <Services>
+                <ReportSettings cbName="Conf" datSet="Conf"/>
+                <GSESettings cbName="Conf" datSet="Conf"/>
+                <SMVSettings cbName="Conf" datSet="Conf">
+                    <SamplesPerSec>5</SamplesPerSec>
+                </SMVSettings>
+            </Services>
+        </AccessPoint>
+    </IED>
+    <IED name="IED_NAME3">
+        <Private type="COMPAS-ICDHeader">
+            <compas:ICDHeader ICDSystemVersionUUID="System_Version_IED_NAME3" IEDType="BCU" IEDSubstationinstance="22" IEDName="IED_NAME3" VendorName="SCLE SFE" IEDmodel="ARKENS-SV1120-HGAAA-EB5" IEDredundancy="A" BayLabel="3THEIX2" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+        </Private>
+        <Private type="COMPAS-SystemVersion">
+            <compas:SystemVersion MainSystemVersion="01.00" MinorSystemVersion="009.001.001"/>
+        </Private>
+        <Private type="COMPAS-Bay">
+            <compas:Bay UUID="UuidBay2"/>
+        </Private>
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LD_INST31" ldName="IED_NAME3LD_INST31">
+                    <LN0 lnClass="LLN0" inst="" lnType="LNEX1">
+                        <DataSet name="DS_LD_INST31_GSE">
+                            <FCDA ldInst="LD_INST31" lnClass="ANCR" lnInst="1" doName="DoName" daName="daNameST" fc="ST"/>
+                        </DataSet>
+                        <DataSet name="DS_LD_INST31_SVE">
+                            <FCDA ldInst="LD_INST31" lnClass="ANCR" lnInst="1" doName="DoName" daName="daNameST" fc="ST"/>
+                        </DataSet>
+                        <DOI name="Mod">
+                            <DAI name="stVal">
+                                <Val>on</Val>
+                            </DAI>
+                        </DOI>
+                        <GSEControl type="GOOSE" appID="IED_NAME3LD_INST31/LLN0.CB_LD_INST31_GSE" fixedOffs="false" securityEnable="None" confRev="10000" name="CB_LD_INST31_GSE" datSet="DS_LD_INST31_GSE">
+                            <IEDName apRef="AP_NAME" ldInst="LD_INST11" lnClass="LLN0">IED_NAME1</IEDName>
+                        </GSEControl>
+                        <SampledValueControl smvID="IED_NAME3LD_INST31/LLN0.CB_LD_INST31_SVE" multicast="true" smpRate="4800" nofASDU="2" smpMod="SmpPerSec" securityEnable="None" confRev="10000" name="CB_LD_INST31_SVE" datSet="DS_LD_INST31_SVE">
+                            <IEDName apRef="AP_NAME" ldInst="LD_INST11" lnClass="LLN0">IED_NAME1</IEDName>
+                            <SmvOpts refreshTime="false" sampleSynchronized="true" sampleRate="true" dataSet="false" security="false" timestamp="false" synchSourceId="false"/>
+                        </SampledValueControl>
+                    </LN0>
+                    <LN lnClass="ANCR" inst="1" lnType="lnType"/>
+                </LDevice>
+            </Server>
+            <Services>
+                <ReportSettings cbName="Conf" datSet="Conf"/>
+                <GSESettings cbName="Conf" datSet="Conf"/>
+                <SMVSettings cbName="Conf" datSet="Conf">
+                    <SamplesPerSec>5</SamplesPerSec>
+                </SMVSettings>
+            </Services>
+        </AccessPoint>
+    </IED>
+    <DataTypeTemplates>
+        <LNodeType lnClass="LLN0" id="LNEX1">
+            <DO name="Mod" type="Do0"/>
+        </LNodeType>
+        <LNodeType lnClass="ANCR" id="lnType">
+            <DO name="DoName" type="Do1"/>
+        </LNodeType>
+        <DOType cdc="ENC" id="Do0">
+            <DA fc="ST" name="stVal" bType="Enum" type="BehaviourModeKind"/>
+        </DOType>
+        <DOType cdc="ENC" id="Do1">
+            <DA fc="ST" name="daNameST" bType="BOOLEAN"/>
+            <DA fc="MX" name="daNameMX" bType="BOOLEAN"/>
+        </DOType>
+        <EnumType id="BehaviourModeKind">
+            <EnumVal ord="1">on</EnumVal>
+            <EnumVal ord="2">off</EnumVal>
+            <EnumVal ord="3">test</EnumVal>
+        </EnumType>
+    </DataTypeTemplates>
+</SCL>
