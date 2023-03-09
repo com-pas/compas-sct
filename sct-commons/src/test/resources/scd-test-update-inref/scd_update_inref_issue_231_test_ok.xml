@@ -65,7 +65,72 @@
                         </Inputs>
                     </LN0>
                 </LDevice>
-
+                <!-- Case with ExtRef.desc suffix with "_1" but parameter iedName not present -->
+                <LDevice inst="LD_WITH_1_InRef_ExtRef_Without_IedName" ldName="IED_NAME1LD_INST12">
+                    <LN0 lnClass="LLN0" inst="" lnType="LN11">
+                        <DOI name="InRef4">
+                            <DAI name="purpose">
+                                <Val>LD_WITH_1_Bad_InRef_DOI_InRef4</Val>
+                            </DAI>
+                            <DAI name="setSrcRef" valKind="RO" valImport="true"/>
+                            <DAI name="setSrcCB" valKind="RO" valImport="false">
+                                <Val>OLD_VAL</Val>
+                            </DAI>
+                            <DAI name="setTstRef" valKind="RO" valImport="false"/>
+                            <DAI name="setTstCB" valKind="RO" valImport="false"/>
+                        </DOI>
+                        <Inputs>
+                            <ExtRef desc="LD_WITH_1_InRef_DOI_EXTREF_WITHOUT_IEDNAME_InRef4_1"
+                                    ldInst="LD_WITH_1_InRef" lnClass="ANCR"
+                                    lnInst="1" prefix="PR" intAddr="INT_ADDR11" pDO="Do11.sdo11"
+                                    doName="Do11.sdo11"/>
+                        </Inputs>
+                    </LN0>
+                </LDevice>
+                <!-- Case with ExtRef.desc suffix with "_1" but parameter ldInst not present -->
+                <LDevice inst="LD_WITH_1_InRef_ExtRef_Without_LdInst" ldName="IED_NAME1LD_INST12">
+                    <LN0 lnClass="LLN0" inst="" lnType="LN11">
+                        <DOI name="InRef5">
+                            <DAI name="purpose">
+                                <Val>LD_WITH_1_Bad_InRef_DOI_InRef4</Val>
+                            </DAI>
+                            <DAI name="setSrcRef" valKind="RO" valImport="true"/>
+                            <DAI name="setSrcCB" valKind="RO" valImport="false">
+                                <Val>OLD_VAL</Val>
+                            </DAI>
+                            <DAI name="setTstRef" valKind="RO" valImport="false"/>
+                            <DAI name="setTstCB" valKind="RO" valImport="false"/>
+                        </DOI>
+                        <Inputs>
+                            <ExtRef iedName="IED_NAME1" desc="LD_WITH_1_InRef_DOI_EXTREF_WITHOUT_LDINST_InRef5_1"
+                                    lnClass="ANCR"
+                                    lnInst="1" prefix="PR" intAddr="INT_ADDR11" pDO="Do11.sdo11"
+                                    doName="Do11.sdo11"/>
+                        </Inputs>
+                    </LN0>
+                </LDevice>
+                <!-- Case with ExtRef.desc suffix with "_1" but parameter lnClass not present -->
+                <LDevice inst="LD_WITH_1_InRef_ExtRef_Without_LnClass" ldName="IED_NAME1LD_INST12">
+                    <LN0 lnClass="LLN0" inst="" lnType="LN11">
+                        <DOI name="InRef6">
+                            <DAI name="purpose">
+                                <Val>LD_WITH_1_Bad_InRef_DOI_InRef4</Val>
+                            </DAI>
+                            <DAI name="setSrcRef" valKind="RO" valImport="true"/>
+                            <DAI name="setSrcCB" valKind="RO" valImport="false">
+                                <Val>OLD_VAL</Val>
+                            </DAI>
+                            <DAI name="setTstRef" valKind="RO" valImport="false"/>
+                            <DAI name="setTstCB" valKind="RO" valImport="false"/>
+                        </DOI>
+                        <Inputs>
+                            <ExtRef iedName="IED_NAME1" desc="LD_WITH_1_InRef_DOI_EXTREF_WITHOUT_LNCLASS_InRef6_1"
+                                    ldInst="LD_WITH_1_InRef"
+                                    lnInst="1" prefix="PR" intAddr="INT_ADDR11" pDO="Do11.sdo11"
+                                    doName="Do11.sdo11"/>
+                        </Inputs>
+                    </LN0>
+                </LDevice>
             </Server>
         </AccessPoint>
     </IED>

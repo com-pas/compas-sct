@@ -1114,9 +1114,12 @@ class SclServiceTest {
     @ParameterizedTest(name = "{0}")
     @CsvSource({
             "Test with only 1 ExtRef should not update srcTstCB,LD_WITH_1_InRef,InRef2,setTstRef",
-            "Test with only 1 ExtRef should not update setTstCB Value,LD_WITH_1_InRef,InRef2,setTstCB"
+            "Test with only 1 ExtRef should not update setTstCB Value,LD_WITH_1_InRef,InRef2,setTstCB",
+            "Test with only 1 ExtRef should not update DO when IedName not present,LD_WITH_1_InRef_ExtRef_Without_IedName,InRef4,setSrcRef",
+            "Test with only 1 ExtRef should not update DO when LdInst not present,LD_WITH_1_InRef_ExtRef_Without_LdInst,InRef5,setSrcRef",
+            "Test with only 1 ExtRef should not update DO when lnClass not present,LD_WITH_1_InRef_ExtRef_Without_LnClass,InRef6,setSrcRef"
     })
-    void updateDoInRef_should_not_update_tst_DAI_When_only_1_ExtRef(String testName, String ldInst, String doName, String daName) {
+    void updateDoInRef_should_not_update_DAI(String testName, String ldInst, String doName, String daName) {
         // Given
         SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_issue_231_test_ok.xml");
 
