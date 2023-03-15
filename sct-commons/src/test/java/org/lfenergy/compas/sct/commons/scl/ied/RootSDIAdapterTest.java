@@ -49,13 +49,6 @@ class RootSDIAdapterTest {
         tdai.setName("angRef");
         tsdi.getSDIOrDAI().add(tdai);
         RootSDIAdapter.DAIAdapter daiAdapter = assertDoesNotThrow(() -> new RootSDIAdapter.DAIAdapter(rootSDIAdapter,tdai));
-
-        // test tree map
-        assertThrows(UnsupportedOperationException.class, () -> daiAdapter.getDataAdapterByName("toto"));
-        assertThrows(
-                UnsupportedOperationException.class,
-                () -> daiAdapter.getStructuredDataAdapterByName("toto")
-        );
     }
 
     @Test

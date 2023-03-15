@@ -6,10 +6,7 @@ package org.lfenergy.compas.sct.commons.util;
 
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.support.ReflectionSupport;
-import org.lfenergy.compas.scl2007b4.model.TAddress;
-import org.lfenergy.compas.scl2007b4.model.TConnectedAP;
-import org.lfenergy.compas.scl2007b4.model.TDurationInMilliSec;
-import org.lfenergy.compas.scl2007b4.model.TP;
+import org.lfenergy.compas.scl2007b4.model.*;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -87,5 +84,28 @@ class SclConstructorHelperTest {
         //Then
         assertThat(tConnectedAP).extracting(TConnectedAP::getIedName, TConnectedAP::getApName)
             .containsExactly(iedName, apName);
+    }
+
+    @Test
+    void newVal_should_create_new_instance_with_no_sGroup() {
+        //Given
+        String value = "value";
+        //When
+        TVal tVal = SclConstructorHelper.newVal(value);
+        //Then
+        assertThat(tVal).extracting(TVal::getValue, TVal::isSetSGroup)
+            .containsExactly(value, false);
+    }
+
+    @Test
+    void newVal_should_create_new_instance_with_sGroup() {
+        //Given
+        String value = "value";
+        long sGroup = 1;
+        //When
+        TVal tVal = SclConstructorHelper.newVal(value, sGroup);
+        //Then
+        assertThat(tVal).extracting(TVal::getValue, TVal::getSGroup)
+            .containsExactly(value, sGroup);
     }
 }

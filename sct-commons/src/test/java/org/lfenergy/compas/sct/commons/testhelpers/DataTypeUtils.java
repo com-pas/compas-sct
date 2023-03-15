@@ -9,6 +9,7 @@ import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedCDCEnum;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.dto.DoTypeName;
+import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 
 import java.util.Map;
 
@@ -26,6 +27,13 @@ public class DataTypeUtils {
         DoTypeName resultDo = new DoTypeName(nameRef);
         resultDo.setCdc(cdc);
         return resultDo;
+    }
+
+    public static ResumedDataTemplate createResumedDataTemplate(DoTypeName doTypeName, DaTypeName daTypeName) {
+        ResumedDataTemplate rDtt = new ResumedDataTemplate();
+        rDtt.setDoName(doTypeName);
+        rDtt.setDaName(daTypeName);
+        return rDtt;
     }
 
     private DataTypeUtils() {

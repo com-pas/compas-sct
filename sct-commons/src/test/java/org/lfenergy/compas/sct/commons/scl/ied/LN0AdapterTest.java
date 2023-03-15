@@ -310,6 +310,57 @@ class LN0AdapterTest {
     }
 
     @Test
+    void findDoiAdapterByName_should_find_DOI(){
+        // Given
+        LN0Adapter ln0Adapter = createLn0AdapterWithDoi("doi1");
+        // When
+        Optional<DOIAdapter> result = ln0Adapter.findDoiAdapterByName("doi1");
+        // Then
+        assertThat(result).map(DOIAdapter::getName).hasValue("doi1");
+    }
+
+    @Test
+    void findDoiAdapterByName_should_return_empty(){
+        // Given
+        LN0Adapter ln0Adapter = createLn0AdapterWithDoi("doi1");
+        // When
+        Optional<DOIAdapter> result = ln0Adapter.findDoiAdapterByName("doi2");
+        // Then
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void getDOIAdapterByName_should_return_DOI(){
+        // Given
+        LN0Adapter ln0Adapter = createLn0AdapterWithDoi("doi1");
+        // When
+        DOIAdapter result = ln0Adapter.getDOIAdapterByName("doi1");
+        // Then
+        assertThat(result.getName()).isEqualTo("doi1");
+    }
+
+    @Test
+    void getDOIAdapterByName_should_throw_exception(){
+        // Given
+        LN0Adapter ln0Adapter = createLn0AdapterWithDoi("doi1");
+        // When & Then
+        assertThatThrownBy(() -> ln0Adapter.getDOIAdapterByName("doi2"))
+                .isInstanceOf(ScdException.class);
+    }
+
+    private static LN0Adapter createLn0AdapterWithDoi(String doiName) {
+        LN0 ln0 = new LN0();
+        TLDevice tlDevice = new TLDevice();
+        tlDevice.setLN0(ln0);
+        LDeviceAdapter lDeviceAdapter = mock(LDeviceAdapter.class);
+        when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
+        TDOI tdoi = new TDOI();
+        tdoi.setName(doiName);
+        ln0.getDOI().add(tdoi);
+        return new LN0Adapter(lDeviceAdapter, ln0);
+    }
+
+    @Test
     void testGetDOIAdapterByName() {
         IEDAdapter iedAdapter = mock(IEDAdapter.class);
         TIED tied = new TIED();
@@ -906,7 +957,7 @@ class LN0AdapterTest {
         List<SclReportItem> sclReportItems = sourceLn0.updateDoInRef();
 
         // Then
-        DOIAdapter.DAIAdapter finalSetSrcRef = sourceLn0.getDOIAdapterByName("InRef6").getDataAdapterByName(DOIAdapter.DA_NAME_SET_SRC_REF);
+        AbstractDAIAdapter<?> finalSetSrcRef = sourceLn0.getDOIAdapterByName("InRef6").getDataAdapterByName(DOIAdapter.DA_NAME_SET_SRC_REF);
         assertThat(finalSetSrcRef.getCurrentElem().isSetVal()).isFalse();
         assertThat(sclReportItems).isEmpty();
     }

@@ -7,7 +7,6 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.ExtrefTarget;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
-import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.util.Utils;
@@ -77,90 +76,24 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
                 Utils.xpathAttributeFilter("name", currentElem.isSetName() ? currentElem.getName() : null));
     }
 
-    /**
-     * Gets SDI by name from current DOI
-     *
-     * @param sName name of SDI to get
-     * @return <em>RootSDIAdapter</em> object
-     * @throws ScdException throws when specified name of SDI not present in current DOI
-     */
     @Override
-    public RootSDIAdapter getStructuredDataAdapterByName(String sName) throws ScdException {
-        return currentElem.getSDIOrDAI()
-                .stream()
-                .filter(tUnNaming -> tUnNaming.getClass().equals(TSDI.class))
-                .map(TSDI.class::cast)
-                .filter(tsdi -> tsdi.getName().equals(sName))
-                .map(tsdi -> new RootSDIAdapter(this, tsdi))
-                .findFirst()
-                .orElseThrow(
-                        () -> new ScdException(
-                                String.format("Unknown SDI (%s) in DOI (%s)", sName, currentElem.getName())
-                        )
-                );
+    public String getName() {
+        return currentElem.getName();
     }
 
-    /**
-     * Gets DAI from current DOI
-     *
-     * @param daName name of DAI to get
-     * @return <em>DAIAdapter</em> object
-     * @throws ScdException throws when specified name of DAI not present in current DOI
-     */
     @Override
-    public DAIAdapter getDataAdapterByName(String daName) throws ScdException {
-        return findDataAdapterByName(daName)
-                .orElseThrow(
-                        () -> new ScdException(
-                                String.format("Unknown DAI (%s) in DOI (%s)", daName, currentElem.getName())
-                        )
-                );
+    public List<TUnNaming> getSDIOrDAI() {
+        return currentElem.getSDIOrDAI();
     }
 
-    /**
-     * Given a DAI[name], returns an associated DAIAdapter
-     *
-     * @param daName name of DAI to get
-     * @return an Optional <em>DAIAdapter</em> if found, Optional.empty() otherwise
-     */
-    public Optional<DAIAdapter> findDataAdapterByName(String daName) {
-        return currentElem.getSDIOrDAI()
-                .stream()
-                .filter(tUnNaming -> tUnNaming.getClass().equals(TDAI.class))
-                .map(TDAI.class::cast)
-                .filter(tdai -> tdai.getName().equals(daName))
-                .map(tdai -> new DAIAdapter(this, tdai))
-                .findFirst();
+    @Override
+    public IDataParentAdapter toAdapter(TSDI childTSDI) {
+        return new RootSDIAdapter(this, childTSDI);
     }
 
-    /**
-     * Adds DAI to current DOI
-     *
-     * @param name        name of DAI to add
-     * @param isUpdatable updatability state of DAI
-     * @return <em>DAIAdapter</em> object as added DAI
-     */
     @Override
-    public DAIAdapter addDAI(String name, boolean isUpdatable) {
-        TDAI tdai = new TDAI();
-        tdai.setName(name);
-        tdai.setValImport(isUpdatable);
-        currentElem.getSDIOrDAI().add(tdai);
-        return new DAIAdapter(this, tdai);
-    }
-
-    /**
-     * Adds SDOI to SDI in current DOI
-     *
-     * @param sdoName name of SDOI to add
-     * @return <em>RootSDIAdapter</em> object as added SDOI
-     */
-    @Override
-    public RootSDIAdapter addSDOI(String sdoName) {
-        TSDI tsdi = new TSDI();
-        tsdi.setName(sdoName);
-        currentElem.getSDIOrDAI().add(tsdi);
-        return new RootSDIAdapter(this, tsdi);
+    public AbstractDAIAdapter<?> toAdapter(TDAI childTDAI) {
+        return new DAIAdapter(this, childTDAI);
     }
 
     /**
@@ -182,11 +115,11 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
             TExtRef tExtRefMin = tExtRefMinOptional.get();
             findDataAdapterByName(DA_NAME_SET_SRC_REF)
                     .orElse(addDAI(DA_NAME_SET_SRC_REF, true))
-                    .updateVal(createInRefValNominalString(tExtRefMin));
+                    .setVal(createInRefValNominalString(tExtRefMin));
             if (tExtRefMin.isSetSrcCBName()) {
                 findDataAdapterByName(DA_NAME_SET_SRC_CB)
                         .orElse(addDAI(DA_NAME_SET_SRC_CB, true))
-                        .updateVal(createInRefValTestString(tExtRefMin));
+                        .setVal(createInRefValTestString(tExtRefMin));
             }
 
             Optional<TExtRef> tExtRefMaxOptional = tExtRefs.stream().max(EXTREF_DESC_SUFFIX_COMPARATOR);
@@ -194,11 +127,11 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
                 TExtRef tExtRefMax = tExtRefMaxOptional.get();
                 findDataAdapterByName(DA_NAME_SET_TST_REF)
                         .orElse(addDAI(DA_NAME_SET_TST_REF, true))
-                        .updateVal(createInRefValNominalString(tExtRefMax));
+                        .setVal(createInRefValNominalString(tExtRefMax));
                 if (tExtRefMax.isSetSrcCBName()) {
                     findDataAdapterByName(DA_NAME_SET_TST_CB)
                             .orElse(addDAI(DA_NAME_SET_TST_CB, true))
-                            .updateVal(createInRefValTestString(tExtRefMax));
+                            .setVal(createInRefValTestString(tExtRefMax));
                 }
             }
         } else {

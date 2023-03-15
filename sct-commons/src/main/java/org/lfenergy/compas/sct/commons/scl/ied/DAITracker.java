@@ -37,14 +37,23 @@ import java.util.Map;
  */
 @Getter
 public class DAITracker {
+    /**
+     * Value of indexDoType when DOI matching the DO is not instantiated
+     */
+    public static final int DOI_NOT_FOUND = -2;
+    /**
+     * When data has no BDA :   value of indexDaType when the DAI matching the DA is not instantiated
+     * When data has BDA :      value of indexDaType when the SDI matching the DA is not instantiated
+     */
+    public static final int SDI_OR_DAI_NOT_FOUND_FOR_DA = -2; //
     private final AbstractLNAdapter<?> lnAdapter;
     private final DoTypeName doTypeName;
     private final DaTypeName daTypeName;
 
     private IDataParentAdapter doiOrSdoiAdapter;
-    private int indexDoType = -2;
+    private int indexDoType = DOI_NOT_FOUND;
     private IDataAdapter bdaiOrDaiAdapter;
-    private int indexDaType = -2;
+    private int indexDaType = SDI_OR_DAI_NOT_FOUND_FOR_DA;
 
     /**
      * Constructor
@@ -61,13 +70,17 @@ public class DAITracker {
     }
 
     /**
-     * Checks DO/DA presence in LNode by browsing through LNode based path given in <em><b>doTypeName</b></em>
-     * and <em><b>daTypeName</b></em> attributes
+     * Checks DOI/SDI/DAI presence in LN (lnAdapter attribute) matching given DO/SDO (doTypeName attribute) and DA/BDA (daTypeName attribute)
+     * As a reminder DOI/SDI/DAI chain matches DO/SDO/DA/BDA chain like this :
+     * - DOI is equivalent to a DO
+     * - SDI are equivalent to SDO and DA with bType="Struct" and BDA with bType="Struct". There can be no SDI when there are no SDO, nor DA(bType="Struct") , nor SDA(bType="Struct")
+     * - DAI is the final element. It is equivalent to the final DA (when bType != "Struct") or the final BDA (BDA with bType != "Struct")
+     *
      * @return one of <em>MatchResult</em> enum value :
      *      <ul>
-     *          <li>FAILED</li>
-     *          <li>PARTIAL_MATCH</li>
-     *          <li>FULL_MATCH</li>
+     *          <li>FAILED</li> => no DOI found ( = nothing found)
+     *          <li>PARTIAL_MATCH</li> => DOI found, and maybe some SDI found (matching SDO or DA), but DAI not found
+     *          <li>FULL_MATCH</li> => DOI found, all intermediate SDI found and DAI found
      *      </ul>
      */
     public MatchResult search() {

@@ -54,12 +54,6 @@ class SDIAdapterTest {
         tsdi.getSDIOrDAI().add(tdai);
         SDIAdapter.DAIAdapter daiAdapter = assertDoesNotThrow(() -> new SDIAdapter.DAIAdapter(sdiAdapter,tdai));
 
-        // test tree map
-        assertThrows(UnsupportedOperationException.class, () -> daiAdapter.getDataAdapterByName("toto"));
-        assertThrows(
-                UnsupportedOperationException.class,
-                () -> daiAdapter.getStructuredDataAdapterByName("toto")
-        );
     }
 
     @Test
