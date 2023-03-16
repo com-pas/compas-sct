@@ -10,7 +10,6 @@ import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TCompasICDHeader;
 import org.lfenergy.compas.scl2007b4.model.TIED;
 import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings;
-import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.Settings;
 import org.lfenergy.compas.sct.commons.dto.SclReport;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
@@ -27,8 +26,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.NetworkRanges;
-import static org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.RangesPerCbType;
+import static org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.*;
 
 @UtilityClass
 public class ExtRefService {
@@ -202,8 +200,12 @@ public class ExtRefService {
     }
 
     private static Optional<SclReportItem> configureControlBlockNetwork(ControlBlockNetworkSettings controlBlockNetworkSettings, PrimitiveIterator.OfLong appIdIterator, Iterator<String> macAddressIterator, ControlBlockAdapter controlBlockAdapter) {
-        Settings settings = controlBlockNetworkSettings.getNetworkSettings(controlBlockAdapter);
-
+        SettingsOrError settingsOrError = controlBlockNetworkSettings.getNetworkSettings(controlBlockAdapter);
+        if (settingsOrError.errorMessage() != null){
+            return Optional.of(controlBlockAdapter.buildFatalReportItem(
+                    "Cannot configure network for this ControlBlock because: " + settingsOrError.errorMessage()));
+        }
+        Settings settings = settingsOrError.settings();
         if (settings == null) {
             return Optional.of(controlBlockAdapter.buildFatalReportItem(
                     "Cannot configure network for this ControlBlock because no settings was provided"));

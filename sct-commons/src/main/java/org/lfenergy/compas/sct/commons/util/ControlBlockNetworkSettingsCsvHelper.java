@@ -5,22 +5,18 @@
 package org.lfenergy.compas.sct.commons.util;
 
 import com.opencsv.bean.CsvBindByPosition;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
-import org.lfenergy.compas.scl2007b4.model.TCompasICDHeader;
-import org.lfenergy.compas.scl2007b4.model.TCompasIEDRedundancy;
-import org.lfenergy.compas.scl2007b4.model.TCompasIEDType;
-import org.lfenergy.compas.scl2007b4.model.TDurationInMilliSec;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings;
 import org.lfenergy.compas.sct.commons.scl.ied.ControlBlockAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 
 import java.io.Reader;
+import java.math.BigInteger;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -38,7 +34,7 @@ public class ControlBlockNetworkSettingsCsvHelper implements ControlBlockNetwork
     private static final int MAX_VLAN_PRIORITY = 7;
     private static final String NONE = "none";
 
-    private final Map<Criteria, Settings> settings;
+    private final Map<Criteria, Settings> allSettings;
 
     /**
      * Constructor
@@ -48,7 +44,7 @@ public class ControlBlockNetworkSettingsCsvHelper implements ControlBlockNetwork
      * @param csvSource a reader that provides the data as CSV. For example :
      */
     public ControlBlockNetworkSettingsCsvHelper(Reader csvSource) {
-        settings = readCsvFile(csvSource);
+        allSettings = readCsvFile(csvSource);
     }
 
     private Map<Criteria, Settings> readCsvFile(Reader csvSource) {
@@ -61,38 +57,50 @@ public class ControlBlockNetworkSettingsCsvHelper implements ControlBlockNetwork
     }
 
     @Override
-    public Settings getNetworkSettings(ControlBlockAdapter controlBlockAdapter) {
+    public SettingsOrError getNetworkSettings(ControlBlockAdapter controlBlockAdapter) {
         ControlBlockEnum controlBlockEnum = controlBlockAdapter.getControlBlockEnum();
         IEDAdapter iedAdapter = controlBlockAdapter.getParentIedAdapter();
-        String systemVersion = iedAdapter.getCompasSystemVersion()
-                .map(version -> version.getMainSystemVersion() + "." + version.getMinorSystemVersion())
-                .orElse(null);
-        String systemVersionWithoutV = removeVFromSystemVersion(systemVersion);
-        TCompasIEDType iedType = iedAdapter.getCompasICDHeader().map(TCompasICDHeader::getIEDType).orElse(null);
-        TCompasIEDRedundancy iedRedundancy = iedAdapter.getCompasICDHeader().map(TCompasICDHeader::getIEDredundancy).orElse(null);
+        Optional<TCompasSystemVersion> compasSystemVersion = iedAdapter.getCompasSystemVersion();
+        if (compasSystemVersion.isEmpty()) {
+            return new SettingsOrError(null, "No private COMPAS-SystemVersion found in this IED");
+        }
+        String systemVersionWithoutV = removeVFromSystemVersion(compasSystemVersion.get());
+        Optional<TCompasICDHeader> compasICDHeader = iedAdapter.getCompasICDHeader();
+        if (compasICDHeader.isEmpty()) {
+            return new SettingsOrError(null, "No private COMPAS-ICDHeader found in this IED");
+        }
+        TCompasIEDType iedType = compasICDHeader.get().getIEDType();
+        TCompasIEDRedundancy iedRedundancy = compasICDHeader.get().getIEDredundancy();
+        BigInteger iedSystemVersionInstance = compasICDHeader.get().getIEDSystemVersioninstance();
         boolean isBayInternal = controlBlockAdapter.getName().endsWith("I");
-        return findSettings(new Criteria(controlBlockEnum, systemVersionWithoutV, iedType, iedRedundancy, isBayInternal));
+
+        Criteria criteria = new Criteria(controlBlockEnum, systemVersionWithoutV, iedType, iedRedundancy, iedSystemVersionInstance, isBayInternal);
+        Settings settings = findSettings(criteria);
+        return settings != null ?
+                new SettingsOrError(settings, null) :
+                new SettingsOrError(null, "No row found with these criteria " + criteria);
     }
 
     private Settings findSettings(Criteria criteria) {
         Objects.requireNonNull(criteria);
         if (criteria.systemVersionWithoutV() == null
                 || criteria.iedType() == null
-                || criteria.iedRedundancy() == null) {
+                || criteria.iedRedundancy() == null
+                || criteria.iedSystemVersionInstance == null) {
             return null;
         }
-        return settings.get(criteria);
+        return allSettings.get(criteria);
     }
 
-    private static String removeVFromSystemVersion(String systemVersion) {
-        if (systemVersion == null) {
+    private static String removeVFromSystemVersion(TCompasSystemVersion compasSystemVersion) {
+        if (StringUtils.isBlank(compasSystemVersion.getMainSystemVersion())
+                || (StringUtils.isBlank(compasSystemVersion.getMinorSystemVersion()))) {
             return null;
         }
-        String[] systemVersionParts = systemVersion.split("\\.");
-        if (systemVersionParts.length < 4) {
-            return systemVersion;
-        }
-        return systemVersionParts[0] + "." + systemVersionParts[1] + "." + systemVersionParts[2] + "." + systemVersionParts[3];
+        String[] minorVersionParts = compasSystemVersion.getMinorSystemVersion().split("\\.");
+        return (minorVersionParts.length == 3) ?
+                compasSystemVersion.getMainSystemVersion() + "." + minorVersionParts[0] + "." + minorVersionParts[1]
+                : null;
     }
 
     private static Criteria rowToCriteria(Row row) {
@@ -100,9 +108,11 @@ public class ControlBlockNetworkSettingsCsvHelper implements ControlBlockNetwork
                 || StringUtils.isBlank(row.xy)
                 || StringUtils.isBlank(row.zw)
                 || StringUtils.isBlank(row.iedType)
+                || StringUtils.isBlank(row.iedRedundancy)
+                || StringUtils.isBlank(row.iedSystemVersionInstance)
                 || StringUtils.isBlank(row.bindingType)
         ) {
-            throw new IllegalArgumentException("At least one criteria (cbType, xy, zw, iedType, bindingType) is blank");
+            throw new IllegalArgumentException("At least one criteria is null in row " + row);
         }
         ControlBlockEnum controlBlockEnum = switch (row.cbType) {
             case "GOOSE" -> ControlBlockEnum.GSE;
@@ -114,6 +124,7 @@ public class ControlBlockNetworkSettingsCsvHelper implements ControlBlockNetwork
                 row.xy + "." + row.zw,
                 TCompasIEDType.fromValue(row.iedType),
                 TCompasIEDRedundancy.fromValue(row.iedRedundancy),
+                new BigInteger(row.iedSystemVersionInstance),
                 row.bindingType.equals("BAY_INTERNAL")
         );
     }
@@ -160,13 +171,11 @@ public class ControlBlockNetworkSettingsCsvHelper implements ControlBlockNetwork
             String systemVersionWithoutV,
             TCompasIEDType iedType,
             TCompasIEDRedundancy iedRedundancy,
+            BigInteger iedSystemVersionInstance,
             boolean isBayInternal) {
     }
 
-    @NoArgsConstructor
-    @Getter
-    @Setter
-    @EqualsAndHashCode
+    @ToString
     public static class Row {
         @CsvBindByPosition(position = 0)
         private String cbType;
@@ -179,14 +188,16 @@ public class ControlBlockNetworkSettingsCsvHelper implements ControlBlockNetwork
         @CsvBindByPosition(position = 4)
         private String iedRedundancy;
         @CsvBindByPosition(position = 5)
-        private String bindingType;
+        private String iedSystemVersionInstance;
         @CsvBindByPosition(position = 6)
-        private String vlanId;
+        private String bindingType;
         @CsvBindByPosition(position = 7)
-        private String vlanPriority;
+        private String vlanId;
         @CsvBindByPosition(position = 8)
-        private String minTime;
+        private String vlanPriority;
         @CsvBindByPosition(position = 9)
+        private String minTime;
+        @CsvBindByPosition(position = 10)
         private String maxTime;
     }
 
