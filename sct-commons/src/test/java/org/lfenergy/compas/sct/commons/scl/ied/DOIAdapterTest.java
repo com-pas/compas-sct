@@ -5,6 +5,7 @@
 package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
@@ -13,11 +14,13 @@ import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
+import org.lfenergy.compas.sct.commons.util.CommonConstants;
 
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newVal;
 
 class DOIAdapterTest {
 
@@ -59,12 +62,6 @@ class DOIAdapterTest {
         daiAdapter.setValImport(true);
         assertThat(daiAdapter.getCurrentElem().isSetValImport()).isTrue();
 
-        // test tree map
-        assertThatThrownBy(() -> daiAdapter.getDataAdapterByName(TOTO)).isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(() -> daiAdapter.getStructuredDataAdapterByName(TOTO)).isInstanceOf(UnsupportedOperationException.class);
-
-        assertThatThrownBy(() -> daiAdapter.addDAI(TOTO)).isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(() -> daiAdapter.addSDOI(TOTO)).isInstanceOf(UnsupportedOperationException.class);
     }
 
     @Test
@@ -112,6 +109,80 @@ class DOIAdapterTest {
     }
 
     @Test
+    void DAIAdapter_update_when_valImport_is_set_to_true_should_update_val() {
+        // Given
+        String newValue = "newValue";
+        DOIAdapter.DAIAdapter daiAdapter = initInnerDAIAdapter("Do", "da");
+        daiAdapter.setValImport(true);
+        daiAdapter.getCurrentElem().getVal().add(newVal("oldValue"));
+        // When
+        daiAdapter.update(0L, newValue);
+
+        assertThat(daiAdapter.getCurrentElem().getVal()).hasSize(1)
+                .first().extracting(TVal::getValue, TVal::isSetSGroup)
+                .containsExactly("newValue", false);
+    }
+
+    @Test
+    void DAIAdapter_update_when_valImport_is_not_set_should_update_val() {
+        // Given
+        String newValue = "newValue";
+        DOIAdapter.DAIAdapter daiAdapter = initInnerDAIAdapter("Do", "da");
+        daiAdapter.getCurrentElem().unsetValImport();
+        daiAdapter.getCurrentElem().getVal().add(newVal("oldValue"));
+        // When
+        daiAdapter.update(0L, newValue);
+
+        assertThat(daiAdapter.getCurrentElem().getVal()).hasSize(1)
+                .first().extracting(TVal::getValue, TVal::isSetSGroup)
+                .containsExactly("newValue", false);
+    }
+
+    @Test
+    void DAIAdapter_update_when_sGroup_is_set_should_update_single_val() {
+        // Given
+        String newValue = "newValue";
+        DOIAdapter.DAIAdapter daiAdapter = initInnerDAIAdapter("Do", "da");
+        daiAdapter.setValImport(true);
+        long sGroup1 = 1;
+        long sGroup2 = 2;
+        daiAdapter.getCurrentElem().getVal().add(newVal("oldValue1", sGroup1));
+        daiAdapter.getCurrentElem().getVal().add(newVal("oldValue2", sGroup2));
+        // When
+        daiAdapter.update(sGroup2, newValue);
+
+        assertThat(daiAdapter.getCurrentElem().getVal()).extracting(TVal::getValue, TVal::getSGroup)
+                .containsExactly(
+                        Tuple.tuple("oldValue1", sGroup1),
+                        Tuple.tuple("newValue", sGroup2));
+    }
+
+    @Test
+    void DAIAdapter_update_when_valImport_is_set_to_false_should_throw_exception() {
+        // Given
+        String newValue = "newValue";
+        DOIAdapter.DAIAdapter daiAdapter = initInnerDAIAdapter("Do", "da");
+        daiAdapter.setValImport(false);
+        // When & Then
+        assertThatThrownBy(() -> daiAdapter.update(0L, newValue))
+                .isInstanceOf(ScdException.class);
+    }
+
+    @Test
+    void DAIAdapter_update_when_valImport_is_set_to_false_but_da_is_Mod_StVal_should_update_value() {
+        // Given
+        String newValue = "newValue";
+        DOIAdapter.DAIAdapter daiAdapter = initInnerDAIAdapter(CommonConstants.MOD_DO_NAME, CommonConstants.STVAL);
+        daiAdapter.setValImport(false);
+        // When
+        daiAdapter.update(0L, newValue);
+
+        assertThat(daiAdapter.getCurrentElem().getVal()).hasSize(1)
+                .first().extracting(TVal::getValue, TVal::isSetSGroup)
+                .containsExactly("newValue", false);
+    }
+
+    @Test
     void testFindDeepestMatch() throws Exception {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
@@ -131,7 +202,7 @@ class DOIAdapterTest {
                 .isNotNull()
                 .isInstanceOf(SDIAdapter.class);
 
-        SDIAdapter firstDAIAdapter = lastSDOIAdapter.getStructuredDataAdapterByName(daTypeName.getName());
+        IDataParentAdapter firstDAIAdapter = lastSDOIAdapter.getStructuredDataAdapterByName(daTypeName.getName());
 
         // When
         pair = firstDAIAdapter.findDeepestMatch(
@@ -153,9 +224,8 @@ class DOIAdapterTest {
         TDAI tdai = new TDAI();
         tdai.setName(daName);
         tdoi.getSDIOrDAI().add(tdai);
-        DOIAdapter.DAIAdapter daiAdapter = assertDoesNotThrow(() -> new DOIAdapter.DAIAdapter(doiAdapter, tdai));
 
-        return daiAdapter;
+        return new DOIAdapter.DAIAdapter(doiAdapter, tdai);
     }
 
     @Test
@@ -207,7 +277,7 @@ class DOIAdapterTest {
         DOIAdapter doiAdapter = daiAdapter.getParentAdapter();
 
         // When
-        Optional<DOIAdapter.DAIAdapter> result = doiAdapter.findDataAdapterByName("da");
+        Optional<AbstractDAIAdapter<?>> result = doiAdapter.findDataAdapterByName("da");
 
         // Then
         assertThat(result)
@@ -223,7 +293,7 @@ class DOIAdapterTest {
         DOIAdapter doiAdapter = daiAdapter.getParentAdapter();
 
         // When
-        Optional<DOIAdapter.DAIAdapter> result = doiAdapter.findDataAdapterByName("wrong");
+        Optional<AbstractDAIAdapter<?>> result = doiAdapter.findDataAdapterByName("wrong");
 
         // Then
         assertThat(result).isEmpty();

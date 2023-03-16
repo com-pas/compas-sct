@@ -249,4 +249,30 @@ class ResumedDataTemplateTest {
         // Then
         assertThat(firstValue).isNotPresent();
     }
+
+    @Test
+    void setVal_should_add_reference_val(){
+        // Given
+        ResumedDataTemplate rDTT = new ResumedDataTemplate();
+        DaTypeName da1 = createDa("da1", TFCEnum.CF, true, Map.of());
+        rDTT.setDaName(da1);
+        // When
+        rDTT.setVal("value");
+        // Then
+        assertThat(rDTT.getDaName().getDaiValues()).hasSize(1)
+                .isEqualTo(Map.of(0L, "value"));
+    }
+
+    @Test
+    void setVal_should_replace_reference_val(){
+        // Given
+        ResumedDataTemplate rDTT = new ResumedDataTemplate();
+        DaTypeName da1 = createDa("da1", TFCEnum.CF, true, Map.of(0L, "oldValue"));
+        rDTT.setDaName(da1);
+        // When
+        rDTT.setVal("newValue");
+        // Then
+        assertThat(rDTT.getDaName().getDaiValues()).hasSize(1)
+                .isEqualTo(Map.of(0L, "newValue"));
+    }
 }

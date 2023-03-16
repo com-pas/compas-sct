@@ -121,21 +121,30 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 .map(dataSet -> new DataSetAdapter(this, dataSet));
     }
 
-    public DOIAdapter getDOIAdapterByName(String doiName) throws ScdException {
-        String iedName = getParentIed().getName();
-        String ldInst = parentAdapter.getInst();
+    /**
+     * Find DOI in this LN/LN0 by name
+     *
+     * @param doiName name of the DOI to look for
+     * @return DOIAdapter when found or else empty Optional.
+     */
+    public Optional<DOIAdapter> findDoiAdapterByName(String doiName) {
         return currentElem.getDOI()
                 .stream()
                 .filter(tdoi -> tdoi.getName().equals(doiName))
                 .findFirst()
-                .map(tdoi -> new DOIAdapter(this, tdoi))
-                .orElseThrow(
-                        () -> new ScdException(
-                                String.format("Unknown DOI(%s) in %s%s/%s%s%s",
-                                        doiName, iedName, ldInst, getPrefix(), getLNClass(), getLNInst()
-                                )
-                        )
-                );
+                .map(tdoi -> new DOIAdapter(this, tdoi));
+    }
+
+    /**
+     * Get DOI in this LN/LN0 by name
+     *
+     * @param doiName name of the DOI to look for
+     * @return DOIAdapter when found or else empty Optional.
+     * @throws ScdException when DOI not found
+     */
+    public DOIAdapter getDOIAdapterByName(String doiName) throws ScdException {
+        return findDoiAdapterByName(doiName)
+                .orElseThrow(() -> new ScdException(String.format("Unknown DOI(%s) in %s", doiName, getXPath())));
     }
 
     public List<DOIAdapter> getDOIAdapters() {
@@ -319,13 +328,14 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      */
     protected List<ControlBlock> getControlBlocks(List<TDataSet> tDataSets, TServiceType serviceType) {
         return tDataSets.stream()
-            .map(tDataSet -> getControlBlocksByDataSetRef(tDataSet.getName(), serviceType))
-            .flatMap(Collection::stream).toList();
+                .map(tDataSet -> getControlBlocksByDataSetRef(tDataSet.getName(), serviceType))
+                .flatMap(Collection::stream).toList();
     }
 
     /**
      * finds all Control Blocks by dataSetRef and a Service Type (GOOSE, SampleValue, Report) or all Service Types.
-     * @param dataSetRef DatSet value searched
+     *
+     * @param dataSetRef  DatSet value searched
      * @param serviceType service type to be filtered
      * @return all Control Blocks matching dataSetRef and a Service Type or all Service Types
      */
@@ -339,39 +349,43 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                     .stream()
                     .filter(tControl -> dataSetRef.equals(tControl.getDatSet()))
                     .map(tgseControl -> {
-                                GooseControlBlock gseCbl = new GooseControlBlock((TGSEControl) tgseControl);
-                                gseCbl.setMetaData(metaData);
-                                return gseCbl;});
+                        GooseControlBlock gseCbl = new GooseControlBlock(tgseControl);
+                        gseCbl.setMetaData(metaData);
+                        return gseCbl;
+                    });
 
         }
         if (isLN0() && (serviceType == null || serviceType == TServiceType.SMV)) {
-            streamSMVControl =  getTControlsByType(TSampledValueControl.class)
+            streamSMVControl = getTControlsByType(TSampledValueControl.class)
                     .stream()
                     .filter(tControl -> dataSetRef.equals(tControl.getDatSet()))
                     .map(sampledValueControl -> {
-                        SMVControlBlock smvCbl = new SMVControlBlock((TSampledValueControl) sampledValueControl);
+                        SMVControlBlock smvCbl = new SMVControlBlock(sampledValueControl);
                         smvCbl.setMetaData(metaData);
-                        return smvCbl;});
+                        return smvCbl;
+                    });
         }
         if (serviceType == null || serviceType == TServiceType.REPORT) {
             streamReportControl = getTControlsByType(TReportControl.class)
                     .stream()
                     .filter(tControl -> dataSetRef.equals(tControl.getDatSet()))
-                            .map(reportControl -> {
-                                ReportControlBlock rptCbl = new ReportControlBlock((TReportControl) reportControl);
-                                rptCbl.setMetaData(metaData);
-                                return rptCbl; });
+                    .map(reportControl -> {
+                        ReportControlBlock rptCbl = new ReportControlBlock(reportControl);
+                        rptCbl.setMetaData(metaData);
+                        return rptCbl;
+                    });
         }
-        return Stream.concat(Stream.concat(streamGSEControl,streamSMVControl),streamReportControl).toList();
+        return Stream.concat(Stream.concat(streamGSEControl, streamSMVControl), streamReportControl).toList();
     }
 
     /**
-     *  finds all Control Blocks by Service Type (GOOSE, SampleValue, Report).
+     * finds all Control Blocks by Service Type (GOOSE, SampleValue, Report).
+     *
      * @param cls Type of Control Block
-     * @return all Control Blocks matching a Service Type
      * @param <V> inference parameter for Type of Control Block to find
+     * @return all Control Blocks matching a Service Type
      */
-    public  <V extends TControl> List<V> getTControlsByType(Class<V> cls) {
+    public <V extends TControl> List<V> getTControlsByType(Class<V> cls) {
         if (TGSEControl.class.equals(cls) && isLN0()) {
             return (List<V>) ((LN0) currentElem).getGSEControl();
         } else if (TSampledValueControl.class.equals(cls) && isLN0()) {
@@ -384,12 +398,13 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
 
     /**
      * Checks if LN contains a Control block with specified name
+     *
      * @param cbName name of Control Block searched
      * @return true if there is at one control Block matches, otherwise false
      */
     private boolean isCBKnown(String cbName) {
         return isLN0()
-                && ( ((LN0) currentElem).getGSEControl().stream().anyMatch(tgse -> tgse.getName().equals(cbName)) ||
+                && (((LN0) currentElem).getGSEControl().stream().anyMatch(tgse -> tgse.getName().equals(cbName)) ||
                 ((LN0) currentElem).getSampledValueControl().stream().anyMatch(tsmv -> tsmv.getName().equals(cbName)))
                 || currentElem.getReportControl().stream().anyMatch(trpt -> trpt.getName().equals(cbName));
     }
@@ -397,13 +412,13 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
     /**
      * Checks if specified Control Block is present in LN
      *
-     * @param cbName name of the control block to look for
+     * @param cbName           name of the control block to look for
      * @param controlBlockEnum type of control block to look for
      * @return true if a ControlBlock of type controlBlockEnum named cbName exists in LN, else false
      */
-    public boolean hasControlBlock(String cbName, ControlBlockEnum controlBlockEnum){
+    public boolean hasControlBlock(String cbName, ControlBlockEnum controlBlockEnum) {
         return getTControlsByType(controlBlockEnum.getControlBlockClass()).stream()
-            .anyMatch(control -> control.getName().equals(cbName));
+                .anyMatch(control -> control.getName().equals(cbName));
     }
 
     /**
@@ -505,16 +520,17 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
 
     /**
      * Gets all possible LNs for given source info
-      * @param binderLDeviceAdapter LDevice in which LNs are searched
-     * @param sourceInfo binding LN info
+     *
+     * @param binderLDeviceAdapter LDevice in which LNs are searched
+     * @param sourceInfo           binding LN info
      * @return list of LNAdapters matching SourceInfo
      */
     private List<AbstractLNAdapter<?>> getPossibleSourceLNAdapters(LDeviceAdapter binderLDeviceAdapter, ExtRefSourceInfo sourceInfo) {
         List<AbstractLNAdapter<?>> aLNAdapters = new ArrayList<>();
-        if(StringUtils.isBlank(sourceInfo.getSrcLNClass())){
+        if (StringUtils.isBlank(sourceInfo.getSrcLNClass())) {
             aLNAdapters.addAll(binderLDeviceAdapter.getLNAdaptersIncludingLN0());
         } else {
-            if(TLLN0Enum.LLN_0.value().equals(sourceInfo.getSrcLNClass())){
+            if (TLLN0Enum.LLN_0.value().equals(sourceInfo.getSrcLNClass())) {
                 aLNAdapters.add(binderLDeviceAdapter.getLN0Adapter());
             } else {
                 aLNAdapters.add(binderLDeviceAdapter.getLNAdapter(sourceInfo.getSrcLNClass(), sourceInfo.getSrcLNInst(), sourceInfo.getSrcPrefix()));
@@ -525,7 +541,8 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
 
     /**
      * Finds ExtRef from LN
-     * @param extRefInfo  ExtRef information (signal, binding and source info)
+     *
+     * @param extRefInfo ExtRef information (signal, binding and source info)
      * @return TExtRef matching given
      */
     public TExtRef extractExtRefFromExtRefInfo(@NonNull ExtRefInfo extRefInfo) {
@@ -685,72 +702,65 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
     }
 
     /**
-     * Updates DAI (in LNode section) after checking updatability with summarized Data Type Template given information and LNode
-     * Summarized Data Type Temple and LNode helps to check updatability. rDtt gives DAI which should be found in LNode,
-     * that LNode gives LNodeType localized in DataTypeTemplate section and contains DOType in which the DAI is localized.
+     * Updates DAI in LN/LN0 section.
+     * It will create the missing DOI/SDI/DAI in this LN/LN0 if needed.
+     * Be careful, this method does not check that the given rDtt is allowed by the lnType of this LN/LN0.
+     * It does not even check if rDtt exists in DataTypeTemplate section.
+     * That means that it will create the missing DOI/SDI/DAI, even if it is not consistent with DataTypeTemplate section.
+     * It is the caller responsibility to ensure the consistency between the given rDtt and the lnType of this LN/LN0 (which points to DataTypeTemplate section).
+     * See 9.3.5 "LN0 and other Logical Nodes" of IEC 61850-6.
+     * If given rDtt.isUpdatable() is false, the method does nothing (it will not check if DA/BDA is updatable in DataTypeTemplate section).
+     * This method will not remove any Val, it will only create new Val or replace existing Val (for example if rDtt.getDaName().getDaiValues() is empty, it does nothing)
      *
-     * @param rDtt summarized Data Type Temple containing new DO and DA data's
-     * @throws ScdException when inconsistency are found in th SCL's
-     *                      DataTypeTemplate. Which should normally not happens.
+     * @param rDtt summarized Data Type Temple containing new DA val
+     * @throws ScdException when given rDtt is missing DoName or DaName
      */
     public void updateDAI(@NonNull ResumedDataTemplate rDtt) throws ScdException {
 
         if (!rDtt.isDoNameDefined() || !rDtt.isDaNameDefined()) {
             throw new ScdException("Cannot update undefined DAI");
         }
-        DoTypeName doTypeName = rDtt.getDoName();
-        DaTypeName daTypeName = rDtt.getDaName();
-
-        DAITracker daiTracker = new DAITracker(this, doTypeName, daTypeName);
-        DAITracker.MatchResult matchResult = daiTracker.search();
-        AbstractDAIAdapter<?> daiAdapter = null;
-        IDataParentAdapter doiOrSdoiAdapter;
-
-        if (!rDtt.isUpdatable())
+        if (!rDtt.isUpdatable() || rDtt.getDaName().getDaiValues().isEmpty()) {
             return;
-
-        if (rDtt.isUpdatable() && matchResult == DAITracker.MatchResult.FULL_MATCH) {
-            daiAdapter = (AbstractDAIAdapter) daiTracker.getBdaiOrDaiAdapter();
-        } else {
-            doiOrSdoiAdapter = daiTracker.getDoiOrSdoiAdapter();
-            int indexDoType = daiTracker.getIndexDoType();
-            int doSz = doTypeName.getStructNames().size();
-            if (matchResult == DAITracker.MatchResult.FAILED) {
-                doiOrSdoiAdapter = addDOI(doTypeName.getName());
-                indexDoType = 0;
-            } else if (indexDoType == -1) {
-                indexDoType = 0;
-            } else if (indexDoType == doSz - 1) {
-                indexDoType = doSz;
-            }
-            for (int i = indexDoType; i < doSz; ++i) {
-                String sdoName = doTypeName.getStructNames().get(i);
-                doiOrSdoiAdapter = doiOrSdoiAdapter.addSDOI(sdoName);
-            }
-
-            IDataParentAdapter daiOrBdaiAdapter = daiTracker.getDoiOrSdoiAdapter();
-            int indexDaType = daiTracker.getIndexDaType();
-            int daSz = daTypeName.getStructNames().size();
-            if (indexDaType <= -1) {
-                indexDaType = 0;
-            } else if (indexDaType == daSz - 1) {
-                indexDaType = daSz;
-            }
-            for (int i = indexDaType; i < daSz; ++i) {
-                String bdaName = daTypeName.getStructNames().get(i);
-                if (indexDaType == 0) {
-                    daiOrBdaiAdapter = doiOrSdoiAdapter.addSDOI(daTypeName.getName());
-                } else if (i == daSz - 1) {
-                    daiAdapter = daiOrBdaiAdapter.addDAI(bdaName, rDtt.isUpdatable());
-                } else {
-                    daiOrBdaiAdapter = daiOrBdaiAdapter.addSDOI(bdaName);
-                }
-            }
-            if (daiAdapter == null) {
-                daiAdapter = doiOrSdoiAdapter.addDAI(daTypeName.getName(), rDtt.isUpdatable());
-            }
         }
-        daiAdapter.update(daTypeName.getDaiValues());
+
+        AbstractDAIAdapter<?> daiAdapter = createDoiSdiDaiChainIfNotExists(rDtt.getDataAttributes(), rDtt.isUpdatable());
+        daiAdapter.update(rDtt.getDaName().getDaiValues());
+    }
+
+    /**
+     * Return the DAI (in DOI/SDI/DAI chain) matching the given data reference name
+     * If it does not exist, create the missing DOI/SDI/DAI elements in this LN/LN0 if needed, based on the given parameters
+     * DOI is the equivalent of the DO
+     * SDI is the equivalent of a type with bType="Struct". It can be a SDO, DA or BDA.
+     * DOI is the equivalent of the final leaf : DA or BDA with bType != "Struct".
+     * Be careful, this method does not check that the given data type is allowed by the lnType of this LN/LN0.
+     * It does not even check if the data type exists in DataTypeTemplate section.
+     * That means that it will create the missing DOI/SDI/DAI, even if it is not consistent with DataTypeTemplate section.
+     * It is the caller responsibility to ensure the consistency between the given data type and the lnType of this LN/LN0 (which refer to DataTypeTemplate section).
+     * See 9.3.5 "LN0 and other Logical Nodes" of IEC 61850-6.
+     *
+     * @param dataTypeRef          Reference name of data : DO/SDO/DA/BDA names, in order from parent to child, separated by a period
+     *                             (Ex: "Do1.da1", "Do2.sdoA.sdoB.da2.bdaA.bdaB")
+     * @param setValImportOnCreate when this method creates the DAI, it will set DAI.valImport attribute with this parameter
+     * @return adapter for existing DAI or created DAI.
+     */
+    private AbstractDAIAdapter<?> createDoiSdiDaiChainIfNotExists(String dataTypeRef, boolean setValImportOnCreate) {
+        String[] names = dataTypeRef.split("\\.");
+        if (names.length < 2 || Arrays.stream(names).anyMatch(StringUtils::isBlank)) {
+            throw new IllegalArgumentException("dataTypeRef must be valid with at least a DO and a DA, but got: " + dataTypeRef);
+        }
+        String doiName = names[0];
+        String daiName = names[names.length - 1];
+        ListIterator<String> sdiNames = Arrays.asList(names).subList(1, names.length - 1).listIterator();
+        IDataParentAdapter parentDoiOrSdi = findDoiAdapterByName(doiName).orElseGet(() -> addDOI(doiName));
+        while (sdiNames.hasNext()) {
+            String currenSdiName = sdiNames.next();
+            final IDataParentAdapter parent = parentDoiOrSdi;
+            parentDoiOrSdi = parentDoiOrSdi.findStructuredDataAdapterByName(currenSdiName).orElseGet(() -> parent.addSDOI(currenSdiName));
+        }
+        final IDataParentAdapter lastParent = parentDoiOrSdi;
+        return lastParent.findDataAdapterByName(daiName).orElseGet(() -> lastParent.addDAI(daiName, setValImportOnCreate));
     }
 
     /**
@@ -894,7 +904,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      * Adds DataSet in specified LNode in current IED/AccessPoint.
      * The AccessPoint must have DataSet creation capabilities
      *
-     * @param dataSetName Name of the dataSet
+     * @param dataSetName      Name of the dataSet
      * @param controlBlockEnum GOOSE, SMV or REPORT service type
      * @throws ScdException throws when IED does not have DataSet creation capabilities
      * @see LDeviceAdapter#hasDataSetCreationCapability
@@ -903,7 +913,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         return findDataSetByName(dataSetName).orElseGet(() -> {
             if (!getParentLDevice().hasDataSetCreationCapability(controlBlockEnum)) {
                 throw new ScdException("IED/AccessPoint does not have capability to create DataSet of type %s in %s"
-                    .formatted(controlBlockEnum, getXPath()));
+                        .formatted(controlBlockEnum, getXPath()));
             }
             TDataSet newDataSet = new TDataSet();
             newDataSet.setName(dataSetName);
@@ -926,18 +936,18 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
 
         if (!getParentLDevice().hasControlBlockCreationCapability(controlBlock.getControlBlockEnum())) {
             throw new ScdException("Cannot create ControlBlock %s %s because IED/AccessPoint does not have capability to create ControlBlock of type %s in %s"
-                .formatted(controlBlock.getClass().getSimpleName(), controlBlock.getName(), controlBlock.getControlBlockEnum(), getXPath()));
+                    .formatted(controlBlock.getClass().getSimpleName(), controlBlock.getName(), controlBlock.getControlBlockEnum(), getXPath()));
         }
 
         if (hasControlBlock(controlBlock.getName(), controlBlock.getControlBlockEnum())) {
             throw new ScdException("Cannot create ControlBlock %s %s because it already exists in %s"
-                .formatted(controlBlock.getClass().getSimpleName(), controlBlock.getName(), getXPath())
+                    .formatted(controlBlock.getClass().getSimpleName(), controlBlock.getName(), getXPath())
             );
         }
 
         if (this.getDataSetByName(controlBlock.getDataSetRef()).isEmpty()) {
             throw new ScdException("Cannot create ControlBlock %s %s because target DataSet %s does not exists in %s"
-                .formatted(controlBlock.getClass().getSimpleName(), controlBlock.getName(), controlBlock.getDataSetRef(), getXPath())
+                    .formatted(controlBlock.getClass().getSimpleName(), controlBlock.getName(), controlBlock.getDataSetRef(), getXPath())
             );
         }
 
@@ -954,7 +964,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
 
     public Stream<ControlBlockAdapter> streamControlBlocks(ControlBlockEnum controlBlockEnum) {
         return getTControlsByType(controlBlockEnum.getControlBlockClass()).stream()
-            .map(tControl -> new ControlBlockAdapter(this, tControl));
+                .map(tControl -> new ControlBlockAdapter(this, tControl));
     }
 
     public ControlBlockAdapter createControlBlockIfNotExists(String cbName, String id, String datSet, ControlBlockEnum controlBlockEnum) {
@@ -970,17 +980,18 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 );
     }
 
-     /**
+    /**
      * Finds all FCDAs in DataSet of Control Block feeding ExtRef
+     *
      * @param tExtRef Fed ExtRef
      * @return list of all FCDA in DataSet of Control Block
      */
-    public List<TFCDA> getFCDAs(TExtRef tExtRef){
+    public List<TFCDA> getFCDAs(TExtRef tExtRef) {
         TControl tControl = getTControlsByType(ControlBlockEnum.from(tExtRef.getServiceType()).getControlBlockClass()).stream()
                 .filter(tCtrl -> tExtRef.getSrcCBName() != null && tExtRef.getSrcCBName().equals(tCtrl.getName()))
                 .findFirst().orElseThrow(() ->
                         new ScdException(String.format("Control Block %s not found in %s", tExtRef.getSrcCBName(), getXPath())));
-       return getCurrentElem().getDataSet().stream()
+        return getCurrentElem().getDataSet().stream()
                 .filter(tDataSet -> tDataSet.getName().equals(tControl.getDatSet()))
                 .map(TDataSet::getFCDA)
                 .flatMap(Collection::stream)
