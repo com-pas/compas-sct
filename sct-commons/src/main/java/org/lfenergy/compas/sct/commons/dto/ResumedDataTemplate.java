@@ -7,6 +7,7 @@ package org.lfenergy.compas.sct.commons.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.util.SclConstructorHelper;
 
 import java.util.ArrayList;
@@ -51,11 +52,24 @@ public class ResumedDataTemplate {
     private DaTypeName daName = new DaTypeName("");
 
     /**
+     * Constructor
+     */
+    public ResumedDataTemplate(AbstractLNAdapter<?> lnAdapter, String doName, String daName) {
+        this.lnClass = lnAdapter.getLNClass();
+        this.lnInst = lnAdapter.getLNInst();
+        this.prefix = lnAdapter.getPrefix();
+        this.lnType = lnAdapter.getLnType();
+        this.doName = new DoTypeName(doName);
+        this.daName = new DaTypeName(daName);
+    }
+
+    /**
      * Copies summarized DataTypeTemplate information to another one
+     *
      * @param dtt input
      * @return Updated ResumedDataTemplate object
      */
-    public static ResumedDataTemplate copyFrom(ResumedDataTemplate dtt){
+    public static ResumedDataTemplate copyFrom(ResumedDataTemplate dtt) {
         ResumedDataTemplate resumedDataTemplate = new ResumedDataTemplate();
         resumedDataTemplate.prefix = dtt.prefix;
         resumedDataTemplate.lnClass = dtt.lnClass;

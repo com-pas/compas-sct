@@ -6,6 +6,7 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.ExtrefTarget;
+import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
@@ -109,36 +110,45 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
      * @return a filled SclReportItem if an error occurs, empty SclReportItem otherwise
      */
     public Optional<SclReportItem> updateDaiFromExtRef(List<TExtRef> tExtRefs) {
+        Optional<SclReportItem> optionalSclReportItem;
         Optional<TExtRef> tExtRefMinOptional = tExtRefs.stream().min(EXTREF_DESC_SUFFIX_COMPARATOR);
-
         if (tExtRefMinOptional.isPresent() && extractDescSuffix(tExtRefMinOptional.get().getDesc()) == 1) {
             TExtRef tExtRefMin = tExtRefMinOptional.get();
-            findDataAdapterByName(DA_NAME_SET_SRC_REF)
-                    .orElse(addDAI(DA_NAME_SET_SRC_REF, true))
-                    .setVal(createInRefValNominalString(tExtRefMin));
+            String valueSrcRef = createInRefValNominalString(tExtRefMin);
+            optionalSclReportItem = updateDAI(DA_NAME_SET_SRC_REF, valueSrcRef);
             if (tExtRefMin.isSetSrcCBName()) {
-                findDataAdapterByName(DA_NAME_SET_SRC_CB)
-                        .orElse(addDAI(DA_NAME_SET_SRC_CB, true))
-                        .setVal(createInRefValTestString(tExtRefMin));
+                String valueSrcCb = createInRefValTestString(tExtRefMin);
+                optionalSclReportItem = updateDAI(DA_NAME_SET_SRC_CB, valueSrcCb);
             }
 
             Optional<TExtRef> tExtRefMaxOptional = tExtRefs.stream().max(EXTREF_DESC_SUFFIX_COMPARATOR);
             if (tExtRefMaxOptional.isPresent() && extractDescSuffix(tExtRefMaxOptional.get().getDesc()) > 1) {
                 TExtRef tExtRefMax = tExtRefMaxOptional.get();
-                findDataAdapterByName(DA_NAME_SET_TST_REF)
-                        .orElse(addDAI(DA_NAME_SET_TST_REF, true))
-                        .setVal(createInRefValNominalString(tExtRefMax));
+                String valueTstRef = createInRefValNominalString(tExtRefMax);
+                optionalSclReportItem = updateDAI(DA_NAME_SET_TST_REF, valueTstRef);
                 if (tExtRefMax.isSetSrcCBName()) {
-                    findDataAdapterByName(DA_NAME_SET_TST_CB)
-                            .orElse(addDAI(DA_NAME_SET_TST_CB, true))
-                            .setVal(createInRefValTestString(tExtRefMax));
+                    String valueTstCb = createInRefValTestString(tExtRefMax);
+                    optionalSclReportItem = updateDAI(DA_NAME_SET_TST_CB, valueTstCb);
                 }
             }
         } else {
-            return Optional.of(SclReportItem.warning(getXPath(), "The DOI %s can't be bound with an ExtRef".formatted(getXPath())));
+            optionalSclReportItem = Optional.of(SclReportItem.warning(getXPath(), "The DOI %s can't be bound with an ExtRef".formatted(getXPath())));
         }
 
+        return optionalSclReportItem;
+    }
+
+    private Optional<SclReportItem> updateDAI(String daName, String value) {
+        ResumedDataTemplate daiFilterSrcRef = new ResumedDataTemplate(getParentAdapter(), getName(), daName);
+        Optional<ResumedDataTemplate> foundDais = getParentAdapter().getDAI(daiFilterSrcRef, true).stream().findFirst();
+        if (foundDais.isEmpty()) {
+            return Optional.of(SclReportItem.warning(getXPath() + "/DAI@name=\"" + daName + "\"/Val", "The DAI cannot be updated"));
+        }
+        ResumedDataTemplate filterForUpdate = foundDais.get();
+        filterForUpdate.setVal(value);
+        getParentAdapter().updateDAI(filterForUpdate);
         return Optional.empty();
+
     }
 
     private static int extractDescSuffix(String desc) throws NumberFormatException {

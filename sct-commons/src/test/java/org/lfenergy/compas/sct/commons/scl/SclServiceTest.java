@@ -1090,7 +1090,7 @@ class SclServiceTest {
     @ParameterizedTest(name = "{0}")
     @CsvSource({
             "Test update setSrcRef Value,LD_WITH_1_InRef,InRef2,setSrcRef,IED_NAME1LD_WITH_1_InRef/PRANCR1.Do11.sdo11",
-            "Test update setSrcCB Value,LD_WITH_1_InRef,InRef2,setSrcCB,IED_NAME1LD_WITH_1_InRef/prefixANCR1.GSE1",
+            "Test update setSrcCB Value,LD_WITH_1_InRef,InRef2,setSrcCB,OLD_VAL",
             "Test update setSrcRef Value,LD_WITH_3_InRef,InRef3,setSrcRef,IED_NAME1LD_WITH_3_InRef/PRANCR1.Do11.sdo11",
             "Test update setSrcCB Value,LD_WITH_3_InRef,InRef3,setSrcCB,IED_NAME1LD_WITH_3_InRef/prefixANCR1.GSE1",
             "Test update setTstRef Value,LD_WITH_3_InRef,InRef3,setTstRef,IED_NAME1LD_WITH_3_InRef/PRANCR1.Do11.sdo11",
@@ -1105,6 +1105,7 @@ class SclServiceTest {
 
         // Then
         assertThat(sclReport.isSuccess()).isTrue();
+        SclTestMarshaller.assertIsMarshallable(sclReport.getSclRootAdapter().currentElem);
         assertThat(getValFromDaiName(sclReport.getSclRootAdapter().getCurrentElem(), "IED_NAME1", ldInst, doName, daName)
                 .map(TVal::getValue))
                 .hasValue(expected);
@@ -1208,6 +1209,4 @@ class SclServiceTest {
                                 "There are too much GOOSE Control Blocks for the IED IED_NAME2: 3 > 2 max",
                                 "There are too much SMV Control Blocks for the IED IED_NAME2: 3 > 1 max");
     }
-
-
 }
