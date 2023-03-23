@@ -31,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.lfenergy.compas.scl2007b4.model.TFCEnum.ST;
 import static org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.*;
+import static org.lfenergy.compas.sct.commons.scl.ExtRefService.filterDuplicatedExtRefs;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
 import static org.lfenergy.compas.sct.commons.util.ControlBlockEnum.*;
 import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newDurationInMilliSec;
@@ -507,6 +508,41 @@ class ExtRefServiceTest {
                                 SMV_NETWORK_RANGES),
                         "Cannot configure network for this ControlBlock because range of MAC Address is exhausted")
         );
+    }
+
+    @Test
+    void filterDuplicatedExtRefs_should_remove_duplicated_extrefs() {
+        // Given
+        TExtRef tExtRefLnClass = createExtRefExample("CB_Name1", TServiceType.GOOSE);
+        tExtRefLnClass.getSrcLNClass().add(TLLN0Enum.LLN_0.value());
+        TExtRef tExtRef = createExtRefExample("CB_Name1", TServiceType.GOOSE);
+        List<TExtRef> tExtRefList = List.of(tExtRef, tExtRefLnClass, createExtRefExample("CB", TServiceType.GOOSE),
+                createExtRefExample("CB", TServiceType.GOOSE));
+        // When
+        List<TExtRef> result = filterDuplicatedExtRefs(tExtRefList);
+        // Then
+        assertThat(result).hasSizeLessThan(tExtRefList.size())
+                .hasSize(2);
+    }
+
+    @Test
+    void filterDuplicatedExtRefs_should_not_remove_not_duplicated_extrefs() {
+        // Given
+        TExtRef tExtRefIedName = createExtRefExample("CB_1", TServiceType.GOOSE);
+        tExtRefIedName.setIedName("IED_XXX");
+        TExtRef tExtRefLdInst = createExtRefExample("CB_1", TServiceType.GOOSE);
+        tExtRefLdInst.setSrcLDInst("LD_XXX");
+        TExtRef tExtRefLnInst = createExtRefExample("CB_1", TServiceType.GOOSE);
+        tExtRefLnInst.setSrcLNInst("X");
+        TExtRef tExtRefPrefix = createExtRefExample("CB_1", TServiceType.GOOSE);
+        tExtRefPrefix.setSrcPrefix("X");
+        List<TExtRef> tExtRefList = List.of(tExtRefIedName, tExtRefLdInst, tExtRefLnInst, tExtRefPrefix,
+                createExtRefExample("CB_1", TServiceType.GOOSE), createExtRefExample("CB_1", TServiceType.SMV));
+        // When
+        List<TExtRef> result = filterDuplicatedExtRefs(tExtRefList);
+        // Then
+        assertThat(result).hasSameSizeAs(tExtRefList)
+                .hasSize(6);
     }
 
 }

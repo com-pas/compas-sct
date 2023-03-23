@@ -11,6 +11,7 @@ import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.scl.ExtRefService;
 import org.lfenergy.compas.sct.commons.scl.PrivateService;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
@@ -419,6 +420,15 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
 
     private SclRootAdapter getSclRootAdapter() {
         return getIedAdapter().getParentAdapter();
+    }
+
+    /**
+     * Remove ExtRef which are fed by same Control Block
+     *
+     * @return list ExtRefs without duplication
+     */
+    public List<TExtRef> filterDuplicatedExtRefs() {
+        return ExtRefService.filterDuplicatedExtRefs(getExtRefs());
     }
 
 }

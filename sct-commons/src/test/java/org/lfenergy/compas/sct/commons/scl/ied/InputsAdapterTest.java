@@ -248,15 +248,56 @@ class InputsAdapterTest {
         InputsAdapter foundInputsAdapter = sclRootAdapter.streamIEDAdapters()
             .flatMap(IEDAdapter::streamLDeviceAdapters)
             .filter(LDeviceAdapter::hasLN0)
-            .map(LDeviceAdapter::getLN0Adapter)
-            .filter(AbstractLNAdapter::hasInputs)
-            .map(LN0Adapter::getInputsAdapter)
-            .filter(inputsAdapter ->
-                inputsAdapter.getCurrentElem().getExtRef().stream().map(TExtRef::getDesc).anyMatch(extRefDesc::equals))
-            .findFirst()
-            .orElseThrow(() -> new AssertionFailedError("ExtRef not found: " + extRefDesc));
+                .map(LDeviceAdapter::getLN0Adapter)
+                .filter(AbstractLNAdapter::hasInputs)
+                .map(LN0Adapter::getInputsAdapter)
+                .filter(inputsAdapter ->
+                        inputsAdapter.getCurrentElem().getExtRef().stream().map(TExtRef::getDesc).anyMatch(extRefDesc::equals))
+                .findFirst()
+                .orElseThrow(() -> new AssertionFailedError("ExtRef not found: " + extRefDesc));
         foundInputsAdapter.getCurrentElem().getExtRef().removeIf(Predicate.not(extref -> extRefDesc.equals(extref.getDesc())));
         return foundInputsAdapter;
+    }
+
+    @Test
+    void filterDuplicatedExtRefs_should_remove_duplicated_extrefs() {
+        // Given
+        TExtRef tExtRefLnClass = createExtRefExample("CB_Name1", TServiceType.GOOSE);
+        tExtRefLnClass.getSrcLNClass().add(TLLN0Enum.LLN_0.value());
+        TExtRef tExtRef = createExtRefExample("CB_Name1", TServiceType.GOOSE);
+        List<TExtRef> tExtRefList = List.of(tExtRef, tExtRefLnClass, createExtRefExample("CB", TServiceType.GOOSE),
+                createExtRefExample("CB", TServiceType.GOOSE));
+        TInputs tInputs = new TInputs();
+        tInputs.getExtRef().addAll(tExtRefList);
+        InputsAdapter inputsAdapter = new InputsAdapter(null, tInputs);
+        // When
+        List<TExtRef> result = inputsAdapter.filterDuplicatedExtRefs();
+        // Then
+        assertThat(result).hasSizeLessThan(tExtRefList.size())
+                .hasSize(2);
+    }
+
+    @Test
+    void filterDuplicatedExtRefs_should_not_remove_not_duplicated_extrefs() {
+        // Given
+        TExtRef tExtRefIedName = createExtRefExample("CB_1", TServiceType.GOOSE);
+        tExtRefIedName.setIedName("IED_XXX");
+        TExtRef tExtRefLdInst = createExtRefExample("CB_1", TServiceType.GOOSE);
+        tExtRefLdInst.setSrcLDInst("LD_XXX");
+        TExtRef tExtRefLnInst = createExtRefExample("CB_1", TServiceType.GOOSE);
+        tExtRefLnInst.setSrcLNInst("X");
+        TExtRef tExtRefPrefix = createExtRefExample("CB_1", TServiceType.GOOSE);
+        tExtRefPrefix.setSrcPrefix("X");
+        List<TExtRef> tExtRefList = List.of(tExtRefIedName, tExtRefLdInst, tExtRefLnInst, tExtRefPrefix,
+                createExtRefExample("CB_1", TServiceType.GOOSE), createExtRefExample("CB_1", TServiceType.SMV));
+        TInputs tInputs = new TInputs();
+        tInputs.getExtRef().addAll(tExtRefList);
+        InputsAdapter inputsAdapter = new InputsAdapter(null, tInputs);
+        // When
+        List<TExtRef> result = inputsAdapter.filterDuplicatedExtRefs();
+        // Then
+        assertThat(result).hasSameSizeAs(tExtRefList)
+                .hasSize(6);
     }
 
 }

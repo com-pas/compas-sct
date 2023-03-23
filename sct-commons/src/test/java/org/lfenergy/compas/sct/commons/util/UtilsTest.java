@@ -11,14 +11,21 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.commons.support.ReflectionSupport;
+import org.lfenergy.compas.scl2007b4.model.TExtRef;
+import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
+import org.lfenergy.compas.scl2007b4.model.TLN;
+import org.lfenergy.compas.scl2007b4.model.TServiceType;
+import org.lfenergy.compas.sct.commons.dto.FCDAInfo;
+import org.lfenergy.compas.sct.commons.exception.ScdException;
 
 import java.util.*;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Named.named;
+import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.createExtRefExample;
+import static org.lfenergy.compas.sct.commons.util.Utils.copySclElement;
 
 
 class UtilsTest {
@@ -537,11 +544,86 @@ class UtilsTest {
 
     @ParameterizedTest
     @CsvSource({"0,6,000000", "255,1,FF", "255,2,FF", "255,3,0FF", "10,2,0A"})
-    void toHex_should_return_hexadecimal(long number, int length, String expected){
+    void toHex_should_return_hexadecimal(long number, int length, String expected) {
         // Given
         // When
         String result = Utils.toHex(number, length);
         // Then
         assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void isExtRefFeedBySameControlBlock_should_return_true() {
+        // Given
+        TExtRef tExtRefLnClass = createExtRefExample("CB_1", TServiceType.GOOSE);
+        tExtRefLnClass.getSrcLNClass().add(TLLN0Enum.LLN_0.value());
+        TExtRef tExtRef = createExtRefExample("CB_1", TServiceType.GOOSE);
+        // When
+        // Then
+        assertThat(Utils.isExtRefFeedBySameControlBlock(tExtRef, tExtRefLnClass)).isTrue();
+        assertThat(Utils.isExtRefFeedBySameControlBlock(createExtRefExample("CB_1", TServiceType.GOOSE), tExtRef)).isTrue();
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("provideExtRefsToCompare")
+    void isExtRefFeedBySameControlBlock_should_return_false(String testCase, TExtRef tExtRef1, TExtRef tExtRef2) {
+        // Given
+        // When
+        // Then
+        assertThat(Utils.isExtRefFeedBySameControlBlock(tExtRef1, tExtRef2)).isFalse();
+    }
+
+    private static Stream<Arguments> provideExtRefsToCompare() {
+        TExtRef tExtRefLnClass = createExtRefExample("CB_1", TServiceType.GOOSE);
+        tExtRefLnClass.getSrcLNClass().add("XXX");
+        TExtRef tExtRefIedName = createExtRefExample("CB_1", TServiceType.GOOSE);
+        tExtRefIedName.setIedName("IED_XXX");
+        TExtRef tExtRefLdInst = createExtRefExample("CB_1", TServiceType.GOOSE);
+        tExtRefLdInst.setSrcLDInst("LD_XXX");
+        TExtRef tExtRefLnInst = createExtRefExample("CB_1", TServiceType.GOOSE);
+        tExtRefLnInst.setSrcLNInst("X");
+        TExtRef tExtRefPrefix = createExtRefExample("CB_1", TServiceType.GOOSE);
+        tExtRefPrefix.setSrcPrefix("X");
+
+        return Stream.of(
+                Arguments.of("ExtRef is not fed by same CB when different ServiceType", createExtRefExample("CB_1", TServiceType.GOOSE),
+                        createExtRefExample("CB_1", TServiceType.SMV)),
+                Arguments.of("ExtRef is not fed by same CB when different SrcCBName", createExtRefExample("CB_1", TServiceType.GOOSE),
+                        createExtRefExample("CB_2", TServiceType.GOOSE)),
+                Arguments.of("ExtRef is not fed by same CB when different SrcLnClass", createExtRefExample("CB_1", TServiceType.GOOSE),
+                        tExtRefLnClass),
+                Arguments.of("ExtRef is not fed by same CB when different IedName", createExtRefExample("CB_1", TServiceType.GOOSE),
+                        tExtRefIedName),
+                Arguments.of("ExtRef is not fed by same CB when different SrcLdInst", createExtRefExample("CB_1", TServiceType.GOOSE),
+                        tExtRefLdInst),
+                Arguments.of("ExtRef is not fed by same CB when different SrcLnInst", createExtRefExample("CB_1", TServiceType.GOOSE),
+                        tExtRefLnInst),
+                Arguments.of("ExtRef is not fed by same CB when different SrcPrefix", createExtRefExample("CB_1", TServiceType.GOOSE),
+                        tExtRefPrefix)
+        );
+    }
+
+    @Test
+    void copySclElement_should_copy_by_value() {
+        // Given
+        TLN tln = new TLN();
+        tln.setLnType("T1");
+        tln.getLnClass().add(TLLN0Enum.LLN_0.value());
+        // When
+        TLN result = copySclElement(tln, TLN.class);
+        // Then
+        assertThat(result).isNotSameAs(tln);
+        assertThat(result).usingRecursiveComparison().isEqualTo(tln);
+    }
+
+    @Test
+    void copySclElement_should_throwException() {
+        // Given
+        FCDAInfo fcdaInfo = new FCDAInfo();
+        // When
+        // Then
+        assertThatCode(() -> copySclElement(fcdaInfo, FCDAInfo.class))
+                .isInstanceOf(ScdException.class)
+                .hasMessage("org.lfenergy.compas.sct.commons.dto.FCDAInfo is not known to this context");
     }
 }
