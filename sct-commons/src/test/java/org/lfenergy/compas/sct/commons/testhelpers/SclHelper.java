@@ -5,6 +5,7 @@
 package org.lfenergy.compas.sct.commons.testhelpers;
 
 import lombok.experimental.UtilityClass;
+import org.assertj.core.api.Assertions;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.SclReport;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
@@ -13,6 +14,7 @@ import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 import org.lfenergy.compas.sct.commons.util.Utils;
 import org.opentest4j.AssertionFailedError;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -29,7 +31,7 @@ public class SclHelper {
 
     public static IEDAdapter findIed(SclRootAdapter sclRootAdapter, String iedName) {
         return sclRootAdapter.findIedAdapterByName(iedName)
-            .orElseThrow(() -> new AssertionFailedError(String.format("IED.name=%s not found", iedName)));
+                .orElseThrow(() -> new AssertionFailedError(String.format("IED.name=%s not found", iedName)));
     }
 
     public static LDeviceAdapter findLDevice(SclRootAdapter sclRootAdapter, String iedName, String ldInst) {
@@ -50,12 +52,12 @@ public class SclHelper {
 
     public static TExtRef findExtRef(SclRootAdapter sclRootAdapter, String iedName, String ldInst, String extRefDesc) {
         return findInputs(sclRootAdapter, iedName, ldInst)
-            .getCurrentElem()
-            .getExtRef()
-            .stream()
-            .filter(extRef -> extRefDesc.equals(extRef.getDesc()))
-            .findFirst()
-            .orElseThrow(() -> new AssertionFailedError(String.format("ExtRef.des=%s not found in IED.name=%s,LDevice.inst=%s", extRefDesc, iedName, ldInst)));
+                .getCurrentElem()
+                .getExtRef()
+                .stream()
+                .filter(extRef -> extRefDesc.equals(extRef.getDesc()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionFailedError(String.format("ExtRef.des=%s not found in IED.name=%s,LDevice.inst=%s", extRefDesc, iedName, ldInst)));
     }
 
     public static TExtRef findExtRef(SclReport sclReport, String iedName, String ldInst, String extRefDesc) {
@@ -80,31 +82,67 @@ public class SclHelper {
             throw new AssertionFailedError(String.format("No LN found in IED.name=%s,LDevice.inst=%s", iedName, ldInst));
         }
         return lDevice.getCurrentElem().getLN()
-            .stream()
-            .filter(tln -> Utils.lnClassEquals(tln.getLnClass(), lnClass)
-                && tln.getInst().equals(lnInst)
-                && Utils.equalsOrBothBlank(prefix, tln.getPrefix()))
-            .findFirst()
-            .map(tln -> new LNAdapter(lDevice, tln))
-            .orElseThrow(
-                ()-> new AssertionFailedError("LN found in IED.name=%s,LDevice.inst=%s with lnClass=%s, lnInst=%s, prefix=%s"
-                    .formatted(iedName, ldInst, lnClass, lnInst, prefix))
-            );
+                .stream()
+                .filter(tln -> Utils.lnClassEquals(tln.getLnClass(), lnClass)
+                        && tln.getInst().equals(lnInst)
+                        && Utils.equalsOrBothBlank(prefix, tln.getPrefix()))
+                .findFirst()
+                .map(tln -> new LNAdapter(lDevice, tln))
+                .orElseThrow(
+                        () -> new AssertionFailedError("LN found in IED.name=%s,LDevice.inst=%s with lnClass=%s, lnInst=%s, prefix=%s"
+                                .formatted(iedName, ldInst, lnClass, lnInst, prefix))
+                );
     }
+
+    public static IDataParentAdapter findDoiOrSdi(AbstractLNAdapter<?> lnAdapter, String dataTypeRef) {
+        if (dataTypeRef.length() < 1) {
+            Assertions.fail("dataTypeRef must at least contain a DO, but got: " + dataTypeRef);
+        }
+        String[] names = dataTypeRef.split("\\.");
+        IDataParentAdapter parentAdapter = lnAdapter.getDOIAdapterByName(names[0]);
+        for (int i = 1; i < names.length; i++) {
+            parentAdapter = parentAdapter.getStructuredDataAdapterByName(names[i]);
+        }
+        return parentAdapter;
+    }
+
+    public static AbstractDAIAdapter<?> findDai(AbstractLNAdapter<?> lnAdapter, String dataTypeRef) {
+        String[] names = dataTypeRef.split("\\.");
+        if (names.length < 2) {
+            Assertions.fail("dataTypeRef must at least contain a DO and a DA name, but got: " + dataTypeRef);
+        }
+
+        IDataParentAdapter parentAdapter = findDoiOrSdi(lnAdapter, String.join(".", Arrays.asList(names).subList(0, names.length - 1)));
+        return parentAdapter.getDataAdapterByName(names[names.length - 1]);
+    }
+
+    public static String getValue(AbstractDAIAdapter<?> daiAdapter) {
+        return getValue(daiAdapter.getCurrentElem());
+    }
+
+    public static String getValue(TDAI tdai) {
+        if (!tdai.isSetVal()) {
+            Assertions.fail("No value found for DAI " + tdai.getName());
+        } else if (tdai.getVal().size() > 1) {
+            Assertions.fail("Expecting a single value for for DAI " + tdai.getName());
+        }
+        return tdai.getVal().get(0).getValue();
+    }
+
 
     public static LDeviceAdapter findLDeviceByLdName(SclRootAdapter sclRootAdapter, String ldName) {
         return sclRootAdapter.streamIEDAdapters()
-            .flatMap(IEDAdapter::streamLDeviceAdapters)
-            .filter(lDeviceAdapter -> ldName.equals(lDeviceAdapter.getLdName()))
-            .findFirst()
-            .orElseThrow(()-> new AssertionFailedError("LDevice with ldName=%s not found in SCD".formatted(ldName)));
+                .flatMap(IEDAdapter::streamLDeviceAdapters)
+                .filter(lDeviceAdapter -> ldName.equals(lDeviceAdapter.getLdName()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionFailedError("LDevice with ldName=%s not found in SCD".formatted(ldName)));
     }
 
     public static DataSetAdapter findDataSet(SclRootAdapter sclRootAdapter, String iedName, String ldInst, String dataSetName) {
         LN0Adapter ln0 = findLn0(sclRootAdapter, iedName, ldInst);
         return ln0.findDataSetByName(dataSetName)
-            .orElseThrow(() -> new AssertionFailedError(String.format("DataSet.name=%s not found in IED.name=%s,LDevice.inst=%s,LN0",
-                dataSetName, iedName, ldInst)));
+                .orElseThrow(() -> new AssertionFailedError(String.format("DataSet.name=%s not found in IED.name=%s,LDevice.inst=%s,LN0",
+                        dataSetName, iedName, ldInst)));
     }
 
     public static DataSetAdapter findDataSet(SclReport sclReport, String iedName, String ldInst, String dataSetName) {
@@ -115,25 +153,25 @@ public class SclHelper {
                                                        ControlBlockEnum controlBlockEnum) {
         LN0Adapter ln0 = findLn0(sclRootAdapter, iedName, ldInst);
         return ln0.findControlBlock(cbName, controlBlockEnum)
-            .orElseThrow(() -> new AssertionFailedError(String.format("%s name=%s not found in IED.name=%s,LDevice.inst=%s,LN0",
-                controlBlockEnum.getControlBlockClass().getSimpleName(), cbName, iedName, ldInst)));
+                .orElseThrow(() -> new AssertionFailedError(String.format("%s name=%s not found in IED.name=%s,LDevice.inst=%s,LN0",
+                        controlBlockEnum.getControlBlockClass().getSimpleName(), cbName, iedName, ldInst)));
     }
 
     public static void assertControlBlockExists(SclReport sclReport, String iedName, String ldInst, String cbName,
-                                                       String datSet, String id, ControlBlockEnum controlBlockEnum) {
+                                                String datSet, String id, ControlBlockEnum controlBlockEnum) {
         ControlBlockAdapter controlBlock = findControlBlock(sclReport.getSclRootAdapter(), iedName, ldInst, cbName, controlBlockEnum);
         assertThat(controlBlock.getCurrentElem().getDatSet()).isEqualTo(datSet);
         assertThat(getControlBlockId(controlBlock.getCurrentElem())).isEqualTo(id);
     }
 
-    private String getControlBlockId(TControl tControl){
-        if (tControl instanceof TGSEControl tgseControl){
+    private String getControlBlockId(TControl tControl) {
+        if (tControl instanceof TGSEControl tgseControl) {
             return tgseControl.getAppID();
         }
-        if (tControl instanceof TSampledValueControl tSampledValueControl){
+        if (tControl instanceof TSampledValueControl tSampledValueControl) {
             return tSampledValueControl.getSmvID();
         }
-        if (tControl instanceof TReportControl tReportControl){
+        if (tControl instanceof TReportControl tReportControl) {
             return tReportControl.getRptID();
         }
         throw new AssertionFailedError("Cannot get Id for ControlBlock of type " + tControl.getClass().getSimpleName());
@@ -141,25 +179,25 @@ public class SclHelper {
 
     public static Stream<TDataSet> streamAllDataSets(SclRootAdapter sclRootAdapter) {
         return streamAllLn0Adapters(sclRootAdapter)
-            .map(ln0Adapter -> ln0Adapter.getCurrentElem().getDataSet())
-            .flatMap(List::stream);
+                .map(ln0Adapter -> ln0Adapter.getCurrentElem().getDataSet())
+                .flatMap(List::stream);
     }
 
     public static Stream<LN0Adapter> streamAllLn0Adapters(SclRootAdapter sclRootAdapter) {
         return sclRootAdapter
-            .streamIEDAdapters()
-            .flatMap(IEDAdapter::streamLDeviceAdapters)
-            .filter(LDeviceAdapter::hasLN0)
-            .map(LDeviceAdapter::getLN0Adapter);
+                .streamIEDAdapters()
+                .flatMap(IEDAdapter::streamLDeviceAdapters)
+                .filter(LDeviceAdapter::hasLN0)
+                .map(LDeviceAdapter::getLN0Adapter);
     }
 
     public static Stream<TExtRef> streamAllExtRef(SclRootAdapter sclRootAdapter) {
         return streamAllLn0Adapters(sclRootAdapter)
-            .filter(AbstractLNAdapter::hasInputs)
-            .map(LN0Adapter::getInputsAdapter)
-            .map(InputsAdapter::getCurrentElem)
-            .map(TInputs::getExtRef)
-            .flatMap(List::stream);
+                .filter(AbstractLNAdapter::hasInputs)
+                .map(LN0Adapter::getInputsAdapter)
+                .map(InputsAdapter::getCurrentElem)
+                .map(TInputs::getExtRef)
+                .flatMap(List::stream);
     }
 
     public static String getDaiValue(AbstractLNAdapter<?> ln, String doiName, String daiName) {
@@ -168,15 +206,15 @@ public class SclHelper {
 
     public static Stream<String> streamAllConnectedApGseP(SCL scd, String pType) {
         return scd.getCommunication().getSubNetwork().stream()
-            .map(TSubNetwork::getConnectedAP)
-            .flatMap(List::stream)
-            .map(TConnectedAP::getGSE)
-            .flatMap(List::stream)
-            .map(TControlBlock::getAddress)
-            .map(TAddress::getP)
-            .flatMap(List::stream)
-            .filter(tp -> pType.equals(tp.getType()))
-            .map(TP::getValue);
+                .map(TSubNetwork::getConnectedAP)
+                .flatMap(List::stream)
+                .map(TConnectedAP::getGSE)
+                .flatMap(List::stream)
+                .map(TControlBlock::getAddress)
+                .map(TAddress::getP)
+                .flatMap(List::stream)
+                .filter(tp -> pType.equals(tp.getType()))
+                .map(TP::getValue);
     }
 
     public static TConnectedAP addConnectedAp(SCL scd, String subNetworkName, String apName, String iedName) {

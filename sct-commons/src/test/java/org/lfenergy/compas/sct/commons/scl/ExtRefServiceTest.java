@@ -412,7 +412,7 @@ class ExtRefServiceTest {
 
         TDurationInMilliSec minTime = newDurationInMilliSec(10);
         TDurationInMilliSec maxTime = newDurationInMilliSec(2000);
-        ControlBlockNetworkSettings controlBlockNetworkSettings = controlBlockAdapter -> new Settings(0x1D6, (byte) 4, minTime, maxTime);
+        ControlBlockNetworkSettings controlBlockNetworkSettings = controlBlockAdapter -> new SettingsOrError(new Settings(0x1D6, (byte) 4, minTime, maxTime), null);
 
         // When
         SclReport sclReport = ExtRefService.configureNetworkForAllControlBlocks(scd, controlBlockNetworkSettings, RANGES_PER_CB_TYPE);
@@ -455,7 +455,7 @@ class ExtRefServiceTest {
 
         TDurationInMilliSec minTime = newDurationInMilliSec(10);
         TDurationInMilliSec maxTime = newDurationInMilliSec(2000);
-        ControlBlockNetworkSettings controlBlockNetworkSettings = controlBlockAdapter -> new Settings(0x1D6, (byte) 4, minTime, maxTime);
+        ControlBlockNetworkSettings controlBlockNetworkSettings = controlBlockAdapter -> new SettingsOrError(new Settings(0x1D6, (byte) 4, minTime, maxTime), null);
         // When
         SclReport sclReport = ExtRefService.configureNetworkForAllControlBlocks(scd, controlBlockNetworkSettings, RANGES_PER_CB_TYPE);
         // Then
@@ -487,18 +487,21 @@ class ExtRefServiceTest {
         Settings settingsWithNullVlanId = new Settings(null, (byte) 1, newDurationInMilliSec(1), newDurationInMilliSec(2));
         Settings settings = new Settings(1, (byte) 1, newDurationInMilliSec(1), newDurationInMilliSec(2));
         return Stream.of(
-                Arguments.of((ControlBlockNetworkSettings) controlBlockAdapter -> null,
+                Arguments.of((ControlBlockNetworkSettings) controlBlockAdapter -> new SettingsOrError(null, null),
                         RANGES_PER_CB_TYPE,
                         "Cannot configure network for this ControlBlock because no settings was provided"),
-                Arguments.of((ControlBlockNetworkSettings) controlBlockAdapter -> settingsWithNullVlanId,
+                Arguments.of((ControlBlockNetworkSettings) controlBlockAdapter -> new SettingsOrError(null, "Custom error message"),
+                        RANGES_PER_CB_TYPE,
+                        "Cannot configure network for this ControlBlock because: Custom error message"),
+                Arguments.of((ControlBlockNetworkSettings) controlBlockAdapter -> new SettingsOrError(settingsWithNullVlanId, null),
                         RANGES_PER_CB_TYPE,
                         "Cannot configure network for this ControlBlock because no Vlan Id was provided in the settings"),
-                Arguments.of((ControlBlockNetworkSettings) controlBlockAdapter -> settings,
+                Arguments.of((ControlBlockNetworkSettings) controlBlockAdapter -> new SettingsOrError(settings, null),
                         new RangesPerCbType(
                                 new NetworkRanges(GSE_APP_ID_MIN, GSE_APP_ID_MIN, GSE_MAC_ADDRESS_PREFIX + "00-FF", GSE_MAC_ADDRESS_PREFIX + "01-AA"),
                                 SMV_NETWORK_RANGES),
                         "Cannot configure network for this ControlBlock because range of appId is exhausted"),
-                Arguments.of((ControlBlockNetworkSettings) controlBlockAdapter -> settings,
+                Arguments.of((ControlBlockNetworkSettings) controlBlockAdapter -> new SettingsOrError(settings, null),
                         new RangesPerCbType(
                                 new NetworkRanges(GSE_APP_ID_MIN, GSE_APP_ID_MIN + 10, GSE_MAC_ADDRESS_PREFIX + "00-FF", GSE_MAC_ADDRESS_PREFIX + "00-FF"),
                                 SMV_NETWORK_RANGES),

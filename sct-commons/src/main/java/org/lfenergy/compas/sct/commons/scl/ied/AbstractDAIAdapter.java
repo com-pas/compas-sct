@@ -7,12 +7,13 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 import org.lfenergy.compas.scl2007b4.model.TDAI;
 import org.lfenergy.compas.scl2007b4.model.TDOI;
 import org.lfenergy.compas.scl2007b4.model.TPrivate;
-import org.lfenergy.compas.scl2007b4.model.TVal;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.util.CommonConstants;
 
 import java.util.Map;
+
+import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newVal;
 
 /**
  * A representation of the model object
@@ -21,15 +22,8 @@ import java.util.Map;
  * The following features are supported:
  * </p>
  * <ol>
- *   <li>Adapter</li>
- *    <ul>
- *      <li>{@link AbstractDAIAdapter#getStructuredDataAdapterByName(String) <em>Returns the value of the <b>Child Adapter </b>object reference</em>}</li>
- *      <li>{@link AbstractDAIAdapter#getDataAdapterByName(String) <em>Returns the value of the <b>Child Adapter </b>object reference By Name</em>}</li>
- *    </ul>
  *   <li>Principal functions</li>
  *    <ul>
- *      <li>{@link AbstractDAIAdapter#addDAI(String) <em>Add <b>TDAI </b> under this object</em>}</li>
- *      <li>{@link AbstractDAIAdapter#addSDOI(String) <em>Add <b>TSDI </b> under this object</em>}</li>
  *      <li>{@link AbstractDAIAdapter#update(Long, String) <em>Update <b>TDAI</b> (sGroup, value)</em>}</li>
  *      <li>{@link AbstractDAIAdapter#update(Map) <em>Update Many <b>TDAI</b> (sGroup, value)</em>}</li>
  *      <li>{@link AbstractDAIAdapter#addPrivate(TPrivate) <em>Add <b>TPrivate </b> under this object</em>}</li>
@@ -50,30 +44,6 @@ public abstract class AbstractDAIAdapter<P extends SclElementAdapter> extends Sc
      */
     protected AbstractDAIAdapter(P parentAdapter, TDAI currentElem) {
         super(parentAdapter, currentElem);
-    }
-
-    /**
-     * Gets SDI from DAI by name
-     *
-     * @param sName SDI name
-     * @param <S>   expected class type
-     * @return <em>IDataAdapter</em> related object
-     * @throws ScdException throws when specified SDI not present in DAI
-     */
-    public <S extends IDataAdapter> S getStructuredDataAdapterByName(String sName) throws ScdException {
-        throw new UnsupportedOperationException("DAI doesn't have any SDI");
-    }
-
-    /**
-     * Gets DataAdapter by DAI
-     *
-     * @param sName DAI name
-     * @param <S>   expected class type
-     * @return <em>IDataAdapter</em> related object
-     * @throws ScdException throws when specified DAI unknown
-     */
-    public <S extends IDataAdapter> S getDataAdapterByName(String sName) throws ScdException {
-        throw new UnsupportedOperationException("DAI doesn't have any DAI");
     }
 
     /**
@@ -104,7 +74,7 @@ public abstract class AbstractDAIAdapter<P extends SclElementAdapter> extends Sc
     }
 
     /**
-     * Updates DAI SGroup value
+     * Updates DAI SGroup value. This method checks if DAI is updatable.
      *
      * @param sGroup SGroup to update
      * @param val    value
@@ -118,42 +88,31 @@ public abstract class AbstractDAIAdapter<P extends SclElementAdapter> extends Sc
             throw new ScdException(msg);
         }
         if (sGroup != null && sGroup != 0) {
-            updateSGroupVal(sGroup, val);
+            setSGroupVal(sGroup, val);
         } else {
-            updateVal(val);
+            setVal(val);
         }
     }
 
-    private void updateSGroupVal(Long sGroup, String val) {
+    private void setSGroupVal(Long sGroup, String value) {
         currentElem.getVal().stream()
                 .filter(tValElem -> tValElem.isSetSGroup() && sGroup.equals(tValElem.getSGroup()))
                 .findFirst()
-                .orElseGet(
-                        () -> {
-                            TVal newTVal = new TVal();
-                            newTVal.setSGroup(sGroup);
-                            currentElem.getVal().add(newTVal);
-                            return newTVal;
-                        })
-                .setValue(val);
+                .ifPresentOrElse(
+                        tVal -> tVal.setValue(value),
+                        () -> currentElem.getVal().add(newVal(value, sGroup)));
     }
 
-    public void updateVal(String s) {
+    /**
+     * Set Val (without sGroup) for DAI without checking if DAI is updatable
+     * @param value new value
+     */
+    public void setVal(String value) {
         currentElem.getVal().stream().findFirst()
-                .orElseGet(
-                        () -> {
-                            TVal newTVal = new TVal();
-                            currentElem.getVal().add(newTVal);
-                            return newTVal;
-                        })
-                .setValue(s);
+                .ifPresentOrElse(
+                        tVal -> tVal.setValue(value),
+                        () -> currentElem.getVal().add(newVal(value)));
+
     }
 
-    public IDataAdapter addDAI(String name) {
-        throw new UnsupportedOperationException("DAI cannot contain an SDI");
-    }
-
-    public IDataAdapter addSDOI(String sdoName) {
-        throw new UnsupportedOperationException("DAI cannot contain an DAI");
-    }
 }

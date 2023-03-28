@@ -7,6 +7,7 @@ package org.lfenergy.compas.sct.commons.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.util.SclConstructorHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +51,7 @@ public class ResumedDataTemplate {
     private DaTypeName daName = new DaTypeName("");
 
     /**
-     * Copies sumarized DataTypeTemplate informations to another one
+     * Copies summarized DataTypeTemplate information to another one
      * @param dtt input
      * @return Updated ResumedDataTemplate object
      */
@@ -89,7 +90,7 @@ public class ResumedDataTemplate {
     }
 
     /**
-     * Gets LNode reference informations
+     * Gets LNode reference information
      * @return String LNode information concatenated
      */
     @JsonIgnore
@@ -335,10 +336,13 @@ public class ResumedDataTemplate {
         return daName.isValImport();
     }
 
+    /**
+     * Set Val of DA
+     * @param daiValue daiValue to set
+     * @return this
+     */
     public ResumedDataTemplate setVal(String daiValue) {
-        TVal newDaiVal = new TVal();
-        newDaiVal.setValue(daiValue);
-        this.setDaiValues(List.of(newDaiVal));
+        this.setDaiValues(List.of(SclConstructorHelper.newVal(daiValue)));
         return this;
     }
 

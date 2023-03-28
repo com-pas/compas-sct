@@ -24,10 +24,10 @@ public interface ControlBlockNetworkSettings {
      * vlanPriority will be ignored when vlanId is null.
      *
      * @param controlBlockAdapter ControlBlock for which we want to configure the communication section
-     * @return network settings : All fields are optional (meaning fields can be null).
-     * When the return value itself is null, the communication section will not be configured for this ControlBlock.
+     * @return network settings to use for configuring Communication section for this ControlBlock.
+     * An error message can be provided (i.e. errorMessage not null) or a null settings, in order to avoid configuring the ControlBlock.
      */
-    Settings getNetworkSettings(ControlBlockAdapter controlBlockAdapter);
+    SettingsOrError getNetworkSettings(ControlBlockAdapter controlBlockAdapter);
 
     /**
      * Network settings for ControlBlock communication
@@ -38,6 +38,15 @@ public interface ControlBlockNetworkSettings {
      * @param maxTime      maxTime for GSE communication element
      */
     record Settings(Integer vlanId, Byte vlanPriority, TDurationInMilliSec minTime, TDurationInMilliSec maxTime) {
+    }
+
+    /**
+     * Network settings for ControlBlock communication or Error message
+     *
+     * @param settings     Network settings for ControlBlock communication. Can be null when errorMessage is provided
+     * @param errorMessage should be null if settings is provided
+     */
+    record SettingsOrError(Settings settings, String errorMessage) {
     }
 
     /**
