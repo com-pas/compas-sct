@@ -1,0 +1,166 @@
+# SPDX-FileCopyrightText: 2023 RTE FRANCE
+#
+# SPDX-License-Identifier: Apache-2.0
+
+#RTE-IEDType,IED.redundancy,IED.instance,Channel.ShortLabel,Channel.MREP,Channel.LevMod.q,Channel.LevMod,BAP.Variant,BAP.Ignored Value,LD.inst,LN.prefix,LN.name,LN.inst,DO.name,DO.inst,SDO.name,DA.name,DA.type,DA.bType,BDA.name,SBDA.name,Channel.Analog.num,Channel.Digital.num,Opt
+BCU,None,1,MR.PX1,X,Other,Positive or Rising,8,N/A,LDPX,,PTRC,0,Str,0,,general,,BOOLEAN,,,,1,P0
+BCU,None,1,DT.PX1,,??,Other,NA,N/A,LDPX,,PTRC,0,Op,0,,general,,BOOLEAN,,,,2,P0
+BCU,None,1,MR.PX1.ZONE 1,,??,Other,NA,N/A,LDPX,,PDIS,1,Op,0,,general,,BOOLEAN,,,,3,P1
+BCU,None,1,MR.PX1.ZONE 2,,??,Other,NA,N/A,LDPX,,PDIS,2,Op,0,,general,,BOOLEAN,,,,4,P1
+BCU,None,1,MR.PX1.ZONE 3,,??,Other,NA,N/A,LDPX,,PDIS,3,Op,0,,general,,BOOLEAN,,,,5,P1
+BCU,None,1,MR.PX1.ZONE 4,,??,Other,NA,N/A,LDPX,,PDIS,4,Op,0,,general,,BOOLEAN,,,,6,P2
+BCU,None,1,MR.PX1.ZONE 5,,??,Other,NA,N/A,LDPX,,PDIS,5,Op,0,,general,,BOOLEAN,,,,7,P2
+BCU,None,1,MR.PX1.ZONE 6,,??,Other,NA,N/A,LDPX,,PDIS,6,Op,0,,general,,BOOLEAN,,,,8,P2
+BCU,None,1,MR.PX1.TERRE,,??,Other,NA,N/A,LDPX,,PTRC,0,Op,0,,neut,,BOOLEAN,,,,9,P0
+BCU,None,1,DT.PX1.PHASE *,,??,Other,NA,N/A,LDPX,,PTRC,0,Op,0,,phsA,,BOOLEAN,,,,10,P0
+BCU,None,1,DT.PX1.PHASE *,,??,Other,NA,N/A,LDPX,,PTRC,0,Op,0,,phsB,,BOOLEAN,,,,11,P0
+BCU,None,1,DT.PX1.PHASE *,,??,Other,NA,N/A,LDPX,,PTRC,0,Op,0,,phsC,,BOOLEAN,,,,12,P0
+BCU,None,1,MR.PX1.AMONT,,??,Other,NA,N/A,LDPX,,PTRC,0,Str,0,,dirGeneral,,BOOLEAN,,,,13,P0
+BCU,None,1,MR.PX1.AVAL,,??,Other,NA,N/A,LDPX,,,,,,,,,,,,,14,P0
+BPU,None,1,MR.PX2,X,Other,Positive or Rising,8,N/A,LDPX,,PTRC,0,Str,0,,general,,BOOLEAN,,,,15,P0
+BPU,None,1,DT.PX2,,??,Other,NA,N/A,LDPX,,PTRC,0,Op,0,,general,,BOOLEAN,,,,16,P0
+BPU,None,1,MR.PX2.ZONE 1,,??,Other,NA,N/A,LDPX,,PDIS,1,Op,0,,general,,BOOLEAN,,,,17,P1
+BPU,None,1,MR.PX2.ZONE 2,,??,Other,NA,N/A,LDPX,,PDIS,2,Op,0,,general,,BOOLEAN,,,,18,P1
+BPU,None,1,MR.PX2.ZONE 3,,??,Other,NA,N/A,LDPX,,PDIS,3,Op,0,,general,,BOOLEAN,,,,19,P1
+BPU,None,1,MR.PX2.ZONE 4,,??,Other,NA,N/A,LDPX,,PDIS,4,Op,0,,general,,BOOLEAN,,,,20,P2
+BPU,None,1,MR.PX2.ZONE 5,,??,Other,NA,N/A,LDPX,,PDIS,5,Op,0,,general,,BOOLEAN,,,,21,P2
+BPU,None,1,MR.PX2.ZONE 6,,??,Other,NA,N/A,LDPX,,PDIS,6,Op,0,,general,,BOOLEAN,,,,22,P2
+BPU,None,1,MR.PX2.TERRE,,??,Other,NA,N/A,LDPX,,PTRC,0,Op,0,,neut,,BOOLEAN,,,,23,P0
+BPU,None,1,DT.PX2.PHASE *,,??,Other,NA,N/A,LDPX,,PTRC,0,Op,0,,phsA,,BOOLEAN,,,,24,P0
+BPU,None,1,DT.PX2.PHASE *,,??,Other,NA,N/A,LDPX,,PTRC,0,Op,0,,phsB,,BOOLEAN,,,,25,P0
+BPU,None,1,DT.PX2.PHASE *,,??,Other,NA,N/A,LDPX,,PTRC,0,Op,0,,phsC,,BOOLEAN,,,,26,P0
+BPU,None,1,MR.PX2.AMONT,,??,Other,NA,N/A,LDPX,,PTRC,0,Str,0,,dirGeneral,,BOOLEAN,,,,27,P0
+BPU,None,1,MR.PX2.AVAL,,??,Other,NA,N/A,LDPX,,PTRC,0,,,,,,,,,,28,P0
+BCU,None,1,REC.ACCx.Vy,X,Other,Positive or Rising,8,N/A,LDPX,,PSCH,0,,,,,,,,,,29,P0
+BCU,None,1,REC.AUTx.Vy,X,Other,Positive or Rising,8,N/A,LDPX,,PSCH,0,,,,,,,,,,30,P0
+BCU,None,1,REC.VERx.Vy,X,Other,Positive or Rising,8,N/A,LDPX,,PSCH,0,,,,,,,,,,31,P0
+BCU,None,1,EMI.ACCx.Vy,,??,Other,NA,N/A,LDPX,,PSCH,0,TxPrm,0,,general,,BOOLEAN,,,,32,P0
+BCU,None,1,EMI.AUTx.Vy,,??,Other,NA,N/A,LDPX,,PSCH,0,TxPrm,0,,general,,BOOLEAN,,,,33,P0
+BCU,None,1,EMI.VERx.Vy,,??,Other,NA,N/A,LDPX,,PSCH,0,TxBlk,0,,general,,BOOLEAN,,,,34,P0
+BCU,None,1,MR.PW,X,Other,Positive or Rising,8,N/A,LDPW,,PTRC,0,Str,0,,general,,BOOLEAN,,,,35,P0
+BCU,None,1,MR.PW.AMONT,,??,Other,NA,N/A,LDPW,,PTRC,0,Str,0,,dirGeneral,,BOOLEAN,,,,36,P1
+BCU,None,1,DT.PW,,??,Other,NA,N/A,LDPW,,PTRC,0,Op,0,,general,,BOOLEAN,,,,37,P0
+BCU,None,1,MR.PCDH,X,Other,Positive or Rising,8,N/A,LDPCDH,,PTRC,0,Str,0,,general,,BOOLEAN,,,,38,P0
+BCU,None,1,EMI.AUT.PCDH,,??,Other,NA,N/A,LDPCDH,,PTRC,0,Op,0,,general,,BOOLEAN,,,,39,P0
+BCU,None,1,EMI.TD.PCDH,,??,Other,NA,N/A,LDPCDH,,PSCH,0,TxPrm,0,,general,,BOOLEAN,,,,40,P0
+BCU,None,1,REC.AUT.PCDH,X,Other,Positive or Rising,8,N/A,LDPCDH,,PSCH,0,,,,,,,,,,41,P0
+BCU,None,1,MR.PAP1,X,Other,Positive or Rising,8,N/A,LDPAP,,PTRC,0,Str,0,,general,,BOOLEAN,,,,42,P0
+BCU,None,1,DT.PAP1,,??,Other,NA,N/A,LDPAP,,PTRC,0,Op,0,,general,,BOOLEAN,,,,43,P0
+BCU,None,1,MR.PAP1.PHASE *,X,Other,Positive or Rising,8,N/A,LDPAP,,PTRC,0,Op,0,,phsA,,BOOLEAN,,,,44,P1
+BCU,None,1,MR.PAP1.PHASE *,X,Other,Positive or Rising,8,N/A,LDPAP,,PTRC,0,Op,0,,phsB,,BOOLEAN,,,,45,P1
+BCU,None,1,MR.PAP1.PHASE *,X,Other,Positive or Rising,8,N/A,LDPAP,,PTRC,0,Op,0,,phsC,,BOOLEAN,,,,46,P1
+BCU,None,1,DT.PAP1.IR,,??,Other,NA,N/A,LDPAP,,PTOC,1,Op,0,,general,,BOOLEAN,,,,47,P1
+BCU,None,1,REC.TDPAP1,X,Other,Positive or Rising,8,N/A,LDTDEC,,PSCH,0,RxTr,0,,general,,BOOLEAN,,,,48,P0
+BCU,None,1,EMI.TDPAP1,,??,Other,NA,N/A,LDTDEC,,PSCH,0,TxTr,0,,general,,BOOLEAN,,,,49,P0
+BCU,None,1,MR.PAP2,X,Other,Positive or Rising,8,N/A,LDPAP,,PTRC,0,Str,0,,general,,BOOLEAN,,,,50,P0
+BCU,None,1,DT.PAP2,,??,Other,NA,N/A,LDPAP,,PTRC,0,Op,0,,general,,BOOLEAN,,,,51,P0
+BCU,None,1,MR.PAP2.PHASE *,X,Other,Positive or Rising,8,N/A,LDPAP,,PTRC,0,Op,0,,phsA,,BOOLEAN,,,,52,P1
+BCU,None,1,MR.PAP2.PHASE *,X,Other,Positive or Rising,8,N/A,LDPAP,,PTRC,0,Op,0,,phsB,,BOOLEAN,,,,53,P1
+BCU,None,1,MR.PAP2.PHASE *,X,Other,Positive or Rising,8,N/A,LDPAP,,PTRC,0,Op,0,,phsC,,BOOLEAN,,,,54,P1
+BCU,None,1,DT.PAP2.IR,,??,Other,NA,N/A,LDPAP,,PTOC,1,Op,0,,general,,BOOLEAN,,,,55,P1
+PDL1,None,1,MR.PDL1,X,Other,Positive or Rising,8,N/A,LDDIFL,,PTRC,0,Str,0,,general,,BOOLEAN,,,,56,P1
+PDL1,None,1,DT.PDL1,,??,Other,NA,N/A,LDDIFL,,PTRC,0,Op,0,,general,,BOOLEAN,,,,57,P0
+PDL1,None,1,MR.PDL1.PHASE *,,??,Other,NA,N/A,LDDIFL,,PTRC,0,Str,0,,phsA,,BOOLEAN,,,,58,P0
+PDL1,None,1,MR.PDL1.PHASE *,,??,Other,NA,N/A,LDDIFL,,PTRC,0,Str,0,,phsB,,BOOLEAN,,,,59,P0
+PDL1,None,1,MR.PDL1.PHASE *,,??,Other,NA,N/A,LDDIFL,,PTRC,0,Str,0,,phsC,,BOOLEAN,,,,60,P0
+PDL2,None,1,MR.PDL2,X,Other,Positive or Rising,8,N/A,LDDIFL,,PTRC,0,Str,0,,general,,BOOLEAN,,,,61,P1
+PDL2,None,1,DT.PDL2,,??,Other,NA,N/A,LDDIFL,,PTRC,0,Op,0,,general,,BOOLEAN,,,,62,P0
+PDL2,None,1,MR.PDL2.PHASE *,X,Other,Positive or Rising,8,N/A,LDDIFL,,PTRC,0,Str,0,,phsA,,BOOLEAN,,,,63,P0
+PDL2,None,1,MR.PDL2.PHASE *,X,Other,Positive or Rising,8,N/A,LDDIFL,,PTRC,0,Str,0,,phsB,,BOOLEAN,,,,64,P0
+PDL2,None,1,MR.PDL2.PHASE *,X,Other,Positive or Rising,8,N/A,LDDIFL,,PTRC,0,Str,0,,phsC,,BOOLEAN,,,,65,P0
+PDB,None,1,MR.PDB,X,Other,Positive or Rising,8,N/A,LDPDB,,PTRC,0,Str,0,,general,,BOOLEAN,,,,66,P0
+PDB,None,1,DT.PDB,,??,Other,NA,N/A,LDPDB,,PTRC,0,Op,0,,general,,BOOLEAN,,,,67,P0
+PDB,None,1,MR.PDB.PHASE *,,??,Other,NA,N/A,LDPDB,,PTRC,0,Str,0,,phsA,,BOOLEAN,,,,68,P1
+PDB,None,1,MR.PDB.PHASE *,,??,Other,NA,N/A,LDPDB,,PTRC,0,Str,0,,phsB,,BOOLEAN,,,,69,P1
+PDB,None,1,MR.PDB.PHASE *,,??,Other,NA,N/A,LDPDB,,PTRC,0,Str,0,,phsC,,BOOLEAN,,,,70,P1
+BCU,None,1,MR.PMC1,X,Other,Positive or Rising,8,N/A,LDPMC,,PTRC,0,Str,0,,general,,BOOLEAN,,,,71,P0
+BCU,None,1,DT.PMC1,,??,Other,NA,N/A,LDPMC,,PTRC,0,Op,0,,general,,BOOLEAN,,,,72,P0
+BCU,None,1,MR.PMC2,X,Other,Positive or Rising,8,N/A,LDPMC,,PTRC,0,Str,0,,general,,BOOLEAN,,,,73,P0
+BCU,None,1,DT.PMC2,,??,Other,NA,N/A,LDPMC,,PTRC,0,Op,0,,general,,BOOLEAN,,,,74,P0
+BCU,None,1,MR.PMC2,X,Other,Positive or Rising,8,N/A,LDPMC,,PTRC,0,Str,0,,general,,BOOLEAN,,,,75,P0
+BCU,None,1,DT.PMC2,,??,Other,NA,N/A,LDPMC,,PTRC,0,Op,0,,general,,BOOLEAN,,,,76,P0
+CFD,None,1,DET.OPT.DEF.CAB1,X,Other,Positive or Rising,8,N/A,LDDFU,,PSCH,0,Op,0,,general,,BOOLEAN,,,,77,P0
+CFD,None,1,DET.OPT.DEF.CAB2,X,Other,Positive or Rising,8,N/A,LDDFU,,PSCH,0,Op,0,,general,,BOOLEAN,,,,78,P0
+CFD,None,1,DET.OPT.DEF.CAB3,X,Other,Positive or Rising,8,N/A,LDDFU,,PSCH,0,Op,0,,general,,BOOLEAN,,,,79,P0
+BCU,None,1,DT.MAXIL1,,??,Other,NA,N/A,LDMAXIL,,PTRC,0,Op,0,,general,,BOOLEAN,,,,80,P0
+BCU,None,1,MR.MAXIL1,X,Other,Positive or Rising,8,N/A,LDMAXIL,,PTRC,0,Str,0,,general,,BOOLEAN,,,,81,P1
+BCU,None,1,MR.MAXIL1.S1P,X,Other,Positive or Rising,8,N/A,LDMAXIL,,PTOC,1,Str,0,,general,,BOOLEAN,,,,82,P0
+BCU,None,1,MR.MAXIL1.S1T,X,Other,Positive or Rising,8,N/A,LDMAXIL,,PTOC,2,Str,0,,general,,BOOLEAN,,,,83,P0
+BCU,None,1,MR.MAXIL1.S2P,X,Other,Positive or Rising,8,N/A,LDMAXIL,,PTOC,3,Str,0,,general,,BOOLEAN,,,,84,P0
+BCU,None,1,DT.MAXIL2,,??,Other,NA,N/A,LDMAXIL,,PTRC,0,Op,0,,general,,BOOLEAN,,,,85,P0
+BCU,None,1,MR.MAXIL2,X,Other,Positive or Rising,8,N/A,LDMAXIL,,PTRC,0,Str,0,,general,,BOOLEAN,,,,86,P1
+BCU,None,1,MR.MAXIL2.S1P,X,Other,Positive or Rising,8,N/A,LDMAXIL,,PTOC,1,Str,0,,general,,BOOLEAN,,,,87,P0
+BCU,None,1,MR.MAXIL2.S1T,X,Other,Positive or Rising,8,N/A,LDMAXIL,,PTOC,2,Str,0,,general,,BOOLEAN,,,,88,P0
+BCU,None,1,MR.MAXIL2.S2P,X,Other,Positive or Rising,8,N/A,LDMAXIL,,PTOC,3,Str,0,,general,,BOOLEAN,,,,89,P0
+BCU,None,1,ADD.DEFAIL.DJ,X,Other,Positive or Rising,8,N/A,LDADD,,RBRF,0,OpEx,0,,general,,BOOLEAN,,,,90,P0
+AUT,None,1,,X,Other,Positive or Rising,8,N/A,,,,,,,,,,,,,,91,P0
+BCU,None,1,AR.ENCLT.RM,X,Other,Positive or Rising,8,N/A,LDREC,,RREC,1,OpCls,0,,general,,BOOLEAN,,,,92,P1
+BCU,None,1,AR.ENCLT.RTR,X,Other,Positive or Rising,8,N/A,LDREC,,RREC,2,OpCls,0,,general,,BOOLEAN,,,,93,P1
+BCU,None,1,AR.ENCLT.TAM,X,Other,Positive or Rising,8,N/A,LDREC,,RREC,3,OpCls,0,,general,,BOOLEAN,,,,94,P1
+BCU,None,1,AR.ENCLT.REBTAM,X,Other,Positive or Rising,8,N/A,LDREC,,RREC,4,OpCls,0,,general,,BOOLEAN,,,,95,P1
+BCU,None,1,AR.ENCLT.RT,X,Other,Positive or Rising,8,N/A,LDRS,,RREC,0,OpCls,0,,general,,BOOLEAN,,,,96,P1
+BCU,None,1,AR.ENCLT.RTS,X,Other,Positive or Rising,8,N/A,LDRTS,,RREC,0,OpCls,0,,general,,BOOLEAN,,,,97,P1
+BCU,None,1,AR.ENCLT.RTS,X,Other,Positive or Rising,8,N/A,LDAMU,,RREC,0,OpCls,0,,general,,BOOLEAN,,,,98,P1
+AUT,None,1,AR.ENCLT,X ,Other,Positive or Rising,8,N/A,LDGRP,,,,,,,,,,,,,99,P0
+BCU,None,1,BCU.FERM.DJ,X,Other,Positive or Rising,8,N/A,LDCMDDJ,,CSWI,1,OpCls,0,,general,,BOOLEAN,,,,100,P1
+BCU,None,1,BCU.OUVERT.DJ,X,Other,Positive or Rising,8,N/A,LDCMDDJ,,CSWI,1,OpOpn,0,,general,,BOOLEAN,,,,101,P1
+SCU-ORG,A,1,SCU.OUV.DJ,X,Other,Positive or Rising,8,N/A,LDDJ,,XCMD,0,OpOpn,0,,general,,BOOLEAN,,,,102,P0
+SCU-ORG,A,1,SCU.FERM.DJ,X,Other,Positive or Rising,8,N/A,LDDJ,,XCMD,0,OpCls,0,,general,,BOOLEAN,,,,103,P0
+BCU,None,1,DPHILB,,??,Other,NA,N/A,LDCMDDJ,,RSYN,1,AngInd,0,,stVal,,BOOLEAN,,,,104,P0
+BCU,None,1,DFLB,,??,Other,NA,N/A,LDCMDDJ,,RSYN,1,HzInd,0,,stVal,,BOOLEAN,,,,105,P0
+BCU,None,1,DULB,,??,Other,NA,N/A,LDCMDDJ,,RSYN,1,VInd,0,,stVal,,BOOLEAN,,,,106,P0
+BCU,None,1,PUL,,??,Other,NA,N/A,LDCMDDJ,,FXOT,1,Op,0,,general,,BOOLEAN,,,,107,P0
+BCU,None,1,PUB,,??,Other,NA,N/A,LDCMDDJ,,FXOT,2,Op,0,,general,,BOOLEAN,,,,108,P0
+BCU,None,1,AUL,,??,Other,NA,N/A,LDCMDDJ,,FXUT,1,Op,0,,general,,BOOLEAN,,,,109,P0
+BCU,None,1,AUB,,??,Other,NA,N/A,LDCMDDJ,,FXUT,2,Op,0,,general,,BOOLEAN,,,,110,P0
+BCU,None,1,CYCLE.ARS.ACTIF,,??,Other,NA,N/A,,,,,,,,,,,,,,111,P1
+BCU,None,1,MQ.U.102,X,??,Other,NA,N/A,LDMQUB1,CB00001002,FXUT,0,Op,0,,general,,BOOLEAN,,,,112,P0
+BCU,None,1,MQ.U.103,X,??,Other,NA,N/A,LDMQUB1,CB00001003,FXUT,0,Op,0,,general,,BOOLEAN,,,,113,P0
+BCU,None,1,MQ.U.104,X,??,Other,NA,N/A,LDMQUB1,CB00001004,FXUT,0,Op,0,,general,,BOOLEAN,,,,114,P0
+BCU,None,1,MQ.U.105,X,??,Other,NA,N/A,LDMQUB1,CB00001005,FXUT,0,Op,0,,general,,BOOLEAN,,,,115,P1
+BCU,None,1,MQ.U.106,X,??,Other,NA,N/A,LDMQUB1,CB00001006,FXUT,0,Op,0,,general,,BOOLEAN,,,,116,P1
+BCU,None,1,MQ.U.202,X,??,Other,NA,N/A,LDMQUB1,CB00002002,FXUT,0,Op,0,,general,,BOOLEAN,,,,117,P1
+BCU,None,1,MQ.U.101,X,??,Other,NA,N/A,LDMQUB1,CB00001001,FXUT,0,Op,0,,general,,BOOLEAN,,,,118,P0
+BCU,None,1,MQ.U.201,X,Other,Positive or Rising,8,N/A,LDMQUB1,CB00002001,FXUT,0,Op,0,,general,,BOOLEAN,,,,119,P0
+BCU,None,1,REC.TDECx.Vy,X,Other,Positive or Rising,8,N/A,LDTDEC,,PSCH,0,RxTr,0,,general,,BOOLEAN,,,,120,P0
+BCU,None,1,EMI.TDECx.Vy,,??,Other,NA,N/A,LDTDEC,,PSCH,0,TxTr,0,,general,,BOOLEAN,,,,121,P0
+BCU,None,1,REC.DESARM.ARS,X,Other,Positive or Rising,8,N/A,LDTDEC,,PSCH,0,RxTr,0,,general,,BOOLEAN,,,,122,P0
+BCU,None,1,EMI.TDECx.Vy,,??,Other,NA,N/A,LDTDEC,,PSCH,0,TxTr,0,,general,,BOOLEAN,,,,123,P0
+BCU,None,1,DT.TDEC,,??,Other,NA,N/A,LDTDEC,,PTRC,0,Op,0,,general,,BOOLEAN,,,,124,P1
+BCU,None,1,EPS.MER,X,Other,Positive or Rising,8,N/A,LDEPS,,RDRE,1,RcdStr,0,,stVal,,BOOLEAN,,,,125,P0
+BCU,None,1,PO.MER,X,Other,Positive or Rising,8,N/A,LDEPF,,RDRE,2,RcdTrg,0,,stVal,,BOOLEAN,,,,126,P0
+BCU,None,1,PRS.MER,X,Other,Positive or Rising,8,N/A,LDPRS,,PTRC,0,Str,0,,general,,BOOLEAN,,,,127,P0
+BCU,None,1,DT.PRS,,??,Other,NA,N/A,LDPRS,,PTRC,0,Op,0,,general,,BOOLEAN,,,,128,P0
+BCU,None,1,ANO.TCT.L,X,Other,Positive or Rising,8,N/A,LDSUTCT,,CALH,1,GrInd,0,,stVal,,BOOLEAN,,,,129,P0
+BCU,None,1,ANO.TCT.B,X,Other,Positive or Rising,8,N/A,LDSUTCT,,CALH,2,GrInd,0,,stVal,,BOOLEAN,,,,130,P0
+BCU,None,1,DT.SUTCT,,??,Other,NA,N/A,LDSUTCT,,PTRC,0,Op,0,,general,,BOOLEAN,,,,131,P0
+BCU,None,1,MR.PSPT,X,Other,Positive or Rising,8,N/A,LDPSPT,,PTRC,0,Str,0,,general,,BOOLEAN,,,,132,P0
+BCU,None,1,DT.PSPT,,??,Other,NA,N/A,LDPSPT,,PTRC,0,Op,0,,general,,BOOLEAN,,,,133,P0
+PDT,None,1,MR.PDT,X,Other,Positive or Rising,8,N/A,LDPDT,,PTRC,0,Str,0,,general,,BOOLEAN,,,,134,P0
+PDT,None,1,DT.PDT,,??,Other,NA,N/A,LDPDT,,PTRC,0,Op,0,,general,,BOOLEAN,,,,135,P0
+PTP,None,1,MR.PTP,X,Other,Positive or Rising,8,N/A,LDPTP,,PTRC,0,Str,0,,general,,BOOLEAN,,,,136,P0
+PTP,None,1,DT.PTP ,,??,Other,NA,N/A,LDPTP,,PTRC,0,Op,0,,general,,BOOLEAN,,,,137,P0
+PDB,None,1,MR.PDLP,X,Other,Positive or Rising,8,N/A,LDPTLP,,PTRC,0,Str,0,,general,,BOOLEAN,,,,138,P0
+PDB,None,1,DT.PDLP,,??,Other,NA,N/A,LDPDLP,,PTRC,0,Op,0,,general,,BOOLEAN,,,,139,P0
+PDB,None,1,MR.PDLC,X,Other,Positive or Rising,8,N/A,LDPDLC,,PTRC,0,Str,0,,general,,BOOLEAN,,,,140,P0
+PDB,None,1,DT.PDLC,,??,Other,NA,N/A,LDPDLC,,PTRC,0,Op,0,,general,,BOOLEAN,,,,141,P0
+BCU,None,1,MR.MAXUL,X,Other,Positive or Rising,8,N/A,LDMAXU,,PTRC,0,Str,0,,general,,BOOLEAN,,,,142,P0
+BCU,None,1,DT.MAXUL,,??,Other,NA,N/A,LDMAXU,,PTRC,0,Op,0,,general,,BOOLEAN,,,,143,P0
+SAMU,A,1,V0,,NA,NA,8,N/A,LDTM1,U01A,TVTR,11,VolSv,0,,instMag,,AnalogueValue,i,,1,,P0
+SAMU,A,1,V4,,NA,NA,8,N/A,LDTM1,U01B,TVTR,12,VolSv,0,,instMag,,AnalogueValue,i,,2,,P0
+SAMU,A,1,V8,,NA,NA,8,N/A,LDTM1,U01C,TVTR,13,VolSv,0,,instMag,,AnalogueValue,i,,3,,P0
+SAMU,A,1,J0,,NA,NA,8,N/A,LDTM1,I01A,TCTR,11,AmpSv,0,,instMag,,AnalogueValue,i,,4,,P0
+SAMU,A,1,J4,,NA,NA,8,N/A,LDTM1,I01B,TCTR,12,AmpSv,0,,instMag,,AnalogueValue,i,,5,,P0
+SAMU,A,1,.J8,,NA,NA,8,N/A,LDTM1,J01C,TCTR,13,AmpSv,0,,instMag,,AnalogueValue,i,,6,,P0
+SAMU,A,1,I0,,NA,NA,8,N/A,LDTM1,I05A,TCTR,51,AmpSv,0,,instMag,,AnalogueValue,i,,7,,P0
+SAMU,A,1,I4,,NA,NA,8,N/A,LDTM1,I05B,TCTR,52,AmpSv,0,,instMag,,AnalogueValue,i,,8,,P0
+SAMU,A,1,I8,,NA,NA,8,N/A,LDTM1,I05C,TCTR,53,AmpSv,0,,instMag,,AnalogueValue,i,,9,,P0
+SAMU,A,1,G,,NA,NA,8,N/A,LDTM1,I06N,TCTR,61,AmpSv,0,,instMag,,AnalogueValue,i,,16,,P0
+SAMU,A,1,U101,,NA,NA,8,N/A,LDPHAS1,,MMXU,101,PhV,0,phsA;phsB;phsC,cVal,,AnalogueValue,mag,f,10,,P0
+SAMU,A,1,U102,,NA,NA,8,N/A,LDPHAS1,,MMXU,102,PhV,0,phsA;phsB;phsC,cVal,,AnalogueValue,mag,f,11,,P0
+SAMU,A,1,U103,,NA,NA,8,N/A,LDPHAS1,,MMXU,103,PhV,0,phsA;phsB;phsC,cVal,,AnalogueValue,mag,f,12,,P0
+SAMU,A,1,U104,,NA,NA,8,N/A,LDPHAS1,,MMXU,104,PhV,0,phsA;phsB;phsC,cVal,,AnalogueValue,mag,f,13,,P0
+SAMU,A,1,U105,,NA,NA,8,N/A,LDPHAS1,,MMXU,105,PhV,0,phsA;phsB;phsC,cVal,,AnalogueValue,mag,f,14,,P0
+SAMU,A,1,U106,,NA,NA,8,N/A,LDPHAS1,,MMXU,106,PhV,0,phsA;phsB;phsC,cVal,,AnalogueValue,mag,f,15,,P0
+SAMU,A,1,U201,,NA,NA,8,N/A,LDPHAS1,,MMXU,201,PhV,0,phsA;phsB;phsC,cVal,,AnalogueValue,mag,f,14,,P0
+SAMU,A,1,U202,,NA,NA,8,N/A,LDPHAS1,,MMXU,202,PhV,0,phsA;phsB;phsC,cVal,,AnalogueValue,mag,f,15,,P0
