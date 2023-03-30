@@ -6,7 +6,7 @@ name: Release Project
 
 on:
   release:
-    types: [ released ]
+    types: [ published ]
 
 jobs:
   publish:
