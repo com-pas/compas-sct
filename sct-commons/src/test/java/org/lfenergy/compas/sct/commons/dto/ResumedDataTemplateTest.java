@@ -8,9 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.lfenergy.compas.scl2007b4.model.TFCEnum;
-import org.lfenergy.compas.scl2007b4.model.TPredefinedCDCEnum;
-import org.lfenergy.compas.scl2007b4.model.TVal;
+import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.scl.ied.LNAdapter;
 
 import java.util.List;
 import java.util.Map;
@@ -274,5 +273,28 @@ class ResumedDataTemplateTest {
         // Then
         assertThat(rDTT.getDaName().getDaiValues()).hasSize(1)
                 .isEqualTo(Map.of(0L, "newValue"));
+    }
+
+    @Test
+    void constructorTest() {
+        // Given
+        TLN tln = new TLN();
+        tln.setLnType("T1");
+        tln.getLnClass().add(TLLN0Enum.LLN_0.value());
+        tln.setPrefix("P1");
+        LNAdapter lnAdapter = new LNAdapter(null, tln);
+        // When
+        ResumedDataTemplate expected = new ResumedDataTemplate(lnAdapter, "do", "da");
+        // Then
+        assertThat(expected.getLnClass()).isEqualTo(TLLN0Enum.LLN_0.value());
+        assertThat(expected.getLnType()).isEqualTo("T1");
+        assertThat(expected.getPrefix()).isEqualTo("P1");
+        assertThat(expected.getDoName().getName()).isEqualTo("do");
+        assertThat(expected.getDoName().getName()).isEqualTo("do");
+        assertThat(expected.getDoName().getStructNames()).isEmpty();
+        assertThat(expected.getDaName().getName()).isEqualTo("da");
+        assertThat(expected.getDaName().getDaiValues()).isEmpty();
+        assertThat(expected.getDaName().isValImport()).isFalse();
+        assertThat(expected.getDaName().isUpdatable()).isFalse();
     }
 }

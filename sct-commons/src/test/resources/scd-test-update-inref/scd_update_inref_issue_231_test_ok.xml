@@ -17,8 +17,8 @@
                             <DAI name="purpose">
                                 <Val>LD_WITH_1_InRef_DOI_InRef2</Val>
                             </DAI>
-                            <DAI name="setSrcRef" valKind="RO" valImport="false"/>
-                            <DAI name="setSrcCB" valKind="RO" valImport="true">
+                            <DAI name="setSrcRef" valKind="RO" valImport="true"/>
+                            <DAI name="setSrcCB" valKind="RO" valImport="false">
                                 <Val>OLD_VAL</Val>
                             </DAI>
                             <DAI name="setTstRef" valKind="RO" valImport="false"/>
@@ -41,11 +41,11 @@
                                 <Val>LD_WITH_3_InRef_DOI_InRef3</Val>
                             </DAI>
                             <DAI name="setSrcRef" valKind="RO" valImport="true"/>
-                            <DAI name="setSrcCB" valKind="RO" valImport="false">
+                            <DAI name="setSrcCB" valKind="RO">
                                 <Val>OLD_VAL</Val>
                             </DAI>
-                            <DAI name="setTstRef" valKind="RO" valImport="false"/>
-                            <DAI name="setTstCB" valKind="RO" valImport="false">
+                            <DAI name="setTstRef" valKind="RO"/>
+                            <DAI name="setTstCB" valKind="RO">
                                 <Val>OLD_VAL</Val>
                             </DAI>
                         </DOI>
@@ -138,6 +138,7 @@
         <LNodeType lnClass="LLN0" id="LN11">
             <DO name="Do11" type="DO11" transient="true"/>
             <DO name="InRef2" type="INREFTYPE"/>
+            <DO name="InRef3" type="INREFTYPE"/>
         </LNodeType>
         <LNodeType lnClass="ANCR" id="LN12">
             <DO name="Do21" type="DO11"/>
@@ -146,10 +147,10 @@
             <SDO name="sdo11" type="DO12"/>
         </DOType>
         <DOType id="INREFTYPE" cdc="ORG">
-            <DA name="setSrcRef" bType="ObjRef" fc="SP"/>
-            <DA name="setTstRef" bType="ObjRef" fc="SP"/>
-            <DA name="setSrcCB" bType="ObjRef" fc="SP"/>
-            <DA name="setTstCB" bType="ObjRef" fc="SP"/>
+            <DA name="setSrcRef" bType="ObjRef" fc="SP" valImport="true"/>
+            <DA name="setTstRef" bType="ObjRef" fc="SP" valImport="true"/>
+            <DA name="setSrcCB" bType="ObjRef" fc="SP" valImport="true"/>
+            <DA name="setTstCB" bType="ObjRef" fc="SP" valImport="true"/>
             <DA name="purpose" bType="VisString255" fc="DC"/>
         </DOType>
         <DOType cdc="WYE" id="DO12">
