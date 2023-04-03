@@ -8,6 +8,7 @@ import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TCompasICDHeader;
+import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.scl2007b4.model.TIED;
 import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings;
 import org.lfenergy.compas.sct.commons.dto.SclReport;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.*;
+import static org.lfenergy.compas.sct.commons.util.Utils.isExtRefFeedBySameControlBlock;
 
 @UtilityClass
 public class ExtRefService {
@@ -225,5 +227,20 @@ public class ExtRefService {
 
         return controlBlockAdapter.configureNetwork(appIdIterator.nextLong(), macAddressIterator.next(), settings.vlanId(), settings.vlanPriority(),
                 settings.minTime(), settings.maxTime());
+    }
+
+
+    /**
+     * Remove ExtRef which are fed by same Control Block
+     *
+     * @return list ExtRefs without duplication
+     */
+    public static List<TExtRef> filterDuplicatedExtRefs(List<TExtRef> tExtRefs) {
+        List<TExtRef> filteredList = new ArrayList<>();
+        tExtRefs.forEach(tExtRef -> {
+            if (filteredList.stream().noneMatch(t -> isExtRefFeedBySameControlBlock(tExtRef, t)))
+                filteredList.add(tExtRef);
+        });
+        return filteredList;
     }
 }

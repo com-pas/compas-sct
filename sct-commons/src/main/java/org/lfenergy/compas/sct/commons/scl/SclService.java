@@ -80,6 +80,7 @@ public class SclService {
 
     private static final String UNKNOWN_LDEVICE_S_IN_IED_S = "Unknown LDevice (%s) in IED (%s)";
     private static final String INVALID_OR_MISSING_ATTRIBUTES_IN_EXT_REF_BINDING_INFO = "Invalid or missing attributes in ExtRef binding info";
+    private static final String IED_TEST_NAME = "IEDTEST";
 
     private SclService() {
         throw new IllegalStateException("SclService class");
@@ -605,6 +606,22 @@ public class SclService {
                 .flatMap(IEDAdapter::streamLDeviceAdapters)
                 .map(LDeviceAdapter::getLN0Adapter)
                 .map(LN0Adapter::updateDoInRef)
+                .flatMap(List::stream)
+                .toList();
+        return new SclReport(sclRootAdapter, sclReportItems);
+    }
+
+    /**
+     * Update and/or create Monitoring LNs (LSVS and LGOS) for bound GOOSE and SMV Control Blocks
+     *
+     * @param scd SCL file for which  LNs (LSVS and LGOS) should be updated and/or created in each LDevice LDSUIED with matching ExtRef information
+     * @return SclReport Object that contain SCL file and set of errors
+     */
+    public static SclReport manageMonitoringLns(SCL scd) {
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        List<SclReportItem> sclReportItems = sclRootAdapter.streamIEDAdapters()
+                .filter(iedAdapter -> !iedAdapter.getName().contains(IED_TEST_NAME))
+                .map(IEDAdapter::manageMonitoringLns)
                 .flatMap(List::stream)
                 .toList();
         return new SclReport(sclRootAdapter, sclReportItems);

@@ -17,6 +17,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.lfenergy.compas.sct.commons.scl.ExtRefService.filterDuplicatedExtRefs;
+
 /**
  * A representation of the model object
  * <em><b>{@link org.lfenergy.compas.scl2007b4.model.TAccessPoint AccessPoint}</b></em>.
@@ -35,7 +37,6 @@ import java.util.stream.Stream;
 public class AccessPointAdapter extends SclElementAdapter<IEDAdapter, TAccessPoint> {
 
     public static final long MAX_OCCURRENCE_NO_LIMIT_VALUE = -1L;
-    private static final String CLIENT_IED_NAME = "The Client IED ";
 
     /**
      * Constructor
@@ -219,7 +220,7 @@ public class AccessPointAdapter extends SclElementAdapter<IEDAdapter, TAccessPoi
      * @param sclReportItems
      * @param tExtRefs
      */
-    record ExtRefAnalyzeRecord(List<SclReportItem> sclReportItems, List<TExtRef> tExtRefs) {
+    public record ExtRefAnalyzeRecord(List<SclReportItem> sclReportItems, List<TExtRef> tExtRefs) {
     }
 
     /**
@@ -229,21 +230,20 @@ public class AccessPointAdapter extends SclElementAdapter<IEDAdapter, TAccessPoi
      */
     public ExtRefAnalyzeRecord getAllCoherentExtRefForAnalyze() {
         List<SclReportItem> sclReportItems = new ArrayList<>();
-        List<TExtRef> tExtRefList = new ArrayList<>();
-        streamLDeviceAdapters().map(lDeviceAdapter -> {
-            List<TExtRef> extRefs = lDeviceAdapter.getLN0Adapter().getExtRefs().stream().filter(TExtRef::isSetSrcCBName).collect(Collectors.toCollection(ArrayList::new));
-            sclReportItems.addAll(checkExtRefWithoutServiceType(extRefs, lDeviceAdapter.getLN0Adapter().getXPath()));
-            extRefs.removeIf(tExtRef -> !tExtRef.isSetServiceType());
-            return extRefs;
-        }).flatMap(Collection::stream).forEach(tExtRef -> {
-            if (tExtRefList.isEmpty())
-                tExtRefList.add(tExtRef);
-            else {
-                if (tExtRefList.stream().noneMatch(t -> isExtRefFeedBySameControlBlock(tExtRef, t)))
-                    tExtRefList.add(tExtRef);
-            }
-        });
-        return new ExtRefAnalyzeRecord(sclReportItems, tExtRefList);
+        List<TExtRef> tExtRefList = streamLDeviceAdapters()
+                .map(LDeviceAdapter::getLN0Adapter)
+                .map(ln0Adapter -> {
+                    List<TExtRef> extRefs = new ArrayList<>();
+                    if (ln0Adapter.hasInputs()) {
+                        extRefs.addAll(ln0Adapter.getInputsAdapter().filterDuplicatedExtRefs()
+                                .stream().filter(TExtRef::isSetSrcCBName).collect(Collectors.toCollection(ArrayList::new)));
+                        sclReportItems.addAll(checkExtRefWithoutServiceType(extRefs, ln0Adapter.getXPath()));
+                        extRefs.removeIf(tExtRef -> !tExtRef.isSetServiceType());
+                    }
+                    return extRefs;
+                }).flatMap(Collection::stream)
+                .toList();
+        return new ExtRefAnalyzeRecord(sclReportItems, filterDuplicatedExtRefs(tExtRefList));
     }
 
     /**
@@ -260,25 +260,6 @@ public class AccessPointAdapter extends SclElementAdapter<IEDAdapter, TAccessPoi
                             Utils.xpathAttributeFilter("desc", tExtRef.getDesc())),
                             "ExtRef is missing ServiceType attribute"))
                 .toList();
-    }
-
-    /**
-     * Checks if two ExtRefs fed by same Control Block for SCL limits analyze
-     * Nota : this equality is only for checking limitation check
-     *
-     * @param t1 extref to compare
-     * @param t2 extref to compare
-     * @return true if the two ExtRef are fed by same Control Block, otherwise false
-     */
-    private static boolean isExtRefFeedBySameControlBlock(TExtRef t1, TExtRef t2) {
-        String srcLNClass1 = (t1.isSetSrcLNClass()) ? t1.getSrcLNClass().get(0) : TLLN0Enum.LLN_0.value();
-        String srcLNClass2 = (t2.isSetSrcLNClass()) ? t2.getSrcLNClass().get(0) : TLLN0Enum.LLN_0.value();
-        return Utils.equalsOrBothBlank(t1.getIedName(), t2.getIedName())
-                && Utils.equalsOrBothBlank(t1.getSrcLDInst(), t2.getSrcLDInst())
-                && srcLNClass1.equals(srcLNClass2)
-                && Utils.equalsOrBothBlank(t1.getSrcLNInst(), t2.getSrcLNInst())
-                && Utils.equalsOrBothBlank(t1.getSrcPrefix(), t2.getSrcPrefix())
-                && t1.getServiceType().equals(t2.getServiceType());
     }
 
     /**
@@ -300,7 +281,6 @@ public class AccessPointAdapter extends SclElementAdapter<IEDAdapter, TAccessPoi
      * Checks Control Block number limitation for bound IED
      *
      * @param tExtRefs           list of ExtRefs referenced same ied
-     * @param msg                message to display hen error occured
      * @param servicesConfigEnum type of Control Block for which check is done
      * @return Optional of encountered error or empty
      */

@@ -27,10 +27,65 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDa;
 import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDo;
+import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.LD_SUIED;
+import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.getDAIAdapters;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
 import static org.lfenergy.compas.sct.commons.util.PrivateEnum.COMPAS_SCL_FILE_TYPE;
 
 class SclServiceTest {
+
+    private static Stream<Arguments> sclProviderMissingRequiredObjects() {
+        SCL scl1 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_KO_MissingBeh.scd");
+        SCL scl2 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_KO_MissingLDevicePrivate.scd");
+        SCL scl3 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_KO_MissingLDevicePrivateAttribute.scd");
+        SCL scl4 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_KO_MissingMod.scd");
+        Tuple[] scl1Errors = new Tuple[]{Tuple.tuple("The LDevice doesn't have a DO @name='Beh' OR its associated DA@fc='ST' AND DA@name='stVal'",
+                "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0")};
+        Tuple[] scl2Errors = new Tuple[]{Tuple.tuple("The LDevice doesn't have a Private compas:LDevice.",
+                "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0")};
+        Tuple[] scl3Errors = new Tuple[]{Tuple.tuple("The Private compas:LDevice doesn't have the attribute 'LDeviceStatus'",
+                "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0")};
+        Tuple[] scl4Errors = new Tuple[]{Tuple.tuple("The LDevice doesn't have a DO @name='Mod'",
+                "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0")};
+        return Stream.of(
+                Arguments.of("MissingDOBeh", scl1, scl1Errors),
+                Arguments.of("MissingLDevicePrivate", scl2, scl2Errors),
+                Arguments.of("MissingLDevicePrivateAttribute", scl3, scl3Errors),
+                Arguments.of("MissingDOMod", scl4, scl4Errors)
+        );
+    }
+
+    private static Stream<Arguments> sclProviderBasedLDeviceStatus() {
+        SCL scl1 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_LD_STATUS_ACTIVE.scd");
+        SCL scl2 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_LD_STATUS_UNTESTED.scd");
+        SCL scl3 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test1_LD_STATUS_INACTIVE.scd");
+        Tuple[] scl1Errors = new Tuple[]{Tuple.tuple("The LDevice cannot be set to 'off' but has not been selected into SSD.",
+                "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
+                Tuple.tuple("The LDevice cannot be set to 'on' but has been selected into SSD.",
+                        "/SCL/IED[@name=\"IedName2\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
+                Tuple.tuple("The LDevice cannot be activated or desactivated because its BehaviourKind Enum contains NOT 'on' AND NOT 'off'.",
+                        "/SCL/IED[@name=\"IedName3\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"
+                )};
+        Tuple[] scl2Errors = new Tuple[]{Tuple.tuple("The LDevice cannot be set to 'off' but has not been selected into SSD.",
+                "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
+                Tuple.tuple("The LDevice cannot be set to 'on' but has been selected into SSD.",
+                        "/SCL/IED[@name=\"IedName2\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
+                Tuple.tuple("The LDevice cannot be activated or desactivated because its BehaviourKind Enum contains NOT 'on' AND NOT 'off'.",
+                        "/SCL/IED[@name=\"IedName3\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"
+                )};
+        Tuple[] scl3Errors = new Tuple[]{Tuple.tuple("The LDevice is not qualified into STD but has been selected into SSD.",
+                "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
+                Tuple.tuple("The LDevice cannot be set to 'on' but has been selected into SSD.",
+                        "/SCL/IED[@name=\"IedName2\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
+                Tuple.tuple("The LDevice cannot be activated or desactivated because its BehaviourKind Enum contains NOT 'on' AND NOT 'off'.",
+                        "/SCL/IED[@name=\"IedName3\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"
+                )};
+        return Stream.of(
+                Arguments.of("ACTIVE", scl1, scl1Errors),
+                Arguments.of("UNTESTED", scl2, scl2Errors),
+                Arguments.of("INACTIVE", scl3, scl3Errors)
+        );
+    }
 
     @Test
     void testAddHistoryItem() throws ScdException {
@@ -890,27 +945,6 @@ class SclServiceTest {
         assertIsMarshallable(scl);
     }
 
-    private static Stream<Arguments> sclProviderMissingRequiredObjects() {
-        SCL scl1 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_KO_MissingBeh.scd");
-        SCL scl2 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_KO_MissingLDevicePrivate.scd");
-        SCL scl3 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_KO_MissingLDevicePrivateAttribute.scd");
-        SCL scl4 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_KO_MissingMod.scd");
-        Tuple[] scl1Errors = new Tuple[]{Tuple.tuple("The LDevice doesn't have a DO @name='Beh' OR its associated DA@fc='ST' AND DA@name='stVal'",
-                "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0")};
-        Tuple[] scl2Errors = new Tuple[]{Tuple.tuple("The LDevice doesn't have a Private compas:LDevice.",
-                "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0")};
-        Tuple[] scl3Errors = new Tuple[]{Tuple.tuple("The Private compas:LDevice doesn't have the attribute 'LDeviceStatus'",
-                "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0")};
-        Tuple[] scl4Errors = new Tuple[]{Tuple.tuple("The LDevice doesn't have a DO @name='Mod'",
-                "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0")};
-        return Stream.of(
-                Arguments.of("MissingDOBeh", scl1, scl1Errors),
-                Arguments.of("MissingLDevicePrivate", scl2, scl2Errors),
-                Arguments.of("MissingLDevicePrivateAttribute", scl3, scl3Errors),
-                Arguments.of("MissingDOMod", scl4, scl4Errors)
-        );
-    }
-
     @ParameterizedTest(name = "{0}")
     @MethodSource("sclProviderMissingRequiredObjects")
     void updateLDeviceStatus_shouldReturnReportWithError_MissingRequiredObject(String testCase, SCL scl, Tuple... errors) {
@@ -929,38 +963,6 @@ class SclServiceTest {
                 .containsExactly(errors);
         assertEquals("off", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName1", "LDSUIED").get().getValue());
         assertEquals(before, after);
-    }
-
-    private static Stream<Arguments> sclProviderBasedLDeviceStatus() {
-        SCL scl1 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_LD_STATUS_ACTIVE.scd");
-        SCL scl2 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_LD_STATUS_UNTESTED.scd");
-        SCL scl3 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test1_LD_STATUS_INACTIVE.scd");
-        Tuple[] scl1Errors = new Tuple[]{Tuple.tuple("The LDevice cannot be set to 'off' but has not been selected into SSD.",
-                "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
-                Tuple.tuple("The LDevice cannot be set to 'on' but has been selected into SSD.",
-                        "/SCL/IED[@name=\"IedName2\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
-                Tuple.tuple("The LDevice cannot be activated or desactivated because its BehaviourKind Enum contains NOT 'on' AND NOT 'off'.",
-                        "/SCL/IED[@name=\"IedName3\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"
-                )};
-        Tuple[] scl2Errors = new Tuple[]{Tuple.tuple("The LDevice cannot be set to 'off' but has not been selected into SSD.",
-                "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
-                Tuple.tuple("The LDevice cannot be set to 'on' but has been selected into SSD.",
-                        "/SCL/IED[@name=\"IedName2\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
-                Tuple.tuple("The LDevice cannot be activated or desactivated because its BehaviourKind Enum contains NOT 'on' AND NOT 'off'.",
-                        "/SCL/IED[@name=\"IedName3\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"
-                )};
-        Tuple[] scl3Errors = new Tuple[]{Tuple.tuple("The LDevice is not qualified into STD but has been selected into SSD.",
-                "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
-                Tuple.tuple("The LDevice cannot be set to 'on' but has been selected into SSD.",
-                        "/SCL/IED[@name=\"IedName2\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
-                Tuple.tuple("The LDevice cannot be activated or desactivated because its BehaviourKind Enum contains NOT 'on' AND NOT 'off'.",
-                        "/SCL/IED[@name=\"IedName3\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"
-                )};
-        return Stream.of(
-                Arguments.of("ACTIVE", scl1, scl1Errors),
-                Arguments.of("UNTESTED", scl2, scl2Errors),
-                Arguments.of("INACTIVE", scl3, scl3Errors)
-        );
     }
 
     @ParameterizedTest(name = "{0}")
@@ -1197,16 +1199,80 @@ class SclServiceTest {
         assertThat(sclReport.getSclReportItems()).hasSize(11)
                 .extracting(SclReportItem::getMessage)
                 .containsExactlyInAnyOrder(
-                                "The Client IED IED_NAME1 subscribes to too much FCDA: 9 > 8 max",
-                                "The Client IED IED_NAME1 subscribes to too much GOOSE Control Blocks: 3 > 2 max",
-                                "The Client IED IED_NAME1 subscribes to too much Report Control Blocks: 1 > 0 max",
-                                "The Client IED IED_NAME1 subscribes to too much SMV Control Blocks: 2 > 1 max",
-                                "There are too much FCDA for the DataSet dataset6 for the LDevice LD_INST21 in IED IED_NAME2: 2 > 1 max",
-                                "There are too much FCDA for the DataSet dataset6 for the LDevice LD_INST22 in IED IED_NAME2: 2 > 1 max",
-                                "There are too much FCDA for the DataSet dataset5 for the LDevice LD_INST22 in IED IED_NAME2: 2 > 1 max",
-                                "There are too much DataSets for the IED IED_NAME2: 6 > 3 max",
-                                "There are too much Report Control Blocks for the IED IED_NAME2: 1 > 0 max",
-                                "There are too much GOOSE Control Blocks for the IED IED_NAME2: 3 > 2 max",
-                                "There are too much SMV Control Blocks for the IED IED_NAME2: 3 > 1 max");
+                        "The Client IED IED_NAME1 subscribes to too much FCDA: 9 > 8 max",
+                        "The Client IED IED_NAME1 subscribes to too much GOOSE Control Blocks: 3 > 2 max",
+                        "The Client IED IED_NAME1 subscribes to too much Report Control Blocks: 1 > 0 max",
+                        "The Client IED IED_NAME1 subscribes to too much SMV Control Blocks: 2 > 1 max",
+                        "There are too much FCDA for the DataSet dataset6 for the LDevice LD_INST21 in IED IED_NAME2: 2 > 1 max",
+                        "There are too much FCDA for the DataSet dataset6 for the LDevice LD_INST22 in IED IED_NAME2: 2 > 1 max",
+                        "There are too much FCDA for the DataSet dataset5 for the LDevice LD_INST22 in IED IED_NAME2: 2 > 1 max",
+                        "There are too much DataSets for the IED IED_NAME2: 6 > 3 max",
+                        "There are too much Report Control Blocks for the IED IED_NAME2: 1 > 0 max",
+                        "There are too much GOOSE Control Blocks for the IED IED_NAME2: 3 > 2 max",
+                        "There are too much SMV Control Blocks for the IED IED_NAME2: 3 > 1 max");
     }
+
+    @Test
+    void manageMonitoringLns_should_update_and_create_lsvs_and_goose() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/monitoring_lns/scd_monitoring_lsvs_lgos.xml");
+        // When
+        SclReport sclReport = SclService.manageMonitoringLns(scd);
+        //Then
+        assertThat(sclReport.getSclReportItems()).isEmpty();
+        LDeviceAdapter lDeviceAdapter = sclReport.getSclRootAdapter().getIEDAdapterByName("IED_NAME1").getLDeviceAdapterByLdInst(LD_SUIED);
+        assertThat(lDeviceAdapter.getLNAdapters())
+                .hasSize(4)
+                .extracting(LNAdapter::getLNClass, LNAdapter::getLNInst).containsExactlyInAnyOrder(
+                        Tuple.tuple("LGOS", "1"), Tuple.tuple("LGOS", "2"),
+                        Tuple.tuple("LSVS", "1"), Tuple.tuple("LSVS", "2"));
+        SclTestMarshaller.assertIsMarshallable(sclReport.getSclRootAdapter().currentElem);
+    }
+
+    @Test
+    void manageMonitoringLns_should_not_update_and_not_create_lsvs_and_goose_when_no_extRef() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/monitoring_lns/scd_monitoring_lsvs_lgos.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        LDeviceAdapter lDeviceAdapter11 = sclRootAdapter.getIEDAdapterByName("IED_NAME1").getLDeviceAdapterByLdInst("LD_INST11");
+        lDeviceAdapter11.getLN0Adapter().getCurrentElem().setInputs(null);
+        LDeviceAdapter lDeviceAdapter21 = sclRootAdapter.getIEDAdapterByName("IED_NAME1").getLDeviceAdapterByLdInst("LD_INST21");
+        lDeviceAdapter21.getLN0Adapter().getCurrentElem().setInputs(null);
+        // When
+        SclReport sclReport = SclService.manageMonitoringLns(scd);
+        //Then
+        assertThat(sclReport.getSclReportItems()).isEmpty();
+        LDeviceAdapter lDeviceAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1").getLDeviceAdapterByLdInst(LD_SUIED);
+        assertThat(lDeviceAdapter.getLNAdapters())
+                .hasSize(2)
+                .extracting(LNAdapter::getLNClass, LNAdapter::getLNInst).containsExactlyInAnyOrder(
+                        Tuple.tuple("LGOS", "3"), Tuple.tuple("LSVS", "9"));
+        SclTestMarshaller.assertIsMarshallable(sclReport.getSclRootAdapter().currentElem);
+    }
+
+    @Test
+    void manageMonitoringLns_should_not_update_and_not_create_lsvs_and_goose_when_dai_not_updatable() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/monitoring_lns/scd_monitoring_lsvs_lgos.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        LDeviceAdapter lDeviceAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1").getLDeviceAdapterByLdInst(LD_SUIED);
+        getDAIAdapters(lDeviceAdapter, "LGOS", "GoCBRef", "setSrcRef")
+                .forEach(daiAdapter -> daiAdapter.getCurrentElem().setValImport(false));
+        getDAIAdapters(lDeviceAdapter, "LSVS", "SvCBRef", "setSrcRef")
+                .forEach(daiAdapter -> daiAdapter.getCurrentElem().setValImport(false));
+        // When
+        SclReport sclReport = SclService.manageMonitoringLns(scd);
+        //Then
+        assertThat(sclReport.getSclReportItems())
+                .isNotEmpty()
+                .hasSize(2)
+                .extracting(SclReportItem::getMessage)
+                .containsExactly("The DAI cannot be updated", "The DAI cannot be updated");
+        assertThat(lDeviceAdapter.getLNAdapters())
+                .hasSize(2)
+                .extracting(LNAdapter::getLNClass, LNAdapter::getLNInst).containsExactlyInAnyOrder(
+                        Tuple.tuple("LGOS", "3"), Tuple.tuple("LSVS", "9"));
+        SclTestMarshaller.assertIsMarshallable(sclReport.getSclRootAdapter().currentElem);
+    }
+
 }

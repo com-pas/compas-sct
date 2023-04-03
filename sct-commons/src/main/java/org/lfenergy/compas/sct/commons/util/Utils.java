@@ -5,7 +5,16 @@
 package org.lfenergy.compas.sct.commons.util;
 
 import org.apache.commons.lang3.StringUtils;
+import org.lfenergy.compas.scl2007b4.model.TExtRef;
+import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
+import org.lfenergy.compas.sct.commons.exception.ScdException;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.util.JAXBSource;
+import javax.xml.namespace.QName;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -22,6 +31,9 @@ public final class Utils {
     private static final int S1_GREATER_THAN_S2 = 1;
     private static final long MAC_ADDRESS_MAX_VALUE = 0xFFFFFFFFFFFFL;
     private static final Pattern MAC_ADDRESS_PATTERN = Pattern.compile("[0-9A-F]{2}([-:][0-9A-F]{2}){5}", Pattern.CASE_INSENSITIVE);
+
+    private static JAXBContext jaxbContext = null;
+    private static Unmarshaller unmarshaller = null;
 
     /**
      * Private Constructor, should not be instanced
@@ -352,5 +364,46 @@ public final class Utils {
      */
     public static String toHex(long number, int length) {
         return StringUtils.leftPad(Long.toHexString(number).toUpperCase(), length, "0");
+    }
+
+    /**
+     * creates a copy of Scl element
+     *
+     * @param object object to copy
+     * @param clazz  class type of the object
+     * @param <T>    type of the object
+     * @return copy of the object
+     */
+    public static <T> T copySclElement(T object, Class<T> clazz) {
+        try {
+            if (jaxbContext == null) {
+                jaxbContext = JAXBContext.newInstance("org.lfenergy.compas.scl2007b4.model");
+                unmarshaller = jaxbContext.createUnmarshaller();
+            }
+            JAXBElement<T> contentObject = new JAXBElement<>(new QName(clazz.getSimpleName()), clazz, object);
+            JAXBSource source = new JAXBSource(jaxbContext, contentObject);
+            return unmarshaller.unmarshal(source, clazz).getValue();
+        } catch (JAXBException e) {
+            throw new ScdException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Checks if two ExtRefs fed by same Control Block
+     *
+     * @param t1 extref to compare
+     * @param t2 extref to compare
+     * @return true if the two ExtRef are fed by same Control Block, otherwise false
+     */
+    public static boolean isExtRefFeedBySameControlBlock(TExtRef t1, TExtRef t2) {
+        String srcLNClass1 = (t1.isSetSrcLNClass()) ? t1.getSrcLNClass().get(0) : TLLN0Enum.LLN_0.value();
+        String srcLNClass2 = (t2.isSetSrcLNClass()) ? t2.getSrcLNClass().get(0) : TLLN0Enum.LLN_0.value();
+        return Utils.equalsOrBothBlank(t1.getIedName(), t2.getIedName())
+                && Utils.equalsOrBothBlank(t1.getSrcLDInst(), t2.getSrcLDInst())
+                && srcLNClass1.equals(srcLNClass2)
+                && Utils.equalsOrBothBlank(t1.getSrcLNInst(), t2.getSrcLNInst())
+                && Utils.equalsOrBothBlank(t1.getSrcPrefix(), t2.getSrcPrefix())
+                && Utils.equalsOrBothBlank(t1.getSrcCBName(), t2.getSrcCBName())
+                && Objects.equals(t1.getServiceType(), t2.getServiceType());
     }
 }
