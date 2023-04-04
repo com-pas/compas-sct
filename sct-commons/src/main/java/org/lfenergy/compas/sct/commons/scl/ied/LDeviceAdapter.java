@@ -13,9 +13,12 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
+import org.lfenergy.compas.sct.commons.util.MonitoringLnClassEnum;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
+
+import static org.lfenergy.compas.sct.commons.util.Utils.copySclElement;
 
 /**
  * A representation of the model object
@@ -50,10 +53,13 @@ import java.util.*;
 @Slf4j
 public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
 
+    private static final String DA_SETSRCREF = "setSrcRef";
+
     /**
      * Constructor
+     *
      * @param parentAdapter Parent container reference
-     * @param currentElem Current reference
+     * @param currentElem   Current reference
      */
     public LDeviceAdapter(IEDAdapter parentAdapter, TLDevice currentElem) {
         super(parentAdapter, currentElem);
@@ -61,6 +67,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
 
     /**
      * Check if node is child of the reference node
+     *
      * @return link parent child existence
      */
     @Override
@@ -75,21 +82,21 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
                 .anyMatch(tlDevice -> currentElem.getInst().equals(tlDevice.getInst()));
     }
 
-    public TAccessPoint getAccessPoint(){
+    public TAccessPoint getAccessPoint() {
         return parentAdapter.getCurrentElem().getAccessPoint()
-            .stream()
-            .filter(accessPoint ->
-                Optional.ofNullable(accessPoint.getServer())
-                    .filter(TServer::isSetLDevice)
-                    .map(TServer::getLDevice)
-                    .stream()
-                    .flatMap(List::stream)
-                    .map(TLDevice::getInst)
-                    .anyMatch(inst -> inst.equals(currentElem.getInst()))
-            )
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException(String.format("LDevice.inst='%s' not found in parent IED.name='%s'", currentElem.getInst(),
-                parentAdapter.getName())));
+                .stream()
+                .filter(accessPoint ->
+                        Optional.ofNullable(accessPoint.getServer())
+                                .filter(TServer::isSetLDevice)
+                                .map(TServer::getLDevice)
+                                .stream()
+                                .flatMap(List::stream)
+                                .map(TLDevice::getInst)
+                                .anyMatch(inst -> inst.equals(currentElem.getInst()))
+                )
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(String.format("LDevice.inst='%s' not found in parent IED.name='%s'", currentElem.getInst(),
+                        parentAdapter.getName())));
     }
 
     @Override
@@ -99,7 +106,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
 
     @Override
     public String getXPath() {
-        if (parentAdapter != null){
+        if (parentAdapter != null) {
             return parentAdapter.getXPath() + "/AccessPoint/Server/" + elementXPath();
         } else {
             return super.getXPath();
@@ -108,11 +115,12 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
 
     /**
      * Updates LDevice name by combining IED name and LDevice ldInst value
+     *
      * @throws ScdException throws when renaming LDevice and new name has more than 33 caracteres
      */
     public void updateLDName() throws ScdException {
         String newLdName = parentAdapter.getCurrentElem().getName() + currentElem.getInst();
-        if(newLdName.length() > 33){
+        if (newLdName.length() > 33) {
             throw new ScdException(newLdName + "(IED.name + LDevice.inst) has more than 33 characters");
         }
         // renaming ldName
@@ -121,14 +129,16 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
 
     /**
      * Gets current LDevice Inst parameter value
+     *
      * @return Inst parameter value
      */
-    public String getInst(){
+    public String getInst() {
         return currentElem.getInst();
     }
 
     /**
      * Gets current LDevice name
+     *
      * @return LDevice name
      */
     public String getLdName() {
@@ -137,75 +147,81 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
 
     /**
      * Gets current LDevice LNode LN0
+     *
      * @return <em>LN0Adapter</em>
      */
-    public LN0Adapter getLN0Adapter(){
+    public LN0Adapter getLN0Adapter() {
         return new LN0Adapter(this, currentElem.getLN0());
     }
 
     /**
      * Checks if LDevice has an LN0 node
+     *
      * @return true if lDevice has a LN0 node, false otherwise
      */
-    public boolean hasLN0(){
+    public boolean hasLN0() {
         return currentElem.isSetLN0();
     }
 
     /**
      * Gets current LDevice LNodes (except LN0)
+     *
      * @return list of <em>LNAdapter</em> object
      */
-    public List<LNAdapter> getLNAdapters(){
+    public List<LNAdapter> getLNAdapters() {
         return currentElem.getLN()
                 .stream()
-                .map(tln -> new LNAdapter(this,tln))
+                .map(tln -> new LNAdapter(this, tln))
                 .toList();
     }
 
     /**
      * Gets specific LNode from current LDevice
+     *
      * @param lnClass LNode lnClass value
-     * @param lnInst LNode lnInst value
-     * @param prefix LNode prefix value
+     * @param lnInst  LNode lnInst value
+     * @param prefix  LNode prefix value
      * @return <em>LNAdapter</em> object
      * @throws ScdException thros when specified LNode not found in current IED
      */
     public LNAdapter getLNAdapter(String lnClass, String lnInst, String prefix) throws ScdException {
         return findLnAdapter(lnClass, lnInst, prefix)
                 .orElseThrow(
-                        ()-> new ScdException(
-                            String.format(
-                                "LDevice [%s] has no LN [%s,%s,%s]", currentElem.getInst(),lnClass,lnInst,prefix)
-                            )
-                        );
+                        () -> new ScdException(
+                                String.format(
+                                        "LDevice [%s] has no LN [%s,%s,%s]", currentElem.getInst(), lnClass, lnInst, prefix)
+                        )
+                );
 
     }
 
     /**
      * Find a specific LN from current LDevice
+     *
      * @param lnClass LNode lnClass value
-     * @param lnInst LNode lnInst value
-     * @param prefix LNode prefix value
+     * @param lnInst  LNode lnInst value
+     * @param prefix  LNode prefix value
      * @return <em>LNAdapter</em> object
      * @throws ScdException thros when specified LNode not found in current IED
      */
     public Optional<LNAdapter> findLnAdapter(String lnClass, String lnInst, String prefix) {
-        if (!currentElem.isSetLN()){
+        if (!currentElem.isSetLN()) {
             return Optional.empty();
         }
         return currentElem.getLN()
-            .stream()
-            .filter(tln -> Utils.lnClassEquals(tln.getLnClass(), lnClass)
-                && tln.getInst().equals(lnInst)
-                && Utils.equalsOrBothBlank(prefix, tln.getPrefix()))
-            .map(tln -> new LNAdapter(this, tln))
-            .findFirst();
+                .stream()
+                .filter(tln -> Utils.lnClassEquals(tln.getLnClass(), lnClass)
+                        && tln.getInst().equals(lnInst)
+                        && Utils.equalsOrBothBlank(prefix, tln.getPrefix()))
+                .map(tln -> new LNAdapter(this, tln))
+                .findFirst();
     }
 
     /**
      * Checks all possible ExtRef in current LDevice which could be bound to given ExtRef as parameter
+     *
      * @param signalInfo ExtRef to bind data
-     * @return  list of <em>ExtRefBindingInfo</em> object (containing binding data for each LDNode in current LDevice
+     * @return list of <em>ExtRefBindingInfo</em> object (containing binding data for each LDNode in current LDevice
      * related to given ExtRef)
      */
     public List<ExtRefBindingInfo> getExtRefBinders(ExtRefSignalInfo signalInfo) {
@@ -214,7 +230,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
                 .filter(abstractLNAdapter -> StringUtils.isBlank(signalInfo.getPLN()) || abstractLNAdapter.getLNClass().equals(signalInfo.getPLN()))
                 .map(lnAdapter -> {
                     String lnType = lnAdapter.getLnType();
-                    ExtRefBindingInfo extRefBindingInfo = dttAdapter.getBinderResumedDTT(lnType,signalInfo);
+                    ExtRefBindingInfo extRefBindingInfo = dttAdapter.getBinderResumedDTT(lnType, signalInfo);
                     extRefBindingInfo.setIedName(parentAdapter.getName());
                     extRefBindingInfo.setLdInst(currentElem.getInst());
                     extRefBindingInfo.setLnClass(lnAdapter.getLNClass());
@@ -227,6 +243,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
 
     /**
      * Gets all ExtRef of all LNodes of current LDevice
+     *
      * @return list of <em>ExtRefInfo</em> object (containing binding data for each LDNode in current LDevice)
      */
     public List<ExtRefInfo> getExtRefInfo() {
@@ -234,8 +251,8 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
         List<AbstractLNAdapter<?>> lnAdapters = getLNAdaptersIncludingLN0();
         LogicalNodeOptions logicalNodeOptions = new LogicalNodeOptions();
         logicalNodeOptions.setWithExtRef(true);
-        for(AbstractLNAdapter<?> lnAdapter : lnAdapters) {
-            LNodeDTO lNodeDTO = LNodeDTO.from(lnAdapter,logicalNodeOptions);
+        for (AbstractLNAdapter<?> lnAdapter : lnAdapters) {
+            LNodeDTO lNodeDTO = LNodeDTO.from(lnAdapter, logicalNodeOptions);
             extRefInfos.addAll(lNodeDTO.getExtRefs());
         }
         return extRefInfos;
@@ -243,23 +260,24 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
 
     /**
      * Gets a list of summarized DataTypeTemplate for DataAttribute DAIs (updatableOnly or not)
-     * @param rDtt reference resumed DataTypeTemplate (used as filter)
+     *
+     * @param rDtt          reference resumed DataTypeTemplate (used as filter)
      * @param updatableOnly true to retrieve only updatableOnly DAIs, false to retrieve all DAIs
      * @return Set of <em>ResumedDataTemplate</em> (updatableOnly or not)
      * @throws ScdException SCD illegal arguments exception
      */
     public Set<ResumedDataTemplate> getDAI(ResumedDataTemplate rDtt, boolean updatableOnly) throws ScdException {
         List<? extends AbstractLNAdapter<?>> lnAdapters;
-        if(StringUtils.isBlank(rDtt.getLnClass())){
+        if (StringUtils.isBlank(rDtt.getLnClass())) {
             lnAdapters = getLNAdaptersIncludingLN0();
-        } else if(rDtt.getLnClass().equals(TLLN0Enum.LLN_0.value())){
-            lnAdapters =  hasLN0() ? Collections.singletonList(getLN0Adapter()) : Collections.emptyList();
+        } else if (rDtt.getLnClass().equals(TLLN0Enum.LLN_0.value())) {
+            lnAdapters = hasLN0() ? Collections.singletonList(getLN0Adapter()) : Collections.emptyList();
         } else {
-            lnAdapters = findLnAdapter(rDtt.getLnClass(),rDtt.getLnInst(),rDtt.getPrefix()).stream().toList();
+            lnAdapters = findLnAdapter(rDtt.getLnClass(), rDtt.getLnInst(), rDtt.getPrefix()).stream().toList();
         }
 
-        Set<ResumedDataTemplate> resumedDataTemplateSet =  new HashSet<>();
-        for(AbstractLNAdapter<?> lnAdapter : lnAdapters){
+        Set<ResumedDataTemplate> resumedDataTemplateSet = new HashSet<>();
+        for (AbstractLNAdapter<?> lnAdapter : lnAdapters) {
             ResumedDataTemplate filter = ResumedDataTemplate.copyFrom(rDtt);
             filter.setLnClass(lnAdapter.getLNClass());
             filter.setLnInst(lnAdapter.getLNInst());
@@ -272,7 +290,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
     }
 
     public Optional<String> getLDeviceStatus() {
-        if (!hasLN0()){
+        if (!hasLN0()) {
             return Optional.empty();
         }
         return getLN0Adapter().getLDeviceStatus();
@@ -280,6 +298,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
 
     /**
      * Gets all LN of LDevice including LN0
+     *
      * @return list of all LN of LDevice
      */
     public List<AbstractLNAdapter<?>> getLNAdaptersIncludingLN0() {
@@ -289,24 +308,24 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
         return aLNAdapters;
     }
 
-    public List<SclReportItem> createDataSetAndControlBlocks(){
+    public List<SclReportItem> createDataSetAndControlBlocks() {
         LN0Adapter ln0Adapter = getLN0Adapter();
-        if (!ln0Adapter.hasInputs()){
+        if (!ln0Adapter.hasInputs()) {
             return Collections.emptyList();
         }
         return ln0Adapter.getInputsAdapter()
-            .updateAllSourceDataSetsAndControlBlocks();
+                .updateAllSourceDataSetsAndControlBlocks();
     }
 
     public Set<ResumedDataTemplate> findSourceDA(TExtRef extRef) {
         String extRefLnClass = extRef.getLnClass().stream().findFirst().orElse("");
         ResumedDataTemplate filter = ResumedDataTemplate.builder()
-            .lnClass(extRefLnClass)
-            .prefix(extRef.getPrefix())
-            .lnInst(extRef.getLnInst())
-            .doName(new DoTypeName(extRef.getDoName()))
-            .daName(new DaTypeName(extRef.getDaName()))
-            .build();
+                .lnClass(extRefLnClass)
+                .prefix(extRef.getPrefix())
+                .lnInst(extRef.getLnInst())
+                .doName(new DoTypeName(extRef.getDoName()))
+                .daName(new DaTypeName(extRef.getDaName()))
+                .build();
         return getDAI(filter, false);
     }
 
@@ -333,7 +352,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
 
     private boolean hasDatSetConfOrDyn(TServiceSettings tServiceSettings) {
         return tServiceSettings.isSetDatSet()
-            && (TServiceSettingsEnum.CONF.equals(tServiceSettings.getDatSet()) || TServiceSettingsEnum.DYN.equals(tServiceSettings.getDatSet()));
+                && (TServiceSettingsEnum.CONF.equals(tServiceSettings.getDatSet()) || TServiceSettingsEnum.DYN.equals(tServiceSettings.getDatSet()));
     }
 
     /**
@@ -359,6 +378,64 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
 
     private boolean hasCBNameConf(TServiceSettings tServiceSettings) {
         return tServiceSettings.isSetCbName()
-            && (TServiceSettingsNoDynEnum.CONF.equals(tServiceSettings.getCbName()));
+                && (TServiceSettingsNoDynEnum.CONF.equals(tServiceSettings.getCbName()));
     }
+
+    /**
+     * Update and/or create Monitoring LNs (LSVS and LGOS) into LDSUIED from ExtRefs binding
+     *
+     * @param tExtRefs              ExtRefs for which source Control Blocks (Goose or SMV) should be monitored
+     * @param monitoringLnClassEnum LNClass value for LN to monitor
+     * @return a list of SclReport Objects that contains errors
+     */
+    public Optional<SclReportItem> manageMonitoringLns(List<TExtRef> tExtRefs, String doName, MonitoringLnClassEnum monitoringLnClassEnum) {
+        if (tExtRefs.isEmpty()) {
+            return Optional.empty();
+        }
+        return getLNAdapters().stream().filter(lnAdapter -> monitoringLnClassEnum.value().equals(lnAdapter.getLNClass()))
+                .map(lnAdapter -> {
+                    Optional<SclReportItem> optionalSclReportItem = Optional.empty();
+                    ResumedDataTemplate filter = new ResumedDataTemplate(lnAdapter, doName, DA_SETSRCREF);
+                    Optional<ResumedDataTemplate> foundDai = lnAdapter.getDAI(filter, true).stream().findFirst();
+                    if (foundDai.isEmpty()) {
+                        optionalSclReportItem = Optional.of(SclReportItem.warning(lnAdapter.getXPath() + "/DOI@name=\"" + doName + "\"/DAI@name=\"setSrcRef\"/Val",
+                                "The DAI cannot be updated"));
+                    } else {
+                        ResumedDataTemplate daToUpdateFilter = foundDai.get();
+                        TLN lnToUpdate = lnAdapter.getCurrentElem();
+                        removeLnsByLnClass(monitoringLnClassEnum);
+                        for (int i = 0; i < tExtRefs.size(); i++) {
+                            getCurrentElem().getLN().add(lnToUpdate);
+                            updateNewCreatedLnDaiValue(lnToUpdate, tExtRefs.get(i), String.valueOf(i + 1), daToUpdateFilter);
+                            lnToUpdate = copySclElement(lnAdapter.getCurrentElem(), TLN.class); //value copy
+                        }
+                    }
+                    return optionalSclReportItem;
+                }).findFirst()
+                .orElse(Optional.of(SclReportItem.warning(getXPath(), "There is no LN %s present in LDevice".formatted(monitoringLnClassEnum.value()))));
+    }
+
+    private void removeLnsByLnClass(MonitoringLnClassEnum monitoringLnClassEnum) {
+        List<TLN> lnToKeep = getCurrentElem().getLN().stream()
+                .filter(tln -> !Utils.lnClassEquals(tln.getLnClass(), monitoringLnClassEnum.value()))
+                .toList();
+        getCurrentElem().unsetLN();
+        getCurrentElem().getLN().addAll(lnToKeep);
+    }
+
+    private void updateNewCreatedLnDaiValue(TLN tln, TExtRef tExtRef, String lnInst, ResumedDataTemplate daToUpdate) {
+        LNAdapter lnAdapter = new LNAdapter(this, tln);
+        String value = createVal(tExtRef);
+        lnAdapter.getCurrentElem().setInst(lnInst);
+        daToUpdate.setVal(value);
+        lnAdapter.updateDAI(daToUpdate);
+    }
+
+    private String createVal(TExtRef tExtRef) {
+        String sourceLdName = getParentAdapter().getParentAdapter().getIEDAdapterByName(tExtRef.getIedName())
+                .getLDeviceAdapterByLdInst(tExtRef.getSrcLDInst()).getLdName();
+        String lnClass = !tExtRef.isSetSrcLNClass() ? TLLN0Enum.LLN_0.value() : tExtRef.getSrcLNClass().get(0);
+        return sourceLdName + "/" + lnClass + "." + tExtRef.getSrcCBName();
+    }
+
 }

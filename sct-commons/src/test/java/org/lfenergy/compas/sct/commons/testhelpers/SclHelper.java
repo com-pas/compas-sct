@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newConnectedAp;
+import static org.lfenergy.compas.sct.commons.util.Utils.lnClassEquals;
 
 /**
  * Provides static methods to quickly retrieve SCL elements, to be used in writing tests.
@@ -28,6 +29,12 @@ import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newConne
  */
 @UtilityClass
 public class SclHelper {
+
+    public static final String DO_GOCBREF = "GoCBRef";
+    public static final String DO_SVCBREF = "SvCBRef";
+    public static final String LD_SUIED = "LDSUIED";
+    public static final String IED_NAME_1 = "IED_NAME_1";
+    public static final String IED_NAME_2 = "IED_NAME_2";
 
     public static IEDAdapter findIed(SclRootAdapter sclRootAdapter, String iedName) {
         return sclRootAdapter.findIedAdapterByName(iedName)
@@ -244,5 +251,108 @@ public class SclHelper {
         scl.getCommunication().getSubNetwork().add(subNetwork);
         subNetwork.getConnectedAP().add(newConnectedAp(iedName, apName));
         return sclRootAdapter;
+    }
+
+    public static TExtRef createExtRefExample(String cbName, TServiceType tServiceType) {
+        TExtRef tExtRef = new TExtRef();
+        tExtRef.setIedName("IED_NAME_2");
+        tExtRef.setServiceType(tServiceType);
+        tExtRef.setSrcLDInst("Inst_2");
+        tExtRef.setSrcLNInst("LN");
+        tExtRef.setSrcPrefix("Prefix");
+        tExtRef.setSrcCBName(cbName);
+        return tExtRef;
+    }
+
+    public static SclRootAdapter createIedsInScl(String lnClass, String doName) {
+        // DataTypeTemplate
+        TDO tdo = new TDO();
+        tdo.setName(doName);
+        tdo.setType("REF");
+        TLNodeType tlNodeType = new TLNodeType();
+        tlNodeType.setId("T1");
+        tlNodeType.getLnClass().add(lnClass);
+        tlNodeType.getDO().add(tdo);
+
+        TDA tda = new TDA();
+        tda.setName("setSrcRef");
+        tda.setValImport(true);
+        tda.setBType(TPredefinedBasicTypeEnum.OBJ_REF);
+        tda.setFc(TFCEnum.SP);
+
+        TDOType tdoType = new TDOType();
+        tdoType.setId("REF");
+        tdoType.getSDOOrDA().add(tda);
+
+        TDataTypeTemplates tDataTypeTemplates = new TDataTypeTemplates();
+        tDataTypeTemplates.getLNodeType().add(tlNodeType);
+        tDataTypeTemplates.getDOType().add(tdoType);
+
+
+        //ied Client
+        TDOI tdoi = new TDOI();
+        tdoi.setName(doName);
+        TLDevice tlDevice = new TLDevice();
+        tlDevice.setInst("LD_ADD");
+        TInputs tInputs = new TInputs();
+        LN0 ln0 = new LN0();
+        ln0.setInputs(tInputs);
+        tlDevice.setLN0(ln0);
+
+        TLDevice tlDevice1 = new TLDevice();
+        tlDevice1.setLN0(new LN0());
+        tlDevice1.setInst(LD_SUIED);
+        TLN tln1 = new TLN();
+        tln1.getLnClass().add(lnClass);
+        tln1.setLnType("T1");
+        tln1.getDOI().add(tdoi);
+        tlDevice1.getLN().add(tln1);
+        TServer tServer1 = new TServer();
+        tServer1.getLDevice().add(tlDevice1);
+        tServer1.getLDevice().add(tlDevice);
+        TAccessPoint tAccessPoint1 = new TAccessPoint();
+        tAccessPoint1.setName("AP_NAME");
+        tAccessPoint1.setServer(tServer1);
+        TIED tied1 = new TIED();
+        tied1.setName(IED_NAME_1);
+        tied1.getAccessPoint().add(tAccessPoint1);
+
+        //ied Source
+        TLDevice tlDevice2 = new TLDevice();
+        tlDevice2.setInst("Inst_2");
+        tlDevice2.setLdName("LD_Name");
+        tlDevice2.setLN0(new LN0());
+        TServer tServer2 = new TServer();
+        tServer2.getLDevice().add(tlDevice2);
+        TAccessPoint tAccessPoint2 = new TAccessPoint();
+        tAccessPoint2.setName("AP_NAME");
+        tAccessPoint2.setServer(tServer2);
+        TIED tied2 = new TIED();
+        tied2.setName(IED_NAME_2);
+        tied2.getAccessPoint().add(tAccessPoint2);
+        //SCL file
+        SCL scd = new SCL();
+        scd.getIED().add(tied1);
+        scd.getIED().add(tied2);
+        THeader tHeader = new THeader();
+        tHeader.setRevision("1");
+        scd.setHeader(tHeader);
+        scd.setDataTypeTemplates(tDataTypeTemplates);
+
+        return new SclRootAdapter(scd);
+    }
+
+    public static List<TVal> getDaiValues(LDeviceAdapter lDeviceAdapter, String lnClass, String doName, String daName) {
+        return getDAIAdapters(lDeviceAdapter, lnClass, doName, daName)
+                .map(daiAdapter -> daiAdapter.getCurrentElem().getVal())
+                .flatMap(List::stream)
+                .toList();
+    }
+
+    public static Stream<DOIAdapter.DAIAdapter> getDAIAdapters(LDeviceAdapter lDeviceAdapter, String lnClass, String doName, String daName) {
+        return lDeviceAdapter.getLNAdapters().stream()
+                .filter(lnAdapter -> lnClassEquals(lnAdapter.getCurrentElem().getLnClass(), lnClass))
+                .map(lnAdapter -> lnAdapter.getDOIAdapterByName(doName))
+                .map(doiAdapter -> (DOIAdapter.DAIAdapter) doiAdapter.getDataAdapterByName(daName));
     }
 }

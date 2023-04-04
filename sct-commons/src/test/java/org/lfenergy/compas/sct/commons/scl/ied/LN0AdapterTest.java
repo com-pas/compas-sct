@@ -29,8 +29,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Named.named;
 import static org.lfenergy.compas.scl2007b4.model.TSampledValueControl.SmvOpts;
-import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.findLn0;
-import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.getDaiValue;
+import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -312,17 +311,17 @@ class LN0AdapterTest {
     @Test
     void findDoiAdapterByName_should_find_DOI(){
         // Given
-        LN0Adapter ln0Adapter = createLn0AdapterWithDoi("doi1");
+        LN0Adapter ln0Adapter = createLn0AdapterWithDoi("doi2");
         // When
-        Optional<DOIAdapter> result = ln0Adapter.findDoiAdapterByName("doi1");
+        Optional<DOIAdapter> result = ln0Adapter.findDoiAdapterByName("doi2");
         // Then
-        assertThat(result).map(DOIAdapter::getName).hasValue("doi1");
+        assertThat(result).map(DOIAdapter::getName).hasValue("doi2");
     }
 
     @Test
     void findDoiAdapterByName_should_return_empty(){
         // Given
-        LN0Adapter ln0Adapter = createLn0AdapterWithDoi("doi1");
+        LN0Adapter ln0Adapter = createLn0AdapterWithDoi("doi3");
         // When
         Optional<DOIAdapter> result = ln0Adapter.findDoiAdapterByName("doi2");
         // Then
@@ -332,17 +331,17 @@ class LN0AdapterTest {
     @Test
     void getDOIAdapterByName_should_return_DOI(){
         // Given
-        LN0Adapter ln0Adapter = createLn0AdapterWithDoi("doi1");
+        LN0Adapter ln0Adapter = createLn0AdapterWithDoi("doi4");
         // When
-        DOIAdapter result = ln0Adapter.getDOIAdapterByName("doi1");
+        DOIAdapter result = ln0Adapter.getDOIAdapterByName("doi4");
         // Then
-        assertThat(result.getName()).isEqualTo("doi1");
+        assertThat(result.getName()).isEqualTo("doi4");
     }
 
     @Test
     void getDOIAdapterByName_should_throw_exception(){
         // Given
-        LN0Adapter ln0Adapter = createLn0AdapterWithDoi("doi1");
+        LN0Adapter ln0Adapter = createLn0AdapterWithDoi("doi5");
         // When & Then
         assertThatThrownBy(() -> ln0Adapter.getDOIAdapterByName("doi2"))
                 .isInstanceOf(ScdException.class);
@@ -1052,7 +1051,42 @@ class LN0AdapterTest {
     }
 
     @Test
-    void streamControlBlocks_should_return_all_GSEControlBlocks(){
+    void updateDoInRef_should_not_update_setSrcRef_and_setSrcCB_and_setTstRef_and_setTstCB_when_ExtRef_desc_matches_and_dais_not_updatable() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_test.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        LN0Adapter sourceLn0 = findLn0(sclRootAdapter, "IED_NAME1", "LD_WITH_3_InRef");
+        String doiNameInRef = "InRef3";
+        findDai(sourceLn0, "InRef3" + "." + DOIAdapter.DA_NAME_SET_SRC_REF).update(0L, "OLD_VAL");
+        findDai(sourceLn0, "InRef3" + "." + DOIAdapter.DA_NAME_SET_TST_REF).update(0L, "OLD_VAL");
+        findDai(sourceLn0, "InRef3" + "." + DOIAdapter.DA_NAME_SET_SRC_REF).getCurrentElem().setValImport(false);
+        findDai(sourceLn0, "InRef3" + "." + DOIAdapter.DA_NAME_SET_SRC_CB).getCurrentElem().setValImport(false);
+        findDai(sourceLn0, "InRef3" + "." + DOIAdapter.DA_NAME_SET_TST_REF).getCurrentElem().setValImport(false);
+        findDai(sourceLn0, "InRef3" + "." + DOIAdapter.DA_NAME_SET_TST_CB).getCurrentElem().setValImport(false);
+        String expectedVal = "OLD_VAL";
+
+        // When
+        List<SclReportItem> sclReportItems = sourceLn0.updateDoInRef();
+        // Then
+
+        String finalSetSrcRef = getDaiValue(sourceLn0, doiNameInRef, DOIAdapter.DA_NAME_SET_SRC_REF);
+        String finalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, DOIAdapter.DA_NAME_SET_SRC_CB);
+        String finalSetTstRef = getDaiValue(sourceLn0, doiNameInRef, DOIAdapter.DA_NAME_SET_TST_REF);
+        String finalSetTstCB = getDaiValue(sourceLn0, doiNameInRef, DOIAdapter.DA_NAME_SET_TST_CB);
+
+        assertThat(finalSetSrcRef).isEqualTo(expectedVal);
+        assertThat(finalSetSrcCB).isEqualTo(expectedVal);
+        assertThat(finalSetTstRef).isEqualTo(expectedVal);
+        assertThat(finalSetTstCB).isEqualTo(expectedVal);
+        assertThat(sclReportItems)
+                .hasSize(1)
+                .extracting(SclReportItem::getMessage)
+                .containsExactly("The DAI cannot be updated");
+    }
+
+
+    @Test
+    void streamControlBlocks_should_return_all_GSEControlBlocks() {
         // Given
         IEDAdapter iedAdapter = mock(IEDAdapter.class);
         TLDevice tlDevice = new TLDevice();

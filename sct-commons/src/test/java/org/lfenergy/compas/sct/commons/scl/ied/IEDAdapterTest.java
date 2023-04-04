@@ -5,6 +5,9 @@
 package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.DTO;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
@@ -14,6 +17,7 @@ import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.PrivateService;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
+import org.lfenergy.compas.sct.commons.util.MonitoringLnClassEnum;
 import org.mockito.Mockito;
 
 import java.util.HashMap;
@@ -25,6 +29,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
 import static org.mockito.Mockito.mock;
 
 class IEDAdapterTest {
@@ -205,7 +210,7 @@ class IEDAdapterTest {
     }
 
     @Test
-    void checkDataGroupCoherence_should_succeed_no_error_message() throws Exception {
+    void checkDataGroupCoherence_should_succeed_no_error_message() {
         //Given
         IEDAdapter iedAdapter = provideIEDForCheckLimitationForIED();
         //When
@@ -215,7 +220,7 @@ class IEDAdapterTest {
     }
 
     @Test
-    void checkDataGroupCoherence_should_fail_five_error_message() throws Exception {
+    void checkDataGroupCoherence_should_fail_five_error_message() {
         //Given
         IEDAdapter iedAdapter = provideIEDForCheckLimitationForIED();
         iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getConfDataSet().setMaxAttributes(2L);
@@ -308,5 +313,116 @@ class IEDAdapterTest {
         Optional<TCompasSystemVersion> compasSystemVersion = iedAdapter.getCompasSystemVersion();
         // Then
         assertThat(compasSystemVersion).map(TCompasSystemVersion::getMainSystemVersion).hasValue("01.00");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("provideLnClassAndDoType")
+    void manageMonitoringLns_should_not_update_ln_when_no_extRef(String testCase, MonitoringLnClassEnum lnClassEnum, String doName) {
+        // Given
+        IEDAdapter iedAdapter = createIedsInScl(lnClassEnum.value(), doName).getIEDAdapterByName(IED_NAME_1);
+        // When
+        List<SclReportItem> sclReportItems = iedAdapter.manageMonitoringLns();
+        // Then
+        LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(LD_SUIED);
+        assertThat(sclReportItems).isEmpty();
+        assertThat(lDeviceAdapter.getLNAdapters())
+                .hasSize(1);
+        assertThat(lDeviceAdapter.getLNAdapters().get(0).getLNInst()).isNull();
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("provideLnClassAndDoType")
+    void manageMonitoringLns_should_not_create_ln_when_no_init_ln(String testCase, MonitoringLnClassEnum lnClassEnum, String doName, TServiceType tServiceType) {
+        // Given
+        IEDAdapter iedAdapter = createIedsInScl(lnClassEnum.value(), doName).getIEDAdapterByName(IED_NAME_1);
+        TExtRef tExtRef = createExtRefExample("CB_Name", tServiceType);
+        LDeviceAdapter lDAdapter = iedAdapter.getLDeviceAdapterByLdInst("LD_ADD");
+        lDAdapter.getLN0Adapter().getCurrentElem().getInputs().getExtRef().add(tExtRef);
+        LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(LD_SUIED);
+        lDeviceAdapter.getCurrentElem().unsetLN();
+        // When
+        List<SclReportItem> sclReportItems = iedAdapter.manageMonitoringLns();
+        // Then
+        assertThat(sclReportItems).isNotEmpty()
+                .extracting(SclReportItem::getMessage)
+                .containsExactly("There is no LN " + lnClassEnum.value() + " present in LDevice");
+        assertThat(lDeviceAdapter.getLNAdapters()).isEmpty();
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("provideLnClassAndDoType")
+    void manageMonitoringLns_should_update_ln_when_one_extRef_and_dai_updatable(String testCase, MonitoringLnClassEnum lnClassEnum, String doName, TServiceType tServiceType) {
+        // Given
+        IEDAdapter iedAdapter = createIedsInScl(lnClassEnum.value(), doName).getIEDAdapterByName(IED_NAME_1);
+        TExtRef tExtRef = createExtRefExample("CB_Name", tServiceType);
+        LDeviceAdapter lDAdapter = iedAdapter.getLDeviceAdapterByLdInst("LD_ADD");
+        lDAdapter.getLN0Adapter().getCurrentElem().getInputs().getExtRef().add(tExtRef);
+        // When
+        List<SclReportItem> sclReportItems = iedAdapter.manageMonitoringLns();
+        // Then
+        LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(LD_SUIED);
+        assertThat(sclReportItems).isEmpty();
+        assertThat(lDeviceAdapter.getLNAdapters())
+                .hasSize(1)
+                .map(LNAdapter::getLNInst)
+                .isEqualTo(List.of("1"));
+        assertThat(getDaiValues(lDeviceAdapter, lnClassEnum.value(), doName, "setSrcRef"))
+                .hasSize(1)
+                .extracting(TVal::getValue)
+                .containsExactly("LD_Name/LLN0.CB_Name");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("provideLnClassAndDoType")
+    void manageMonitoringLns_should_not_update_ln_when_one_extRef_and_dai_not_updatable(String testCase, MonitoringLnClassEnum lnClassEnum, String doName, TServiceType tServiceType) {
+        // Given
+        SclRootAdapter sclRootAdapter = createIedsInScl(lnClassEnum.value(), doName);
+        sclRootAdapter.getDataTypeTemplateAdapter().getDOTypeAdapterById("REF").get().getDAAdapterByName("setSrcRef")
+                .get().getCurrentElem().setValImport(false);
+        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(IED_NAME_1);
+        TExtRef tExtRef = createExtRefExample("CB_Name", tServiceType);
+        LDeviceAdapter lDAdapter = iedAdapter.getLDeviceAdapterByLdInst("LD_ADD");
+        lDAdapter.getLN0Adapter().getCurrentElem().getInputs().getExtRef().add(tExtRef);
+        // When
+        List<SclReportItem> sclReportItems = iedAdapter.manageMonitoringLns();
+        // Then
+        LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(LD_SUIED);
+        assertThat(sclReportItems).isNotEmpty()
+                .extracting(SclReportItem::getMessage)
+                .containsExactly("The DAI cannot be updated");
+        assertThat(lDeviceAdapter.getLNAdapters())
+                .hasSize(1);
+        assertThat(lDeviceAdapter.getLNAdapters().get(0).getLNInst()).isNull();
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("provideLnClassAndDoType")
+    void manageMonitoringLns_should_update_ln_when_2_extRef_and_dai_updatable(String testCase, MonitoringLnClassEnum lnClassEnum, String doName, TServiceType tServiceType) {
+        // Given
+        IEDAdapter iedAdapter = createIedsInScl(lnClassEnum.value(), doName).getIEDAdapterByName(IED_NAME_1);
+        TExtRef tExtRef1 = createExtRefExample("CB_Name_1", tServiceType);
+        TExtRef tExtRef2 = createExtRefExample("CB_Name_2", tServiceType);
+        LDeviceAdapter lDAdapter = iedAdapter.getLDeviceAdapterByLdInst("LD_ADD");
+        lDAdapter.getLN0Adapter().getCurrentElem().getInputs().getExtRef().addAll(List.of(tExtRef1, tExtRef2));
+        // When
+        List<SclReportItem> sclReportItems = iedAdapter.manageMonitoringLns();
+        // Then
+        LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(LD_SUIED);
+        assertThat(sclReportItems).isEmpty();
+        assertThat(lDeviceAdapter.getLNAdapters())
+                .hasSize(2)
+                .map(LNAdapter::getLNInst)
+                .isEqualTo(List.of("1", "2"));
+        assertThat(getDaiValues(lDeviceAdapter, lnClassEnum.value(), doName, "setSrcRef"))
+                .hasSize(2)
+                .extracting(TVal::getValue)
+                .containsExactly("LD_Name/LLN0.CB_Name_1", "LD_Name/LLN0.CB_Name_2");
+    }
+
+    private static Stream<Arguments> provideLnClassAndDoType() {
+        return Stream.of(
+                Arguments.of("Case GOOSE : ln LGOS", MonitoringLnClassEnum.LGOS, DO_GOCBREF, TServiceType.GOOSE),
+                Arguments.of("Case SMV : ln LSVS", MonitoringLnClassEnum.LSVS, DO_SVCBREF, TServiceType.SMV)
+        );
     }
 }

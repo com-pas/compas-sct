@@ -15,13 +15,11 @@ import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.PrivateService;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.util.MonitoringLnClassEnum;
 import org.lfenergy.compas.sct.commons.util.ServicesConfigEnum;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -62,6 +60,9 @@ import java.util.stream.Stream;
 public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
 
     private static final String MESSAGE_LDEVICE_INST_NOT_FOUND = "LDevice.inst '%s' not found in IED '%s'";
+    private static final String DO_GOCBREF = "GoCBRef";
+    private static final String DO_SVCBREF = "SvCBRef";
+    private static final String LDSUIED_LDINST = "LDSUIED";
 
     /**
      * Constructor
@@ -91,10 +92,10 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
     public IEDAdapter(SclRootAdapter parentAdapter, String iedName) throws ScdException {
         super(parentAdapter);
         TIED ied = parentAdapter.getCurrentElem().getIED()
-            .stream()
-            .filter(tied -> tied.getName().equals(iedName))
-            .findFirst()
-            .orElseThrow(() -> new ScdException("Unknown IED name :" + iedName));
+                .stream()
+                .filter(tied -> tied.getName().equals(iedName))
+                .findFirst()
+                .orElseThrow(() -> new ScdException("Unknown IED name :" + iedName));
         setCurrentElem(ied);
     }
 
@@ -326,19 +327,20 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
 
     /**
      * Checks if Controls, DataSets and FCDAs of IED respect config limitation
+     *
      * @return empty list if all IED respect limits, otherwise list of errors
      */
     public List<SclReportItem> checkDataGroupCoherence() {
         return streamAccessPointAdapters()
                 .flatMap(accessPointAdapter ->
                         Stream.concat(
-                            accessPointAdapter.checkFCDALimitations().stream(),
-                            Stream.of(
-                                accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.DATASET),
-                                accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.REPORT),
-                                accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.GSE),
-                                accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.SMV))
-                            .flatMap(Optional::stream)
+                                accessPointAdapter.checkFCDALimitations().stream(),
+                                Stream.of(
+                                                accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.DATASET),
+                                                accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.REPORT),
+                                                accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.GSE),
+                                                accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.SMV))
+                                        .flatMap(Optional::stream)
                         )
                 )
                 .toList();
@@ -346,27 +348,29 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
 
     /**
      * Checks if Controls and FCDAs of source IEDs respect config limitation
+     *
      * @return empty list if all IED respect limits, otherwise list of errors
      */
     public List<SclReportItem> checkBindingDataGroupCoherence() {
-       return streamAccessPointAdapters()
+        return streamAccessPointAdapters()
                 .flatMap(accessPointAdapter -> {
                     AccessPointAdapter.ExtRefAnalyzeRecord extRefAnalyzeRecord = accessPointAdapter.getAllCoherentExtRefForAnalyze();
                     return Stream.of(
-                            extRefAnalyzeRecord.sclReportItems().stream(),
-                            accessPointAdapter.checkLimitationForBoundIedFcdas(extRefAnalyzeRecord.tExtRefs()).stream(),
-                            accessPointAdapter.checkLimitationForBoundIEDControls(extRefAnalyzeRecord.tExtRefs()).stream())
-                        .flatMap(Function.identity());
+                                    extRefAnalyzeRecord.sclReportItems().stream(),
+                                    accessPointAdapter.checkLimitationForBoundIedFcdas(extRefAnalyzeRecord.tExtRefs()).stream(),
+                                    accessPointAdapter.checkLimitationForBoundIEDControls(extRefAnalyzeRecord.tExtRefs()).stream())
+                            .flatMap(Function.identity());
                 }).toList();
     }
 
     private Stream<AccessPointAdapter> streamAccessPointAdapters() {
         return currentElem.getAccessPoint().stream()
-            .map(tAccessPoint -> new AccessPointAdapter(this, tAccessPoint));
+                .map(tAccessPoint -> new AccessPointAdapter(this, tAccessPoint));
     }
 
     /**
      * Get value of private type COMPAS-ICDHeader
+     *
      * @return COMPAS-ICDHeader private value if present, else empty Optional
      */
     public Optional<TCompasICDHeader> getCompasICDHeader() {
@@ -375,10 +379,40 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
 
     /**
      * Get value of private type COMPAS-SystemVersion
+     *
      * @return COMPAS-SystemVersion private value if present, else empty Optional
      */
     public Optional<TCompasSystemVersion> getCompasSystemVersion() {
         return PrivateService.extractCompasPrivate(currentElem, TCompasSystemVersion.class);
     }
+
+    /**
+     * Update and/or create Monitoring LNs (LSVS and LGOS) into LDSUIED for each bound ExtRef of each LDevice
+     *
+     * @return a list of SclReport Objects that contains errors
+     */
+    public List<SclReportItem> manageMonitoringLns() {
+        List<SclReportItem> sclReportItems = new ArrayList<>();
+        findLDeviceAdapterByLdInst(LDSUIED_LDINST).ifPresent(lDeviceAdapter -> {
+            lDeviceAdapter.manageMonitoringLns(retrieveAllExtRefForServiceType(TServiceType.GOOSE), DO_GOCBREF, MonitoringLnClassEnum.LGOS)
+                    .ifPresent(sclReportItems::add);
+            lDeviceAdapter.manageMonitoringLns(retrieveAllExtRefForServiceType(TServiceType.SMV), DO_SVCBREF, MonitoringLnClassEnum.LSVS)
+                    .ifPresent(sclReportItems::add);
+        });
+        return sclReportItems;
+    }
+
+    private List<TExtRef> retrieveAllExtRefForServiceType(TServiceType tServiceType) {
+        return streamLDeviceAdapters()
+                .map(LDeviceAdapter::getLN0Adapter)
+                .filter(AbstractLNAdapter::hasInputs)
+                .map(LN0Adapter::getInputsAdapter)
+                .map(InputsAdapter::filterDuplicatedExtRefs)
+                .flatMap(List::stream)
+                .filter(tExtRef -> tExtRef.isSetServiceType() && tExtRef.isSetSrcCBName() &&
+                        tServiceType.equals(tExtRef.getServiceType()))
+                .toList();
+    }
+
 
 }

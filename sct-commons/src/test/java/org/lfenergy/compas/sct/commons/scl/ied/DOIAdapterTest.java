@@ -7,6 +7,7 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 import org.apache.commons.lang3.tuple.Pair;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.dto.DoTypeName;
@@ -15,6 +16,7 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.lfenergy.compas.sct.commons.util.CommonConstants;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
 
@@ -22,6 +24,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newVal;
 
+@ExtendWith(MockitoExtension.class)
 class DOIAdapterTest {
 
     @Test
@@ -183,7 +186,7 @@ class DOIAdapterTest {
     }
 
     @Test
-    void testFindDeepestMatch() throws Exception {
+    void testFindDeepestMatch() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -214,7 +217,6 @@ class DOIAdapterTest {
         assertThat(pair.getLeft()).isNotNull();
         assertThat(pair.getLeft()).isInstanceOf(SDIAdapter.DAIAdapter.class);
     }
-
 
     private DOIAdapter.DAIAdapter initInnerDAIAdapter(String doName, String daName) {
         TDOI tdoi = new TDOI();
@@ -302,8 +304,7 @@ class DOIAdapterTest {
     @Test
     void updateDaiFromExtRef_should_update_setSrcXX_values_when_ExtRef_desc_suffix_ends_with_1() {
         // Given
-        DOIAdapter.DAIAdapter daiAdapter = initInnerDAIAdapter("Do", "da");
-        DOIAdapter doiAdapter = daiAdapter.getParentAdapter();
+        DOIAdapter doiAdapter = createDOIAdapterInScl();
         TDAI daiSrcRef = new TDAI();
         daiSrcRef.setName(DOIAdapter.DA_NAME_SET_SRC_REF);
         TDAI daiSrcCb = new TDAI();
@@ -331,8 +332,7 @@ class DOIAdapterTest {
     @Test
     void updateDaiFromExtRef_should_update_setSrcRef_value_but_not_setSrcCB_when_ExtRef_dont_contains_CB() {
         // Given
-        DOIAdapter.DAIAdapter daiAdapter = initInnerDAIAdapter("Do", "da");
-        DOIAdapter doiAdapter = daiAdapter.getParentAdapter();
+        DOIAdapter doiAdapter = createDOIAdapterInScl();
         TDAI daiSrcRef = new TDAI();
         daiSrcRef.setName(DOIAdapter.DA_NAME_SET_SRC_REF);
         doiAdapter.getCurrentElem().getSDIOrDAI().add(daiSrcRef);
@@ -353,8 +353,7 @@ class DOIAdapterTest {
     @Test
     void updateDaiFromExtRef_should_update_setSrcXX_and_setTstXX_values_when_ExtRef_desc_suffix_ends_with_1_and_3() {
         // Given
-        DOIAdapter.DAIAdapter daiAdapter = initInnerDAIAdapter("Do", "da");
-        DOIAdapter doiAdapter = daiAdapter.getParentAdapter();
+        DOIAdapter doiAdapter = createDOIAdapterInScl();
         TDAI daiSrcRef = new TDAI();
         daiSrcRef.setName(DOIAdapter.DA_NAME_SET_SRC_REF);
         doiAdapter.getCurrentElem().getSDIOrDAI().add(daiSrcRef);
@@ -406,8 +405,7 @@ class DOIAdapterTest {
     @Test
     void updateDaiFromExtRef_should_update_only_setSrcRef_and_setTstRef_values_when_ExtRef_desc_suffix_ends_with_1_and_3_without_CB() {
         // Given
-        DOIAdapter.DAIAdapter daiAdapter = initInnerDAIAdapter("Do", "da");
-        DOIAdapter doiAdapter = daiAdapter.getParentAdapter();
+        DOIAdapter doiAdapter = createDOIAdapterInScl();
         TDAI daiSrcRef = new TDAI();
         daiSrcRef.setName(DOIAdapter.DA_NAME_SET_SRC_REF);
         doiAdapter.getCurrentElem().getSDIOrDAI().add(daiSrcRef);
@@ -468,8 +466,7 @@ class DOIAdapterTest {
     @Test
     void updateDaiFromExtRef_should_create_DAI_when_no_DAI_name_setSrcRef() {
         // Given
-        DOIAdapter.DAIAdapter daiAdapter = initInnerDAIAdapter("Do", "da");
-        DOIAdapter doiAdapter = daiAdapter.getParentAdapter();
+        DOIAdapter doiAdapter = createDOIAdapterInScl();
 
         TExtRef extRef1 = givenExtRef(1, false);
 
@@ -504,8 +501,7 @@ class DOIAdapterTest {
     @Test
     void updateDaiFromExtRef_should_compose_correct_name_when_optional_ExtRef_attributes_are_missing() {
         // Given
-        DOIAdapter.DAIAdapter daiAdapter = initInnerDAIAdapter("Do", "da");
-        DOIAdapter doiAdapter = daiAdapter.getParentAdapter();
+        DOIAdapter doiAdapter = createDOIAdapterInScl();
         TDAI daiSrcRef = new TDAI();
         daiSrcRef.setName(DOIAdapter.DA_NAME_SET_SRC_REF);
         doiAdapter.getCurrentElem().getSDIOrDAI().add(daiSrcRef);
@@ -568,5 +564,66 @@ class DOIAdapterTest {
         // When Then
         assertThatThrownBy(() -> doiAdapter.updateDaiFromExtRef(extRefList))
                 .isInstanceOf(NumberFormatException.class);
+    }
+
+    private DOIAdapter createDOIAdapterInScl() {
+        TDOI tdoi = new TDOI();
+        tdoi.setName("InRef");
+
+        LN0 ln0 = new LN0();
+        ln0.setLnType("T1");
+        ln0.getDOI().add(tdoi);
+        TLDevice tlDevice = new TLDevice();
+        tlDevice.setInst("Inst");
+        tlDevice.setLN0(ln0);
+        TServer tServer = new TServer();
+        tServer.getLDevice().add(tlDevice);
+        TAccessPoint tAccessPoint = new TAccessPoint();
+        tAccessPoint.setName("AP_NAME");
+        tAccessPoint.setServer(tServer);
+        TIED tied = new TIED();
+        tied.setName("IED_NAME");
+        tied.getAccessPoint().add(tAccessPoint);
+        //SCL file
+        SCL scd = new SCL();
+        scd.getIED().add(tied);
+        THeader tHeader = new THeader();
+        tHeader.setRevision("1");
+        scd.setHeader(tHeader);
+        // DataTypeTemplate
+        TLNodeType tlNodeType = new TLNodeType();
+        tlNodeType.setId("T1");
+        tlNodeType.getLnClass().add("LLN0");
+        TDO tdo = new TDO();
+        tdo.setName("InRef");
+        tdo.setType("REF");
+        tlNodeType.getDO().add(tdo);
+        TDOType tdoType = new TDOType();
+        tdoType.setId("REF");
+        TDA tda1 = createDa(DOIAdapter.DA_NAME_SET_SRC_REF);
+        TDA tda2 = createDa(DOIAdapter.DA_NAME_SET_SRC_CB);
+        TDA tda3 = createDa(DOIAdapter.DA_NAME_SET_TST_REF);
+        TDA tda4 = createDa(DOIAdapter.DA_NAME_SET_TST_CB);
+        tdoType.getSDOOrDA().addAll(List.of(tda1, tda2, tda3, tda4));
+
+        TDataTypeTemplates tDataTypeTemplates = new TDataTypeTemplates();
+        tDataTypeTemplates.getLNodeType().add(tlNodeType);
+        tDataTypeTemplates.getDOType().add(tdoType);
+        scd.setDataTypeTemplates(tDataTypeTemplates);
+
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        LN0Adapter ln0Adapter = sclRootAdapter.getIEDAdapterByName("IED_NAME").getLDeviceAdapterByLdInst("Inst").getLN0Adapter();
+
+        DOIAdapter doiAdapter = new DOIAdapter(ln0Adapter, tdoi);
+        return doiAdapter;
+    }
+
+    private TDA createDa(String daName) {
+        TDA tda1 = new TDA();
+        tda1.setName(daName);
+        tda1.setValImport(true);
+        tda1.setBType(TPredefinedBasicTypeEnum.OBJ_REF);
+        tda1.setFc(TFCEnum.SP);
+        return tda1;
     }
 }
