@@ -315,7 +315,7 @@ class DOIAdapterTest {
         TExtRef extRef1 = givenExtRef(1, true);
 
         // When
-        Optional<SclReportItem> sclReportItems = doiAdapter.updateDaiFromExtRef(List.of(extRef1));
+        List<SclReportItem> sclReportItems = doiAdapter.updateDaiFromExtRef(List.of(extRef1));
 
         // Then
         assertThat(sclReportItems).isEmpty();
@@ -340,7 +340,7 @@ class DOIAdapterTest {
         TExtRef extRef1 = givenExtRef(1, false);
 
         // When
-        Optional<SclReportItem> sclReportItems = doiAdapter.updateDaiFromExtRef(List.of(extRef1));
+        List<SclReportItem> sclReportItems = doiAdapter.updateDaiFromExtRef(List.of(extRef1));
 
         // Then
         assertThat(sclReportItems).isEmpty();
@@ -371,7 +371,7 @@ class DOIAdapterTest {
         TExtRef extRef3 = givenExtRef(3, true);
 
         // When
-        Optional<SclReportItem> sclReportItems = doiAdapter.updateDaiFromExtRef(List.of(extRef1, extRef3));
+        List<SclReportItem> sclReportItems = doiAdapter.updateDaiFromExtRef(List.of(extRef1, extRef3));
 
         // Then
         assertThat(sclReportItems).isEmpty();
@@ -423,7 +423,7 @@ class DOIAdapterTest {
         TExtRef extRef3 = givenExtRef(3, false);
 
         // When
-        Optional<SclReportItem> sclReportItems = doiAdapter.updateDaiFromExtRef(List.of(extRef1, extRef3));
+        List<SclReportItem> sclReportItems = doiAdapter.updateDaiFromExtRef(List.of(extRef1, extRef3));
 
         // Then
         assertThat(sclReportItems).isEmpty();
@@ -451,14 +451,13 @@ class DOIAdapterTest {
         TExtRef extRef3 = givenExtRef(3, false);
 
         // When
-        Optional<SclReportItem> sclReportItems = doiAdapter.updateDaiFromExtRef(List.of(extRef3));
+        List<SclReportItem> sclReportItems = doiAdapter.updateDaiFromExtRef(List.of(extRef3));
 
         // Then
         assertThat(sclReportItems)
-                .isPresent()
-                .isNotEmpty();
-        assertThat(sclReportItems.get().getMessage())
-                .contains("can't be bound with an ExtRef");
+                .isNotEmpty()
+                .extracting(SclReportItem::getMessage)
+                .contains("The DOI /DOI[@name=\"Do\"] can't be bound with an ExtRef");
         assertThat(doiAdapter.getDataAdapterByName(DOIAdapter.DA_NAME_SET_SRC_REF)).isNotNull();
         assertThat(getDaiValOfDoi(doiAdapter, DOIAdapter.DA_NAME_SET_SRC_REF)).isNotPresent();
     }
@@ -471,7 +470,7 @@ class DOIAdapterTest {
         TExtRef extRef1 = givenExtRef(1, false);
 
         // When
-        Optional<SclReportItem> sclReportItems = doiAdapter.updateDaiFromExtRef(List.of(extRef1));
+        List<SclReportItem> sclReportItems = doiAdapter.updateDaiFromExtRef(List.of(extRef1));
 
         // Then
         assertThat(sclReportItems).isEmpty();
@@ -489,13 +488,14 @@ class DOIAdapterTest {
         DOIAdapter doiAdapter = daiAdapter.getParentAdapter();
 
         // When
-        Optional<SclReportItem> sclReportItems = doiAdapter.updateDaiFromExtRef(List.of());
+        List<SclReportItem> sclReportItems = doiAdapter.updateDaiFromExtRef(List.of());
 
         // Then
         assertThat(sclReportItems)
-                .isPresent()
                 .isNotEmpty();
-        assertThat(sclReportItems.get().getMessage()).contains("can't be bound with an ExtRef");
+        assertThat(sclReportItems)
+                .extracting(SclReportItem::getMessage)
+                .contains("The DOI /DOI[@name=\"Do\"] can't be bound with an ExtRef");
     }
 
     @Test
@@ -529,7 +529,7 @@ class DOIAdapterTest {
         extRef3.setDoName("DO_NAME_3");
 
         // When
-        Optional<SclReportItem> sclReportItems = doiAdapter.updateDaiFromExtRef(List.of(extRef1, extRef3));
+        List<SclReportItem> sclReportItems = doiAdapter.updateDaiFromExtRef(List.of(extRef1, extRef3));
 
         // Then
         assertThat(sclReportItems).isEmpty();
