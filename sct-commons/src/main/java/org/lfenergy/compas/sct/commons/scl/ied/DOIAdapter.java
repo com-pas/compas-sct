@@ -12,10 +12,7 @@ import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 
 /**
@@ -109,33 +106,33 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
      * @param tExtRefs all the ExtRefs contained in the current LDevice/LLN0
      * @return a filled SclReportItem if an error occurs, empty SclReportItem otherwise
      */
-    public Optional<SclReportItem> updateDaiFromExtRef(List<TExtRef> tExtRefs) {
-        Optional<SclReportItem> optionalSclReportItem;
+    public List<SclReportItem> updateDaiFromExtRef(List<TExtRef> tExtRefs) {
+        List<SclReportItem> sclReportItems = new ArrayList<>();
         Optional<TExtRef> tExtRefMinOptional = tExtRefs.stream().min(EXTREF_DESC_SUFFIX_COMPARATOR);
         if (tExtRefMinOptional.isPresent() && extractDescSuffix(tExtRefMinOptional.get().getDesc()) == 1) {
             TExtRef tExtRefMin = tExtRefMinOptional.get();
             String valueSrcRef = createInRefValNominalString(tExtRefMin);
-            optionalSclReportItem = updateDAI(DA_NAME_SET_SRC_REF, valueSrcRef);
+            updateDAI(DA_NAME_SET_SRC_REF, valueSrcRef).ifPresent(sclReportItems::add);
             if (tExtRefMin.isSetSrcCBName()) {
                 String valueSrcCb = createInRefValTestString(tExtRefMin);
-                optionalSclReportItem = updateDAI(DA_NAME_SET_SRC_CB, valueSrcCb);
+                updateDAI(DA_NAME_SET_SRC_CB, valueSrcCb).ifPresent(sclReportItems::add);
             }
 
             Optional<TExtRef> tExtRefMaxOptional = tExtRefs.stream().max(EXTREF_DESC_SUFFIX_COMPARATOR);
             if (tExtRefMaxOptional.isPresent() && extractDescSuffix(tExtRefMaxOptional.get().getDesc()) > 1) {
                 TExtRef tExtRefMax = tExtRefMaxOptional.get();
                 String valueTstRef = createInRefValNominalString(tExtRefMax);
-                optionalSclReportItem = updateDAI(DA_NAME_SET_TST_REF, valueTstRef);
+                updateDAI(DA_NAME_SET_TST_REF, valueTstRef).ifPresent(sclReportItems::add);
                 if (tExtRefMax.isSetSrcCBName()) {
                     String valueTstCb = createInRefValTestString(tExtRefMax);
-                    optionalSclReportItem = updateDAI(DA_NAME_SET_TST_CB, valueTstCb);
+                    updateDAI(DA_NAME_SET_TST_CB, valueTstCb).ifPresent(sclReportItems::add);
                 }
             }
         } else {
-            optionalSclReportItem = Optional.of(SclReportItem.warning(getXPath(), "The DOI %s can't be bound with an ExtRef".formatted(getXPath())));
+            sclReportItems.add(SclReportItem.warning(getXPath(), "The DOI %s can't be bound with an ExtRef".formatted(getXPath())));
         }
 
-        return optionalSclReportItem;
+        return sclReportItems;
     }
 
     private Optional<SclReportItem> updateDAI(String daName, String value) {

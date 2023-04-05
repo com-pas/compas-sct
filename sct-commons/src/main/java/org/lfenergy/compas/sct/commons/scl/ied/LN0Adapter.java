@@ -15,6 +15,7 @@ import org.lfenergy.compas.sct.commons.scl.PrivateService;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 
@@ -265,9 +266,10 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
                 .map(doiAdapter -> doiAdapter.getDataAdapterByName(DAI_NAME_PURPOSE).getCurrentElem().getVal().stream()
                         .findFirst()
                         .map(tVal -> doiAdapter.updateDaiFromExtRef(getBoundExtRefsByDesc(tVal.getValue())))
-                        .orElse(Optional.of(SclReportItem.warning(getXPath(), "The DOI %s can't be bound with an ExtRef".formatted(getXPath())))))
-                .flatMap(Optional::stream)
-                .toList();
+                        .orElse(List.of(SclReportItem.warning(getXPath(), "The DOI %s can't be bound with an ExtRef".formatted(getXPath()))))
+                )
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
     }
 
     private List<TExtRef> getBoundExtRefsByDesc(String desc) {

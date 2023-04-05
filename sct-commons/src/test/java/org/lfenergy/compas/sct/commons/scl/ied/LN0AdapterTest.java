@@ -1079,9 +1079,10 @@ class LN0AdapterTest {
         assertThat(finalSetTstRef).isEqualTo(expectedVal);
         assertThat(finalSetTstCB).isEqualTo(expectedVal);
         assertThat(sclReportItems)
-                .hasSize(1)
+                .hasSize(4)
                 .extracting(SclReportItem::getMessage)
-                .containsExactly("The DAI cannot be updated");
+                .containsExactly("The DAI cannot be updated", "The DAI cannot be updated", "The DAI cannot be updated",
+                        "The DAI cannot be updated");
     }
 
 
