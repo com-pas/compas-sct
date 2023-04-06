@@ -192,11 +192,11 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
 
     /**
      * Checks if current DOType contains DA
-     * @param da DA name
+     * @param daName DA name
      * @return <em>Boolean</em> value of check result
      */
-    public boolean containsDAWithDAName(String da){
-        return getTdaStream().anyMatch(tda -> tda.getName().equals(da));
+    public boolean containsDAWithDAName(String daName){
+        return getTdaStream().anyMatch(tda -> tda.getName().equals(daName));
     }
 
     /**
@@ -260,19 +260,16 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
      */
     Pair<String,DOTypeAdapter> findPathSDOToDA(String sdoName, String daName) throws ScdException {
         String errMsg = String.format("No coherence or path between DO/SDO(%s) and DA(%s)", sdoName,daName);
-        Optional<TSDO> opSdo = getSDOByName(sdoName);
-        if(opSdo.isEmpty()) {
-            throw new ScdException(errMsg);
-        }
+        TSDO sdo = getSDOByName(sdoName)
+                .orElseThrow(() -> new ScdException(errMsg));
 
-        DOTypeAdapter doTypeAdapter = parentAdapter.getDOTypeAdapterById(opSdo.get().getType()).orElse(null);
-        if(doTypeAdapter == null) {
-            throw new ScdException(errMsg);
+        DOTypeAdapter doTypeReferencedBySdo = parentAdapter.getDOTypeAdapterById(sdo.getType())
+                .orElseThrow(() -> new ScdException(errMsg));
+
+        if(doTypeReferencedBySdo.containsDAWithDAName(daName)){
+            return Pair.of(sdo.getName(),doTypeReferencedBySdo);
         }
-        if(doTypeAdapter.containsDAWithDAName(daName)){
-            return Pair.of(opSdo.get().getName(),doTypeAdapter);
-        }
-        return doTypeAdapter.findPathDoTypeToDA(daName);
+        return doTypeReferencedBySdo.findPathDoTypeToDA(daName);
     }
 
     /**
@@ -407,20 +404,20 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
 
     /**
      * Gets from current DOType specific DA
-     * @param name name of DA to return
+     * @param daName name of DA to return
      * @return optional of <em>TDA</em> object or empty if unknown DA name
      */
-    public Optional<TDA> getDAByName(String name) {
+    public Optional<TDA> getDAByName(String daName) {
         TDOType tdoType = currentElem;
-        if (!containsDAWithDAName(name)) {
-            tdoType = findPathDoTypeToDA(name)
+        if (!containsDAWithDAName(daName)) {
+            tdoType = findPathDoTypeToDA(daName)
                     .getValue()
                     .getCurrentElem();
         }
         return tdoType.getSDOOrDA()
                 .stream()
                 .filter(unNaming -> unNaming.getClass().equals(TDA.class)
-                        && ((TDA)unNaming).getName().equals(name))
+                        && ((TDA)unNaming).getName().equals(daName))
                 .map(TDA.class::cast)
                 .findFirst();
     }

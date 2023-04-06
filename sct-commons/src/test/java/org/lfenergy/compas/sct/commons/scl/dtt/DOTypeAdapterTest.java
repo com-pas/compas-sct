@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.scl.dtt;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -76,7 +77,7 @@ class DOTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter, TDOTyp
         DataTypeTemplateAdapter rcvDttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
         assertTrue(rcvDttAdapter.getDATypeAdapters().size() > 1);
 
-        DOTypeAdapter rcvDOTypeAdapter =  rcvDttAdapter.getDOTypeAdapters().get(0);
+        DOTypeAdapter rcvDOTypeAdapter = rcvDttAdapter.getDOTypeAdapters().get(0);
         assertTrue(rcvDOTypeAdapter.hasSameContentAs(rcvDOTypeAdapter.getCurrentElem()));
         assertFalse(rcvDOTypeAdapter.hasSameContentAs(rcvDttAdapter.getDOTypeAdapters().get(1).getCurrentElem()));
     }
@@ -85,21 +86,21 @@ class DOTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter, TDOTyp
     void testCheckAndCompleteStructData() throws Exception {
         //Given
         DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
-        DOTypeAdapter doTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getDOTypeAdapterById("DO2").get());
-        DoTypeName doTypeName = new DoTypeName("Op","origin");
+        DOTypeAdapter doTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getDOTypeAdapterById("DO2").get());
+        DoTypeName doTypeName = new DoTypeName("Op", "origin");
 
-        assertDoesNotThrow(() ->doTypeAdapter.checkAndCompleteStructData(doTypeName));
-        assertEquals(TPredefinedCDCEnum.WYE,doTypeName.getCdc());
-        DoTypeName doTypeName1 = new DoTypeName("Op","toto");
+        assertDoesNotThrow(() -> doTypeAdapter.checkAndCompleteStructData(doTypeName));
+        assertEquals(TPredefinedCDCEnum.WYE, doTypeName.getCdc());
+        DoTypeName doTypeName1 = new DoTypeName("Op", "toto");
         //When Then
-        assertThatThrownBy(() ->doTypeAdapter.checkAndCompleteStructData(doTypeName1)).isInstanceOf(ScdException.class);
+        assertThatThrownBy(() -> doTypeAdapter.checkAndCompleteStructData(doTypeName1)).isInstanceOf(ScdException.class);
     }
 
     @Test
     void testGetResumedDTTs_filter_on_DO() throws Exception {
         // given
         DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
-        DOTypeAdapter doTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getDOTypeAdapterById("DO2").get());
+        DOTypeAdapter doTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getDOTypeAdapterById("DO2").get());
         ResumedDataTemplate rootRDtt = new ResumedDataTemplate();
         rootRDtt.setDoName(new DoTypeName("Op"));
         ResumedDataTemplate filter = new ResumedDataTemplate();
@@ -109,14 +110,14 @@ class DOTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter, TDOTyp
         List<ResumedDataTemplate> rDtts = doTypeAdapter.getResumedDTTs(rootRDtt, filter);
 
         // then
-        assertEquals(2,rDtts.size());
+        assertEquals(2, rDtts.size());
     }
 
     @Test
     void testGetResumedDTTs_filter_on_DO_and_DA() throws Exception {
         // given
         DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
-        DOTypeAdapter doTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getDOTypeAdapterById("DO2").get());
+        DOTypeAdapter doTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getDOTypeAdapterById("DO2").get());
         ResumedDataTemplate rootRDtt = new ResumedDataTemplate();
         rootRDtt.setDoName(new DoTypeName("Op"));
         ResumedDataTemplate filter = new ResumedDataTemplate();
@@ -126,24 +127,77 @@ class DOTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter, TDOTyp
         List<ResumedDataTemplate> rDtts = doTypeAdapter.getResumedDTTs(rootRDtt, filter);
 
         // then
-        assertEquals(1,rDtts.size());
+        assertEquals(1, rDtts.size());
     }
 
 
     @Test
     void testFindPathSDO2DA() throws Exception {
+        // Given
         DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(
                 AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID
         );
-        DOTypeAdapter doTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getDOTypeAdapterById("DO1").get());
-        assertThrows(ScdException.class, () ->  doTypeAdapter.findPathSDOToDA("origin","unknown"));
-        assertThrows(ScdException.class, () ->  doTypeAdapter.findPathSDOToDA("unknown","antRef"));
+        DOTypeAdapter doTypeAdapter = dttAdapter.getDOTypeAdapterById("DO1").get();
+        // When
+        // Then
+        assertThrows(ScdException.class, () -> doTypeAdapter.findPathSDOToDA("origin", "unknown"));
+        assertThrows(ScdException.class, () -> doTypeAdapter.findPathSDOToDA("unknown", "antRef"));
         var pair = assertDoesNotThrow(
-                () -> doTypeAdapter.findPathSDOToDA("origin","antRef")
+                () -> doTypeAdapter.findPathSDOToDA("origin", "antRef")
         );
-        assertEquals("d",pair.getKey());
+        assertEquals("d", pair.getKey());
         DOTypeAdapter lastDoTypeAdapter = pair.getValue();
-        assertEquals("DO3",lastDoTypeAdapter.getCurrentElem().getId());
+        assertEquals("DO3", lastDoTypeAdapter.getCurrentElem().getId());
+    }
+
+    @Test
+    void findPathSDOToDA_should_return_something() throws Exception {
+        // Given
+        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(
+                AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID
+        );
+        DOTypeAdapter doTypeAdapter = dttAdapter.getDOTypeAdapterById("DO1").get();
+        // When
+        Pair<String, DOTypeAdapter> pair = doTypeAdapter.findPathSDOToDA("origin", "antRef");
+        // Then
+        assertEquals("d", pair.getKey());
+        DOTypeAdapter lastDoTypeAdapter = pair.getValue();
+        assertEquals("DO3", lastDoTypeAdapter.getCurrentElem().getId());
+    }
+
+    @Test
+    void findPathSDOToDA_should_return_something_when_DO_DA() throws Exception {
+        // Given
+
+        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(
+                AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID
+        );
+        DOTypeAdapter doTypeAdapter = dttAdapter.getDOTypeAdapterById("DO1").get();
+        // When
+        Pair<String, DOTypeAdapter> pair = doTypeAdapter.findPathSDOToDA("origin", "antRef");
+        // Then
+        assertEquals("d", pair.getKey());
+        DOTypeAdapter lastDoTypeAdapter = pair.getValue();
+        assertEquals("DO3", lastDoTypeAdapter.getCurrentElem().getId());
+    }
+
+    @Test
+    void findPathSDOToDA_should_throw_exception() throws Exception {
+        // Given
+        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(
+                AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID
+        );
+        DOTypeAdapter doTypeAdapter = dttAdapter.getDOTypeAdapterById("DO1").get();
+        // When
+        var pair = assertDoesNotThrow(
+                () -> doTypeAdapter.findPathSDOToDA("origin", "antRef")
+        );
+        // Then
+        assertThrows(ScdException.class, () -> doTypeAdapter.findPathSDOToDA("origin", "unknown"));
+        assertThrows(ScdException.class, () -> doTypeAdapter.findPathSDOToDA("unknown", "antRef"));
+        assertEquals("d", pair.getKey());
+        DOTypeAdapter lastDoTypeAdapter = pair.getValue();
+        assertEquals("DO3", lastDoTypeAdapter.getCurrentElem().getId());
     }
 
     @Test
@@ -151,13 +205,13 @@ class DOTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter, TDOTyp
         DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(
                 AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID
         );
-        DaTypeName daTypeName = new DaTypeName("antRef","origin.ctlVal");
+        DaTypeName daTypeName = new DaTypeName("antRef", "origin.ctlVal");
         ResumedDataTemplate rDtt = new ResumedDataTemplate();
         rDtt.setDoName(new DoTypeName("Op"));
         DOTypeAdapter doTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getDOTypeAdapterById("DO2").get());
-        assertDoesNotThrow(() -> doTypeAdapter.getResumedDTTByDaName(daTypeName,rDtt));
-        assertEquals("Op.origin",rDtt.getDoName().toString());
-        assertEquals("antRef.origin.ctlVal",rDtt.getDaName().toString());
+        assertDoesNotThrow(() -> doTypeAdapter.getResumedDTTByDaName(daTypeName, rDtt));
+        assertEquals("Op.origin", rDtt.getDoName().toString());
+        assertEquals("antRef.origin.ctlVal", rDtt.getDaName().toString());
     }
 
     @Test
@@ -189,16 +243,16 @@ class DOTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter, TDOTyp
 
     @ParameterizedTest
     @CsvSource({"angRef,CF,PhaseAngleReferenceKind", "antRef,ST,DA1"})
-    void getDAByName(String daName, String fc, String type) throws Exception {
+    void getDAByName(String daName, String expectedFc, String expectedType) throws Exception {
         // Given
         DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(
                 AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
-        DOTypeAdapter doTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getDOTypeAdapterById("DO2").get());
+        DOTypeAdapter doTypeAdapter = dttAdapter.getDOTypeAdapterById("DO2").get();
         // When
-        TDA result = assertDoesNotThrow(() -> doTypeAdapter.getDAByName(daName).get());
+        TDA result = doTypeAdapter.getDAByName(daName).get();
         // Then
         assertThat(result).isNotNull()
                 .extracting(TDA::getName, TDA::getFc, TDA::getType)
-                .containsExactlyInAnyOrder(daName,TFCEnum.fromValue(fc),type);
+                .containsExactlyInAnyOrder(daName, TFCEnum.fromValue(expectedFc), expectedType);
     }
 }
