@@ -227,10 +227,10 @@ public class LNodeTypeAdapter
     Pair<String,DOTypeAdapter> findPathFromDo2DA(String doName, String daName) throws ScdException {
         DOAdapter doAdapter = getDOAdapterByName(doName).orElseThrow();
         DOTypeAdapter doTypeAdapter = doAdapter.getDoTypeAdapter().orElseThrow();
-        if(doTypeAdapter.containsDAWithDAName(doName)){
+        if(doTypeAdapter.containsDaWithDaName(doName)){
             return Pair.of(doName,doTypeAdapter);
         }
-        return doTypeAdapter.findPathDoTypeToDA(daName);
+        return doTypeAdapter.findPathDoTypeToDa(daName);
     }
 
 
@@ -265,10 +265,10 @@ public class LNodeTypeAdapter
             adapterPair = findPathFromDo2DA(doTypeName.getName(),daTypeName.getName());
             lastDoTypeAdapter = adapterPair.getValue();
         } else {
-            if(adapterPair.getRight().containsDAWithDAName(daTypeName.getName())){
+            if(adapterPair.getRight().containsDaWithDaName(daTypeName.getName())){
                 lastDoTypeAdapter = adapterPair.getValue();
             } else {
-                adapterPair = adapterPair.getRight().findPathDoTypeToDA(daTypeName.getName());
+                adapterPair = adapterPair.getRight().findPathDoTypeToDa(daTypeName.getName());
                 lastDoTypeAdapter = adapterPair.getValue();
             }
         }
