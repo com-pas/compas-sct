@@ -8,7 +8,11 @@
     <!-- Duplicate ICDSystemVersionUUID -->
     <IED name="IED_NAME1">
         <Private type="COMPAS-ICDHeader">
-            <compas:ICDHeader IEDType="BCU" IEDSubstationinstance="22" BayLabel="3THEIX2" IEDName="IED_NAME1" ICDSystemVersionUUID="Duplicated_ICDSystemVersionUUID" VendorName="SCLE SFE" IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+            <compas:ICDHeader IEDType="BCU" IEDSubstationinstance="22" IEDSystemVersioninstance="1" BayLabel="3THEIX2"
+                              IEDName="IED_NAME1" ICDSystemVersionUUID="Duplicated_ICDSystemVersionUUID"
+                              VendorName="SCLE SFE" IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2."
+                              swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a"
+                              headerRevision="412995"/>
         </Private>
         <AccessPoint name="AP_NAME">
             <Server>
@@ -21,7 +25,11 @@
     </IED>
     <IED name="IED_NAME2">
         <Private type="COMPAS-ICDHeader">
-            <compas:ICDHeader IEDType="BCU" IEDSubstationinstance="22" BayLabel="3THEIX2" IEDName="IED_NAME2" ICDSystemVersionUUID="Duplicated_ICDSystemVersionUUID" VendorName="SCLE SFE" IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+            <compas:ICDHeader IEDType="BCU" IEDSubstationinstance="22" IEDSystemVersioninstance="1" BayLabel="3THEIX2"
+                              IEDName="IED_NAME2" ICDSystemVersionUUID="Duplicated_ICDSystemVersionUUID"
+                              VendorName="SCLE SFE" IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2."
+                              swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a"
+                              headerRevision="412995"/>
         </Private>
         <AccessPoint name="AP_NAME">
             <Server>
@@ -46,7 +54,10 @@
     <!-- Blank compas:ICDHeader iedName -->
     <IED name="IED_NAME4">
         <Private type="COMPAS-ICDHeader">
-            <compas:ICDHeader IEDType="BCU" IEDSubstationinstance="22" BayLabel="3THEIX2" IEDName="" ICDSystemVersionUUID="System_Version_IED_NAME4" VendorName="SCLE SFE" IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+            <compas:ICDHeader IEDType="BCU" IEDSubstationinstance="22" IEDSystemVersioninstance="1" BayLabel="3THEIX2"
+                              IEDName="" ICDSystemVersionUUID="System_Version_IED_NAME4" VendorName="SCLE SFE"
+                              IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a"
+                              headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
         </Private>
         <AccessPoint name="AP_NAME">
             <Server>
@@ -60,7 +71,10 @@
     <!-- Blank compas:ICDHeader ICDSystemVersionUUID -->
     <IED name="IED_NAME5">
         <Private type="COMPAS-ICDHeader">
-            <compas:ICDHeader IEDType="BCU" IEDSubstationinstance="22" BayLabel="3THEIX2" IEDName="IED_NAME5" ICDSystemVersionUUID="" VendorName="SCLE SFE" IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+            <compas:ICDHeader IEDType="BCU" IEDSubstationinstance="22" IEDSystemVersioninstance="1" BayLabel="3THEIX2"
+                              IEDName="IED_NAME5" ICDSystemVersionUUID="" VendorName="SCLE SFE" IEDredundancy="A"
+                              IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a"
+                              headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
         </Private>
         <AccessPoint name="AP_NAME">
             <Server>

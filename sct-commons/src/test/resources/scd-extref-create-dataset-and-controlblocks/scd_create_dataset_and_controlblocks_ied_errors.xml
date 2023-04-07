@@ -8,7 +8,10 @@
     <!-- target IED (IED_NAME1) is missing compas:Bay@UUID -->
     <IED name="IED_NAME1">
         <Private type="COMPAS-ICDHeader">
-            <compas:ICDHeader IEDType="BCU" IEDSubstationinstance="11" BayLabel="3THEIX2" IEDName="IED_NAME1" ICDSystemVersionUUID="System_Version_IED_NAME1" VendorName="SCLE SFE" IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+            <compas:ICDHeader IEDType="BCU" IEDSubstationinstance="11" IEDSystemVersioninstance="1" BayLabel="3THEIX2"
+                              IEDName="IED_NAME1" ICDSystemVersionUUID="System_Version_IED_NAME1" VendorName="SCLE SFE"
+                              IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a"
+                              headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
         </Private>
         <AccessPoint name="AP_NAME">
             <Server>
@@ -33,10 +36,13 @@
     </IED>
     <IED name="IED_NAME2">
         <Private type="COMPAS-ICDHeader">
-            <compas:ICDHeader IEDType="BCU" IEDSubstationinstance="22" BayLabel="3THEIX2" IEDName="IED_NAME2" ICDSystemVersionUUID="System_Version_IED_NAME2" VendorName="SCLE SFE" IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+            <compas:ICDHeader IEDType="BCU" IEDSubstationinstance="22" IEDSystemVersioninstance="1" BayLabel="3THEIX2"
+                              IEDName="IED_NAME2" ICDSystemVersionUUID="System_Version_IED_NAME2" VendorName="SCLE SFE"
+                              IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a"
+                              headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
         </Private>
         <Private type="COMPAS-Bay">
-            <compas:Bay UUID="UuidBay1"/>
+            <compas:Bay UUID="UuidBay1" BayCodif="CB00001101" NumBay="1" BayCount="1" MainShortLabel="aa"/>
         </Private>
         <AccessPoint name="AP_NAME">
             <Server>
@@ -57,10 +63,13 @@
     <!-- source IED (IED_NAME4) missing compas:Bay@UUID -->
     <IED name="IED_NAME3">
         <Private type="COMPAS-ICDHeader">
-            <compas:ICDHeader IEDType="BCU" IEDSubstationinstance="11" BayLabel="3THEIX2" IEDName="IED_NAME3" ICDSystemVersionUUID="System_Version_IED_NAME3" VendorName="SCLE SFE" IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+            <compas:ICDHeader IEDType="BCU" IEDSubstationinstance="11" IEDSystemVersioninstance="1" BayLabel="3THEIX2"
+                              IEDName="IED_NAME3" ICDSystemVersionUUID="System_Version_IED_NAME3" VendorName="SCLE SFE"
+                              IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a"
+                              headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
         </Private>
         <Private type="COMPAS-Bay">
-            <compas:Bay UUID="UuidBay1"/>
+            <compas:Bay UUID="UuidBay1" BayCodif="CB00001101" NumBay="1" BayCount="1" MainShortLabel="aa"/>
         </Private>
         <AccessPoint name="AP_NAME">
             <Server>
@@ -85,7 +94,10 @@
     </IED>
     <IED name="IED_NAME4">
         <Private type="COMPAS-ICDHeader">
-            <compas:ICDHeader IEDType="BCU" IEDSubstationinstance="22" BayLabel="3THEIX2" IEDName="IED_NAME4" ICDSystemVersionUUID="System_Version_IED_NAME4" VendorName="SCLE SFE" IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+            <compas:ICDHeader IEDType="BCU" IEDSubstationinstance="22" IEDSystemVersioninstance="1" BayLabel="3THEIX2"
+                              IEDName="IED_NAME4" ICDSystemVersionUUID="System_Version_IED_NAME4" VendorName="SCLE SFE"
+                              IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a"
+                              headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
         </Private>
         <AccessPoint name="AP_NAME">
             <Server>
