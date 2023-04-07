@@ -6,7 +6,7 @@
 
 package org.lfenergy.compas.sct.commons.util;
 
-import lombok.experimental.UtilityClass;
+import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
 
 import java.math.BigDecimal;
@@ -17,11 +17,14 @@ import java.util.List;
  * xjc only provides NoArgConstructors on generated classes.
  * This utility class provides constructors with the most relevant attributes.
  */
-@UtilityClass
-public class SclConstructorHelper {
+public final class SclConstructorHelper {
 
     private static final String SECOND = "s";
     private static final String MILLI = "m";
+
+    private SclConstructorHelper() {
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+    }
 
     /**
      * Create new instance of TP
@@ -62,6 +65,20 @@ public class SclConstructorHelper {
      */
     public static TDurationInMilliSec newDurationInMilliSec(long value) {
         return newDurationInMilliSec(new BigDecimal(value), SECOND, MILLI);
+    }
+
+    /**
+     * Clone TDurationInMilliSec. The clone is independent of the tDurationInMilliSec because all fields are immutable.
+     *
+     * @param tDurationInMilliSec TDurationInMilliSec to clone
+     * @return new instance of TDurationInMilliSec initialized with the given parameters
+     * @see #newDurationInMilliSec(BigDecimal, String, String)
+     */
+    public static TDurationInMilliSec newDurationInMilliSec(TDurationInMilliSec tDurationInMilliSec) {
+        if (tDurationInMilliSec == null) {
+            return null;
+        }
+        return newDurationInMilliSec(tDurationInMilliSec.getValue(), tDurationInMilliSec.getUnit(), tDurationInMilliSec.getMultiplier());
     }
 
     /**
@@ -117,4 +134,15 @@ public class SclConstructorHelper {
         return newVal(value, null);
     }
 
+    public static TFCDA newFcda(String ldInst, String lnClass, String lnInst, String prefix, String doName, String daName, TFCEnum fc) {
+        TFCDA tfcda = new TFCDA();
+        tfcda.setLdInst(ldInst);
+        if (StringUtils.isNotBlank(lnClass)) tfcda.getLnClass().add(lnClass);
+        tfcda.setLnInst(lnInst);
+        tfcda.setPrefix(prefix);
+        tfcda.setDoName(doName);
+        tfcda.setDaName(daName);
+        tfcda.setFc(fc);
+        return tfcda;
+    }
 }

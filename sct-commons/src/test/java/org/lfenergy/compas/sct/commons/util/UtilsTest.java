@@ -23,7 +23,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Named.named;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.createExtRefExample;
 import static org.lfenergy.compas.sct.commons.util.Utils.copySclElement;
 
@@ -337,44 +336,6 @@ class UtilsTest {
             Arguments.of(null, "a", LOWER_THAN),
             Arguments.of(null, "b", LOWER_THAN)  // transitivity null < "a" && "a" < "b" => null < "b"
         );
-    }
-
-    @ParameterizedTest
-    @MethodSource("provideBlankStrings")
-    void nullIfBlank_when_input_is_blank_should_return_null(String input){
-        // Given : Parameter
-        // When
-        String result = Utils.nullIfBlank(input);
-        // Then
-        assertThat(result).isNull();
-    }
-
-    public static Stream<Arguments> provideBlankStrings() {
-        return Stream.of(
-            Arguments.of(named("null", null)),
-            Arguments.of(""),
-            Arguments.of(" ")
-        );
-    }
-
-    @Test
-    void nullIfBlank_when_input_is_not_blank_should_return_same_string(){
-        // Given
-        String input = "a";
-        // When
-        String result = Utils.nullIfBlank(input);
-        // Then
-        assertThat(result).isEqualTo(input);
-    }
-
-    @ParameterizedTest
-    @MethodSource("provideBlankStrings")
-    void emptyIfBlank_when_input_is_blank_should_return_null(String input){
-        // Given : Parameter
-        // When
-        String result = Utils.emptyIfBlank(input);
-        // Then
-        assertThat(result).isEmpty();
     }
 
     @ParameterizedTest

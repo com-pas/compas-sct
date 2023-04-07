@@ -226,26 +226,6 @@ public final class Utils {
     }
 
     /**
-     * return null if input string is blank.
-     * Blank means : null, empty string or whitespaces (as defined by {@link Character#isWhitespace(char)}) only string.
-     * @param s string to split
-     * @return null if input string is blank, else s parameter
-     */
-    public static String nullIfBlank(String s) {
-        return StringUtils.isBlank(s) ? null : s;
-    }
-
-    /**
-     * return empty String (i.e "") if input string is blank.
-     * Blank means : null, empty string or whitespaces (as defined by {@link Character#isWhitespace(char)}) only string.
-     * @param s string to split
-     * @return empty string (i.e "") if input string is blank, else s parameter
-     */
-    public static String emptyIfBlank(String s) {
-        return StringUtils.isBlank(s) ? "" : s;
-    }
-
-    /**
      * Check if lnClass as List os the same as lnClass as a String.
      * For some reason, xjc plugin generates a List&lt;String&gt; instead of a String for the lnClass attribute.
      * When marshalling an XML file, lnClass is represented as a List with a single element.

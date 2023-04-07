@@ -4,7 +4,6 @@
 
 package org.lfenergy.compas.sct.commons.scl;
 
-import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TCompasICDHeader;
@@ -30,10 +29,13 @@ import java.util.stream.Stream;
 import static org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.*;
 import static org.lfenergy.compas.sct.commons.util.Utils.isExtRefFeedBySameControlBlock;
 
-@UtilityClass
-public class ExtRefService {
+public final class ExtRefService {
 
     private static final String MESSAGE_MISSING_IED_NAME_PARAMETER = "IED.name parameter is missing";
+
+    private ExtRefService() {
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+    }
 
     /**
      * Updates iedName attribute of all ExtRefs in the Scd.
@@ -203,7 +205,7 @@ public class ExtRefService {
 
     private static Optional<SclReportItem> configureControlBlockNetwork(ControlBlockNetworkSettings controlBlockNetworkSettings, PrimitiveIterator.OfLong appIdIterator, Iterator<String> macAddressIterator, ControlBlockAdapter controlBlockAdapter) {
         SettingsOrError settingsOrError = controlBlockNetworkSettings.getNetworkSettings(controlBlockAdapter);
-        if (settingsOrError.errorMessage() != null){
+        if (settingsOrError.errorMessage() != null) {
             return Optional.of(controlBlockAdapter.buildFatalReportItem(
                     "Cannot configure network for this ControlBlock because: " + settingsOrError.errorMessage()));
         }

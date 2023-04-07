@@ -22,6 +22,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.MOD_DO_NAME;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL_DA_NAME;
+
 
 /**
  * A representation of the model object
@@ -72,6 +75,10 @@ import java.util.stream.Stream;
 @Slf4j
 public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdapter<LDeviceAdapter, T> {
 
+
+    public static final DoTypeName MOD_DO_TYPE_NAME = new DoTypeName(MOD_DO_NAME);
+    public static final DaTypeName STVAL_DA_TYPE_NAME = new DaTypeName(STVAL_DA_NAME);
+    private static final String DAI_MOD_STVAL_VALUE_ON = "on";
 
     /**
      * Constructor
@@ -967,6 +974,17 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 .map(tControl -> new ControlBlockAdapter(this, tControl));
     }
 
+    /**
+     * Create ControlBlock if there is no ControlBlock of the same type (controlBlockEnum) and with the same cbName in this LN/LN0.
+     * When the controlBlock already exists, the id and datSet attributes are NOT updated with the given values.
+     *
+     * @param cbName           cbName of the controlBlock to look for. When not found, the cbName of the controlBlock to create.
+     * @param id               When controlBlock not found, the id of the controlBlock to create
+     * @param datSet           the datSet of the controlBlock to create
+     * @param controlBlockEnum the type of ControlBlock to create
+     * @return existing controlBlock if a controlBlock of the same type and with same cbName was found in this LN/LN0, otherwise the created ControlBlock.
+     * The returned ControlBlock is always a child of this LN/LN0.
+     */
     public ControlBlockAdapter createControlBlockIfNotExists(String cbName, String id, String datSet, ControlBlockEnum controlBlockEnum) {
         return findControlBlock(cbName, controlBlockEnum)
                 .orElseGet(() -> addControlBlock(
@@ -978,6 +996,25 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                                 }
                         )
                 );
+    }
+
+    /**
+     * Generate a ControlBlock Id based on the current LN and the given ldName (ldName can be different from the parent LD.name)
+     *
+     * @param ldName LD name to use for generating the id
+     * @param cbName name of the ControlBlock
+     * @return "ldName/LnPrefixLnClassLnInst.cbName". Blank values are omitted (e.g "IEDNAME1LD1/LLN0.CBNAME1")
+     */
+    public String generateControlBlockId(String ldName, String cbName) {
+        String s = getLNInst();
+        String s1 = getPrefix();
+        return StringUtils.trimToEmpty(ldName)
+                + "/"
+                + StringUtils.trimToEmpty(s1)
+                + StringUtils.defaultString(getLNClass(), "")
+                + StringUtils.trimToEmpty(s)
+                + "."
+                + StringUtils.trimToEmpty(cbName);
     }
 
     /**
@@ -996,5 +1033,30 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 .map(TDataSet::getFCDA)
                 .flatMap(Collection::stream)
                 .toList();
+    }
+
+    /**
+     * Get the value of "Mod.stVal" of the current LN
+     *
+     * @return Mod.stVal value if present, else empty Optional
+     */
+    public Optional<String> getDaiModStValValue() {
+        return getDaiModStVal()
+                .flatMap(ResumedDataTemplate::findFirstValue);
+    }
+
+    /**
+     * Check the status ("Mod.stVal" value) of the current LN
+     *
+     * @return true if data Mod.stVal is present and has value equals to LnStatus.ON
+     */
+    public boolean isDaiModStValOn() {
+        return DAI_MOD_STVAL_VALUE_ON.equals(getDaiModStValValue().orElse(null));
+    }
+
+    protected Optional<ResumedDataTemplate> getDaiModStVal() {
+        ResumedDataTemplate daiModFilter = new ResumedDataTemplate(this, MOD_DO_TYPE_NAME, STVAL_DA_TYPE_NAME);
+        return getDAI(daiModFilter, false).stream()
+                .findFirst();
     }
 }

@@ -11,8 +11,6 @@ import org.lfenergy.compas.sct.commons.util.Utils;
 import java.util.Objects;
 
 import static org.lfenergy.compas.scl2007b4.model.TControlWithIEDName.IEDName;
-import static org.lfenergy.compas.sct.commons.util.Utils.emptyIfBlank;
-import static org.lfenergy.compas.sct.commons.util.Utils.nullIfBlank;
 
 /**
  * Record that hold the data for TClientLN and TControlWithIEDName.IEDName which have the same fields.
@@ -50,8 +48,8 @@ public record ControlBlockTarget(String apRef, String iedName, String ldInst, St
             newTClientLn.getLnClass().add(lnClass);
         }
         // LnInst is required on TClientLN, so it cannot be null, but it can be empty
-        newTClientLn.setLnInst(emptyIfBlank(lnInst));
-        newTClientLn.setPrefix(nullIfBlank(prefix));
+        newTClientLn.setLnInst(StringUtils.trimToEmpty(lnInst));
+        newTClientLn.setPrefix(StringUtils.trimToNull(prefix));
         newTClientLn.setDesc(desc);
         return newTClientLn;
     }
@@ -69,8 +67,8 @@ public record ControlBlockTarget(String apRef, String iedName, String ldInst, St
             newIedName.getLnClass().add(lnClass);
         }
         // LnInst is optional on IEDName, so it can be null, but cannot be empty
-        newIedName.setLnInst(nullIfBlank(lnInst));
-        newIedName.setPrefix(nullIfBlank(prefix));
+        newIedName.setLnInst(StringUtils.trimToNull(lnInst));
+        newIedName.setPrefix(StringUtils.trimToNull(prefix));
         return newIedName;
     }
 

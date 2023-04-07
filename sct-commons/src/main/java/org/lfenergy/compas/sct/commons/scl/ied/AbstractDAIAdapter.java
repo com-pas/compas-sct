@@ -57,7 +57,7 @@ public abstract class AbstractDAIAdapter<P extends SclElementAdapter> extends Sc
 
     private boolean isDOModDAstVal() {
         if (parentAdapter.getCurrentElem() instanceof final TDOI tdoi) {
-            return currentElem.getName().equals(CommonConstants.STVAL) && tdoi.getName().equals(CommonConstants.MOD_DO_NAME);
+            return currentElem.getName().equals(CommonConstants.STVAL_DA_NAME) && tdoi.getName().equals(CommonConstants.MOD_DO_NAME);
         }
         return false;
     }

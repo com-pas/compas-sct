@@ -5,9 +5,7 @@
 package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.dto.ExtrefTarget;
-import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
-import org.lfenergy.compas.sct.commons.dto.SclReportItem;
+import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.util.Utils;
@@ -136,7 +134,7 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
     }
 
     private Optional<SclReportItem> updateDAI(String daName, String value) {
-        ResumedDataTemplate daiFilterSrcRef = new ResumedDataTemplate(getParentAdapter(), getName(), daName);
+        ResumedDataTemplate daiFilterSrcRef = new ResumedDataTemplate(getParentAdapter(), new DoTypeName(getName()), new DaTypeName(daName));
         Optional<ResumedDataTemplate> foundDais = getParentAdapter().getDAI(daiFilterSrcRef, true).stream().findFirst();
         if (foundDais.isEmpty()) {
             return Optional.of(SclReportItem.warning(getXPath() + "/DAI@name=\"" + daName + "\"/Val", "The DAI cannot be updated"));
