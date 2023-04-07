@@ -18,6 +18,7 @@ import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
 
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 import static org.lfenergy.compas.sct.commons.util.Utils.copySclElement;
 
 /**
@@ -53,6 +54,8 @@ import static org.lfenergy.compas.sct.commons.util.Utils.copySclElement;
 @Slf4j
 public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
 
+    private static final long INTG_PD_VALUE_FOR_FC_MX = 2000L;
+
     private static final String DA_SETSRCREF = "setSrcRef";
 
     /**
@@ -63,6 +66,42 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
      */
     public LDeviceAdapter(IEDAdapter parentAdapter, TLDevice currentElem) {
         super(parentAdapter, currentElem);
+    }
+
+    /**
+     * Create DataSet and ReportControl Blocks for the HMI with the given FCDAs.
+     * DataSet and ReportControl are created in LN0, even if FCDA refers to another LN.
+     *
+     * @param fcdas List of FCDA for which we must create the DataSet and ReportControl
+     */
+    public void createHmiReportControlBlocks(List<TFCDA> fcdas) {
+        LN0Adapter ln0 = getLN0Adapter();
+        if (!ln0.isDaiModStValOn()) return;
+        fcdas.stream()
+                .filter(fcda -> getInst().equals(fcda.getLdInst()) && fcda.isSetLnClass())
+                .forEach(fcda -> (fcda.getLnClass().get(0).equals(TLLN0Enum.LLN_0.value()) ?
+                        Optional.of(ln0) // ln0 Mod stVal "ON" has already been checked, no need to check it again
+                        : findLnAdapter(fcda.getLnClass().get(0), fcda.getLnInst(), fcda.getPrefix()).filter(AbstractLNAdapter::isDaiModStValOn))
+                        .map(sourceLn -> sourceLn.getDAI(new ResumedDataTemplate(fcda), false))
+                        .filter(das -> das.stream().anyMatch(da -> fcda.getFc() == da.getFc())) // getDAI does not filter on DA.
+                        .ifPresent(resumedDataTemplates -> createHmiReportCB(ln0, fcda)));
+    }
+
+    private void createHmiReportCB(LN0Adapter ln0, TFCDA fcda) {
+        boolean isFcMx = fcda.getFc() == TFCEnum.MX;
+        String dataSetSuffix = getInst().toUpperCase(Locale.ENGLISH) + ATTRIBUTE_VALUE_SEPARATOR + (isFcMx ? "CYPO" : "DQPO");
+        DataSetAdapter dataSet = ln0.createDataSetIfNotExists(DATASET_NAME_PREFIX + dataSetSuffix, ControlBlockEnum.REPORT);
+        dataSet.createFCDAIfNotExists(fcda.getLdInst(), fcda.getPrefix(), fcda.getLnClass().get(0), fcda.getLnInst(), fcda.getDoName(), fcda.getDaName(), fcda.getFc());
+        String cbName = CONTROLBLOCK_NAME_PREFIX + dataSetSuffix;
+        String cbId = ln0.generateControlBlockId(getLdName(), cbName);
+        String datSet = dataSet.getCurrentElem().getName();
+        ControlBlockAdapter controlBlockAdapter = ln0.createControlBlockIfNotExists(cbName, cbId, datSet, ControlBlockEnum.REPORT);
+        if (isFcMx) {
+            TReportControl tReportControl = (TReportControl) controlBlockAdapter.getCurrentElem();
+            tReportControl.setIntgPd(INTG_PD_VALUE_FOR_FC_MX);
+            tReportControl.getTrgOps().setDchg(false);
+            tReportControl.getTrgOps().setQchg(false);
+        }
     }
 
     /**
@@ -293,7 +332,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
         if (!hasLN0()) {
             return Optional.empty();
         }
-        return getLN0Adapter().getLDeviceStatus();
+        return getLN0Adapter().getDaiModStValValue();
     }
 
     /**
@@ -395,7 +434,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
         return getLNAdapters().stream().filter(lnAdapter -> monitoringLnClassEnum.value().equals(lnAdapter.getLNClass()))
                 .map(lnAdapter -> {
                     Optional<SclReportItem> optionalSclReportItem = Optional.empty();
-                    ResumedDataTemplate filter = new ResumedDataTemplate(lnAdapter, doName, DA_SETSRCREF);
+                    ResumedDataTemplate filter = new ResumedDataTemplate(lnAdapter, new DoTypeName(doName), new DaTypeName(DA_SETSRCREF));
                     Optional<ResumedDataTemplate> foundDai = lnAdapter.getDAI(filter, true).stream().findFirst();
                     if (foundDai.isEmpty()) {
                         optionalSclReportItem = Optional.of(SclReportItem.warning(lnAdapter.getXPath() + "/DOI@name=\"" + doName + "\"/DAI@name=\"setSrcRef\"/Val",

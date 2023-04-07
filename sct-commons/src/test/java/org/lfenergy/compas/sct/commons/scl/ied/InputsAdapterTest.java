@@ -228,7 +228,7 @@ class InputsAdapterTest {
     }
 
     @Test
-    void updateAllSourceDataSetsAndControlBlocks_when_AceessPoint_does_not_have_dataset_creation_capability_should_report_error() {
+    void updateAllSourceDataSetsAndControlBlocks_when_AccessPoint_does_not_have_dataset_creation_capability_should_report_error() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);

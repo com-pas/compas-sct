@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
 import org.lfenergy.compas.sct.commons.dto.ExtrefTarget;
-import org.lfenergy.compas.sct.commons.util.Utils;
 
 /**
  * A representation of the model object
@@ -55,16 +54,22 @@ public class ObjectReference {
     public ObjectReference(TExtRef extRef, ExtrefTarget target) {
         this.ldName = extRef.getIedName() + extRef.getLdInst();
         if(target.equals(ExtrefTarget.SRC_REF)) {
-            this.lNodeName = Utils.emptyIfBlank(extRef.getPrefix())
-                    + (extRef.isSetLnClass() ? extRef.getLnClass().get(0): TLLN0Enum.LLN_0.value())
-                    + Utils.emptyIfBlank(extRef.getLnInst());
-            this.dataAttributes = Utils.emptyIfBlank(extRef.getDoName());
+            String s1 = extRef.getLnInst();
+            String s2 = extRef.getPrefix();
+            this.lNodeName = StringUtils.trimToEmpty(s2)
+                    + (extRef.isSetLnClass() ? extRef.getLnClass().get(0) : TLLN0Enum.LLN_0.value())
+                    + StringUtils.trimToEmpty(s1);
+            String s = extRef.getDoName();
+            this.dataAttributes = StringUtils.trimToEmpty(s);
         }
         if(target.equals(ExtrefTarget.SRC_CB)) {
-            this.lNodeName = Utils.emptyIfBlank(extRef.getSrcPrefix())
-                    + (extRef.isSetSrcLNClass() ? extRef.getSrcLNClass().get(0): TLLN0Enum.LLN_0.value())
-                    + Utils.emptyIfBlank(extRef.getSrcLNInst());
-            this.dataAttributes = Utils.emptyIfBlank(extRef.getSrcCBName());
+            String s1 = extRef.getSrcLNInst();
+            String s2 = extRef.getSrcPrefix();
+            this.lNodeName = StringUtils.trimToEmpty(s2)
+                    + (extRef.isSetSrcLNClass() ? extRef.getSrcLNClass().get(0) : TLLN0Enum.LLN_0.value())
+                    + StringUtils.trimToEmpty(s1);
+            String s = extRef.getSrcCBName();
+            this.dataAttributes = StringUtils.trimToEmpty(s);
         }
         this.reference = this.ldName + "/" + this.lNodeName + "." + this.dataAttributes;
     }

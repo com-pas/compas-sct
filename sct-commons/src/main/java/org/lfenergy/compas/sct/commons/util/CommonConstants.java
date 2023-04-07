@@ -17,7 +17,10 @@ public final class CommonConstants {
     public static final String HEADER_REVISION = "headerRevision";
     public static final String BEHAVIOUR_DO_NAME = "Beh";
     public static final String MOD_DO_NAME = "Mod";
-    public static final String STVAL = "stVal";
+    public static final String STVAL_DA_NAME = "stVal";
+    public static final String ATTRIBUTE_VALUE_SEPARATOR = "_";
+    public static final String CONTROLBLOCK_NAME_PREFIX = "CB" + ATTRIBUTE_VALUE_SEPARATOR;
+    public static final String DATASET_NAME_PREFIX = "DS" + ATTRIBUTE_VALUE_SEPARATOR;
 
     /**
      * Private Controlller, should not be instanced

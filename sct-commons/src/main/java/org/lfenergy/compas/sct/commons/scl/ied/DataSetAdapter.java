@@ -17,7 +17,9 @@ import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
 
-import static org.lfenergy.compas.sct.commons.util.Utils.*;
+import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newFcda;
+import static org.lfenergy.compas.sct.commons.util.Utils.equalsOrBothBlank;
+import static org.lfenergy.compas.sct.commons.util.Utils.xpathAttributeFilter;
 
 /**
  * A representation of the model object
@@ -47,13 +49,13 @@ public class DataSetAdapter extends SclElementAdapter<AbstractLNAdapter<? extend
      * IEC 61850 requires FCDA to be oredred inside a DataSet.
      * This is the comparator to sort the FCDA inside a DataSet
      */
-    private static final Comparator<TFCDA> fcdaComparator = Comparator
-        .comparing(TFCDA::getLdInst, Utils::blanksFirstComparator)
-        .thenComparing(TFCDA::getPrefix, Utils::blanksFirstComparator)
-        .thenComparing(tfcda -> tfcda.isSetLnClass() ? tfcda.getLnClass().get(0) : null, Utils::blanksFirstComparator)
-        .thenComparing(tfcda -> tfcda.getLnInst() != null ? Integer.valueOf(tfcda.getLnInst()) : null, Comparator.nullsFirst(Integer::compareTo))
-        .thenComparing(TFCDA::getDoName, Utils::blanksFirstComparator)
-        .thenComparing(TFCDA::getDaName, Utils::blanksFirstComparator);
+    private static final Comparator<TFCDA> FCDA_COMPARATOR = Comparator
+            .comparing(TFCDA::getLdInst, Utils::blanksFirstComparator)
+            .thenComparing(TFCDA::getPrefix, Utils::blanksFirstComparator)
+            .thenComparing(tfcda -> tfcda.isSetLnClass() ? tfcda.getLnClass().get(0) : null, Utils::blanksFirstComparator)
+            .thenComparing(tfcda -> tfcda.getLnInst() != null ? Integer.valueOf(tfcda.getLnInst()) : null, Comparator.nullsFirst(Integer::compareTo))
+            .thenComparing(TFCDA::getDoName, Utils::blanksFirstComparator)
+            .thenComparing(TFCDA::getDaName, Utils::blanksFirstComparator);
 
     public DataSetAdapter(AbstractLNAdapter<? extends TAnyLN> parentAdapter, TDataSet dataSet) {
         super(parentAdapter, dataSet);
@@ -67,11 +69,12 @@ public class DataSetAdapter extends SclElementAdapter<AbstractLNAdapter<? extend
     @Override
     protected boolean amChildElementRef() {
         return parentAdapter.getCurrentElem().isSetDataSet() && parentAdapter.getCurrentElem().getDataSet().stream().anyMatch(dataSet ->
-            Objects.equals(currentElem.getName(), dataSet.getName()));
+                Objects.equals(currentElem.getName(), dataSet.getName()));
     }
 
     /**
      * Returns local XPath
+     *
      * @return XPath for current element (not including parent XPath)
      */
     @Override
@@ -81,13 +84,14 @@ public class DataSetAdapter extends SclElementAdapter<AbstractLNAdapter<? extend
 
     /**
      * Find a FCDA matching all given criteria.
-     * @param ldInst FCDA ldInst attribute
-     * @param prefix FCDA prefix attribute
+     *
+     * @param ldInst  FCDA ldInst attribute
+     * @param prefix  FCDA prefix attribute
      * @param lnClass FCDA lnClass attribute
-     * @param lnInst FCDA lnInst attribute
-     * @param doName FCDA doName attribute
-     * @param daName FCDA daNae attribute
-     * @param fc FCDA fc attribute
+     * @param lnInst  FCDA lnInst attribute
+     * @param doName  FCDA doName attribute
+     * @param daName  FCDA daNae attribute
+     * @param fc      FCDA fc attribute
      * @return Matching FCDA in this DataSet when found, empty Optional otherwise.
      */
     public Optional<TFCDA> findFCDA(String ldInst, String prefix, String lnClass, String lnInst, String doName, String daName, TFCEnum fc) {
@@ -95,48 +99,47 @@ public class DataSetAdapter extends SclElementAdapter<AbstractLNAdapter<? extend
             return Optional.empty();
         }
         return currentElem.getFCDA().stream()
-            .filter(tfcda ->
-                Objects.equals(ldInst, tfcda.getLdInst())
-                    && equalsOrBothBlank(prefix, tfcda.getPrefix())
-                    && Utils.lnClassEquals(tfcda.getLnClass(), lnClass)
-                    && equalsOrBothBlank(lnInst, tfcda.getLnInst())
-                    && Objects.equals(doName, tfcda.getDoName())
-                    && Objects.equals(fc, tfcda.getFc())
-                    && equalsOrBothBlank(daName, tfcda.getDaName()))
-            .findFirst();
+                .filter(tfcda ->
+                        Objects.equals(ldInst, tfcda.getLdInst())
+                                && equalsOrBothBlank(prefix, tfcda.getPrefix())
+                                && Utils.lnClassEquals(tfcda.getLnClass(), lnClass)
+                                && equalsOrBothBlank(lnInst, tfcda.getLnInst())
+                                && Objects.equals(doName, tfcda.getDoName())
+                                && Objects.equals(fc, tfcda.getFc())
+                                && equalsOrBothBlank(daName, tfcda.getDaName()))
+                .findFirst();
     }
 
     /**
      * Create a new FCDA in this DataSet.
      * Does nothing if a FCDA with the given attribute already exists in this DataSet.
-     * @param ldInst FCDA ldInst attribute
-     * @param prefix FCDA prefix attribute
+     *
+     * @param ldInst  FCDA ldInst attribute
+     * @param prefix  FCDA prefix attribute
      * @param lnClass FCDA lnClass attribute
-     * @param lnInst FCDA lnInst attribute
-     * @param doName FCDA doName attribute
-     * @param daName FCDA daNae attribute
-     * @param fc FCDA fc attribute
+     * @param lnInst  FCDA lnInst attribute
+     * @param doName  FCDA doName attribute
+     * @param daName  FCDA daNae attribute
+     * @param fc      FCDA fc attribute
      * @return created FCDA, or existing FCDA with the given attributes
      */
     public TFCDA createFCDAIfNotExists(String ldInst, String prefix, String lnClass, String lnInst, String doName, String daName, TFCEnum fc) {
         Objects.requireNonNull(fc); // fc is required by XSD
         Optional<TFCDA> fcda = findFCDA(ldInst, prefix, lnClass, lnInst, doName, daName, fc);
         return fcda
-            .orElseGet(() -> {
-                TFCDA newFcda = new TFCDA();
-                newFcda.setLdInst(nullIfBlank(ldInst));
-                newFcda.setPrefix(nullIfBlank(prefix));
-                if (StringUtils.isNotBlank(lnClass)) {
-                    newFcda.getLnClass().add(lnClass);
-                }
-                newFcda.setLnInst(nullIfBlank(lnInst));
-                newFcda.setDoName(nullIfBlank(doName));
-                newFcda.setDaName(nullIfBlank(daName));
-                newFcda.setFc(fc);
-                currentElem.getFCDA().add(newFcda);
-                currentElem.getFCDA().sort(fcdaComparator);
-                return newFcda;
-            });
+                .orElseGet(() -> {
+                    TFCDA newFcda = newFcda(
+                            StringUtils.trimToNull(ldInst),
+                            lnClass,
+                            StringUtils.trimToNull(lnInst),
+                            StringUtils.trimToNull(prefix),
+                            StringUtils.trimToNull(doName),
+                            StringUtils.trimToNull(daName),
+                            fc);
+                    currentElem.getFCDA().add(newFcda);
+                    currentElem.getFCDA().sort(FCDA_COMPARATOR);
+                    return newFcda;
+                });
     }
 
 }

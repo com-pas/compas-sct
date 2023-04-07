@@ -6,6 +6,7 @@ package org.lfenergy.compas.sct.commons.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.util.SclConstructorHelper;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.MOD_DO_NAME;
-import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL_DA_NAME;
 
 
 /**
@@ -54,13 +55,23 @@ public class ResumedDataTemplate {
     /**
      * Constructor
      */
-    public ResumedDataTemplate(AbstractLNAdapter<?> lnAdapter, String doName, String daName) {
+    public ResumedDataTemplate(AbstractLNAdapter<?> lnAdapter, DoTypeName doName, DaTypeName daName) {
         this.lnClass = lnAdapter.getLNClass();
         this.lnInst = lnAdapter.getLNInst();
         this.prefix = lnAdapter.getPrefix();
         this.lnType = lnAdapter.getLnType();
-        this.doName = new DoTypeName(doName);
-        this.daName = new DaTypeName(daName);
+        this.doName = doName;
+        this.daName = daName;
+    }
+
+    public ResumedDataTemplate(TFCDA fcda) {
+        this.lnClass = fcda.isSetLnClass() ? fcda.getLnClass().get(0) : null;
+        this.lnInst = fcda.getLnInst();
+        this.prefix = fcda.getPrefix();
+        this.lnType = null;
+        this.doName = new DoTypeName(StringUtils.trimToEmpty(fcda.getDoName()));
+        this.daName = new DaTypeName(StringUtils.trimToEmpty(fcda.getDaName()));
+        if (daName.isDefined()) this.setFc(fcda.getFc());
     }
 
     /**
@@ -94,7 +105,7 @@ public class ResumedDataTemplate {
      * @return true if DO is "Mod" and DA is "stVal", false otherwise
      */
     private boolean isDOModDAstVal(){
-        return doName.getName().equals(MOD_DO_NAME) && daName.getName().equals(STVAL);
+        return doName.getName().equals(MOD_DO_NAME) && daName.getName().equals(STVAL_DA_NAME);
     }
 
     @JsonIgnore

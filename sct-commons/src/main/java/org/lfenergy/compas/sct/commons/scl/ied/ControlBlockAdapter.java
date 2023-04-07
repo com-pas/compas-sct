@@ -12,13 +12,14 @@ import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.com.ConnectedAPAdapter;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
-import org.lfenergy.compas.sct.commons.util.SclConstructorHelper;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newDurationInMilliSec;
+import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newP;
 import static org.lfenergy.compas.sct.commons.util.Utils.xpathAttributeFilter;
 
 /**
@@ -147,29 +148,22 @@ public class ControlBlockAdapter extends SclElementAdapter<AbstractLNAdapter<? e
         }
         ConnectedAPAdapter connectedAPAdapter = optConApAdapter.get();
         List<TP> listOfPs = new ArrayList<>();
-        listOfPs.add(SclConstructorHelper.newP(APPID_P_TYPE, Utils.toHex(appId, APPID_LENGTH)));
-        listOfPs.add(SclConstructorHelper.newP(MAC_ADDRESS_P_TYPE, macAddress));
+        listOfPs.add(newP(APPID_P_TYPE, Utils.toHex(appId, APPID_LENGTH)));
+        listOfPs.add(newP(MAC_ADDRESS_P_TYPE, macAddress));
         if (vlanId != null) {
-            listOfPs.add(SclConstructorHelper.newP(VLAN_ID_P_TYPE, Utils.toHex(vlanId, VLAN_ID_LENGTH)));
+            listOfPs.add(newP(VLAN_ID_P_TYPE, Utils.toHex(vlanId, VLAN_ID_LENGTH)));
             if (vlanPriority != null) {
-                listOfPs.add(SclConstructorHelper.newP(VLAN_PRIORITY_P_TYPE, String.valueOf(vlanPriority)));
+                listOfPs.add(newP(VLAN_PRIORITY_P_TYPE, String.valueOf(vlanPriority)));
             }
         }
         switch (getControlBlockEnum()) {
-            case GSE -> connectedAPAdapter.updateGseOrCreateIfNotExists(getParentLDeviceAdapter().getInst(), currentElem.getName(), listOfPs, clone(minTime), clone(maxTime));
+            case GSE -> connectedAPAdapter.updateGseOrCreateIfNotExists(getParentLDeviceAdapter().getInst(), currentElem.getName(), listOfPs, newDurationInMilliSec(minTime), newDurationInMilliSec(maxTime));
             case SAMPLED_VALUE -> connectedAPAdapter.updateSmvOrCreateIfNotExists(getParentLDeviceAdapter().getInst(), currentElem.getName(), listOfPs);
             default -> {
                 return Optional.of(buildFatalReportItem("configureNetwork not yet implemented for %s ControlBlocks".formatted(getControlBlockEnum())));
             }
         }
         return Optional.empty();
-    }
-
-    private TDurationInMilliSec clone(TDurationInMilliSec tDurationInMilliSec){
-        if (tDurationInMilliSec == null) {
-            return null;
-        }
-        return SclConstructorHelper.newDurationInMilliSec(tDurationInMilliSec.getValue(), tDurationInMilliSec.getUnit(), tDurationInMilliSec.getMultiplier());
     }
 
     /**

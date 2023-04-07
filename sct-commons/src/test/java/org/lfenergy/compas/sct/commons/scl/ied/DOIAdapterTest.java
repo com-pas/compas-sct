@@ -175,7 +175,7 @@ class DOIAdapterTest {
     void DAIAdapter_update_when_valImport_is_set_to_false_but_da_is_Mod_StVal_should_update_value() {
         // Given
         String newValue = "newValue";
-        DOIAdapter.DAIAdapter daiAdapter = initInnerDAIAdapter(CommonConstants.MOD_DO_NAME, CommonConstants.STVAL);
+        DOIAdapter.DAIAdapter daiAdapter = initInnerDAIAdapter(CommonConstants.MOD_DO_NAME, CommonConstants.STVAL_DA_NAME);
         daiAdapter.setValImport(false);
         // When
         daiAdapter.update(0L, newValue);

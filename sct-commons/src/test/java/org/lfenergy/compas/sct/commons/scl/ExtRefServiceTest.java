@@ -15,7 +15,6 @@ import org.lfenergy.compas.sct.commons.dto.ControlBlockTarget;
 import org.lfenergy.compas.sct.commons.dto.SclReport;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.ied.ControlBlockAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.DataSetAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.FCDARecord;
@@ -247,9 +246,7 @@ class ExtRefServiceTest {
         assertControlBlockExists(sclReport, "IED_NAME2", "LD_INST21", "CB_LD_INST21_GSI", "DS_LD_INST21_GSI", "IED_NAME2LD_INST21/LLN0.CB_LD_INST21_GSI", GSE);
 
         // Check one ControlBlock content (ReportControl with sourceDA.fc=MX)
-        ControlBlockAdapter reportControlBlock = findControlBlock(sclReport.getSclRootAdapter(), "IED_NAME2", "LD_INST21", "CB_LD_INST21_CYCI", REPORT);
-        assertThat(reportControlBlock.getCurrentElem()).isInstanceOf(TReportControl.class);
-        TReportControl tReportControl = (TReportControl) reportControlBlock.getCurrentElem();
+        TReportControl tReportControl = findControlBlock(sclReport.getSclRootAdapter(), "IED_NAME2", "LD_INST21", "CB_LD_INST21_CYCI", TReportControl.class);
         assertThat(tReportControl).extracting(TReportControl::getConfRev, TReportControl::isBuffered, TReportControl::getBufTime, TReportControl::isIndexed,
                         TControlWithTriggerOpt::getIntgPd)
                 .containsExactly(1L, true, 0L, true, 60000L);
