@@ -13,6 +13,7 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
+import org.lfenergy.compas.sct.commons.util.LDeviceStatus;
 import org.lfenergy.compas.sct.commons.util.MonitoringLnClassEnum;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
@@ -76,12 +77,12 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
      */
     public void createHmiReportControlBlocks(List<TFCDA> fcdas) {
         LN0Adapter ln0 = getLN0Adapter();
-        if (!ln0.isDaiModStValOn()) return;
+        if (!ln0.getDaiModStValValue().map(LDeviceStatus.ON::equals).orElse(false)) return;
         fcdas.stream()
                 .filter(fcda -> getInst().equals(fcda.getLdInst()) && fcda.isSetLnClass())
                 .forEach(fcda -> (fcda.getLnClass().get(0).equals(TLLN0Enum.LLN_0.value()) ?
                         Optional.of(ln0) // ln0 Mod stVal "ON" has already been checked, no need to check it again
-                        : findLnAdapter(fcda.getLnClass().get(0), fcda.getLnInst(), fcda.getPrefix()).filter(AbstractLNAdapter::isDaiModStValOn))
+                        : findLnAdapter(fcda.getLnClass().get(0), fcda.getLnInst(), fcda.getPrefix()).filter(lnAdapter -> lnAdapter.getDaiModStValValue().map(LDeviceStatus.ON::equals).orElse(true)))
                         .map(sourceLn -> sourceLn.getDAI(new ResumedDataTemplate(fcda), false))
                         .filter(das -> das.stream().anyMatch(da -> fcda.getFc() == da.getFc())) // getDAI does not filter on DA.
                         .ifPresent(resumedDataTemplates -> createHmiReportCB(ln0, fcda)));

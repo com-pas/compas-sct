@@ -104,7 +104,31 @@ class HmiServiceTest {
     }
 
     @Test
-    void createAllIhmReportControlBlocks_when_lDevice_ON_but_LN_status_OFF_should_not_create_dataset() {
+    void createAllIhmReportControlBlocks_when_lDevice_ON_but_LN_Mod_StVal_missing_should_create_dataset_and_controlblock() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-hmi-create-report-cb/scd_create_dataset_and_controlblocks_for_hmi.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        LNAdapter ln = findLn(sclRootAdapter, "IedName1", "LdInst11", "ANCR", "1", null);
+        ln.getCurrentElem().unsetDOI();
+        TFCDA fcda = newFcda("LdInst11", "ANCR", "1", null, "DoName1", null, TFCEnum.ST);
+        // When
+        HmiService.createAllHmiReportControlBlocks(scd, List.of(fcda));
+        // Then
+        // Check DataSet is created
+        DataSetAdapter dataSet = findDataSet(sclRootAdapter, "IedName1", "LdInst11", "DS_LDINST11_DQPO");
+        assertThat(dataSet.getCurrentElem().getFCDA()).hasSize(1).first()
+                .usingRecursiveComparison().isEqualTo(fcda);
+        // Check ControlBlock is created
+        LN0Adapter ln0 = findLn0(sclRootAdapter, "IedName1", "LdInst11");
+        assertThat(ln0.getTControlsByType(TReportControl.class)).hasSize(1);
+        TReportControl reportControl = findControlBlock(sclRootAdapter, "IedName1", "LdInst11", "CB_LDINST11_DQPO", TReportControl.class);
+        assertThat(reportControl).extracting(TReportControl::getRptID, TControl::getDatSet, TReportControl::getConfRev, TReportControl::isBuffered, TReportControl::getBufTime, TReportControl::isIndexed,
+                        TControlWithTriggerOpt::getIntgPd)
+                .containsExactly("IedName1LdInst11/LLN0.CB_LDINST11_DQPO", "DS_LDINST11_DQPO", 1L, true, 0L, true, 60000L);
+    }
+
+    @Test
+    void createAllIhmReportControlBlocks_when_lDevice_ON_but_LN_Mod_StVal_OFF_should_not_create_dataset() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-hmi-create-report-cb/scd_create_dataset_and_controlblocks_for_hmi.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);

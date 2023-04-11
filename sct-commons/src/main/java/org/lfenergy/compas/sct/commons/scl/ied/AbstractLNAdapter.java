@@ -1045,15 +1045,6 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 .flatMap(ResumedDataTemplate::findFirstValue);
     }
 
-    /**
-     * Check the status ("Mod.stVal" value) of the current LN
-     *
-     * @return true if data Mod.stVal is present and has value equals to LnStatus.ON
-     */
-    public boolean isDaiModStValOn() {
-        return DAI_MOD_STVAL_VALUE_ON.equals(getDaiModStValValue().orElse(null));
-    }
-
     protected Optional<ResumedDataTemplate> getDaiModStVal() {
         ResumedDataTemplate daiModFilter = new ResumedDataTemplate(this, MOD_DO_TYPE_NAME, STVAL_DA_TYPE_NAME);
         return getDAI(daiModFilter, false).stream()
