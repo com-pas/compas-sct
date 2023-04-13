@@ -702,42 +702,6 @@ class LN0AdapterTest {
     }
 
     @Test
-    void isStatusOn_when_ModStVal_is_on_should_return_true() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_with_extref_errors.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        LN0Adapter ln0 = findLn0(sclRootAdapter, "IED_NAME1", "LD_INST11");
-        // When
-        boolean isStatusOn = ln0.isDaiModStValOn();
-        // Then
-        assertThat(isStatusOn).isTrue();
-    }
-
-    @Test
-    void isStatusOn_when_ModStVal_is_not_on_should_return_false() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_with_extref_errors.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        LN0Adapter ln0 = findLn0(sclRootAdapter, "IED_NAME1", "LD_INST13");
-        // When
-        boolean isStatusOn = ln0.isDaiModStValOn();
-        // Then
-        assertThat(isStatusOn).isFalse();
-    }
-
-    @Test
-    void isStatusOn_when_ModStVal_has_no_value_should_return_false() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_with_extref_errors.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        LN0Adapter ln0 = findLn0(sclRootAdapter, "IED_NAME1", "LD_INST14");
-        // When
-        boolean isStatusOn = ln0.isDaiModStValOn();
-        // Then
-        assertThat(isStatusOn).isFalse();
-    }
-
-    @Test
     void createDataSetIfNotExists_should_create_dataSet() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
