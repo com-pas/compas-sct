@@ -5,11 +5,13 @@
 package org.lfenergy.compas.sct.commons.util;
 
 import com.opencsv.bean.CsvBindByPosition;
-import lombok.ToString;
-import org.lfenergy.compas.sct.commons.dto.LDEPFSettings;
+import lombok.Getter;
+import org.lfenergy.compas.sct.commons.dto.LDEPFSettingsSupplier;
 
 import java.io.Reader;
+import java.math.BigInteger;
 import java.util.List;
+import java.util.function.Function;
 
 
 /**
@@ -18,31 +20,59 @@ import java.util.List;
  *
  * @see CsvUtils
  */
-public class SettingLDEPFCsvHelper implements LDEPFSettings<SettingLDEPFCsvHelper.SettingLDEPF> {
+public class SettingLDEPFCsvHelper implements LDEPFSettingsSupplier {
 
-    private final List<SettingLDEPF> settings ;
+    private final List<LDEPFSetting> settings ;
 
     /**
      * Constructor
+     *
      * @param reader input
      */
     public SettingLDEPFCsvHelper(Reader reader) {
-        this.settings = CsvUtils.parseRows(reader, SettingLDEPF.class).stream().toList();
+        this.settings = CsvUtils.parseRows(reader, LDEPFSettingBind.class).stream().map(lDEPFSettingsFunction).toList();
     }
 
     @Override
-    public List<SettingLDEPF> getSettings() {
+    public List<LDEPFSetting> getSettings() {
         return this.settings;
     }
 
-    @ToString
-    public static class SettingLDEPF {
+    Function<LDEPFSettingBind, LDEPFSetting> lDEPFSettingsFunction = (LDEPFSettingBind setting) -> LDEPFSetting.builder()
+            .rteIedType(setting.getRteIedType())
+            .iedRedundancy(setting.getIedRedundancy())
+            .iedInstance(setting.getIedInstance())
+            .channelShortLabel(setting.getChannelShortLabel())
+            .channelMREP(setting.getChannelMREP())
+            .channelLevModQ(setting.getChannelLevModQ())
+            .channelLevModLevMod(setting.getChannelLevModLevMod())
+            .bapVariant(setting.getBapVariant())
+            .bapIgnoredValue(setting.getBapIgnoredValue())
+            .ldInst(setting.getLdInst())
+            .lnPrefix(setting.getLnPrefix())
+            .lnClass(setting.getLnClass())
+            .lnInst(setting.getLnInst())
+            .doName(setting.getDoName())
+            .doInst(setting.getDoInst())
+            .sdoName(setting.getSdoName())
+            .daName(setting.getDaName())
+            .daType(setting.getDaType())
+            .dabType(setting.getDabType())
+            .bdaName(setting.getBdaName())
+            .sbdaName(setting.getSbdaName())
+            .channelAnalogNum(setting.getChannelAnalogNum())
+            .channelDigitalNum(setting.getChannelDigitalNum())
+            .opt(setting.getOpt())
+            .build();
+
+    @Getter
+    public static class LDEPFSettingBind {
         @CsvBindByPosition(position = 0)
         private String rteIedType;
         @CsvBindByPosition(position = 1)
         private String iedRedundancy;
         @CsvBindByPosition(position = 2)
-        private String iedInstance;
+        private BigInteger iedInstance;
         @CsvBindByPosition(position = 3)
         private String channelShortLabel;
         @CsvBindByPosition(position = 4)
@@ -60,7 +90,7 @@ public class SettingLDEPFCsvHelper implements LDEPFSettings<SettingLDEPFCsvHelpe
         @CsvBindByPosition(position = 10)
         private String lnPrefix;
         @CsvBindByPosition(position = 11)
-        private String lnName;
+        private String lnClass;
         @CsvBindByPosition(position = 12)
         private String lnInst;
         @CsvBindByPosition(position = 13)

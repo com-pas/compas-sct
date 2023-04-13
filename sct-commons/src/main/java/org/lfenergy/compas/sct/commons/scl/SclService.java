@@ -25,6 +25,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.ICD_SYSTEM_VERSION_UUID;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.IED_TEST_NAME;
 import static org.lfenergy.compas.sct.commons.util.PrivateEnum.COMPAS_ICDHEADER;
 
 /**
@@ -80,7 +81,6 @@ public class SclService {
 
     private static final String UNKNOWN_LDEVICE_S_IN_IED_S = "Unknown LDevice (%s) in IED (%s)";
     private static final String INVALID_OR_MISSING_ATTRIBUTES_IN_EXT_REF_BINDING_INFO = "Invalid or missing attributes in ExtRef binding info";
-    private static final String IED_TEST_NAME = "IEDTEST";
 
     private SclService() {
         throw new IllegalStateException("SclService class");
