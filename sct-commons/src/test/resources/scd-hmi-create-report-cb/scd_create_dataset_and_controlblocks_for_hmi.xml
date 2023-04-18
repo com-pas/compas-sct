@@ -8,7 +8,10 @@
     <!-- target IED (IedName1) is missing compas:Bay@UUID -->
     <IED name="IedName1">
         <Private type="COMPAS-ICDHeader">
-            <compas:ICDHeader IEDType="BCU" IEDSubstationinstance="11" BayLabel="3THEIX2" IEDName="IedName1" ICDSystemVersionUUID="System_Version_IedName1" VendorName="SCLE SFE" IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+            <compas:ICDHeader IEDType="BCU" IEDSubstationinstance="11" IEDSystemVersioninstance="1" BayLabel="3THEIX2"
+                              IEDName="IedName1" ICDSystemVersionUUID="System_Version_IedName1" VendorName="SCLE SFE"
+                              IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a"
+                              headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
         </Private>
         <AccessPoint name="AP_NAME">
             <Server>

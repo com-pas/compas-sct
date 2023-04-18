@@ -34,7 +34,11 @@
             <compas:SystemVersion MainSystemVersion="01.00" MinorSystemVersion="009.001.001"/>
         </Private>
         <Private type="COMPAS-ICDHeader">
-            <compas:ICDHeader IEDType="PDB" ICDSystemVersionUUID="ad27d262-7c90-46df-b480-68088f9fe8a4" VendorName="RTE" IEDredundancy="A" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="6b4d51eb-c391-4eef-b118-f516bc09f20c" headerVersion="01.00.00" headerRevision="01.00.00"/>
+            <compas:ICDHeader IEDType="PDB" ICDSystemVersionUUID="ad27d262-7c90-46df-b480-68088f9fe8a4"
+                              IEDSubstationinstance="1" IEDSystemVersioninstance="1" VendorName="RTE" IEDredundancy="A"
+                              IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00"
+                              headerId="6b4d51eb-c391-4eef-b118-f516bc09f20c" headerVersion="01.00.00"
+                              headerRevision="01.00.00"/>
         </Private>
         <Services nameLength="64">
             <ConfLNs fixPrefix="true" fixLnInst="true"/>
