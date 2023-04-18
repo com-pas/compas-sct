@@ -678,23 +678,27 @@ class LN0AdapterTest {
     }
 
     @Test
-    void getLDeviceStatus_should_succeed() {
+    void getLnStatus_should_return_ModStValValue() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_with_extref_errors.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        Optional<LN0Adapter> optionalLN0Adapter = sclRootAdapter.streamIEDAdapters()
-                .flatMap(IEDAdapter::streamLDeviceAdapters)
-                .filter(lDeviceAdapter -> "IED_NAME1LD_INST13".equals(lDeviceAdapter.getLdName()))
-                .map(LDeviceAdapter::getLN0Adapter)
-                .findFirst();
-        assertThat(optionalLN0Adapter).isPresent();
-        LN0Adapter ln0Adapter = optionalLN0Adapter.get();
+        LN0Adapter ln0 = findLn0(sclRootAdapter, "IED_NAME1", "LD_INST13");
         // When
-        Optional<String> result = ln0Adapter.getLDeviceStatus();
+        Optional<String> lnStatus = ln0.getDaiModStValValue();
         // Then
-        assertThat(result)
-                .isPresent()
-                .hasValue("test");
+        assertThat(lnStatus).hasValue("test");
+    }
+
+    @Test
+    void getLnStatus_should_return_empty_Optional() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_with_extref_errors.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        LN0Adapter ln0 = findLn0(sclRootAdapter, "IED_NAME1", "LD_INST14");
+        // When
+        Optional<String> lnStatus = ln0.getDaiModStValValue();
+        // Then
+        assertThat(lnStatus).isEmpty();
     }
 
     @Test

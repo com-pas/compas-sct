@@ -22,6 +22,7 @@ import org.lfenergy.compas.sct.commons.util.Utils;
 import java.util.*;
 import java.util.function.Predicate;
 
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 import static org.lfenergy.compas.sct.commons.util.LDeviceStatus.OFF;
 import static org.lfenergy.compas.sct.commons.util.LDeviceStatus.ON;
 
@@ -60,9 +61,6 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
     private static final String MESSAGE_POLL_SERVICE_TYPE_NOT_SUPPORTED = "only GOOSE, SMV and REPORT ServiceType are allowed";
 
     private static final int EXTREF_DESC_DA_NAME_POSITION = -2;
-    private static final String ATTRIBUTE_VALUE_SEPARATOR = "_";
-    private static final String DATASET_NAME_PREFIX = "DS" + ATTRIBUTE_VALUE_SEPARATOR;
-    private static final String CONTROLBLOCK_NAME_PREFIX = "CB" + ATTRIBUTE_VALUE_SEPARATOR;
 
     /**
      * Constructor
@@ -354,9 +352,10 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
     }
 
     private void createControlBlockWithTarget(TExtRef extRef, LDeviceAdapter sourceLDevice, ResumedDataTemplate sourceDa, String cbName, String datSet) {
-        String cbId = generateControlBlockId(cbName, sourceLDevice.getLdName(), getParentAdapter());
+        String sourceLDName = sourceLDevice.getLdName();
+        String cbId = getParentAdapter().generateControlBlockId(sourceLDName, cbName);
         ControlBlockAdapter controlBlockAdapter = sourceLDevice.getLN0Adapter().createControlBlockIfNotExists(cbName, cbId, datSet, ControlBlockEnum.from(extRef.getServiceType()));
-        if (sourceDa.getFc() != TFCEnum.ST && controlBlockAdapter.getCurrentElem() instanceof TReportControl tReportControl){
+        if (sourceDa.getFc() != TFCEnum.ST && controlBlockAdapter.getCurrentElem() instanceof TReportControl tReportControl) {
             tReportControl.getTrgOps().setDchg(false);
             tReportControl.getTrgOps().setQchg(false);
         }
@@ -373,24 +372,14 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
     }
 
     private static String generateDataSetSuffix(TExtRef extRef, ResumedDataTemplate sourceDa, boolean isBayInternal) {
-        return extRef.getLdInst() + ATTRIBUTE_VALUE_SEPARATOR
-            + switch (extRef.getServiceType()) {
+        return extRef.getLdInst().toUpperCase(Locale.ENGLISH) + ATTRIBUTE_VALUE_SEPARATOR
+                + switch (extRef.getServiceType()) {
             case GOOSE -> "G" + ((sourceDa.getFc() == TFCEnum.ST) ? "S" : "M");
             case SMV -> "SV";
             case REPORT -> (sourceDa.getFc() == TFCEnum.ST) ? "DQC" : "CYC";
             case POLL -> throw new IllegalArgumentException(MESSAGE_POLL_SERVICE_TYPE_NOT_SUPPORTED);
         }
-            + (isBayInternal ? "I" : "E");
-    }
-
-    private String generateControlBlockId(String cbName, String sourceLDName, AbstractLNAdapter<?> targetLn) {
-        return Utils.emptyIfBlank(sourceLDName)
-            + "/"
-            + Utils.emptyIfBlank(targetLn.getPrefix())
-            + Objects.requireNonNullElse(targetLn.getLNClass(), "")
-            + Utils.emptyIfBlank(targetLn.getLNInst())
-            + "."
-            + cbName;
+                + (isBayInternal ? "I" : "E");
     }
 
     private Optional<SclReportItem> removeFilteredSourceDas(TExtRef extRef, final Set<ResumedDataTemplate> sourceDas) {

@@ -17,7 +17,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.BEHAVIOUR_DO_NAME;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL_DA_NAME;
 
 /**
  * A representation of the model object
@@ -68,8 +69,6 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
  */
 public class LN0Adapter extends AbstractLNAdapter<LN0> {
 
-    public static final DoTypeName MOD_DO_TYPE_NAME = new DoTypeName(MOD_DO_NAME);
-    public static final DaTypeName STVAL_DA_TYPE_NAME = new DaTypeName(STVAL);
     public static final DoTypeName BEHAVIOUR_DO_TYPE_NAME = new DoTypeName(BEHAVIOUR_DO_NAME);
     public static final DaTypeName BEHAVIOUR_DA_TYPE_NAME = getDaTypeNameForBeh();
     private static final String DAI_NAME_PURPOSE = "purpose";
@@ -173,24 +172,6 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
     }
 
     /**
-     * Construct ResumedDataTemplate object with DO and DA attributes
-     *
-     * @param doTypeName <em><b>DoTypeName </b> object</em>
-     * @param daTypeName <em><b>DaTypeName </b> object</em>
-     * @return ResumedDataTemplate
-     */
-    private ResumedDataTemplate createDaiFilter(DoTypeName doTypeName, DaTypeName daTypeName) {
-        ResumedDataTemplate filter = new ResumedDataTemplate();
-        filter.setLnClass(getLNClass());
-        filter.setLnInst(getLNInst());
-        filter.setPrefix(getPrefix());
-        filter.setLnType(getLnType());
-        filter.setDoName(doTypeName);
-        filter.setDaName(daTypeName);
-        return filter;
-    }
-
-    /**
      * Verify and update LDevice status in parent Node
      *
      * @param iedNameLDeviceInstList pair of Ied name and LDevice inst attributes
@@ -200,7 +181,7 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
         LDeviceActivation lDeviceActivation = new LDeviceActivation(iedNameLDeviceInstList);
         final String iedName = getParentAdapter().getParentAdapter().getName();
         final String ldInst = getParentAdapter().getInst();
-        ResumedDataTemplate daiBehFilter = createDaiFilter(BEHAVIOUR_DO_TYPE_NAME, BEHAVIOUR_DA_TYPE_NAME);
+        ResumedDataTemplate daiBehFilter = new ResumedDataTemplate(this, BEHAVIOUR_DO_TYPE_NAME, BEHAVIOUR_DA_TYPE_NAME);
         List<ResumedDataTemplate> daiBehList = getDAI(daiBehFilter, false);
         if (daiBehList.isEmpty()) {
             return Optional.of(buildFatalReportItem("The LDevice doesn't have a DO @name='Beh' OR its associated DA@fc='ST' AND DA@name='stVal'"));
@@ -234,20 +215,9 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
         return Optional.empty();
     }
 
-    public Optional<String> getLDeviceStatus() {
-        return getDaiModStVal()
-                .flatMap(ResumedDataTemplate::findFirstValue);
-    }
-
-    private Optional<ResumedDataTemplate> getDaiModStVal() {
-        ResumedDataTemplate daiModFilter = createDaiFilter(MOD_DO_TYPE_NAME, STVAL_DA_TYPE_NAME);
-        return getDAI(daiModFilter, false).stream()
-                .findFirst();
-    }
-
     private static DaTypeName getDaTypeNameForBeh() {
         DaTypeName daTypeNameBeh = new DaTypeName();
-        daTypeNameBeh.setName(STVAL);
+        daTypeNameBeh.setName(STVAL_DA_NAME);
         daTypeNameBeh.setBType(TPredefinedBasicTypeEnum.ENUM);
         daTypeNameBeh.setFc(TFCEnum.ST);
         return daTypeNameBeh;

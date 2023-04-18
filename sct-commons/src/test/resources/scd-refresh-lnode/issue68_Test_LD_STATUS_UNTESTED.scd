@@ -19,7 +19,8 @@
 			<Voltage unit="V" multiplier="k">0</Voltage>
 			<Bay name="BAY_1">
 				<Private type="COMPAS-Bay">
-					<compas:Bay BayCodif="TG00000001" UUID="9cd6f05b-1bbd-4ba3-86c5-41c99103e06d" Version="1" MainShortLabel="SITE1" SecondLabel="SITE-TGENE" NumBay="7" />
+					<compas:Bay BayCodif="TG00000001" UUID="9cd6f05b-1bbd-4ba3-86c5-41c99103e06d" Version="1"
+                                MainShortLabel="SITE1" SecondLabel="SITE-TGENE" NumBay="7" BayCount="1"/>
 				</Private>
 				<Private type="COMPAS-Criteria">
 					<compas:Criteria ObjectID="9cd6f05b-1bbd-4ba3-86c5-41c99103e06d" CriteriaAssociationID="CriteriaAssociationID" />
@@ -30,7 +31,12 @@
 					</Private>
 					<LNode iedName="IedName2" ldInst="LDSUIED" lnClass="LLN0" lnInst="">
 						<Private type="COMPAS-ICDHeader">
-							<compas:ICDHeader ICDSystemVersionUUID="IED4d4fe1a8cda64cf88a5ee4176a1a0eed" IEDType="SAMU" IEDSubstationinstance="3" IEDName="IedName2" VendorName="RTE" IEDmodel="ICDfromModeling" IEDredundancy="B" BayLabel="SITE1" hwRev="01.00.00" swRev="01.00.00" headerId="cacfa2df-bdb2-47a7-b7ea-07916586ebdd" headerVersion="01.00.00" headerRevision="01.00.00"></compas:ICDHeader>
+                            <compas:ICDHeader ICDSystemVersionUUID="IED4d4fe1a8cda64cf88a5ee4176a1a0eed"
+                                              IEDSystemVersioninstance="1" IEDType="SAMU" IEDSubstationinstance="3"
+                                              IEDName="IedName2" VendorName="RTE" IEDmodel="ICDfromModeling"
+                                              IEDredundancy="B" BayLabel="SITE1" hwRev="01.00.00" swRev="01.00.00"
+                                              headerId="cacfa2df-bdb2-47a7-b7ea-07916586ebdd" headerVersion="01.00.00"
+                                              headerRevision="01.00.00"/>
 						</Private>
 					</LNode>
 				</Function>
@@ -70,7 +76,11 @@
 			<compas:SystemVersion MainSystemVersion="01.00" MinorSystemVersion="009.001.001" />
 		</Private>
 		<Private type="COMPAS-ICDHeader">
-			<compas:ICDHeader ICDSystemVersionUUID="IED4d4fe1a8cda64cf88a5ee4176a1a0eed" IEDType="SAMU" IEDSubstationinstance="3" IEDName="IedName1" VendorName="RTE" IEDmodel="ICDfromModeling" IEDredundancy="B" BayLabel="SITE1" hwRev="01.00.00" swRev="01.00.00" headerId="cacfa2df-bdb2-47a7-b7ea-07916586ebdd" headerVersion="01.00.00" headerRevision="01.00.00"></compas:ICDHeader>
+            <compas:ICDHeader ICDSystemVersionUUID="IED4d4fe1a8cda64cf88a5ee4176a1a0eed" IEDSystemVersioninstance="1"
+                              IEDType="SAMU" IEDSubstationinstance="3" IEDName="IedName1" VendorName="RTE"
+                              IEDmodel="ICDfromModeling" IEDredundancy="B" BayLabel="SITE1" hwRev="01.00.00"
+                              swRev="01.00.00" headerId="cacfa2df-bdb2-47a7-b7ea-07916586ebdd" headerVersion="01.00.00"
+                              headerRevision="01.00.00"/>
 		</Private>
 		<AccessPoint name="PROCESS_AP">
 			<Server>
@@ -107,7 +117,11 @@
 			<compas:SystemVersion MainSystemVersion="01.00" MinorSystemVersion="009.001.001" />
 		</Private>
 		<Private type="COMPAS-ICDHeader">
-			<compas:ICDHeader ICDSystemVersionUUID="IED4d4fe1a8cda64cf88a5ee4176a1a0eef" IEDType="SAMU" IEDSubstationinstance="3" IEDName="IedName2" VendorName="RTE" IEDmodel="ICDfromModeling" IEDredundancy="A" BayLabel="SITE1" hwRev="01.00.00" swRev="01.00.00" headerId="cacfa2df-bdb2-47a7-b7ea-07916586ebdd" headerVersion="01.00.00" headerRevision="01.00.00"></compas:ICDHeader>
+            <compas:ICDHeader ICDSystemVersionUUID="IED4d4fe1a8cda64cf88a5ee4176a1a0eef" IEDSystemVersioninstance="1"
+                              IEDType="SAMU" IEDSubstationinstance="3" IEDName="IedName2" VendorName="RTE"
+                              IEDmodel="ICDfromModeling" IEDredundancy="A" BayLabel="SITE1" hwRev="01.00.00"
+                              swRev="01.00.00" headerId="cacfa2df-bdb2-47a7-b7ea-07916586ebdd" headerVersion="01.00.00"
+                              headerRevision="01.00.00"/>
 		</Private>
 		<AccessPoint name="PROCESS_AP">
 			<Server>
@@ -144,7 +158,11 @@
 			<compas:SystemVersion MainSystemVersion="01.00" MinorSystemVersion="009.001.001" />
 		</Private>
 		<Private type="COMPAS-ICDHeader">
-			<compas:ICDHeader ICDSystemVersionUUID="IED4d4fe1a8cda64cf88a5ee4176a1a0eef" IEDType="SAMU" IEDSubstationinstance="3" IEDName="IedName3" VendorName="RTE" IEDmodel="ICDfromModeling" IEDredundancy="A" BayLabel="SITE1" hwRev="01.00.00" swRev="01.00.00" headerId="cacfa2df-bdb2-47a7-b7ea-07916586ebdd" headerVersion="01.00.00" headerRevision="01.00.00"></compas:ICDHeader>
+            <compas:ICDHeader ICDSystemVersionUUID="IED4d4fe1a8cda64cf88a5ee4176a1a0eef" IEDSystemVersioninstance="1"
+                              IEDType="SAMU" IEDSubstationinstance="3" IEDName="IedName3" VendorName="RTE"
+                              IEDmodel="ICDfromModeling" IEDredundancy="A" BayLabel="SITE1" hwRev="01.00.00"
+                              swRev="01.00.00" headerId="cacfa2df-bdb2-47a7-b7ea-07916586ebdd" headerVersion="01.00.00"
+                              headerRevision="01.00.00"/>
 		</Private>
 		<AccessPoint name="PROCESS_AP">
 			<Server>

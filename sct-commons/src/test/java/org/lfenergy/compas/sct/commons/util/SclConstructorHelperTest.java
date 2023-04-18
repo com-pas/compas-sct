@@ -51,22 +51,37 @@ class SclConstructorHelperTest {
     }
 
     @Test
-    void testNewDurationInMilliSec_should_create_new_instance_with_given_parameters() {
+    void newDurationInMilliSec_with_value_only_should_create_new_instance_with_given_value_and_default_unit_and_multiplier() {
         //Given
         long value = 5L;
         //When
         TDurationInMilliSec durationInMilliSec = SclConstructorHelper.newDurationInMilliSec(value);
         //Then
         assertThat(durationInMilliSec).extracting(TDurationInMilliSec::getValue, TDurationInMilliSec::getUnit, TDurationInMilliSec::getMultiplier)
-            .containsExactly(new BigDecimal(value), "s", "m");
+                .containsExactly(new BigDecimal(value), "s", "m");
+    }
+
+    @Test
+    void newDurationInMilliSec_should_clone_given_instance() {
+        //Given
+        BigDecimal value = new BigDecimal(5);
+        String unit = "unit";
+        String multiplier = "multiplier";
+        TDurationInMilliSec input = SclConstructorHelper.newDurationInMilliSec(value, unit, multiplier);
+        //When
+        TDurationInMilliSec durationInMilliSec = SclConstructorHelper.newDurationInMilliSec(input);
+        //Then
+        assertThat(durationInMilliSec).extracting(TDurationInMilliSec::getValue, TDurationInMilliSec::getUnit, TDurationInMilliSec::getMultiplier)
+                .containsExactly(value, unit, multiplier);
+        assertThat(durationInMilliSec).isNotSameAs(input);
     }
 
     @Test
     void newAddress_should_create_new_instance_with_given_parameters() {
         //Given
         List<TP> listOfP = List.of(
-            SclConstructorHelper.newP("type1", "value1"),
-            SclConstructorHelper.newP("type2", "value2"));
+                SclConstructorHelper.newP("type1", "value1"),
+                SclConstructorHelper.newP("type2", "value2"));
         //When
         TAddress tAddress = SclConstructorHelper.newAddress(listOfP);
         //Then
@@ -106,6 +121,39 @@ class SclConstructorHelperTest {
         TVal tVal = SclConstructorHelper.newVal(value, sGroup);
         //Then
         assertThat(tVal).extracting(TVal::getValue, TVal::getSGroup)
-            .containsExactly(value, sGroup);
+                .containsExactly(value, sGroup);
+    }
+
+    @Test
+    void newFcda_should_create_new_instance_with_given_parameters() {
+        //Given
+        String ldinst = "ldinst";
+        String lnClass = "lnClass";
+        String lnInst = "lnInst";
+        String prefix = "prefix";
+        String doName = "doName";
+        String daName = "daName";
+        TFCEnum fc = TFCEnum.ST;
+        //When
+        TFCDA tfcda = SclConstructorHelper.newFcda(ldinst, lnClass, lnInst, prefix, doName, daName, fc);
+        //Then
+        assertThat(tfcda).extracting(TFCDA::getLdInst, TFCDA::getLnClass, TFCDA::getLnInst, TFCDA::getPrefix, TFCDA::getDoName, TFCDA::getDaName, TFCDA::getFc)
+                .containsExactly(ldinst, List.of(lnClass), lnInst, prefix, doName, daName, fc);
+    }
+
+    @Test
+    void newFcda_should_when_blank_lnClass_should_not_set_lnClass() {
+        //Given
+        String ldinst = "ldinst";
+        String lnClass = "";
+        String lnInst = "lnInst";
+        String prefix = "prefix";
+        String doName = "doName";
+        String daName = "daName";
+        TFCEnum fc = TFCEnum.ST;
+        //When
+        TFCDA tfcda = SclConstructorHelper.newFcda(ldinst, lnClass, lnInst, prefix, doName, daName, fc);
+        //Then
+        assertThat(tfcda.isSetLnClass()).isFalse();
     }
 }

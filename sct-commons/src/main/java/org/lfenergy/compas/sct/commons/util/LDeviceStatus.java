@@ -6,14 +6,14 @@
 
 package org.lfenergy.compas.sct.commons.util;
 
-import lombok.experimental.UtilityClass;
-
 /**
  * A representation of a specific object <em><b>TDAI</b></em> name that have attribute name STVal.
- *
  */
-@UtilityClass
-public class LDeviceStatus {
+public final class LDeviceStatus {
     public static final String ON = "on";
     public static final String OFF = "off";
+
+    private LDeviceStatus() {
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+    }
 }

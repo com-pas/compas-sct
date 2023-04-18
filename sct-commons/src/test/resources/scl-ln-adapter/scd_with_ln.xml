@@ -8,10 +8,13 @@
     <!-- has dataset creation capability -->
     <IED name="IED_NAME1">
         <Private type="COMPAS-ICDHeader">
-            <compas:ICDHeader IEDType="BCU" IEDSubstationinstance="11" BayLabel="3THEIX2" IEDName="IED_NAME1" ICDSystemVersionUUID="System_Version_IED_NAME1" VendorName="SCLE SFE" IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+            <compas:ICDHeader IEDType="BCU" IEDSubstationinstance="11" IEDSystemVersioninstance="1" BayLabel="3THEIX2"
+                              IEDName="IED_NAME1" ICDSystemVersionUUID="System_Version_IED_NAME1" VendorName="SCLE SFE"
+                              IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a"
+                              headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
         </Private>
         <Private type="COMPAS-Bay">
-            <compas:Bay UUID="UuidBay1"/>
+            <compas:Bay UUID="UuidBay1" BayCodif="T000001" MainShortLabel="aaa" NumBay="5" BayCount="1"/>
         </Private>
         <Services>
             <GSESettings datSet="Conf"/>
@@ -42,10 +45,13 @@
     <!-- missing dataset creation capability -->
     <IED name="IED_NAME2">
         <Private type="COMPAS-ICDHeader">
-            <compas:ICDHeader IEDType="BCU" IEDSubstationinstance="21" BayLabel="3THEIX2" IEDName="IED_NAME2" ICDSystemVersionUUID="System_Version_IED_NAME2" VendorName="SCLE SFE" IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+            <compas:ICDHeader IEDType="BCU" IEDSubstationinstance="21" IEDSystemVersioninstance="1" BayLabel="3THEIX2"
+                              IEDName="IED_NAME2" ICDSystemVersionUUID="System_Version_IED_NAME2" VendorName="SCLE SFE"
+                              IEDredundancy="A" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="0.0.2." swRev="1.0a"
+                              headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
         </Private>
         <Private type="COMPAS-Bay">
-            <compas:Bay UUID="UuidBay1"/>
+            <compas:Bay UUID="UuidBay1" BayCodif="T000001" MainShortLabel="aaa" NumBay="5" BayCount="1"/>
         </Private>
         <AccessPoint name="AP_NAME">
             <Server>

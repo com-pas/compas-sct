@@ -12,10 +12,14 @@
     </Communication>
     <IED name="IED_NAME1">
         <Private type="COMPAS-ICDHeader">
-            <compas:ICDHeader ICDSystemVersionUUID="System_Version_IED_NAME1" IEDType="BCU" IEDSubstationinstance="11" IEDName="IED_NAME1" VendorName="SCLE SFE" IEDmodel="ARKENS-SV1120-HGAAA-EB5" IEDredundancy="A" BayLabel="3THEIX2" hwRev="0.0.2." swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+            <compas:ICDHeader ICDSystemVersionUUID="System_Version_IED_NAME1" IEDType="BCU" IEDSubstationinstance="11"
+                              IEDSystemVersioninstance="1" IEDName="IED_NAME1" VendorName="SCLE SFE"
+                              IEDmodel="ARKENS-SV1120-HGAAA-EB5" IEDredundancy="A" BayLabel="3THEIX2" hwRev="0.0.2."
+                              swRev="1.0a" headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a"
+                              headerRevision="412995"/>
         </Private>
         <Private type="COMPAS-Bay">
-            <compas:Bay UUID="UuidBay1"/>
+            <compas:Bay UUID="UuidBay1" BayCodif="CB00001101" NumBay="1" BayCount="1" MainShortLabel="aa"/>
         </Private>
         <AccessPoint name="AP_NAME">
             <Server>
@@ -56,7 +60,7 @@
             <compas:SystemVersion MainSystemVersion="01.00" MinorSystemVersion="009.001.001"/>
         </Private>
         <Private type="COMPAS-Bay">
-            <compas:Bay UUID="UuidBay1"/>
+            <compas:Bay UUID="UuidBay1" BayCodif="CB00001101" NumBay="1" BayCount="1" MainShortLabel="aa"/>
         </Private>
         <AccessPoint name="AP_NAME">
             <Server>
@@ -109,7 +113,7 @@
             <compas:SystemVersion MainSystemVersion="01.00" MinorSystemVersion="009.001.001"/>
         </Private>
         <Private type="COMPAS-Bay">
-            <compas:Bay UUID="UuidBay2"/>
+            <compas:Bay UUID="UuidBay2" BayCodif="CB00001101" NumBay="1" BayCount="1" MainShortLabel="aa"/>
         </Private>
         <AccessPoint name="AP_NAME">
             <Server>

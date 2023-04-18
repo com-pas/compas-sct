@@ -4,7 +4,6 @@
 
 package org.lfenergy.compas.sct.commons.testhelpers;
 
-import lombok.experimental.UtilityClass;
 import org.assertj.core.api.Assertions;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.SclReport;
@@ -27,8 +26,11 @@ import static org.lfenergy.compas.sct.commons.util.Utils.lnClassEquals;
  * Methods throw AssertionFailedError when element not found (equivalent of calling JUnit Assert.fail())
  * which stops the test nicely (compared to an exception error), with a message and a failed status.
  */
-@UtilityClass
-public class SclHelper {
+public final class SclHelper {
+
+    private SclHelper() {
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+    }
 
     public static final String DO_GOCBREF = "GoCBRef";
     public static final String DO_SVCBREF = "SvCBRef";
@@ -164,14 +166,23 @@ public class SclHelper {
                         controlBlockEnum.getControlBlockClass().getSimpleName(), cbName, iedName, ldInst)));
     }
 
-    public static void assertControlBlockExists(SclReport sclReport, String iedName, String ldInst, String cbName,
-                                                String datSet, String id, ControlBlockEnum controlBlockEnum) {
-        ControlBlockAdapter controlBlock = findControlBlock(sclReport.getSclRootAdapter(), iedName, ldInst, cbName, controlBlockEnum);
-        assertThat(controlBlock.getCurrentElem().getDatSet()).isEqualTo(datSet);
-        assertThat(getControlBlockId(controlBlock.getCurrentElem())).isEqualTo(id);
+    public static <T extends TControl> T findControlBlock(SclRootAdapter sclRootAdapter, String iedName, String ldInst, String cbName, Class<T> controlBlockClass) {
+        LN0Adapter ln0 = findLn0(sclRootAdapter, iedName, ldInst);
+        return ln0.getTControlsByType(controlBlockClass).stream()
+                .filter(t -> cbName.equals(t.getName()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionFailedError(String.format("%s name=%s not found in IED.name=%s,LDevice.inst=%s,LN0",
+                        controlBlockClass.getSimpleName(), cbName, iedName, ldInst)));
     }
 
-    private String getControlBlockId(TControl tControl) {
+    public static void assertControlBlockExists(SclReport sclReport, String iedName, String ldInst, String cbName,
+                                                String datSet, String id, ControlBlockEnum controlBlockEnum) {
+        TControl controlBlock = findControlBlock(sclReport.getSclRootAdapter(), iedName, ldInst, cbName, controlBlockEnum.getControlBlockClass());
+        assertThat(controlBlock.getDatSet()).isEqualTo(datSet);
+        assertThat(getControlBlockId(controlBlock)).isEqualTo(id);
+    }
+
+    private static String getControlBlockId(TControl tControl) {
         if (tControl instanceof TGSEControl tgseControl) {
             return tgseControl.getAppID();
         }
@@ -187,6 +198,12 @@ public class SclHelper {
     public static Stream<TDataSet> streamAllDataSets(SclRootAdapter sclRootAdapter) {
         return streamAllLn0Adapters(sclRootAdapter)
                 .map(ln0Adapter -> ln0Adapter.getCurrentElem().getDataSet())
+                .flatMap(List::stream);
+    }
+
+    public static <T extends TControl> Stream<T> streamAllControlBlocks(SclRootAdapter sclRootAdapter, Class<T> controlBlockClass) {
+        return streamAllLn0Adapters(sclRootAdapter)
+                .map(ln0Adapter -> ln0Adapter.getTControlsByType(controlBlockClass))
                 .flatMap(List::stream);
     }
 

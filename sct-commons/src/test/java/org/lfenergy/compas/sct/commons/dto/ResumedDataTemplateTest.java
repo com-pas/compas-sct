@@ -20,7 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDa;
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.MOD_DO_NAME;
-import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL_DA_NAME;
+import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newFcda;
 
 class ResumedDataTemplateTest {
 
@@ -177,12 +178,12 @@ class ResumedDataTemplateTest {
 
     private static Stream<Arguments> daParametersProviderUpdatable() {
         return Stream.of(
-                Arguments.of("should return true when Mod", STVAL, TFCEnum.CF, true),
-                Arguments.of("should return true when Mod", STVAL, TFCEnum.CF, false),
-                Arguments.of("should return true when Mod", STVAL, TFCEnum.MX, true),
-                Arguments.of("should return true when Mod", STVAL, TFCEnum.MX, false),
-                Arguments.of("should return true when Mod", STVAL, null, true),
-                Arguments.of("should return true when Mod", STVAL, null, false),
+                Arguments.of("should return true when Mod", STVAL_DA_NAME, TFCEnum.CF, true),
+                Arguments.of("should return true when Mod", STVAL_DA_NAME, TFCEnum.CF, false),
+                Arguments.of("should return true when Mod", STVAL_DA_NAME, TFCEnum.MX, true),
+                Arguments.of("should return true when Mod", STVAL_DA_NAME, TFCEnum.MX, false),
+                Arguments.of("should return true when Mod", STVAL_DA_NAME, null, true),
+                Arguments.of("should return true when Mod", STVAL_DA_NAME, null, false),
                 Arguments.of("should return true when Mod", CTL_MODEL, TFCEnum.CF, true)
         );
     }
@@ -276,25 +277,60 @@ class ResumedDataTemplateTest {
     }
 
     @Test
-    void constructorTest() {
+    void constructor_should_create_new_instance() {
         // Given
         TLN tln = new TLN();
         tln.setLnType("T1");
         tln.getLnClass().add(TLLN0Enum.LLN_0.value());
         tln.setPrefix("P1");
+        tln.setInst("1");
         LNAdapter lnAdapter = new LNAdapter(null, tln);
+        DoTypeName doName = new DoTypeName("do");
+        DaTypeName daName = new DaTypeName("da");
         // When
-        ResumedDataTemplate expected = new ResumedDataTemplate(lnAdapter, "do", "da");
+        ResumedDataTemplate expected = new ResumedDataTemplate(lnAdapter, doName, daName);
         // Then
-        assertThat(expected.getLnClass()).isEqualTo(TLLN0Enum.LLN_0.value());
-        assertThat(expected.getLnType()).isEqualTo("T1");
-        assertThat(expected.getPrefix()).isEqualTo("P1");
-        assertThat(expected.getDoName().getName()).isEqualTo("do");
-        assertThat(expected.getDoName().getName()).isEqualTo("do");
-        assertThat(expected.getDoName().getStructNames()).isEmpty();
-        assertThat(expected.getDaName().getName()).isEqualTo("da");
-        assertThat(expected.getDaName().getDaiValues()).isEmpty();
-        assertThat(expected.getDaName().isValImport()).isFalse();
-        assertThat(expected.getDaName().isUpdatable()).isFalse();
+        assertThat(expected).extracting(ResumedDataTemplate::getLnType, ResumedDataTemplate::getLnClass, ResumedDataTemplate::getPrefix, ResumedDataTemplate::getLnInst)
+                .containsExactly("T1", TLLN0Enum.LLN_0.value(), "P1", "1");
+        assertThat(expected.getDoName()).isEqualTo(new DoTypeName("do"));
+        assertThat(expected.getDaName()).isEqualTo(new DaTypeName("da"));
+    }
+
+
+    @Test
+    void constructor_from_TFCDA_should_create_new_instance_with_same_attributes() {
+        //Given
+        TFCDA tfcda = newFcda("ldInst", "lnClass", "lnInst", "prefix", "DoName.sdo", "daName.bda", TFCEnum.ST);
+        //When
+        ResumedDataTemplate resumedDataTemplate = new ResumedDataTemplate(tfcda);
+        //Then
+        assertThat(resumedDataTemplate.getLNRef())
+                .isEqualTo("prefixlnClasslnInst.DoName.sdo.daName.bda");
+        DaTypeName expectedDa = new DaTypeName("daName.bda");
+        expectedDa.setFc(TFCEnum.ST);
+        assertThat(resumedDataTemplate.getDaName()).isEqualTo(expectedDa);
+    }
+
+    @Test
+    void constructor_from_TFCDA_should_ignore_blank_DaName() {
+        //Given
+        TFCDA tfcda = newFcda("ldInst", "lnClass", "lnInst", "prefix", "DoName.sdo", "", TFCEnum.ST);
+        //When
+        ResumedDataTemplate resumedDataTemplate = new ResumedDataTemplate(tfcda);
+        //Then
+        assertThat(resumedDataTemplate.isDaNameDefined()).isFalse();
+        assertThat(resumedDataTemplate.getFc()).isNull();
+    }
+
+    @Test
+    void constructor_from_TFCDA_should_ignore_blank_fc() {
+        //Given
+        TFCDA tfcda = newFcda("ldInst", "lnClass", "lnInst", "prefix", "DoName.sdo", "daName.bda", null);
+        //When
+        ResumedDataTemplate resumedDataTemplate = new ResumedDataTemplate(tfcda);
+        //Then
+        assertThat(resumedDataTemplate.getLNRef())
+                .isEqualTo("prefixlnClasslnInst.DoName.sdo.daName.bda");
+        assertThat(resumedDataTemplate.getFc()).isNull();
     }
 }
