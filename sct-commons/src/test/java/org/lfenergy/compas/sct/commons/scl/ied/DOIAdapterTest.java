@@ -22,10 +22,32 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newVal;
 
 @ExtendWith(MockitoExtension.class)
 class DOIAdapterTest {
+
+    private static Optional<TVal> getDaiValOfDoi(DOIAdapter doiAdapter, String daName) {
+        return doiAdapter.getDataAdapterByName(daName).getCurrentElem().getVal().stream().findFirst();
+    }
+
+    private static TExtRef givenExtRef(int num, boolean withCbName) {
+        TExtRef extRef1 = new TExtRef();
+        extRef1.setIedName("IED_NAME_" + num);
+        extRef1.setDesc("ExtRef_desc_" + num);
+        extRef1.setLdInst("LD_INST_" + num);
+        extRef1.setSrcPrefix("SRC_PREFIX_" + num);
+        extRef1.setSrcLNInst("SRC_LN_INST_" + num);
+        extRef1.getLnClass().add("ANCR");
+        extRef1.setLnInst(Integer.toString(num));
+        extRef1.setPrefix("PREFIX_" + num);
+        extRef1.setDoName("DO_NAME_" + num);
+        if (withCbName) {
+            extRef1.setSrcCBName("CB_NAME_" + num);
+        }
+        return extRef1;
+    }
 
     @Test
     void testConstructor() {
@@ -271,7 +293,6 @@ class DOIAdapterTest {
         assertThat(result).isEqualTo("DAI[@name=\"da\"]");
     }
 
-
     @Test
     void findDataAdapterByName_should_return_DAIAdapter_when_DA_name_exist() {
         // Given
@@ -306,9 +327,9 @@ class DOIAdapterTest {
         // Given
         DOIAdapter doiAdapter = createDOIAdapterInScl();
         TDAI daiSrcRef = new TDAI();
-        daiSrcRef.setName(DOIAdapter.DA_NAME_SET_SRC_REF);
+        daiSrcRef.setName(SETSRCREF_DA_NAME);
         TDAI daiSrcCb = new TDAI();
-        daiSrcCb.setName(DOIAdapter.DA_NAME_SET_SRC_CB);
+        daiSrcCb.setName(SETSRCCB_DA_NAME);
         doiAdapter.getCurrentElem().getSDIOrDAI().add(daiSrcRef);
         doiAdapter.getCurrentElem().getSDIOrDAI().add(daiSrcCb);
 
@@ -319,14 +340,12 @@ class DOIAdapterTest {
 
         // Then
         assertThat(sclReportItems).isEmpty();
-        assertThat(getDaiValOfDoi(doiAdapter, DOIAdapter.DA_NAME_SET_SRC_REF).get().getValue())
+        assertThat(getDaiValOfDoi(doiAdapter, SETSRCREF_DA_NAME)).isPresent()
+                .get().extracting(TVal::getValue)
                 .isEqualTo("IED_NAME_1LD_INST_1/PREFIX_1ANCR1.DO_NAME_1");
-        assertThat(getDaiValOfDoi(doiAdapter, DOIAdapter.DA_NAME_SET_SRC_CB).get().getValue())
+        assertThat(getDaiValOfDoi(doiAdapter, SETSRCCB_DA_NAME)).isPresent()
+                .get().extracting(TVal::getValue)
                 .isEqualTo("IED_NAME_1LD_INST_1/SRC_PREFIX_1LLN0SRC_LN_INST_1.CB_NAME_1");
-    }
-
-    private static Optional<TVal> getDaiValOfDoi(DOIAdapter doiAdapter, String daName) {
-        return doiAdapter.getDataAdapterByName(daName).getCurrentElem().getVal().stream().findFirst();
     }
 
     @Test
@@ -334,7 +353,7 @@ class DOIAdapterTest {
         // Given
         DOIAdapter doiAdapter = createDOIAdapterInScl();
         TDAI daiSrcRef = new TDAI();
-        daiSrcRef.setName(DOIAdapter.DA_NAME_SET_SRC_REF);
+        daiSrcRef.setName(SETSRCREF_DA_NAME);
         doiAdapter.getCurrentElem().getSDIOrDAI().add(daiSrcRef);
 
         TExtRef extRef1 = givenExtRef(1, false);
@@ -344,10 +363,10 @@ class DOIAdapterTest {
 
         // Then
         assertThat(sclReportItems).isEmpty();
-        assertThat(getDaiValOfDoi(doiAdapter, DOIAdapter.DA_NAME_SET_SRC_REF)).isPresent();
-        assertThat(getDaiValOfDoi(doiAdapter, DOIAdapter.DA_NAME_SET_SRC_REF).get().getValue())
+        assertThat(getDaiValOfDoi(doiAdapter, SETSRCREF_DA_NAME)).isPresent()
+                .get().extracting(TVal::getValue)
                 .isEqualTo("IED_NAME_1LD_INST_1/PREFIX_1ANCR1.DO_NAME_1");
-        assertThatThrownBy(() -> getDaiValOfDoi(doiAdapter, DOIAdapter.DA_NAME_SET_SRC_CB)).isInstanceOf(ScdException.class);
+        assertThatThrownBy(() -> getDaiValOfDoi(doiAdapter, SETSRCCB_DA_NAME)).isInstanceOf(ScdException.class);
     }
 
     @Test
@@ -355,16 +374,16 @@ class DOIAdapterTest {
         // Given
         DOIAdapter doiAdapter = createDOIAdapterInScl();
         TDAI daiSrcRef = new TDAI();
-        daiSrcRef.setName(DOIAdapter.DA_NAME_SET_SRC_REF);
+        daiSrcRef.setName(SETSRCREF_DA_NAME);
         doiAdapter.getCurrentElem().getSDIOrDAI().add(daiSrcRef);
         TDAI daiSrcCb = new TDAI();
-        daiSrcCb.setName(DOIAdapter.DA_NAME_SET_SRC_CB);
+        daiSrcCb.setName(SETSRCCB_DA_NAME);
         doiAdapter.getCurrentElem().getSDIOrDAI().add(daiSrcCb);
         TDAI daiTstRef = new TDAI();
-        daiTstRef.setName(DOIAdapter.DA_NAME_SET_TST_REF);
+        daiTstRef.setName(SETTSTREF_DA_NAME);
         doiAdapter.getCurrentElem().getSDIOrDAI().add(daiTstRef);
         TDAI daiTstCb = new TDAI();
-        daiTstCb.setName(DOIAdapter.DA_NAME_SET_TST_CB);
+        daiTstCb.setName(SETTSTCB_DA_NAME);
         doiAdapter.getCurrentElem().getSDIOrDAI().add(daiTstCb);
 
         TExtRef extRef1 = givenExtRef(1, true);
@@ -375,31 +394,18 @@ class DOIAdapterTest {
 
         // Then
         assertThat(sclReportItems).isEmpty();
-        assertThat(getDaiValOfDoi(doiAdapter, DOIAdapter.DA_NAME_SET_SRC_REF).get().getValue())
+        assertThat(getDaiValOfDoi(doiAdapter, SETSRCREF_DA_NAME)).isPresent()
+                .get().extracting(TVal::getValue)
                 .isEqualTo("IED_NAME_1LD_INST_1/PREFIX_1ANCR1.DO_NAME_1");
-        assertThat(getDaiValOfDoi(doiAdapter, DOIAdapter.DA_NAME_SET_SRC_CB).get().getValue())
+        assertThat(getDaiValOfDoi(doiAdapter, SETSRCCB_DA_NAME)).isPresent()
+                .get().extracting(TVal::getValue)
                 .isEqualTo("IED_NAME_1LD_INST_1/SRC_PREFIX_1LLN0SRC_LN_INST_1.CB_NAME_1");
-        assertThat(getDaiValOfDoi(doiAdapter, DOIAdapter.DA_NAME_SET_TST_REF).get().getValue())
+        assertThat(getDaiValOfDoi(doiAdapter, SETTSTREF_DA_NAME)).isPresent()
+                .get().extracting(TVal::getValue)
                 .isEqualTo("IED_NAME_3LD_INST_3/PREFIX_3ANCR3.DO_NAME_3");
-        assertThat(getDaiValOfDoi(doiAdapter, DOIAdapter.DA_NAME_SET_TST_CB).get().getValue())
+        assertThat(getDaiValOfDoi(doiAdapter, SETTSTCB_DA_NAME)).isPresent()
+                .get().extracting(TVal::getValue)
                 .isEqualTo("IED_NAME_3LD_INST_3/SRC_PREFIX_3LLN0SRC_LN_INST_3.CB_NAME_3");
-    }
-
-    private static TExtRef givenExtRef(int num, boolean withCbName) {
-        TExtRef extRef1 = new TExtRef();
-        extRef1.setIedName("IED_NAME_" + num);
-        extRef1.setDesc("ExtRef_desc_" + num);
-        extRef1.setLdInst("LD_INST_" + num);
-        extRef1.setSrcPrefix("SRC_PREFIX_" + num);
-        extRef1.setSrcLNInst("SRC_LN_INST_" + num);
-        extRef1.getLnClass().add("ANCR");
-        extRef1.setLnInst(Integer.toString(num));
-        extRef1.setPrefix("PREFIX_" + num);
-        extRef1.setDoName("DO_NAME_" + num);
-        if (withCbName) {
-            extRef1.setSrcCBName("CB_NAME_" + num);
-        }
-        return extRef1;
     }
 
     @Test
@@ -407,16 +413,16 @@ class DOIAdapterTest {
         // Given
         DOIAdapter doiAdapter = createDOIAdapterInScl();
         TDAI daiSrcRef = new TDAI();
-        daiSrcRef.setName(DOIAdapter.DA_NAME_SET_SRC_REF);
+        daiSrcRef.setName(SETSRCREF_DA_NAME);
         doiAdapter.getCurrentElem().getSDIOrDAI().add(daiSrcRef);
         TDAI daiSrcCb = new TDAI();
-        daiSrcCb.setName(DOIAdapter.DA_NAME_SET_SRC_CB);
+        daiSrcCb.setName(SETSRCCB_DA_NAME);
         doiAdapter.getCurrentElem().getSDIOrDAI().add(daiSrcCb);
         TDAI daiTstRef = new TDAI();
-        daiTstRef.setName(DOIAdapter.DA_NAME_SET_TST_REF);
+        daiTstRef.setName(SETTSTREF_DA_NAME);
         doiAdapter.getCurrentElem().getSDIOrDAI().add(daiTstRef);
         TDAI daiTstCb = new TDAI();
-        daiTstCb.setName(DOIAdapter.DA_NAME_SET_TST_CB);
+        daiTstCb.setName(SETTSTCB_DA_NAME);
         doiAdapter.getCurrentElem().getSDIOrDAI().add(daiTstCb);
 
         TExtRef extRef1 = givenExtRef(1, false);
@@ -427,15 +433,15 @@ class DOIAdapterTest {
 
         // Then
         assertThat(sclReportItems).isEmpty();
-        assertThat(getDaiValOfDoi(doiAdapter, DOIAdapter.DA_NAME_SET_SRC_REF)).isPresent();
-        assertThat(getDaiValOfDoi(doiAdapter, DOIAdapter.DA_NAME_SET_SRC_REF).get().getValue())
+        assertThat(getDaiValOfDoi(doiAdapter, SETSRCREF_DA_NAME)).isPresent()
+                .get().extracting(TVal::getValue)
                 .isEqualTo("IED_NAME_1LD_INST_1/PREFIX_1ANCR1.DO_NAME_1");
-        assertThat(getDaiValOfDoi(doiAdapter, DOIAdapter.DA_NAME_SET_SRC_CB))
+        assertThat(getDaiValOfDoi(doiAdapter, SETSRCCB_DA_NAME))
                 .isNotPresent();
-        assertThat(getDaiValOfDoi(doiAdapter, DOIAdapter.DA_NAME_SET_TST_REF)).isPresent();
-        assertThat(getDaiValOfDoi(doiAdapter, DOIAdapter.DA_NAME_SET_TST_REF).get().getValue())
+        assertThat(getDaiValOfDoi(doiAdapter, SETTSTREF_DA_NAME)).isPresent()
+                .get().extracting(TVal::getValue)
                 .isEqualTo("IED_NAME_3LD_INST_3/PREFIX_3ANCR3.DO_NAME_3");
-        assertThat(getDaiValOfDoi(doiAdapter, DOIAdapter.DA_NAME_SET_TST_CB))
+        assertThat(getDaiValOfDoi(doiAdapter, SETTSTCB_DA_NAME))
                 .isNotPresent();
     }
 
@@ -445,7 +451,7 @@ class DOIAdapterTest {
         DOIAdapter.DAIAdapter daiAdapter = initInnerDAIAdapter("Do", "da");
         DOIAdapter doiAdapter = daiAdapter.getParentAdapter();
         TDAI daiSrcRef = new TDAI();
-        daiSrcRef.setName(DOIAdapter.DA_NAME_SET_SRC_REF);
+        daiSrcRef.setName(SETSRCREF_DA_NAME);
         doiAdapter.getCurrentElem().getSDIOrDAI().add(daiSrcRef);
 
         TExtRef extRef3 = givenExtRef(3, false);
@@ -458,8 +464,8 @@ class DOIAdapterTest {
                 .isNotEmpty()
                 .extracting(SclReportItem::getMessage)
                 .contains("The DOI /DOI[@name=\"Do\"] can't be bound with an ExtRef");
-        assertThat(doiAdapter.getDataAdapterByName(DOIAdapter.DA_NAME_SET_SRC_REF)).isNotNull();
-        assertThat(getDaiValOfDoi(doiAdapter, DOIAdapter.DA_NAME_SET_SRC_REF)).isNotPresent();
+        assertThat(doiAdapter.getDataAdapterByName(SETSRCREF_DA_NAME)).isNotNull();
+        assertThat(getDaiValOfDoi(doiAdapter, SETSRCREF_DA_NAME)).isNotPresent();
     }
 
     @Test
@@ -474,11 +480,11 @@ class DOIAdapterTest {
 
         // Then
         assertThat(sclReportItems).isEmpty();
-        assertThat(doiAdapter.getDataAdapterByName(DOIAdapter.DA_NAME_SET_SRC_REF)).isNotNull();
-        assertThat(getDaiValOfDoi(doiAdapter, DOIAdapter.DA_NAME_SET_SRC_REF))
+        assertThat(doiAdapter.getDataAdapterByName(SETSRCREF_DA_NAME)).isNotNull();
+        assertThat(getDaiValOfDoi(doiAdapter, SETSRCREF_DA_NAME))
                 .isPresent()
-                .map(TVal::getValue)
-                .contains("IED_NAME_1LD_INST_1/PREFIX_1ANCR1.DO_NAME_1");
+                .get().extracting(TVal::getValue)
+                .isEqualTo("IED_NAME_1LD_INST_1/PREFIX_1ANCR1.DO_NAME_1");
     }
 
     @Test
@@ -503,16 +509,16 @@ class DOIAdapterTest {
         // Given
         DOIAdapter doiAdapter = createDOIAdapterInScl();
         TDAI daiSrcRef = new TDAI();
-        daiSrcRef.setName(DOIAdapter.DA_NAME_SET_SRC_REF);
+        daiSrcRef.setName(SETSRCREF_DA_NAME);
         doiAdapter.getCurrentElem().getSDIOrDAI().add(daiSrcRef);
         TDAI daiSrcCb = new TDAI();
-        daiSrcCb.setName(DOIAdapter.DA_NAME_SET_SRC_CB);
+        daiSrcCb.setName(SETSRCCB_DA_NAME);
         doiAdapter.getCurrentElem().getSDIOrDAI().add(daiSrcCb);
         TDAI daiTstRef = new TDAI();
-        daiTstRef.setName(DOIAdapter.DA_NAME_SET_TST_REF);
+        daiTstRef.setName(SETTSTREF_DA_NAME);
         doiAdapter.getCurrentElem().getSDIOrDAI().add(daiTstRef);
         TDAI daiTstCb = new TDAI();
-        daiTstCb.setName(DOIAdapter.DA_NAME_SET_TST_CB);
+        daiTstCb.setName(SETTSTCB_DA_NAME);
         doiAdapter.getCurrentElem().getSDIOrDAI().add(daiTstCb);
 
         TExtRef extRef1 = new TExtRef();
@@ -533,15 +539,15 @@ class DOIAdapterTest {
 
         // Then
         assertThat(sclReportItems).isEmpty();
-        assertThat(getDaiValOfDoi(doiAdapter, DOIAdapter.DA_NAME_SET_SRC_REF)).isPresent();
-        assertThat(getDaiValOfDoi(doiAdapter, DOIAdapter.DA_NAME_SET_SRC_REF).get().getValue())
+        assertThat(getDaiValOfDoi(doiAdapter, SETSRCREF_DA_NAME)).isPresent()
+                .get().extracting(TVal::getValue)
                 .isEqualTo("IED_NAME_1LD_INST_1/LN_CLASS_1.DO_NAME_1");
-        assertThat(getDaiValOfDoi(doiAdapter, DOIAdapter.DA_NAME_SET_SRC_CB))
+        assertThat(getDaiValOfDoi(doiAdapter, SETSRCCB_DA_NAME))
                 .isNotPresent();
-        assertThat(getDaiValOfDoi(doiAdapter, DOIAdapter.DA_NAME_SET_TST_REF)).isPresent();
-        assertThat(getDaiValOfDoi(doiAdapter, DOIAdapter.DA_NAME_SET_TST_REF).get().getValue())
+        assertThat(getDaiValOfDoi(doiAdapter, SETTSTREF_DA_NAME)).isPresent()
+                .get().extracting(TVal::getValue)
                 .isEqualTo("IED_NAME_3LD_INST_3/LN_CLASS_3.DO_NAME_3");
-        assertThat(getDaiValOfDoi(doiAdapter, DOIAdapter.DA_NAME_SET_TST_CB))
+        assertThat(getDaiValOfDoi(doiAdapter, SETTSTCB_DA_NAME))
                 .isNotPresent();
     }
 
@@ -551,10 +557,10 @@ class DOIAdapterTest {
         DOIAdapter.DAIAdapter daiAdapter = initInnerDAIAdapter("Do", "da");
         DOIAdapter doiAdapter = daiAdapter.getParentAdapter();
         TDAI daiSrcRef = new TDAI();
-        daiSrcRef.setName(DOIAdapter.DA_NAME_SET_SRC_REF);
+        daiSrcRef.setName(SETSRCREF_DA_NAME);
         doiAdapter.getCurrentElem().getSDIOrDAI().add(daiSrcRef);
         TDAI daiSrcCb = new TDAI();
-        daiSrcCb.setName(DOIAdapter.DA_NAME_SET_SRC_CB);
+        daiSrcCb.setName(SETSRCCB_DA_NAME);
         doiAdapter.getCurrentElem().getSDIOrDAI().add(daiSrcCb);
 
         TExtRef extRef1 = new TExtRef();
@@ -565,6 +571,66 @@ class DOIAdapterTest {
         assertThatThrownBy(() -> doiAdapter.updateDaiFromExtRef(extRefList))
                 .isInstanceOf(NumberFormatException.class);
     }
+
+    @Test
+    void updateDai_should_create_and_update_value_when_dai_not_present_in_do_and_is_updatable() {
+        // Given
+        DOIAdapter doiAdapter = createDOIAdapterInScl();
+        // When
+        Optional<SclReportItem> sclReportItems = doiAdapter.updateDAI(SETSRCREF_DA_NAME, "new value");
+        // Then
+        assertThat(sclReportItems).isEmpty();
+        assertThat(getDaiValOfDoi(doiAdapter, SETSRCREF_DA_NAME)).isPresent()
+                .get().extracting(TVal::getValue)
+                .isEqualTo("new value");
+    }
+
+    @Test
+    void updateDai_should_update_value_when_dai_present_in_do_and_is_updatable() {
+        // Given
+        DOIAdapter doiAdapter = createDOIAdapterInScl();
+        TVal tVal = new TVal();
+        tVal.setValue("old value");
+        TDAI daiSrcRef = new TDAI();
+        daiSrcRef.setName(SETSRCREF_DA_NAME);
+        daiSrcRef.getVal().add(tVal);
+        doiAdapter.getCurrentElem().getSDIOrDAI().add(daiSrcRef);
+
+        // When
+        Optional<SclReportItem> sclReportItems = doiAdapter.updateDAI(SETSRCREF_DA_NAME, "new value");
+
+        // Then
+        assertThat(sclReportItems).isEmpty();
+        assertThat(getDaiValOfDoi(doiAdapter, SETSRCREF_DA_NAME)).isPresent()
+                .get().extracting(TVal::getValue)
+                .isNotEqualTo("old value")
+                .isEqualTo("new value");
+    }
+
+    @Test
+    void updateDai_should_not_update_value_and_return_warning_message_when_dai_is_not_updatable() {
+        // Given
+        DOIAdapter doiAdapter = createDOIAdapterInScl();
+        TVal tVal = new TVal();
+        tVal.setValue("old value");
+        TDAI daiSrcRef = new TDAI();
+        daiSrcRef.setName(SETSRCREF_DA_NAME);
+        daiSrcRef.getVal().add(tVal);
+        daiSrcRef.setValImport(false);
+        doiAdapter.getCurrentElem().getSDIOrDAI().add(daiSrcRef);
+
+        // When
+        Optional<SclReportItem> sclReportItems = doiAdapter.updateDAI(SETSRCREF_DA_NAME, "new value");
+
+        // Then
+        assertThat(sclReportItems).isPresent()
+                .get().extracting(SclReportItem::getMessage)
+                .isEqualTo("The DAI setSrcRef cannot be updated");
+        assertThat(getDaiValOfDoi(doiAdapter, SETSRCREF_DA_NAME)).isPresent()
+                .get().extracting(TVal::getValue)
+                .isEqualTo("old value");
+    }
+
 
     private DOIAdapter createDOIAdapterInScl() {
         TDOI tdoi = new TDOI();
@@ -600,10 +666,10 @@ class DOIAdapterTest {
         tlNodeType.getDO().add(tdo);
         TDOType tdoType = new TDOType();
         tdoType.setId("REF");
-        TDA tda1 = createDa(DOIAdapter.DA_NAME_SET_SRC_REF);
-        TDA tda2 = createDa(DOIAdapter.DA_NAME_SET_SRC_CB);
-        TDA tda3 = createDa(DOIAdapter.DA_NAME_SET_TST_REF);
-        TDA tda4 = createDa(DOIAdapter.DA_NAME_SET_TST_CB);
+        TDA tda1 = createDa(SETSRCREF_DA_NAME);
+        TDA tda2 = createDa(SETSRCCB_DA_NAME);
+        TDA tda3 = createDa(SETTSTREF_DA_NAME);
+        TDA tda4 = createDa(SETTSTCB_DA_NAME);
         tdoType.getSDOOrDA().addAll(List.of(tda1, tda2, tda3, tda4));
 
         TDataTypeTemplates tDataTypeTemplates = new TDataTypeTemplates();
@@ -614,8 +680,7 @@ class DOIAdapterTest {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         LN0Adapter ln0Adapter = sclRootAdapter.getIEDAdapterByName("IED_NAME").getLDeviceAdapterByLdInst("Inst").getLN0Adapter();
 
-        DOIAdapter doiAdapter = new DOIAdapter(ln0Adapter, tdoi);
-        return doiAdapter;
+        return new DOIAdapter(ln0Adapter, tdoi);
     }
 
     private TDA createDa(String daName) {

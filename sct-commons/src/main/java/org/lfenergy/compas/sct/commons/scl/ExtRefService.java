@@ -5,13 +5,19 @@
 package org.lfenergy.compas.sct.commons.scl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
-import org.lfenergy.compas.sct.commons.dto.ExtRefInfo.ExtRefBayReference;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ied.*;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 import org.lfenergy.compas.sct.commons.util.ILDEPFSettings;
+import org.lfenergy.compas.scl2007b4.model.SCL;
+import org.lfenergy.compas.scl2007b4.model.TCompasICDHeader;
+import org.lfenergy.compas.scl2007b4.model.TExtRef;
+import org.lfenergy.compas.scl2007b4.model.TIED;
+import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings;
+import org.lfenergy.compas.sct.commons.dto.SclReport;
+import org.lfenergy.compas.sct.commons.dto.SclReportItem;
+import org.lfenergy.compas.sct.commons.util.LDeviceStatus;
 import org.lfenergy.compas.sct.commons.util.PrivateEnum;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
@@ -21,7 +27,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.*;
-import static org.lfenergy.compas.sct.commons.util.CommonConstants.IED_TEST_NAME;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 import static org.lfenergy.compas.sct.commons.util.Utils.isExtRefFeedBySameControlBlock;
 
 public final class ExtRefService {
@@ -251,26 +257,29 @@ public final class ExtRefService {
     public static SclReport manageBindingForLDEPF(SCL scd, ILDEPFSettings settings) {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         List<SclReportItem> sclReportItems = new ArrayList<>();
-        List<ExtRefBayReference> extRefBayReferences = sclRootAdapter.streamIEDAdapters()
+        sclRootAdapter.streamIEDAdapters()
                 .filter(iedAdapter -> !iedAdapter.getName().equals(IED_TEST_NAME))
-                .map(iedAdapter -> iedAdapter.getExtRefBayReferenceForActifLDEPF(sclReportItems))
-                .flatMap(List::stream).toList();
-        for (ExtRefBayReference extRefBayRef: extRefBayReferences){
-            var lDPFSettingMatchingExtRef = settings.getLDEPFSettingDataMatchExtRef(extRefBayRef.extRef());
-            if(lDPFSettingMatchingExtRef.isPresent()){
-                List<TIED> iedSources = settings.getIedSources(sclRootAdapter, extRefBayRef.compasBay(), lDPFSettingMatchingExtRef.get());
-                if(iedSources.size() != 1) {
-                    if(iedSources.size() > 1) {
-                        sclReportItems.add(SclReportItem.warning(null, "There is more than one IED source to bind the signal " +
-                                "/IED@name="+extRefBayRef.iedName()+"/LDevice@inst=LDEPF/LN0" +
-                                "/ExtRef@desc="+extRefBayRef.extRef().getDesc()));
-                    }
-                    continue;
-                }
-                updateLDEPFExtRefBinding(extRefBayRef.extRef(), iedSources.get(0), lDPFSettingMatchingExtRef.get());
-            }
-        }
+                .map(iedAdapter -> iedAdapter.findLDeviceAdapterByLdInst(LDEVICE_LDEPF))
+                .flatMap(Optional::stream)
+                .forEach(lDeviceAdapter ->
+                        lDeviceAdapter.getExtRefBayReferenceForActifLDEPF(sclReportItems)
+                                .forEach(extRefBayRef -> settings.getLDEPFSettingDataMatchExtRef(extRefBayRef.extRef())
+                                        .ifPresent(lDPFSettingMatchingExtRef -> {
+                                            List<TIED> iedSources = settings.getIedSources(sclRootAdapter, extRefBayRef.compasBay(), lDPFSettingMatchingExtRef);
+                                            if (iedSources.size() == 1) {
+                                                updateLDEPFExtRefBinding(extRefBayRef.extRef(), iedSources.get(0), lDPFSettingMatchingExtRef);
+                                                sclReportItems.addAll(updateLDEPFDos(lDeviceAdapter, extRefBayRef.extRef(), lDPFSettingMatchingExtRef));
+                                            } else {
+                                                if (iedSources.size() > 1) {
+                                                    sclReportItems.add(SclReportItem.warning(null, "There is more than one IED source to bind the signal " +
+                                                            "/IED@name=" + extRefBayRef.iedName() + "/LDevice@inst=LDEPF/LN0" +
+                                                            "/ExtRef@desc=" + extRefBayRef.extRef().getDesc()));
+                                                }
+                                            }
+                                        }))
+                );
         return new SclReport(sclRootAdapter, sclReportItems);
+
     }
 
 
@@ -284,6 +293,65 @@ public final class ExtRefService {
         }
         String doName = StringUtils.isEmpty(setting.getDoInst()) || StringUtils.isBlank(setting.getDoInst()) || setting.getDoInst().equals("0") ? setting.getDoName() : setting.getDoName() + setting.getDoInst();
         extRef.setDoName(doName);
+    }
+
+    private static List<SclReportItem> updateLDEPFDos(LDeviceAdapter lDeviceAdapter, TExtRef extRef, LDEPFSettingData setting) {
+        List<SclReportItem> sclReportItems = new ArrayList<>();
+        List<DoNameAndDaName> doNameAndDaNameList = List.of(
+                new DoNameAndDaName(CHNUM1_DO_NAME, DU_DA_NAME),
+                new DoNameAndDaName(LEVMOD_DO_NAME, SETVAL_DA_NAME),
+                new DoNameAndDaName(MOD_DO_NAME, STVAL_DA_NAME),
+                new DoNameAndDaName(SRCREF_DO_NAME, SETSRCREF_DA_NAME)
+        );
+        if (setting.getChannelDigitalNum() != null && setting.getChannelAnalogNum() == null) {
+            //digital
+            lDeviceAdapter.findLnAdapter(LN_RBDR, String.valueOf(setting.getChannelDigitalNum()), null)
+                    .ifPresent(lnAdapter -> doNameAndDaNameList.forEach(doNameAndDaName -> updateVal(lnAdapter, doNameAndDaName.doName, doNameAndDaName.daName, extRef, setting).ifPresent(sclReportItems::add)));
+            lDeviceAdapter.findLnAdapter(LN_RBDR, String.valueOf(setting.getChannelDigitalNum()), LN_PREFIX_B)
+                    .ifPresent(lnAdapter -> doNameAndDaNameList.forEach(doNameAndDaName -> updateVal(lnAdapter, doNameAndDaName.doName, doNameAndDaName.daName, extRef, setting).ifPresent(sclReportItems::add)));
+        }
+        if (setting.getChannelDigitalNum() == null && setting.getChannelAnalogNum() != null) {
+            //analog
+            lDeviceAdapter.findLnAdapter(LN_RADR, String.valueOf(setting.getChannelAnalogNum()), null)
+                    .ifPresent(lnAdapter -> doNameAndDaNameList.forEach(doNameAndDaName -> updateVal(lnAdapter, doNameAndDaName.doName, doNameAndDaName.daName, extRef, setting).ifPresent(sclReportItems::add)));
+            lDeviceAdapter.findLnAdapter(LN_RADR, String.valueOf(setting.getChannelAnalogNum()), LN_PREFIX_A)
+                    .ifPresent(lnAdapter -> doNameAndDaNameList.forEach(doNameAndDaName -> updateVal(lnAdapter, doNameAndDaName.doName, doNameAndDaName.daName, extRef, setting).ifPresent(sclReportItems::add)));
+        }
+        return sclReportItems;
+    }
+
+    private static Optional<SclReportItem> updateVal(AbstractLNAdapter<?> lnAdapter, String doName, String daName, TExtRef extRef, LDEPFSettingData setting) {
+        String value = switch (daName) {
+            case DU_DA_NAME -> setting.getChannelShortLabel();
+            case SETVAL_DA_NAME ->
+                    LN_PREFIX_B.equals(lnAdapter.getPrefix()) || LN_PREFIX_A.equals(lnAdapter.getPrefix()) ? setting.getChannelLevModQ() : setting.getChannelLevMod();
+            case STVAL_DA_NAME -> LDeviceStatus.ON;
+            case SETSRCREF_DA_NAME -> computeDaiValue(lnAdapter, extRef, setting.getDaName());
+            default -> null;
+        };
+        return lnAdapter.getDOIAdapterByName(doName).updateDAI(daName, value);
+    }
+
+    private record DoNameAndDaName(String doName, String daName) {
+    }
+
+    private static String computeDaiValue(AbstractLNAdapter<?> lnAdapter, TExtRef extRef, String daName) {
+        if (LN_PREFIX_B.equals(lnAdapter.getPrefix()) || LN_PREFIX_A.equals(lnAdapter.getPrefix())) {
+            return extRef.getIedName() +
+                    extRef.getLdInst() + "/" +
+                    StringUtils.trimToEmpty(extRef.getPrefix()) +
+                    extRef.getLnClass().get(0) +
+                    StringUtils.trimToEmpty(extRef.getLnInst()) + "." +
+                    extRef.getDoName() + "." + Q_DA_NAME;
+        } else {
+            return extRef.getIedName() +
+                    extRef.getLdInst() + "/" +
+                    StringUtils.trimToEmpty(extRef.getPrefix()) +
+                    extRef.getLnClass().get(0) +
+                    StringUtils.trimToEmpty(extRef.getLnInst()) + "." +
+                    extRef.getDoName() + "." +
+                    daName;
+        }
     }
 
 }

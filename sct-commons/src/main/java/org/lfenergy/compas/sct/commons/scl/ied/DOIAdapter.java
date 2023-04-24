@@ -12,6 +12,8 @@ import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
 
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
+
 
 /**
  * A representation of the model object
@@ -39,10 +41,7 @@ import java.util.*;
  */
 public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TAnyLN>, TDOI> implements IDataParentAdapter {
 
-    protected static final String DA_NAME_SET_SRC_REF = "setSrcRef";
-    protected static final String DA_NAME_SET_SRC_CB = "setSrcCB";
-    protected static final String DA_NAME_SET_TST_REF = "setTstRef";
-    protected static final String DA_NAME_SET_TST_CB = "setTstCB";
+    protected static final String DAI_NOT_UPDATABLE_MESSAGE = "The DAI %s cannot be updated";
 
     private static final Comparator<TExtRef> EXTREF_DESC_SUFFIX_COMPARATOR = Comparator.comparingInt(extRef -> extractDescSuffix(extRef.getDesc()));
 
@@ -110,20 +109,20 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
         if (tExtRefMinOptional.isPresent() && extractDescSuffix(tExtRefMinOptional.get().getDesc()) == 1) {
             TExtRef tExtRefMin = tExtRefMinOptional.get();
             String valueSrcRef = createInRefValNominalString(tExtRefMin);
-            updateDAI(DA_NAME_SET_SRC_REF, valueSrcRef).ifPresent(sclReportItems::add);
+            updateDAI(SETSRCREF_DA_NAME, valueSrcRef).ifPresent(sclReportItems::add);
             if (tExtRefMin.isSetSrcCBName()) {
                 String valueSrcCb = createInRefValTestString(tExtRefMin);
-                updateDAI(DA_NAME_SET_SRC_CB, valueSrcCb).ifPresent(sclReportItems::add);
+                updateDAI(SETSRCCB_DA_NAME, valueSrcCb).ifPresent(sclReportItems::add);
             }
 
             Optional<TExtRef> tExtRefMaxOptional = tExtRefs.stream().max(EXTREF_DESC_SUFFIX_COMPARATOR);
             if (tExtRefMaxOptional.isPresent() && extractDescSuffix(tExtRefMaxOptional.get().getDesc()) > 1) {
                 TExtRef tExtRefMax = tExtRefMaxOptional.get();
                 String valueTstRef = createInRefValNominalString(tExtRefMax);
-                updateDAI(DA_NAME_SET_TST_REF, valueTstRef).ifPresent(sclReportItems::add);
+                updateDAI(SETTSTREF_DA_NAME, valueTstRef).ifPresent(sclReportItems::add);
                 if (tExtRefMax.isSetSrcCBName()) {
                     String valueTstCb = createInRefValTestString(tExtRefMax);
-                    updateDAI(DA_NAME_SET_TST_CB, valueTstCb).ifPresent(sclReportItems::add);
+                    updateDAI(SETTSTCB_DA_NAME, valueTstCb).ifPresent(sclReportItems::add);
                 }
             }
         } else {
@@ -133,11 +132,18 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
         return sclReportItems;
     }
 
-    private Optional<SclReportItem> updateDAI(String daName, String value) {
-        DataAttributeRef daiFilterSrcRef = new DataAttributeRef(getParentAdapter(), new DoTypeName(getName()), new DaTypeName(daName));
-        Optional<DataAttributeRef> foundDais = getParentAdapter().getDAI(daiFilterSrcRef, true).stream().findFirst();
+    /**
+     * Check and update DAI identified by name with given value
+     *
+     * @param daName name of DAI to update
+     * @param value  new value
+     * @return warning message when DAI not updatable, otherwise return empty and update DAI with value
+     */
+    public Optional<SclReportItem> updateDAI(String daName, String value) {
+            DataAttributeRef daiFilterSrcRef = new DataAttributeRef(getParentAdapter(), new DoTypeName(getName()), new DaTypeName(daName));
+            Optional<DataAttributeRef> foundDais = getParentAdapter().getDAI(daiFilterSrcRef, true).stream().findFirst();
         if (foundDais.isEmpty()) {
-            return Optional.of(SclReportItem.warning(getXPath() + "/DAI@name=\"" + daName + "\"/Val", "The DAI cannot be updated"));
+            return Optional.of(SclReportItem.warning(getXPath() + "/DAI@name=\"" + daName + "\"/Val", DAI_NOT_UPDATABLE_MESSAGE.formatted(daName)));
         }
         DataAttributeRef filterForUpdate = foundDais.get();
         filterForUpdate.setVal(value);

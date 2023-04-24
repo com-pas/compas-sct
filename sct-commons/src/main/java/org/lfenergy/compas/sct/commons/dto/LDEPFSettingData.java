@@ -41,7 +41,7 @@ public class LDEPFSettingData {
     @CsvBindByPosition(position = 6)
     private String channelLevModQ;
     @CsvBindByPosition(position = 7)
-    private String channelLevModLevMod;
+    private String channelLevMod;
     @CsvBindByPosition(position = 8)
     private String bapVariant;
     @CsvBindByPosition(position = 9)

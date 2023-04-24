@@ -12,6 +12,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.DataSetAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.FCDARecord;
@@ -25,7 +26,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,6 +37,7 @@ import static org.lfenergy.compas.scl2007b4.model.TFCEnum.ST;
 import static org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.*;
 import static org.lfenergy.compas.sct.commons.scl.ExtRefService.filterDuplicatedExtRefs;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 import static org.lfenergy.compas.sct.commons.util.ControlBlockEnum.*;
 import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newDurationInMilliSec;
 
@@ -552,31 +556,63 @@ class ExtRefServiceTest {
         InputStreamReader reader = new InputStreamReader(inputStream);
         SettingLDEPFCsvHelper settingLDEPFCsvHelper = new SettingLDEPFCsvHelper(reader);
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_iedSources_in_different_bay.xml");
+
+        LDEPFSettingData expectedSettingData = LDEPFSettingData.builder()
+                .bayScope(TCompasFlowKind.BAY_INTERNAL)
+                .channelDigitalNum(1)
+                .channelAnalogNum(null)
+                .channelShortLabel("MR.PX1")
+                .channelLevMod("Positive or Rising")
+                .channelLevModQ("Other")
+                .iedType("BCU").iedRedundancy("None").iedInstance(BigInteger.valueOf(1))
+                .ldInst("LDPX")
+                .lnClass("PTRC").lnInst("0").lnPrefix(null)
+                .doName("Str").doInst("0").daName("general")
+                .build();
+
         // When
         SclReport sclReport = ExtRefService.manageBindingForLDEPF(scd, settingLDEPFCsvHelper);
         // Then
         assertThat(sclReport.getSclReportItems()).isEmpty();
         TExtRef extRef1 = findExtRef(sclReport, "IED_NAME1", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
         assertThat(extRef1.getIedName()).isEqualTo("IED_NAME1");
-
         TExtRef extRef2 = findExtRef(sclReport, "IED_NAME2", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
         assertThat(extRef2.getIedName()).isEqualTo("IED_NAME2");
-
         TExtRef extRef3 = findExtRef(sclReport, "IED_NAME3", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
         assertThat(extRef3.getIedName()).isEqualTo("IED_NAME1");
 
-        LDEPFSettingData expectedSettingData = LDEPFSettingData.builder()
-                .bayScope(TCompasFlowKind.BAY_INTERNAL)
-                .channelDigitalNum(1)
-                .channelAnalogNum(null)
-                .iedType("BCU").iedRedundancy("None").iedInstance(BigInteger.valueOf(1))
-                .ldInst("LDPX")
-                .lnClass("PTRC").lnInst("0").lnPrefix(null)
-                .doName("Str").doInst("0").daName("general")
-                .build();
         assertExtRefIsBoundAccordingTOLDEPF(extRef1, expectedSettingData);
         assertExtRefIsBoundAccordingTOLDEPF(extRef2, expectedSettingData);
         assertExtRefIsBoundAccordingTOLDEPF(extRef3, expectedSettingData);
+
+        AbstractLNAdapter<?> lnRbdr = findLn(sclReport.getSclRootAdapter(), "IED_NAME1", "LDEPF", "RBDR", "1", "");
+        assertThat(getDaiValue(lnRbdr, CHNUM1_DO_NAME, DU_DA_NAME))
+                .isNotEqualTo("dU_old_val")
+                .isEqualTo("MR.PX1");
+        assertThat(getDaiValue(lnRbdr, LEVMOD_DO_NAME, SETVAL_DA_NAME))
+                .isNotEqualTo("setVal_old_val")
+                .isEqualTo("Positive or Rising");
+        assertThat(getDaiValue(lnRbdr, MOD_DO_NAME, STVAL_DA_NAME))
+                .isNotEqualTo("off")
+                .isEqualTo("on");
+        assertThat(getDaiValue(lnRbdr, SRCREF_DO_NAME, SETSRCREF_DA_NAME))
+                .isNotEqualTo("setSrcRef_old_val")
+                .isEqualTo("IED_NAME1LDPX/PTRC0.Str.general");
+
+        AbstractLNAdapter<?> lnBrbdr = findLn(sclReport.getSclRootAdapter(), "IED_NAME1", "LDEPF", "RBDR", "1", "b");
+        assertThat(getDaiValue(lnBrbdr, CHNUM1_DO_NAME, DU_DA_NAME))
+                .isNotEqualTo("dU_old_val")
+                .isEqualTo("MR.PX1");
+        assertThat(getDaiValue(lnBrbdr, LEVMOD_DO_NAME, SETVAL_DA_NAME))
+                .isNotEqualTo("setVal_old_val")
+                .isEqualTo("Other");
+        assertThat(getDaiValue(lnBrbdr, MOD_DO_NAME, STVAL_DA_NAME))
+                .isNotEqualTo("off")
+                .isEqualTo("on");
+        assertThat(getDaiValue(lnBrbdr, SRCREF_DO_NAME, SETSRCREF_DA_NAME))
+                .isNotEqualTo("setSrcRef_old_val")
+                .isEqualTo("IED_NAME1LDPX/PTRC0.Str.q");
+
     }
 
 
@@ -596,9 +632,65 @@ class ExtRefServiceTest {
         assertThat(extRef1.getIedName()).isEqualTo("IED_NAME1");
         assertExtRefIsBoundAccordingTOLDEPF(extRef1, getLDEPFSettingByDigitalNum(settingLDEPFCsvHelper.getSettings(), 1));
 
+        AbstractLNAdapter<?> lnRbdr = findLn(sclReport.getSclRootAdapter(), "IED_NAME1", "LDEPF", "RBDR", "1", "");
+        assertThat(getDaiValue(lnRbdr, CHNUM1_DO_NAME, DU_DA_NAME))
+                .isNotEqualTo("dU_old_val")
+                .isEqualTo("MR.PX1");
+        assertThat(getDaiValue(lnRbdr, LEVMOD_DO_NAME, SETVAL_DA_NAME))
+                .isNotEqualTo("setVal_old_val")
+                .isEqualTo("Positive or Rising");
+        assertThat(getDaiValue(lnRbdr, MOD_DO_NAME, STVAL_DA_NAME))
+                .isNotEqualTo("off")
+                .isEqualTo("on");
+        assertThat(getDaiValue(lnRbdr, SRCREF_DO_NAME, SETSRCREF_DA_NAME))
+                .isNotEqualTo("setSrcRef_old_val")
+                .isEqualTo("IED_NAME1LDPX/PTRC0.Str.general");
+
+        AbstractLNAdapter<?> lnBrbdr = findLn(sclReport.getSclRootAdapter(), "IED_NAME1", "LDEPF", "RBDR", "1", "b");
+        assertThat(getDaiValue(lnBrbdr, CHNUM1_DO_NAME, DU_DA_NAME))
+                .isNotEqualTo("dU_old_val")
+                .isEqualTo("MR.PX1");
+        assertThat(getDaiValue(lnBrbdr, LEVMOD_DO_NAME, SETVAL_DA_NAME))
+                .isNotEqualTo("setVal_old_val")
+                .isEqualTo("Other");
+        assertThat(getDaiValue(lnBrbdr, MOD_DO_NAME, STVAL_DA_NAME))
+                .isNotEqualTo("off")
+                .isEqualTo("on");
+        assertThat(getDaiValue(lnBrbdr, SRCREF_DO_NAME, SETSRCREF_DA_NAME))
+                .isNotEqualTo("setSrcRef_old_val")
+                .isEqualTo("IED_NAME1LDPX/PTRC0.Str.q");
+
         TExtRef extRef2 = findExtRef(sclReport, "IED_NAME2", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 15_1_BOOLEEN_1_general_1");
         assertThat(extRef2.getIedName()).isEqualTo("IED_NAME2");
         assertExtRefIsBoundAccordingTOLDEPF(extRef2, getLDEPFSettingByDigitalNum(settingLDEPFCsvHelper.getSettings(), 15));
+
+        AbstractLNAdapter<?> lnRbdr2 = findLn(sclReport.getSclRootAdapter(), "IED_NAME2", "LDEPF", "RBDR", "15", "");
+        assertThat(getDaiValue(lnRbdr2, CHNUM1_DO_NAME, DU_DA_NAME))
+                .isNotEqualTo("dU_old_val")
+                .isEqualTo("MR.PX2");
+        assertThat(getDaiValue(lnRbdr2, LEVMOD_DO_NAME, SETVAL_DA_NAME))
+                .isNotEqualTo("setVal_old_val")
+                .isEqualTo("Positive or Rising");
+        assertThat(getDaiValue(lnRbdr2, MOD_DO_NAME, STVAL_DA_NAME))
+                .isNotEqualTo("off")
+                .isEqualTo("on");
+        assertThat(getDaiValue(lnRbdr2, SRCREF_DO_NAME, SETSRCREF_DA_NAME))
+                .isNotEqualTo("setSrcRef_old_val")
+                .isEqualTo("IED_NAME2LDPX/PTRC0.Str.general");
+
+        AbstractLNAdapter<?> lnBrbdr2 = findLn(sclReport.getSclRootAdapter(), "IED_NAME2", "LDEPF", "RBDR", "15", "b");
+        assertThat(getDaiValue(lnBrbdr2, CHNUM1_DO_NAME, DU_DA_NAME))
+                .isNotEqualTo("dU_old_val")
+                .isEqualTo("MR.PX2");
+        assertThat(getDaiValue(lnBrbdr2, LEVMOD_DO_NAME, SETVAL_DA_NAME))
+                .isNotEqualTo("setVal_old_val")
+                .isEqualTo("Other");
+        assertThat(getDaiValue(lnBrbdr2, MOD_DO_NAME, STVAL_DA_NAME))
+                .isNotEqualTo("off")
+                .isEqualTo("on");
+        assertThat(getDaiValue(lnBrbdr2, SRCREF_DO_NAME, SETSRCREF_DA_NAME))
+                .isNotEqualTo("setSrcRef_old_val")
+                .isEqualTo("IED_NAME2LDPX/PTRC0.Str.q");
     }
 
     @Test
@@ -612,8 +704,7 @@ class ExtRefServiceTest {
         // When
         SclReport sclReport = ExtRefService.manageBindingForLDEPF(scd, settings);
         // Then
-        assertThat(sclReport.getSclReportItems()).hasSize(2);
-        assertThat(sclReport.getSclReportItems())
+        assertThat(sclReport.getSclReportItems()).hasSize(2)
                 .extracting(SclReportItem::getMessage)
                 .isEqualTo(List.of("There is more than one IED source to bind the signal /IED@name=IED_NAME2/LDevice@inst=LDEPF/LN0/ExtRef@desc=DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1",
                         "There is more than one IED source to bind the signal /IED@name=IED_NAME3/LDevice@inst=LDEPF/LN0/ExtRef@desc=DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1"));
@@ -623,6 +714,26 @@ class ExtRefServiceTest {
         assertThat(extRef2.isSetIedName()).isFalse();
         TExtRef extRef3 = findExtRef(sclReport, "IED_NAME3", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
         assertThat(extRef3.isSetIedName()).isFalse();
+
+        AbstractLNAdapter<?> lnRbdr = findLn(sclReport.getSclRootAdapter(), "IED_NAME2", "LDEPF", "RBDR", "1", "");
+        assertThat(getDaiValue(lnRbdr, CHNUM1_DO_NAME, DU_DA_NAME))
+                .isEqualTo("dU_old_val");
+        assertThat(getDaiValue(lnRbdr, LEVMOD_DO_NAME, SETVAL_DA_NAME))
+                .isEqualTo("setVal_old_val");
+        assertThat(getDaiValue(lnRbdr, MOD_DO_NAME, STVAL_DA_NAME))
+                .isEqualTo("off");
+        assertThat(getDaiValue(lnRbdr, SRCREF_DO_NAME, SETSRCREF_DA_NAME))
+                .isEqualTo("setSrcRef_old_val");
+
+        AbstractLNAdapter<?> lnBrbdr = findLn(sclReport.getSclRootAdapter(), "IED_NAME2", "LDEPF", "RBDR", "1", "b");
+        assertThat(getDaiValue(lnBrbdr, CHNUM1_DO_NAME, DU_DA_NAME))
+                .isEqualTo("dU_old_val");
+        assertThat(getDaiValue(lnBrbdr, LEVMOD_DO_NAME, SETVAL_DA_NAME))
+                .isEqualTo("setVal_old_val");
+        assertThat(getDaiValue(lnBrbdr, MOD_DO_NAME, STVAL_DA_NAME))
+                .isEqualTo("off");
+        assertThat(getDaiValue(lnBrbdr, SRCREF_DO_NAME, SETSRCREF_DA_NAME))
+                .isEqualTo("setSrcRef_old_val");
     }
 
     @Test
@@ -631,19 +742,47 @@ class ExtRefServiceTest {
         InputStream inputStream = Objects.requireNonNull(CsvUtils.class.getClassLoader().getResourceAsStream(fileName), "Resource not found: " + fileName);
         InputStreamReader reader = new InputStreamReader(inputStream);
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_dataTypeTemplateValid.xml");
-        SettingLDEPFCsvHelper settingsSupplier = new SettingLDEPFCsvHelper(reader);
+        SettingLDEPFCsvHelper settingLDEPFCsvHelper = new SettingLDEPFCsvHelper(reader);
         // When
-        SclReport sclReport = ExtRefService.manageBindingForLDEPF(scd, settingsSupplier);
+        SclReport sclReport = ExtRefService.manageBindingForLDEPF(scd, settingLDEPFCsvHelper);
         // Then
         assertThat(sclReport.getSclReportItems()).isEmpty();
         SclTestMarshaller.assertIsMarshallable(sclReport.getSclRootAdapter().getCurrentElem());
         TExtRef extRefBindInternally = findExtRef(sclReport, "IED_NAME1", "LDEPF", "DYN_LDEPF_ANALOG CHANNEL 1_1_AnalogueValue_1_instMag_1");
         assertThat(extRefBindInternally.getIedName()).isEqualTo("IED_NAME1");
-        assertExtRefIsBoundAccordingTOLDEPF(extRefBindInternally, getLDEPFSettingByAnalogNum(settingsSupplier.getSettings(), 1));
+        assertExtRefIsBoundAccordingTOLDEPF(extRefBindInternally, getLDEPFSettingByAnalogNum(settingLDEPFCsvHelper.getSettings(), 1));
+
+        AbstractLNAdapter<?> lnRadr = findLn(sclReport.getSclRootAdapter(), "IED_NAME1", "LDEPF", "RADR", "1", "");
+        assertThat(getDaiValue(lnRadr, CHNUM1_DO_NAME, DU_DA_NAME))
+                .isNotEqualTo("dU_old_val")
+                .isEqualTo("V0");
+        assertThat(getDaiValue(lnRadr, LEVMOD_DO_NAME, SETVAL_DA_NAME))
+                .isNotEqualTo("setVal_old_val")
+                .isEqualTo("NA");
+        assertThat(getDaiValue(lnRadr, MOD_DO_NAME, STVAL_DA_NAME))
+                .isNotEqualTo("off")
+                .isEqualTo("on");
+        assertThat(getDaiValue(lnRadr, SRCREF_DO_NAME, SETSRCREF_DA_NAME))
+                .isNotEqualTo("setSrcRef_old_val")
+                .isEqualTo("IED_NAME1LDTM1/U01ATVTR11.VolSv.instMag");
+
+        AbstractLNAdapter<?> lnAradr = findLn(sclReport.getSclRootAdapter(), "IED_NAME1", "LDEPF", "RADR", "1", "a");
+        assertThat(getDaiValue(lnAradr, CHNUM1_DO_NAME, DU_DA_NAME))
+                .isNotEqualTo("dU_old_val")
+                .isEqualTo("V0");
+        assertThat(getDaiValue(lnAradr, LEVMOD_DO_NAME, SETVAL_DA_NAME))
+                .isNotEqualTo("setVal_old_val")
+                .isEqualTo("NA");
+        assertThat(getDaiValue(lnAradr, MOD_DO_NAME, STVAL_DA_NAME))
+                .isNotEqualTo("off")
+                .isEqualTo("on");
+        assertThat(getDaiValue(lnAradr, SRCREF_DO_NAME, SETSRCREF_DA_NAME))
+                .isNotEqualTo("setSrcRef_old_val")
+                .isEqualTo("IED_NAME1LDTM1/U01ATVTR11.VolSv.q");
 
         TExtRef extRefBindExternally = findExtRef(sclReport, "IED_NAME1", "LDEPF", "DYN_LDEPF_ANALOG CHANNEL 10_1_AnalogueValue_1_cVal_1");
         assertThat(extRefBindExternally.getIedName()).isEqualTo("IED_NAME2");
-        assertExtRefIsBoundAccordingTOLDEPF(extRefBindExternally, getLDEPFSettingByAnalogNum(settingsSupplier.getSettings(), 10));
+        assertExtRefIsBoundAccordingTOLDEPF(extRefBindExternally, getLDEPFSettingByAnalogNum(settingLDEPFCsvHelper.getSettings(), 10));
     }
 
     private void assertExtRefIsBoundAccordingTOLDEPF(TExtRef extRef, LDEPFSettingData setting) {

@@ -30,7 +30,8 @@
                             </DAI>
                         </DOI>
                         <Inputs>
-                            <ExtRef intAddr="INT_ADDR11" pDO="Str" pLN="PTRC" desc="DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1"/>
+                            <ExtRef intAddr="INT_ADDR11" pDO="Str" pLN="PTRC"
+                                    desc="DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1"/>
                         </Inputs>
                     </LN0>
                 </LDevice>
@@ -54,7 +55,8 @@
         </Private>
         <Private type="COMPAS-ICDHeader"> <!-- ICDHeader check (IEDType, IEDredundancy, IEDSystemVersioninstance) -->
             <compas:ICDHeader IEDType="BCU" IEDredundancy="None" IEDSystemVersioninstance="1"
-                              ICDSystemVersionUUID="System_Version_IED_NAME1" VendorName="SCLE SFE" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="1.0" swRev="1.0"
+                              ICDSystemVersionUUID="System_Version_IED_NAME1" VendorName="SCLE SFE"
+                              IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="1.0" swRev="1.0"
                               headerId="ARKENS-SV1120-HGAAA-EB5_SCU"/>
         </Private>
         <AccessPoint name="AP_NAME">
@@ -68,9 +70,55 @@
                             </DAI>
                         </DOI>
                         <Inputs>
-                            <ExtRef intAddr="INT_ADDR11" pDO="Str" pLN="PTRC" desc="DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1"/>
+                            <ExtRef intAddr="INT_ADDR11" pDO="Str" pLN="PTRC"
+                                    desc="DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1"/>
                         </Inputs>
                     </LN0>
+                    <LN lnClass="RBDR" inst="1" lnType="RTE_RBDR">
+                        <DOI name="ChNum1">
+                            <DAI name="dU" valKind="RO" valImport="true">
+                                <Val>dU_old_val</Val> <!-- should not be updated -->
+                            </DAI>
+                        </DOI>
+                        <DOI name="LevMod">
+                            <DAI name="setVal" valKind="RO" valImport="true">
+                                <Val>setVal_old_val</Val>   <!-- should not be updated -->
+                            </DAI>
+                        </DOI>
+                        <DOI name="Mod">
+                            <DAI name="stVal" sAddr="50606.0" valKind="Set" valImport="false">
+                                <Val>off</Val> <!-- should not be updated -->
+                            </DAI>
+                        </DOI>
+                        <DOI name="SrcRef">
+                            <DAI name="setSrcRef" valKind="Set" valImport="true">
+                                <Val>setSrcRef_old_val</Val>  <!-- should not be updated -->
+                            </DAI>
+                        </DOI>
+                    </LN>
+
+                    <LN prefix="b" lnClass="RBDR" inst="1" lnType="RTE_RBDR">
+                        <DOI name="ChNum1">
+                            <DAI name="dU" valKind="RO" valImport="true">
+                                <Val>dU_old_val</Val>  <!-- should not be updated -->
+                            </DAI>
+                        </DOI>
+                        <DOI name="LevMod">
+                            <DAI name="setVal" valKind="RO" valImport="true">
+                                <Val>setVal_old_val</Val>   <!-- should not be updated -->
+                            </DAI>
+                        </DOI>
+                        <DOI name="Mod">
+                            <DAI name="stVal" sAddr="50606.0" valKind="Set" valImport="false">
+                                <Val>off</Val>  <!-- should not be updated -->
+                            </DAI>
+                        </DOI>
+                        <DOI name="SrcRef">
+                            <DAI name="setSrcRef" valKind="Set" valImport="true">
+                                <Val>setSrcRef_old_val</Val>   <!-- should not be updated -->
+                            </DAI>
+                        </DOI>
+                    </LN>
                 </LDevice>
                 <LDevice inst="LDPX" ldName="IED_NAME2LDPX">
                     <LN0 lnClass="LLN0" inst="" lnType="LLN0_ID1">
@@ -132,12 +180,31 @@
             <DO name="Mod" type="DO2"/>
             <DO name="Str" type="ACD1"/>
         </LNodeType>
+        <LNodeType lnClass="RBDR" id="RTE_RBDR"> <!-- lnClass RBDR -->
+            <DO name="ChNum1" type="DOCh"/>
+            <DO name="LevMod" type="DOLe"/>
+            <DO name="Mod" type="DOMo"/>
+            <DO name="SrcRef" type="DOSr"/>
+        </LNodeType>
         <DOType cdc="ACD" id="ACD1">
             <DA name="general" bType="BOOLEAN" fc="ST"/>
         </DOType>
         <DOType cdc="ENC" id="DO2">
-            <DA fc="ST" dchg="true" qchg="false" dupd="false" name="stVal" bType="Enum" type="BehaviourModeKind" valImport="true" />
+            <DA fc="ST" dchg="true" name="stVal" bType="Enum" type="BehaviourModeKind"
+                valImport="true"/>
             <DA fc="BL" name="daName1" bType="BOOLEAN"/>
+        </DOType>
+        <DOType cdc="ENC" id="DOCh">
+            <DA fc="ST" dchg="true" name="dU" bType="VisString255" valImport="true"/>
+        </DOType>
+        <DOType cdc="ENC" id="DOLe">
+            <DA fc="ST" dchg="true" name="setVal" bType="VisString255" valImport="true"/>
+        </DOType>
+        <DOType cdc="ENC" id="DOMo">
+            <DA fc="ST" dchg="true" name="stVal" bType="Enum" type="BehaviourModeKind" valImport="true"/>
+        </DOType>
+        <DOType cdc="ENC" id="DOSr">
+            <DA fc="ST" dchg="true" name="setSrcRef" bType="VisString255" valImport="true"/>
         </DOType>
         <EnumType id="BehaviourModeKind">
             <EnumVal ord="1">on</EnumVal>
