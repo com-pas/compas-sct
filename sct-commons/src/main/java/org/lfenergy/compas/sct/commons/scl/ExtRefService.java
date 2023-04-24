@@ -7,11 +7,11 @@ package org.lfenergy.compas.sct.commons.scl;
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
-import org.lfenergy.compas.sct.commons.dto.LDEPFSettingsSupplier.LDEPFSetting;
 import org.lfenergy.compas.sct.commons.dto.ExtRefInfo.ExtRefBayReference;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ied.*;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
+import org.lfenergy.compas.sct.commons.util.ILDEPFSettings;
 import org.lfenergy.compas.sct.commons.util.PrivateEnum;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
@@ -245,10 +245,10 @@ public final class ExtRefService {
     /**
      * ExtRef Binding For LDevice (inst=LDEPF) that matching LDEPF configuration
      * @param scd SCL
-     * @param settingsSupplier LDEPFSettingsSupplier
+     * @param settings ILDEPFSettings
      * @return a report contains errors
      */
-    public static SclReport manageBindingForLDEPF(SCL scd, LDEPFSettingsSupplier settingsSupplier) {
+    public static SclReport manageBindingForLDEPF(SCL scd, ILDEPFSettings settings) {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         List<SclReportItem> sclReportItems = new ArrayList<>();
         List<ExtRefBayReference> extRefBayReferences = sclRootAdapter.streamIEDAdapters()
@@ -256,9 +256,9 @@ public final class ExtRefService {
                 .map(iedAdapter -> iedAdapter.getExtRefBayReferenceForActifLDEPF(sclReportItems))
                 .flatMap(List::stream).toList();
         for (ExtRefBayReference extRefBayRef: extRefBayReferences){
-            var lDPFSettingMatchingExtRef = settingsSupplier.getLDEPFSettingMatchingExtRef(extRefBayRef.extRef());
+            var lDPFSettingMatchingExtRef = settings.getLDEPFSettingDataMatchExtRef(extRefBayRef.extRef());
             if(lDPFSettingMatchingExtRef.isPresent()){
-                List<TIED> iedSources = settingsSupplier.getIedSources(sclRootAdapter, extRefBayRef.compasBay(), lDPFSettingMatchingExtRef.get());
+                List<TIED> iedSources = settings.getIedSources(sclRootAdapter, extRefBayRef.compasBay(), lDPFSettingMatchingExtRef.get());
                 if(iedSources.size() != 1) {
                     if(iedSources.size() > 1) {
                         sclReportItems.add(SclReportItem.warning(null, "There is more than one IED source to bind the signal " +
@@ -273,17 +273,17 @@ public final class ExtRefService {
         return new SclReport(sclRootAdapter, sclReportItems);
     }
 
-    private static void updateLDEPFExtRefBinding(TExtRef extRef, TIED iedSource, LDEPFSetting setting) {
-        extRef.setIedName(iedSource.getName());
-        extRef.setLdInst(setting.ldInst());
-        extRef.getLnClass().add(setting.lnClass());
-        extRef.setLnInst(setting.lnInst());
-        if(setting.lnPrefix() != null){
-            extRef.setPrefix(setting.lnPrefix());
-        }
-        var doName = setting.doInst().equals("0") ? setting.doName() : setting.doName()+setting.doInst() ;
-        extRef.setDoName(doName);
 
+    private static void updateLDEPFExtRefBinding(TExtRef extRef, TIED iedSource, LDEPFSettingData setting) {
+        extRef.setIedName(iedSource.getName());
+        extRef.setLdInst(setting.getLdInst());
+        extRef.getLnClass().add(setting.getLnClass());
+        extRef.setLnInst(setting.getLnInst());
+        if(setting.getLnPrefix() != null){
+            extRef.setPrefix(setting.getLnPrefix());
+        }
+        String doName = StringUtils.isEmpty(setting.getDoInst()) || StringUtils.isBlank(setting.getDoInst()) || setting.getDoInst().equals("0") ? setting.getDoName() : setting.getDoName() + setting.getDoInst();
+        extRef.setDoName(doName);
     }
 
 }

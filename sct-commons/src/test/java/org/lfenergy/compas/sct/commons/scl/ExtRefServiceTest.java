@@ -18,6 +18,7 @@ import org.lfenergy.compas.sct.commons.testhelpers.FCDARecord;
 import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.lfenergy.compas.sct.commons.util.CsvUtils;
+import org.lfenergy.compas.sct.commons.util.ILDEPFSettings;
 import org.lfenergy.compas.sct.commons.util.SettingLDEPFCsvHelper;
 
 import java.io.InputStream;
@@ -544,84 +545,125 @@ class ExtRefServiceTest {
     }
 
     @Test
-    void manageBindingForLDEPF_should_return_no_report_when_all_extRefInSameBay_update_successfully() {
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_iedSources_in_different_bay.xml");
-        var digitalSetting1 = LDEPFSettingsSupplier.LDEPFSetting.builder()
-                .channelDigitalNum("10")
-                .channelAnalogNum(null)
-                .rteIedType("BCU").iedRedundancy("None").iedInstance(BigInteger.valueOf(1))
-                .ldInst("LDPX")
-                .lnClass("PTRC").lnInst("0").lnPrefix(null)
-                .doName("Str").doInst("0").daName("general")
-                .build();
-        LDEPFSettingsSupplier settingsSupplier = () -> List.of(digitalSetting1);
-        // When
-        SclReport sclReport = ExtRefService.manageBindingForLDEPF(scd, settingsSupplier);
-        // Then
-        assertThat(sclReport.getSclReportItems()).isEmpty();
-        TExtRef extRef1 = findExtRef(sclReport, "IED_NAME1", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 10_1_BOOLEEN_1_general_1");
-        assertThat(extRef1.getIedName()).isEqualTo("IED_NAME1");
-        assertExtRefIsBoundAccordingTOLDEPF(extRef1, digitalSetting1);
-
-        TExtRef extRef2 = findExtRef(sclReport, "IED_NAME2", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 10_1_BOOLEEN_1_general_1");
-        assertThat(extRef2.getIedName()).isEqualTo("IED_NAME2");
-        assertExtRefIsBoundAccordingTOLDEPF(extRef2, digitalSetting1);
-
-        TExtRef extRef3 = findExtRef(sclReport, "IED_NAME3", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 10_1_BOOLEEN_1_general_1");
-        assertThat(extRef3.getIedName()).isEqualTo("IED_NAME1");
-        assertExtRefIsBoundAccordingTOLDEPF(extRef3, digitalSetting1);
-    }
-
-    @Test
-    void manageBindingForLDEPF_should_return_no_report_when_extRef_withIedTypeBCUOrBPU_update_successfully() {
+    void manageBindingForLDEPF_should_return_noReportAndExtRefUpdateSuccessfully_whenFlowKindIsInternalAndAllExtRefInSameBay() {
+       //Given
         String fileName = "LDEPF_Setting_file.csv";
         InputStream inputStream = Objects.requireNonNull(CsvUtils.class.getClassLoader().getResourceAsStream(fileName), "Resource not found: " + fileName);
         InputStreamReader reader = new InputStreamReader(inputStream);
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_extref_with_BCU_BPU.xml");
-        LDEPFSettingsSupplier settingsSupplier = new SettingLDEPFCsvHelper(reader);
+        SettingLDEPFCsvHelper settingLDEPFCsvHelper = new SettingLDEPFCsvHelper(reader);
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_iedSources_in_different_bay.xml");
         // When
-        SclReport sclReport = ExtRefService.manageBindingForLDEPF(scd, settingsSupplier);
+        SclReport sclReport = ExtRefService.manageBindingForLDEPF(scd, settingLDEPFCsvHelper);
         // Then
         assertThat(sclReport.getSclReportItems()).isEmpty();
         TExtRef extRef1 = findExtRef(sclReport, "IED_NAME1", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
         assertThat(extRef1.getIedName()).isEqualTo("IED_NAME1");
 
-        TExtRef extRef2 = findExtRef(sclReport, "IED_NAME2", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 15_1_BOOLEEN_1_general_1");
+        TExtRef extRef2 = findExtRef(sclReport, "IED_NAME2", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
         assertThat(extRef2.getIedName()).isEqualTo("IED_NAME2");
-    }
 
-    @Test
-    void manageBindingForLDEPF_should_return_report_when_manyIedSourceFound() {
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_manyIedSources_in_same_bay.xml");
-        var digitalSetting = LDEPFSettingsSupplier.LDEPFSetting.builder()
-                .channelDigitalNum("12")
+        TExtRef extRef3 = findExtRef(sclReport, "IED_NAME3", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
+        assertThat(extRef3.getIedName()).isEqualTo("IED_NAME1");
+
+        LDEPFSettingData expectedSettingData = LDEPFSettingData.builder()
+                .bayScope(TCompasFlowKind.BAY_INTERNAL)
+                .channelDigitalNum(1)
                 .channelAnalogNum(null)
-                .rteIedType("BCU").iedRedundancy("None").iedInstance(BigInteger.valueOf(1))
+                .iedType("BCU").iedRedundancy("None").iedInstance(BigInteger.valueOf(1))
                 .ldInst("LDPX")
                 .lnClass("PTRC").lnInst("0").lnPrefix(null)
                 .doName("Str").doInst("0").daName("general")
                 .build();
-        LDEPFSettingsSupplier settingsSupplier = () -> List.of(digitalSetting);
+        assertExtRefIsBoundAccordingTOLDEPF(extRef1, expectedSettingData);
+        assertExtRefIsBoundAccordingTOLDEPF(extRef2, expectedSettingData);
+        assertExtRefIsBoundAccordingTOLDEPF(extRef3, expectedSettingData);
+    }
+
+
+    @Test
+    void manageBindingForLDEPF_should_return_no_report_when_extRef_withDifferentIedType_update_successfully() {
+        String fileName = "LDEPF_Setting_file.csv";
+        InputStream inputStream = Objects.requireNonNull(CsvUtils.class.getClassLoader().getResourceAsStream(fileName), "Resource not found: " + fileName);
+        InputStreamReader reader = new InputStreamReader(inputStream);
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_extref_with_BCU_BPU.xml");
+        SettingLDEPFCsvHelper settingLDEPFCsvHelper = new SettingLDEPFCsvHelper(reader);
         // When
-        SclReport sclReport = ExtRefService.manageBindingForLDEPF(scd, settingsSupplier);
+        SclReport sclReport = ExtRefService.manageBindingForLDEPF(scd, settingLDEPFCsvHelper);
+        // Then
+        assertThat(sclReport.getSclReportItems()).isEmpty();
+        SclTestMarshaller.assertIsMarshallable(sclReport.getSclRootAdapter().getCurrentElem());
+        TExtRef extRef1 = findExtRef(sclReport, "IED_NAME1", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
+        assertThat(extRef1.getIedName()).isEqualTo("IED_NAME1");
+        assertExtRefIsBoundAccordingTOLDEPF(extRef1, getLDEPFSettingByDigitalNum(settingLDEPFCsvHelper.getSettings(), 1));
+
+        TExtRef extRef2 = findExtRef(sclReport, "IED_NAME2", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 15_1_BOOLEEN_1_general_1");
+        assertThat(extRef2.getIedName()).isEqualTo("IED_NAME2");
+        assertExtRefIsBoundAccordingTOLDEPF(extRef2, getLDEPFSettingByDigitalNum(settingLDEPFCsvHelper.getSettings(), 15));
+    }
+
+    @Test
+    void manageBindingForLDEPF_should_return_report_when_manyIedSourceFound() {
+        //Given
+        String fileName = "LDEPF_Setting_file.csv";
+        InputStream inputStream = Objects.requireNonNull(CsvUtils.class.getClassLoader().getResourceAsStream(fileName), "Resource not found: " + fileName);
+        InputStreamReader reader = new InputStreamReader(inputStream);
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_manyIedSources_in_same_bay.xml");
+        ILDEPFSettings settings = new SettingLDEPFCsvHelper(reader);
+        // When
+        SclReport sclReport = ExtRefService.manageBindingForLDEPF(scd, settings);
         // Then
         assertThat(sclReport.getSclReportItems()).hasSize(2);
         assertThat(sclReport.getSclReportItems())
                 .extracting(SclReportItem::getMessage)
-                .isEqualTo(List.of("There is more than one IED source to bind the signal /IED@name=IED_NAME1/LDevice@inst=LDEPF/LN0/ExtRef@desc=DYN_LDEPF_DIGITAL CHANNEL 12_1_BOOLEEN_1_general_1",
-                        "There is more than one IED source to bind the signal /IED@name=IED_NAME2/LDevice@inst=LDEPF/LN0/ExtRef@desc=DYN_LDEPF_DIGITAL CHANNEL 12_1_BOOLEEN_1_general_1"));
-        TExtRef extRef1 = findExtRef(sclReport, "IED_NAME1", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 12_1_BOOLEEN_1_general_1");
-        assertThat(extRef1.isSetIedName()).isFalse();
-        TExtRef extRef2 = findExtRef(sclReport, "IED_NAME2", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 12_1_BOOLEEN_1_general_1");
+                .isEqualTo(List.of("There is more than one IED source to bind the signal /IED@name=IED_NAME2/LDevice@inst=LDEPF/LN0/ExtRef@desc=DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1",
+                        "There is more than one IED source to bind the signal /IED@name=IED_NAME3/LDevice@inst=LDEPF/LN0/ExtRef@desc=DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1"));
+        TExtRef extRef1 = findExtRef(sclReport, "IED_NAME1", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
+        assertThat(extRef1.isSetIedName()).isTrue();
+        TExtRef extRef2 = findExtRef(sclReport, "IED_NAME2", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
         assertThat(extRef2.isSetIedName()).isFalse();
+        TExtRef extRef3 = findExtRef(sclReport, "IED_NAME3", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
+        assertThat(extRef3.isSetIedName()).isFalse();
     }
 
-    private void assertExtRefIsBoundAccordingTOLDEPF(TExtRef extRef, LDEPFSettingsSupplier.LDEPFSetting setting) {
-        assertThat(extRef.getLdInst()).isEqualTo(setting.ldInst());
-        assertThat(extRef.getLnClass()).contains(setting.lnClass());
-        assertThat(extRef.getLnInst()).isEqualTo(setting.lnInst());
-        assertThat(extRef.getPrefix()).isEqualTo(setting.lnPrefix());
-        assertThat(extRef.getDoName()).isEqualTo(setting.doName());
+    @Test
+    void manageBindingForLDEPF_should_return_no_report_when_extRefInFlowKindInternalAndExternal_update_successfully() {
+        String fileName = "LDEPF_Setting_file.csv";
+        InputStream inputStream = Objects.requireNonNull(CsvUtils.class.getClassLoader().getResourceAsStream(fileName), "Resource not found: " + fileName);
+        InputStreamReader reader = new InputStreamReader(inputStream);
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_dataTypeTemplateValid.xml");
+        SettingLDEPFCsvHelper settingsSupplier = new SettingLDEPFCsvHelper(reader);
+        // When
+        SclReport sclReport = ExtRefService.manageBindingForLDEPF(scd, settingsSupplier);
+        // Then
+        assertThat(sclReport.getSclReportItems()).isEmpty();
+        SclTestMarshaller.assertIsMarshallable(sclReport.getSclRootAdapter().getCurrentElem());
+        TExtRef extRefBindInternally = findExtRef(sclReport, "IED_NAME1", "LDEPF", "DYN_LDEPF_ANALOG CHANNEL 1_1_AnalogueValue_1_instMag_1");
+        assertThat(extRefBindInternally.getIedName()).isEqualTo("IED_NAME1");
+        assertExtRefIsBoundAccordingTOLDEPF(extRefBindInternally, getLDEPFSettingByAnalogNum(settingsSupplier.getSettings(), 1));
+
+        TExtRef extRefBindExternally = findExtRef(sclReport, "IED_NAME1", "LDEPF", "DYN_LDEPF_ANALOG CHANNEL 10_1_AnalogueValue_1_cVal_1");
+        assertThat(extRefBindExternally.getIedName()).isEqualTo("IED_NAME2");
+        assertExtRefIsBoundAccordingTOLDEPF(extRefBindExternally, getLDEPFSettingByAnalogNum(settingsSupplier.getSettings(), 10));
+    }
+
+    private void assertExtRefIsBoundAccordingTOLDEPF(TExtRef extRef, LDEPFSettingData setting) {
+        assertThat(extRef.getLdInst()).isEqualTo(setting.getLdInst());
+        assertThat(extRef.getLnClass()).contains(setting.getLnClass());
+        assertThat(extRef.getLnInst()).isEqualTo(setting.getLnInst());
+        assertThat(extRef.getPrefix()).isEqualTo(setting.getLnPrefix());
+        assertThat(extRef.getDoName()).isEqualTo(setting.getDoName());
+    }
+
+    private LDEPFSettingData getLDEPFSettingByDigitalNum(List<LDEPFSettingData> settings, Integer digitalNum) {
+        return settings.stream()
+                .filter(setting -> digitalNum.equals(setting.getChannelDigitalNum()))
+                .findFirst().get();
+    }
+
+    private LDEPFSettingData getLDEPFSettingByAnalogNum(List<LDEPFSettingData> settings, Integer analogNum) {
+        return settings.stream()
+                .filter(setting -> analogNum.equals(setting.getChannelAnalogNum()))
+                .findFirst().get();
     }
 
 }

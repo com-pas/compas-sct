@@ -30,7 +30,7 @@
                             </DAI>
                         </DOI>
                         <Inputs>
-                            <ExtRef intAddr="INT_ADDR11" pDO="Str" pLN="PTRC" desc="DYN_LDEPF_DIGITAL CHANNEL 10_1_BOOLEEN_1_general_1"/>
+                            <ExtRef intAddr="INT_ADDR11" pDO="Str" pLN="PTRC" desc="DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1"/>
                         </Inputs>
                     </LN0>
                 </LDevice>
@@ -92,7 +92,7 @@
                             </DAI>
                         </DOI>
                         <Inputs>
-                            <ExtRef intAddr="INT_ADDR11" pDO="Str" pLN="PTRC" desc="DYN_LDEPF_DIGITAL CHANNEL 10_1_BOOLEEN_1_general_1"/>
+                            <ExtRef intAddr="INT_ADDR11" pDO="Str" pLN="PTRC" desc="DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1"/>
                         </Inputs>
                     </LN0>
                 </LDevice>
@@ -136,7 +136,7 @@
                             </DAI>
                         </DOI>
                         <Inputs>
-                            <ExtRef intAddr="INT_ADDR11" pDO="Str" pLN="PTRC" desc="DYN_LDEPF_DIGITAL CHANNEL 10_1_BOOLEEN_1_general_1"/>
+                            <ExtRef intAddr="INT_ADDR11" pDO="Str" pLN="PTRC" desc="DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1"/>
                         </Inputs>
                     </LN0>
                 </LDevice>
@@ -165,12 +165,12 @@
         <LNodeType lnClass="LLN0" id="LLN0_ID1">
             <DO name="Mod" type="DO2"/>
         </LNodeType>
-        <LNodeType lnClass="PTRC" id="PTRC_ID1"> <!-- lnClass PTRC -->
+        <LNodeType lnClass="PTRC" id="PTRC_ID1">
             <DO name="Mod" type="DO2"/>
-            <DO name="Str" type="ACD1"/> <!-- doName Str -->
+            <DO name="Str" type="ACD1"/>
         </LNodeType>
         <DOType cdc="ACD" id="ACD1">
-            <DA name="general" bType="BOOLEAN" fc="ST"/>  <!-- daName general -->
+            <DA name="general" bType="BOOLEAN" fc="ST"/>
         </DOType>
         <DOType cdc="ENC" id="DO2">
             <DA fc="ST" dchg="true" qchg="false" dupd="false" name="stVal" bType="Enum" type="BehaviourModeKind" valImport="true" />
