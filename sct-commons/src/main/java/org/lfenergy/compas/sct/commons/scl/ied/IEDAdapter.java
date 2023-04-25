@@ -8,6 +8,7 @@ import lombok.NonNull;
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
+import org.lfenergy.compas.sct.commons.dto.ExtRefInfo.ExtRefBayReference;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
@@ -15,13 +16,15 @@ import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.PrivateService;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import org.lfenergy.compas.sct.commons.util.MonitoringLnClassEnum;
-import org.lfenergy.compas.sct.commons.util.ServicesConfigEnum;
-import org.lfenergy.compas.sct.commons.util.Utils;
+import org.lfenergy.compas.sct.commons.util.*;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import static org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter.MOD_DO_TYPE_NAME;
+import static org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter.STVAL_DA_TYPE_NAME;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.LDEVICE_LDEPF;
 
 /**
  * A representation of the model object
@@ -414,5 +417,35 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
                 .toList();
     }
 
+    /**
+     * Provides a list of ExtRef and associated Bay <br/>
+     * - The location of ExtRef should be in an active LDevice (inst=LDEPF) <br/>
+     * - ExtRef that lacks Bay or ICDHeader Private is not returned <br/>
+     * @param sclReportItems List of SclReportItem
+     * @return list of ExtRef and associated Bay
+     */
+    public List<ExtRefBayReference> getExtRefBayReferenceForActifLDEPF(final List<SclReportItem> sclReportItems) {
+        return findLDeviceAdapterByLdInst(LDEVICE_LDEPF)
+                .filter(lDeviceAdapter ->  {
+                    if(getPrivateCompasBay().isEmpty()) {
+                        sclReportItems.add(SclReportItem.fatal(getXPath(), "The IED has no Private Bay"));
+                        if(getCompasICDHeader().isEmpty()) {
+                            sclReportItems.add(SclReportItem.fatal(getXPath(), "The IED has no Private compas:ICDHeader"));
+                        }
+                        return false;
+                    }
+                    if(lDeviceAdapter.getLDeviceStatus().isEmpty()) {
+                        sclReportItems.add(SclReportItem.fatal(getXPath(),
+                        "There is no DOI@name="+MOD_DO_TYPE_NAME+"/DAI@name="+STVAL_DA_TYPE_NAME + "/Val for LDevice@inst"+LDEVICE_LDEPF));
+                        return false;
+                    }
+                    return lDeviceAdapter.getLDeviceStatus().get().equals(LDeviceStatus.ON);
+                })
+                .map(lDeviceAdapter -> lDeviceAdapter.getLN0Adapter()
+                        .getInputsAdapter().getCurrentElem().getExtRef().stream()
+                        .map(extRef -> new ExtRefBayReference(getName(), getPrivateCompasBay().get(), extRef))
+                        .toList())
+                .stream().flatMap(List::stream).toList();
+    }
 
 }

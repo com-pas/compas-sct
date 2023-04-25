@@ -22,6 +22,9 @@ public final class CommonConstants {
     public static final String CONTROLBLOCK_NAME_PREFIX = "CB" + ATTRIBUTE_VALUE_SEPARATOR;
     public static final String DATASET_NAME_PREFIX = "DS" + ATTRIBUTE_VALUE_SEPARATOR;
 
+    public static final String LDEVICE_LDEPF = "LDEPF";
+    public static final String IED_TEST_NAME = "IEDTEST";
+
     /**
      * Private Controlller, should not be instanced
      */

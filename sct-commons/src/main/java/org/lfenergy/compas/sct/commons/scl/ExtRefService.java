@@ -5,18 +5,12 @@
 package org.lfenergy.compas.sct.commons.scl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.lfenergy.compas.scl2007b4.model.SCL;
-import org.lfenergy.compas.scl2007b4.model.TCompasICDHeader;
-import org.lfenergy.compas.scl2007b4.model.TExtRef;
-import org.lfenergy.compas.scl2007b4.model.TIED;
-import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings;
-import org.lfenergy.compas.sct.commons.dto.SclReport;
-import org.lfenergy.compas.sct.commons.dto.SclReportItem;
+import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.dto.*;
+import org.lfenergy.compas.sct.commons.dto.LDEPFSettingsSupplier.LDEPFSetting;
+import org.lfenergy.compas.sct.commons.dto.ExtRefInfo.ExtRefBayReference;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.ied.ControlBlockAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.LN0Adapter;
+import org.lfenergy.compas.sct.commons.scl.ied.*;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 import org.lfenergy.compas.sct.commons.util.PrivateEnum;
 import org.lfenergy.compas.sct.commons.util.Utils;
@@ -27,6 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.*;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.IED_TEST_NAME;
 import static org.lfenergy.compas.sct.commons.util.Utils.isExtRefFeedBySameControlBlock;
 
 public final class ExtRefService {
@@ -245,4 +240,50 @@ public final class ExtRefService {
         });
         return filteredList;
     }
+
+
+    /**
+     * ExtRef Binding For LDevice (inst=LDEPF) that matching LDEPF configuration
+     * @param scd SCL
+     * @param settingsSupplier LDEPFSettingsSupplier
+     * @return a report contains errors
+     */
+    public static SclReport manageBindingForLDEPF(SCL scd, LDEPFSettingsSupplier settingsSupplier) {
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        List<SclReportItem> sclReportItems = new ArrayList<>();
+        List<ExtRefBayReference> extRefBayReferences = sclRootAdapter.streamIEDAdapters()
+                .filter(iedAdapter -> !iedAdapter.getName().equals(IED_TEST_NAME))
+                .map(iedAdapter -> iedAdapter.getExtRefBayReferenceForActifLDEPF(sclReportItems))
+                .flatMap(List::stream).toList();
+        for (ExtRefBayReference extRefBayRef: extRefBayReferences){
+            var lDPFSettingMatchingExtRef = settingsSupplier.getLDEPFSettingMatchingExtRef(extRefBayRef.extRef());
+            if(lDPFSettingMatchingExtRef.isPresent()){
+                List<TIED> iedSources = settingsSupplier.getIedSources(sclRootAdapter, extRefBayRef.compasBay(), lDPFSettingMatchingExtRef.get());
+                if(iedSources.size() != 1) {
+                    if(iedSources.size() > 1) {
+                        sclReportItems.add(SclReportItem.warning(null, "There is more than one IED source to bind the signal " +
+                                "/IED@name="+extRefBayRef.iedName()+"/LDevice@inst=LDEPF/LN0" +
+                                "/ExtRef@desc="+extRefBayRef.extRef().getDesc()));
+                    }
+                    continue;
+                }
+                updateLDEPFExtRefBinding(extRefBayRef.extRef(), iedSources.get(0), lDPFSettingMatchingExtRef.get());
+            }
+        }
+        return new SclReport(sclRootAdapter, sclReportItems);
+    }
+
+    private static void updateLDEPFExtRefBinding(TExtRef extRef, TIED iedSource, LDEPFSetting setting) {
+        extRef.setIedName(iedSource.getName());
+        extRef.setLdInst(setting.ldInst());
+        extRef.getLnClass().add(setting.lnClass());
+        extRef.setLnInst(setting.lnInst());
+        if(setting.lnPrefix() != null){
+            extRef.setPrefix(setting.lnPrefix());
+        }
+        var doName = setting.doInst().equals("0") ? setting.doName() : setting.doName()+setting.doInst() ;
+        extRef.setDoName(doName);
+
+    }
+
 }
