@@ -117,21 +117,21 @@ class LDeviceAdapterTest {
     @Test
     void TestGetDAI() {
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS1"));
-        var rDtts = lDeviceAdapter.getDAI(new ResumedDataTemplate(),true);
-        assertEquals(4,rDtts.size());
+        var dataAttributeRefs = lDeviceAdapter.getDAI(new DataAttributeRef(),true);
+        assertEquals(4,dataAttributeRefs.size());
 
 
 
-        ResumedDataTemplate filter = new ResumedDataTemplate();
+        DataAttributeRef filter = new DataAttributeRef();
         filter.setLnClass(TLLN0Enum.LLN_0.value());
-        rDtts = lDeviceAdapter.getDAI(filter,true);
-        assertEquals(4,rDtts.size());
+        dataAttributeRefs = lDeviceAdapter.getDAI(filter,true);
+        assertEquals(4,dataAttributeRefs.size());
 
         lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.findLDeviceAdapterByLdInst("LD_INS2").get());
         filter.setLnClass("ANCR");
         filter.setLnInst("1");
-        rDtts = lDeviceAdapter.getDAI(filter,true);
-        assertEquals(2,rDtts.size());
+        dataAttributeRefs = lDeviceAdapter.getDAI(filter,true);
+        assertEquals(2,dataAttributeRefs.size());
     }
 
     @Test

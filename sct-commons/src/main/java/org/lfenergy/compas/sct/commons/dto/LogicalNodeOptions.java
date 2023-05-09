@@ -15,7 +15,7 @@ import lombok.Setter;
  * </p>
  * <ul>
  *   <li>{@link LogicalNodeOptions#withExtRef <em>withExtRef</em>}</li>
- *   <li>{@link LogicalNodeOptions#withResumedDtt <em>withResumedDtt</em>}</li>
+ *   <li>{@link LogicalNodeOptions#withDataAttributeRef <em>withDataAttributeRef</em>}</li>
  *   <li>{@link LogicalNodeOptions#withDatSet <em>withDatSet</em>}</li>
  *   <li>{@link LogicalNodeOptions#withCB <em>withCB</em>}</li>
  * </ul>
@@ -25,20 +25,20 @@ import lombok.Setter;
 @NoArgsConstructor
 public class LogicalNodeOptions {
     private boolean withExtRef = false;
-    private boolean withResumedDtt = false;
+    private boolean withDataAttributeRef = false;
     private boolean withCB = false;
     private boolean withDatSet = false;
 
     /**
      * Constructor
      * @param withExtRef input
-     * @param withResumedDtt input
+     * @param withDataAttributeRef input
      * @param withCB input
      * @param withDatSet input
      */
-    public LogicalNodeOptions(boolean withExtRef, boolean withResumedDtt, boolean withCB, boolean withDatSet) {
+    public LogicalNodeOptions(boolean withExtRef, boolean withDataAttributeRef, boolean withCB, boolean withDatSet) {
         this.withExtRef = withExtRef;
-        this.withResumedDtt = withResumedDtt;
+        this.withDataAttributeRef = withDataAttributeRef;
         this.withCB = withCB;
         this.withDatSet = withDatSet;
     }

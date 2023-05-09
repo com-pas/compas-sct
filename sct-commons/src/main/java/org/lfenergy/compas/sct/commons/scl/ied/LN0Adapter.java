@@ -42,8 +42,8 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL_DA_NAME
  *      <li>{@link LN0Adapter#getExtRefs(ExtRefSignalInfo) <em>Returns the value of the <b>TExtRef </b>containment reference list By <b>ExtRefSignalInfo <b></b></b></em>}</li>
  *      <li>{@link LN0Adapter#isExtRefExist(ExtRefSignalInfo) <em></b>throws exception when specified signal not found in LN target</b></em>}</li>
  *
- *      <li>{@link LN0Adapter#getDAI <em>Returns the value of the <b>ResumedDataTemplate </b> containment reference By filter</em>}</li>
- *      <li>{@link LN0Adapter#getDAIValues(ResumedDataTemplate) <em>Returns <b>DAI (sGroup, value) </b> containment reference list By <b>ResumedDataTemplate </b> filter</em>}</li>
+ *      <li>{@link LN0Adapter#getDAI <em>Returns the value of the <b>DataAttributeRef </b> containment reference By filter</em>}</li>
+ *      <li>{@link LN0Adapter#getDAIValues(DataAttributeRef) <em>Returns <b>DAI (sGroup, value) </b> containment reference list By <b>DataAttributeRef </b> filter</em>}</li>
  *
  *      <li>{@link LN0Adapter#getDataSetByName(String) <em>Returns the value of the <b>TDataSet </b>object reference By the value of the <b>name </b>attribute </em>}</li>
  *
@@ -181,8 +181,8 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
         LDeviceActivation lDeviceActivation = new LDeviceActivation(iedNameLDeviceInstList);
         final String iedName = getParentAdapter().getParentAdapter().getName();
         final String ldInst = getParentAdapter().getInst();
-        ResumedDataTemplate daiBehFilter = new ResumedDataTemplate(this, BEHAVIOUR_DO_TYPE_NAME, BEHAVIOUR_DA_TYPE_NAME);
-        List<ResumedDataTemplate> daiBehList = getDAI(daiBehFilter, false);
+        DataAttributeRef daiBehFilter = new DataAttributeRef(this, BEHAVIOUR_DO_TYPE_NAME, BEHAVIOUR_DA_TYPE_NAME);
+        List<DataAttributeRef> daiBehList = getDAI(daiBehFilter, false);
         if (daiBehList.isEmpty()) {
             return Optional.of(buildFatalReportItem("The LDevice doesn't have a DO @name='Beh' OR its associated DA@fc='ST' AND DA@name='stVal'"));
         }
@@ -195,11 +195,11 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
             return Optional.of(buildFatalReportItem("The Private compas:LDevice doesn't have the attribute 'LDeviceStatus'"));
         }
         TCompasLDeviceStatus compasLDeviceStatus = compasLDevicePrivateList.get(0).getLDeviceStatus();
-        Optional<ResumedDataTemplate> optionalModStVal = getDaiModStVal();
+        Optional<DataAttributeRef> optionalModStVal = getDaiModStVal();
         if (optionalModStVal.isEmpty()) {
             return Optional.of(buildFatalReportItem("The LDevice doesn't have a DO @name='Mod'"));
         }
-        ResumedDataTemplate newDaModToSetInLN0 = optionalModStVal.get();
+        DataAttributeRef newDaModToSetInLN0 = optionalModStVal.get();
         String initialValue = newDaModToSetInLN0.findFirstValue().orElse("");
         lDeviceActivation.checkLDeviceActivationStatus(iedName, ldInst, compasLDeviceStatus, enumValues);
         if (lDeviceActivation.isUpdatable()) {

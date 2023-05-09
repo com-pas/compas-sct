@@ -122,24 +122,24 @@ class LNodeTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TLNo
     }
 
     @Test
-    void testGetResumedDTTs() throws Exception {
+    void testGetDataAttributeRefs() throws Exception {
         DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
         LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getLNodeTypeAdapterById("LN1").get());
-        ResumedDataTemplate rootRDtt = new ResumedDataTemplate();
-        rootRDtt.setDoName(new DoTypeName("Op"));
-        ResumedDataTemplate filter = new ResumedDataTemplate();
+        DataAttributeRef rootDataAttributeRef = new DataAttributeRef();
+        rootDataAttributeRef.setDoName(new DoTypeName("Op"));
+        DataAttributeRef filter = new DataAttributeRef();
         filter.setDoName(new DoTypeName("Op.res"));
-        var rDtts = lNodeTypeAdapter.getResumedDTTs(filter);
-        assertEquals(2,rDtts.size());
+        var dataAttributeRefs = lNodeTypeAdapter.getDataAttributeRefs(filter);
+        assertEquals(2,dataAttributeRefs.size());
 
         filter.setDoName(new DoTypeName("Op.res"));
         filter.setDaName(new DaTypeName("d"));
-        rDtts = lNodeTypeAdapter.getResumedDTTs(filter);
-        assertEquals(1,rDtts.size());
+        dataAttributeRefs = lNodeTypeAdapter.getDataAttributeRefs(filter);
+        assertEquals(1,dataAttributeRefs.size());
 
         filter.setDoName(new DoTypeName("Op.res"));
         filter.setDaName(new DaTypeName("antRef"));
-        assertTrue(lNodeTypeAdapter.getResumedDTTs(filter).isEmpty());
+        assertTrue(lNodeTypeAdapter.getDataAttributeRefs(filter).isEmpty());
     }
 
     @Test
@@ -169,14 +169,14 @@ class LNodeTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TLNo
     }
 
     @Test
-    void getResumedDTTByDaName() throws Exception {
+    void getDataAttributeRefByDaName() throws Exception {
         DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(
                 AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID
         );
         DaTypeName daTypeName = new DaTypeName("antRef","origin.ctlVal");
         LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("LN1").get());
-        List<ResumedDataTemplate> rDtts = assertDoesNotThrow(()-> lNodeTypeAdapter.getResumedDTTByDaName(daTypeName));
-        assertEquals(2,rDtts.size());
+        List<DataAttributeRef> dataAttributeRefs = assertDoesNotThrow(()-> lNodeTypeAdapter.getDataAttributeRefByDaName(daTypeName));
+        assertEquals(2,dataAttributeRefs.size());
     }
 
     @Test

@@ -35,18 +35,18 @@ class LNAdapterTest {
     private static DoTypeName DO_TYPE_NAME;
     private static DaTypeName DA_TYPE_NAME;
     private static String DATA_TYPE_REF;
-    private static ResumedDataTemplate RDDT_DO_SDO1_D_ANTREF_BDA1_BDA2_BDA3;
-    private static ResumedDataTemplate RDTT_DO_DA2;
+    private static DataAttributeRef RDDT_DO_SDO1_D_ANTREF_BDA1_BDA2_BDA3;
+    private static DataAttributeRef DATA_ATTRIBUTE_REF_DO_DA2;
 
 
     @BeforeEach
     void setUp() {
-        // As DoTypeName, DaTypeName and ResumedDataTemplate are mutable, make sure to re-init them before each test
+        // As DoTypeName, DaTypeName and DataAttributeRef are mutable, make sure to re-init them before each test
         DO_TYPE_NAME = createDo("Do.sdo1.d", TPredefinedCDCEnum.WYE);
         DA_TYPE_NAME = createDa("antRef.bda1.bda2.bda3", TFCEnum.CF, true, Map.of(0L, NEW_VALUE));
         DATA_TYPE_REF = DO_TYPE_NAME + "." + DA_TYPE_NAME;
-        RDDT_DO_SDO1_D_ANTREF_BDA1_BDA2_BDA3 = createResumedDataTemplate(DO_TYPE_NAME, DA_TYPE_NAME);
-        RDTT_DO_DA2 = createResumedDataTemplate(createDo("Do", TPredefinedCDCEnum.WYE), createDa("da2", TFCEnum.CF, true, Map.of(0L, NEW_VALUE)));
+        RDDT_DO_SDO1_D_ANTREF_BDA1_BDA2_BDA3 = createDataAttributeRef(DO_TYPE_NAME, DA_TYPE_NAME);
+        DATA_ATTRIBUTE_REF_DO_DA2 = createDataAttributeRef(createDo("Do", TPredefinedCDCEnum.WYE), createDa("da2", TFCEnum.CF, true, Map.of(0L, NEW_VALUE)));
     }
 
     @Test
@@ -457,41 +457,41 @@ class LNAdapterTest {
     }
 
     @Test
-    void updateDAI_should_throw_ScdException_when_ResumedDataTemplate_is_empty() {
+    void updateDAI_should_throw_ScdException_when_DataAttributeRef_is_empty() {
         // Given
-        ResumedDataTemplate rDtt = new ResumedDataTemplate();
+        DataAttributeRef dataAttributeRef = new DataAttributeRef();
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         LN0Adapter lnAdapter = findLn0(sclRootAdapter, "IED_NAME", "LD_INS1");
 
         // When Then
-        assertThatThrownBy(() -> lnAdapter.updateDAI(rDtt))
+        assertThatThrownBy(() -> lnAdapter.updateDAI(dataAttributeRef))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("Cannot update undefined DAI");
     }
 
     @Test
-    void updateDAI_should_throw_ScdException_when_ResumedDataTemplate_DA_name_is_not_defined() {
+    void updateDAI_should_throw_ScdException_when_DataAttributeRef_DA_name_is_not_defined() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         AbstractLNAdapter<?> lnAdapter = findLn0(new SclRootAdapter(scd), "IED_NAME", "LD_INS1");
-        ResumedDataTemplate rDtt = createResumedDataTemplate(DO_TYPE_NAME, null);
+        DataAttributeRef dataAttributeRef = createDataAttributeRef(DO_TYPE_NAME, null);
 
         // When Then
-        assertThatThrownBy(() -> lnAdapter.updateDAI(rDtt))
+        assertThatThrownBy(() -> lnAdapter.updateDAI(dataAttributeRef))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("Cannot update undefined DAI");
     }
 
     @Test
-    void updateDAI_should_throw_ScdException_when_ResumedDataTemplate_DO_name_is_not_defined() {
+    void updateDAI_should_throw_ScdException_when_DataAttributeRef_DO_name_is_not_defined() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         AbstractLNAdapter<?> lnAdapter = findLn0(new SclRootAdapter(scd), "IED_NAME", "LD_INS1");
-        ResumedDataTemplate rDtt = createResumedDataTemplate(null, DA_TYPE_NAME);
+        DataAttributeRef dataAttributeRef = createDataAttributeRef(null, DA_TYPE_NAME);
 
         // When Then
-        assertThatThrownBy(() -> lnAdapter.updateDAI(rDtt))
+        assertThatThrownBy(() -> lnAdapter.updateDAI(dataAttributeRef))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("Cannot update undefined DAI");
     }
@@ -501,14 +501,14 @@ class LNAdapterTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         AbstractLNAdapter<?> lnAdapter = findLn0(new SclRootAdapter(scd), "IED_NAME", "LD_INS1");
-        ResumedDataTemplate rDtt = ResumedDataTemplate.copyFrom(RDDT_DO_SDO1_D_ANTREF_BDA1_BDA2_BDA3);
-        rDtt.setFc(TFCEnum.BL);
+        DataAttributeRef dataAttributeRef = DataAttributeRef.copyFrom(RDDT_DO_SDO1_D_ANTREF_BDA1_BDA2_BDA3);
+        dataAttributeRef.setFc(TFCEnum.BL);
         final String OLD_VALUE = "Completed-diff";
-        assertThat(rDtt.isUpdatable()).isFalse();
+        assertThat(dataAttributeRef.isUpdatable()).isFalse();
         assertThat(getValue(findDai(lnAdapter, RDDT_DO_SDO1_D_ANTREF_BDA1_BDA2_BDA3.getDataAttributes())))
                 .isEqualTo(OLD_VALUE);
         // When
-        lnAdapter.updateDAI(rDtt);
+        lnAdapter.updateDAI(dataAttributeRef);
 
         // Then
         TDAI tdai = findDai(lnAdapter, DATA_TYPE_REF).getCurrentElem();
@@ -538,13 +538,13 @@ class LNAdapterTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         AbstractLNAdapter<?> lnAdapter = findLn0(new SclRootAdapter(scd), "IED_NAME", "LD_INS1");
-        assertThat(RDTT_DO_DA2.isUpdatable()).isTrue();
+        assertThat(DATA_ATTRIBUTE_REF_DO_DA2.isUpdatable()).isTrue();
 
         // When
-        lnAdapter.updateDAI(RDTT_DO_DA2);
+        lnAdapter.updateDAI(DATA_ATTRIBUTE_REF_DO_DA2);
 
         // Then
-        AbstractDAIAdapter<?> daiAdapter = findDai(lnAdapter, RDTT_DO_DA2.getDataAttributes());
+        AbstractDAIAdapter<?> daiAdapter = findDai(lnAdapter, DATA_ATTRIBUTE_REF_DO_DA2.getDataAttributes());
         assertThat(getValue(daiAdapter)).isEqualTo(NEW_VALUE);
         MarshallerWrapper.assertValidateXmlSchema(scd);
     }
@@ -570,14 +570,14 @@ class LNAdapterTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         AbstractLNAdapter<?> lnAdapter = findLn0(new SclRootAdapter(scd), "IED_NAME", "LD_INS2");
-        ResumedDataTemplate rDtt = RDTT_DO_DA2;
+        DataAttributeRef dataAttributeRef = DATA_ATTRIBUTE_REF_DO_DA2;
         assertThat(lnAdapter.getCurrentElem().getDOI()).isEmpty();
 
         // When
-        lnAdapter.updateDAI(rDtt);
+        lnAdapter.updateDAI(dataAttributeRef);
 
         // Then
-        AbstractDAIAdapter<?> daiAdapter = findDai(lnAdapter, RDTT_DO_DA2.getDataAttributes());
+        AbstractDAIAdapter<?> daiAdapter = findDai(lnAdapter, DATA_ATTRIBUTE_REF_DO_DA2.getDataAttributes());
         assertThat(getValue(daiAdapter)).isEqualTo(NEW_VALUE);
         MarshallerWrapper.assertValidateXmlSchema(scd);
     }
@@ -594,12 +594,12 @@ class LNAdapterTest {
                 .withLnClass(TLLN0Enum.LLN_0.value())
                 .build();
 
-        ResumedDataTemplate rDtt = ResumedDataTemplate.copyFrom(RDDT_DO_SDO1_D_ANTREF_BDA1_BDA2_BDA3);
-        rDtt.setValImport(false);
-        assertThat(rDtt.isUpdatable()).isFalse();
+        DataAttributeRef dataAttributeRef = DataAttributeRef.copyFrom(RDDT_DO_SDO1_D_ANTREF_BDA1_BDA2_BDA3);
+        dataAttributeRef.setValImport(false);
+        assertThat(dataAttributeRef.isUpdatable()).isFalse();
 
         // When & Then
-        assertThatCode(() -> lnAdapter.updateDAI(rDtt)).doesNotThrowAnyException();
+        assertThatCode(() -> lnAdapter.updateDAI(dataAttributeRef)).doesNotThrowAnyException();
     }
 
     @Test
@@ -611,10 +611,10 @@ class LNAdapterTest {
         assertThat(lnAdapter.getCurrentElem().getDOI()).isEmpty();
 
         // When
-        lnAdapter.updateDAI(RDTT_DO_DA2);
+        lnAdapter.updateDAI(DATA_ATTRIBUTE_REF_DO_DA2);
 
         // Then
-        TDAI dai = findDai(lnAdapter, RDTT_DO_DA2.getDataAttributes()).getCurrentElem();
+        TDAI dai = findDai(lnAdapter, DATA_ATTRIBUTE_REF_DO_DA2.getDataAttributes()).getCurrentElem();
         assertThat(dai.isValImport()).isTrue();
         assertThat(getValue(dai)).isEqualTo(NEW_VALUE);
         MarshallerWrapper.assertValidateXmlSchema(scd);
@@ -625,14 +625,14 @@ class LNAdapterTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         AbstractLNAdapter<?> lnAdapter = findLn0(new SclRootAdapter(scd), "IED_NAME", "LD_INS1");
-        lnAdapter.getDOIAdapterByName(RDTT_DO_DA2.getDoRef()).getSDIOrDAI().clear();
-        assertThat(findDoiOrSdi(lnAdapter, RDTT_DO_DA2.getDoName().getName()).getSDIOrDAI()).isEmpty();
+        lnAdapter.getDOIAdapterByName(DATA_ATTRIBUTE_REF_DO_DA2.getDoRef()).getSDIOrDAI().clear();
+        assertThat(findDoiOrSdi(lnAdapter, DATA_ATTRIBUTE_REF_DO_DA2.getDoName().getName()).getSDIOrDAI()).isEmpty();
 
         // When
-        lnAdapter.updateDAI(RDTT_DO_DA2);
+        lnAdapter.updateDAI(DATA_ATTRIBUTE_REF_DO_DA2);
 
         // Then
-        TDAI dai = findDai(lnAdapter, RDTT_DO_DA2.getDataAttributes()).getCurrentElem();
+        TDAI dai = findDai(lnAdapter, DATA_ATTRIBUTE_REF_DO_DA2.getDataAttributes()).getCurrentElem();
         assertThat(dai.isValImport()).isTrue();
         assertThat(getValue(dai)).isEqualTo(NEW_VALUE);
         MarshallerWrapper.assertValidateXmlSchema(scd);
@@ -643,13 +643,13 @@ class LNAdapterTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         AbstractLNAdapter<?> lnAdapter = findLn0(new SclRootAdapter(scd), "IED_NAME", "LD_INS1");
-        assertThat(findDai(lnAdapter, RDTT_DO_DA2.getDataAttributes())).isNotNull();
+        assertThat(findDai(lnAdapter, DATA_ATTRIBUTE_REF_DO_DA2.getDataAttributes())).isNotNull();
 
         // When
-        lnAdapter.updateDAI(RDTT_DO_DA2);
+        lnAdapter.updateDAI(DATA_ATTRIBUTE_REF_DO_DA2);
 
         // Then
-        TDAI dai = findDai(lnAdapter, RDTT_DO_DA2.getDataAttributes()).getCurrentElem();
+        TDAI dai = findDai(lnAdapter, DATA_ATTRIBUTE_REF_DO_DA2.getDataAttributes()).getCurrentElem();
         assertThat(dai.isValImport()).isTrue();
         assertThat(getValue(dai)).isEqualTo(NEW_VALUE);
         MarshallerWrapper.assertValidateXmlSchema(scd);
@@ -754,8 +754,8 @@ class LNAdapterTest {
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LDSUIED").get());
         LNAdapter lnAdapter = lDeviceAdapter.getLNAdapter("PIOC", "1", null);
-        var rDtts = lnAdapter.getDAI(new ResumedDataTemplate(), true);
-        assertFalse(rDtts.isEmpty());
+        var dataAttributeRefs = lnAdapter.getDAI(new DataAttributeRef(), true);
+        assertFalse(dataAttributeRefs.isEmpty());
     }
 
     private LNAdapter initLNAdapter(TLN tln) {

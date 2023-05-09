@@ -47,8 +47,8 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL_DA_NAME
  *      <li>{@link AbstractLNAdapter#getExtRefs() <em>Returns the value of the <b>TExtRef </b>containment reference list</em>}</li>
  *      <li>{@link AbstractLNAdapter#getExtRefs(ExtRefSignalInfo) <em>Returns the value of the <b>TExtRef </b>containment reference list By <b>ExtRefSignalInfo <b></b></b></em>}</li>
  *
- *      <li>{@link AbstractLNAdapter#getDAI <em>Returns the value of the <b>ResumedDataTemplate </b> containment reference By filter</em>}</li>
- *      <li>{@link AbstractLNAdapter#getDAIValues(ResumedDataTemplate) <em>Returns <b>DAI (sGroup, value) </b> containment reference list By <b>ResumedDataTemplate </b> filter</em>}</li>
+ *      <li>{@link AbstractLNAdapter#getDAI <em>Returns the value of the <b>DataAttributeRef </b> containment reference By filter</em>}</li>
+ *      <li>{@link AbstractLNAdapter#getDAIValues(DataAttributeRef) <em>Returns <b>DAI (sGroup, value) </b> containment reference list By <b>DataAttributeRef </b> filter</em>}</li>
  *
  *      <li>{@link AbstractLNAdapter#getDataSetByName(String) <em>Returns the value of the <b>TDataSet </b>object reference By the value of the <b>name </b>attribute </em>}</li>
  *
@@ -103,7 +103,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
     public abstract String getPrefix();
 
     /**
-     * Returns sets of enum value for given ResumedDataTemplate object
+     * Returns sets of enum value for given DataAttributeRef object
      *
      * @param enumType enum Type
      * @return Enum value list
@@ -577,19 +577,19 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
     }
 
     /**
-     * Returns a list of resumed DataTypeTemplate for DataAttribute (updatable or not)
+     * Returns a list of Data Attribute Reference for DataAttribute (updatable or not)
      *
-     * @param rDtt          reference resumed DataTypeTemplate (used as filter)
+     * @param dataAttributeRef          Data Attribute Reference (used as filter)
      * @param updatableOnly true to retrieve DataTypeTemplate's related to only updatable DAI, false to retrieve all
-     * @return List of resumed DataTypeTemplate for DataAttribute (updatable or not)
+     * @return List of Data Attribute Reference (updatable or not)
      * @throws ScdException SCD illegal arguments exception
      */
-    public List<ResumedDataTemplate> getDAI(ResumedDataTemplate rDtt, boolean updatableOnly) throws ScdException {
+    public List<DataAttributeRef> getDAI(DataAttributeRef dataAttributeRef, boolean updatableOnly) throws ScdException {
         String lnType = currentElem.getLnType();
-        if (!StringUtils.isBlank(rDtt.getLnType())) {
-            lnType = rDtt.getLnType();
+        if (!StringUtils.isBlank(dataAttributeRef.getLnType())) {
+            lnType = dataAttributeRef.getLnType();
         }
-        // get resumedDTT from DataTypeTemplate (it might be overridden in the DAI)
+        // get dataAttributeRef from DataTypeTemplate (it might be overridden in the DAI)
         DataTypeTemplateAdapter dttAdapter = getDataTypeTemplateAdapter();
         LNodeTypeAdapter lNodeTypeAdapter = dttAdapter.getLNodeTypeAdapterById(lnType)
                 .orElseThrow(
@@ -597,39 +597,39 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                                 String.format("Corrupted SCD : lnType missing for LN : %s%s", getLNClass(), getLNInst())
                         )
                 );
-        List<ResumedDataTemplate> resumedDTTs = lNodeTypeAdapter.getResumedDTTs(rDtt);
+        List<DataAttributeRef> dataAttributeRefs = lNodeTypeAdapter.getDataAttributeRefs(dataAttributeRef);
 
-        resumedDTTs.forEach(this::overrideAttributesFromDAI);
+        dataAttributeRefs.forEach(this::overrideAttributesFromDAI);
 
         if (updatableOnly) {
-            return resumedDTTs.stream().filter(ResumedDataTemplate::isUpdatable).toList();
+            return dataAttributeRefs.stream().filter(DataAttributeRef::isUpdatable).toList();
         } else {
-            return resumedDTTs;
+            return dataAttributeRefs;
         }
     }
 
     /**
-     * Update given ResumedDataTemplate DAI datas from LNode
+     * Update given DataAttributeRef DAI datas from LNode
      *
-     * @param rDtt summarized Data Type Template object to update DAI datas
+     * @param dataAttributeRef summarized Data Type Template object to update DAI datas
      */
-    protected void overrideAttributesFromDAI(final ResumedDataTemplate rDtt) {
-        findMatch(rDtt.getDoName(), rDtt.getDaName())
+    protected void overrideAttributesFromDAI(final DataAttributeRef dataAttributeRef) {
+        findMatch(dataAttributeRef.getDoName(), dataAttributeRef.getDaName())
                 .map(iDataAdapter -> (AbstractDAIAdapter<?>) iDataAdapter)
                 .map(AbstractDAIAdapter::getCurrentElem)
                 .ifPresent(tdai -> {
-                    rDtt.setDaiValues(tdai.getVal());
-                    if (rDtt.getDaName().getFc() == TFCEnum.SG || rDtt.getDaName().getFc() == TFCEnum.SE) {
+                    dataAttributeRef.setDaiValues(tdai.getVal());
+                    if (dataAttributeRef.getDaName().getFc() == TFCEnum.SG || dataAttributeRef.getDaName().getFc() == TFCEnum.SE) {
                         boolean isGroup = hasSgGroup(tdai);
                         if (isGroup) {
-                            rDtt.setValImport((!tdai.isSetValImport() || tdai.isValImport()) && iedHasConfSG());
+                            dataAttributeRef.setValImport((!tdai.isSetValImport() || tdai.isValImport()) && iedHasConfSG());
                         } else {
-                            rDtt.setValImport(false);
+                            dataAttributeRef.setValImport(false);
                             log.warn("Inconsistency in the SCD file - DAI {} with fc={} must have a sGroup attribute",
-                                    rDtt.getObjRef(getParentIed().getName(), parentAdapter.getInst()), rDtt.getDaName().getFc());
+                                    dataAttributeRef.getObjRef(getParentIed().getName(), parentAdapter.getInst()), dataAttributeRef.getDaName().getFc());
                         }
                     } else if (tdai.isSetValImport()) {
-                        rDtt.setValImport(tdai.isValImport());
+                        dataAttributeRef.setValImport(tdai.isValImport());
                     }
                 });
     }
@@ -711,28 +711,28 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
     /**
      * Updates DAI in LN/LN0 section.
      * It will create the missing DOI/SDI/DAI in this LN/LN0 if needed.
-     * Be careful, this method does not check that the given rDtt is allowed by the lnType of this LN/LN0.
-     * It does not even check if rDtt exists in DataTypeTemplate section.
+     * Be careful, this method does not check that the given dataAttributeRef is allowed by the lnType of this LN/LN0.
+     * It does not even check if dataAttributeRef exists in DataTypeTemplate section.
      * That means that it will create the missing DOI/SDI/DAI, even if it is not consistent with DataTypeTemplate section.
-     * It is the caller responsibility to ensure the consistency between the given rDtt and the lnType of this LN/LN0 (which points to DataTypeTemplate section).
+     * It is the caller responsibility to ensure the consistency between the given dataAttributeRef and the lnType of this LN/LN0 (which points to DataTypeTemplate section).
      * See 9.3.5 "LN0 and other Logical Nodes" of IEC 61850-6.
-     * If given rDtt.isUpdatable() is false, the method does nothing (it will not check if DA/BDA is updatable in DataTypeTemplate section).
-     * This method will not remove any Val, it will only create new Val or replace existing Val (for example if rDtt.getDaName().getDaiValues() is empty, it does nothing)
+     * If given dataAttributeRef.isUpdatable() is false, the method does nothing (it will not check if DA/BDA is updatable in DataTypeTemplate section).
+     * This method will not remove any Val, it will only create new Val or replace existing Val (for example if dataAttributeRef.getDaName().getDaiValues() is empty, it does nothing)
      *
-     * @param rDtt summarized Data Type Temple containing new DA val
-     * @throws ScdException when given rDtt is missing DoName or DaName
+     * @param dataAttributeRef summarized Data Type Temple containing new DA val
+     * @throws ScdException when given dataAttributeRef is missing DoName or DaName
      */
-    public void updateDAI(@NonNull ResumedDataTemplate rDtt) throws ScdException {
+    public void updateDAI(@NonNull DataAttributeRef dataAttributeRef) throws ScdException {
 
-        if (!rDtt.isDoNameDefined() || !rDtt.isDaNameDefined()) {
+        if (!dataAttributeRef.isDoNameDefined() || !dataAttributeRef.isDaNameDefined()) {
             throw new ScdException("Cannot update undefined DAI");
         }
-        if (!rDtt.isUpdatable() || rDtt.getDaName().getDaiValues().isEmpty()) {
+        if (!dataAttributeRef.isUpdatable() || dataAttributeRef.getDaName().getDaiValues().isEmpty()) {
             return;
         }
 
-        AbstractDAIAdapter<?> daiAdapter = createDoiSdiDaiChainIfNotExists(rDtt.getDataAttributes(), rDtt.isUpdatable());
-        daiAdapter.update(rDtt.getDaName().getDaiValues());
+        AbstractDAIAdapter<?> daiAdapter = createDoiSdiDaiChainIfNotExists(dataAttributeRef.getDataAttributes(), dataAttributeRef.isUpdatable());
+        daiAdapter.update(dataAttributeRef.getDaName().getDaiValues());
     }
 
     /**
@@ -813,14 +813,14 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                                 String.format("Corrupted  SCD file: Reference to unknown LNodeType(%s)", getLnType())
                         )
                 );
-        ResumedDataTemplate filter = ResumedDataTemplate.builder()
+        DataAttributeRef filter = DataAttributeRef.builder()
                 .lnInst(getLNInst())
                 .lnClass(getLNClass())
                 .lnType(currentElem.getLnType()).build();
-        List<ResumedDataTemplate> rDtts = lNodeTypeAdapter.getResumedDTTs(filter);
+        List<DataAttributeRef> dataAttributeRefs = lNodeTypeAdapter.getDataAttributeRefs(filter);
 
         return matchesDataAttributes(dataAttribute) ||
-                rDtts.stream().anyMatch(rDtt -> rDtt.getDataAttributes().startsWith(dataAttribute));
+                dataAttributeRefs.stream().anyMatch(dataAttributeRef -> dataAttributeRef.getDataAttributes().startsWith(dataAttribute));
     }
 
     /**
@@ -851,11 +851,11 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
     /**
      * Gets DAI values for specified DA in summaraized Data Type Template
      *
-     * @param rDtt summaraized Data Type Template containing DA datas
+     * @param dataAttributeRef summaraized Data Type Template containing DA datas
      * @return map of Setting Group and it's VAL
      */
-    public Map<Long, String> getDAIValues(ResumedDataTemplate rDtt) {
-        DAITracker daiTracker = new DAITracker(this, rDtt.getDoName(), rDtt.getDaName());
+    public Map<Long, String> getDAIValues(DataAttributeRef dataAttributeRef) {
+        DAITracker daiTracker = new DAITracker(this, dataAttributeRef.getDoName(), dataAttributeRef.getDaName());
         DAITracker.MatchResult matchResult = daiTracker.search();
         if (matchResult != DAITracker.MatchResult.FULL_MATCH) {
             return new HashMap<>();
@@ -1042,11 +1042,11 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      */
     public Optional<String> getDaiModStValValue() {
         return getDaiModStVal()
-                .flatMap(ResumedDataTemplate::findFirstValue);
+                .flatMap(DataAttributeRef::findFirstValue);
     }
 
-    protected Optional<ResumedDataTemplate> getDaiModStVal() {
-        ResumedDataTemplate daiModFilter = new ResumedDataTemplate(this, MOD_DO_TYPE_NAME, STVAL_DA_TYPE_NAME);
+    protected Optional<DataAttributeRef> getDaiModStVal() {
+        DataAttributeRef daiModFilter = new DataAttributeRef(this, MOD_DO_TYPE_NAME, STVAL_DA_TYPE_NAME);
         return getDAI(daiModFilter, false).stream()
                 .findFirst();
     }

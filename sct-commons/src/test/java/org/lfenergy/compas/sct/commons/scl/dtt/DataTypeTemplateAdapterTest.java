@@ -381,7 +381,7 @@ class DataTypeTemplateAdapterTest {
     @CsvSource({"A,LN1,No coherence or path between DOType(DO2) and DA(A)",
             "antRef,LN1,Invalid ExtRef signal: no coherence between pDO(Op.origin) and pDA(antRef)",
             "antRef.origin.ctlVal,LN_Type1,Unknown LNodeType:LN_Type1"})
-    void getBinderResumedDTT_shouldThrowScdException_whenDONotContainDA(String pDA, String lnType, String message) throws Exception {
+    void getBinderDataAttributeRef_shouldThrowScdException_whenDONotContainDA(String pDA, String lnType, String message) throws Exception {
         //Given
         DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
         ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
@@ -389,13 +389,13 @@ class DataTypeTemplateAdapterTest {
         signalInfo.setPDO("Op.origin");
         signalInfo.setPDA(pDA);
         //When Then
-        assertThatThrownBy(() -> dttAdapter.getBinderResumedDTT(lnType,signalInfo))
+        assertThatThrownBy(() -> dttAdapter.getBinderDataAttribute(lnType,signalInfo))
                 .isInstanceOf(ScdException.class)
                 .hasMessage(message);
     }
 
     @Test
-    void getBinderResumedDTT_shouldThrowScdException_whenLnClassNotMatches() throws Exception {
+    void getBinderDataAttributeRef_shouldThrowScdException_whenLnClassNotMatches() throws Exception {
         //Given
         DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
         LNodeTypeAdapter lNodeTypeAdapter = dttAdapter.getLNodeTypeAdapterById("LN1").get();
@@ -406,13 +406,13 @@ class DataTypeTemplateAdapterTest {
         signalInfo.setPDO("Op.origin");
         signalInfo.setPDA("antRef.origin.ctlVal");
         //When Then
-        assertThatThrownBy(() -> dttAdapter.getBinderResumedDTT("LN1",signalInfo))
+        assertThatThrownBy(() -> dttAdapter.getBinderDataAttribute("LN1",signalInfo))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("lnClass is mandatory for LNodeType in DataTemplate : LN1");
     }
 
     @Test
-    void getBinderResumedDTT_shouldThrowScdException_whenDOIdNotFound() throws Exception {
+    void getBinderDataAttributeRef_shouldThrowScdException_whenDOIdNotFound() throws Exception {
         //Given
         DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
 
@@ -420,13 +420,13 @@ class DataTypeTemplateAdapterTest {
         signalInfo.setPLN("PIOC");
         signalInfo.setPDO("Do");
         //When Then
-        assertThatThrownBy(() -> dttAdapter.getBinderResumedDTT("LN1",signalInfo))
+        assertThatThrownBy(() -> dttAdapter.getBinderDataAttribute("LN1",signalInfo))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Unknown doName :Do");
     }
 
     @Test
-    void getBinderResumedDTT_shouldReturnBindingInfoWithoutDO_whenSignalPDOEmpty() throws Exception {
+    void getBinderDataAttributeRef_shouldReturnBindingInfoWithoutDO_whenSignalPDOEmpty() throws Exception {
         //Given
         DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
 
@@ -434,7 +434,7 @@ class DataTypeTemplateAdapterTest {
         signalInfo.setPLN("PIOC");
         signalInfo.setPDO(null);
         //When Then
-        ExtRefBindingInfo bindingInfo = assertDoesNotThrow(() -> dttAdapter.getBinderResumedDTT("LN1",signalInfo));
+        ExtRefBindingInfo bindingInfo = assertDoesNotThrow(() -> dttAdapter.getBinderDataAttribute("LN1",signalInfo));
         assertThat(bindingInfo)
                 .extracting("lnType", "lnClass")
                 .containsExactlyInAnyOrder("LN1", "PIOC");
@@ -442,7 +442,7 @@ class DataTypeTemplateAdapterTest {
     }
 
     @Test
-    void getBinderResumedDTT_shouldReturnBindingInfoWithoutDA_whenSignalPDAEmpty() throws Exception {
+    void getBinderDataAttributeRef_shouldReturnBindingInfoWithoutDA_whenSignalPDAEmpty() throws Exception {
         //Given
         DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
 
@@ -451,7 +451,7 @@ class DataTypeTemplateAdapterTest {
         signalInfo.setPDO("Op.origin");
         signalInfo.setPDA(null);
         //When Then
-        ExtRefBindingInfo bindingInfo = assertDoesNotThrow(() -> dttAdapter.getBinderResumedDTT("LN1",signalInfo));
+        ExtRefBindingInfo bindingInfo = assertDoesNotThrow(() -> dttAdapter.getBinderDataAttribute("LN1",signalInfo));
         assertThat(bindingInfo)
                 .extracting("lnType", "lnClass")
                 .containsExactlyInAnyOrder("LN1", "PIOC");
@@ -460,7 +460,7 @@ class DataTypeTemplateAdapterTest {
     }
 
     @Test
-    void getBinderResumedDTT_shouldReturnBindingInfo_whenExist() throws Exception {
+    void getBinderDataAttributeRef_shouldReturnBindingInfo_whenExist() throws Exception {
         //Given
         DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
 
@@ -469,7 +469,7 @@ class DataTypeTemplateAdapterTest {
         signalInfo.setPDO("Op.origin");
         signalInfo.setPDA("antRef.origin.ctlVal");
         //When Then
-        ExtRefBindingInfo bindingInfo = assertDoesNotThrow(() -> dttAdapter.getBinderResumedDTT("LN1",signalInfo));
+        ExtRefBindingInfo bindingInfo = assertDoesNotThrow(() -> dttAdapter.getBinderDataAttribute("LN1",signalInfo));
         assertThat(bindingInfo)
                 .extracting("lnType", "lnClass")
                 .containsExactlyInAnyOrder("LN1", "PIOC");

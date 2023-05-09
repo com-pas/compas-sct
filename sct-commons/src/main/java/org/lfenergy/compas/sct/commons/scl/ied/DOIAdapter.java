@@ -134,12 +134,12 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
     }
 
     private Optional<SclReportItem> updateDAI(String daName, String value) {
-        ResumedDataTemplate daiFilterSrcRef = new ResumedDataTemplate(getParentAdapter(), new DoTypeName(getName()), new DaTypeName(daName));
-        Optional<ResumedDataTemplate> foundDais = getParentAdapter().getDAI(daiFilterSrcRef, true).stream().findFirst();
+        DataAttributeRef daiFilterSrcRef = new DataAttributeRef(getParentAdapter(), new DoTypeName(getName()), new DaTypeName(daName));
+        Optional<DataAttributeRef> foundDais = getParentAdapter().getDAI(daiFilterSrcRef, true).stream().findFirst();
         if (foundDais.isEmpty()) {
             return Optional.of(SclReportItem.warning(getXPath() + "/DAI@name=\"" + daName + "\"/Val", "The DAI cannot be updated"));
         }
-        ResumedDataTemplate filterForUpdate = foundDais.get();
+        DataAttributeRef filterForUpdate = foundDais.get();
         filterForUpdate.setVal(value);
         getParentAdapter().updateDAI(filterForUpdate);
         return Optional.empty();

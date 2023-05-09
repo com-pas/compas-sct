@@ -7,7 +7,7 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 import org.lfenergy.compas.scl2007b4.model.TLN;
 import org.lfenergy.compas.scl2007b4.model.TServiceType;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
-import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
+import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
@@ -36,8 +36,8 @@ import java.util.List;
  *      <li>{@link LNAdapter#getExtRefs(ExtRefSignalInfo) <em>Returns the value of the <b>TExtRef </b>containment reference list By <b>ExtRefSignalInfo <b></b></b></em>}</li>
  *      <li>{@link LNAdapter#isExtRefExist(ExtRefSignalInfo) <em>Returns the value of the <b>TExtRef </b>containment reference list By <b>ExtRefSignalInfo </b></em>}</li>
  *
- *      <li>{@link LNAdapter#getDAI <em>Returns the value of the <b>ResumedDataTemplate </b> containment reference By filter</em>}</li>
- *      <li>{@link LNAdapter#getDAIValues(ResumedDataTemplate) <em>Returns <b>DAI (sGroup, value) </b> containment reference list By <b>ResumedDataTemplate </b> filter</em>}</li>
+ *      <li>{@link LNAdapter#getDAI <em>Returns the value of the <b>DataAttributeRef </b> containment reference By filter</em>}</li>
+ *      <li>{@link LNAdapter#getDAIValues(DataAttributeRef) <em>Returns <b>DAI (sGroup, value) </b> containment reference list By <b>DataAttributeRef </b> filter</em>}</li>
 
  *      <li>{@link LNAdapter#getDataSetByName(String) <em>Returns the value of the <b>TDataSet </b>object reference By the value of the <b>name </b>attribute </em>}</li>
  *
