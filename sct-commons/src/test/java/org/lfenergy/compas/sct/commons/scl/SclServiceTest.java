@@ -549,34 +549,34 @@ class SclServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
 
         // when
-        Set<ResumedDataTemplate> allResults = SclService.getDAI(scd, "IED_NAME1", "LD_INST12", new ResumedDataTemplate(), true);
+        Set<DataAttributeRef> allResults = SclService.getDAI(scd, "IED_NAME1", "LD_INST12", new DataAttributeRef(), true);
 
         // then
         assertThat(allResults).hasSize(733);
 
-        List<ResumedDataTemplate> resultsWithDa = allResults.stream().filter(rdt -> StringUtils.isNotBlank(rdt.getDaRef())).collect(Collectors.toList());
+        List<DataAttributeRef> resultsWithDa = allResults.stream().filter(rdt -> StringUtils.isNotBlank(rdt.getDaRef())).collect(Collectors.toList());
         assertThat(resultsWithDa).hasSize(733);
 
-        List<ResumedDataTemplate> resultsWithNoBda = allResults.stream().filter(rdt -> rdt.getBdaNames().isEmpty()).collect(Collectors.toList());
+        List<DataAttributeRef> resultsWithNoBda = allResults.stream().filter(rdt -> rdt.getBdaNames().isEmpty()).collect(Collectors.toList());
         assertThat(resultsWithNoBda).hasSize(3);
-        List<ResumedDataTemplate> resultsWithBdaDepth1 = allResults.stream().filter(rdt -> rdt.getBdaNames().size() == 1).collect(Collectors.toList());
+        List<DataAttributeRef> resultsWithBdaDepth1 = allResults.stream().filter(rdt -> rdt.getBdaNames().size() == 1).collect(Collectors.toList());
         assertThat(resultsWithBdaDepth1).isEmpty();
-        List<ResumedDataTemplate> resultsWithBdaDepth2 = allResults.stream().filter(rdt -> rdt.getBdaNames().size() == 2).collect(Collectors.toList());
+        List<DataAttributeRef> resultsWithBdaDepth2 = allResults.stream().filter(rdt -> rdt.getBdaNames().size() == 2).collect(Collectors.toList());
         assertThat(resultsWithBdaDepth2).hasSize(1);
-        List<ResumedDataTemplate> resultsWithBdaDepth3 = allResults.stream().filter(rdt -> rdt.getBdaNames().size() == 3).collect(Collectors.toList());
+        List<DataAttributeRef> resultsWithBdaDepth3 = allResults.stream().filter(rdt -> rdt.getBdaNames().size() == 3).collect(Collectors.toList());
         assertThat(resultsWithBdaDepth3).hasSize(729);
 
 
-        List<ResumedDataTemplate> resultsWithDo = allResults.stream().filter(rdt -> StringUtils.isNotBlank(rdt.getDoRef())).collect(Collectors.toList());
+        List<DataAttributeRef> resultsWithDo = allResults.stream().filter(rdt -> StringUtils.isNotBlank(rdt.getDoRef())).collect(Collectors.toList());
         assertThat(resultsWithDo).hasSize(733);
 
-        List<ResumedDataTemplate> resultsWithNoSdo = allResults.stream().filter(rdt -> rdt.getSdoNames().isEmpty()).collect(Collectors.toList());
+        List<DataAttributeRef> resultsWithNoSdo = allResults.stream().filter(rdt -> rdt.getSdoNames().isEmpty()).collect(Collectors.toList());
         assertThat(resultsWithNoSdo).hasSize(3);
-        List<ResumedDataTemplate> resultsWithSdoDepth1 = allResults.stream().filter(rdt -> rdt.getSdoNames().size() == 1).collect(Collectors.toList());
+        List<DataAttributeRef> resultsWithSdoDepth1 = allResults.stream().filter(rdt -> rdt.getSdoNames().size() == 1).collect(Collectors.toList());
         assertThat(resultsWithSdoDepth1).isEmpty();
-        List<ResumedDataTemplate> resultsWithSdoDepth2 = allResults.stream().filter(rdt -> rdt.getSdoNames().size() == 2).collect(Collectors.toList());
+        List<DataAttributeRef> resultsWithSdoDepth2 = allResults.stream().filter(rdt -> rdt.getSdoNames().size() == 2).collect(Collectors.toList());
         assertThat(resultsWithSdoDepth2).hasSize(730);
-        List<ResumedDataTemplate> resultsWithSdoDepth3 = allResults.stream().filter(rdt -> rdt.getSdoNames().size() == 3).collect(Collectors.toList());
+        List<DataAttributeRef> resultsWithSdoDepth3 = allResults.stream().filter(rdt -> rdt.getSdoNames().size() == 3).collect(Collectors.toList());
         assertThat(resultsWithSdoDepth3).isEmpty();
     }
 
@@ -586,12 +586,12 @@ class SclServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_test_aggregate_DAI.xml");
 
         // when
-        Set<ResumedDataTemplate> dais = SclService.getDAI(scd, "VirtualBCU", "LDMODEXPF", new ResumedDataTemplate(), false);
+        Set<DataAttributeRef> dais = SclService.getDAI(scd, "VirtualBCU", "LDMODEXPF", new DataAttributeRef(), false);
 
         // then
-        ResumedDataTemplate lln0 = ResumedDataTemplate.builder().prefix("").lnType("lntype1").lnClass("LLN0").lnInst("").build();
-        ResumedDataTemplate lln0DoA = lln0.toBuilder().doName(createDo("DoA", TPredefinedCDCEnum.DPL)).build();
-        ResumedDataTemplate lln0DoB = lln0.toBuilder().doName(createDo("DoB", TPredefinedCDCEnum.ACD)).build();
+        DataAttributeRef lln0 = DataAttributeRef.builder().prefix("").lnType("lntype1").lnClass("LLN0").lnInst("").build();
+        DataAttributeRef lln0DoA = lln0.toBuilder().doName(createDo("DoA", TPredefinedCDCEnum.DPL)).build();
+        DataAttributeRef lln0DoB = lln0.toBuilder().doName(createDo("DoB", TPredefinedCDCEnum.ACD)).build();
 
         assertThat(dais).containsExactlyInAnyOrder(
                 lln0DoA.toBuilder().daName(createDa("daNotInDai", TFCEnum.CF, false, Map.of(0L, "0"))).build(),
@@ -606,7 +606,7 @@ class SclServiceTest {
                 lln0DoB.toBuilder().daName(createDa("structDa.daiOverrideValImport", TFCEnum.ST, true, Map.of())).build(),
                 lln0DoB.toBuilder().daName(createDa("structDa.daiOverrideValImport2", TFCEnum.ST, false, Map.of())).build(),
 
-                ResumedDataTemplate.builder().prefix("").lnType("lntype2").lnClass("LPHD").lnInst("0")
+                DataAttributeRef.builder().prefix("").lnType("lntype2").lnClass("LPHD").lnInst("0")
                         .doName(createDo("PhyNam", TPredefinedCDCEnum.DPS))
                         .daName(createDa("aDa", TFCEnum.BL, false, Map.of())).build()
         );
@@ -618,9 +618,9 @@ class SclServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
 
         // when & then
-        ResumedDataTemplate resumedDataTemplate = new ResumedDataTemplate();
+        DataAttributeRef dataAttributeRef = new DataAttributeRef();
         assertThrows(ScdException.class,
-                () -> SclService.getDAI(scd, "IED_NAME1", "UNKNOWNLD", resumedDataTemplate, true));
+                () -> SclService.getDAI(scd, "IED_NAME1", "UNKNOWNLD", dataAttributeRef, true));
     }
 
     @Test
@@ -629,13 +629,13 @@ class SclServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_test_updatable_DAI.xml");
 
         // when
-        Set<ResumedDataTemplate> dais = SclService.getDAI(scd, "VirtualBCU", "LDMODEXPF", new ResumedDataTemplate(), true);
+        Set<DataAttributeRef> dais = SclService.getDAI(scd, "VirtualBCU", "LDMODEXPF", new DataAttributeRef(), true);
 
         // then
         assertThat(dais).isNotNull();
         List<String> resultSimpleDa = dais.stream()
-                .filter(rdtt -> rdtt.getBdaNames().isEmpty()) // test only simple DA
-                .map(ResumedDataTemplate::getLNRef).collect(Collectors.toList());
+                .filter(dataAttributeRef -> dataAttributeRef.getBdaNames().isEmpty()) // test only simple DA
+                .map(DataAttributeRef::getLNRef).collect(Collectors.toList());
         assertThat(resultSimpleDa).containsExactlyInAnyOrder(
                 // ...AndTrueInDai : If ValImport is True in DAI, DA is updatable
                 "LLN0.DoA.valImportNotSetAndTrueInDai",
@@ -661,13 +661,13 @@ class SclServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_test_updatable_DAI.xml");
 
         // when
-        Set<ResumedDataTemplate> dais = SclService.getDAI(scd, "VirtualBCU", "LDMODEXPF", new ResumedDataTemplate(), true);
+        Set<DataAttributeRef> dais = SclService.getDAI(scd, "VirtualBCU", "LDMODEXPF", new DataAttributeRef(), true);
 
         // then
         assertThat(dais).isNotNull();
         List<String> resultStructDa = dais.stream()
-                .filter(rdtt -> !rdtt.getBdaNames().isEmpty()) // test only struct DA
-                .map(ResumedDataTemplate::getLNRef).collect(Collectors.toList());
+                .filter(dataAttributeRef -> !dataAttributeRef.getBdaNames().isEmpty()) // test only struct DA
+                .map(DataAttributeRef::getLNRef).collect(Collectors.toList());
         assertThat(resultStructDa).containsExactlyInAnyOrder(
                 // ...AndTrueInDai : If ValImport is True in DAI, BDA is updatable
                 "LLN0.DoB.structValImportNotSet.bValImportFalseAndTrueInDai",
@@ -703,13 +703,13 @@ class SclServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_test_updatable_DAI.xml");
 
         // when
-        Set<ResumedDataTemplate> dais = SclService.getDAI(scd, "VirtualBCU", "LDCAP", new ResumedDataTemplate(), true);
+        Set<DataAttributeRef> dais = SclService.getDAI(scd, "VirtualBCU", "LDCAP", new DataAttributeRef(), true);
 
         // then
         assertThat(dais).isNotNull();
         List<String> resultSimpleDa = dais.stream()
-                .filter(rdtt -> rdtt.getBdaNames().isEmpty()) // test only simple DA
-                .map(ResumedDataTemplate::getLNRef).collect(Collectors.toList());
+                .filter(dataAttributeRef -> dataAttributeRef.getBdaNames().isEmpty()) // test only simple DA
+                .map(DataAttributeRef::getLNRef).collect(Collectors.toList());
         assertThat(resultSimpleDa).containsExactlyInAnyOrder(
                 "LLN0.DoD.sGroupValImportNotSet",
                 "LLN0.DoD.sGroupValImportTrue"
@@ -722,7 +722,7 @@ class SclServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_test_updatable_DAI.xml");
 
         // when
-        Set<ResumedDataTemplate> dais = SclService.getDAI(scd, "VirtualBCU", "LDMOD", new ResumedDataTemplate(), true);
+        Set<DataAttributeRef> dais = SclService.getDAI(scd, "VirtualBCU", "LDMOD", new DataAttributeRef(), true);
 
         // then
         assertThat(dais)
@@ -772,22 +772,22 @@ class SclServiceTest {
 
     @Test
     void testUpdateDAI() {
-        ResumedDataTemplate rDtt = new ResumedDataTemplate();
-        rDtt.setLnType("unknownID");
+        DataAttributeRef dataAttributeRef = new DataAttributeRef();
+        dataAttributeRef.setLnType("unknownID");
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
 
         assertThrows(ScdException.class, () -> SclService.updateDAI(
-                scd, "IED", "LD", rDtt
+                scd, "IED", "LD", dataAttributeRef
         ));
-        rDtt.setLnType("LNO1");
-        rDtt.setLnClass(TLLN0Enum.LLN_0.value());
+        dataAttributeRef.setLnType("LNO1");
+        dataAttributeRef.setLnClass(TLLN0Enum.LLN_0.value());
         DoTypeName doTypeName = new DoTypeName("Do.sdo1.d");
-        rDtt.setDoName(doTypeName);
-        rDtt.setDaName(new DaTypeName("antRef.bda1.bda2.bda3"));
+        dataAttributeRef.setDoName(doTypeName);
+        dataAttributeRef.setDaName(new DaTypeName("antRef.bda1.bda2.bda3"));
         TVal tVal = new TVal();
         tVal.setValue("newValue");
-        rDtt.setDaiValues(List.of(tVal));
-        assertDoesNotThrow(() -> SclService.updateDAI(scd, "IED_NAME", "LD_INS1", rDtt));
+        dataAttributeRef.setDaiValues(List.of(tVal));
+        assertDoesNotThrow(() -> SclService.updateDAI(scd, "IED_NAME", "LD_INS1", dataAttributeRef));
         assertIsMarshallable(scd);
     }
 

@@ -7,7 +7,7 @@ package org.lfenergy.compas.sct.commons.util;
 import com.opencsv.bean.CsvBindByPosition;
 import lombok.*;
 import org.apache.commons.lang3.StringUtils;
-import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
+import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
@@ -21,15 +21,15 @@ public enum FcdaCandidates {
     private Set<FcdaCandidate> candidates;
 
     /**
-     * Check if resumedDataTemplate is contains
+     * Check if dataAttributeRef is contains
      *
-     * @see #contains(ResumedDataTemplate)
+     * @see #contains(DataAttributeRef)
      */
-    public boolean contains(ResumedDataTemplate resumedDataTemplate) {
-        return contains(resumedDataTemplate.getLnClass(),
-            resumedDataTemplate.getDoName().toStringWithoutInst(),
-            resumedDataTemplate.getDaName().toString(),
-            resumedDataTemplate.getFc().value());
+    public boolean contains(DataAttributeRef dataAttributeRef) {
+        return contains(dataAttributeRef.getLnClass(),
+            dataAttributeRef.getDoName().toStringWithoutInst(),
+            dataAttributeRef.getDaName().toString(),
+            dataAttributeRef.getFc().value());
     }
 
     boolean contains(String lnClass, String doName, String daName, String fc) {

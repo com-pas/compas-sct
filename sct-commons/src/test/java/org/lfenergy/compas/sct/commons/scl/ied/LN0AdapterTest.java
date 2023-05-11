@@ -470,7 +470,7 @@ class LN0AdapterTest {
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LDSUIED").get());
         LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
-        ResumedDataTemplate filter = new ResumedDataTemplate();
+        DataAttributeRef filter = new DataAttributeRef();
         filter.setLnClass(ln0Adapter.getLNClass());
         filter.setLnInst(ln0Adapter.getLNInst());
         filter.setPrefix(ln0Adapter.getPrefix());
@@ -482,12 +482,12 @@ class LN0AdapterTest {
         daTypeName.setFc(TFCEnum.ST);
         filter.setDaName(daTypeName);
         //When
-        var rDtts = ln0Adapter.getDAI(filter, false);
+        var dataAttributeRefs = ln0Adapter.getDAI(filter, false);
         //Then
-        assertFalse(rDtts.isEmpty());
-        assertEquals(1, rDtts.size());
-        assertNotNull(rDtts.get(0).getDaName().getType());
-        assertEquals("BehaviourModeKind", rDtts.get(0).getDaName().getType());
+        assertFalse(dataAttributeRefs.isEmpty());
+        assertEquals(1, dataAttributeRefs.size());
+        assertNotNull(dataAttributeRefs.get(0).getDaName().getType());
+        assertEquals("BehaviourModeKind", dataAttributeRefs.get(0).getDaName().getType());
     }
 
     @Test

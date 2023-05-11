@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  *   <li>{@link LNodeDTO#getGooseControlBlocks <em>Refers To GooseControl Blocks</em>}</li>
  *   <li>{@link LNodeDTO#getSmvControlBlocks <em>Refers To SmvControl Blocks</em>}</li>
  *   <li>{@link LNodeDTO#getReportControlBlocks <em>Refers To ReportControl Blocks</em>}</li>
- *  <li>{@link LNodeDTO#getResumedDataTemplates <em>Refers To DataTemplates Objects</em>}</li>
+ *  <li>{@link LNodeDTO#getDataAttributeRefs <em>Refers To DataTemplates Objects</em>}</li>
  * </ul>
  *
  * @see org.lfenergy.compas.scl2007b4.model.TLNode
@@ -55,7 +55,7 @@ public class LNodeDTO {
     private Set<SMVControlBlock> smvControlBlocks = new HashSet<>();
     private Set<ReportControlBlock> reportControlBlocks = new HashSet<>();
     private Set<DataSetInfo> datSets = new HashSet<>();
-    private Set<ResumedDataTemplate> resumedDataTemplates = new HashSet<>();
+    private Set<DataAttributeRef> dataAttributeRefs = new HashSet<>();
 
     /**
      * Constructor
@@ -113,7 +113,7 @@ public class LNodeDTO {
             lNodeDTO.datSets = DataSetInfo.getDataSets(nodeAdapter);
         }
 
-        if(options.isWithResumedDtt()) {
+        if(options.isWithDataAttributeRef()) {
             DataTypeTemplateAdapter dttAdapter = nodeAdapter.getDataTypeTemplateAdapter();
             LNodeTypeAdapter lNodeTypeAdapter = dttAdapter.getLNodeTypeAdapterById(nodeAdapter.getLnType())
                     .orElseThrow(
@@ -124,13 +124,13 @@ public class LNodeDTO {
                                     )
                             )
                     );
-            ResumedDataTemplate filter = ResumedDataTemplate.builder()
+            DataAttributeRef filter = DataAttributeRef.builder()
                 .lnInst(nodeAdapter.getLNInst())
                 .lnClass(nodeAdapter.getLNClass())
                 .prefix(nodeAdapter.getPrefix())
                 .lnType(nodeAdapter.getLnType()).build();
-            List<ResumedDataTemplate> resumedDataTemplateList = lNodeTypeAdapter.getResumedDTTs(filter);
-            lNodeDTO.addAllResumedDataTemplate(resumedDataTemplateList);
+            List<DataAttributeRef> dataAttributeRefList = lNodeTypeAdapter.getDataAttributeRefs(filter);
+            lNodeDTO.addAllDataAttributeRef(dataAttributeRefList);
         }
 
         if(options.isWithCB()) {
@@ -241,26 +241,26 @@ public class LNodeDTO {
 
     /**
      * Adds DataTypeTemplate's sumarised data
-     * @param dtt input
+     * @param dataAttributeRef input
      */
-    public void addResumedDataTemplate(ResumedDataTemplate dtt) {
-        resumedDataTemplates.add(dtt);
+    public void addDataAttributeRef(DataAttributeRef dataAttributeRef) {
+        dataAttributeRefs.add(dataAttributeRef);
     }
 
     /**
      * Adds list of DataTypeTemplate's sumarised data
-     * @param dtt input
+     * @param dataAttributeRefs input
      */
-    public void addAllResumedDataTemplate(List<ResumedDataTemplate> dtt) {
-        this.resumedDataTemplates.addAll(dtt);
+    public void addAllDataAttributeRef(List<DataAttributeRef> dataAttributeRefs) {
+        this.dataAttributeRefs.addAll(dataAttributeRefs);
     }
 
     /**
      * Gets DataTypeTemplate's sumarised data
-     * @return Set of ResumedDataTemplate object
+     * @return Set of DataAttributeRef object
      */
-    public Set<ResumedDataTemplate> getResumedDataTemplates(){
-        return Set.of(resumedDataTemplates.toArray(new ResumedDataTemplate[0]));
+    public Set<DataAttributeRef> getDataAttributeRefs(){
+        return Set.of(dataAttributeRefs.toArray(new DataAttributeRef[0]));
     }
 
     /**

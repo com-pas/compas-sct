@@ -8,8 +8,8 @@ import org.lfenergy.compas.scl2007b4.model.TFCEnum;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedCDCEnum;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
+import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
 import org.lfenergy.compas.sct.commons.dto.DoTypeName;
-import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 
 import java.util.Map;
 
@@ -29,11 +29,11 @@ public class DataTypeUtils {
         return resultDo;
     }
 
-    public static ResumedDataTemplate createResumedDataTemplate(DoTypeName doTypeName, DaTypeName daTypeName) {
-        ResumedDataTemplate rDtt = new ResumedDataTemplate();
-        rDtt.setDoName(doTypeName);
-        rDtt.setDaName(daTypeName);
-        return rDtt;
+    public static DataAttributeRef createDataAttributeRef(DoTypeName doTypeName, DaTypeName daTypeName) {
+        DataAttributeRef dataAttributeRef = new DataAttributeRef();
+        dataAttributeRef.setDoName(doTypeName);
+        dataAttributeRef.setDaName(daTypeName);
+        return dataAttributeRef;
     }
 
     private DataTypeUtils() {

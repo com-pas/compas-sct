@@ -163,43 +163,43 @@ public class DTO {
 
 
     /*-----------------------------------------------*/
-    /*                   ResumedDataTemplate         */
+    /*                   DataAttributeRef         */
     /*-----------------------------------------------*/
     public static final String LN_TYPE = "LN_TYPE";
 
     public static final String CDC = TPredefinedCDCEnum.WYE.value();
     public static final String FC = TFCEnum.CF.value();
 
-    public static ResumedDataTemplate createRTT() {
-        ResumedDataTemplate rDTT = new ResumedDataTemplate();
+    public static DataAttributeRef createDataAttributeRef() {
+        DataAttributeRef dataAttributeRef = new DataAttributeRef();
 
-        rDTT.setLnType(LN_TYPE);
-        rDTT.setLnClass(TLLN0Enum.LLN_0.value());
-        rDTT.setDoName(new DoTypeName(DO_NAME));
-        rDTT.setDaName(new DaTypeName(DA_NAME));
-        rDTT.getDoName().setCdc(TPredefinedCDCEnum.fromValue(CDC));
-        rDTT.getDaName().setFc(TFCEnum.fromValue(FC));
+        dataAttributeRef.setLnType(LN_TYPE);
+        dataAttributeRef.setLnClass(TLLN0Enum.LLN_0.value());
+        dataAttributeRef.setDoName(new DoTypeName(DO_NAME));
+        dataAttributeRef.setDaName(new DaTypeName(DA_NAME));
+        dataAttributeRef.getDoName().setCdc(TPredefinedCDCEnum.fromValue(CDC));
+        dataAttributeRef.getDaName().setFc(TFCEnum.fromValue(FC));
 
-        return rDTT;
+        return dataAttributeRef;
     }
 
-    public static ResumedDataTemplate createRTT(String prefix, String lnClass, String lnInst) {
-        ResumedDataTemplate rDTT = new ResumedDataTemplate();
+    public static DataAttributeRef createDataAttributeRef(String prefix, String lnClass, String lnInst) {
+        DataAttributeRef dataAttributeRef = new DataAttributeRef();
 
-        rDTT.setLnType(LN_TYPE);
-        rDTT.setLnClass(lnClass);
-        rDTT.setLnInst(lnInst);
-        rDTT.setPrefix(prefix);
+        dataAttributeRef.setLnType(LN_TYPE);
+        dataAttributeRef.setLnClass(lnClass);
+        dataAttributeRef.setLnInst(lnInst);
+        dataAttributeRef.setPrefix(prefix);
 
-        rDTT.setDoName(new DoTypeName("do.sdo1.sdo2"));
-        rDTT.setDaName(new DaTypeName("da.bda1.bda2"));
-        rDTT.setCdc(TPredefinedCDCEnum.fromValue(CDC));
-        rDTT.setFc(TFCEnum.fromValue(FC));
-        rDTT.setBType("Check");
-        rDTT.setType("type");
-        rDTT.setValImport(true);
+        dataAttributeRef.setDoName(new DoTypeName("do.sdo1.sdo2"));
+        dataAttributeRef.setDaName(new DaTypeName("da.bda1.bda2"));
+        dataAttributeRef.setCdc(TPredefinedCDCEnum.fromValue(CDC));
+        dataAttributeRef.setFc(TFCEnum.fromValue(FC));
+        dataAttributeRef.setBType("Check");
+        dataAttributeRef.setType("type");
+        dataAttributeRef.setValImport(true);
 
-        return rDTT;
+        return dataAttributeRef;
     }
 
     /*-----------------------------------------------*/

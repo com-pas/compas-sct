@@ -59,9 +59,9 @@ import static org.lfenergy.compas.sct.commons.util.PrivateEnum.COMPAS_ICDHEADER;
  *   </ol>
  *   <li>DAI features</li>
  *   <ol>
- *      <li>{@link SclService#getDAI <em>Returns list of <b>ResumedDataTemplate </b></em>}</li>
- *      <li>{@link SclService#updateDAI(SCL, String, String, ResumedDataTemplate)
- *      <em>Update the <b>TDAI </b> reference object for given <b>iedName</b>, <b>ldInst </b> and <b>ResumedDataTemplate </b> model</em>}</li>
+ *      <li>{@link SclService#getDAI <em>Returns list of <b>DataAttributeRef </b></em>}</li>
+ *      <li>{@link SclService#updateDAI(SCL, String, String, DataAttributeRef)
+ *      <em>Update the <b>TDAI </b> reference object for given <b>iedName</b>, <b>ldInst </b> and <b>DataAttributeRef </b> model</em>}</li>
  *   </ol>
  *   <li>EnumType features</li>
  *   <ol>
@@ -392,43 +392,43 @@ public class SclService {
 
     /**
      * Gets a list of summarized DataTypeTemplate for DataAttribute DA (updatable or not) related to the one given
-     * in <em>rDtt</em>
+     * in <em>dataAttributeRef</em>
      *
      * @param scd       SCL file in which DataTypeTemplate of DAIs should be found
      * @param iedName   name of IED in which DAs are localized
      * @param ldInst    ldInst of LDevice in which DAIs are localized
-     * @param rDtt      reference summarized DataTypeTemplate related to IED DAIs
+     * @param dataAttributeRef      reference summarized DataTypeTemplate related to IED DAIs
      * @param updatable true to retrieve DataTypeTemplate's related to only updatable DAIs, false to retrieve all
-     * @return List of resumed DataTypeTemplate for DataAttribute (updatable or not)
+     * @return Set of Data Attribute Reference for DataAttribute (updatable or not)
      * @throws ScdException SCD illegal arguments exception, missing mandatory data
      */
-    public static Set<ResumedDataTemplate> getDAI(SCL scd, String iedName, String ldInst, ResumedDataTemplate rDtt, boolean updatable) throws ScdException {
+    public static Set<DataAttributeRef> getDAI(SCL scd, String iedName, String ldInst, DataAttributeRef dataAttributeRef, boolean updatable) throws ScdException {
         LDeviceAdapter lDeviceAdapter = createLDeviceAdapter(scd, iedName, ldInst);
-        return lDeviceAdapter.getDAI(rDtt, updatable);
+        return lDeviceAdapter.getDAI(dataAttributeRef, updatable);
     }
 
     /**
-     * Updates DAI based on given data in <em>rDtt</em>
+     * Updates DAI based on given data in <em>dataAttributeRef</em>
      *
      * @param scd     SCL file in which DataTypeTemplate of DAI should be found
      * @param iedName name of IED in which DAI is localized
      * @param ldInst  ldInst of LDevice in which DAI is localized
-     * @param rDtt    reference summarized DataTypeTemplate related to DAI to update
+     * @param dataAttributeRef    reference summarized DataTypeTemplate related to DAI to update
      * @throws ScdException when inconsistency are found in th SCL's
      *                      DataTypeTemplate. Which should normally not happens.
      */
-    public static void updateDAI(SCL scd, String iedName, String ldInst, ResumedDataTemplate rDtt) throws ScdException {
+    public static void updateDAI(SCL scd, String iedName, String ldInst, DataAttributeRef dataAttributeRef) throws ScdException {
         long startTime = System.nanoTime();
         log.info(Utils.entering());
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         DataTypeTemplateAdapter dttAdapter = sclRootAdapter.getDataTypeTemplateAdapter();
-        LNodeTypeAdapter lNodeTypeAdapter = dttAdapter.getLNodeTypeAdapterById(rDtt.getLnType())
-                .orElseThrow(() -> new ScdException("Unknown LNodeType : " + rDtt.getLnType()));
-        lNodeTypeAdapter.check(rDtt.getDoName(), rDtt.getDaName());
+        LNodeTypeAdapter lNodeTypeAdapter = dttAdapter.getLNodeTypeAdapterById(dataAttributeRef.getLnType())
+                .orElseThrow(() -> new ScdException("Unknown LNodeType : " + dataAttributeRef.getLnType()));
+        lNodeTypeAdapter.check(dataAttributeRef.getDoName(), dataAttributeRef.getDaName());
 
-        if (TPredefinedBasicTypeEnum.OBJ_REF == rDtt.getBType()) {
-            Long sGroup = rDtt.getDaName().getDaiValues().keySet().stream().findFirst().orElse(-1L);
-            String val = sGroup < 0 ? null : rDtt.getDaName().getDaiValues().get(sGroup);
+        if (TPredefinedBasicTypeEnum.OBJ_REF == dataAttributeRef.getBType()) {
+            Long sGroup = dataAttributeRef.getDaName().getDaiValues().keySet().stream().findFirst().orElse(-1L);
+            String val = sGroup < 0 ? null : dataAttributeRef.getDaName().getDaiValues().get(sGroup);
             sclRootAdapter.checkObjRef(val);
         }
 
@@ -438,16 +438,16 @@ public class SclService {
 
         AbstractLNAdapter<?> lnAdapter = AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
-                .withLnClass(rDtt.getLnClass())
-                .withLnInst(rDtt.getLnInst())
-                .withLnPrefix(rDtt.getPrefix())
+                .withLnClass(dataAttributeRef.getLnClass())
+                .withLnInst(dataAttributeRef.getLnInst())
+                .withLnPrefix(dataAttributeRef.getPrefix())
                 .build();
 
-        if (TPredefinedCDCEnum.ING == rDtt.getCdc() || TPredefinedCDCEnum.ASG == rDtt.getCdc()) {
-            DAITracker daiTracker = new DAITracker(lnAdapter, rDtt.getDoName(), rDtt.getDaName());
+        if (TPredefinedCDCEnum.ING == dataAttributeRef.getCdc() || TPredefinedCDCEnum.ASG == dataAttributeRef.getCdc()) {
+            DAITracker daiTracker = new DAITracker(lnAdapter, dataAttributeRef.getDoName(), dataAttributeRef.getDaName());
             daiTracker.validateBoundedDAI();
         }
-        lnAdapter.updateDAI(rDtt);
+        lnAdapter.updateDAI(dataAttributeRef);
         log.info(Utils.leaving(startTime));
     }
 
