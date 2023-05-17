@@ -30,7 +30,7 @@
                             </DAI>
                         </DOI>
                         <Inputs>
-                            <ExtRef intAddr="INT_ADDR11" pDO="Str" pLN="PTRC" desc="DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1"/>
+                            <ExtRef intAddr="INT_ADDR11" pDO="Str" pLN="PTRC" desc="DYN_LDEPF_DIGITAL CHANNEL 10_1_BOOLEEN_1_general_1"/>
                         </Inputs>
                     </LN0>
                 </LDevice>
@@ -44,12 +44,30 @@
                     </LN0>
                     <LN lnClass="PTRC" inst="0" lnType="PTRC_ID1">
                     </LN>
+                    <LN lnClass="PTRC" inst="2" lnType="PTRC_ID1">
+                        <DOI name="Mod">
+                            <DAI name="stVal">
+                                <Val>off</Val>
+                            </DAI>
+                        </DOI>
+                    </LN>
+                </LDevice>
+                <LDevice inst="LDPXINVALID" ldName="IED_NAME1LDPX">
+                    <LN0 lnClass="LLN0" inst="" lnType="LLN0_ID1">
+                        <DOI name="Mod">
+                            <DAI name="stVal">
+                                <Val>off</Val>
+                            </DAI>
+                        </DOI>
+                    </LN0>
+                    <LN lnClass="PTRC" inst="0" lnType="PTRC_ID1">
+                    </LN>
                 </LDevice>
             </Server>
         </AccessPoint>
     </IED>
     <IED name="IED_NAME2">
-        <Private type="COMPAS-Bay"> <!-- BAY check (UUID) -->
+        <Private type="COMPAS-Bay"><!-- BAY check (UUID) -->
             <compas:Bay UUID="bayUUID2" BayCodif="CB00001101" NumBay="1" BayCount="1" MainShortLabel="aa"/>
         </Private>
         <Private type="COMPAS-ICDHeader"> <!-- ICDHeader check (IEDType, IEDredundancy, IEDSystemVersioninstance) -->
@@ -68,7 +86,7 @@
                             </DAI>
                         </DOI>
                         <Inputs>
-                            <ExtRef intAddr="INT_ADDR11" pDO="Str" pLN="PTRC" desc="DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1"/>
+                            <ExtRef intAddr="INT_ADDR11" pDO="Str" pLN="PTRC" desc="DYN_LDEPF_DIGITAL CHANNEL 10_1_BOOLEEN_1_general_1"/>
                         </Inputs>
                     </LN0>
                 </LDevice>
@@ -87,7 +105,7 @@
         </AccessPoint>
     </IED>
     <IED name="IED_NAME3">
-        <Private type="COMPAS-Bay"> <!-- BAY check (UUID) -->
+        <Private type="COMPAS-Bay"><!-- BAY check (UUID) -->
             <compas:Bay UUID="bayUUID2" BayCodif="CB00001101" NumBay="1" BayCount="1" MainShortLabel="aa"/>
         </Private>
         <Private type="COMPAS-ICDHeader"> <!-- ICDHeader check (IEDType, IEDredundancy, IEDSystemVersioninstance) -->
@@ -98,7 +116,7 @@
         <AccessPoint name="AP_NAME">
             <Server>
                 <Authentication/>
-                <LDevice inst="LDEPF" ldName="IED_NAME2LDEPF">
+                <LDevice inst="LDEPF" ldName="IED_NAME3LDEPF">
                     <LN0 lnClass="LLN0" inst="" lnType="LLN0_ID1">
                         <DOI name="Mod">
                             <DAI name="stVal" valImport="true">
@@ -106,17 +124,18 @@
                             </DAI>
                         </DOI>
                         <Inputs>
-                            <ExtRef intAddr="INT_ADDR11" pDO="Str" pLN="PTRC" desc="DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1"/>
+                            <ExtRef intAddr="INT_ADDR11" pDO="Str" pLN="PTRC" desc="DYN_LDEPF_DIGITAL CHANNEL 10_1_BOOLEEN_1_general_1"/>
                         </Inputs>
                     </LN0>
                 </LDevice>
-                <LDevice inst="LDPX" ldName="IED_NAME2LDPX">
+                <LDevice inst="LDPX" ldName="IED_NAME3LDPX">
                     <LN0 lnClass="LLN0" inst="" lnType="LLN0_ID1">
                         <DOI name="Mod">
                             <DAI name="stVal">
                                 <Val>on</Val>
                             </DAI>
                         </DOI>
+
                     </LN0>
                     <LN lnClass="PTRC" inst="0" lnType="PTRC_ID1">
                     </LN>

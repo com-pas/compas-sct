@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- SPDX-FileCopyrightText: 2023 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<SCL version="2007" revision="B" release="4" xmlns="http://www.iec.ch/61850/2003/SCL" xmlns:compas="https://www.lfenergy.org/compas/extension/v1">
+    <Private type="COMPAS-SclFileType">
+        <compas:SclFileType>SCD</compas:SclFileType>
+    </Private>
+    <Header id="hId" version="2007" revision="B" toolID="COMPAS"/>
+    <IED name="IEDTEST">
+        <AccessPoint name="AP_NAME"/>
+    </IED>
+    <IED name="IED_NAME1">
+        <Private type="COMPAS-Bay"><!-- BAY check (UUID) -->
+            <compas:Bay UUID="bayUUID1" BayCodif="CB00001101" NumBay="1" BayCount="1" MainShortLabel="aa"/>
+        </Private>
+        <Private type="COMPAS-ICDHeader"><!-- ICDHeader check (IEDType, IEDredundancy, IEDSystemVersioninstance) -->
+            <compas:ICDHeader IEDType="SAMU" IEDredundancy="A" IEDSystemVersioninstance="1"
+                              ICDSystemVersionUUID="System_Version_UUID" VendorName="SCLE SFE" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="1.0" swRev="1.0"
+                              headerId="ARKENS-SV1120-HGAAA-EB5_SCU"/>
+        </Private>
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LDEPF" ldName="IED_NAME1LDEPF">
+                    <LN0 lnClass="LLN0" inst="" lnType="LLN0_ID1">
+                        <DOI name="Mod">
+                            <DAI name="stVal" valImport="true">
+                                <Val>on</Val>
+                            </DAI>
+                        </DOI>
+                        <Inputs><!-- ExtRef check (pLN, pDO, desc) -->
+                            <ExtRef pLN="TVTR" pDO="VolSv" desc="DYN_LDEPF_ANALOG CHANNEL 1_1_AnalogueValue_1_instMag_1"/>
+                            <ExtRef pLN="MMXU" pDO="PhV" desc="DYN_LDEPF_ANALOG CHANNEL 10_1_AnalogueValue_1_cVal_1"/>
+                        </Inputs>
+                    </LN0>
+                </LDevice>
+                <LDevice inst="LDTM1" ldName="IED_NAME1LDTM1">
+                    <LN0 lnClass="LLN0" inst="" lnType="LLN0_ID1">
+                        <DOI name="Mod">
+                            <DAI name="stVal">
+                                <Val>on</Val>
+                            </DAI>
+                        </DOI>
+                    </LN0>
+                    <LN lnClass="TVTR" inst="11" prefix="U01A" lnType="TVTR_ID1">
+                    </LN>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
+    <IED name="IED_NAME2">
+        <Private type="COMPAS-Bay"><!-- BAY check (UUID) -->
+            <compas:Bay UUID="bayUUID2" BayCodif="CB00001101" NumBay="1" BayCount="1" MainShortLabel="aa"/>
+        </Private>
+        <Private type="COMPAS-ICDHeader"><!-- ICDHeader check (IEDType, IEDredundancy, IEDSystemVersioninstance) -->
+            <compas:ICDHeader IEDType="SAMU" IEDredundancy="A" IEDSystemVersioninstance="1"
+                              ICDSystemVersionUUID="System_Version_UUID" VendorName="SCLE SFE" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="1.0" swRev="1.0"
+                              headerId="ARKENS-SV1120-HGAAA-EB5_SCU"/>
+        </Private>
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LDPHAS1" ldName="IED_NAME2LDPHAS1">
+                    <LN0 lnClass="LLN0" inst="" lnType="LLN0_ID1">
+                        <DOI name="Mod">
+                            <DAI name="stVal">
+                                <Val>on</Val>
+                            </DAI>
+                        </DOI>
+                    </LN0>
+                    <LN lnClass="MMXU" inst="101" lnType="MMXU_ID1">
+                    </LN>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
+    <DataTypeTemplates>
+        <LNodeType lnClass="LLN0" id="LLN0_ID1">
+            <DO name="Mod" type="DO2"/>
+        </LNodeType>
+        <LNodeType lnClass="TVTR" id="TVTR_ID1">
+            <DO name="Mod" type="DO2"/>
+            <DO name="VolSv" type="VolSv_DOType"/>
+        </LNodeType>
+        <LNodeType lnClass="MMXU" id="MMXU_ID1">
+            <DO name="Mod" type="DO2"/>
+            <DO name="PhV" type="PhV_DOType"/>
+        </LNodeType>
+        <DOType cdc="ACD" id="VolSv_DOType">
+            <DA name="instMag" bType="Struct" type="instMag_DAType" fc="ST"/>
+        </DOType>
+        <DOType cdc="ACD" id="PhV_DOType">
+            <SDO name="phsB" type="phsB_DOType"/>
+        </DOType>
+        <DOType cdc="ENC" id="DO2">
+            <DA fc="ST" dchg="true" name="stVal" bType="Enum" type="BehaviourModeKind" valImport="true" />
+            <DA fc="BL" name="daName1" bType="BOOLEAN"/>
+        </DOType>
+        <DOType cdc="ENC" id="phsB_DOType"><!-- daName cVal -->
+            <DA name="wrongDaName" bType="Struct" type="cVal_DAType" dupd="true" fc="MX"/>
+        </DOType>
+        <DAType id="instMag_DAType">
+            <BDA name="i" bType="FLOAT32"/>
+        </DAType>
+        <DAType id="cVal_DAType">
+            <BDA name="mag" bType="Struct" type="mag_DAType"/>
+        </DAType>
+        <DAType id="mag_DAType">
+            <BDA name="f" bType="FLOAT32"/>
+        </DAType>
+        <EnumType id="BehaviourModeKind">
+            <EnumVal ord="1">on</EnumVal>
+            <EnumVal ord="2">off</EnumVal>
+            <EnumVal ord="3">blocked</EnumVal>
+            <EnumVal ord="4">test</EnumVal>
+            <EnumVal ord="5">test/blocked</EnumVal>
+        </EnumType>
+    </DataTypeTemplates>
+</SCL>

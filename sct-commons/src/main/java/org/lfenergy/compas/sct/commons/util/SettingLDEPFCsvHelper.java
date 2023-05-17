@@ -4,25 +4,32 @@
 
 package org.lfenergy.compas.sct.commons.util;
 
-import com.opencsv.bean.CsvBindByPosition;
 import lombok.Getter;
-import org.lfenergy.compas.sct.commons.dto.LDEPFSettingsSupplier;
+import org.lfenergy.compas.scl2007b4.model.TCompasBay;
+import org.lfenergy.compas.scl2007b4.model.TCompasFlowKind;
+import org.lfenergy.compas.scl2007b4.model.TExtRef;
+import org.lfenergy.compas.scl2007b4.model.TIED;
+import org.lfenergy.compas.sct.commons.dto.LDEPFSettingData;
+import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 
 import java.io.Reader;
-import java.math.BigInteger;
 import java.util.List;
-import java.util.function.Function;
+import java.util.Optional;
+
+import static org.lfenergy.compas.sct.commons.util.Utils.*;
 
 
 /**
- * This class is an implementation example for interface LDEPFSettings.
+ * This class is an implementation example for interface ILDEPFSettings.
  * It relies on a CSV file.
  *
  * @see CsvUtils
  */
-public class SettingLDEPFCsvHelper implements LDEPFSettingsSupplier {
+@Getter
+public class SettingLDEPFCsvHelper implements ILDEPFSettings {
 
-    private final List<LDEPFSetting> settings ;
+    private final List<LDEPFSettingData> settings ;
 
     /**
      * Constructor
@@ -30,90 +37,28 @@ public class SettingLDEPFCsvHelper implements LDEPFSettingsSupplier {
      * @param reader input
      */
     public SettingLDEPFCsvHelper(Reader reader) {
-        this.settings = CsvUtils.parseRows(reader, LDEPFSettingBind.class).stream().map(lDEPFSettingsFunction).toList();
+        this.settings = CsvUtils.parseRows(reader, LDEPFSettingData.class);
     }
 
     @Override
-    public List<LDEPFSetting> getSettings() {
-        return this.settings;
+    public Optional<LDEPFSettingData> getLDEPFSettingDataMatchExtRef(TExtRef extRef) {
+        return this.settings.stream().filter(setting -> setting.isMatchExtRef(extRef)).findFirst();
     }
 
-    Function<LDEPFSettingBind, LDEPFSetting> lDEPFSettingsFunction = (LDEPFSettingBind setting) -> LDEPFSetting.builder()
-            .rteIedType(setting.getRteIedType())
-            .iedRedundancy(setting.getIedRedundancy())
-            .iedInstance(setting.getIedInstance())
-            .channelShortLabel(setting.getChannelShortLabel())
-            .channelMREP(setting.getChannelMREP())
-            .channelLevModQ(setting.getChannelLevModQ())
-            .channelLevModLevMod(setting.getChannelLevModLevMod())
-            .bapVariant(setting.getBapVariant())
-            .bapIgnoredValue(setting.getBapIgnoredValue())
-            .ldInst(setting.getLdInst())
-            .lnPrefix(setting.getLnPrefix())
-            .lnClass(setting.getLnClass())
-            .lnInst(setting.getLnInst())
-            .doName(setting.getDoName())
-            .doInst(setting.getDoInst())
-            .sdoName(setting.getSdoName())
-            .daName(setting.getDaName())
-            .daType(setting.getDaType())
-            .dabType(setting.getDabType())
-            .bdaName(setting.getBdaName())
-            .sbdaName(setting.getSbdaName())
-            .channelAnalogNum(setting.getChannelAnalogNum())
-            .channelDigitalNum(setting.getChannelDigitalNum())
-            .opt(setting.getOpt())
-            .build();
-
-    @Getter
-    public static class LDEPFSettingBind {
-        @CsvBindByPosition(position = 0)
-        private String rteIedType;
-        @CsvBindByPosition(position = 1)
-        private String iedRedundancy;
-        @CsvBindByPosition(position = 2)
-        private BigInteger iedInstance;
-        @CsvBindByPosition(position = 3)
-        private String channelShortLabel;
-        @CsvBindByPosition(position = 4)
-        private String channelMREP;
-        @CsvBindByPosition(position = 5)
-        private String channelLevModQ;
-        @CsvBindByPosition(position = 6)
-        private String channelLevModLevMod;
-        @CsvBindByPosition(position = 7)
-        private String bapVariant;
-        @CsvBindByPosition(position = 8)
-        private String bapIgnoredValue;
-        @CsvBindByPosition(position = 9)
-        private String ldInst;
-        @CsvBindByPosition(position = 10)
-        private String lnPrefix;
-        @CsvBindByPosition(position = 11)
-        private String lnClass;
-        @CsvBindByPosition(position = 12)
-        private String lnInst;
-        @CsvBindByPosition(position = 13)
-        private String doName;
-        @CsvBindByPosition(position = 14)
-        private String doInst;
-        @CsvBindByPosition(position = 15)
-        private String sdoName;
-        @CsvBindByPosition(position = 16)
-        private String daName;
-        @CsvBindByPosition(position = 17)
-        private String daType;
-        @CsvBindByPosition(position = 18)
-        private String dabType;
-        @CsvBindByPosition(position = 19)
-        private String bdaName;
-        @CsvBindByPosition(position = 20)
-        private String sbdaName;
-        @CsvBindByPosition(position = 21)
-        private String channelAnalogNum;
-        @CsvBindByPosition(position = 22)
-        private String channelDigitalNum;
-        @CsvBindByPosition(position = 23)
-        private String opt;
+    @Override
+    public List<TIED> getIedSources(SclRootAdapter sclRootAdapter, TCompasBay compasBay, LDEPFSettingData setting) {
+        return sclRootAdapter.streamIEDAdapters()
+                .filter(iedAdapter -> (setting.getBayScope().equals(TCompasFlowKind.BAY_EXTERNAL)
+                    && iedAdapter.getPrivateCompasBay().stream().noneMatch(bay -> bay.getUUID().equals(compasBay.getUUID())))
+                    || (setting.getBayScope().equals(TCompasFlowKind.BAY_INTERNAL)
+                    && iedAdapter.getPrivateCompasBay().stream().anyMatch(bay -> bay.getUUID().equals(compasBay.getUUID()))))
+                .filter(iedAdapter -> isIcdHeaderMatch(iedAdapter, setting))
+                .filter(iedAdapter -> getActiveSourceLDevice(iedAdapter, setting)
+                        .map(lDeviceAdapter -> getActiveLNodeSource(lDeviceAdapter, setting)
+                                .map(lnAdapter -> isValidDataTypeTemplate(lnAdapter, setting))
+                                .orElse(false))
+                        .orElse(false))
+                .map(IEDAdapter::getCurrentElem).limit(2).toList();
     }
+
 }

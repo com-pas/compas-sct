@@ -140,9 +140,9 @@
         <LNodeType lnClass="LLN0" id="LLN0_ID1">
             <DO name="Mod" type="DO2"/>
         </LNodeType>
-        <LNodeType lnClass="PTRC" id="PTRC_ID1"> <!-- DO/DA check of source object (lnClass PTRC) -->
+        <LNodeType lnClass="PTRC" id="PTRC_ID1">
             <DO name="Mod" type="DO2"/>
-            <DO name="Str" type="ACD1"/> <!-- doName Str -->
+            <DO name="Str" type="ACD1"/>
             <DO name="Op" type="ACD1"/> <!-- doName Op -->
         </LNodeType>
         <DOType cdc="ACD" id="ACD1">
