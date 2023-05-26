@@ -19,6 +19,8 @@ import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
 
+import static org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter.MOD_DO_TYPE_NAME;
+import static org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter.STVAL_DA_TYPE_NAME;
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 import static org.lfenergy.compas.sct.commons.util.Utils.copySclElement;
 
@@ -476,6 +478,33 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
                 .getLDeviceAdapterByLdInst(tExtRef.getSrcLDInst()).getLdName();
         String lnClass = !tExtRef.isSetSrcLNClass() ? TLLN0Enum.LLN_0.value() : tExtRef.getSrcLNClass().get(0);
         return sourceLdName + "/" + lnClass + "." + tExtRef.getSrcCBName();
+    }
+
+    /**
+     * Provides a list of ExtRef and associated Bay <br/>
+     * - The location of ExtRef should be in an active LDevice (inst=LDEPF) <br/>
+     * - ExtRef that lacks Bay or ICDHeader Private is not returned <br/>
+     *
+     * @param sclReportItems List of SclReportItem
+     * @return list of ExtRef and associated Bay
+     */
+    public List<ExtRefInfo.ExtRefBayReference> getExtRefBayReferenceForActifLDEPF(final List<SclReportItem> sclReportItems) {
+        List<ExtRefInfo.ExtRefBayReference> extRefBayReferenceList = new ArrayList<>();
+        IEDAdapter parentIedAdapter = getParentAdapter();
+        if (parentIedAdapter.getPrivateCompasBay().isEmpty()) {
+            sclReportItems.add(SclReportItem.fatal(getXPath(), "The IED has no Private Bay"));
+            if (parentIedAdapter.getCompasICDHeader().isEmpty()) {
+                sclReportItems.add(SclReportItem.fatal(getXPath(), "The IED has no Private compas:ICDHeader"));
+            }
+            return Collections.emptyList();
+        }
+
+        getLDeviceStatus().ifPresentOrElse(s -> {
+            if (LDeviceStatus.ON.equals(s)) {
+                extRefBayReferenceList.addAll(getLN0Adapter().getInputsAdapter().getCurrentElem().getExtRef().stream().map(extRef -> new ExtRefInfo.ExtRefBayReference(parentIedAdapter.getName(), parentIedAdapter.getPrivateCompasBay().get(), extRef)).toList());
+            }
+        }, () -> sclReportItems.add(SclReportItem.fatal(getXPath(), "There is no DOI@name=" + MOD_DO_TYPE_NAME + "/DAI@name=" + STVAL_DA_TYPE_NAME + "/Val for LDevice@inst" + LDEVICE_LDEPF)));
+        return extRefBayReferenceList;
     }
 
 }

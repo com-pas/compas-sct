@@ -10,7 +10,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.DTO;
-import org.lfenergy.compas.sct.commons.dto.ExtRefInfo.ExtRefBayReference;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
@@ -21,16 +20,16 @@ import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.lfenergy.compas.sct.commons.util.MonitoringLnClassEnum;
 import org.mockito.Mockito;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter.MOD_DO_TYPE_NAME;
-import static org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter.STVAL_DA_TYPE_NAME;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
-import static org.lfenergy.compas.sct.commons.util.CommonConstants.LDEVICE_LDEPF;
 import static org.mockito.Mockito.mock;
 
 class IEDAdapterTest {
@@ -418,69 +417,6 @@ class IEDAdapterTest {
                 .hasSize(2)
                 .extracting(TVal::getValue)
                 .containsExactly("LD_Name/LLN0.CB_Name_1", "LD_Name/LLN0.CB_Name_2");
-    }
-
-    @Test
-    void getExtRefBuyReferenceForActifLDEPF_should_return_existingExtRef_when_LDEPF_active_and_bay_exists() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_extrefbayRef.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1");
-        // When
-        List<SclReportItem> sclReportItems = new ArrayList<>();
-        List<ExtRefBayReference> extRefBayReferences = iedAdapter.getExtRefBayReferenceForActifLDEPF(sclReportItems);
-        // Then
-        assertThat(extRefBayReferences).hasSize(1);
-        assertThat(sclReportItems).isEmpty();
-    }
-
-    @Test
-    void getExtRefBayReferenceForActifLDEPF_should_return_fatal_errors_when_NoPrivateBuyNorIcdHeader() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_extrefbayRef.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1");
-        iedAdapter.getCurrentElem().getPrivate().clear();
-        // When
-        List<SclReportItem> sclReportItems = new ArrayList<>();
-        List<ExtRefBayReference> extRefBayReferences = iedAdapter.getExtRefBayReferenceForActifLDEPF(sclReportItems);
-        // Then
-        assertThat(extRefBayReferences).isEmpty();
-        assertThat(sclReportItems).hasSize(2);
-        assertThat(sclReportItems)
-                .extracting(SclReportItem::getMessage)
-                .contains("The IED has no Private Bay", "The IED has no Private compas:ICDHeader");
-    }
-
-    @Test
-    void getExtRefBayReferenceForActifLDEPF_should_return_fatal_errors_when_DOI_Mod_notExists() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_extrefbayRef.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME3");
-        // When
-        List<SclReportItem> sclReportItems = new ArrayList<>();
-        List<ExtRefBayReference> extRefBayReferences = iedAdapter.getExtRefBayReferenceForActifLDEPF(sclReportItems);
-        // Then
-        assertThat(extRefBayReferences).isEmpty();
-        assertThat(sclReportItems).hasSize(1);
-        assertThat(sclReportItems)
-                .extracting(SclReportItem::getMessage)
-                .containsExactly("There is no DOI@name="+MOD_DO_TYPE_NAME+"/DAI@name="+STVAL_DA_TYPE_NAME + "/Val for LDevice@inst"+LDEVICE_LDEPF);
-    }
-
-    @Test
-    void getExtRefBayReferenceForActifLDEPF_should_return_existingExtRef_when_LDEPF_NotActive() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_extrefbayRef.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME2");
-        // When
-        List<SclReportItem> sclReportItems = new ArrayList<>();
-        List<ExtRefBayReference> extRefBayReferences = iedAdapter.getExtRefBayReferenceForActifLDEPF(sclReportItems);
-        // Then
-        assertThat(extRefBayReferences).isEmpty();
-        assertThat(sclReportItems).isEmpty();
     }
 
     private static Stream<Arguments> provideLnClassAndDoType() {
