@@ -44,17 +44,10 @@
         <logback-classic.version>1.4.5</logback-classic.version>
         <assertj.version>3.22.0</assertj.version>
         <lombok.version>1.18.24</lombok.version>
+        <jackson-databind.version>2.13.4.1</jackson-databind.version>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.lfenergy.compas.core</groupId>
-            <artifactId>scl2007b4</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.lfenergy.compas.core</groupId>
-            <artifactId>scl-extension</artifactId>
-        </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
@@ -87,11 +80,6 @@
             </dependency>
             <dependency>
                 <groupId>org.lfenergy.compas.core</groupId>
-                <artifactId>scl2007b4</artifactId>
-                <version>${compas-core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.lfenergy.compas.core</groupId>
                 <artifactId>scl-extension</artifactId>
                 <version>${compas-core.version}</version>
             </dependency>
@@ -110,6 +98,11 @@
                 <artifactId>assertj-core</artifactId>
                 <version>${assertj.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson-databind.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <modules>
@@ -122,16 +115,6 @@
     <build>
         <pluginManagement>
             <plugins>
-                <plugin>
-                    <groupId>org.lfenergy.compas.xsd</groupId>
-                    <artifactId>compas-scl-xsd</artifactId>
-                    <version>${compas-scl-xsd.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.lfenergy.compas.core</groupId>
-                    <artifactId>scl-extension</artifactId>
-                    <version>${compas-core.version}</version>
-                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
