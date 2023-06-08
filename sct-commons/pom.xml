@@ -36,6 +36,10 @@
             <version>3.12.0</version>
         </dependency>
         <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
             <groupId>jakarta.xml.bind</groupId>
             <artifactId>jakarta.xml.bind-api</artifactId>
             <version>2.3.3</version>
@@ -170,7 +174,7 @@
                                     <artifactId>scl-extension</artifactId>
                                 </artifactItem>
                             </artifactItems>
-                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <outputDirectory>${project.build.outputDirectory}</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
@@ -189,8 +193,8 @@
                 </executions>
                 <configuration>
                     <sources>
-                        <source>${project.build.directory}/xsd/SCL2007B4/SCL.xsd</source>
-                        <source>${project.build.directory}/xsd/SCL_CoMPAS.xsd</source>
+                        <source>${project.build.outputDirectory}/xsd/SCL2007B4/SCL.xsd</source>
+                        <source>${project.build.outputDirectory}/xsd/SCL_CoMPAS.xsd</source>
                     </sources>
                     <xjbSources>
                         <xjbSource>${project.basedir}/src/main/resources/binding_configuration.xjb</xjbSource>
