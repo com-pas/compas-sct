@@ -4,21 +4,56 @@
 
 name: SonarCloud Analysis
 
-on: push
+on:
+  workflow_run:
+    workflows: [SonarCloud Build]
+    types: [completed]
 
 jobs:
-  build:
-    name: Build
+  sonarcloud:
+    name: SonarCloud
     runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
     timeout-minutes: 15
-
-    if: ${{ (github.event_name != 'pull_request_target' && github.actor != 'dependabot[bot]') || (github.actor == 'dependabot[bot]' && github.event_name == 'pull_request_target') }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: echo event
+        run: cat $GITHUB_EVENT_PATH
+      - name: Download PR number artifact
+        if: github.event.workflow_run.event == 'pull_request'
+        uses: dawidd6/action-download-artifact@v2
         with:
+          workflow: SonarCloud Build
+          run_id: ${{ github.event.workflow_run.id }}
+          name: PR_NUMBER
+      - name: Read PR_NUMBER.txt
+        if: github.event.workflow_run.event == 'pull_request'
+        id: pr_number
+        uses: juliangruber/read-file-action@v1
+        with:
+          path: ./PR_NUMBER.txt
+      - name: Request GitHub API for PR data
+        if: github.event.workflow_run.event == 'pull_request'
+        uses: octokit/request-action@v2.x
+        id: get_pr_data
+        with:
+          route: GET /repos/{full_name}/pulls/{number}
+          number: ${{ steps.pr_number.outputs.content }}
+          full_name: ${{ github.event.repository.full_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v3
+        with:
+          repository: ${{ github.event.workflow_run.head_repository.full_name }}
+          ref: ${{ github.event.workflow_run.head_branch }}
           fetch-depth: 0
-
+      - name: Checkout base branch
+        if: github.event.workflow_run.event == 'pull_request'
+        run: |
+          git remote add upstream ${{ github.event.repository.clone_url }}
+          git fetch upstream
+          git checkout -B ${{ fromJson(steps.get_pr_data.outputs.data).base.ref }} upstream/${{ fromJson(steps.get_pr_data.outputs.data).base.ref }}
+          git checkout ${{ github.event.workflow_run.head_branch }}
+          git clean -ffdx && git reset --hard HEAD
       - name: Cache SonarCloud packages
         uses: actions/cache@v3
         with:
@@ -44,27 +79,31 @@ jobs:
         with:
           output_file: custom_maven_settings.xml
           servers: '[{ "id": "github-packages-compas", "username": "OWNER", "password": "${{ secrets.GITHUB_TOKEN }}" }]'
-
       - name: Build and analyze (Pull Request)
-        if: ${{ github.event_name == 'pull_request' || (github.actor == 'dependabot[bot]' && github.event_name == 'pull_request_target') }}
+#        if: ${{ github.event.workflow_run.event == 'pull_request' || (github.event.workflow_run.actor == 'dependabot[bot]' && github.event.workflow_run.event == 'pull_request_target') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn -B -s custom_maven_settings.xml \
-            ${{ steps.sonar_env.outputs.sonar_opts }} \
-            -Dsonar.pullrequest.branch=${{ github.ref_name }} \
-            -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} \
-            -Dsonar.pullrequest.base=${{ github.base_ref }} \
-            -Dsonar.scm.revision=${{ github.event.pull_request.head.sha }} \
-            clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+          echo "github.event.workflow_run.event"
+          echo ${{ github.event.workflow_run.event}}
+#          mvn -B -s custom_maven_settings.xml \
+#            ${{ steps.sonar_env.outputs.sonar_opts }} \
+#            -Dsonar.pullrequest.branch=${{ fromJson(steps.get_pr_data.outputs.data).head.ref }} \
+#            -Dsonar.pullrequest.key=${{ fromJson(steps.get_pr_data.outputs.data).number }} \
+#            -Dsonar.pullrequest.base=${{ fromJson(steps.get_pr_data.outputs.data).base.ref }} \
+#            -Dsonar.scm.revision=${{ github.event.workflow_run.head_sha }} \
+#            clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
       - name: Build and analyze (Push)
-        if: ${{ github.event_name == 'push' }}
+#        if: ${{ github.event.workflow_run.event == 'push' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn -B -s custom_maven_settings.xml \
-            ${{ steps.sonar_env.outputs.sonar_opts }} \
-            -Dsonar.branch.name=${{ github.ref_name }} \
-            clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+          echo "github.event.workflow_run.event"
+          echo ${{ github.event.workflow_run.event}}
+#          mvn -B -s custom_maven_settings.xml \
+#            ${{ steps.sonar_env.outputs.sonar_opts }} \
+#            -Dsonar.scm.revision=${{ github.event.workflow_run.head_sha }} \
+#            -Dsonar.branch.name=${{ github.event.workflow_run.head_branch }} \
+#            clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
