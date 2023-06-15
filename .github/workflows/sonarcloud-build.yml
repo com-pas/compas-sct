@@ -1,0 +1,61 @@
+# SPDX-FileCopyrightText: 2022 RTE FRANCE
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name: SonarCloud Build
+
+on: push
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    if: ${{ (github.event_name != 'pull_request_target' && github.actor != 'dependabot[bot]') || (github.actor == 'dependabot[bot]' && github.event_name == 'pull_request_target') }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'maven'
+
+      - name: Create custom Maven Settings.xml
+        uses: whelk-io/maven-settings-xml-action@v21
+        with:
+          output_file: custom_maven_settings.xml
+          servers: '[{ "id": "github-packages-compas", "username": "OWNER", "password": "${{ secrets.GITHUB_TOKEN }}" }]'
+      - name: Build and analyze (Pull Request)
+        if: ${{ github.event_name == 'pull_request' || (github.actor == 'dependabot[bot]' && github.event_name == 'pull_request_target') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mvn -B -s custom_maven_settings.xml clean verify
+      - name: Build and analyze (Push)
+        if: ${{ github.event_name == 'push' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mvn -B -s custom_maven_settings.xml clean verify
+      - name: Save PR number to file
+        if: github.event_name == 'pull_request'
+        run: echo ${{ github.event.number }} > PR_NUMBER.txt
+      - name: Archive PR number
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v3
+        with:
+          name: PR_NUMBER
+          path: PR_NUMBER.txt
