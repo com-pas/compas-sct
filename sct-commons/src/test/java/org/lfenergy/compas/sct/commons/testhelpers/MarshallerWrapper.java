@@ -8,9 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
-import org.lfenergy.compas.core.commons.exception.CompasErrorCode;
-import org.lfenergy.compas.core.commons.exception.CompasException;
 import org.lfenergy.compas.scl2007b4.model.SCL;
+import org.opentest4j.AssertionFailedError;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -54,7 +53,7 @@ public class MarshallerWrapper {
         } catch (JAXBException exp) {
             String message = String.format("Error marshalling the Class: %s", exp);
             log.error(message, exp);
-            throw new CompasException(CompasErrorCode.MARSHAL_ERROR_CODE, message);
+            throw new AssertionFailedError(message, exp);
         }
     }
 
@@ -67,14 +66,13 @@ public class MarshallerWrapper {
         try {
             Object result = getInstance().unmarshaller.unmarshal(new StreamSource(xml));
             if (!result.getClass().isAssignableFrom(cls)) {
-                throw new CompasException(CompasErrorCode.UNMARSHAL_ERROR_CODE,
-                    "Error unmarshalling to the Class. Invalid class");
+                throw new AssertionFailedError("Error unmarshalling to the Class. Invalid class");
             }
             return cls.cast(result);
         } catch (JAXBException exp) {
             String message = String.format("Error unmarshalling to the Class: %s", exp.getLocalizedMessage());
             log.error(message, exp);
-            throw new CompasException(CompasErrorCode.UNMARSHAL_ERROR_CODE, message, exp);
+            throw new AssertionFailedError(message, exp);
         }
     }
 
@@ -85,7 +83,7 @@ public class MarshallerWrapper {
             } catch (JAXBException | SAXException | ParserConfigurationException exp) {
                 var message = "Error creating JAXB Marshaller and Unmarshaller.";
                 log.error(message, exp);
-                throw new CompasException(CompasErrorCode.CREATION_ERROR_CODE, message, exp);
+                throw new AssertionFailedError(message, exp);
             }
         }
         return singleton;
@@ -122,7 +120,7 @@ public class MarshallerWrapper {
         } catch (IOException e) {
             var message = "Error loading XML schema : " + path;
             log.error(message, e);
-            throw new CompasException(CompasErrorCode.CREATION_ERROR_CODE, message);
+            throw new AssertionFailedError(message, e);
         }
         InputSource inputSource = new InputSource(url.toString());
         return new SAXSource(xmlReader, inputSource);

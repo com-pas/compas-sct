@@ -27,7 +27,10 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter.MOD_DO_TYPE_NAME;
+import static org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter.STVAL_DA_TYPE_NAME;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.LDEVICE_LDEPF;
 import static org.lfenergy.compas.sct.commons.util.ControlBlockEnum.*;
 import static org.lfenergy.compas.sct.commons.util.Utils.copySclElement;
 
@@ -117,21 +120,21 @@ class LDeviceAdapterTest {
     @Test
     void TestGetDAI() {
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS1"));
-        var rDtts = lDeviceAdapter.getDAI(new ResumedDataTemplate(),true);
-        assertEquals(4,rDtts.size());
+        var dataAttributeRefs = lDeviceAdapter.getDAI(new DataAttributeRef(),true);
+        assertEquals(4,dataAttributeRefs.size());
 
 
 
-        ResumedDataTemplate filter = new ResumedDataTemplate();
+        DataAttributeRef filter = new DataAttributeRef();
         filter.setLnClass(TLLN0Enum.LLN_0.value());
-        rDtts = lDeviceAdapter.getDAI(filter,true);
-        assertEquals(4,rDtts.size());
+        dataAttributeRefs = lDeviceAdapter.getDAI(filter,true);
+        assertEquals(4,dataAttributeRefs.size());
 
         lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.findLDeviceAdapterByLdInst("LD_INS2").get());
         filter.setLnClass("ANCR");
         filter.setLnInst("1");
-        rDtts = lDeviceAdapter.getDAI(filter,true);
-        assertEquals(2,rDtts.size());
+        dataAttributeRefs = lDeviceAdapter.getDAI(filter,true);
+        assertEquals(2,dataAttributeRefs.size());
     }
 
     @Test
@@ -555,6 +558,70 @@ class LDeviceAdapterTest {
                 .hasSize(2)
                 .extracting(TVal::getValue)
                 .containsExactly("LD_Name/LLN0.CB_Name_1", "LD_Name/LLN0.CB_Name_2");
+    }
+
+    @Test
+    void getExtRefBuyReferenceForActifLDEPF_should_return_existingExtRef_when_LDEPF_active_and_bay_exists() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_extrefbayRef.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        LDeviceAdapter lDeviceAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1").getLDeviceAdapterByLdInst("LDEPF");
+        // When
+        List<SclReportItem> sclReportItems = new ArrayList<>();
+        List<ExtRefInfo.ExtRefBayReference> extRefBayReferences = lDeviceAdapter.getExtRefBayReferenceForActifLDEPF(sclReportItems);
+        // Then
+        assertThat(extRefBayReferences).hasSize(1);
+        assertThat(sclReportItems).isEmpty();
+    }
+
+    @Test
+    void getExtRefBayReferenceForActifLDEPF_should_return_fatal_errors_when_NoPrivateBuyNorIcdHeader() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_extrefbayRef.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1");
+        iedAdapter.getCurrentElem().getPrivate().clear();
+        LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst("LDEPF");
+        // When
+        List<SclReportItem> sclReportItems = new ArrayList<>();
+        List<ExtRefInfo.ExtRefBayReference> extRefBayReferences = lDeviceAdapter.getExtRefBayReferenceForActifLDEPF(sclReportItems);
+        // Then
+        assertThat(extRefBayReferences).isEmpty();
+        assertThat(sclReportItems).hasSize(2);
+        assertThat(sclReportItems)
+                .extracting(SclReportItem::getMessage)
+                .contains("The IED has no Private Bay", "The IED has no Private compas:ICDHeader");
+    }
+
+    @Test
+    void getExtRefBayReferenceForActifLDEPF_should_return_fatal_errors_when_DOI_Mod_notExists() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_extrefbayRef.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        LDeviceAdapter lDeviceAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME3").getLDeviceAdapterByLdInst("LDEPF");
+        // When
+        List<SclReportItem> sclReportItems = new ArrayList<>();
+        List<ExtRefInfo.ExtRefBayReference> extRefBayReferences = lDeviceAdapter.getExtRefBayReferenceForActifLDEPF(sclReportItems);
+        // Then
+        assertThat(extRefBayReferences).isEmpty();
+        assertThat(sclReportItems).hasSize(1);
+        assertThat(sclReportItems)
+                .extracting(SclReportItem::getMessage)
+                .containsExactly("There is no DOI@name=" + MOD_DO_TYPE_NAME + "/DAI@name=" + STVAL_DA_TYPE_NAME + "/Val for LDevice@inst" + LDEVICE_LDEPF);
+    }
+
+    @Test
+    void getExtRefBayReferenceForActifLDEPF_should_not_return_existingExtRef_when_LDEPF_NotActive() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_extrefbayRef.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        LDeviceAdapter lDeviceAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME2").getLDeviceAdapterByLdInst("LDEPF");
+        // When
+        List<SclReportItem> sclReportItems = new ArrayList<>();
+        List<ExtRefInfo.ExtRefBayReference> extRefBayReferences = lDeviceAdapter.getExtRefBayReferenceForActifLDEPF(sclReportItems);
+        // Then
+        assertThat(extRefBayReferences).isEmpty();
+        assertThat(sclReportItems).isEmpty();
     }
 
     private static Stream<Arguments> provideLnClassAndDoType() {

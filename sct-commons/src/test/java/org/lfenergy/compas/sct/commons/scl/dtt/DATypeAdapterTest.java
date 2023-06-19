@@ -10,8 +10,8 @@ import org.lfenergy.compas.scl2007b4.model.TDAType;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
 import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
+import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
 import org.lfenergy.compas.sct.commons.dto.DoTypeName;
-import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.mockito.Mockito;
 
@@ -116,31 +116,31 @@ class DATypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TDAType
     }
 
     @Test
-    void testGetResumedRTTs() throws Exception {
+    void testGetDataAttributeRefs() throws Exception {
         DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
         DATypeAdapter daTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getDATypeAdapterById("DA1").get());
-        ResumedDataTemplate rootRDtt = new ResumedDataTemplate();
-        rootRDtt.getDaName().setName("origin");
-        rootRDtt.getDoName().setName("StrVal");
-        List<ResumedDataTemplate> rDtts = daTypeAdapter.getResumedDTTs(rootRDtt, new ResumedDataTemplate());
-        assertEquals(2,rDtts.size());
+        DataAttributeRef rootDataAttributeRef = new DataAttributeRef();
+        rootDataAttributeRef.getDaName().setName("origin");
+        rootDataAttributeRef.getDoName().setName("StrVal");
+        List<DataAttributeRef> dataAttributeRefs = daTypeAdapter.getDataAttributeRefs(rootDataAttributeRef, new DataAttributeRef());
+        assertEquals(2,dataAttributeRefs.size());
 
     }
 
     @Test
-    void getResumedDTTByDaName() throws Exception {
+    void getDataAttributeRefByDaName() throws Exception {
 
         DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(
                 AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID
         );
         DaTypeName daTypeName = new DaTypeName("antRef","origin.ctlVal");
         DoTypeName doTypeName = new DoTypeName("Op.origin");
-        ResumedDataTemplate rDtt = new ResumedDataTemplate();
-        rDtt.setDoName(doTypeName);
-        rDtt.getDaName().setName("antRef");
-        assertTrue(rDtt.getBdaNames().isEmpty());
+        DataAttributeRef dataAttributeRef = new DataAttributeRef();
+        dataAttributeRef.setDoName(doTypeName);
+        dataAttributeRef.getDaName().setName("antRef");
+        assertTrue(dataAttributeRef.getBdaNames().isEmpty());
         DATypeAdapter daTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getDATypeAdapterById("DA1").get());
-        assertDoesNotThrow(() -> daTypeAdapter.getResumedDTTByDaName(daTypeName,0,rDtt).get());
+        assertDoesNotThrow(() -> daTypeAdapter.getDataAttributeRefByDaName(daTypeName,0,dataAttributeRef).get());
     }
 
     @Test

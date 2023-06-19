@@ -7,7 +7,6 @@ package org.lfenergy.compas.sct.commons.util;
 import lombok.Getter;
 import org.lfenergy.compas.scl2007b4.model.*;
 
-import javax.validation.constraints.NotNull;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -43,7 +42,6 @@ public enum PrivateEnum {
         this.compasClass = compasClass;
     }
 
-    @NotNull
     public static PrivateEnum fromClass(Class<?> compasClass) {
         PrivateEnum result = classToEnum.get(compasClass);
         if (result == null) {

@@ -11,9 +11,9 @@ import org.lfenergy.compas.scl2007b4.model.TDO;
 import org.lfenergy.compas.scl2007b4.model.TLNodeType;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
+import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
 import org.lfenergy.compas.sct.commons.dto.DoTypeName;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
-import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.util.Utils;
@@ -41,7 +41,7 @@ import java.util.Optional;
  *      <li>{@link LNodeTypeAdapter#getDOTypeId <em>Returns the value of the <b>type </b>attribute By DOType Id</em>}</li>
  *      <li>{@link LNodeTypeAdapter#getId() <em>Returns the value of the <b>id </b>attribute</em>}</li>
  *      <li>{@link LNodeTypeAdapter#getLNClass <em>Returns the value of the <b>lnClass </b>attribute</em>}</li>
- *      <li>{@link LNodeTypeAdapter#getResumedDTTs <em>Returns <b>ResumedDataTemplate </b> list</em>}</li>
+ *      <li>{@link LNodeTypeAdapter#getDataAttributeRefs <em>Returns <b>DataAttributeRef </b> list</em>}</li>
  *    </ul>
  *   <li>Checklist functions</li>
  *    <ul>
@@ -153,27 +153,27 @@ public class LNodeTypeAdapter
     }
 
     /**
-     * return a list of summarized Resumed Data Type Templates beginning from given this LNodeType.
+     * return a list of summarized Data Attribute References beginning from given this LNodeType.
      * @apiNote This method doesn't check relationship between DO/SDO and DA. Check should be done by caller
      * @param filter filter for LNodeType
-     * @return list of completed Resumed Data Type Templates beginning from this LNodeType.
+     * @return list of completed Data Attribute References beginning from this LNodeType.
      */
-    public List<ResumedDataTemplate> getResumedDTTs(@NonNull ResumedDataTemplate filter)  {
+    public List<DataAttributeRef> getDataAttributeRefs(@NonNull DataAttributeRef filter)  {
 
-        List<ResumedDataTemplate> resumedDataTemplates = new ArrayList<>();
+        List<DataAttributeRef> dataAttributeRefs = new ArrayList<>();
         if(filter.isDaNameDefined()) {
             try {
                 check(filter.getDoName(),filter.getDaName());
             } catch (ScdException e){
                 log.error(e.getMessage());
-                return resumedDataTemplates;
+                return dataAttributeRefs;
             }
         }
-        ResumedDataTemplate rootRDTT = new ResumedDataTemplate();
-        rootRDTT.setLnType(currentElem.getId());
-        rootRDTT.setLnClass(filter.getLnClass());
-        rootRDTT.setLnInst(filter.getLnInst());
-        rootRDTT.setPrefix(filter.getPrefix());
+        DataAttributeRef rootDataAttributeRef = new DataAttributeRef();
+        rootDataAttributeRef.setLnType(currentElem.getId());
+        rootDataAttributeRef.setLnClass(filter.getLnClass());
+        rootDataAttributeRef.setLnInst(filter.getLnInst());
+        rootDataAttributeRef.setPrefix(filter.getPrefix());
 
         for(TDO tdo : currentElem.getDO()){
             if(filter.isDoNameDefined() &&
@@ -183,14 +183,14 @@ public class LNodeTypeAdapter
 
             parentAdapter.getDOTypeAdapterById(tdo.getType()).ifPresent(
                 doTypeAdapter -> {
-                    ResumedDataTemplate currentRDTT = ResumedDataTemplate.copyFrom(rootRDTT);
-                    currentRDTT.getDoName().setName(tdo.getName());
-                    currentRDTT.getDoName().setCdc(doTypeAdapter.getCdc());
-                    resumedDataTemplates.addAll(doTypeAdapter.getResumedDTTs(currentRDTT, filter));
+                    DataAttributeRef currentDataAttributeRef = DataAttributeRef.copyFrom(rootDataAttributeRef);
+                    currentDataAttributeRef.getDoName().setName(tdo.getName());
+                    currentDataAttributeRef.getDoName().setCdc(doTypeAdapter.getCdc());
+                    dataAttributeRefs.addAll(doTypeAdapter.getDataAttributeRefs(currentDataAttributeRef, filter));
                 }
             ); // else this should never happen or the scd won't be built in the first place and we'd never be here
         }
-        return resumedDataTemplates;
+        return dataAttributeRefs;
     }
 
     /**
@@ -301,37 +301,37 @@ public class LNodeTypeAdapter
     /**
      * Gets list of summarized data type template from DaTypeName
      * @param daTypeName DaTypeName from which summarized data type templates are created
-     * @return list of <em>ResumedDataTemplate</em> object
+     * @return list of <em>DataAttributeRef</em> object
      */
-    public List<ResumedDataTemplate> getResumedDTTByDaName(DaTypeName daTypeName) throws ScdException {
-        Optional<ResumedDataTemplate> opRDtt;
-        List<ResumedDataTemplate> rDtts = new ArrayList<>();
+    public List<DataAttributeRef> getDataAttributeRefByDaName(DaTypeName daTypeName) throws ScdException {
+        Optional<DataAttributeRef> opDataAttributeRef;
+        List<DataAttributeRef> dataAttributeRefs = new ArrayList<>();
         for(TDO tdo : currentElem.getDO()){
             DOAdapter doAdapter = new DOAdapter(this,tdo);
             DOTypeAdapter doTypeAdapter = doAdapter.getDoTypeAdapter().orElseThrow();
-            ResumedDataTemplate rDtt = new ResumedDataTemplate();
-            rDtt.setLnType(currentElem.getId());
-            rDtt.getDoName().setName(doAdapter.getCurrentElem().getName());
+            DataAttributeRef dataAttributeRef = new DataAttributeRef();
+            dataAttributeRef.setLnType(currentElem.getId());
+            dataAttributeRef.getDoName().setName(doAdapter.getCurrentElem().getName());
 
-            opRDtt = doTypeAdapter.getResumedDTTByDaName(daTypeName, rDtt);
-            opRDtt.ifPresent(rDtts::add);
+            opDataAttributeRef = doTypeAdapter.getDataAttributeRefByDaName(daTypeName, dataAttributeRef);
+            opDataAttributeRef.ifPresent(dataAttributeRefs::add);
         }
-        return rDtts;
+        return dataAttributeRefs;
     }
 
     /**
      * Gets list of summarized data type template from DoTypeName
      * @param doTypeName DoTypeName from which summarized data type templates are created
-     * @return list of <em>ResumedDataTemplate</em> object
+     * @return list of <em>DataAttributeRef</em> object
      */
-    public List<ResumedDataTemplate> getResumedDTTByDoName(DoTypeName doTypeName) {
+    public List<DataAttributeRef> getDataAttributeRefByDoName(DoTypeName doTypeName) {
 
 
         DOAdapter doAdapter = getDOAdapterByName(doTypeName.getName()).orElseThrow();
-        ResumedDataTemplate rDtt = new ResumedDataTemplate();
-        rDtt.getDoName().setName(doTypeName.getName());
+        DataAttributeRef dataAttributeRef = new DataAttributeRef();
+        dataAttributeRef.getDoName().setName(doTypeName.getName());
         DOTypeAdapter doTypeAdapter = doAdapter.getDoTypeAdapter().orElseThrow();
-        return doTypeAdapter.getResumedDTTByDoName(doTypeName,0,rDtt);
+        return doTypeAdapter.getDataAttributeRefByDoName(doTypeName,0,dataAttributeRef);
 
     }
 

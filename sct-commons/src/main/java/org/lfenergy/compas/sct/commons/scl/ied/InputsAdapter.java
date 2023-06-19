@@ -8,7 +8,7 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
+import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ExtRefService;
@@ -314,7 +314,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
             return warningReportItem(extRef, String.format(MESSAGE_SOURCE_LDEVICE_NOT_FOUND, sourceIed.getXPath()));
         }
         LDeviceAdapter sourceLDevice = optionalSourceLDevice.get();
-        Set<ResumedDataTemplate> sourceDas = sourceLDevice.findSourceDA(extRef);
+        Set<DataAttributeRef> sourceDas = sourceLDevice.findSourceDA(extRef);
         if (sourceDas.isEmpty()) {
             return warningReportItem(extRef, String.format(MESSAGE_SOURCE_LN_NOT_FOUND, optionalSourceLDevice.get().getXPath()));
         }
@@ -341,7 +341,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         return Optional.empty();
     }
 
-    private void createDataSetWithFCDA(TExtRef extRef, LDeviceAdapter sourceLDevice, ResumedDataTemplate sourceDa, String dataSetName) {
+    private void createDataSetWithFCDA(TExtRef extRef, LDeviceAdapter sourceLDevice, DataAttributeRef sourceDa, String dataSetName) {
         DataSetAdapter dataSetAdapter = sourceLDevice.getLN0Adapter().createDataSetIfNotExists(dataSetName, ControlBlockEnum.from(extRef.getServiceType()));
         String fcdaDaName = extRef.getServiceType() == TServiceType.REPORT ? null : sourceDa.getDaRef();
         String fcdaLnClass = extRef.getLnClass().stream().findFirst().orElse(null);
@@ -351,7 +351,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
             sourceDa.getFc());
     }
 
-    private void createControlBlockWithTarget(TExtRef extRef, LDeviceAdapter sourceLDevice, ResumedDataTemplate sourceDa, String cbName, String datSet) {
+    private void createControlBlockWithTarget(TExtRef extRef, LDeviceAdapter sourceLDevice, DataAttributeRef sourceDa, String cbName, String datSet) {
         String sourceLDName = sourceLDevice.getLdName();
         String cbId = getParentAdapter().generateControlBlockId(sourceLDName, cbName);
         ControlBlockAdapter controlBlockAdapter = sourceLDevice.getLN0Adapter().createControlBlockIfNotExists(cbName, cbId, datSet, ControlBlockEnum.from(extRef.getServiceType()));
@@ -371,7 +371,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         extRef.unsetSrcLNClass();
     }
 
-    private static String generateDataSetSuffix(TExtRef extRef, ResumedDataTemplate sourceDa, boolean isBayInternal) {
+    private static String generateDataSetSuffix(TExtRef extRef, DataAttributeRef sourceDa, boolean isBayInternal) {
         return extRef.getLdInst().toUpperCase(Locale.ENGLISH) + ATTRIBUTE_VALUE_SEPARATOR
                 + switch (extRef.getServiceType()) {
             case GOOSE -> "G" + ((sourceDa.getFc() == TFCEnum.ST) ? "S" : "M");
@@ -382,7 +382,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
                 + (isBayInternal ? "I" : "E");
     }
 
-    private Optional<SclReportItem> removeFilteredSourceDas(TExtRef extRef, final Set<ResumedDataTemplate> sourceDas) {
+    private Optional<SclReportItem> removeFilteredSourceDas(TExtRef extRef, final Set<DataAttributeRef> sourceDas) {
         sourceDas.removeIf(da -> da.getFc() != TFCEnum.MX && da.getFc() != TFCEnum.ST);
         return switch (extRef.getServiceType()) {
             case GOOSE, SMV -> {
@@ -394,12 +394,12 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         };
     }
 
-    private Optional<SclReportItem> removeFilterSourceDaForReport(TExtRef extRef, Set<ResumedDataTemplate> sourceDas) {
+    private Optional<SclReportItem> removeFilterSourceDaForReport(TExtRef extRef, Set<DataAttributeRef> sourceDas) {
         String daName = Utils.extractField(extRef.getDesc(), ATTRIBUTE_VALUE_SEPARATOR, EXTREF_DESC_DA_NAME_POSITION);
         if (StringUtils.isBlank(daName)) {
             return fatalReportItem(extRef, MESSAGE_EXTREF_DESC_MALFORMED);
         }
-        sourceDas.removeIf(resumedDataTemplate -> !resumedDataTemplate.getDaName().toString().equals(daName));
+        sourceDas.removeIf(dataAttributeRef -> !dataAttributeRef.getDaName().toString().equals(daName));
         return Optional.empty();
     }
 

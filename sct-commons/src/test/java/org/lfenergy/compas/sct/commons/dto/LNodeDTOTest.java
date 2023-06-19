@@ -29,7 +29,7 @@ class LNodeDTOTest {
         lNodeDTO.setNodeType(DTO.LN_TYPE);
         assertAll("LNODE",
                 ()-> assertTrue(lNodeDTO.getGooseControlBlocks().isEmpty()),
-                ()-> assertTrue(lNodeDTO.getResumedDataTemplates().isEmpty()),
+                ()-> assertTrue(lNodeDTO.getDataAttributeRefs().isEmpty()),
                 ()-> assertTrue(lNodeDTO.getDatSets().isEmpty()),
                 ()-> assertTrue(lNodeDTO.getExtRefs().isEmpty()),
                 ()-> assertEquals(DTO.HOLDER_LN_INST,lNodeDTO.getInst()),
@@ -37,7 +37,7 @@ class LNodeDTOTest {
                 ()-> assertEquals(DTO.LN_TYPE,lNodeDTO.getNodeType()),
                 ()-> assertEquals(DTO.HOLDER_LN_PREFIX,lNodeDTO.getPrefix())
         );
-        lNodeDTO.addResumedDataTemplate(ResumedDataTemplate.builder().daName(new DaTypeName("da1")).build());
+        lNodeDTO.addDataAttributeRef(DataAttributeRef.builder().daName(new DaTypeName("da1")).build());
         lNodeDTO.addExtRefInfo(new ExtRefInfo());
         lNodeDTO.addControlBlock(new ReportControlBlock("rpt", "rptID", "rptDatSet"));
         lNodeDTO.addDataSet(new DataSetInfo());
@@ -45,13 +45,13 @@ class LNodeDTOTest {
         lNodeDTO.addAllControlBlocks(List.of(new SMVControlBlock("smv", "smvID", "smvDatSet")));
         lNodeDTO.addAllDatSets(List.of(new DataSetInfo()));
         lNodeDTO.addAllExtRefInfo(List.of(new ExtRefInfo()));
-        lNodeDTO.addAllResumedDataTemplate(List.of(ResumedDataTemplate.builder().daName(new DaTypeName("da2")).build()));
+        lNodeDTO.addAllDataAttributeRef(List.of(DataAttributeRef.builder().daName(new DaTypeName("da2")).build()));
 
         assertEquals(2, lNodeDTO.getExtRefs().size());
         assertEquals(2, lNodeDTO.getDatSets().size());
         assertEquals(1, lNodeDTO.getSmvControlBlocks().size());
         assertEquals(1, lNodeDTO.getReportControlBlocks().size());
-        assertEquals(2, lNodeDTO.getResumedDataTemplates().size());
+        assertEquals(2, lNodeDTO.getDataAttributeRefs().size());
     }
 
     @Test
@@ -73,7 +73,7 @@ class LNodeDTOTest {
         when(lnAdapter.getDataTypeTemplateAdapter()).thenReturn(dataTypeTemplateAdapter);
         LNodeTypeAdapter lNodeTypeAdapter = mock(LNodeTypeAdapter.class);
         when(dataTypeTemplateAdapter.getLNodeTypeAdapterById(any())).thenReturn(Optional.of(lNodeTypeAdapter));
-        when(lNodeTypeAdapter.getResumedDTTs(any())).thenReturn(List.of(ResumedDataTemplate.builder().build()));
+        when(lNodeTypeAdapter.getDataAttributeRefs(any())).thenReturn(List.of(DataAttributeRef.builder().build()));
 
         TExtRef extRef = DTO.createExtRef();
         when(lnAdapter.getExtRefs(null)).thenReturn(List.of(extRef));

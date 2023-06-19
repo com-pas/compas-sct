@@ -558,7 +558,7 @@ public class DataTypeTemplateAdapter extends SclElementAdapter<SclRootAdapter, T
      * @return ExtRef binding information in <em>ExtRefBindingInfo</em> object
      * @throws ScdException
      */
-    public ExtRefBindingInfo getBinderResumedDTT(String lnType, ExtRefSignalInfo signalInfo) throws ScdException {
+    public ExtRefBindingInfo getBinderDataAttribute(String lnType, ExtRefSignalInfo signalInfo) throws ScdException {
         ExtRefBindingInfo binder = new ExtRefBindingInfo();
         // LNodeType check
         LNodeTypeAdapter lNodeTypeAdapter = getLNodeTypeAdapterById(lnType)

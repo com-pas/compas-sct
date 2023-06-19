@@ -46,6 +46,59 @@
                             <ExtRef pLN="PTRC" pDO="Str" desc="DYN_LDEPF_DIGITAL CHANNEL 13_1_BOOLEEN_1_dirGeneral_1"/>
                         </Inputs>
                     </LN0>
+                    <LN lnClass="RBDR" inst="1" lnType="RTE_RBDR">
+                        <DOI name="ChNum1">
+                            <DAI name="dU" valKind="RO" valImport="true">
+                                <Val>dU_old_val
+                                </Val> <!-- "MR.PX1"     It is the Channel.ShortLabel column value of the current setting file line -->
+                            </DAI>
+                        </DOI>
+                        <DOI name="LevMod">
+                            <DAI name="setVal" valKind="RO" valImport="true">
+                                <Val>setVal_old_val
+                                </Val>   <!-- "Positive or Rising"      It is the Channel.LevMod column value of the current setting file line -->
+                            </DAI>
+                        </DOI>
+                        <DOI name="Mod">
+                            <DAI name="stVal" sAddr="50606.0" valKind="Set" valImport="false">
+                                <Val>off
+                                </Val> <!-- "on"  With the help of RSR-121, Mod/stVal always updatable even if valImport="false" -->
+                            </DAI>
+                        </DOI>
+                        <DOI name="SrcRef">
+                            <DAI name="setSrcRef" valKind="Set" valImport="true">
+                                <Val>setSrcRef_old_val
+                                </Val>  <!-- "IED_NAME1LDPX/PTRC0.Str.general"  must contain ExtRef@iedNameExtRef@ldInst/ExtRef@prefixExtRef@lnClassExtRef@lnInst[.]ExtRef@doName[.]ExtRef@daName="general" from the DA.name column value of the setting file -->
+                            </DAI>
+                        </DOI>
+                    </LN>
+
+                    <LN prefix="b" lnClass="RBDR" inst="1" lnType="RTE_RBDR">
+                        <DOI name="ChNum1">
+                            <DAI name="dU" valKind="RO" valImport="true">
+                                <Val>dU_old_val
+                                </Val>  <!-- "MR.PX1"     It is the Channel.ShortLabel column value of the current setting file line -->
+                            </DAI>
+                        </DOI>
+                        <DOI name="LevMod">
+                            <DAI name="setVal" valKind="RO" valImport="true">
+                                <Val>setVal_old_val
+                                </Val>   <!-- "Other"   It is the Channel.LevMod.q column value of the current setting file line -->
+                            </DAI>
+                        </DOI>
+                        <DOI name="Mod">
+                            <DAI name="stVal" sAddr="50606.0" valKind="Set" valImport="false">
+                                <Val>off
+                                </Val>  <!-- "on" With the help of RSR-121, Mod/stVal always updatable even if valImport="false" -->
+                            </DAI>
+                        </DOI>
+                        <DOI name="SrcRef">
+                            <DAI name="setSrcRef" valKind="Set" valImport="true">
+                                <Val>setSrcRef_old_val
+                                </Val>   <!-- "IED_NAME1LDPX/PTRC0.Str.q"  must contain ExtRef@iedNameExtRef@ldInst/ExtRef@prefixExtRef@lnClassExtRef@lnInst[.]ExtRef@doName.q , DA name will be always q for bRBDR -->
+                            </DAI>
+                        </DOI>
+                    </LN>
                 </LDevice>
                 <LDevice inst="LDPX" ldName="IED_NAME1LDPX">
                     <LN0 lnClass="LLN0" inst="" lnType="LLN0_ID1">
@@ -115,6 +168,59 @@
                             <ExtRef pLN="PTRC" pDO="Str" desc="DYN_LDEPF_DIGITAL CHANNEL 27_1_BOOLEEN_1_dirGeneral_1"/>
                         </Inputs>
                     </LN0>
+                    <LN lnClass="RBDR" inst="15" lnType="RTE_RBDR">
+                        <DOI name="ChNum1">
+                            <DAI name="dU" valKind="RO" valImport="true">
+                                <Val>dU_old_val
+                                </Val> <!-- "MR.PX1"     It is the Channel.ShortLabel column value of the current setting file line -->
+                            </DAI>
+                        </DOI>
+                        <DOI name="LevMod">
+                            <DAI name="setVal" valKind="RO" valImport="true">
+                                <Val>setVal_old_val
+                                </Val>   <!-- "Positive or Rising"      It is the Channel.LevMod column value of the current setting file line -->
+                            </DAI>
+                        </DOI>
+                        <DOI name="Mod">
+                            <DAI name="stVal" sAddr="50606.0" valKind="Set" valImport="false">
+                                <Val>off
+                                </Val> <!-- "on"  With the help of RSR-121, Mod/stVal always updatable even if valImport="false" -->
+                            </DAI>
+                        </DOI>
+                        <DOI name="SrcRef">
+                            <DAI name="setSrcRef" valKind="Set" valImport="true">
+                                <Val>setSrcRef_old_val
+                                </Val>  <!-- "IED_NAME1LDPX/PTRC0.Str.general"  must contain ExtRef@iedNameExtRef@ldInst/ExtRef@prefixExtRef@lnClassExtRef@lnInst[.]ExtRef@doName[.]ExtRef@daName="general" from the DA.name column value of the setting file -->
+                            </DAI>
+                        </DOI>
+                    </LN>
+
+                    <LN prefix="b" lnClass="RBDR" inst="15" lnType="RTE_RBDR">
+                        <DOI name="ChNum1">
+                            <DAI name="dU" valKind="RO" valImport="true">
+                                <Val>dU_old_val
+                                </Val>  <!-- "MR.PX1"     It is the Channel.ShortLabel column value of the current setting file line -->
+                            </DAI>
+                        </DOI>
+                        <DOI name="LevMod">
+                            <DAI name="setVal" valKind="RO" valImport="true">
+                                <Val>setVal_old_val
+                                </Val>   <!-- "Other"   It is the Channel.LevMod.q column value of the current setting file line -->
+                            </DAI>
+                        </DOI>
+                        <DOI name="Mod">
+                            <DAI name="stVal" sAddr="50606.0" valKind="Set" valImport="false">
+                                <Val>off
+                                </Val>  <!-- "on" With the help of RSR-121, Mod/stVal always updatable even if valImport="false" -->
+                            </DAI>
+                        </DOI>
+                        <DOI name="SrcRef">
+                            <DAI name="setSrcRef" valKind="Set" valImport="true">
+                                <Val>setSrcRef_old_val
+                                </Val>   <!-- "IED_NAME1LDPX/PTRC0.Str.q"  must contain ExtRef@iedNameExtRef@ldInst/ExtRef@prefixExtRef@lnClassExtRef@lnInst[.]ExtRef@doName.q , DA name will be always q for bRBDR -->
+                            </DAI>
+                        </DOI>
+                    </LN>
                 </LDevice>
                 <LDevice inst="LDPX" ldName="IED_NAME2LDPX">
                     <LN0 lnClass="LLN0" inst="" lnType="LLN0_ID1">
@@ -140,17 +246,36 @@
         <LNodeType lnClass="LLN0" id="LLN0_ID1">
             <DO name="Mod" type="DO2"/>
         </LNodeType>
-        <LNodeType lnClass="PTRC" id="PTRC_ID1"> <!-- DO/DA check of source object (lnClass PTRC) -->
+        <LNodeType lnClass="PTRC" id="PTRC_ID1">
             <DO name="Mod" type="DO2"/>
-            <DO name="Str" type="ACD1"/> <!-- doName Str -->
+            <DO name="Str" type="ACD1"/>
             <DO name="Op" type="ACD1"/> <!-- doName Op -->
+        </LNodeType>
+        <LNodeType lnClass="RBDR" id="RTE_RBDR"> <!-- lnClass RBDR -->
+            <DO name="ChNum1" type="DOCh"/>
+            <DO name="LevMod" type="DOLe"/>
+            <DO name="Mod" type="DOMo"/>
+            <DO name="SrcRef" type="DOSr"/>
         </LNodeType>
         <DOType cdc="ACD" id="ACD1">
             <DA name="general" bType="BOOLEAN" fc="ST"/>  <!-- daName general -->
         </DOType>
         <DOType cdc="ENC" id="DO2">
-            <DA fc="ST" dchg="true" qchg="false" dupd="false" name="stVal" bType="Enum" type="BehaviourModeKind" valImport="true" />
+            <DA fc="ST" dchg="true" name="stVal" bType="Enum" type="BehaviourModeKind"
+                valImport="true"/>
             <DA fc="BL" name="daName1" bType="BOOLEAN"/>
+        </DOType>
+        <DOType cdc="ENC" id="DOCh">
+            <DA fc="ST" dchg="true" name="dU" bType="VisString255" valImport="true"/>
+        </DOType>
+        <DOType cdc="ENC" id="DOLe">
+            <DA fc="ST" dchg="true" name="setVal" bType="VisString255" valImport="true"/>
+        </DOType>
+        <DOType cdc="ENC" id="DOMo">
+            <DA fc="ST" dchg="true" name="stVal" bType="Enum" type="BehaviourModeKind" valImport="true"/>
+        </DOType>
+        <DOType cdc="ENC" id="DOSr">
+            <DA fc="ST" dchg="true" name="setSrcRef" bType="VisString255" valImport="true"/>
         </DOType>
         <EnumType id="BehaviourModeKind">
             <EnumVal ord="1">on</EnumVal>

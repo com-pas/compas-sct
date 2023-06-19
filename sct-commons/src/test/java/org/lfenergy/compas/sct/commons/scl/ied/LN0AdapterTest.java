@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Named.named;
 import static org.lfenergy.compas.scl2007b4.model.TSampledValueControl.SmvOpts;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -470,7 +471,7 @@ class LN0AdapterTest {
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LDSUIED").get());
         LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
-        ResumedDataTemplate filter = new ResumedDataTemplate();
+        DataAttributeRef filter = new DataAttributeRef();
         filter.setLnClass(ln0Adapter.getLNClass());
         filter.setLnInst(ln0Adapter.getLNInst());
         filter.setPrefix(ln0Adapter.getPrefix());
@@ -482,12 +483,12 @@ class LN0AdapterTest {
         daTypeName.setFc(TFCEnum.ST);
         filter.setDaName(daTypeName);
         //When
-        var rDtts = ln0Adapter.getDAI(filter, false);
+        var dataAttributeRefs = ln0Adapter.getDAI(filter, false);
         //Then
-        assertFalse(rDtts.isEmpty());
-        assertEquals(1, rDtts.size());
-        assertNotNull(rDtts.get(0).getDaName().getType());
-        assertEquals("BehaviourModeKind", rDtts.get(0).getDaName().getType());
+        assertFalse(dataAttributeRefs.isEmpty());
+        assertEquals(1, dataAttributeRefs.size());
+        assertNotNull(dataAttributeRefs.get(0).getDaName().getType());
+        assertEquals("BehaviourModeKind", dataAttributeRefs.get(0).getDaName().getType());
     }
 
     @Test
@@ -960,7 +961,7 @@ class LN0AdapterTest {
         List<SclReportItem> sclReportItems = sourceLn0.updateDoInRef();
 
         // Then
-        AbstractDAIAdapter<?> finalSetSrcRef = sourceLn0.getDOIAdapterByName("InRef6").getDataAdapterByName(DOIAdapter.DA_NAME_SET_SRC_REF);
+        AbstractDAIAdapter<?> finalSetSrcRef = sourceLn0.getDOIAdapterByName("InRef6").getDataAdapterByName(SETSRCREF_DA_NAME);
         assertThat(finalSetSrcRef.getCurrentElem().isSetVal()).isFalse();
         assertThat(sclReportItems).isEmpty();
     }
@@ -972,8 +973,8 @@ class LN0AdapterTest {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         LN0Adapter sourceLn0 = findLn0(sclRootAdapter, "IED_NAME1", "LD_WITH_1_InRef_without_cbName");
         String doiNameInRef = "InRef7";
-        List<TVal> daiValList = sourceLn0.getDOIAdapterByName(doiNameInRef).getDataAdapterByName(DOIAdapter.DA_NAME_SET_SRC_REF).getCurrentElem().getVal();
-        String originalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, DOIAdapter.DA_NAME_SET_SRC_CB);
+        List<TVal> daiValList = sourceLn0.getDOIAdapterByName(doiNameInRef).getDataAdapterByName(SETSRCREF_DA_NAME).getCurrentElem().getVal();
+        String originalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, SETSRCCB_DA_NAME);
         String expectedSrcRef = "IED_NAME1LD_WITH_1_InRef/PRANCR1.Do11.sdo11";
 
         assertThat(daiValList).isEmpty();
@@ -982,8 +983,8 @@ class LN0AdapterTest {
         List<SclReportItem> sclReportItems = sourceLn0.updateDoInRef();
 
         // Then
-        String finalSetSrcRef = getDaiValue(sourceLn0, doiNameInRef, DOIAdapter.DA_NAME_SET_SRC_REF);
-        String finalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, DOIAdapter.DA_NAME_SET_SRC_CB);
+        String finalSetSrcRef = getDaiValue(sourceLn0, doiNameInRef, SETSRCREF_DA_NAME);
+        String finalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, SETSRCCB_DA_NAME);
         assertThat(finalSetSrcRef)
                 .isNotBlank()
                 .isEqualTo(expectedSrcRef);
@@ -998,7 +999,7 @@ class LN0AdapterTest {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         LN0Adapter sourceLn0 = findLn0(sclRootAdapter, "IED_NAME1", "LD_WITH_1_InRef");
         String doiNameInRef = "InRef2";
-        String originalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, DOIAdapter.DA_NAME_SET_SRC_CB);
+        String originalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, SETSRCCB_DA_NAME);
         String expectedSrcRef = "IED_NAME1LD_WITH_1_InRef/PRANCR1.Do11.sdo11";
         String expectedSrcCb = "IED_NAME1LD_WITH_1_InRef/prefixANCR1.GSE1";
 
@@ -1006,8 +1007,8 @@ class LN0AdapterTest {
         List<SclReportItem> sclReportItems = sourceLn0.updateDoInRef();
 
         // Then
-        String finalSetSrcRef = getDaiValue(sourceLn0, doiNameInRef, DOIAdapter.DA_NAME_SET_SRC_REF);
-        String finalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, DOIAdapter.DA_NAME_SET_SRC_CB);
+        String finalSetSrcRef = getDaiValue(sourceLn0, doiNameInRef, SETSRCREF_DA_NAME);
+        String finalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, SETSRCCB_DA_NAME);
         assertThat(finalSetSrcRef)
                 .isNotBlank()
                 .isEqualTo(expectedSrcRef);
@@ -1024,10 +1025,10 @@ class LN0AdapterTest {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         LN0Adapter sourceLn0 = findLn0(sclRootAdapter, "IED_NAME1", "LD_WITH_3_InRef");
         String doiNameInRef = "InRef3";
-        String originalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, DOIAdapter.DA_NAME_SET_SRC_CB);
+        String originalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, SETSRCCB_DA_NAME);
         String expectedSrcRef = "IED_NAME1LD_WITH_3_InRef/PRANCR1.Do11.sdo11";
         String expectedSrcCb = "IED_NAME1LD_WITH_3_InRef/prefixANCR1.GSE1";
-        String originalSetTstCB = getDaiValue(sourceLn0, doiNameInRef, DOIAdapter.DA_NAME_SET_TST_CB);
+        String originalSetTstCB = getDaiValue(sourceLn0, doiNameInRef, SETTSTCB_DA_NAME);
         String expectedTstRef = "IED_NAME1LD_WITH_3_InRef/PRANCR1.Do11.sdo11";
         String expectedTstCB = "IED_NAME1LD_WITH_3_InRef/prefixANCR3.GSE3";
 
@@ -1035,10 +1036,10 @@ class LN0AdapterTest {
         List<SclReportItem> sclReportItems = sourceLn0.updateDoInRef();
         // Then
 
-        String finalSetSrcRef = getDaiValue(sourceLn0, doiNameInRef, DOIAdapter.DA_NAME_SET_SRC_REF);
-        String finalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, DOIAdapter.DA_NAME_SET_SRC_CB);
-        String finalSetTstRef = getDaiValue(sourceLn0, doiNameInRef, DOIAdapter.DA_NAME_SET_TST_REF);
-        String finalSetTstCB = getDaiValue(sourceLn0, doiNameInRef, DOIAdapter.DA_NAME_SET_TST_CB);
+        String finalSetSrcRef = getDaiValue(sourceLn0, doiNameInRef, SETSRCREF_DA_NAME);
+        String finalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, SETSRCCB_DA_NAME);
+        String finalSetTstRef = getDaiValue(sourceLn0, doiNameInRef, SETTSTREF_DA_NAME);
+        String finalSetTstCB = getDaiValue(sourceLn0, doiNameInRef, SETTSTCB_DA_NAME);
         assertThat(finalSetSrcRef)
                 .isNotBlank()
                 .isEqualTo(expectedSrcRef);
@@ -1061,22 +1062,22 @@ class LN0AdapterTest {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         LN0Adapter sourceLn0 = findLn0(sclRootAdapter, "IED_NAME1", "LD_WITH_3_InRef");
         String doiNameInRef = "InRef3";
-        findDai(sourceLn0, "InRef3" + "." + DOIAdapter.DA_NAME_SET_SRC_REF).update(0L, "OLD_VAL");
-        findDai(sourceLn0, "InRef3" + "." + DOIAdapter.DA_NAME_SET_TST_REF).update(0L, "OLD_VAL");
-        findDai(sourceLn0, "InRef3" + "." + DOIAdapter.DA_NAME_SET_SRC_REF).getCurrentElem().setValImport(false);
-        findDai(sourceLn0, "InRef3" + "." + DOIAdapter.DA_NAME_SET_SRC_CB).getCurrentElem().setValImport(false);
-        findDai(sourceLn0, "InRef3" + "." + DOIAdapter.DA_NAME_SET_TST_REF).getCurrentElem().setValImport(false);
-        findDai(sourceLn0, "InRef3" + "." + DOIAdapter.DA_NAME_SET_TST_CB).getCurrentElem().setValImport(false);
+        findDai(sourceLn0, "InRef3" + "." + SETSRCREF_DA_NAME).update(0L, "OLD_VAL");
+        findDai(sourceLn0, "InRef3" + "." + SETTSTREF_DA_NAME).update(0L, "OLD_VAL");
+        findDai(sourceLn0, "InRef3" + "." + SETSRCREF_DA_NAME).getCurrentElem().setValImport(false);
+        findDai(sourceLn0, "InRef3" + "." + SETSRCCB_DA_NAME).getCurrentElem().setValImport(false);
+        findDai(sourceLn0, "InRef3" + "." + SETTSTREF_DA_NAME).getCurrentElem().setValImport(false);
+        findDai(sourceLn0, "InRef3" + "." + SETTSTCB_DA_NAME).getCurrentElem().setValImport(false);
         String expectedVal = "OLD_VAL";
 
         // When
         List<SclReportItem> sclReportItems = sourceLn0.updateDoInRef();
         // Then
 
-        String finalSetSrcRef = getDaiValue(sourceLn0, doiNameInRef, DOIAdapter.DA_NAME_SET_SRC_REF);
-        String finalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, DOIAdapter.DA_NAME_SET_SRC_CB);
-        String finalSetTstRef = getDaiValue(sourceLn0, doiNameInRef, DOIAdapter.DA_NAME_SET_TST_REF);
-        String finalSetTstCB = getDaiValue(sourceLn0, doiNameInRef, DOIAdapter.DA_NAME_SET_TST_CB);
+        String finalSetSrcRef = getDaiValue(sourceLn0, doiNameInRef, SETSRCREF_DA_NAME);
+        String finalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, SETSRCCB_DA_NAME);
+        String finalSetTstRef = getDaiValue(sourceLn0, doiNameInRef, SETTSTREF_DA_NAME);
+        String finalSetTstCB = getDaiValue(sourceLn0, doiNameInRef, SETTSTCB_DA_NAME);
 
         assertThat(finalSetSrcRef).isEqualTo(expectedVal);
         assertThat(finalSetSrcCB).isEqualTo(expectedVal);
@@ -1085,8 +1086,8 @@ class LN0AdapterTest {
         assertThat(sclReportItems)
                 .hasSize(4)
                 .extracting(SclReportItem::getMessage)
-                .containsExactly("The DAI cannot be updated", "The DAI cannot be updated", "The DAI cannot be updated",
-                        "The DAI cannot be updated");
+                .containsExactly("The DAI setSrcRef cannot be updated", "The DAI setSrcCB cannot be updated",
+                        "The DAI setTstRef cannot be updated", "The DAI setTstCB cannot be updated");
     }
 
 

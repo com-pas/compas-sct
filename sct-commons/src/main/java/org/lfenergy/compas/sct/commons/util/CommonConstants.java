@@ -22,7 +22,21 @@ public final class CommonConstants {
     public static final String CONTROLBLOCK_NAME_PREFIX = "CB" + ATTRIBUTE_VALUE_SEPARATOR;
     public static final String DATASET_NAME_PREFIX = "DS" + ATTRIBUTE_VALUE_SEPARATOR;
 
+    public static final String LN_RADR = "RADR";
+    public static final String LN_RBDR = "RBDR";
+    public static final String LN_PREFIX_A = "a";
+    public static final String LN_PREFIX_B = "b";
     public static final String LDEVICE_LDEPF = "LDEPF";
+    public static final String CHNUM1_DO_NAME = "ChNum1";
+    public static final String LEVMOD_DO_NAME = "LevMod";
+    public static final String SRCREF_DO_NAME = "SrcRef";
+    public static final String DU_DA_NAME = "dU";
+    public static final String SETVAL_DA_NAME = "setVal";
+    public static final String SETSRCREF_DA_NAME = "setSrcRef";
+    public static final String SETSRCCB_DA_NAME = "setSrcCB";
+    public static final String SETTSTREF_DA_NAME = "setTstRef";
+    public static final String SETTSTCB_DA_NAME = "setTstCB";
+    public static final String Q_DA_NAME = "q";
     public static final String IED_TEST_NAME = "IEDTEST";
 
     /**

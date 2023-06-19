@@ -19,6 +19,8 @@ import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
 
+import static org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter.MOD_DO_TYPE_NAME;
+import static org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter.STVAL_DA_TYPE_NAME;
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 import static org.lfenergy.compas.sct.commons.util.Utils.copySclElement;
 
@@ -40,7 +42,7 @@ import static org.lfenergy.compas.sct.commons.util.Utils.copySclElement;
  *      <li>{@link LDeviceAdapter#getLdName <em>Returns the value of the <b>ldName </b>attribute</em>}</li>
  *      <li>{@link LDeviceAdapter#getExtRefInfo em>Returns the value of the <b>ExtRefInfo </b>containment reference</em>}</li>
  *      <li>{@link LDeviceAdapter#getExtRefBinders <em>Returns the value of the <b>ExtRefBindingInfo </b>containment reference list By <b>ExtRefSignalInfo</b></em>}</li>
- *      <li>{@link LDeviceAdapter#getDAI <em>Returns the value of the <b>ResumedDataTemplate </b>containment reference By filter</em>}</li>
+ *      <li>{@link LDeviceAdapter#getDAI <em>Returns the value of the <b>DataAttributeRef </b>containment reference By filter</em>}</li>
  *      <li>{@link LDeviceAdapter#addPrivate <em>Add <b>TPrivate </b>under this object</em>}</li>
  *    </ul>
  * </ol>
@@ -83,9 +85,9 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
                 .forEach(fcda -> (fcda.getLnClass().get(0).equals(TLLN0Enum.LLN_0.value()) ?
                         Optional.of(ln0) // ln0 Mod stVal "ON" has already been checked, no need to check it again
                         : findLnAdapter(fcda.getLnClass().get(0), fcda.getLnInst(), fcda.getPrefix()).filter(lnAdapter -> lnAdapter.getDaiModStValValue().map(LDeviceStatus.ON::equals).orElse(true)))
-                        .map(sourceLn -> sourceLn.getDAI(new ResumedDataTemplate(fcda), false))
+                        .map(sourceLn -> sourceLn.getDAI(new DataAttributeRef(fcda), false))
                         .filter(das -> das.stream().anyMatch(da -> fcda.getFc() == da.getFc())) // getDAI does not filter on DA.
-                        .ifPresent(resumedDataTemplates -> createHmiReportCB(ln0, fcda)));
+                        .ifPresent(dataAttributeRefs -> createHmiReportCB(ln0, fcda)));
     }
 
     private void createHmiReportCB(LN0Adapter ln0, TFCDA fcda) {
@@ -270,7 +272,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
                 .filter(abstractLNAdapter -> StringUtils.isBlank(signalInfo.getPLN()) || abstractLNAdapter.getLNClass().equals(signalInfo.getPLN()))
                 .map(lnAdapter -> {
                     String lnType = lnAdapter.getLnType();
-                    ExtRefBindingInfo extRefBindingInfo = dttAdapter.getBinderResumedDTT(lnType, signalInfo);
+                    ExtRefBindingInfo extRefBindingInfo = dttAdapter.getBinderDataAttribute(lnType, signalInfo);
                     extRefBindingInfo.setIedName(parentAdapter.getName());
                     extRefBindingInfo.setLdInst(currentElem.getInst());
                     extRefBindingInfo.setLnClass(lnAdapter.getLNClass());
@@ -301,31 +303,31 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
     /**
      * Gets a list of summarized DataTypeTemplate for DataAttribute DAIs (updatableOnly or not)
      *
-     * @param rDtt          reference resumed DataTypeTemplate (used as filter)
+     * @param dataAttributeRef          Data Attribute Reference (used as filter)
      * @param updatableOnly true to retrieve only updatableOnly DAIs, false to retrieve all DAIs
-     * @return Set of <em>ResumedDataTemplate</em> (updatableOnly or not)
+     * @return Set of <em>DataAttributeRef</em> (updatableOnly or not)
      * @throws ScdException SCD illegal arguments exception
      */
-    public Set<ResumedDataTemplate> getDAI(ResumedDataTemplate rDtt, boolean updatableOnly) throws ScdException {
+    public Set<DataAttributeRef> getDAI(DataAttributeRef dataAttributeRef, boolean updatableOnly) throws ScdException {
         List<? extends AbstractLNAdapter<?>> lnAdapters;
-        if (StringUtils.isBlank(rDtt.getLnClass())) {
+        if (StringUtils.isBlank(dataAttributeRef.getLnClass())) {
             lnAdapters = getLNAdaptersIncludingLN0();
-        } else if (rDtt.getLnClass().equals(TLLN0Enum.LLN_0.value())) {
+        } else if (dataAttributeRef.getLnClass().equals(TLLN0Enum.LLN_0.value())) {
             lnAdapters = hasLN0() ? Collections.singletonList(getLN0Adapter()) : Collections.emptyList();
         } else {
-            lnAdapters = findLnAdapter(rDtt.getLnClass(), rDtt.getLnInst(), rDtt.getPrefix()).stream().toList();
+            lnAdapters = findLnAdapter(dataAttributeRef.getLnClass(), dataAttributeRef.getLnInst(), dataAttributeRef.getPrefix()).stream().toList();
         }
 
-        Set<ResumedDataTemplate> resumedDataTemplateSet = new HashSet<>();
+        Set<DataAttributeRef> dataAttributeRefSet = new HashSet<>();
         for (AbstractLNAdapter<?> lnAdapter : lnAdapters) {
-            ResumedDataTemplate filter = ResumedDataTemplate.copyFrom(rDtt);
+            DataAttributeRef filter = DataAttributeRef.copyFrom(dataAttributeRef);
             filter.setLnClass(lnAdapter.getLNClass());
             filter.setLnInst(lnAdapter.getLNInst());
             filter.setPrefix(lnAdapter.getPrefix());
             filter.setLnType(lnAdapter.getLnType());
-            resumedDataTemplateSet.addAll(lnAdapter.getDAI(filter, updatableOnly));
+            dataAttributeRefSet.addAll(lnAdapter.getDAI(filter, updatableOnly));
         }
-        return resumedDataTemplateSet;
+        return dataAttributeRefSet;
 
     }
 
@@ -357,9 +359,9 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
                 .updateAllSourceDataSetsAndControlBlocks();
     }
 
-    public Set<ResumedDataTemplate> findSourceDA(TExtRef extRef) {
+    public Set<DataAttributeRef> findSourceDA(TExtRef extRef) {
         String extRefLnClass = extRef.getLnClass().stream().findFirst().orElse("");
-        ResumedDataTemplate filter = ResumedDataTemplate.builder()
+        DataAttributeRef filter = DataAttributeRef.builder()
                 .lnClass(extRefLnClass)
                 .prefix(extRef.getPrefix())
                 .lnInst(extRef.getLnInst())
@@ -435,13 +437,13 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
         return getLNAdapters().stream().filter(lnAdapter -> monitoringLnClassEnum.value().equals(lnAdapter.getLNClass()))
                 .map(lnAdapter -> {
                     Optional<SclReportItem> optionalSclReportItem = Optional.empty();
-                    ResumedDataTemplate filter = new ResumedDataTemplate(lnAdapter, new DoTypeName(doName), new DaTypeName(DA_SETSRCREF));
-                    Optional<ResumedDataTemplate> foundDai = lnAdapter.getDAI(filter, true).stream().findFirst();
+                    DataAttributeRef filter = new DataAttributeRef(lnAdapter, new DoTypeName(doName), new DaTypeName(DA_SETSRCREF));
+                    Optional<DataAttributeRef> foundDai = lnAdapter.getDAI(filter, true).stream().findFirst();
                     if (foundDai.isEmpty()) {
                         optionalSclReportItem = Optional.of(SclReportItem.warning(lnAdapter.getXPath() + "/DOI@name=\"" + doName + "\"/DAI@name=\"setSrcRef\"/Val",
                                 "The DAI cannot be updated"));
                     } else {
-                        ResumedDataTemplate daToUpdateFilter = foundDai.get();
+                        DataAttributeRef daToUpdateFilter = foundDai.get();
                         TLN lnToUpdate = lnAdapter.getCurrentElem();
                         removeLnsByLnClass(monitoringLnClassEnum);
                         for (int i = 0; i < tExtRefs.size(); i++) {
@@ -463,7 +465,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
         getCurrentElem().getLN().addAll(lnToKeep);
     }
 
-    private void updateNewCreatedLnDaiValue(TLN tln, TExtRef tExtRef, String lnInst, ResumedDataTemplate daToUpdate) {
+    private void updateNewCreatedLnDaiValue(TLN tln, TExtRef tExtRef, String lnInst, DataAttributeRef daToUpdate) {
         LNAdapter lnAdapter = new LNAdapter(this, tln);
         String value = createVal(tExtRef);
         lnAdapter.getCurrentElem().setInst(lnInst);
@@ -476,6 +478,33 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
                 .getLDeviceAdapterByLdInst(tExtRef.getSrcLDInst()).getLdName();
         String lnClass = !tExtRef.isSetSrcLNClass() ? TLLN0Enum.LLN_0.value() : tExtRef.getSrcLNClass().get(0);
         return sourceLdName + "/" + lnClass + "." + tExtRef.getSrcCBName();
+    }
+
+    /**
+     * Provides a list of ExtRef and associated Bay <br/>
+     * - The location of ExtRef should be in an active LDevice (inst=LDEPF) <br/>
+     * - ExtRef that lacks Bay or ICDHeader Private is not returned <br/>
+     *
+     * @param sclReportItems List of SclReportItem
+     * @return list of ExtRef and associated Bay
+     */
+    public List<ExtRefInfo.ExtRefBayReference> getExtRefBayReferenceForActifLDEPF(final List<SclReportItem> sclReportItems) {
+        List<ExtRefInfo.ExtRefBayReference> extRefBayReferenceList = new ArrayList<>();
+        IEDAdapter parentIedAdapter = getParentAdapter();
+        if (parentIedAdapter.getPrivateCompasBay().isEmpty()) {
+            sclReportItems.add(SclReportItem.fatal(getXPath(), "The IED has no Private Bay"));
+            if (parentIedAdapter.getCompasICDHeader().isEmpty()) {
+                sclReportItems.add(SclReportItem.fatal(getXPath(), "The IED has no Private compas:ICDHeader"));
+            }
+            return Collections.emptyList();
+        }
+
+        getLDeviceStatus().ifPresentOrElse(s -> {
+            if (LDeviceStatus.ON.equals(s)) {
+                extRefBayReferenceList.addAll(getLN0Adapter().getInputsAdapter().getCurrentElem().getExtRef().stream().map(extRef -> new ExtRefInfo.ExtRefBayReference(parentIedAdapter.getName(), parentIedAdapter.getPrivateCompasBay().get(), extRef)).toList());
+            }
+        }, () -> sclReportItems.add(SclReportItem.fatal(getXPath(), "There is no DOI@name=" + MOD_DO_TYPE_NAME + "/DAI@name=" + STVAL_DA_TYPE_NAME + "/Val for LDevice@inst" + LDEVICE_LDEPF)));
+        return extRefBayReferenceList;
     }
 
 }

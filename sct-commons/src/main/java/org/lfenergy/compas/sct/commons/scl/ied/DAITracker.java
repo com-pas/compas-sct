@@ -9,8 +9,8 @@ import lombok.NonNull;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedCDCEnum;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
+import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
 import org.lfenergy.compas.sct.commons.dto.DoTypeName;
-import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
@@ -157,17 +157,17 @@ public class DAITracker {
         LNodeTypeAdapter lNodeTypeAdapter = dttAdapter.getLNodeTypeAdapterById(lnAdapter.getLnType())
                 .orElseThrow(() -> new ScdException("Unknown LNodeType : " + lnAdapter.getLnType()));
 
-        List<ResumedDataTemplate> rDtts =  lNodeTypeAdapter.getResumedDTTByDoName(doTypeName);
+        List<DataAttributeRef> dataAttributeRefs =  lNodeTypeAdapter.getDataAttributeRefByDoName(doTypeName);
         try{
-            ResumedDataTemplate tempRDtt =  rDtts.stream()
+            DataAttributeRef tempDataAttributeRef =  dataAttributeRefs.stream()
                     .filter(rData -> rData.getDaName().getName().equals("minVal")).findFirst().orElse(null);
-            if(tempRDtt != null) {
-                Map<Long, String> daiValues = lnAdapter.getDAIValues(tempRDtt);
+            if(tempDataAttributeRef != null) {
+                Map<Long, String> daiValues = lnAdapter.getDAIValues(tempDataAttributeRef);
                 if (!daiValues.isEmpty()) {
-                    tempRDtt.getDaName().setDaiValues(daiValues);
+                    tempDataAttributeRef.getDaName().setDaiValues(daiValues);
                 }
 
-                double min = getDaiNumericValue(tempRDtt.getDaName(), Double.MIN_VALUE);
+                double min = getDaiNumericValue(tempDataAttributeRef.getDaName(), Double.MIN_VALUE);
                 if (val < min) {
                     throw new ScdException(
                             String.format("The DA(%s) value(%f) must be greater than(%f)",daTypeName, val,min)
@@ -175,15 +175,15 @@ public class DAITracker {
                 }
             }
 
-            tempRDtt =  rDtts.stream()
+            tempDataAttributeRef =  dataAttributeRefs.stream()
                     .filter(rData -> rData.getDaName().getName().equals("maxVal")).findFirst().orElse(null);
-            if(tempRDtt != null) {
-                Map<Long, String> daiValues = lnAdapter.getDAIValues(tempRDtt);
+            if(tempDataAttributeRef != null) {
+                Map<Long, String> daiValues = lnAdapter.getDAIValues(tempDataAttributeRef);
                 if (!daiValues.isEmpty()) {
-                    tempRDtt.getDaName().setDaiValues(daiValues);
+                    tempDataAttributeRef.getDaName().setDaiValues(daiValues);
                 }
 
-                double max = getDaiNumericValue(tempRDtt.getDaName(), Double.MAX_VALUE);
+                double max = getDaiNumericValue(tempDataAttributeRef.getDaName(), Double.MAX_VALUE);
                 if (val > max) {
                     throw new ScdException(
                             String.format("The DA(%s) value(%f) must be less than(%f)",daTypeName, val,max)
@@ -191,15 +191,15 @@ public class DAITracker {
                 }
             }
 
-            tempRDtt =  rDtts.stream()
+            tempDataAttributeRef =  dataAttributeRefs.stream()
                     .filter(rData -> rData.getDaName().getName().equals("stepSize")).findFirst().orElse(null);
-            if(tempRDtt != null) {
-                Map<Long, String> daiValues = lnAdapter.getDAIValues(tempRDtt);
+            if(tempDataAttributeRef != null) {
+                Map<Long, String> daiValues = lnAdapter.getDAIValues(tempDataAttributeRef);
                 if (!daiValues.isEmpty()) {
-                    tempRDtt.getDaName().setDaiValues(daiValues);
+                    tempDataAttributeRef.getDaName().setDaiValues(daiValues);
                 }
 
-                double step =  getDaiNumericValue(tempRDtt.getDaName(),val);
+                double step =  getDaiNumericValue(tempDataAttributeRef.getDaName(),val);
                 if (Math.abs((int)val)% Math.abs((int)step) > Math.pow(10,-9)) {
                     throw new ScdException(
                             String.format("The DA(%s) value(%f) divisible by (%f)",daTypeName,val,step)

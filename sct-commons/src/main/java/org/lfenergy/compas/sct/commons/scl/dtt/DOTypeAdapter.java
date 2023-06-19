@@ -7,8 +7,8 @@ package org.lfenergy.compas.sct.commons.scl.dtt;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
+import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
 import org.lfenergy.compas.sct.commons.dto.DoTypeName;
-import org.lfenergy.compas.sct.commons.dto.ResumedDataTemplate;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
@@ -33,10 +33,10 @@ import java.util.stream.Stream;
  *    <ul>
  *      <li>{@link DOTypeAdapter#addPrivate <em>Add <b>TPrivate </b>under this object</em>}</li>
  *      <li>{@link DOTypeAdapter#getDAByName <em>Returns the value of the <b>TDA </b>reference object By name</em>}</li>
- *      <li>{@link DOTypeAdapter#getResumedDTTByDaName <em>Returns <b>ResumedDTT</b> By <b>DaTypeName </b> </em>}</li>
- *      <li>{@link DOTypeAdapter#getResumedDTTByDoName <em>Returns <b>ResumedDTT</b> By <b>DoTypeName </b></em>}</li>
- *      <li>{@link DOTypeAdapter#getResumedDTTs <em>Returns List Of <b>ResumedDTT</b> By Custom filter</em>}</li>
- *      <li>{@link DOTypeAdapter#getResumedDTTsOfDA <em>Returns List Of <b>ResumedDTT</b> By <b>DA </b> Object</em>}</li>
+ *      <li>{@link DOTypeAdapter#getDataAttributeRefByDaName <em>Returns <b>DataAttributeRef</b> By <b>DaTypeName </b> </em>}</li>
+ *      <li>{@link DOTypeAdapter#getDataAttributeRefByDoName <em>Returns <b>DataAttributeRef</b> By <b>DoTypeName </b></em>}</li>
+ *      <li>{@link DOTypeAdapter#getDataAttributeRefs <em>Returns List Of <b>DataAttributeRef</b> By Custom filter</em>}</li>
+ *      <li>{@link DOTypeAdapter#getDataAttributeRefsOfDA <em>Returns List Of <b>DataAttributeRef</b> By <b>DA </b> Object</em>}</li>
  *      <li>{@link DOTypeAdapter#getSdoOrDAs <em>Returns List of <b>TSDO or TDA</b> </em>}</li>
  *      <li>{@link DOTypeAdapter#getCdc <em>Returns the value of the <b>cdc </b>attribute</em>}</li>
  *    </ul>
@@ -64,40 +64,40 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
     }
 
     /**
-     * complete the input resumed data type template from DataTypeTemplate filtered out by the given DoTypeName
+     * complete the input Data Attribute Reference from DataTypeTemplate filtered out by the given DoTypeName
      * @param doTypeName the Data object, eventually with DOs
      * @param idx index of the DOs in the given DoTypeName
-     * @param rDtt Resumed Data Template to complete
-     * @return completed Resumed Data Template or null if the filter constrains are not met
+     * @param dataAttributeRef Data Attribute Reference to complete
+     * @return completed Data Attribute Reference or null if the filter constrains are not met
      */
-    public List<ResumedDataTemplate> getResumedDTTByDoName(DoTypeName doTypeName, int idx, ResumedDataTemplate rDtt) {
+    public List<DataAttributeRef> getDataAttributeRefByDoName(DoTypeName doTypeName, int idx, DataAttributeRef dataAttributeRef) {
 
         int sz = doTypeName.getStructNames().size();
         if(!doTypeName.isDefined()) {
             return new ArrayList<>();
         }
-        List<ResumedDataTemplate> result = new ArrayList<>();
+        List<DataAttributeRef> result = new ArrayList<>();
         if(sz - idx > 0){
             String sdoName = doTypeName.getStructNames().get(idx);
             TSDO tsdo = getSDOByName(sdoName).orElse(null);
             if(tsdo == null) {
                 return new ArrayList<>();
             }
-            ResumedDataTemplate copyRDtt = ResumedDataTemplate.copyFrom(rDtt);
-            copyRDtt.getDoName().setCdc(getCdc());
-            copyRDtt.getDoName().addStructName(sdoName);
+            DataAttributeRef copyDataAttributeRef = DataAttributeRef.copyFrom(dataAttributeRef);
+            copyDataAttributeRef.getDoName().setCdc(getCdc());
+            copyDataAttributeRef.getDoName().addStructName(sdoName);
             DOTypeAdapter doTypeAdapter = getDataTypeTemplateAdapter().getDOTypeAdapterById(tsdo.getType())
                     .orElseThrow();
-            result.addAll( doTypeAdapter.getResumedDTTByDoName(doTypeName,idx+1,copyRDtt));
+            result.addAll( doTypeAdapter.getDataAttributeRefByDoName(doTypeName,idx+1,copyDataAttributeRef));
 
         } else {
             for(TDA tda : getSdoOrDAs(TDA.class)){
-                ResumedDataTemplate copyRDtt = ResumedDataTemplate.copyFrom(rDtt);
+                DataAttributeRef copyDataAttributeRef = DataAttributeRef.copyFrom(dataAttributeRef);
                 DAAdapter daAdapter = new DAAdapter(this,tda);
-                copyRDtt.getDaName().setName(daAdapter.getName());
-                copyRDtt.getDaName().setType(daAdapter.getType());
-                copyRDtt.getDaName().setBType(daAdapter.getBType());
-                copyRDtt.getDaName().setValImport(daAdapter.isValImport());
+                copyDataAttributeRef.getDaName().setName(daAdapter.getName());
+                copyDataAttributeRef.getDaName().setType(daAdapter.getType());
+                copyDataAttributeRef.getDaName().setBType(daAdapter.getBType());
+                copyDataAttributeRef.getDaName().setValImport(daAdapter.isValImport());
                 if(!daAdapter.isTail()){
                     DATypeAdapter daTypeAdapter = daAdapter.getDATypeAdapter()
                             .orElseThrow(
@@ -108,10 +108,10 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
                                             )
                                     )
                             );
-                    result.addAll( daTypeAdapter.completeResumedDTT(copyRDtt));
+                    result.addAll( daTypeAdapter.completeDataAttributeRef(copyDataAttributeRef));
                 } else {
-                    copyRDtt.getDaName().addDaiValues(tda.getVal());
-                    result.add(copyRDtt);
+                    copyDataAttributeRef.getDaName().addDaiValues(tda.getVal());
+                    result.add(copyDataAttributeRef);
                 }
             }
         }
@@ -119,18 +119,18 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
     }
 
     /**
-     * Completes recursively summarize Data Type Templates (rdtt) from DOType to specified DaTypeName.
+     * Completes recursively summarize Data Type Templates (dataAttributeRef) from DOType to specified DaTypeName.
      * @param daTypeName the Data object, eventually with DA
-     * @param rDtt reference Resumed Data Type Template to complete
-     * @return optional of <em>ResumedDataTemplate</em> object
+     * @param dataAttributeRef reference Data Attribute Reference to complete
+     * @return optional of <em>DataAttributeRef</em> object
      * @throws ScdException
      */
-    public Optional<ResumedDataTemplate> getResumedDTTByDaName(DaTypeName daTypeName,
-                                                               ResumedDataTemplate rDtt) throws ScdException {
-        if(!rDtt.getDoName().isDefined()) {
+    public Optional<DataAttributeRef> getDataAttributeRefByDaName(DaTypeName daTypeName,
+                                                            DataAttributeRef dataAttributeRef) throws ScdException {
+        if(!dataAttributeRef.getDoName().isDefined()) {
             return Optional.empty();
         }
-        DoTypeName doTypeName = rDtt.getDoName();
+        DoTypeName doTypeName = dataAttributeRef.getDoName();
 
         for(TUnNaming tUnNaming : currentElem.getSDOOrDA()){
             if(tUnNaming.getClass().equals(TSDO.class)) {
@@ -138,22 +138,22 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
                 DOTypeAdapter doTypeAdapter = getDOTypeAdapterBySdoName(sdo.getName()).orElseThrow();
                 doTypeName.addStructName(sdo.getName());
                 doTypeName.setCdc(getCdc());
-                Optional<ResumedDataTemplate> opRDtt = doTypeAdapter.getResumedDTTByDaName(daTypeName,rDtt);
-                if (opRDtt.isPresent()) {
-                    return opRDtt;
+                Optional<DataAttributeRef> opDataAttributeRef = doTypeAdapter.getDataAttributeRefByDaName(daTypeName,dataAttributeRef);
+                if (opDataAttributeRef.isPresent()) {
+                    return opDataAttributeRef;
                 }
             } else {
                 TDA tda = (TDA)tUnNaming;
-                rDtt.getDaName().setValImport(tda.isValImport());
-                rDtt.getDaName().setFc(tda.getFc());
-                rDtt.getDaName().setType(tda.getType());
-                rDtt.getDaName().setBType(tda.getBType());
-                rDtt.getDaName().setName(tda.getName());
-                rDtt.setDaiValues(tda.getVal());
+                dataAttributeRef.getDaName().setValImport(tda.isValImport());
+                dataAttributeRef.getDaName().setFc(tda.getFc());
+                dataAttributeRef.getDaName().setType(tda.getType());
+                dataAttributeRef.getDaName().setBType(tda.getBType());
+                dataAttributeRef.getDaName().setName(tda.getName());
+                dataAttributeRef.setDaiValues(tda.getVal());
                 if(tda.getBType() != TPredefinedBasicTypeEnum.STRUCT &&
                         tda.getName().equals(daTypeName.getName()) &&
                         daTypeName.getStructNames().isEmpty()  ){
-                    return Optional.of(rDtt);
+                    return Optional.of(dataAttributeRef);
                 }
 
                 if(tda.getBType() == TPredefinedBasicTypeEnum.STRUCT &&
@@ -164,9 +164,9 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
 
                     DATypeAdapter daTypeAdapter = daAdapter.getDATypeAdapter()
                             .orElseThrow(() -> new AssertionError(""));
-                    Optional<ResumedDataTemplate> opRDtt = daTypeAdapter.getResumedDTTByDaName(daTypeName,0,rDtt);
-                    if (opRDtt.isPresent()) {
-                        return opRDtt;
+                    Optional<DataAttributeRef> opDataAttributeRef = daTypeAdapter.getDataAttributeRefByDaName(daTypeName,0,dataAttributeRef);
+                    if (opDataAttributeRef.isPresent()) {
+                        return opDataAttributeRef;
                     }
                 }
             }
@@ -446,83 +446,83 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
     }
 
     /**
-     * return a list of Resumed Data Type Templates beginning from this DoType (Do or SDO).
+     * return a list of Data Attribute References beginning from this DoType (Do or SDO).
      * @apiNote This method doesn't check relationship between DO/SDO and DA. Check should be done by caller
-     * @param rootRDTT reference Resumed Data Type Template used to build the list
+     * @param rootDataAttributeRef reference Data Attribute Reference used to build the list
      * @param filter filter for DO/SDO and DA/BDA
-     * @return list of Resumed Data Type Templates beginning from this DoType (Do or SDO)
+     * @return list of Data Attribute References beginning from this DoType (Do or SDO)
      */
-    public List<ResumedDataTemplate> getResumedDTTs(ResumedDataTemplate rootRDTT, ResumedDataTemplate filter) {
-        List<ResumedDataTemplate> resultRDTTs = new ArrayList<>();
+    public List<DataAttributeRef> getDataAttributeRefs(DataAttributeRef rootDataAttributeRef, DataAttributeRef filter) {
+        List<DataAttributeRef> resultDataAttributeRefs = new ArrayList<>();
         for(TUnNaming tUnNaming: currentElem.getSDOOrDA()){
             if(tUnNaming.getClass() == TDA.class){
                 TDA tda = (TDA)tUnNaming;
-                resultRDTTs.addAll(getResumedDTTsOfDA(rootRDTT, filter, tda));
+                resultDataAttributeRefs.addAll(getDataAttributeRefsOfDA(rootDataAttributeRef, filter, tda));
             } else {
                 TSDO tsdo = (TSDO)tUnNaming;
                 if(excludedByFilter(filter, tsdo)){
                     continue;
                 }
-                ResumedDataTemplate currentRDTT = ResumedDataTemplate.copyFrom(rootRDTT);
-                currentRDTT.addDoStructName(tsdo.getName());
+                DataAttributeRef currentDataAttributeRef = DataAttributeRef.copyFrom(rootDataAttributeRef);
+                currentDataAttributeRef.addDoStructName(tsdo.getName());
                 parentAdapter.getDOTypeAdapterById(tsdo.getType()).ifPresent(
                     doTypeAdapter ->
-                        resultRDTTs.addAll(doTypeAdapter.getResumedDTTs(currentRDTT, filter)));
+                        resultDataAttributeRefs.addAll(doTypeAdapter.getDataAttributeRefs(currentDataAttributeRef, filter)));
             }
         }
-        return resultRDTTs;
+        return resultDataAttributeRefs;
     }
 
     /**
-     * return a list of summarized Resumed Data Type Templates beginning from given DA/BDA.
+     * return a list of summarized Data Attribute References beginning from given DA/BDA.
      * <ul>
-     *     <li> If DA the list will contain only one summarized Resumed Data Type Templates  </li>
-     *     <li> If BDA list will contain all summarized Resumed Data Type Templates for each DA in BDA </li>
+     *     <li> If DA the list will contain only one summarized Data Attribute References  </li>
+     *     <li> If BDA list will contain all summarized Data Attribute References for each DA in BDA </li>
      * </ul>
      * @apiNote This method doesn't check relationship between DO/SDO and DA. Check should be done by caller
-     * @param rootRDTT reference Resumed Data Type Template used to build the list
+     * @param rootDataAttributeRef reference Data Attribute Reference used to build the list
      * @param filter filter for DA/BDA
      * @param da DA containing information to summarize
-     * @return list of completed Resumed Data Type Templates beginning from this DoType.
+     * @return list of completed Data Attribute References beginning from this DoType.
      */
-    private List<ResumedDataTemplate> getResumedDTTsOfDA(ResumedDataTemplate rootRDTT, ResumedDataTemplate filter, TDA da){
+    private List<DataAttributeRef> getDataAttributeRefsOfDA(DataAttributeRef rootDataAttributeRef, DataAttributeRef filter, TDA da){
         if(excludedByFilter(filter, da)){
             return Collections.emptyList();
         }
-        ResumedDataTemplate currentRDTT = ResumedDataTemplate.copyFrom(rootRDTT);
-        currentRDTT.getDaName().setName(da.getName());
-        currentRDTT.getDaName().setFc(da.getFc());
-        currentRDTT.getDaName().setBType(da.getBType());
+        DataAttributeRef currentDataAttributeRef = DataAttributeRef.copyFrom(rootDataAttributeRef);
+        currentDataAttributeRef.getDaName().setName(da.getName());
+        currentDataAttributeRef.getDaName().setFc(da.getFc());
+        currentDataAttributeRef.getDaName().setBType(da.getBType());
         if(da.getBType() == TPredefinedBasicTypeEnum.STRUCT){
             return parentAdapter.getDATypeAdapterById(da.getType())
-                .map(daTypeAdapter -> daTypeAdapter.getResumedDTTs(currentRDTT, filter))
+                .map(daTypeAdapter -> daTypeAdapter.getDataAttributeRefs(currentDataAttributeRef, filter))
                 .orElse(Collections.emptyList());
         } else {
-            currentRDTT.getDaName().setType(da.getType());
-            currentRDTT.getDaName().setValImport(da.isValImport());
-            currentRDTT.setDaiValues(da.getVal());
-            return List.of(currentRDTT);
+            currentDataAttributeRef.getDaName().setType(da.getType());
+            currentDataAttributeRef.getDaName().setValImport(da.isValImport());
+            currentDataAttributeRef.setDaiValues(da.getVal());
+            return List.of(currentDataAttributeRef);
         }
     }
 
     /**
-     * Checks if given Resumed Data Type Template contains specified DA
-     * @param filter Resumed Data Type Template to check contain
+     * Checks if given Data Attribute Reference contains specified DA
+     * @param filter Data Attribute Reference to check contain
      * @param da SDO to checked
      * @return <em>Boolean</em> exclusion result
      */
-    private boolean excludedByFilter(ResumedDataTemplate filter, TDA da) {
+    private boolean excludedByFilter(DataAttributeRef filter, TDA da) {
         return filter != null && filter.isDaNameDefined() &&
             !filter.getDaName().getName().equals(da.getName());
     }
 
     /**
-     * Checks if given Resumed Data Type Template contains specified SDO
-     * @param filter Resumed Data Type Template to check contain
+     * Checks if given Data Attribute Reference contains specified SDO
+     * @param filter Data Attribute Reference to check contain
      * @param tsdo SDO to checked
      * @return <em>Boolean</em> exclusion result
      */
-    private boolean excludedByFilter(ResumedDataTemplate filter, TSDO tsdo) {
+    private boolean excludedByFilter(DataAttributeRef filter, TSDO tsdo) {
         return filter != null &&
             !filter.getSdoNames().isEmpty() &&
             !filter.getSdoNames().contains(tsdo.getName());
