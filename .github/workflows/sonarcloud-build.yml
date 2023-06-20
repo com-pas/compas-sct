@@ -43,7 +43,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ./mvn -B -s custom_maven_settings.xml clean verify
+          mvn -B -s custom_maven_settings.xml clean verify
       - name: Build and analyze (Push)
         if: ${{ github.event_name == 'push' }}
         env:
