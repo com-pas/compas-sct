@@ -99,15 +99,12 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         }
         String lDeviceStatus = optionalLDeviceStatus.get();
         return switch (lDeviceStatus) {
-            case ON -> {
-                List<TCompasFlow> compasFlows = PrivateService.extractCompasPrivates(currentElem, TCompasFlow.class);
-                yield getExtRefs().stream()
+            case ON -> getExtRefs().stream()
                     .filter(tExtRef -> StringUtils.isNotBlank(tExtRef.getIedName()) && StringUtils.isNotBlank(tExtRef.getDesc()))
                     .map(extRef ->
-                        updateExtRefIedName(extRef, compasFlows, icdSystemVersionToIed.get(extRef.getIedName())))
+                        updateExtRefIedName(extRef, icdSystemVersionToIed.get(extRef.getIedName())))
                     .flatMap(Optional::stream)
                     .toList();
-            }
             case OFF -> {
                 getExtRefs().forEach(this::clearBinding);
                 yield Collections.emptyList();
@@ -120,11 +117,10 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
      * Find matching CompasFlow private and set ExtRef iedName accordingly
      *
      * @param extRef         extRef whose iedName will be updated
-     * @param allCompasFlows list of all CompasFlow private in this Inputs
      * @return Error if ExtRef could not be updated
      */
-    private Optional<SclReportItem> updateExtRefIedName(TExtRef extRef, final List<TCompasFlow> allCompasFlows, IEDAdapter sourceIed) {
-        List<TCompasFlow> matchingCompasFlows = getMatchingCompasFlows(extRef, allCompasFlows);
+    private Optional<SclReportItem> updateExtRefIedName(TExtRef extRef, IEDAdapter sourceIed) {
+        List<TCompasFlow> matchingCompasFlows = getMatchingCompasFlows(extRef);
         if (!singleMatch(matchingCompasFlows)) {
             return fatalReportItem(extRef,
                 matchingCompasFlows.isEmpty() ? MESSAGE_NO_MATCHING_COMPAS_FLOW : MESSAGE_TOO_MANY_MATCHING_COMPAS_FLOWS);
@@ -224,11 +220,12 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
      * Find CompasFlows that match given ExtRef
      *
      * @param extRef      extRef to match
-     * @param compasFlows list of all CompasFlow in which to search
      * @return list of matching CompasFlows
      */
-    private List<TCompasFlow> getMatchingCompasFlows(TExtRef extRef, List<TCompasFlow> compasFlows) {
-        return compasFlows.stream().filter(compasFlow -> isMatchingExtRef(compasFlow, extRef)).toList();
+    private List<TCompasFlow> getMatchingCompasFlows(TExtRef extRef) {
+        return PrivateService.extractCompasPrivates(currentElem, TCompasFlow.class)
+                .filter(compasFlow -> isMatchingExtRef(compasFlow, extRef))
+                .toList();
     }
 
     /**
@@ -258,7 +255,6 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
     }
 
     public List<SclReportItem> updateAllSourceDataSetsAndControlBlocks() {
-        List<TCompasFlow> compasFlows = PrivateService.extractCompasPrivates(currentElem, TCompasFlow.class);
         String currentBayUuid = getIedAdapter().getPrivateCompasBay().map(TCompasBay::getUUID).orElse(null);
         if (StringUtils.isBlank(currentBayUuid)) {
             return List.of(getIedAdapter().buildFatalReportItem(MESSAGE_IED_MISSING_COMPAS_BAY_UUID));
@@ -266,14 +262,14 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         return getExtRefs().stream()
             .filter(this::areBindingAttributesPresent)
             .filter(this::isExternalBound)
-            .filter(extRef -> matchingCompasFlowIsActiveOrUntested(extRef, compasFlows))
+            .filter(this::matchingCompasFlowIsActiveOrUntested)
             .map(extRef -> updateSourceDataSetsAndControlBlocks(extRef, currentBayUuid))
             .flatMap(Optional::stream)
             .toList();
     }
 
-    private boolean matchingCompasFlowIsActiveOrUntested(TExtRef extRef, List<TCompasFlow> compasFlows) {
-        return getMatchingCompasFlows(extRef, compasFlows).stream().findFirst()
+    private boolean matchingCompasFlowIsActiveOrUntested(TExtRef extRef) {
+        return getMatchingCompasFlows(extRef).stream().findFirst()
             .map(TCompasFlow::getFlowStatus)
             .filter(flowStatus -> flowStatus == TCompasFlowStatus.ACTIVE || flowStatus == TCompasFlowStatus.UNTESTED)
             .isPresent();
