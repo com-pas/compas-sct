@@ -26,7 +26,8 @@ public enum PrivateEnum {
     COMPAS_ICDHEADER("COMPAS-ICDHeader", TCompasICDHeader.class),
     COMPAS_LDEVICE("COMPAS-LDevice", TCompasLDevice.class),
     COMPAS_SCL_FILE_TYPE("COMPAS-SclFileType", TCompasSclFileType.class),
-    COMPAS_SYSTEM_VERSION("COMPAS-SystemVersion", TCompasSystemVersion.class);
+    COMPAS_SYSTEM_VERSION("COMPAS-SystemVersion", TCompasSystemVersion.class),
+    COMPAS_TOPO("COMPAS-Topo", TCompasTopo.class);
 
     private static final Map<Class<?>, PrivateEnum> classToEnum = Arrays.stream(PrivateEnum.values()).collect(Collectors.toMap(
         compasPrivateEnum -> compasPrivateEnum.compasClass,
