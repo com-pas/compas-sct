@@ -7,12 +7,12 @@ package org.lfenergy.compas.sct.commons.scl;
 import lombok.NonNull;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.scl.icd.IcdHeader;
 import org.lfenergy.compas.sct.commons.util.PrivateEnum;
 
 import javax.xml.bind.JAXBElement;
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
@@ -24,13 +24,10 @@ import static org.lfenergy.compas.sct.commons.util.PrivateEnum.COMPAS_ICDHEADER;
  * The following features are supported:
  * </p>
  * <ol>
- *  <li>{@link PrivateService#extractCompasPrivate(TPrivate, Class)
- *      <em>Returns the value of the <b>TPrivate </b> reference object By class type</em>}</li>
- *
  *  <li>{@link PrivateService#extractCompasPrivates(TBaseElement, Class)
  *      <em>Returns the value of the <b>TPrivate </b> containment reference list from given <b>TBaseElement </b> By class type</em>}</li>
  *
- *  <li>{@link PrivateService#extractCompasPrivates(List, Class)
+ *  <li>{@link PrivateService#extractCompasPrivates(TBaseElement, Class)}
  *      <em>Returns the value of the <b>TPrivate </b> containment reference list from given <b>TPrivate </b> elements By class type</em>}
  *   </li>
  * </ol>
@@ -45,68 +42,32 @@ public final class PrivateService {
     private static final ObjectFactory objectFactory = new ObjectFactory();
 
     /**
-     * Extract compas element of class <em>compasClass</em> nested in private elements.
-     * @param tPrivates list of privates to look in
-     * @param compasClass class of privates to extract
-     * @return list of compas objects nested in the privates.
-     * @param <T> Inference parameter stands for class <em>compasClass</em>
-     * @throws ScdException throws when inconsistency between types
-     */
-    public static <T> List<T> extractCompasPrivates(List<TPrivate> tPrivates, Class<T> compasClass) throws ScdException {
-        PrivateEnum privateEnum = PrivateEnum.fromClass(compasClass);
-        List<Object> compasElements = tPrivates.stream().filter(tPrivate -> privateEnum.getPrivateType().equals(tPrivate.getType()))
-            .map(TAnyContentFromOtherNamespace::getContent).flatMap(List::stream)
-            .filter(JAXBElement.class::isInstance).map(JAXBElement.class::cast)
-            .filter(Predicate.not(JAXBElement::isNil))
-            .map(JAXBElement::getValue).toList();
-
-        List<T> result = new ArrayList<>();
-        for (Object compasElement : compasElements) {
-            if (compasClass.isInstance(compasElement)) {
-                result.add(compasClass.cast(compasElement));
-            } else {
-                throw new ScdException(String.format("Private is inconsistent. It has type=%s which expect JAXBElement<%s> content, " +
-                        "but got JAXBElement<%s>",
-                    privateEnum.getPrivateType(), privateEnum.getCompasClass().getName(), compasElement.getClass().getName()));
-            }
-        }
-        return result;
-    }
-
-    /**
      * Extract compas elements of class <em>compasClass</em> nested in private elements of the given baseElement.
+     *
      * @param baseElement element where to look for privates
      * @param compasClass class of privates to extract
+     * @param <T>         Inference parameter stands for class <em>compasClass</em>
      * @return list of compas objects nested in the privates.
-     * @param <T> Inference parameter stands for class <em>compasClass</em>
      * @throws ScdException throws when inconsistency between types
      */
-    public static <T> List<T> extractCompasPrivates(TBaseElement baseElement, Class<T> compasClass) throws ScdException {
+    public static <T> Stream<T> extractCompasPrivates(TBaseElement baseElement, Class<T> compasClass) throws ScdException {
         if (!baseElement.isSetPrivate()) {
-            return Collections.emptyList();
+            return Stream.empty();
         }
-        return extractCompasPrivates(baseElement.getPrivate(), compasClass);
+        return getPrivateStream(baseElement.getPrivate(), compasClass);
     }
 
-    /**
-     * Extract a single compas element of class <em>compasClass</em> nested in a private element.
-     * Throws an exception when there are more than 1 compas element of given <em>compasClass</em> nested inside the private element.
-     * @param tPrivate private where to look in
-     * @param compasClass class of privates to extract
-     * @return list of compas objects nested in the privates.
-     * @param <T> Inference parameter stands for class <em>compasClass</em>
-     * @throws ScdException throws when inconsistency between types, or when more than 1 compas element is found
-     */
-    public static <T> Optional<T> extractCompasPrivate(TPrivate tPrivate, Class<T> compasClass) throws ScdException {
-        List<T> compasPrivates = extractCompasPrivates(Collections.singletonList(tPrivate), compasClass);
-        if (compasPrivates.size() > 1) {
-            throw new ScdException(String.format("Expecting maximum 1 element of type %s in private %s, but got %d",
-                compasClass.getName(), tPrivate.getType(), compasPrivates.size()));
-        }
-        if (compasPrivates.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(compasPrivates.get(0));
+    public static <T> Stream<T> getPrivateStream(List<TPrivate> privates, Class<T> compasClass) {
+        return privates
+                .stream()
+                .filter(tPrivate -> PrivateEnum.fromClass(compasClass).getPrivateType().equals(tPrivate.getType()))
+                .map(TAnyContentFromOtherNamespace::getContent)
+                .flatMap(List::stream)
+                .filter(JAXBElement.class::isInstance)
+                .map(JAXBElement.class::cast)
+                .filter(Predicate.not(JAXBElement::isNil))
+                .map(JAXBElement::getValue)
+                .map(compasClass::cast);
     }
 
     /**
@@ -119,15 +80,8 @@ public final class PrivateService {
      * @throws ScdException throws when inconsistency between types, or when more than 1 compas element is found
      */
     public static <T> Optional<T> extractCompasPrivate(TBaseElement baseElement, Class<T> compasClass) throws ScdException {
-        List<T> compasPrivates = extractCompasPrivates(baseElement, compasClass);
-        if (compasPrivates.size() > 1) {
-            throw new ScdException(String.format("Expecting maximum 1 private of type %s with 1 element, but found %d",
-                PrivateEnum.fromClass(compasClass).getPrivateType(), compasPrivates.size()));
-        }
-        if (compasPrivates.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(compasPrivates.get(0));
+        return extractCompasPrivates(baseElement, compasClass)
+                .reduce((private1, private2) -> toOneCompasICDHeader(PrivateEnum.fromClass(compasClass)));
     }
 
     /**
@@ -137,7 +91,13 @@ public final class PrivateService {
      * @throws ScdException throws when inconsistency between types
      */
     public static Optional<TCompasICDHeader> extractCompasICDHeader(TPrivate tPrivate) throws ScdException {
-        return extractCompasPrivate(tPrivate, TCompasICDHeader.class);
+        return getPrivateStream(List.of(tPrivate), TCompasICDHeader.class)
+                .reduce((tCompasICDHeader1, tCompasICDHeader2) -> toOneCompasICDHeader(COMPAS_ICDHEADER));
+    }
+
+    private static <T> T toOneCompasICDHeader(PrivateEnum privateEnum) {
+        //Check same type elements inside the private content
+        throw new ScdException("Expecting maximum 1 element of type " + privateEnum.getCompasClass() + " in private " + privateEnum.getPrivateType() + ", but got more");
     }
 
     /**
@@ -165,24 +125,6 @@ public final class PrivateService {
 
     /**
      * Create Private of given type as parameter
-     * @param compasCriteria type of Private to create
-     * @return created Private
-     */
-    public static TPrivate createPrivate(TCompasCriteria compasCriteria) {
-        return createPrivate(objectFactory.createCriteria(compasCriteria));
-    }
-
-    /**
-     * Create Private of given type as parameter
-     * @param compasFlow type of Private to create
-     * @return created Private
-     */
-    public static TPrivate createPrivate(TCompasFlow compasFlow) {
-        return createPrivate(objectFactory.createFlow(compasFlow));
-    }
-
-    /**
-     * Create Private of given type as parameter
      * @param compasFunction type of Private to create
      * @return created Private
      */
@@ -201,15 +143,6 @@ public final class PrivateService {
 
     /**
      * Create Private of given type as parameter
-     * @param compasLDevice type of Private to create
-     * @return created Private
-     */
-    public static TPrivate createPrivate(TCompasLDevice compasLDevice) {
-        return createPrivate(objectFactory.createLDevice(compasLDevice));
-    }
-
-    /**
-     * Create Private of given type as parameter
      * @param compasSclFileType type of Private to create
      * @return created Private
      */
@@ -224,6 +157,21 @@ public final class PrivateService {
      */
     public static TPrivate createPrivate(TCompasSystemVersion compasSystemVersion) {
         return createPrivate(objectFactory.createSystemVersion(compasSystemVersion));
+    }
+
+    /**
+     * Create a single Private of type COMPAS-Topo
+     * containing all given TCompasTopo
+     * @param compasTopos list of TCompasTopo
+     * @return created Private
+     */
+    public static TPrivate createPrivate(List<TCompasTopo> compasTopos) {
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType(PrivateEnum.COMPAS_TOPO.getPrivateType());
+        tPrivate.getContent().addAll(
+                compasTopos.stream().map(objectFactory::createTopo).toList()
+        );
+        return tPrivate;
     }
 
     /**
@@ -248,16 +196,20 @@ public final class PrivateService {
      * all corresponding STD
      */
     public static Map<String, PrivateLinkedToSTDs> createMapICDSystemVersionUuidAndSTDFile(Set<SCL> stds) {
-        Map<String, PrivateLinkedToSTDs> stringSCLMap = new HashMap<>();
-        stds.forEach(std -> std.getIED().forEach(ied -> ied.getPrivate().forEach(tp ->
-                PrivateService.extractCompasICDHeader(tp).map(TCompasICDHeader::getICDSystemVersionUUID).ifPresent(icdSysVer -> {
-                    PrivateLinkedToSTDs privateLinkedToSTDs = stringSCLMap.get(icdSysVer);
-                    List<SCL> list = privateLinkedToSTDs != null ? privateLinkedToSTDs.stdList() : new ArrayList<>();
-                    list.add(std);
-                    stringSCLMap.put(icdSysVer, new PrivateLinkedToSTDs(tp, list));
-                })
-        )));
-        return stringSCLMap;
+        Map<String, PrivateLinkedToSTDs> icdSysVerToPrivateStdsMap = new HashMap<>();
+        stds.forEach(std -> std.getIED()
+                .forEach(ied -> ied.getPrivate()
+                        .forEach(tp ->
+                                PrivateService.extractCompasICDHeader(tp)
+                                        .map(TCompasICDHeader::getICDSystemVersionUUID)
+                                        .ifPresent(icdSysVer -> {
+                                            PrivateLinkedToSTDs privateLinkedToSTDs = icdSysVerToPrivateStdsMap.get(icdSysVer);
+                                            List<SCL> list = privateLinkedToSTDs != null ? privateLinkedToSTDs.stdList() : new ArrayList<>();
+                                            list.add(std);
+                                            icdSysVerToPrivateStdsMap.put(icdSysVer, new PrivateLinkedToSTDs(tp, list));
+                                        })
+                        )));
+        return icdSysVerToPrivateStdsMap;
     }
 
 
@@ -297,27 +249,27 @@ public final class PrivateService {
                 " and " + ICD_SYSTEM_VERSION_UUID + " = " + optionalCompasICDHeader.map(TCompasICDHeader::getICDSystemVersionUUID).orElse(null);
     }
 
-
     /**
-     * Creates stream of Private for all Privates COMPAS-ICDHeader in /Substation of SCL
+     * Creates stream of IcdHeader for all Privates COMPAS-ICDHeader in /Substation of SCL
      *
      * @param scdRootAdapter SCL file in which Private should be found
      * @return stream of COMPAS-ICDHeader Private
      */
-    public static Stream<TPrivate> streamIcdHeaderPrivatesWithDistinctIEDName(SclRootAdapter scdRootAdapter) {
-        return scdRootAdapter.getCurrentElem().getSubstation().get(0).getVoltageLevel().stream()
+    public static Stream<IcdHeader> streamIcdHeaders(SclRootAdapter scdRootAdapter) {
+        return scdRootAdapter.getCurrentElem()
+                .getSubstation()
+                .get(0)
+                .getVoltageLevel()
+                .stream()
                 .map(TVoltageLevel::getBay).flatMap(Collection::stream)
                 .map(TBay::getFunction).flatMap(Collection::stream)
                 .map(TFunction::getLNode).flatMap(Collection::stream)
                 .map(TLNode::getPrivate).flatMap(Collection::stream)
-                .filter(tPrivate ->
-                        tPrivate.getType().equals(COMPAS_ICDHEADER.getPrivateType())
-                                && PrivateService.extractCompasICDHeader(tPrivate).map(TCompasICDHeader::getIEDName).isPresent())
-                .collect(Collectors.groupingBy(tPrivate -> PrivateService.extractCompasICDHeader(tPrivate).get().getIEDName()))
-                .values().stream()
-                .map(tPrivates -> tPrivates.get(0));
+                .map(PrivateService::extractCompasICDHeader)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(IcdHeader::new);
     }
-
 
     /**
      * Compares if two Private:COMPAS-ICDHeader have all attributes equal except IEDNane, BayLabel and IEDinstance
@@ -348,14 +300,12 @@ public final class PrivateService {
      * Copy Private COMPAS_ICDHEADER from LNode of SCD into Private COMPAS_ICDHEADER from IED of STD
      *
      * @param stdPrivate   Private of IED from STD in which to copy new data
-     * @param lNodePrivate Private of IED from STD from which new data are taken
+     * @param compasICDHeader Private of IED from STD from which new data are taken
      * @throws ScdException throws when Private is not COMPAS_ICDHEADER one
      */
-    public static void copyCompasICDHeaderFromLNodePrivateIntoSTDPrivate(TPrivate stdPrivate, TPrivate lNodePrivate) throws ScdException {
-        TCompasICDHeader lNodeCompasICDHeader = extractCompasICDHeader(lNodePrivate)
-                .orElseThrow(() -> new ScdException(COMPAS_ICDHEADER + " not found in LNode Private "));
+    public static void copyCompasICDHeaderFromLNodePrivateIntoSTDPrivate(TPrivate stdPrivate, TCompasICDHeader compasICDHeader) throws ScdException {
         stdPrivate.getContent().clear();
-        stdPrivate.getContent().add(objectFactory.createICDHeader(lNodeCompasICDHeader));
+        stdPrivate.getContent().add(objectFactory.createICDHeader(compasICDHeader));
     }
 
 

@@ -187,14 +187,14 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
             return Optional.of(buildFatalReportItem("The LDevice doesn't have a DO @name='Beh' OR its associated DA@fc='ST' AND DA@name='stVal'"));
         }
         Set<String> enumValues = getEnumValues(daiBehList.get(0).getDaName().getType());
-        List<TCompasLDevice> compasLDevicePrivateList = PrivateService.extractCompasPrivates(getParentAdapter().getCurrentElem(), TCompasLDevice.class);
-        if (compasLDevicePrivateList.isEmpty()) {
+        Optional<TCompasLDevice> optionalTCompasLDevice = PrivateService.extractCompasPrivate(getParentAdapter().getCurrentElem(), TCompasLDevice.class);
+        if (optionalTCompasLDevice.isEmpty()) {
             return Optional.of(buildFatalReportItem("The LDevice doesn't have a Private compas:LDevice."));
         }
-        if (!compasLDevicePrivateList.get(0).isSetLDeviceStatus()) {
+        if (!optionalTCompasLDevice.get().isSetLDeviceStatus()) {
             return Optional.of(buildFatalReportItem("The Private compas:LDevice doesn't have the attribute 'LDeviceStatus'"));
         }
-        TCompasLDeviceStatus compasLDeviceStatus = compasLDevicePrivateList.get(0).getLDeviceStatus();
+        TCompasLDeviceStatus compasLDeviceStatus = optionalTCompasLDevice.get().getLDeviceStatus();
         Optional<DataAttributeRef> optionalModStVal = getDaiModStVal();
         if (optionalModStVal.isEmpty()) {
             return Optional.of(buildFatalReportItem("The LDevice doesn't have a DO @name='Mod'"));

@@ -11,6 +11,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.platform.commons.support.ReflectionSupport;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.scl.icd.IcdHeader;
+import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.lfenergy.compas.sct.commons.util.PrivateEnum;
 
 import javax.xml.bind.JAXBElement;
@@ -21,8 +23,7 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 class PrivateServiceTest {
@@ -58,9 +59,12 @@ class PrivateServiceTest {
     @Test
     void extractCompasPrivates_should_return_privates_value() {
         // Given : setUp
+        TBaseElement baseElement = new SCL();
+        baseElement.getPrivate().add(privateSCD);
+        baseElement.getPrivate().add(privateICD);
+        // Given : setUp
         // When
-        List<TCompasSclFileType> result = PrivateService.extractCompasPrivates(List.of(privateSCD, privateICD),
-            TCompasSclFileType.class);
+        List<TCompasSclFileType> result = PrivateService.extractCompasPrivates(baseElement, TCompasSclFileType.class).toList();
         //Then
         assertThat(result)
             .hasSize(2)
@@ -70,8 +74,10 @@ class PrivateServiceTest {
     @Test
     void extractCompasPrivates_when_no_privates_match_class_should_return_empty_list() {
         // Given : setUp
+        TBaseElement baseElement = new SCL();
+        baseElement.getPrivate().add(privateSCD);
         // When
-        List<TCompasICDHeader> result = PrivateService.extractCompasPrivates(List.of(privateSCD), TCompasICDHeader.class);
+        List<TCompasICDHeader> result = PrivateService.extractCompasPrivates(baseElement, TCompasICDHeader.class).toList();
         //Then
         assertThat(result).isEmpty();
     }
@@ -79,21 +85,29 @@ class PrivateServiceTest {
     @Test
     void extractCompasPrivates_when_class_is_not_compas_class_should_throw_exception() {
         // Given : setUp
-        List<TPrivate> privates = List.of(privateSCD);
-        // When & Then
-        assertThatThrownBy(() -> PrivateService.extractCompasPrivates(privates, Object.class)).isInstanceOf(
-            NoSuchElementException.class);
+        TBaseElement baseElement = new SCL();
+        baseElement.getPrivate().add(privateSCD);
+        // When
+        Stream<Object> compasPrivates = PrivateService.extractCompasPrivates(baseElement, Object.class);
+        // Then
+        assertThatCode(compasPrivates::toList)
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessage("Class java.lang.Object is not mapped to a compas type. See org.lfenergy.compas.sct.commons.util.PrivateEnum");
     }
 
     @Test
     void extractCompasPrivates_when_content_not_match_private_type_should_throw_exception() {
         // Given : setUp
         privateSCD.setType(PrivateEnum.COMPAS_BAY.getPrivateType());
+        TBaseElement baseElement = new SCL();
+        baseElement.getPrivate().add(privateSCD);
         Class<?> compasClass = PrivateEnum.COMPAS_BAY.getCompasClass();
-        List<TPrivate> privates = List.of(privateSCD);
+
+        Stream<?> stream = PrivateService.extractCompasPrivates(baseElement, compasClass);
         // When & Then
-        assertThatThrownBy(() -> PrivateService.extractCompasPrivates(privates, compasClass)).isInstanceOf(
-            ScdException.class);
+        assertThatCode(stream::toList)
+                .isInstanceOf(ClassCastException.class)
+                .hasMessage("Cannot cast org.lfenergy.compas.scl2007b4.model.TCompasSclFileType to org.lfenergy.compas.scl2007b4.model.TCompasBay");
     }
 
     @Test
@@ -103,7 +117,7 @@ class PrivateServiceTest {
         baseElement.getPrivate().add(privateSCD);
         baseElement.getPrivate().add(privateICD);
         // When
-        List<TCompasSclFileType> result = PrivateService.extractCompasPrivates(baseElement, TCompasSclFileType.class);
+        List<TCompasSclFileType> result = PrivateService.extractCompasPrivates(baseElement, TCompasSclFileType.class).toList();
         // Then
         assertThat(result)
             .hasSize(2)
@@ -121,44 +135,12 @@ class PrivateServiceTest {
     }
 
     @Test
-    void extractCompasPrivate_should_return_private_value() {
-        // Given : setUp
-        // When
-        Optional<TCompasSclFileType> result = PrivateService.extractCompasPrivate(privateSCD,
-            TCompasSclFileType.class);
-        //Then
-        assertThat(result).isPresent()
-            .hasValue(TCompasSclFileType.SCD);
-    }
-
-    @Test
-    void extractCompasPrivate_should_return_empty() {
-        // Given : setUp
-        // When
-        Optional<TCompasBay> result = PrivateService.extractCompasPrivate(privateSCD,
-            TCompasBay.class);
-        //Then
-        assertThat(result).isNotPresent();
-    }
-
-    @Test
-    void extractCompasPrivate_should_throw_exception() {
-        // Given : setUp
-        privateSCD.getContent().add(objectFactory.createSclFileType(TCompasSclFileType.ICD));
-        Class<?> compasClass = PrivateEnum.COMPAS_SCL_FILE_TYPE.getCompasClass();
-        // When & Then
-        assertThatThrownBy(() -> PrivateService.extractCompasPrivate(privateSCD, compasClass)).isInstanceOf(
-            ScdException.class);
-    }
-
-    @Test
     void extractCompasPrivate_on_base_element_should_return_private_value() {
         // Given : setUp
         TBaseElement baseElement = new SCL();
         baseElement.getPrivate().add(privateSCD);
         // When
-        Optional<TCompasSclFileType> result = PrivateService.extractCompasPrivate(baseElement,
-            TCompasSclFileType.class);
+        Optional<TCompasSclFileType> result = PrivateService.extractCompasPrivate(baseElement, TCompasSclFileType.class);
         //Then
         assertThat(result).isPresent()
             .hasValue(TCompasSclFileType.SCD);
@@ -169,8 +151,7 @@ class PrivateServiceTest {
         // Given
         TBaseElement baseElement = new SCL();
         // When
-        Optional<TCompasBay> result = PrivateService.extractCompasPrivate(baseElement,
-            TCompasBay.class);
+        Optional<TCompasBay> result = PrivateService.extractCompasPrivate(baseElement, TCompasBay.class);
         //Then
         assertThat(result).isNotPresent();
     }
@@ -182,8 +163,9 @@ class PrivateServiceTest {
         baseElement.getPrivate().add(privateSCD);
         baseElement.getPrivate().add(privateICD);
         // When & Then
-        assertThatThrownBy(() -> PrivateService.extractCompasPrivate(baseElement, TCompasSclFileType.class)).isInstanceOf(
-            ScdException.class);
+        assertThatCode(() -> PrivateService.extractCompasPrivate(baseElement, TCompasSclFileType.class))
+                .isInstanceOf(ScdException.class)
+                .hasMessage("Expecting maximum 1 element of type class org.lfenergy.compas.scl2007b4.model.TCompasSclFileType in private COMPAS-SclFileType, but got more");
     }
 
     @Test
@@ -224,11 +206,7 @@ class PrivateServiceTest {
 
     public static Stream<Object> createPrivateTestSources() {
         return Stream.of(new TCompasBay(),
-            new TCompasCriteria(),
-            new TCompasFlow(),
-            new TCompasFunction(),
             new TCompasICDHeader(),
-            new TCompasLDevice(),
             TCompasSclFileType.SCD,
             new TCompasSystemVersion());
     }
@@ -438,11 +416,12 @@ class PrivateServiceTest {
         //When
         SclRootAdapter sclRootAdapter = SclService.initScl(Optional.empty(), "hv", "hr");
         sclRootAdapter.setCurrentElem(scl);
-        Stream<TPrivate> tPrivateStream = PrivateService.streamIcdHeaderPrivatesWithDistinctIEDName(sclRootAdapter);
+        Stream<IcdHeader> tPrivateStream = PrivateService.streamIcdHeaders(sclRootAdapter);
 
         //Then
-        assertThat(tPrivateStream.toList()).hasSize(3)
-                .extracting(tPrivate -> PrivateService.extractCompasICDHeader(tPrivate).get().getIEDName())
+        assertThat(tPrivateStream.toList())
+                .hasSize(3)
+                .extracting(IcdHeader::getIedName)
                 .containsExactlyInAnyOrder("IED-1", "IED-2", "IED-3");
     }
 
@@ -468,7 +447,7 @@ class PrivateServiceTest {
         //When
         SclRootAdapter sclRootAdapter = SclService.initScl(Optional.empty(), "hv", "hr");
         sclRootAdapter.setCurrentElem(scl);
-        Stream<TPrivate> tPrivateStream = PrivateService.streamIcdHeaderPrivatesWithDistinctIEDName(sclRootAdapter);
+        Stream<IcdHeader> tPrivateStream = PrivateService.streamIcdHeaders(sclRootAdapter);
 
         //Then
         assertThat(tPrivateStream.toList()).isEmpty();
@@ -539,16 +518,80 @@ class PrivateServiceTest {
         lNodeCompasICDHeader.setIEDName("IED-1");
         lNodeCompasICDHeader.setBayLabel("BAY-1");
         lNodeCompasICDHeader.setIEDSubstationinstance(BigInteger.ONE);
-        TPrivate stdTPrivate =  PrivateService.createPrivate(stdCompasICDHeader);
-        TPrivate lNodePrivate =  PrivateService.createPrivate(lNodeCompasICDHeader);
-        assertThat(stdTPrivate).isNotEqualTo(lNodePrivate);
+        TPrivate stdTPrivate = PrivateService.createPrivate(stdCompasICDHeader);
 
         // When
-        PrivateService.copyCompasICDHeaderFromLNodePrivateIntoSTDPrivate(stdTPrivate,lNodePrivate);
+        PrivateService.copyCompasICDHeaderFromLNodePrivateIntoSTDPrivate(stdTPrivate, lNodeCompasICDHeader);
+
         // Then
         TCompasICDHeader result = PrivateService.extractCompasICDHeader(stdTPrivate).get();
         assertThat(result).extracting(TCompasICDHeader::getICDSystemVersionUUID, TCompasICDHeader::getIEDName,
-                TCompasICDHeader::getIEDSubstationinstance, TCompasICDHeader::getBayLabel)
+                        TCompasICDHeader::getIEDSubstationinstance, TCompasICDHeader::getBayLabel)
                 .containsExactlyInAnyOrder("UUID-2", "IED-1", BigInteger.ONE, "BAY-1");
+    }
+
+    @Test
+    void gettCompasICDHeaders_should_return_ICDHeaders() {
+        //Given
+        TIED tied = createTIED();
+
+        //When
+        TCompasICDHeader tCompasICDHeader = PrivateService.extractCompasPrivate(tied, TCompasICDHeader.class).orElseThrow();
+
+        //Then
+        assertThat(tCompasICDHeader)
+                .extracting(
+                        TCompasICDHeader::getContent,
+                        TCompasICDHeader::getICDSystemVersionUUID,
+                        TCompasICDHeader::getIEDType,
+                        TCompasICDHeader::getIEDSubstationinstance,
+                        TCompasICDHeader::getIEDSystemVersioninstance,
+                        TCompasICDHeader::getIEDName,
+                        TCompasICDHeader::getVendorName,
+                        TCompasICDHeader::getIEDmodel,
+                        TCompasICDHeader::getIEDredundancy,
+                        TCompasICDHeader::getBayLabel,
+                        TCompasICDHeader::getHwRev,
+                        TCompasICDHeader::getSwRev,
+                        TCompasICDHeader::getHeaderId,
+                        TCompasICDHeader::getHeaderVersion,
+                        TCompasICDHeader::getHeaderRevision
+                )
+                .containsExactly("",
+                        "IED4d4fe1a8cda64cf88a5ee4176a1a0eef",
+                        TCompasIEDType.SCU,
+                        BigInteger.ONE,
+                        BigInteger.ONE,
+                        null,
+                        "RTE",
+                        "ICDfromModeling",
+                        TCompasIEDRedundancy.A,
+                        null,
+                        "01.00.00",
+                        "01.00.00",
+                        "f8dbc8c1-2db7-4652-a9d6-0b414bdeccfa",
+                        "01.00.00",
+                        "01.00.00");
+
+    }
+
+    private static TIED createTIED() {
+        SCL sclFromFile = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        return sclFromFile.getIED().get(0);
+    }
+
+    @Test
+    void createPrivate_compas_Topo_should_succeed(){
+        // Given
+        TCompasTopo tCompasTopo1 = new TCompasTopo();
+        TCompasTopo tCompasTopo2 = new TCompasTopo();
+        List<TCompasTopo> compasTopos = List.of(tCompasTopo1, tCompasTopo2);
+        // When
+        TPrivate result = PrivateService.createPrivate(compasTopos);
+        // Then
+        assertThat(result.getContent())
+                .map(JAXBElement.class::cast)
+                .map(JAXBElement::getValue)
+                .containsExactly(tCompasTopo1, tCompasTopo2);
     }
 }
