@@ -160,6 +160,21 @@ public final class PrivateService {
     }
 
     /**
+     * Create a single Private of type COMPAS-Topo
+     * containing all given TCompasTopo
+     * @param compasTopos list of TCompasTopo
+     * @return created Private
+     */
+    public static TPrivate createPrivate(List<TCompasTopo> compasTopos) {
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType(PrivateEnum.COMPAS_TOPO.getPrivateType());
+        tPrivate.getContent().addAll(
+                compasTopos.stream().map(objectFactory::createTopo).toList()
+        );
+        return tPrivate;
+    }
+
+    /**
      * Create Private of given type as parameter
      * @param jaxbElement content of Private to create
      * @return created Private

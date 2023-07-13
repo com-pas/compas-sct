@@ -579,4 +579,19 @@ class PrivateServiceTest {
         SCL sclFromFile = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         return sclFromFile.getIED().get(0);
     }
+
+    @Test
+    void createPrivate_compas_Topo_should_succeed(){
+        // Given
+        TCompasTopo tCompasTopo1 = new TCompasTopo();
+        TCompasTopo tCompasTopo2 = new TCompasTopo();
+        List<TCompasTopo> compasTopos = List.of(tCompasTopo1, tCompasTopo2);
+        // When
+        TPrivate result = PrivateService.createPrivate(compasTopos);
+        // Then
+        assertThat(result.getContent())
+                .map(JAXBElement.class::cast)
+                .map(JAXBElement::getValue)
+                .containsExactly(tCompasTopo1, tCompasTopo2);
+    }
 }
