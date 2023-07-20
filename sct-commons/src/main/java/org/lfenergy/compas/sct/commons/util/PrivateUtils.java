@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.util;
 
+import jakarta.xml.bind.JAXBElement;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import org.lfenergy.compas.scl2007b4.model.*;
@@ -11,7 +12,6 @@ import org.lfenergy.compas.sct.commons.dto.PrivateLinkedToStds;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.icd.IcdHeader;
 
-import javax.xml.bind.JAXBElement;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;

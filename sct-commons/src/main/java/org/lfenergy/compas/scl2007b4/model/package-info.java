@@ -13,8 +13,8 @@
 
 package org.lfenergy.compas.scl2007b4.model;
 
-import javax.xml.bind.annotation.XmlNs;
-import javax.xml.bind.annotation.XmlNsForm;
-import javax.xml.bind.annotation.XmlSchema;
-
 /* This file is used by the Marshaller to set prefix "compas" for Compas Privates when marshalling JAXB objects */
+
+import jakarta.xml.bind.annotation.XmlNs;
+import jakarta.xml.bind.annotation.XmlNsForm;
+import jakarta.xml.bind.annotation.XmlSchema;

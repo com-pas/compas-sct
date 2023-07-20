@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.util;
 
+import jakarta.xml.bind.JAXBElement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,7 +16,6 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.icd.IcdHeader;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
-import javax.xml.bind.JAXBElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
