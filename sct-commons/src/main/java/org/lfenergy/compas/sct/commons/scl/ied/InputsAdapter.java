@@ -187,7 +187,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         return matchingCompasFlows.size() == 1;
     }
 
-    private void clearBinding(TExtRef extRef) {
+    public void clearBinding(TExtRef extRef) {
         extRef.setIedName(null);
         extRef.setLdInst(null);
         extRef.setPrefix(null);
