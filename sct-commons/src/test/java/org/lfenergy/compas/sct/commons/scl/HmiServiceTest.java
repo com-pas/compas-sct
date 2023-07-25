@@ -11,7 +11,7 @@ import org.lfenergy.compas.sct.commons.scl.ied.LN0Adapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LNAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.lfenergy.compas.sct.commons.util.CommonConstants;
-import org.lfenergy.compas.sct.commons.util.LDeviceStatus;
+import org.lfenergy.compas.sct.commons.util.LdeviceStatus;
 
 import java.util.List;
 
@@ -150,7 +150,7 @@ class HmiServiceTest {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         LN0Adapter ln0 = findLn0(sclRootAdapter, "IedName1", "LdInst11");
         ln0.getDOIAdapterByName(CommonConstants.MOD_DO_NAME).getDataAdapterByName(CommonConstants.STVAL_DA_NAME).setVal("off");
-        assertThat(findLDevice(sclRootAdapter, "IedName1", "LdInst11").getLDeviceStatus()).hasValue(LDeviceStatus.OFF);
+        assertThat(findLDevice(sclRootAdapter, "IedName1", "LdInst11").getLDeviceStatus()).hasValue(LdeviceStatus.OFF.getValue());
         TFCDA fcda = newFcda("LdInst11", "ANCR", "1", null, "DoName1", null, TFCEnum.ST);
         // When
         HmiService.createAllHmiReportControlBlocks(scd, List.of(fcda));

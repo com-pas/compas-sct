@@ -13,7 +13,7 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
-import org.lfenergy.compas.sct.commons.util.LDeviceStatus;
+import org.lfenergy.compas.sct.commons.util.LdeviceStatus;
 import org.lfenergy.compas.sct.commons.util.MonitoringLnClassEnum;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
@@ -79,12 +79,13 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
      */
     public void createHmiReportControlBlocks(List<TFCDA> fcdas) {
         LN0Adapter ln0 = getLN0Adapter();
-        if (!ln0.getDaiModStValValue().map(LDeviceStatus.ON::equals).orElse(false)) return;
+        if (!ln0.getDaiModStValValue().map(LdeviceStatus::fromValue).map(LdeviceStatus.ON::equals).orElse(false)) return;
         fcdas.stream()
                 .filter(fcda -> getInst().equals(fcda.getLdInst()) && fcda.isSetLnClass())
                 .forEach(fcda -> (fcda.getLnClass().get(0).equals(TLLN0Enum.LLN_0.value()) ?
                         Optional.of(ln0) // ln0 Mod stVal "ON" has already been checked, no need to check it again
-                        : findLnAdapter(fcda.getLnClass().get(0), fcda.getLnInst(), fcda.getPrefix()).filter(lnAdapter -> lnAdapter.getDaiModStValValue().map(LDeviceStatus.ON::equals).orElse(true)))
+                        :
+                        findLnAdapter(fcda.getLnClass().get(0), fcda.getLnInst(), fcda.getPrefix()).filter(lnAdapter -> lnAdapter.getDaiModStValValue().map(LdeviceStatus::fromValue).map(LdeviceStatus.ON::equals).orElse(true)))
                         .map(sourceLn -> sourceLn.getDAI(new DataAttributeRef(fcda), false))
                         .filter(das -> das.stream().anyMatch(da -> fcda.getFc() == da.getFc())) // getDAI does not filter on DA.
                         .ifPresent(dataAttributeRefs -> createHmiReportCB(ln0, fcda)));
@@ -499,8 +500,8 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
             return Collections.emptyList();
         }
 
-        getLDeviceStatus().ifPresentOrElse(s -> {
-            if (LDeviceStatus.ON.equals(s)) {
+        getLDeviceStatus().map(LdeviceStatus::fromValue).ifPresentOrElse(s -> {
+            if (LdeviceStatus.ON.equals(s)) {
                 extRefBayReferenceList.addAll(getLN0Adapter().getInputsAdapter().getCurrentElem().getExtRef().stream().map(extRef -> new ExtRefInfo.ExtRefBayReference(parentIedAdapter.getName(), parentIedAdapter.getPrivateCompasBay().get(), extRef)).toList());
             }
         }, () -> sclReportItems.add(SclReportItem.fatal(getXPath(), "There is no DOI@name=" + MOD_DO_TYPE_NAME + "/DAI@name=" + STVAL_DA_TYPE_NAME + "/Val for LDevice@inst" + LDEVICE_LDEPF)));
