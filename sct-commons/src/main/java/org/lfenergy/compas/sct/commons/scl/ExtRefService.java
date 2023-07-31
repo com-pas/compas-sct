@@ -8,8 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ied.*;
-import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
-import org.lfenergy.compas.sct.commons.util.ILDEPFSettings;
+import org.lfenergy.compas.sct.commons.util.*;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TCompasICDHeader;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
@@ -17,9 +16,6 @@ import org.lfenergy.compas.scl2007b4.model.TIED;
 import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings;
 import org.lfenergy.compas.sct.commons.dto.SclReport;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
-import org.lfenergy.compas.sct.commons.util.LDeviceStatus;
-import org.lfenergy.compas.sct.commons.util.PrivateEnum;
-import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
 import java.util.function.Function;
@@ -325,7 +321,7 @@ public final class ExtRefService {
             case DU_DA_NAME -> setting.getChannelShortLabel();
             case SETVAL_DA_NAME ->
                     LN_PREFIX_B.equals(lnAdapter.getPrefix()) || LN_PREFIX_A.equals(lnAdapter.getPrefix()) ? setting.getChannelLevModQ() : setting.getChannelLevMod();
-            case STVAL_DA_NAME -> LDeviceStatus.ON;
+            case STVAL_DA_NAME -> LdeviceStatus.ON.getValue();
             case SETSRCREF_DA_NAME -> computeDaiValue(lnAdapter, extRef, setting.getDaName());
             default -> null;
         };

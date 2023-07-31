@@ -411,7 +411,7 @@ public final class Utils {
     public static Optional<LDeviceAdapter> getActiveSourceLDevice(IEDAdapter iedAdapter, LDEPFSettingData setting) {
         return iedAdapter.findLDeviceAdapterByLdInst(setting.getLdInst())
                 .filter(lDeviceAdapter -> lDeviceAdapter.getLDeviceStatus()
-                        .map(status -> status.equals(LDeviceStatus.ON))
+                        .map(status -> status.equals(LdeviceStatus.ON.getValue()))
                         .orElse(false))
                 .stream().findFirst();
     }
@@ -426,7 +426,7 @@ public final class Utils {
                         && Utils.equalsOrBothBlank(setting.getLnPrefix(), lnAdapter.getPrefix()))
                 .findFirst()
                 .filter(lnAdapter -> lnAdapter.getDaiModStValValue()
-                        .map(status -> status.equals(LDeviceStatus.ON))
+                        .map(status -> status.equals(LdeviceStatus.ON.getValue()))
                         .orElse(true));
     }
 

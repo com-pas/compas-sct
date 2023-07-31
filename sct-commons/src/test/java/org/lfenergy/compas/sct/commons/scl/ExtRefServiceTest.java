@@ -110,7 +110,7 @@ class ExtRefServiceTest {
                                                 "The signal ExtRef has more than one matching compas:Flow Private"),
                                         SclReportItem.fatal(
                                                 "/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST13\"]",
-                                                "The LDevice status is neither \"on\" nor \"off\""),
+                                                "The Ldevice status test does not exist. It should be among [on, off]"),
                                         SclReportItem.fatal(
                                                 "/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST14\"]",
                                                 "The LDevice status is undefined"),
