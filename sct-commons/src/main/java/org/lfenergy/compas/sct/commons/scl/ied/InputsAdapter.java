@@ -17,14 +17,13 @@ import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 import org.lfenergy.compas.sct.commons.util.FcdaCandidates;
+import org.lfenergy.compas.sct.commons.util.LdeviceStatus;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
 import java.util.function.Predicate;
 
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
-import static org.lfenergy.compas.sct.commons.util.LDeviceStatus.OFF;
-import static org.lfenergy.compas.sct.commons.util.LDeviceStatus.ON;
 
 /**
  * A representation of the model object
@@ -41,17 +40,16 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
     private static final String MESSAGE_NO_MATCHING_COMPAS_FLOW = "The signal ExtRef has no matching compas:Flow Private";
     private static final String MESSAGE_TOO_MANY_MATCHING_COMPAS_FLOWS = "The signal ExtRef has more than one matching compas:Flow Private";
     private static final String MESSAGE_SOURCE_LDEVICE_NOT_FOUND = "The signal ExtRef ExtRefldinst does not match any " +
-        "LDevice with same inst attribute in source IED %s";
+            "LDevice with same inst attribute in source IED %s";
     private static final String MESSAGE_SOURCE_LN_NOT_FOUND = "The signal ExtRef lninst, doName or daName does not match any " +
-        "source in LDevice %s";
+            "source in LDevice %s";
     private static final String MESSAGE_SERVICE_TYPE_MISSING = "The signal ExtRef is missing ServiceType attribute";
     private static final String MESSAGE_INVALID_SERVICE_TYPE = "The signal ExtRef ServiceType attribute is unexpected : %s";
     private static final String MESSAGE_IED_MISSING_COMPAS_BAY_UUID = "IED is missing Private/compas:Bay@UUID attribute";
     private static final String MESSAGE_EXTREF_DESC_MALFORMED = "ExtRef.serviceType=Report but ExtRef.desc attribute is malformed";
     private static final String MESSAGE_LDEVICE_STATUS_UNDEFINED = "The LDevice status is undefined";
-    private static final String MESSAGE_LDEVICE_STATUS_NEITHER_ON_NOR_OFF = "The LDevice status is neither \"on\" nor \"off\"";
     private static final String MESSAGE_EXTREF_IEDNAME_DOES_NOT_MATCH_ANY_SYSTEM_VERSION_UUID = "The signal ExtRef iedName does not match any " +
-        "IED/Private/compas:ICDHeader@ICDSystemVersionUUID";
+            "IED/Private/compas:ICDHeader@ICDSystemVersionUUID";
     private static final String MESSAGE_SOURCE_LDEVICE_STATUS_UNDEFINED = "The signal ExtRef source LDevice %s status is undefined";
     private static final String MESSAGE_SOURCE_LDEVICE_STATUS_NEITHER_ON_NOR_OFF = "The signal ExtRef source LDevice %s status is neither \"on\" nor \"off\"";
     private static final String MESSAGE_SOURCE_LDEVICE_STATUS_OFF = "The signal ExtRef source LDevice %s status is off";
@@ -97,33 +95,36 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         if (optionalLDeviceStatus.isEmpty()) {
             return List.of(getLDeviceAdapter().buildFatalReportItem(MESSAGE_LDEVICE_STATUS_UNDEFINED));
         }
-        String lDeviceStatus = optionalLDeviceStatus.get();
-        return switch (lDeviceStatus) {
-            case ON -> getExtRefs().stream()
-                    .filter(tExtRef -> StringUtils.isNotBlank(tExtRef.getIedName()) && StringUtils.isNotBlank(tExtRef.getDesc()))
-                    .map(extRef ->
-                        updateExtRefIedName(extRef, icdSystemVersionToIed.get(extRef.getIedName())))
-                    .flatMap(Optional::stream)
-                    .toList();
-            case OFF -> {
-                getExtRefs().forEach(this::clearBinding);
-                yield Collections.emptyList();
-            }
-            default -> List.of(getLDeviceAdapter().buildFatalReportItem(MESSAGE_LDEVICE_STATUS_NEITHER_ON_NOR_OFF));
-        };
+        try {
+            LdeviceStatus lDeviceStatus = LdeviceStatus.fromValue(optionalLDeviceStatus.get());
+            return switch (lDeviceStatus) {
+                case ON -> getExtRefs().stream()
+                        .filter(tExtRef -> StringUtils.isNotBlank(tExtRef.getIedName()) && StringUtils.isNotBlank(tExtRef.getDesc()))
+                        .map(extRef ->
+                                updateExtRefIedName(extRef, icdSystemVersionToIed.get(extRef.getIedName())))
+                        .flatMap(Optional::stream)
+                        .toList();
+                case OFF -> {
+                    getExtRefs().forEach(this::clearBinding);
+                    yield Collections.emptyList();
+                }
+            };
+        } catch (IllegalArgumentException e) {
+            return List.of(getLDeviceAdapter().buildFatalReportItem(e.getMessage()));
+        }
     }
 
     /**
      * Find matching CompasFlow private and set ExtRef iedName accordingly
      *
-     * @param extRef         extRef whose iedName will be updated
+     * @param extRef extRef whose iedName will be updated
      * @return Error if ExtRef could not be updated
      */
     private Optional<SclReportItem> updateExtRefIedName(TExtRef extRef, IEDAdapter sourceIed) {
         List<TCompasFlow> matchingCompasFlows = getMatchingCompasFlows(extRef);
         if (!singleMatch(matchingCompasFlows)) {
             return fatalReportItem(extRef,
-                matchingCompasFlows.isEmpty() ? MESSAGE_NO_MATCHING_COMPAS_FLOW : MESSAGE_TOO_MANY_MATCHING_COMPAS_FLOWS);
+                    matchingCompasFlows.isEmpty() ? MESSAGE_NO_MATCHING_COMPAS_FLOW : MESSAGE_TOO_MANY_MATCHING_COMPAS_FLOWS);
         }
         TCompasFlow compasFlow = matchingCompasFlows.get(0);
         if (compasFlow.getFlowStatus() == TCompasFlowStatus.INACTIVE) {
@@ -136,7 +137,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
             return sourceValidationError;
         }
         String sourceIedName = PrivateService.extractCompasPrivate(sourceIed.getCurrentElem(), TCompasICDHeader.class)
-            .map(TCompasICDHeader::getIEDName).orElse("");
+                .map(TCompasICDHeader::getIEDName).orElse("");
         extRef.setIedName(sourceIedName);
         compasFlow.setExtRefiedName(sourceIedName);
         log.debug(String.format("extRef.desc=%s, iedName=%s%n", extRef.getDesc(), sourceIedName));
@@ -170,17 +171,19 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         Optional<String> optionalSourceLDeviceStatus = sourceLDevice.getLDeviceStatus();
         if (optionalSourceLDeviceStatus.isEmpty()) {
             return fatalReportItem(extRef, String.format(MESSAGE_SOURCE_LDEVICE_STATUS_UNDEFINED,
-                sourceLDevice.getXPath()));
-        }
-        return optionalSourceLDeviceStatus.map(sourceLDeviceStatus ->
-            switch (sourceLDeviceStatus) {
-                case OFF -> SclReportItem.warning(extRefXPath(extRef.getDesc()), String.format(MESSAGE_SOURCE_LDEVICE_STATUS_OFF,
                     sourceLDevice.getXPath()));
-                case ON -> null;
-                default -> SclReportItem.fatal(extRefXPath(extRef.getDesc()),
-                    String.format(MESSAGE_SOURCE_LDEVICE_STATUS_NEITHER_ON_NOR_OFF,
-                        sourceLDevice.getXPath()));
-            });
+        }
+        return optionalSourceLDeviceStatus.map(sourceLDeviceStatus -> {
+            try {
+                LdeviceStatus lDeviceStatus = LdeviceStatus.fromValue(sourceLDeviceStatus);
+                return switch (lDeviceStatus) {
+                    case OFF -> SclReportItem.warning(extRefXPath(extRef.getDesc()), String.format(MESSAGE_SOURCE_LDEVICE_STATUS_OFF, sourceLDevice.getXPath()));
+                    case ON -> null;
+                };
+            } catch (IllegalArgumentException e) {
+                return SclReportItem.fatal(extRefXPath(extRef.getDesc()), String.format(MESSAGE_SOURCE_LDEVICE_STATUS_NEITHER_ON_NOR_OFF, sourceLDevice.getXPath()));
+            }
+        });
     }
 
     private boolean singleMatch(List<TCompasFlow> matchingCompasFlows) {
@@ -213,13 +216,13 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
 
     private String extRefXPath(String extRefDesc) {
         return getXPath() + String.format("/ExtRef[%s]",
-            Utils.xpathAttributeFilter("desc", extRefDesc));
+                Utils.xpathAttributeFilter("desc", extRefDesc));
     }
 
     /**
      * Find CompasFlows that match given ExtRef
      *
-     * @param extRef      extRef to match
+     * @param extRef extRef to match
      * @return list of matching CompasFlows
      */
     private List<TCompasFlow> getMatchingCompasFlows(TExtRef extRef) {
@@ -239,18 +242,18 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
     private boolean isMatchingExtRef(TCompasFlow compasFlow, TExtRef extRef) {
         String extRefLnClass = extRef.isSetLnClass() ? extRef.getLnClass().get(0) : null;
         return Utils.equalsOrBothBlank(compasFlow.getDataStreamKey(), extRef.getDesc())
-            && Utils.equalsOrBothBlank(compasFlow.getExtRefiedName(), extRef.getIedName())
-            && Utils.equalsOrBothBlank(compasFlow.getExtRefldinst(), extRef.getLdInst())
-            && Utils.equalsOrBothBlank(compasFlow.getExtRefprefix(), extRef.getPrefix())
-            && Utils.equalsOrBothBlank(compasFlow.getExtReflnClass(), extRefLnClass)
-            && Utils.equalsOrBothBlank(compasFlow.getExtReflnInst(), extRef.getLnInst());
+                && Utils.equalsOrBothBlank(compasFlow.getExtRefiedName(), extRef.getIedName())
+                && Utils.equalsOrBothBlank(compasFlow.getExtRefldinst(), extRef.getLdInst())
+                && Utils.equalsOrBothBlank(compasFlow.getExtRefprefix(), extRef.getPrefix())
+                && Utils.equalsOrBothBlank(compasFlow.getExtReflnClass(), extRefLnClass)
+                && Utils.equalsOrBothBlank(compasFlow.getExtReflnInst(), extRef.getLnInst());
     }
 
     private LDeviceAdapter getLDeviceAdapter() {
         return parentAdapter.getParentAdapter();
     }
 
-    private AbstractLNAdapter<?> getLNAdapter(){
+    private AbstractLNAdapter<?> getLNAdapter() {
         return parentAdapter;
     }
 
@@ -260,19 +263,19 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
             return List.of(getIedAdapter().buildFatalReportItem(MESSAGE_IED_MISSING_COMPAS_BAY_UUID));
         }
         return getExtRefs().stream()
-            .filter(this::areBindingAttributesPresent)
-            .filter(this::isExternalBound)
-            .filter(this::matchingCompasFlowIsActiveOrUntested)
-            .map(extRef -> updateSourceDataSetsAndControlBlocks(extRef, currentBayUuid))
-            .flatMap(Optional::stream)
-            .toList();
+                .filter(this::areBindingAttributesPresent)
+                .filter(this::isExternalBound)
+                .filter(this::matchingCompasFlowIsActiveOrUntested)
+                .map(extRef -> updateSourceDataSetsAndControlBlocks(extRef, currentBayUuid))
+                .flatMap(Optional::stream)
+                .toList();
     }
 
     private boolean matchingCompasFlowIsActiveOrUntested(TExtRef extRef) {
         return getMatchingCompasFlows(extRef).stream().findFirst()
-            .map(TCompasFlow::getFlowStatus)
-            .filter(flowStatus -> flowStatus == TCompasFlowStatus.ACTIVE || flowStatus == TCompasFlowStatus.UNTESTED)
-            .isPresent();
+                .map(TCompasFlow::getFlowStatus)
+                .filter(flowStatus -> flowStatus == TCompasFlowStatus.ACTIVE || flowStatus == TCompasFlowStatus.UNTESTED)
+                .isPresent();
     }
 
     private boolean isExternalBound(TExtRef tExtRef) {
@@ -281,10 +284,10 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
 
     private boolean areBindingAttributesPresent(TExtRef tExtRef) {
         return StringUtils.isNotBlank(tExtRef.getIedName())
-            && StringUtils.isNotBlank(tExtRef.getDesc())
-            && StringUtils.isNotBlank(tExtRef.getLdInst())
-            && tExtRef.getLnClass().stream().findFirst().filter(StringUtils::isNotBlank).isPresent()
-            && StringUtils.isNotBlank(tExtRef.getDoName());
+                && StringUtils.isNotBlank(tExtRef.getDesc())
+                && StringUtils.isNotBlank(tExtRef.getLdInst())
+                && tExtRef.getLnClass().stream().findFirst().filter(StringUtils::isNotBlank).isPresent()
+                && StringUtils.isNotBlank(tExtRef.getDoName());
     }
 
     private Optional<SclReportItem> updateSourceDataSetsAndControlBlocks(TExtRef extRef, String targetBayUuid) {
@@ -297,8 +300,8 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         }
         IEDAdapter sourceIed = optionalSrcIedAdapter.get();
         Optional<String> sourceIedBayUuid = sourceIed.getPrivateCompasBay()
-            .map(TCompasBay::getUUID)
-            .filter(StringUtils::isNotBlank);
+                .map(TCompasBay::getUUID)
+                .filter(StringUtils::isNotBlank);
         if (sourceIedBayUuid.isEmpty()) {
             return fatalReportItem(extRef, MESSAGE_SOURCE_IED_MISSING_COMPAS_BAY_UUID);
         }
@@ -342,9 +345,9 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         String fcdaDaName = extRef.getServiceType() == TServiceType.REPORT ? null : sourceDa.getDaRef();
         String fcdaLnClass = extRef.getLnClass().stream().findFirst().orElse(null);
         dataSetAdapter.createFCDAIfNotExists(extRef.getLdInst(), extRef.getPrefix(), fcdaLnClass, extRef.getLnInst(),
-            sourceDa.getDoRef(),
-            fcdaDaName,
-            sourceDa.getFc());
+                sourceDa.getDoRef(),
+                fcdaDaName,
+                sourceDa.getFc());
     }
 
     private void createControlBlockWithTarget(TExtRef extRef, LDeviceAdapter sourceLDevice, DataAttributeRef sourceDa, String cbName, String datSet) {
