@@ -6,7 +6,6 @@ package org.lfenergy.compas.sct.commons.testhelpers;
 
 import org.assertj.core.api.Assertions;
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.dto.SclReport;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.*;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
@@ -38,17 +37,17 @@ public final class SclHelper {
     public static final String IED_NAME_1 = "IED_NAME_1";
     public static final String IED_NAME_2 = "IED_NAME_2";
 
-    public static IEDAdapter findIed(SclRootAdapter sclRootAdapter, String iedName) {
-        return sclRootAdapter.findIedAdapterByName(iedName)
+    public static IEDAdapter findIed(SCL scl, String iedName) {
+        return new SclRootAdapter(scl).findIedAdapterByName(iedName)
                 .orElseThrow(() -> new AssertionFailedError(String.format("IED.name=%s not found", iedName)));
     }
 
-    public static LDeviceAdapter findLDevice(SclRootAdapter sclRootAdapter, String iedName, String ldInst) {
-        return findIed(sclRootAdapter, iedName).findLDeviceAdapterByLdInst(ldInst).orElseThrow(() -> new AssertionFailedError(String.format("LDevice.inst=%s not found in IED.name=%s", ldInst, iedName)));
+    public static LDeviceAdapter findLDevice(SCL scl, String iedName, String ldInst) {
+        return findIed(scl, iedName).findLDeviceAdapterByLdInst(ldInst).orElseThrow(() -> new AssertionFailedError(String.format("LDevice.inst=%s not found in IED.name=%s", ldInst, iedName)));
     }
 
-    public static InputsAdapter findInputs(SclRootAdapter sclRootAdapter, String iedName, String ldInst) {
-        LDeviceAdapter lDevice = findLDevice(sclRootAdapter, iedName, ldInst);
+    public static InputsAdapter findInputs(SCL scl, String iedName, String ldInst) {
+        LDeviceAdapter lDevice = findLDevice(scl, iedName, ldInst);
         if (!lDevice.hasLN0()) {
             throw new AssertionFailedError(String.format("IED.name=%s, LDevice.inst=%s has no LN0 element", ldInst, iedName));
         }
@@ -59,8 +58,8 @@ public final class SclHelper {
         return ln0Adapter.getInputsAdapter();
     }
 
-    public static TExtRef findExtRef(SclRootAdapter sclRootAdapter, String iedName, String ldInst, String extRefDesc) {
-        return findInputs(sclRootAdapter, iedName, ldInst)
+    public static TExtRef findExtRef(SCL scl, String iedName, String ldInst, String extRefDesc) {
+        return findInputs(scl, iedName, ldInst)
                 .getCurrentElem()
                 .getExtRef()
                 .stream()
@@ -69,24 +68,16 @@ public final class SclHelper {
                 .orElseThrow(() -> new AssertionFailedError(String.format("ExtRef.des=%s not found in IED.name=%s,LDevice.inst=%s", extRefDesc, iedName, ldInst)));
     }
 
-    public static TExtRef findExtRef(SclReport sclReport, String iedName, String ldInst, String extRefDesc) {
-        return findExtRef(sclReport.getSclRootAdapter(), iedName, ldInst, extRefDesc);
-    }
-
-    public static LDeviceAdapter findLDevice(SclReport sclReport, String iedName, String ldInst) {
-        return findLDevice(sclReport.getSclRootAdapter(), iedName, ldInst);
-    }
-
-    public static LN0Adapter findLn0(SclRootAdapter sclRootAdapter, String iedName, String ldInst) {
-        LDeviceAdapter lDevice = findLDevice(sclRootAdapter, iedName, ldInst);
+    public static LN0Adapter findLn0(SCL scl, String iedName, String ldInst) {
+        LDeviceAdapter lDevice = findLDevice(scl, iedName, ldInst);
         if (!lDevice.hasLN0()) {
             throw new AssertionFailedError(String.format("LN0 not found in IED.name=%s,LDevice.inst=%s", iedName, ldInst));
         }
         return lDevice.getLN0Adapter();
     }
 
-    public static LNAdapter findLn(SclRootAdapter sclRootAdapter, String iedName, String ldInst, String lnClass, String lnInst, String prefix) {
-        LDeviceAdapter lDevice = findLDevice(sclRootAdapter, iedName, ldInst);
+    public static LNAdapter findLn(SCL scl, String iedName, String ldInst, String lnClass, String lnInst, String prefix) {
+        LDeviceAdapter lDevice = findLDevice(scl, iedName, ldInst);
         if (!lDevice.getCurrentElem().isSetLN()) {
             throw new AssertionFailedError(String.format("No LN found in IED.name=%s,LDevice.inst=%s", iedName, ldInst));
         }
@@ -139,35 +130,31 @@ public final class SclHelper {
     }
 
 
-    public static LDeviceAdapter findLDeviceByLdName(SclRootAdapter sclRootAdapter, String ldName) {
-        return sclRootAdapter.streamIEDAdapters()
+    public static LDeviceAdapter findLDeviceByLdName(SCL scl, String ldName) {
+        return new SclRootAdapter(scl).streamIEDAdapters()
                 .flatMap(IEDAdapter::streamLDeviceAdapters)
                 .filter(lDeviceAdapter -> ldName.equals(lDeviceAdapter.getLdName()))
                 .findFirst()
                 .orElseThrow(() -> new AssertionFailedError("LDevice with ldName=%s not found in SCD".formatted(ldName)));
     }
 
-    public static DataSetAdapter findDataSet(SclRootAdapter sclRootAdapter, String iedName, String ldInst, String dataSetName) {
-        LN0Adapter ln0 = findLn0(sclRootAdapter, iedName, ldInst);
+    public static DataSetAdapter findDataSet(SCL scl, String iedName, String ldInst, String dataSetName) {
+        LN0Adapter ln0 = findLn0(scl, iedName, ldInst);
         return ln0.findDataSetByName(dataSetName)
                 .orElseThrow(() -> new AssertionFailedError(String.format("DataSet.name=%s not found in IED.name=%s,LDevice.inst=%s,LN0",
                         dataSetName, iedName, ldInst)));
     }
 
-    public static DataSetAdapter findDataSet(SclReport sclReport, String iedName, String ldInst, String dataSetName) {
-        return findDataSet(sclReport.getSclRootAdapter(), iedName, ldInst, dataSetName);
-    }
-
-    public static ControlBlockAdapter findControlBlock(SclRootAdapter sclRootAdapter, String iedName, String ldInst, String cbName,
+    public static ControlBlockAdapter findControlBlock(SCL scl, String iedName, String ldInst, String cbName,
                                                        ControlBlockEnum controlBlockEnum) {
-        LN0Adapter ln0 = findLn0(sclRootAdapter, iedName, ldInst);
+        LN0Adapter ln0 = findLn0(scl, iedName, ldInst);
         return ln0.findControlBlock(cbName, controlBlockEnum)
                 .orElseThrow(() -> new AssertionFailedError(String.format("%s name=%s not found in IED.name=%s,LDevice.inst=%s,LN0",
                         controlBlockEnum.getControlBlockClass().getSimpleName(), cbName, iedName, ldInst)));
     }
 
-    public static <T extends TControl> T findControlBlock(SclRootAdapter sclRootAdapter, String iedName, String ldInst, String cbName, Class<T> controlBlockClass) {
-        LN0Adapter ln0 = findLn0(sclRootAdapter, iedName, ldInst);
+    public static <T extends TControl> T findControlBlock(SCL scl, String iedName, String ldInst, String cbName, Class<T> controlBlockClass) {
+        LN0Adapter ln0 = findLn0(scl, iedName, ldInst);
         return ln0.getTControlsByType(controlBlockClass).stream()
                 .filter(t -> cbName.equals(t.getName()))
                 .findFirst()
@@ -175,9 +162,9 @@ public final class SclHelper {
                         controlBlockClass.getSimpleName(), cbName, iedName, ldInst)));
     }
 
-    public static void assertControlBlockExists(SclReport sclReport, String iedName, String ldInst, String cbName,
+    public static void assertControlBlockExists(SCL scd, String iedName, String ldInst, String cbName,
                                                 String datSet, String id, ControlBlockEnum controlBlockEnum) {
-        TControl controlBlock = findControlBlock(sclReport.getSclRootAdapter(), iedName, ldInst, cbName, controlBlockEnum.getControlBlockClass());
+        TControl controlBlock = findControlBlock(scd, iedName, ldInst, cbName, controlBlockEnum.getControlBlockClass());
         assertThat(controlBlock.getDatSet()).isEqualTo(datSet);
         assertThat(getControlBlockId(controlBlock)).isEqualTo(id);
     }
@@ -195,28 +182,28 @@ public final class SclHelper {
         throw new AssertionFailedError("Cannot get Id for ControlBlock of type " + tControl.getClass().getSimpleName());
     }
 
-    public static Stream<TDataSet> streamAllDataSets(SclRootAdapter sclRootAdapter) {
-        return streamAllLn0Adapters(sclRootAdapter)
+    public static Stream<TDataSet> streamAllDataSets(SCL scl) {
+        return streamAllLn0Adapters(scl)
                 .map(ln0Adapter -> ln0Adapter.getCurrentElem().getDataSet())
                 .flatMap(List::stream);
     }
 
-    public static <T extends TControl> Stream<T> streamAllControlBlocks(SclRootAdapter sclRootAdapter, Class<T> controlBlockClass) {
-        return streamAllLn0Adapters(sclRootAdapter)
+    public static <T extends TControl> Stream<T> streamAllControlBlocks(SCL scl, Class<T> controlBlockClass) {
+        return streamAllLn0Adapters(scl)
                 .map(ln0Adapter -> ln0Adapter.getTControlsByType(controlBlockClass))
                 .flatMap(List::stream);
     }
 
-    public static Stream<LN0Adapter> streamAllLn0Adapters(SclRootAdapter sclRootAdapter) {
-        return sclRootAdapter
+    public static Stream<LN0Adapter> streamAllLn0Adapters(SCL scl) {
+        return new SclRootAdapter(scl)
                 .streamIEDAdapters()
                 .flatMap(IEDAdapter::streamLDeviceAdapters)
                 .filter(LDeviceAdapter::hasLN0)
                 .map(LDeviceAdapter::getLN0Adapter);
     }
 
-    public static Stream<TExtRef> streamAllExtRef(SclRootAdapter sclRootAdapter) {
-        return streamAllLn0Adapters(sclRootAdapter)
+    public static Stream<TExtRef> streamAllExtRef(SCL scl) {
+        return streamAllLn0Adapters(scl)
                 .filter(AbstractLNAdapter::hasInputs)
                 .map(LN0Adapter::getInputsAdapter)
                 .map(InputsAdapter::getCurrentElem)

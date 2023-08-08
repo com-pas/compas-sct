@@ -651,7 +651,7 @@ class LN0AdapterTest {
     void getTControlsByType_should_return_LN0_list_of_controls_for_this_class(Class<? extends TControl> tControlClass, Function<LN0, List<?>> getter) {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
-        LN0Adapter ln0Adapter = findLn0(new SclRootAdapter(scd), "IED4d4fe1a8cda64cf88a5ee4176a1a0eef", "LDSUIED");
+        LN0Adapter ln0Adapter = findLn0(scd, "IED4d4fe1a8cda64cf88a5ee4176a1a0eef", "LDSUIED");
         // When
         List<? extends TControl> controlList = ln0Adapter.getTControlsByType(tControlClass);
         // Then
@@ -682,8 +682,7 @@ class LN0AdapterTest {
     void getLnStatus_should_return_ModStValValue() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_with_extref_errors.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        LN0Adapter ln0 = findLn0(sclRootAdapter, "IED_NAME1", "LD_INST13");
+        LN0Adapter ln0 = findLn0(scd, "IED_NAME1", "LD_INST13");
         // When
         Optional<String> lnStatus = ln0.getDaiModStValValue();
         // Then
@@ -694,8 +693,7 @@ class LN0AdapterTest {
     void getLnStatus_should_return_empty_Optional() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_with_extref_errors.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        LN0Adapter ln0 = findLn0(sclRootAdapter, "IED_NAME1", "LD_INST14");
+        LN0Adapter ln0 = findLn0(scd, "IED_NAME1", "LD_INST14");
         // When
         Optional<String> lnStatus = ln0.getDaiModStValValue();
         // Then
@@ -706,7 +704,7 @@ class LN0AdapterTest {
     void createDataSetIfNotExists_should_create_dataSet() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
-        LN0Adapter ln0 = findLn0(new SclRootAdapter(scd), "IED_NAME1", "LD_INST11");
+        LN0Adapter ln0 = findLn0(scd, "IED_NAME1", "LD_INST11");
         assertThat(ln0.getCurrentElem().getDataSet()).isEmpty();
         // When
         DataSetAdapter newDataSet = ln0.createDataSetIfNotExists("newDataSet", ControlBlockEnum.GSE);
@@ -722,7 +720,7 @@ class LN0AdapterTest {
     void createDataSetIfNotExists_when_dataset_exists_should_not_create_dataset() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
-        LN0Adapter ln0 = findLn0(new SclRootAdapter(scd), "IED_NAME1", "LD_INST12");
+        LN0Adapter ln0 = findLn0(scd, "IED_NAME1", "LD_INST12");
         assertThat(ln0.getCurrentElem().getDataSet()).hasSize(1);
         // When
         DataSetAdapter newDataSet = ln0.createDataSetIfNotExists("existingDataSet", ControlBlockEnum.GSE);
@@ -738,7 +736,7 @@ class LN0AdapterTest {
     void createDataSetIfNotExists_when_ied_does_not_have_creation_capabilities_should_throw_exception() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
-        LN0Adapter ln0 = findLn0(new SclRootAdapter(scd), "IED_NAME2", "LD_INST21");
+        LN0Adapter ln0 = findLn0(scd, "IED_NAME2", "LD_INST21");
         // When & Then
         assertThatThrownBy(() -> ln0.createDataSetIfNotExists("existingDataSet", ControlBlockEnum.GSE))
                 .isInstanceOf(ScdException.class);
@@ -748,7 +746,7 @@ class LN0AdapterTest {
     void createControlBlockIfNotExists_should_create_GSEControl() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
-        LN0Adapter sourceLn0 = findLn0(new SclRootAdapter(scd), "IED_NAME1", "LD_INST11");
+        LN0Adapter sourceLn0 = findLn0(scd, "IED_NAME1", "LD_INST11");
         assertThat(sourceLn0.getCurrentElem().getDataSet()).isEmpty();
         final String NEW_DATASET_NAME = "newDataSet";
         final String NEW_CB_NAME = "newControlBlock";
@@ -769,7 +767,7 @@ class LN0AdapterTest {
     void createControlBlockIfNotExists_should_create_SampledValueControl() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
-        LN0Adapter sourceLn0 = findLn0(new SclRootAdapter(scd), "IED_NAME1", "LD_INST11");
+        LN0Adapter sourceLn0 = findLn0(scd, "IED_NAME1", "LD_INST11");
         assertThat(sourceLn0.getCurrentElem().getDataSet()).isEmpty();
         final String NEW_DATASET_NAME = "newDataSet";
         final String NEW_CB_NAME = "newControlBlock";
@@ -797,7 +795,7 @@ class LN0AdapterTest {
     void createControlBlockIfNotExists_should_create_ReportControl() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
-        LN0Adapter sourceLn0 = findLn0(new SclRootAdapter(scd), "IED_NAME1", "LD_INST11");
+        LN0Adapter sourceLn0 = findLn0(scd, "IED_NAME1", "LD_INST11");
 
         assertThat(sourceLn0.getCurrentElem().getDataSet()).isEmpty();
         final String NEW_DATASET_NAME = "newDataSet";
@@ -925,7 +923,7 @@ class LN0AdapterTest {
     void updateDoInRef_should_return_error_message(String testName, String ldInst, String doiName) {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_test.xml");
-        LN0Adapter sourceLn0 = findLn0(new SclRootAdapter(scd), "IED_NAME1", ldInst);
+        LN0Adapter sourceLn0 = findLn0(scd, "IED_NAME1", ldInst);
 
         // When
         List<SclReportItem> sclReportItems = sourceLn0.updateDoInRef();
@@ -940,7 +938,7 @@ class LN0AdapterTest {
     void updateDoInRef_should_return_error_message_when_no_Val_in_DAI_purpose() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_test.xml");
-        LN0Adapter sourceLn0 = findLn0(new SclRootAdapter(scd), "IED_NAME1", "LD_Without_Val_in_DAI_purpose");
+        LN0Adapter sourceLn0 = findLn0(scd, "IED_NAME1", "LD_Without_Val_in_DAI_purpose");
 
         // When
         List<SclReportItem> sclReportItems = sourceLn0.updateDoInRef();
@@ -955,7 +953,7 @@ class LN0AdapterTest {
     void updateDoInRef_should_not_treat_LN0_when_DAI_name_purpose_not_compliant() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_test.xml");
-        LN0Adapter sourceLn0 = findLn0(new SclRootAdapter(scd), "IED_NAME1", "LD_Without_purpose");
+        LN0Adapter sourceLn0 = findLn0(scd, "IED_NAME1", "LD_Without_purpose");
 
         // When
         List<SclReportItem> sclReportItems = sourceLn0.updateDoInRef();
@@ -970,8 +968,7 @@ class LN0AdapterTest {
     void updateDoInRef_should_update_setSrcRef_and_not_setSrcCB_when_one_ExtRef_desc_matches() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_test.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        LN0Adapter sourceLn0 = findLn0(sclRootAdapter, "IED_NAME1", "LD_WITH_1_InRef_without_cbName");
+        LN0Adapter sourceLn0 = findLn0(scd, "IED_NAME1", "LD_WITH_1_InRef_without_cbName");
         String doiNameInRef = "InRef7";
         List<TVal> daiValList = sourceLn0.getDOIAdapterByName(doiNameInRef).getDataAdapterByName(SETSRCREF_DA_NAME).getCurrentElem().getVal();
         String originalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, SETSRCCB_DA_NAME);
@@ -996,8 +993,7 @@ class LN0AdapterTest {
     void updateDoInRef_should_update_setSrcRef_and_setSrcCB_when_one_ExtRef_desc_matches() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_test.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        LN0Adapter sourceLn0 = findLn0(sclRootAdapter, "IED_NAME1", "LD_WITH_1_InRef");
+        LN0Adapter sourceLn0 = findLn0(scd, "IED_NAME1", "LD_WITH_1_InRef");
         String doiNameInRef = "InRef2";
         String originalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, SETSRCCB_DA_NAME);
         String expectedSrcRef = "IED_NAME1LD_WITH_1_InRef/PRANCR1.Do11.sdo11";
@@ -1022,8 +1018,7 @@ class LN0AdapterTest {
     void updateDoInRef_should_update_setSrcRef_and_setSrcCB_and_setTstRef_and_setTstCB_when_ExtRef_desc_matches() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_test.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        LN0Adapter sourceLn0 = findLn0(sclRootAdapter, "IED_NAME1", "LD_WITH_3_InRef");
+        LN0Adapter sourceLn0 = findLn0(scd, "IED_NAME1", "LD_WITH_3_InRef");
         String doiNameInRef = "InRef3";
         String originalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, SETSRCCB_DA_NAME);
         String expectedSrcRef = "IED_NAME1LD_WITH_3_InRef/PRANCR1.Do11.sdo11";
@@ -1059,8 +1054,7 @@ class LN0AdapterTest {
     void updateDoInRef_should_not_update_setSrcRef_and_setSrcCB_and_setTstRef_and_setTstCB_when_ExtRef_desc_matches_and_dais_not_updatable() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_test.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        LN0Adapter sourceLn0 = findLn0(sclRootAdapter, "IED_NAME1", "LD_WITH_3_InRef");
+        LN0Adapter sourceLn0 = findLn0(scd, "IED_NAME1", "LD_WITH_3_InRef");
         String doiNameInRef = "InRef3";
         findDai(sourceLn0, "InRef3" + "." + SETSRCREF_DA_NAME).update(0L, "OLD_VAL");
         findDai(sourceLn0, "InRef3" + "." + SETTSTREF_DA_NAME).update(0L, "OLD_VAL");

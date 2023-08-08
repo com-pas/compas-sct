@@ -10,7 +10,6 @@ import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.sct.commons.dto.HeaderDTO;
 import org.lfenergy.compas.sct.commons.dto.SubNetworkDTO;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclService;
 import org.lfenergy.compas.sct.commons.scl.SubstationService;
 
@@ -22,7 +21,7 @@ import java.util.*;
  * The following features are supported:
  * </p>
  * <ul>
- *   <li>{@link SclAutomationService#createSCD(SCL, HeaderDTO, Set) Adds all elements under the <b>SCL </b> object from given <b>SSD </b> and <b>STD </b> files}
+ *   <li>{@link SclAutomationService#createSCD(SCL, HeaderDTO, List) Adds all elements under the <b>SCL </b> object from given <b>SSD </b> and <b>STD </b> files}
  *  </ul>
  */
 public class SclAutomationService {
@@ -40,24 +39,24 @@ public class SclAutomationService {
     }
 
     /**
-     * Create a SCD file from specified parameters, it calls all functions defined in the process one by one, every step
-     * return a SCD file which will be used by the next step.
+     * Create an SCD file from specified parameters, it calls all functions defined in the process one by one, every step
+     * return an SCD file which will be used by the next step.
      * @param ssd : (mandatory) file contains substation datas
      * @param headerDTO : (mandatory) object which hold header datas and historys' one
-     * @param stds : (optional) list of STD files containing IED datas (IED, Communication and DataTypeTemplate)
-     * @return a SCD file encapsuled in object SclRootAdapter
+     * @param stds : list of STD files containing IED datas (IED, Communication and DataTypeTemplate)
+     * @return an SCD object
      * @throws ScdException
      */
-    public static SclRootAdapter createSCD(@NonNull SCL ssd, @NonNull HeaderDTO headerDTO, Set<SCL> stds) throws ScdException {
-        SclRootAdapter scdAdapter = SclService.initScl(Optional.ofNullable(headerDTO.getId()),
+    public static SCL createSCD(@NonNull SCL ssd, @NonNull HeaderDTO headerDTO, List<SCL> stds) throws ScdException {
+        SCL scd = SclService.initScl(Optional.ofNullable(headerDTO.getId()),
                 headerDTO.getVersion(), headerDTO.getRevision());
         if (!headerDTO.getHistoryItems().isEmpty()) {
             HeaderDTO.HistoryItem hItem = headerDTO.getHistoryItems().get(0);
-            SclService.addHistoryItem(scdAdapter.getCurrentElem(), hItem.getWho(), hItem.getWhat(), hItem.getWhy());
+            SclService.addHistoryItem(scd, hItem.getWho(), hItem.getWhat(), hItem.getWhy());
         }
-        SubstationService.addSubstation(scdAdapter.getCurrentElem(), ssd);
-        SclService.importSTDElementsInSCD(scdAdapter, stds, comMap);
-        SclService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scdAdapter.getCurrentElem());
-        return scdAdapter;
+        SubstationService.addSubstation(scd, ssd);
+        SclService.importSTDElementsInSCD(scd, stds, comMap);
+        SclService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scd);
+        return scd;
     }
 }

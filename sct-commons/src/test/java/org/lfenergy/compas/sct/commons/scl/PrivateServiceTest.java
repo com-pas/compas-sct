@@ -274,7 +274,7 @@ class PrivateServiceTest {
         scl1.getIED().add(tied1);
 
         //When
-        Map<String, PrivateService.PrivateLinkedToSTDs> stringSCLMap = PrivateService.createMapICDSystemVersionUuidAndSTDFile(Set.of(scl1));
+        Map<String, PrivateService.PrivateLinkedToSTDs> stringSCLMap = PrivateService.createMapICDSystemVersionUuidAndSTDFile(List.of(scl1));
 
         //Then
         assertThat(stringSCLMap.keySet()).isEmpty();
@@ -307,7 +307,7 @@ class PrivateServiceTest {
         scl3.getIED().add(tied3);
 
         //When
-        Map<String, PrivateService.PrivateLinkedToSTDs> stringSCLMap = PrivateService.createMapICDSystemVersionUuidAndSTDFile(Set.of(scl1,scl2,scl3));
+        Map<String, PrivateService.PrivateLinkedToSTDs> stringSCLMap = PrivateService.createMapICDSystemVersionUuidAndSTDFile(List.of(scl1,scl2,scl3));
 
         //Then
         assertThat(stringSCLMap.keySet()).hasSize(2).containsExactly("UUID-1", "UUID-2");
@@ -414,9 +414,7 @@ class PrivateServiceTest {
         scl.getSubstation().add(tSubstation);
 
         //When
-        SclRootAdapter sclRootAdapter = SclService.initScl(Optional.empty(), "hv", "hr");
-        sclRootAdapter.setCurrentElem(scl);
-        Stream<IcdHeader> tPrivateStream = PrivateService.streamIcdHeaders(sclRootAdapter);
+        Stream<IcdHeader> tPrivateStream = PrivateService.streamIcdHeaders(scl);
 
         //Then
         assertThat(tPrivateStream.toList())
@@ -445,9 +443,7 @@ class PrivateServiceTest {
         scl.getSubstation().add(tSubstation);
 
         //When
-        SclRootAdapter sclRootAdapter = SclService.initScl(Optional.empty(), "hv", "hr");
-        sclRootAdapter.setCurrentElem(scl);
-        Stream<IcdHeader> tPrivateStream = PrivateService.streamIcdHeaders(sclRootAdapter);
+        Stream<IcdHeader> tPrivateStream = PrivateService.streamIcdHeaders(scl);
 
         //Then
         assertThat(tPrivateStream.toList()).isEmpty();
