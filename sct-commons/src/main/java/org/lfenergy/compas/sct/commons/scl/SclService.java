@@ -92,14 +92,14 @@ public class SclService {
      * @param hId       optional SCL Header ID, if empty random UUID will be created
      * @param hVersion  SCL Header Version
      * @param hRevision SCL Header Revision
-     * @return <em>SclRootAdapter</em> object as SCD file
-     * @throws ScdException throws when inconsistenc in SCL file
+     * @return <em>SCL</em> SCD object
+     * @throws ScdException throws when inconsistance in SCL file
      */
-    public static SclRootAdapter initScl(Optional<UUID> hId, String hVersion, String hRevision) throws ScdException {
+    public static SCL initScl(final Optional<UUID> hId, final String hVersion, final String hRevision) throws ScdException {
         UUID headerId = hId.orElseGet(UUID::randomUUID);
         SclRootAdapter scdAdapter = new SclRootAdapter(headerId.toString(), hVersion, hRevision);
         scdAdapter.addPrivate(PrivateService.createPrivate(TCompasSclFileType.SCD));
-        return scdAdapter;
+        return scdAdapter.getCurrentElem();
     }
 
     /**
@@ -109,13 +109,13 @@ public class SclService {
      * @param who  Who realize the action
      * @param what What kind of action is realized
      * @param why  Why this action is done
-     * @return <em>SclRootAdapter</em> object as SCD file
+     * @return <em>SCL</em> SCD object
      */
-    public static SclRootAdapter addHistoryItem(SCL scd, String who, String what, String why) {
+    public static SCL addHistoryItem(SCL scd, String who, String what, String why) {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         HeaderAdapter headerAdapter = sclRootAdapter.getHeaderAdapter();
         headerAdapter.addHistoryItem(who, what, why);
-        return sclRootAdapter;
+        return sclRootAdapter.getCurrentElem();
     }
 
     /**
@@ -123,9 +123,9 @@ public class SclService {
      *
      * @param scd       SCL file in which Header should be updated
      * @param headerDTO Header new values
-     * @return <em>SclRootAdapter</em> object as SCD file
+     * @return <em>SCL</em> SCD object
      */
-    public static SclRootAdapter updateHeader(@NonNull SCL scd, @NonNull HeaderDTO headerDTO) {
+    public static SCL updateHeader(@NonNull SCL scd, @NonNull HeaderDTO headerDTO) {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         HeaderAdapter headerAdapter = sclRootAdapter.getHeaderAdapter();
 
@@ -150,7 +150,7 @@ public class SclService {
             );
         }
 
-        return sclRootAdapter;
+        return sclRootAdapter.getCurrentElem();
     }
 
     /**
@@ -159,12 +159,11 @@ public class SclService {
      * @param scd     SCL file in which IED should be added
      * @param iedName name of IED to add in SCL
      * @param icd     ICD containing IED to add and related DataTypeTemplate
-     * @return <em>IEDAdapter</em> as added IED
+     * @return <em>SCL</em> SCD object
      * @throws ScdException throws when inconsistency between IED to add and SCL file content
      */
-    public static IEDAdapter addIED(SCL scd, String iedName, SCL icd) throws ScdException {
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        return sclRootAdapter.addIED(icd, iedName);
+    public static SCL addIED(SCL scd, String iedName, SCL icd) throws ScdException {
+        return new SclRootAdapter(scd).addIED(icd, iedName).getParentAdapter().getCurrentElem();
     }
 
     /**
@@ -173,11 +172,10 @@ public class SclService {
      * @param scd         SCL file in which SubNetworks should be added
      * @param subNetworks list of SubNetworks DTO contenting SubNetwork and ConnectedAp parameter names
      * @param icd         ICD file from which SubNetworks functional data are copied from
-     * @return optional of <em>CommunicationAdapter</em> object as Communication node of SCL file.
-     * Calling getParentAdapter() will give SCL file
+     * @return optional of <em>TCommunication</em> Communication node of SCL file.
      * @throws ScdException throws when no Communication in SCL and <em>createIfNotExists == false</em>
      */
-    public static Optional<CommunicationAdapter> addSubnetworks(SCL scd, Set<SubNetworkDTO> subNetworks, Optional<SCL> icd) throws ScdException {
+    public static Optional<TCommunication> addSubnetworks(SCL scd, Set<SubNetworkDTO> subNetworks, Optional<SCL> icd) throws ScdException {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         CommunicationAdapter communicationAdapter;
         if (!subNetworks.isEmpty()) {
@@ -199,7 +197,7 @@ public class SclService {
 
                 }
             }
-            return Optional.of(communicationAdapter);
+            return Optional.of(communicationAdapter.getCurrentElem());
         }
         return Optional.empty();
     }
@@ -483,10 +481,10 @@ public class SclService {
      *     <li>import connectedAP and rename ConnectedAP/@iedName in Communication node in SCD file</li>
      * </ul>
      *
-     * @param scdRootAdapter adapter object related to SCL file in which content of STD files are imported
+     * @param scd            SCL object in which content of STD files are imported
      * @param stds           list of STD files contenting datas to import into SCD
      * @param comMap         couple of Subnetwork name and possible corresponding ConnectAP names
-     * @return updated SCD file as <em>SclRootAdapter</em>
+     * @return updated SCD object
      * @throws ScdException throws when inconsistency between Substation of SCL content and gien STD files as :
      *                      <ul>
      *                           <li>ICD_SYSTEM_VERSION_UUID in IED/Private of STD is not present in COMPAS-ICDHeader in Substation/../LNode of SCL</li>
@@ -496,7 +494,7 @@ public class SclService {
      *                           <li>COMPAS_ICDHEADER in Substation/../LNode of SCL not found in IED/Private of STD</li>
      *                      </ul>
      */
-    public static SclRootAdapter importSTDElementsInSCD(@NonNull SclRootAdapter scdRootAdapter, Set<SCL> stds, Map<Pair<String, String>, List<String>> comMap) throws ScdException {
+    public static SCL importSTDElementsInSCD(@NonNull SCL scd, List<SCL> stds, Map<Pair<String, String>, List<String>> comMap) throws ScdException {
 
         //Check SCD and STD compatibilities
         Map<String, PrivateService.PrivateLinkedToSTDs> mapICDSystemVersionUuidAndSTDFile = PrivateService.createMapICDSystemVersionUuidAndSTDFile(stds);
@@ -504,7 +502,8 @@ public class SclService {
         // List all Private and remove duplicated one with same iedName
         // For each Private.ICDSystemVersionUUID and Private.iedName find STD File
         List<String> iedNamesUsed = new ArrayList<>();
-        PrivateService.streamIcdHeaders(scdRootAdapter)
+        SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
+        PrivateService.streamIcdHeaders(scd)
                 .forEach(icdHeader -> {
                     if (!iedNamesUsed.contains(icdHeader.getIedName())) {
                         String iedName = icdHeader.getIedName();
@@ -528,7 +527,7 @@ public class SclService {
                         addSubnetworks(scdRootAdapter.getCurrentElem(), subNetworkDTOSet, Optional.of(std));
                     }
                 });
-        return scdRootAdapter;
+        return scdRootAdapter.getCurrentElem();
     }
 
 
@@ -560,73 +559,65 @@ public class SclService {
      * Activate used LDevice and Deactivate unused LDevice in {@link TLNode <em><b>TLNode </b></em>}
      *
      * @param scd SCL file for which LDevice should be activated or deactivated
-     * @return SclReport Object that contain SCL file and set of errors
+     * @return list of encountered errors
      */
-    public static SclReport updateLDeviceStatus(SCL scd) {
+    public static List<SclReportItem> updateLDeviceStatus(SCL scd) {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         SubstationAdapter substationAdapter = sclRootAdapter.getSubstationAdapter();
         final List<Pair<String, String>> iedNameLdInstList = substationAdapter.getIedAndLDeviceNamesForLN0FromLNode();
-        List<SclReportItem> errors = sclRootAdapter.streamIEDAdapters()
+        return sclRootAdapter.streamIEDAdapters()
                 .flatMap(IEDAdapter::streamLDeviceAdapters)
                 .map(LDeviceAdapter::getLN0Adapter)
                 .map(ln0Adapter -> ln0Adapter.updateLDeviceStatus(iedNameLdInstList))
                 .flatMap(Optional::stream)
-                .toList();
-        SclReport sclReport = new SclReport();
-        sclReport.getSclReportItems().addAll(errors);
-        sclReport.setSclRootAdapter(sclRootAdapter);
-        return sclReport;
+                .collect(Collectors.toList());
     }
 
     /**
      * Checks Control Blocks, DataSets and FCDA number limitation into Access Points
      *
      * @param scd SCL file for which LDevice should be activated or deactivated
-     * @return SclReport Object that contain SCL file and set of errors
+     * @return list of encountered errors
      */
-    public static SclReport analyzeDataGroups(SCL scd) {
+    public static List<SclReportItem> analyzeDataGroups(SCL scd) {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        List<SclReportItem> sclReportItems = sclRootAdapter.streamIEDAdapters()
+        return sclRootAdapter.streamIEDAdapters()
                 .map(iedAdapter -> {
                     List<SclReportItem> list = new ArrayList<>();
                     list.addAll(iedAdapter.checkDataGroupCoherence());
                     list.addAll(iedAdapter.checkBindingDataGroupCoherence());
                     return list;
-                }).flatMap(Collection::stream).toList();
-
-        return new SclReport(sclRootAdapter, sclReportItems);
+                }).flatMap(Collection::stream).collect(Collectors.toList());
     }
 
     /**
      * Update DAIs of DO InRef in all LN0 of the SCD using matching ExtRef information.
      *
      * @param scd SCL file for which DOs InRef should be updated with matching ExtRef information
-     * @return SclReport Object that contain SCL file and set of errors
+     * @return list of encountered errors
      */
-    public static SclReport updateDoInRef(SCL scd) {
+    public static List<SclReportItem> updateDoInRef(SCL scd) {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        List<SclReportItem> sclReportItems = sclRootAdapter.streamIEDAdapters()
+        return sclRootAdapter.streamIEDAdapters()
                 .flatMap(IEDAdapter::streamLDeviceAdapters)
                 .map(LDeviceAdapter::getLN0Adapter)
                 .map(LN0Adapter::updateDoInRef)
                 .flatMap(List::stream)
-                .toList();
-        return new SclReport(sclRootAdapter, sclReportItems);
+                .collect(Collectors.toList());
     }
 
     /**
      * Update and/or create Monitoring LNs (LSVS and LGOS) for bound GOOSE and SMV Control Blocks
      *
      * @param scd SCL file for which  LNs (LSVS and LGOS) should be updated and/or created in each LDevice LDSUIED with matching ExtRef information
-     * @return SclReport Object that contain SCL file and set of errors
+     * @return list of encountered errors
      */
-    public static SclReport manageMonitoringLns(SCL scd) {
+    public static List<SclReportItem> manageMonitoringLns(SCL scd) {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        List<SclReportItem> sclReportItems = sclRootAdapter.streamIEDAdapters()
+        return sclRootAdapter.streamIEDAdapters()
                 .filter(iedAdapter -> !iedAdapter.getName().contains(IED_TEST_NAME))
                 .map(IEDAdapter::manageMonitoringLns)
                 .flatMap(List::stream)
-                .toList();
-        return new SclReport(sclRootAdapter, sclReportItems);
+                .collect(Collectors.toList());
     }
 }

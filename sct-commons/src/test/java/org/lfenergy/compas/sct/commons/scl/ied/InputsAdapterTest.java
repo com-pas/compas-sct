@@ -57,7 +57,7 @@ class InputsAdapterTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_ied_errors.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        InputsAdapter inputsAdapter = findInputs(sclRootAdapter, "IED_NAME1", "LD_INST11");
+        InputsAdapter inputsAdapter = findInputs(sclRootAdapter.getCurrentElem(), "IED_NAME1", "LD_INST11");
         // When
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();
         // Then
@@ -72,7 +72,7 @@ class InputsAdapterTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_ied_errors.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        InputsAdapter inputsAdapter = findInputs(sclRootAdapter, "IED_NAME3", "LD_INST31");
+        InputsAdapter inputsAdapter = findInputs(sclRootAdapter.getCurrentElem(), "IED_NAME3", "LD_INST31");
         // When
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();
         // Then
@@ -88,7 +88,7 @@ class InputsAdapterTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_extref_errors.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        InputsAdapter inputsAdapter = findInputs(sclRootAdapter, "IED_NAME1", "LD_INST11");
+        InputsAdapter inputsAdapter = findInputs(sclRootAdapter.getCurrentElem(), "IED_NAME1", "LD_INST11");
         // When
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();
         // Then
@@ -110,7 +110,7 @@ class InputsAdapterTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        InputsAdapter inputsAdapter = findInputs(sclRootAdapter, "IED_NAME1", "LD_INST11");
+        InputsAdapter inputsAdapter = findInputs(sclRootAdapter.getCurrentElem(), "IED_NAME1", "LD_INST11");
         // When
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();
         // Then
@@ -137,7 +137,7 @@ class InputsAdapterTest {
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();
         // Then
         assertThat(sclReportItems).isEmpty();
-        DataSetAdapter dataSet = findDataSet(sclRootAdapter, expectedSourceIedName, expectedSourceLDeviceInst, expectedDataSetName);
+        DataSetAdapter dataSet = findDataSet(scd, expectedSourceIedName, expectedSourceLDeviceInst, expectedDataSetName);
         assertThat(dataSet.getCurrentElem().getFCDA())
             .extracting(TFCDA::getLdInst)
             .containsOnly(expectedSourceLDeviceInst);
@@ -234,7 +234,7 @@ class InputsAdapterTest {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         InputsAdapter inputsAdapter = keepOnlyThisExtRef(sclRootAdapter, "test bay internal");
         TExtRef extRef = inputsAdapter.getCurrentElem().getExtRef().get(0);
-        LDeviceAdapter sourceLDevice = findLDevice(sclRootAdapter, extRef.getIedName(), extRef.getLdInst());
+        LDeviceAdapter sourceLDevice = findLDevice(sclRootAdapter.getCurrentElem(), extRef.getIedName(), extRef.getLdInst());
         sourceLDevice.getAccessPoint().setServices(new TServices());
         // When
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();

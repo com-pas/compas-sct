@@ -117,8 +117,7 @@ class ControlBlockNetworkSettingsTest {
     void getNetworkSettings_should_return_settings_for_bay_internal_controlBlock() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        ControlBlockAdapter controlBlockAdapter = findControlBlock(sclRootAdapter, "IED_NAME2", "LD_INST21", "CB_LD_INST21_GSI", ControlBlockEnum.GSE);
+        ControlBlockAdapter controlBlockAdapter = findControlBlock(scd, "IED_NAME2", "LD_INST21", "CB_LD_INST21_GSI", ControlBlockEnum.GSE);
 
         //When
         SettingsOrError settingsOrError = controlBlockNetworkSettings.getNetworkSettings(controlBlockAdapter);
@@ -139,8 +138,7 @@ class ControlBlockNetworkSettingsTest {
     void getNetworkSettings_should_return_settings_for_bay_external_controlBlock() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        ControlBlockAdapter controlBlockAdapter = findControlBlock(sclRootAdapter, "IED_NAME3", "LD_INST31", "CB_LD_INST31_GSE", ControlBlockEnum.GSE);
+        ControlBlockAdapter controlBlockAdapter = findControlBlock(scd, "IED_NAME3", "LD_INST31", "CB_LD_INST31_GSE", ControlBlockEnum.GSE);
 
         //When
         SettingsOrError settingsOrError = controlBlockNetworkSettings.getNetworkSettings(controlBlockAdapter);
@@ -161,8 +159,7 @@ class ControlBlockNetworkSettingsTest {
     void getNetworkSettings_should_return_vlanId_null_when_column_contains_none() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        ControlBlockAdapter controlBlockAdapter = findControlBlock(sclRootAdapter, "IED_NAME2", "LD_INST21", "CB_LD_INST21_SVI", ControlBlockEnum.SAMPLED_VALUE);
+        ControlBlockAdapter controlBlockAdapter = findControlBlock(scd, "IED_NAME2", "LD_INST21", "CB_LD_INST21_SVI", ControlBlockEnum.SAMPLED_VALUE);
 
         //When
         SettingsOrError settingsOrError = controlBlockNetworkSettings.getNetworkSettings(controlBlockAdapter);
@@ -179,8 +176,8 @@ class ControlBlockNetworkSettingsTest {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        findIed(sclRootAdapter, "IED_NAME2").getCompasSystemVersion().get().setMainSystemVersion("99.99");
-        ControlBlockAdapter controlBlockAdapter = findControlBlock(sclRootAdapter, "IED_NAME2", "LD_INST21", "CB_LD_INST21_GSI", ControlBlockEnum.GSE);
+        findIed(sclRootAdapter.getCurrentElem(), "IED_NAME2").getCompasSystemVersion().get().setMainSystemVersion("99.99");
+        ControlBlockAdapter controlBlockAdapter = findControlBlock(sclRootAdapter.getCurrentElem(), "IED_NAME2", "LD_INST21", "CB_LD_INST21_GSI", ControlBlockEnum.GSE);
 
         //When
         SettingsOrError settingsOrError = controlBlockNetworkSettings.getNetworkSettings(controlBlockAdapter);
@@ -196,8 +193,8 @@ class ControlBlockNetworkSettingsTest {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        PrivateService.removePrivates(findIed(sclRootAdapter, "IED_NAME2").getCurrentElem(), missingPrivate);
-        ControlBlockAdapter controlBlockAdapter = findControlBlock(sclRootAdapter, "IED_NAME2", "LD_INST21", "CB_LD_INST21_GSI", ControlBlockEnum.GSE);
+        PrivateService.removePrivates(findIed(sclRootAdapter.getCurrentElem(), "IED_NAME2").getCurrentElem(), missingPrivate);
+        ControlBlockAdapter controlBlockAdapter = findControlBlock(sclRootAdapter.getCurrentElem(), "IED_NAME2", "LD_INST21", "CB_LD_INST21_GSI", ControlBlockEnum.GSE);
 
         //When
         SettingsOrError settingsOrError = controlBlockNetworkSettings.getNetworkSettings(controlBlockAdapter);
@@ -212,9 +209,8 @@ class ControlBlockNetworkSettingsTest {
     void getNetworkSettings_should_return_null_when_missing_ied_private_attributes(Consumer<IEDAdapter> transformIedPrivate) {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        ControlBlockAdapter controlBlockAdapter = findControlBlock(sclRootAdapter, "IED_NAME2", "LD_INST21", "CB_LD_INST21_GSI", ControlBlockEnum.GSE);
-        IEDAdapter iedAdapter = findIed(sclRootAdapter, "IED_NAME2");
+        ControlBlockAdapter controlBlockAdapter = findControlBlock(scd, "IED_NAME2", "LD_INST21", "CB_LD_INST21_GSI", ControlBlockEnum.GSE);
+        IEDAdapter iedAdapter = findIed(scd, "IED_NAME2");
         transformIedPrivate.accept(iedAdapter);
 
         //When

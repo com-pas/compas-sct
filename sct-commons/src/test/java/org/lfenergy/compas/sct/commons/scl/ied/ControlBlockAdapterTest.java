@@ -40,11 +40,10 @@ class ControlBlockAdapterTest {
     void addTargetIfNotExists_should_add_target(){
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        LN0Adapter ln0 = findLn0(sclRootAdapter, "IED_NAME1", "LD_INST11");
+        LN0Adapter ln0 = findLn0(scd, "IED_NAME1", "LD_INST11");
         ln0.createDataSetIfNotExists("datSet", ControlBlockEnum.GSE);
         ControlBlockAdapter controlBlockAdapter = ln0.createControlBlockIfNotExists("cbName", "cbId", "datSet", ControlBlockEnum.GSE);
-        LNAdapter targetLn = findLn(sclRootAdapter, "IED_NAME2", "LD_INST21", "ANCR", "1", "prefix");
+        LNAdapter targetLn = findLn(scd, "IED_NAME2", "LD_INST21", "ANCR", "1", "prefix");
         // When
         controlBlockAdapter.addTargetIfNotExists(targetLn);
 
@@ -65,8 +64,7 @@ class ControlBlockAdapterTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
         TConnectedAP connectedAP = SclHelper.addConnectedAp(scd, "SUB_NETWORK_NAME", "AP_NAME", "IED_NAME1");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        LN0Adapter ln0 = findLn0(sclRootAdapter, "IED_NAME1", "LD_INST11");
+        LN0Adapter ln0 = findLn0(scd, "IED_NAME1", "LD_INST11");
         ln0.createDataSetIfNotExists("datSet", ControlBlockEnum.GSE);
         ControlBlockAdapter controlBlockAdapter = ln0.createControlBlockIfNotExists("cbName", "cbId", "datSet", ControlBlockEnum.GSE);
         // When
@@ -95,8 +93,7 @@ class ControlBlockAdapterTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
         TConnectedAP connectedAP = SclHelper.addConnectedAp(scd, "SUB_NETWORK_NAME", "AP_NAME", "IED_NAME1");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        LN0Adapter ln0 = findLn0(sclRootAdapter, "IED_NAME1", "LD_INST11");
+        LN0Adapter ln0 = findLn0(scd, "IED_NAME1", "LD_INST11");
         ln0.createDataSetIfNotExists("datSet", ControlBlockEnum.SAMPLED_VALUE);
         ControlBlockAdapter controlBlockAdapter = ln0.createControlBlockIfNotExists("cbName", "cbId", "datSet", ControlBlockEnum.SAMPLED_VALUE);
         // When
@@ -120,8 +117,7 @@ class ControlBlockAdapterTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
         SclHelper.addConnectedAp(scd, "SUB_NETWORK_NAME", "AP_NAME", "IED_NAME2"); // ConnectedAp for IED_NAME2 instead of IED_NAME1
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        LN0Adapter ln0 = findLn0(sclRootAdapter, "IED_NAME1", "LD_INST11");
+        LN0Adapter ln0 = findLn0(scd, "IED_NAME1", "LD_INST11");
         ln0.createDataSetIfNotExists("datSet", ControlBlockEnum.SAMPLED_VALUE);
         ControlBlockAdapter controlBlockAdapter = ln0.createControlBlockIfNotExists("cbName", "cbId", "datSet", ControlBlockEnum.SAMPLED_VALUE);
         // When
