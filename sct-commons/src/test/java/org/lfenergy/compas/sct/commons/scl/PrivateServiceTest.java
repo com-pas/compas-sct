@@ -239,6 +239,7 @@ class PrivateServiceTest {
         TBaseElement baseElement = new SCL();
         baseElement.getPrivate().add(privateSCD);
         TCompasICDHeader tCompasICDHeader = objectFactory.createTCompasICDHeader();
+        //TODO not should appear in given section, only one When step - PrivateService.createPrivate
         baseElement.getPrivate().add(PrivateService.createPrivate(tCompasICDHeader));
         // When
         PrivateService.removePrivates(baseElement, PrivateEnum.COMPAS_ICDHEADER);
@@ -269,6 +270,7 @@ class PrivateServiceTest {
         SCL scl1 = new SCL();
         TIED tied1 = new TIED();
         TCompasICDHeader compasICDHeader1 = new TCompasICDHeader();
+        //TODO not should appear in given section, only one When step
         TPrivate tPrivate1 =  PrivateService.createPrivate(compasICDHeader1);
         tied1.getPrivate().add(tPrivate1);
         scl1.getIED().add(tied1);
@@ -296,8 +298,11 @@ class PrivateServiceTest {
         compasICDHeader2.setICDSystemVersionUUID("UUID-2");
         TCompasICDHeader compasICDHeader3 = new TCompasICDHeader();
         compasICDHeader3.setICDSystemVersionUUID("UUID-2");
+        //TODO not should appear in given section, only one When step
         TPrivate tPrivate1 =  PrivateService.createPrivate(compasICDHeader1);
+        //TODO not should appear in given section, only one When step
         TPrivate tPrivate2 =  PrivateService.createPrivate(compasICDHeader2);
+        //TODO not should appear in given section, only one When step
         TPrivate tPrivate3 =  PrivateService.createPrivate(compasICDHeader3);
         tied1.getPrivate().add(tPrivate1);
         tied2.getPrivate().add(tPrivate2);
@@ -324,13 +329,13 @@ class PrivateServiceTest {
         compasICDHeader2.setHeaderId("ID-2");
         compasICDHeader2.setHeaderVersion("VER-2");
         compasICDHeader2.setHeaderRevision("REV-2");
+        //TODO not should appear in given section, only one When step
         TPrivate tPrivate1 =  PrivateService.createPrivate(compasICDHeader1);
+        //TODO not should appear in given section, only one When step
         TPrivate tPrivate2 =  PrivateService.createPrivate(compasICDHeader2);
-
 
         PrivateService.PrivateLinkedToSTDs privateLinkedToSTDs1 = new PrivateService.PrivateLinkedToSTDs(tPrivate1,Collections.singletonList(new SCL()));
         PrivateService.PrivateLinkedToSTDs privateLinkedToSTDs2 = new PrivateService.PrivateLinkedToSTDs(tPrivate2, Arrays.asList(new SCL(), new SCL()));
-
 
         Map<String, PrivateService.PrivateLinkedToSTDs> stringSCLMap = new HashMap<>();
         stringSCLMap.put("UUID-1", privateLinkedToSTDs1);
@@ -350,13 +355,13 @@ class PrivateServiceTest {
         compasICDHeader1.setICDSystemVersionUUID("UUID-1");
         TCompasICDHeader compasICDHeader2 = new TCompasICDHeader();
         compasICDHeader2.setICDSystemVersionUUID("UUID-2");
+        //TODO not should appear in given section, only one When step
         TPrivate tPrivate1 =  PrivateService.createPrivate(compasICDHeader1);
+        //TODO not should appear in given section, only one When step
         TPrivate tPrivate2 =  PrivateService.createPrivate(compasICDHeader2);
-
 
         PrivateService.PrivateLinkedToSTDs privateLinkedToSTDs1 = new PrivateService.PrivateLinkedToSTDs(tPrivate1,Collections.singletonList(new SCL()));
         PrivateService.PrivateLinkedToSTDs privateLinkedToSTDs2 = new PrivateService.PrivateLinkedToSTDs(tPrivate2, Collections.singletonList(new SCL()));
-
 
         Map<String, PrivateService.PrivateLinkedToSTDs> stringSCLMap = new HashMap<>();
         stringSCLMap.put("UUID-1", privateLinkedToSTDs1);
@@ -374,6 +379,7 @@ class PrivateServiceTest {
         compasICDHeader.setHeaderId("ID-1");
         compasICDHeader.setHeaderVersion("VER-1");
         compasICDHeader.setICDSystemVersionUUID("UUID-1");
+        //TODO not should appear in given section, only one When step
         TPrivate tPrivate =  PrivateService.createPrivate(compasICDHeader);
 
         //When
@@ -397,8 +403,11 @@ class PrivateServiceTest {
         compasICDHeader2.setIEDName("IED-2");
         TCompasICDHeader compasICDHeader3 = new TCompasICDHeader();
         compasICDHeader3.setIEDName("IED-3");
+        //TODO not should appear in given section, only one When step
         TPrivate tPrivate1 =  PrivateService.createPrivate(compasICDHeader1);
+        //TODO not should appear in given section, only one When step
         TPrivate tPrivate2 =  PrivateService.createPrivate(compasICDHeader2);
+        //TODO not should appear in given section, only one When step
         TPrivate tPrivate3 =  PrivateService.createPrivate(compasICDHeader3);
         tlNode1.getPrivate().add(tPrivate1);
         tlNode2.getPrivate().add(tPrivate2);
@@ -430,6 +439,7 @@ class PrivateServiceTest {
         TLNode tlNode1 = new TLNode();
         TCompasBay compasBay = new TCompasBay();
         compasBay.setUUID("UUID");
+        //TODO not should appear in given section, only one When step
         TPrivate tPrivate1 =  PrivateService.createPrivate(compasBay);
         tlNode1.getPrivate().add(tPrivate1);
         TFunction tFunction = new TFunction();
@@ -457,7 +467,9 @@ class PrivateServiceTest {
         compasICDHeader1.setBayLabel("BAY-1");
         compasICDHeader1.setIEDSubstationinstance(BigInteger.ONE);
         TCompasICDHeader compasICDHeader2 = new TCompasICDHeader();
+        //TODO not should appear in given section, only one When step
         TPrivate tPrivate1 =  PrivateService.createPrivate(compasICDHeader1);
+        //TODO not should appear in given section, only one When step
         TPrivate tPrivate2 =  PrivateService.createPrivate(compasICDHeader2);
 
         // When
@@ -476,7 +488,9 @@ class PrivateServiceTest {
         compasICDHeader1.setICDSystemVersionUUID("UUID-1");
         TCompasICDHeader compasICDHeader2 = new TCompasICDHeader();
         compasICDHeader2.setICDSystemVersionUUID("UUID-2");
+        //TODO not should appear in given section, only one When step
         TPrivate tPrivate1 =  PrivateService.createPrivate(compasICDHeader1);
+        //TODO not should appear in given section, only one When step
         TPrivate tPrivate2 =  PrivateService.createPrivate(compasICDHeader2);
 
         // When
@@ -495,7 +509,9 @@ class PrivateServiceTest {
         compasICDHeader1.setICDSystemVersionUUID("UUID-1");
         TCompasICDHeader compasICDHeader2 = new TCompasICDHeader();
         compasICDHeader2.setICDSystemVersionUUID("UUID-1");
+        //TODO not should appear in given section, only one When step
         TPrivate tPrivate1 =  PrivateService.createPrivate(compasICDHeader1);
+        //TODO not should appear in given section, only one When step
         TPrivate tPrivate2 =  PrivateService.createPrivate(compasICDHeader2);
 
         // When
@@ -514,6 +530,7 @@ class PrivateServiceTest {
         lNodeCompasICDHeader.setIEDName("IED-1");
         lNodeCompasICDHeader.setBayLabel("BAY-1");
         lNodeCompasICDHeader.setIEDSubstationinstance(BigInteger.ONE);
+        //TODO not should appear in given section, only one When step
         TPrivate stdTPrivate = PrivateService.createPrivate(stdCompasICDHeader);
 
         // When
@@ -521,13 +538,14 @@ class PrivateServiceTest {
 
         // Then
         TCompasICDHeader result = PrivateService.extractCompasICDHeader(stdTPrivate).get();
+        //FIXME is this the 'When' extractCompasICDHeader ??? so why test named copyCompasICDHeaderFromLNodePrivateIntoSTDPrivate
         assertThat(result).extracting(TCompasICDHeader::getICDSystemVersionUUID, TCompasICDHeader::getIEDName,
                         TCompasICDHeader::getIEDSubstationinstance, TCompasICDHeader::getBayLabel)
                 .containsExactlyInAnyOrder("UUID-2", "IED-1", BigInteger.ONE, "BAY-1");
     }
 
     @Test
-    void gettCompasICDHeaders_should_return_ICDHeaders() {
+    void getCompasICDHeaders_should_return_ICDHeaders() {
         //Given
         TIED tied = createTIED();
 

@@ -56,7 +56,7 @@ class ExtRefServiceTest {
         // Given : An ExtRef with a matching compas:Flow
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_success.xml");
         // When
-        List<SclReportItem> sclReportItems = ExtRefService.updateAllExtRefIedNames(scd);
+        ExtRefService.updateAllExtRefIedNames(scd);
         // Then
         TExtRef extRef = findExtRef(scd, "IED_NAME1", "LD_INST11", "STAT_LDSUIED_LPDO 1 Sortie_13_BOOLEAN_18_stVal_1");
         assertThat(extRef.getIedName()).isEqualTo("IED_NAME2");
@@ -65,6 +65,7 @@ class ExtRefServiceTest {
                 .getLN0Adapter()
                 .getCurrentElem()
                 .getInputs();
+        //TODO PrivateService methods should not appear in then section
         assertThat(PrivateService.extractCompasPrivate(inputs, TCompasFlow.class))
                 .map(TCompasFlow::getExtRefiedName)
                 .hasValue("IED_NAME2");
@@ -393,7 +394,6 @@ class ExtRefServiceTest {
     void updateAllSourceDataSetsAndControlBlocks_should_sort_FCDA_inside_DataSet_and_avoid_duplicates() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success_test_fcda_sort.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         // When
         List<SclReportItem> sclReportItems = ExtRefService.createDataSetAndControlBlocks(scd);
         // Then
@@ -522,7 +522,7 @@ class ExtRefServiceTest {
         List<TExtRef> tExtRefList = List.of(tExtRef, tExtRefLnClass, createExtRefExample("CB", TServiceType.GOOSE),
                 createExtRefExample("CB", TServiceType.GOOSE));
         // When
-        List<TExtRef> result = filterDuplicatedExtRefs(tExtRefList);
+        List<TExtRef> result = ExtRefService.filterDuplicatedExtRefs(tExtRefList);
         // Then
         assertThat(result).hasSizeLessThan(tExtRefList.size())
                 .hasSize(2);
