@@ -20,14 +20,14 @@ class ConnectedApDTOTest {
         Mockito.when(connectedAPAdapter.getApName()).thenReturn(DTO.AP_NAME);
         Mockito.when(connectedAPAdapter.getIedName()).thenReturn(DTO.HOLDER_IED_NAME);
 
-        ConnectedApDTO connectedApDTO = new ConnectedApDTO(connectedAPAdapter);
+        ConnectedApDTO connectedApDTO = ConnectedApDTO.from(connectedAPAdapter);
 
-        assertEquals(DTO.HOLDER_IED_NAME, connectedApDTO.getIedName());
-        assertEquals(DTO.AP_NAME, connectedApDTO.getApName());
+        assertEquals(DTO.HOLDER_IED_NAME, connectedApDTO.iedName());
+        assertEquals(DTO.AP_NAME, connectedApDTO.apName());
 
         connectedApDTO = ConnectedApDTO.from(connectedAPAdapter);
 
-        assertEquals(DTO.HOLDER_IED_NAME, connectedApDTO.getIedName());
-        assertEquals(DTO.AP_NAME, connectedApDTO.getApName());
+        assertEquals(DTO.HOLDER_IED_NAME, connectedApDTO.iedName());
+        assertEquals(DTO.AP_NAME, connectedApDTO.apName());
     }
 }

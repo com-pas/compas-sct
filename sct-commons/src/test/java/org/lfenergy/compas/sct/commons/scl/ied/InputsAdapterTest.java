@@ -56,8 +56,7 @@ class InputsAdapterTest {
     void updateAllSourceDataSetsAndControlBlocks_should_report_Target_Ied_missing_Private_compasBay_errors() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_ied_errors.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        InputsAdapter inputsAdapter = findInputs(sclRootAdapter.getCurrentElem(), "IED_NAME1", "LD_INST11");
+        InputsAdapter inputsAdapter = findInputs(scd, "IED_NAME1", "LD_INST11");
         // When
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();
         // Then
@@ -71,8 +70,7 @@ class InputsAdapterTest {
     void updateAllSourceDataSetsAndControlBlocks_should_report_Source_Ied_missing_Private_compasBay_errors() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_ied_errors.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        InputsAdapter inputsAdapter = findInputs(sclRootAdapter.getCurrentElem(), "IED_NAME3", "LD_INST31");
+        InputsAdapter inputsAdapter = findInputs(scd, "IED_NAME3", "LD_INST31");
         // When
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();
         // Then
@@ -87,8 +85,7 @@ class InputsAdapterTest {
     void updateAllSourceDataSetsAndControlBlocks_should_report_ExtRef_attribute_missing() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_extref_errors.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        InputsAdapter inputsAdapter = findInputs(sclRootAdapter.getCurrentElem(), "IED_NAME1", "LD_INST11");
+        InputsAdapter inputsAdapter = findInputs(scd, "IED_NAME1", "LD_INST11");
         // When
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();
         // Then
@@ -109,8 +106,7 @@ class InputsAdapterTest {
     void updateAllSourceDataSetsAndControlBlocks_should_succeed() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        InputsAdapter inputsAdapter = findInputs(sclRootAdapter.getCurrentElem(), "IED_NAME1", "LD_INST11");
+        InputsAdapter inputsAdapter = findInputs(scd, "IED_NAME1", "LD_INST11");
         // When
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();
         // Then

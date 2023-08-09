@@ -43,11 +43,10 @@ public final class SubstationService {
      * Adds or Updates Substation section in SCL
      * @param scd SCL file in which Substation should be added/updated
      * @param ssd SCL file from which Substation should be copied
-     * @return <em>SCL</em> SCD object
      * @throws ScdException throws when SCD contents already another Substation, or with different name, or contents
      * more than one Substation
      */
-    public static SCL addSubstation(@NonNull SCL scd, @NonNull SCL ssd) throws ScdException {
+    public static void addSubstation(@NonNull SCL scd, @NonNull SCL ssd) throws ScdException {
         if (scd.getSubstation().size() > 1) {
             throw new ScdException(String.format("SCD file must have 0 or 1 Substation, but got %d", scd.getSubstation().size()));
         }
@@ -57,7 +56,6 @@ public final class SubstationService {
         TSubstation ssdTSubstation = ssd.getSubstation().get(0);
         if (scd.getSubstation().isEmpty()) {
             scd.getSubstation().add(ssdTSubstation);
-            return scd;
         } else {
             TSubstation scdTSubstation = scd.getSubstation().get(0);
             if (scdTSubstation.getName().equalsIgnoreCase(ssdTSubstation.getName())) {
@@ -65,7 +63,6 @@ public final class SubstationService {
                 for (TVoltageLevel tvl : ssdTSubstation.getVoltageLevel()) {
                     updateVoltageLevel(scdSubstationAdapter, tvl);
                 }
-                return scdSubstationAdapter.getParentAdapter().getCurrentElem();
             } else
                 throw new ScdException("SCD file must have only one Substation and the Substation name from SSD file is" +
                     " different from the one in SCD file. The files are rejected.");

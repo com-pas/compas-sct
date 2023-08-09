@@ -8,16 +8,12 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.tuple.Pair;
-import org.lfenergy.compas.sct.commons.scl.com.CommunicationAdapter;
-import org.lfenergy.compas.sct.commons.scl.com.ConnectedAPAdapter;
+import org.lfenergy.compas.scl2007b4.model.TCommunication;
+import org.lfenergy.compas.scl2007b4.model.TConnectedAP;
+import org.lfenergy.compas.scl2007b4.model.TSubNetwork;
 import org.lfenergy.compas.sct.commons.scl.com.SubNetworkAdapter;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 /**
  * A representation of the model object <em><b>Sub Network</b></em>.
@@ -39,7 +35,7 @@ public class SubNetworkDTO {
 
     private String name;
     private SubnetworkType type;
-    private Set<ConnectedApDTO> connectedAPs = new HashSet<>();
+    private final Set<ConnectedApDTO> connectedAPs = new HashSet<>();
 
     /**
      * Constructor
@@ -145,20 +141,21 @@ public class SubNetworkDTO {
     }
 
     /**
-     * Create default SubnetworkType in Communication node of SCL file
-     * @param iedName name of existing IED in SCL
-     * @param comAdapter Communication node Adapter object value
-     * @param comMap possible name of SubnetworkTypes and corresponding ConnectedAPs
-     * @return
+     * Create default Subnetwork in Communication node of SCL file
+     * @param iedName           Name of existing IED in SCL
+     * @param communication     Communication node in SCL
+     * @param subNetworkTypes   Possible name of Subnetwork and corresponding ConnectedAPs
+     * @return List of Subnetwork
      */
-    public static Set<SubNetworkDTO> createDefaultSubnetwork(String iedName, CommunicationAdapter comAdapter, Map<Pair<String, String>, List<String>> comMap){
-        Set<SubNetworkDTO> subNetworkDTOS = new HashSet<>();
-        comMap.forEach((subnetworkNameType, apNames) -> {
-            SubNetworkDTO subNetworkDTO = new SubNetworkDTO(subnetworkNameType.getLeft(), subnetworkNameType.getRight());
-            apNames.forEach(s -> {
-                if(getStdConnectedApNames(comAdapter).contains(s)){
-                    ConnectedApDTO connectedApDTO = new ConnectedApDTO(iedName, s);
-                    subNetworkDTO.addConnectedAP(connectedApDTO);}
+    public static List<SubNetworkDTO> createDefaultSubnetwork(String iedName, TCommunication communication, List<SubNetworkTypeDTO> subNetworkTypes){
+        List<SubNetworkDTO> subNetworkDTOS = new ArrayList<>();
+        subNetworkTypes.forEach(subnetwork -> {
+            SubNetworkDTO subNetworkDTO = new SubNetworkDTO(subnetwork.subnetworkName(), subnetwork.subnetworkType());
+            subnetwork.accessPointNames().forEach(accessPointName -> {
+                if(getStdConnectedApNames(communication).contains(accessPointName)){
+                    ConnectedApDTO connectedApDTO = new ConnectedApDTO(iedName, accessPointName);
+                    subNetworkDTO.addConnectedAP(connectedApDTO);
+                }
             });
             subNetworkDTOS.add(subNetworkDTO);
         });
@@ -167,13 +164,15 @@ public class SubNetworkDTO {
 
     /**
      * Gets ConnectedAP name's from Communication node
-     * @param comAdapter Communication node object value
-     * @return
+     * @param communication Communication node object value
+     * @return List of ConnectedAP names
      */
-    private static List<String> getStdConnectedApNames(CommunicationAdapter comAdapter){
-        return comAdapter.getSubNetworkAdapters().stream()
-                .map(SubNetworkAdapter::getConnectedAPAdapters)
-                .flatMap(connectedAPAdapters -> connectedAPAdapters.stream().map(ConnectedAPAdapter::getApName))
-                .collect(Collectors.toList());
+    private static List<String> getStdConnectedApNames(TCommunication communication){
+        return communication.getSubNetwork().stream()
+                .map(TSubNetwork::getConnectedAP)
+                .flatMap(List::stream)
+                .map(TConnectedAP::getApName)
+                .toList();
     }
+
 }

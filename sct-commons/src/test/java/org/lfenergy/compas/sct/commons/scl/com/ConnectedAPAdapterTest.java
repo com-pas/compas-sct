@@ -64,10 +64,9 @@ class ConnectedAPAdapterTest {
 
         SCL icd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_with_filled_communication.xml");
         SclRootAdapter icdRootAdapter = new SclRootAdapter(icd);
-        Optional<SCL> opIcd = Optional.of(icdRootAdapter.getCurrentElem());
 
         // WHEN
-        connectedAPAdapter.copyAddressAndPhysConnFromIcd(opIcd);
+        connectedAPAdapter.copyAddressAndPhysConnFromIcd(icdRootAdapter.getCurrentElem());
 
         // THEN
         assertThat(connectedAPAdapter.getCurrentElem().getAddress()).isNotNull();
@@ -81,10 +80,9 @@ class ConnectedAPAdapterTest {
         ConnectedAPAdapter connectedAPAdapter = assertDoesNotThrow(
                 () -> subNetworkAdapter.getConnectedAPAdapter(DTO.HOLDER_IED_NAME, DTO.AP_NAME)
         );
-        Optional<SCL> opIcd = Optional.empty();
 
         // WHEN
-        connectedAPAdapter.copyAddressAndPhysConnFromIcd(opIcd);
+        connectedAPAdapter.copyAddressAndPhysConnFromIcd(null);
 
         // THEN
         assertThat(connectedAPAdapter.getCurrentElem().getAddress()).isNull();

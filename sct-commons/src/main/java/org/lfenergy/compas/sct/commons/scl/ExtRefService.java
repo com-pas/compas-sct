@@ -59,7 +59,7 @@ public final class ExtRefService {
                 .filter(LN0Adapter::hasInputs)
                 .map(LN0Adapter::getInputsAdapter)
                 .map(inputsAdapter -> inputsAdapter.updateAllExtRefIedNames(icdSystemVersionToIed))
-                .flatMap(List::stream).collect(Collectors.toList());
+                .flatMap(List::stream).toList();
     }
 
     private static List<SclReportItem> validateIed(SclRootAdapter sclRootAdapter) {
@@ -152,7 +152,7 @@ public final class ExtRefService {
         return lDeviceAdapters
                 .map(LDeviceAdapter::createDataSetAndControlBlocks)
                 .flatMap(List::stream)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**

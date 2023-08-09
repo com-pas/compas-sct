@@ -65,7 +65,6 @@ class ExtRefServiceTest {
                 .getLN0Adapter()
                 .getCurrentElem()
                 .getInputs();
-        //TODO PrivateService methods should not appear in then section
         assertThat(PrivateService.extractCompasPrivate(inputs, TCompasFlow.class))
                 .map(TCompasFlow::getExtRefiedName)
                 .hasValue("IED_NAME2");

@@ -19,6 +19,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -32,12 +33,13 @@ class SclAutomationServiceTest {
     @BeforeEach
     void init() {
         headerDTO = new HeaderDTO();
+        headerDTO.setId(UUID.randomUUID());
         headerDTO.setRevision("hRevision");
         headerDTO.setVersion("hVersion");
     }
 
     @Test
-    void createSCD_should_return_generatedSCD() throws Exception {
+    void createSCD_should_return_generatedSCD() {
         // Given
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd.xml");
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
@@ -54,7 +56,7 @@ class SclAutomationServiceTest {
     }
 
     @Test
-    void createSCD_With_HItem() throws Exception {
+    void createSCD_With_HItem() {
         // Given
         HeaderDTO.HistoryItem historyItem = new HeaderDTO.HistoryItem();
         historyItem.setWhat("what");
@@ -100,7 +102,7 @@ class SclAutomationServiceTest {
     }
 
     @Test
-    void createSCD_SSD_Without_Substation() throws Exception {
+    void createSCD_SSD_Without_Substation() {
         // Given
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd_without_substations.xml");
         // When & Then
@@ -110,7 +112,7 @@ class SclAutomationServiceTest {
     }
 
     @Test
-    void createSCD_should_throw_exception_when_null_ssd() throws Exception {
+    void createSCD_should_throw_exception_when_null_ssd() {
         // Given
         HeaderDTO.HistoryItem historyItem = new HeaderDTO.HistoryItem();
         historyItem.setWhat("what");
@@ -125,7 +127,7 @@ class SclAutomationServiceTest {
     }
 
     @Test
-    void createSCD_should_throw_exception_when_null_headerDTO() throws Exception {
+    void createSCD_should_throw_exception_when_null_headerDTO() {
         // Given
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
         SCL std1 = SclTestMarshaller.getSCLFromFile("/std_1.xml");
@@ -136,7 +138,7 @@ class SclAutomationServiceTest {
     }
 
     @Test
-    void createSCD_should_delete_ControlBlocks_DataSet_and_ExtRef_src_attributes() throws Exception {
+    void createSCD_should_delete_ControlBlocks_DataSet_and_ExtRef_src_attributes() {
         // Given
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/ssd.xml");
         SCL std = SclTestMarshaller.getSCLFromFile("/scl-remove-controlBlocks-dataSet-extRefSrc/scl-with-control-blocks.xml");
