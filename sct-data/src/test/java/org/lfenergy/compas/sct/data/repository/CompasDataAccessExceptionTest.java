@@ -6,17 +6,18 @@ package org.lfenergy.compas.sct.data.repository;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class CompasDataAccessExceptionTest {
 
     @Test
-    void testConstructor(){
-        CompasDataAccessException ex = new CompasDataAccessException("msg",new RuntimeException());
-        assertEquals("msg",ex.getLocalizedMessage());
-        assertNotNull(ex.getCause());
-        assertEquals(RuntimeException.class,ex.getCause().getClass());
-
+    void constructor_whenCalled_shouldFillValues(){
+        // When
+        CompasDataAccessException compasDataAccessException = new CompasDataAccessException("msg",new RuntimeException());
+        // Then
+        assertThat(compasDataAccessException.getLocalizedMessage()).isEqualTo("msg");
+        assertThat(compasDataAccessException.getCause()).isNotNull();
+        assertThat(compasDataAccessException.getCause().getClass()).isEqualTo(RuntimeException.class);
     }
 
 }

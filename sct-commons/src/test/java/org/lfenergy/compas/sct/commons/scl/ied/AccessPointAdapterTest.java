@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.dto.DTO;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
@@ -20,32 +19,30 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class AccessPointAdapterTest {
 
     @Test
-    void amChildElementRef() {
+    void amChildElementRef_whenCalledWithExistingRelationBetweenIEDAndAccessPoint_shouldReturnTrue() {
         //Given
-        SclRootAdapter sclRootAdapter = new SclRootAdapter("hID","hVersion","hRevision");
+        IEDAdapter iedAdapter = mock(IEDAdapter.class);
         TIED tied = new TIED();
-        tied.setName(DTO.HOLDER_IED_NAME);
         TAccessPoint tAccessPoint = new TAccessPoint();
         tAccessPoint.setName("AP_NAME");
-        tAccessPoint.setServices(new TServices());
         tied.getAccessPoint().add(tAccessPoint);
-        sclRootAdapter.getCurrentElem().getIED().add(tied);
-        IEDAdapter iAdapter = sclRootAdapter.getIEDAdapterByName(DTO.HOLDER_IED_NAME);
-        //When
-        AccessPointAdapter accessPointAdapter = new AccessPointAdapter(iAdapter, iAdapter.getCurrentElem().getAccessPoint().get(0));
-        //Then
+        when(iedAdapter.getCurrentElem()).thenReturn(tied);
+
+        AccessPointAdapter accessPointAdapter = new AccessPointAdapter(iedAdapter, tAccessPoint);
+        // When Then
         assertThat(accessPointAdapter.amChildElementRef()).isTrue();
-        assertThat(accessPointAdapter.getCurrentElem().getServices()).isNotNull();
     }
 
     @ParameterizedTest
     @CsvSource(value = {"AP_NAME;AccessPoint[@name=\"AP_NAME\"]", ";AccessPoint[not(@name)]"}
             , delimiter = ';')
-    void elementXPath(String apName, String message) {
+    void elementXPath_should_return_expected_xpath_value(String apName, String message) {
         // Given
         TAccessPoint tAccessPoint = new TAccessPoint();
         tAccessPoint.setName(apName);
@@ -57,7 +54,7 @@ class AccessPointAdapterTest {
     }
 
     @Test
-    void getXPath() {
+    void getXPath_should_return_expected_xpath_value() {
         // Given
         TIED tied = new TIED();
         tied.setName("IED_NAME");
@@ -167,7 +164,7 @@ class AccessPointAdapterTest {
     }
 
     @Test
-    void checkControlsLimitation_should_succeed_when_ConfReportControl_is_missing() {
+    void checkControlsLimitation_when_ConfReportControl_is_missing_should_succeed() {
         //Given
         AccessPointAdapter accessPointAdapter = provideAPForCheckLimitationForIED();
         accessPointAdapter.getCurrentElem().getServices().setConfReportControl(null);
@@ -178,7 +175,7 @@ class AccessPointAdapterTest {
     }
 
     @Test
-    void checkControlsLimitation_should_succeed_when_GOOSE_is_missing() {
+    void checkControlsLimitation_when_GOOSE_is_missing_should_succeed() {
         //Given
         AccessPointAdapter accessPointAdapter = provideAPForCheckLimitationForIED();
         accessPointAdapter.getCurrentElem().getServices().setGOOSE(null);
@@ -189,7 +186,7 @@ class AccessPointAdapterTest {
     }
 
     @Test
-    void checkControlsLimitation_should_succeed_when_ConfDataSet_is_missing() {
+    void checkControlsLimitation_when_ConfDataSet_is_missing_should_succeed() {
         //Given
         AccessPointAdapter accessPointAdapter = provideAPForCheckLimitationForIED();
         accessPointAdapter.getCurrentElem().getServices().setConfDataSet(null);
@@ -200,7 +197,7 @@ class AccessPointAdapterTest {
     }
 
     @Test
-    void checkControlsLimitation_should_succeed_when_Services_is_missing() {
+    void checkControlsLimitation_when_Services_is_missing_should_succeed() {
         //Given
         AccessPointAdapter accessPointAdapter = provideAPForCheckLimitationForIED();
         accessPointAdapter.getCurrentElem().setServices(null);

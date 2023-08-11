@@ -40,7 +40,7 @@ class SettingLDEPFCsvHelperTest {
     }
 
     @Test
-    void getLDPFSettingMatchingExtRef_should_return_NoSetting_whenNotMatchExtRefDescValue() {
+    void getLDPFSettingMatchingExtRef_whenNotMatchExtRefDescValue_should_return_NoSetting() {
         // Given
         TExtRef tExtRef = new TExtRef();
         tExtRef.setDesc("desc1");
@@ -54,7 +54,7 @@ class SettingLDEPFCsvHelperTest {
     }
 
     @Test
-    void getLDPFSettingMatchingExtRef_should_return_digitalSetting_whenMatchExtRef() {
+    void getLDPFSettingMatchingExtRef_whenMatchExtRef_should_return_digitalSetting() {
         // Given
         TExtRef tExtRef = new TExtRef();
         tExtRef.setDesc("DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_Y_general_1");
@@ -69,7 +69,7 @@ class SettingLDEPFCsvHelperTest {
     }
 
     @Test
-    void getLDPFSettingMatchingExtRef_should_return_analogSetting_whenMatchExtRef() {
+    void getLDPFSettingMatchingExtRef_whenMatchExtRef_should_return_analogSetting() {
         // Given
         TExtRef tExtRef = new TExtRef();
         tExtRef.setDesc("DYN_LDEPF_ANALOG CHANNEL 1_1_AnalogueValue_Y_instMag_1");
@@ -84,7 +84,7 @@ class SettingLDEPFCsvHelperTest {
     }
 
     @Test
-    void getLDPFSettingMatchingExtRef_should_return_NoSetting_whenNotMatchExtRefPLNValue() {
+    void getLDPFSettingMatchingExtRef_whenNotMatchExtRefPLNValue_should_return_NoSetting() {
         // Given
         TExtRef tExtRef = new TExtRef();
         tExtRef.setDesc("DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_Y_general_1");
@@ -98,7 +98,7 @@ class SettingLDEPFCsvHelperTest {
     }
 
     @Test
-    void getLDPFSettingMatchingExtRef_should_return_NoSetting_when_AllSettingsNotMatchExtRefWithUnknownPDOValue() {
+    void getLDPFSettingMatchingExtRef_when_AllSettingsNotMatchExtRefWithUnknownPDOValue_should_return_NoSetting() {
         // Given
         TExtRef tExtRef = new TExtRef();
         tExtRef.setDesc("DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_Y_general_1");
@@ -112,7 +112,7 @@ class SettingLDEPFCsvHelperTest {
     }
 
     @Test
-    void getIedSources_should_return_oneIedSource_whenFlowKindIsInternalAndMatchAllVerification() {
+    void getIedSources_whenFlowKindIsInternalAndMatchAllVerification_should_return_oneIedSource() {
         // Given
         String fileName = "LDEPF_Setting_file.csv";
         InputStream inputStream = Objects.requireNonNull(CsvUtils.class.getClassLoader().getResourceAsStream(fileName), "Resource not found: " + fileName);
@@ -145,7 +145,7 @@ class SettingLDEPFCsvHelperTest {
     }
 
     @Test
-    void getIedSources_should_return_OneIedSource_whenFlowKindIsInternal() {
+    void getIedSources_whenFlowKindIsInternal_should_return_OneIedSource() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_iedSources_in_different_bay.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -169,7 +169,7 @@ class SettingLDEPFCsvHelperTest {
 
 
     @Test
-    void getIedSources_should_return_TwoIedSources_whenFlowKindIsExternalAndTwoIedSourcesFoundWithTheSameBayUUID() {
+    void getIedSources_whenFlowKindIsExternalAndTwoIedSourcesFoundWithTheSameBayUUID_should_return_TwoIedSources() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_External_iedSources_in_same_bay.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -194,7 +194,7 @@ class SettingLDEPFCsvHelperTest {
     }
 
     @Test
-    void getIedSources_should_return_TwoIedSources_whenFlowKindIsExternalAndTwoIedSourcesFoundWithTheSameICDHeader() {
+    void getIedSources_whenFlowKindIsExternalAndTwoIedSourcesFoundWithTheSameICDHeader_should_return_TwoIedSources() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_iedSources_in_different_bay.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -226,7 +226,7 @@ class SettingLDEPFCsvHelperTest {
             "NO_EXISTING_INST_OF_LDEVICE_SOURCE",
             "LDEVICE_INVALID"
     })
-    void getIedSources_should_return_NoIedSource_whenLDevice(String ldInst) {
+    void getIedSources_whenLDeviceInstEqual_shouldReturnNoIedSource(String ldInst) {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_iedSources_in_different_bay.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -250,7 +250,7 @@ class SettingLDEPFCsvHelperTest {
     }
 
     @Test
-    void getIedSources_should_return_NoIedSource_whenFlowKindIsInternalAndNoExistingLNodeSource() {
+    void getIedSources_whenFlowKindIsInternalAndNoExistingLNodeSource_should_return_NoIedSource() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_iedSources_in_different_bay.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -275,7 +275,7 @@ class SettingLDEPFCsvHelperTest {
 
 
     @Test
-    void getIedSources_should_return_NoIedSource_whenFlowKindIsInternalAndLNodeSourceIsOff() {
+    void getIedSources_whenFlowKindIsInternalAndLNodeSourceIsOff_should_return_NoIedSource() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_iedSources_in_different_bay.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -299,7 +299,7 @@ class SettingLDEPFCsvHelperTest {
     }
 
     @Test
-    void getIedSources_should_return_OneIedSource_whenFlowKindIsInternalAndDataTypeTemplateIsValid() {
+    void getIedSources_whenFlowKindIsInternalAndDataTypeTemplateIsValid_should_return_OneIedSource() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_dataTypeTemplateValid.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -320,7 +320,7 @@ class SettingLDEPFCsvHelperTest {
     }
 
     @Test
-    void getIedSources_should_return_IedSource_whenFlowKindIsExternalAndDataTypeTemplateIsValid() {
+    void getIedSources_whenFlowKindIsExternalAndDataTypeTemplateIsValid_should_return_IedSource() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_dataTypeTemplateValid.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -343,7 +343,7 @@ class SettingLDEPFCsvHelperTest {
 
     @ParameterizedTest
     @MethodSource("provideInternalAndExternalLDEPFSetting")
-    void getIedSources_should_return_IedSource_whenInternalAndExternalFlowKindAreApplied(final LDEPFSettingData setting, final boolean isInSameBay) {
+    void getIedSources_whenInternalAndExternalFlowKindAreApplied_should_return_IedSource(final LDEPFSettingData setting, final boolean isInSameBay) {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_dataTypeTemplateValid.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -359,7 +359,7 @@ class SettingLDEPFCsvHelperTest {
 
     @ParameterizedTest
     @MethodSource("provideInvalidDoName")
-    void getIedSources_should_return_NoSource_whenInvalidDoName(final SCL scd, final LDEPFSettingData setting) {
+    void getIedSources_whenInvalidDoName_should_return_NoSource(final SCL scd, final LDEPFSettingData setting) {
         // Given
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         TCompasBay compasBay = getCompasBayUUID(new SclRootAdapter(scd), "IED_NAME1");
@@ -372,7 +372,7 @@ class SettingLDEPFCsvHelperTest {
 
     @ParameterizedTest
     @MethodSource("provideInvalidSdoName")
-    void getIedSources_should_return_NoSource_whenInvalidSdoName(final SCL scd, final LDEPFSettingData setting) {
+    void getIedSources_whenInvalidSdoName_should_return_NoSource(final SCL scd, final LDEPFSettingData setting) {
         // Given
         SettingLDEPFCsvHelper settingLDEPFCsvHelper = new SettingLDEPFCsvHelper(reader);
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -386,7 +386,7 @@ class SettingLDEPFCsvHelperTest {
 
     @ParameterizedTest
     @MethodSource("provideInvalidDaName")
-    void getIedSources_should_return_NoSource_whenInvalidDaName(final SCL scd, final LDEPFSettingData setting) {
+    void getIedSources_whenInvalidDaName_should_return_NoSource(final SCL scd, final LDEPFSettingData setting) {
         // Given
         SettingLDEPFCsvHelper settingLDEPFCsvHelper = new SettingLDEPFCsvHelper(reader);
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -400,7 +400,7 @@ class SettingLDEPFCsvHelperTest {
 
     @ParameterizedTest
     @MethodSource("provideInvalidBdaName")
-    void getIedSources_should_return_NoSource_whenInvalidBdaName(final SCL scd, final LDEPFSettingData setting) {
+    void getIedSources_whenInvalidBdaName_should_return_NoSource(final SCL scd, final LDEPFSettingData setting) {
         // Given
         SettingLDEPFCsvHelper settingLDEPFCsvHelper = new SettingLDEPFCsvHelper(reader);
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -414,7 +414,7 @@ class SettingLDEPFCsvHelperTest {
 
     @ParameterizedTest
     @MethodSource("provideInvalidSbdaName")
-    void getIedSources_should_return_NoSource_whenInvalidSbdaName(final SCL scd, final LDEPFSettingData setting) {
+    void getIedSources_whenInvalidSbdaName_should_return_NoSource(final SCL scd, final LDEPFSettingData setting) {
         // Given
         SettingLDEPFCsvHelper settingLDEPFCsvHelper = new SettingLDEPFCsvHelper(reader);
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);

@@ -4,198 +4,218 @@
 
 package org.lfenergy.compas.sct.commons.scl.dtt;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import org.mockito.Mockito;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.lfenergy.compas.sct.commons.dto.DTO.P_DO;
+import static org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateTestUtils.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-class LNodeTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TLNodeType> {
-    @Override
-    protected void completeInit() {
-        TLNodeType tlNodeType = new TLNodeType();
-        tlNodeType.setId("ID");
-        List<TLNodeType> tlNodeTypes = new ArrayList<>();
-        tlNodeTypes.add(tlNodeType);
-        sclElement = tlNodeType;
-        Mockito.when(sclElementAdapter.getCurrentElem().getLNodeType()).thenReturn(tlNodeTypes);
+class LNodeTypeAdapterTest {
+
+    @Test
+    void constructor_whenCalledWithNoRelationBetweenDataTypeTemplatesAndLNodeType_shouldThrowException() {
+        // Given
+        DataTypeTemplateAdapter dataTemplateAdapter = mock(DataTypeTemplateAdapter.class);
+        when(dataTemplateAdapter.getCurrentElem()).thenReturn(new TDataTypeTemplates());
+        TLNodeType nodeType = new TLNodeType();
+        // When Then
+        assertThatCode(() -> new LNodeTypeAdapter(dataTemplateAdapter, nodeType))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("No relation between SCL parent element and child");
     }
 
     @Test
-    void testAmChildElementRef() {
-        init();
-        assertDoesNotThrow(
-                () -> new LNodeTypeAdapter(sclElementAdapter,sclElement)
-        );
+    void constructor_whenCalledWithExistingRelationBetweenDataTypeTemplatesAndLNodeType_shouldNotThrowException() {
+        // Given
+        DataTypeTemplateAdapter dataTemplateAdapter = mock(DataTypeTemplateAdapter.class);
+        TDataTypeTemplates dataTemplate = new TDataTypeTemplates();
+        TLNodeType nodeType = new TLNodeType();
+        dataTemplate.getLNodeType().add(nodeType);
+        when(dataTemplateAdapter.getCurrentElem()).thenReturn(dataTemplate);
+        // When Then
+        assertThatCode(() -> new LNodeTypeAdapter(dataTemplateAdapter, nodeType)).doesNotThrowAnyException();
     }
 
     @Test
+    @Tag("issue-321")
     void testHasSameContentAs() {
-        init();
+        // Given
+        DataTypeTemplateAdapter dataTemplateAdapter = mock(DataTypeTemplateAdapter.class);
+        TDataTypeTemplates dataTemplate = new TDataTypeTemplates();
         TLNodeType tlNodeType = createLNOdeType();
         TLNodeType tlNodeType1 = createLNOdeType();
-        sclElement = tlNodeType;
-        sclElementAdapter.getCurrentElem().getLNodeType().add(tlNodeType);
-        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(
-                () -> new LNodeTypeAdapter(sclElementAdapter,tlNodeType)
-        );
+        dataTemplate.getLNodeType().add(tlNodeType);
+        dataTemplate.getLNodeType().add(tlNodeType1);
+        when(dataTemplateAdapter.getCurrentElem()).thenReturn(dataTemplate);
+        LNodeTypeAdapter lNodeTypeAdapter =  new LNodeTypeAdapter(dataTemplateAdapter, tlNodeType);
+        assertThat(lNodeTypeAdapter.getLNClass()).isEqualTo(DTO.HOLDER_LN_CLASS);
+        assertThat(lNodeTypeAdapter.getDOTypeId("Op")).isPresent();
 
-        assertEquals(DTO.HOLDER_LN_CLASS,lNodeTypeAdapter.getLNClass());
-        assertTrue(lNodeTypeAdapter.getDOTypeId("Op").isPresent());
-
-        assertTrue(lNodeTypeAdapter.hasSameContentAs(tlNodeType1));
-        assertEquals(3,tlNodeType1.getDO().size());
-
+        // When Then
+        assertThat(lNodeTypeAdapter.hasSameContentAs(tlNodeType1)).isTrue();
+        assertThat(tlNodeType1.getDO()).hasSize(3);
+        // Given
         tlNodeType1.getDO().get(2).setAccessControl("AC");
-        assertFalse(lNodeTypeAdapter.hasSameContentAs(tlNodeType1));
-
+        // When Then
+        assertThat(lNodeTypeAdapter.hasSameContentAs(tlNodeType1)).isFalse();
+        // Given
         tlNodeType1.getDO().get(2).setTransient(true);
-        assertFalse(lNodeTypeAdapter.hasSameContentAs(tlNodeType1));
-
+        // When Then
+        assertThat(lNodeTypeAdapter.hasSameContentAs(tlNodeType1)).isFalse();
+        // Given
         tlNodeType1.getDO().get(2).setName("NAME");
-        assertFalse(lNodeTypeAdapter.hasSameContentAs(tlNodeType1));
-
+        // When Then
+        assertThat(lNodeTypeAdapter.hasSameContentAs(tlNodeType1)).isFalse();
+        // Given
         tlNodeType1.getDO().get(2).setType("DO11");
-        assertFalse(lNodeTypeAdapter.hasSameContentAs(tlNodeType1));
-
+        // When Then
+        assertThat(lNodeTypeAdapter.hasSameContentAs(tlNodeType1)).isFalse();
+        // Given
         TDO tdo = new TDO();
         tdo.setType("DO12");
         tdo.setName("OpPPP");
         tlNodeType1.getDO().add(tdo);
-        assertFalse(lNodeTypeAdapter.hasSameContentAs(tlNodeType1));
-
+        // When Then
+        assertThat(lNodeTypeAdapter.hasSameContentAs(tlNodeType1)).isFalse();
+        // Given
         tlNodeType1.setIedType("ANOTHER_TYPE");
-        assertFalse(lNodeTypeAdapter.hasSameContentAs(tlNodeType1));
-
+        // When Then
+        assertThat(lNodeTypeAdapter.hasSameContentAs(tlNodeType1)).isFalse();
+        // Given
         TPrivate aPrivate = new TPrivate();
         aPrivate.setType("TYPE");
         aPrivate.setSource("https://a.com");
         tlNodeType1.getPrivate().add(aPrivate);
-        assertFalse(lNodeTypeAdapter.hasSameContentAs(tlNodeType1));
+        // When Then
+        assertThat(lNodeTypeAdapter.hasSameContentAs(tlNodeType1)).isFalse();
     }
 
     @Test
-    void containsDOWithDOTypeId() {
-        init();
-        TLNodeType tlNodeType = createLNOdeType();
-        TLNodeType tlNodeType1 = createLNOdeType();
-        sclElement = tlNodeType;
-        sclElementAdapter.getCurrentElem().getLNodeType().add(tlNodeType);
-        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(
-                () -> new LNodeTypeAdapter(sclElementAdapter,tlNodeType)
-        );
-
-        assertTrue(lNodeTypeAdapter.containsDOWithDOTypeId("DO1"));
-        assertFalse(lNodeTypeAdapter.containsDOWithDOTypeId("DO11"));
-    }
-
-
-    private TLNodeType createLNOdeType(){
-        TLNodeType tlNodeType = new TLNodeType();
-        tlNodeType.setId("BDA1");
-        tlNodeType.setIedType("IEDTYPE");
-        tlNodeType.getLnClass().add(DTO.HOLDER_LN_CLASS);
-
+    void containsDOWithDOTypeId_should_check_if_LNodeType_contains_DO_with_specific_DOType_ID() {
+        // Given
+        DataTypeTemplateAdapter dataTemplateAdapter = mock(DataTypeTemplateAdapter.class);
+        TDataTypeTemplates dataTemplate = new TDataTypeTemplates();
         TDO tdo = new TDO();
         tdo.setType("DO1");
-        tdo.setName("Op");
-
-        TDO tdo1 = new TDO();
-        tdo1.setType("DO2");
-        tdo1.setName("Beh");
-
-        TDO tdo2 = new TDO();
-        tdo2.setType("DO3");
-        tdo2.setName("StrVal");
-
-        tlNodeType.getDO().addAll(List.of(tdo,tdo1,tdo2));
-        return tlNodeType;
+        TLNodeType tlNodeType = new TLNodeType();
+        tlNodeType.getDO().add(tdo);
+        dataTemplate.getLNodeType().add(tlNodeType);
+        when(dataTemplateAdapter.getCurrentElem()).thenReturn(dataTemplate);
+        LNodeTypeAdapter lNodeTypeAdapter = new LNodeTypeAdapter(dataTemplateAdapter, tlNodeType);
+        // When Then
+        assertThat(lNodeTypeAdapter.containsDOWithDOTypeId("DO1")).isTrue();
+        // When Then
+        assertThat(lNodeTypeAdapter.containsDOWithDOTypeId("DO11")).isFalse();
     }
 
+
     @Test
-    void testGetDataAttributeRefs() throws Exception {
-        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
-        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getLNodeTypeAdapterById("LN1").get());
+    @Tag("issue-321")
+    void testGetDataAttributeRefs() {
+        // Given
+        DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT);
+        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("LN1").get());
         DataAttributeRef rootDataAttributeRef = new DataAttributeRef();
         rootDataAttributeRef.setDoName(new DoTypeName("Op"));
         DataAttributeRef filter = new DataAttributeRef();
         filter.setDoName(new DoTypeName("Op.res"));
+        // When
         var dataAttributeRefs = lNodeTypeAdapter.getDataAttributeRefs(filter);
-        assertEquals(2,dataAttributeRefs.size());
-
+        // Then
+        assertThat(dataAttributeRefs).hasSize(2);
+        // Given
         filter.setDoName(new DoTypeName("Op.res"));
         filter.setDaName(new DaTypeName("d"));
+        // When
         dataAttributeRefs = lNodeTypeAdapter.getDataAttributeRefs(filter);
-        assertEquals(1,dataAttributeRefs.size());
-
+        // Then
+        assertThat(dataAttributeRefs).hasSize(1);
+        // Given
         filter.setDoName(new DoTypeName("Op.res"));
         filter.setDaName(new DaTypeName("antRef"));
-        assertTrue(lNodeTypeAdapter.getDataAttributeRefs(filter).isEmpty());
+        // When Then
+        assertThat(lNodeTypeAdapter.getDataAttributeRefs(filter)).isEmpty();
     }
 
     @Test
-    void testCheck() throws Exception {
-        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
-        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getLNodeTypeAdapterById("LN1").get());
+    @Tag("issue-321")
+    void testCheck() {
+        // Given
+        DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT);
+        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("LN1").get());
         DoTypeName doTypeName1 = new DoTypeName("");
         DaTypeName daTypeName1 = new DaTypeName("");
+        // When Then
         assertThatThrownBy(() -> lNodeTypeAdapter.check(doTypeName1,daTypeName1)).isInstanceOf(ScdException.class);
         DoTypeName doTypeName2 = new DoTypeName("do");
         DaTypeName daTypeName2 = new DaTypeName("");
+        // When Then
         assertThatThrownBy(() -> lNodeTypeAdapter.check(doTypeName2,daTypeName2)).isInstanceOf(ScdException.class);
         DoTypeName doTypeName3 = new DoTypeName("do");
         DaTypeName daTypeName3 = new DaTypeName("da");
+        // When Then
         assertThatThrownBy(() -> lNodeTypeAdapter.check(doTypeName3,daTypeName3)).isInstanceOf(ScdException.class);
         DoTypeName doTypeName = new DoTypeName("Op.res");
         DaTypeName daTypeName = new DaTypeName("d");
-
-        assertDoesNotThrow(() -> lNodeTypeAdapter.check(doTypeName,daTypeName));
+        // When Then
+        assertThatCode(() -> lNodeTypeAdapter.check(doTypeName,daTypeName)).doesNotThrowAnyException();
         doTypeName.setName("StrVal");
         doTypeName.getStructNames().clear();
         daTypeName.setName("origin");
         daTypeName.getStructNames().clear();
         daTypeName.setStructNames(List.of("origin","ctlVal"));
-        assertDoesNotThrow(() -> lNodeTypeAdapter.check(doTypeName,daTypeName));
+        // When Then
+        assertThatCode(() -> lNodeTypeAdapter.check(doTypeName,daTypeName)).doesNotThrowAnyException();
 
     }
 
     @Test
-    void getDataAttributeRefByDaName() throws Exception {
-        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(
-                AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID
-        );
+    void getDataAttributeRefByDaName_should_return_list_of_DataAttributeRef() {
+        // Given
+        DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT_DIFF_CONTENT_SAME_ID);
         DaTypeName daTypeName = new DaTypeName("antRef","origin.ctlVal");
         LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("LN1").get());
+        // When
         List<DataAttributeRef> dataAttributeRefs = assertDoesNotThrow(()-> lNodeTypeAdapter.getDataAttributeRefByDaName(daTypeName));
-        assertEquals(2,dataAttributeRefs.size());
+        // Then
+        assertThat(dataAttributeRefs).hasSize(2);
     }
 
     @Test
-    void addPrivate() throws Exception {
-        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
-        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getLNodeTypeAdapterById("LN1").get());
+    void addPrivate_with_type_and_source_should_create_Private() {
+        // Given
+        DataTypeTemplateAdapter dataTemplateAdapter = mock(DataTypeTemplateAdapter.class);
+        TDataTypeTemplates dataTemplate = new TDataTypeTemplates();
+        TLNodeType nodeType = new TLNodeType();
+        dataTemplate.getLNodeType().add(nodeType);
+        when(dataTemplateAdapter.getCurrentElem()).thenReturn(dataTemplate);
+        LNodeTypeAdapter lNodeTypeAdapter = new LNodeTypeAdapter(dataTemplateAdapter, nodeType);
+        assertThat(lNodeTypeAdapter.getCurrentElem().getPrivate()).isEmpty();
+
         TPrivate tPrivate = new TPrivate();
         tPrivate.setType("Private Type");
         tPrivate.setSource("Private Source");
-        assertFalse(lNodeTypeAdapter.getCurrentElem().getPrivate().isEmpty());
+        // When
         lNodeTypeAdapter.addPrivate(tPrivate);
-        assertEquals(2, lNodeTypeAdapter.getCurrentElem().getPrivate().size());
+        // Then
+        assertThat(lNodeTypeAdapter.getCurrentElem().getPrivate()).isNotEmpty();
     }
 
 
     @Test
-    void elementXPath() throws Exception {
+    void elementXPath_should_return_expected_xpath_value() {
         // Given
-        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
+        DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT);
         LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getLNodeTypeAdapterById("LN1").get());
         // When
         String result = lNodeTypeAdapter.elementXPath();
@@ -204,15 +224,12 @@ class LNodeTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TLNo
     }
 
     @Test
-    void checkMatchingDOType_shouldFindOneDO() {
-        //Given
-        ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
-        signalInfo.setPDO("P_DO12");
-
+    @Tag("issue-321")
+    void findMatchingDOType_shouldFindOneDO() {
+        // Given
         SclRootAdapter sclRootAdapter = new SclRootAdapter("hID","hVersion","hRevision");
         sclRootAdapter.getCurrentElem().setDataTypeTemplates(new TDataTypeTemplates());
-        DataTypeTemplateAdapter dttAdapter = assertDoesNotThrow(
-                sclRootAdapter::getDataTypeTemplateAdapter);
+        DataTypeTemplateAdapter dttAdapter = assertDoesNotThrow(sclRootAdapter::getDataTypeTemplateAdapter);
 
         TDO tdo= new TDO();
         tdo.setName("P_DO");
@@ -228,25 +245,28 @@ class LNodeTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TLNo
 
         dttAdapter.getCurrentElem().getLNodeType().add(tlNodeType);
         LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("ID").get());
+
+        ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
+        signalInfo.setPDO("P_DO12");
         //When
         DataTypeTemplateAdapter.DOTypeInfo expectedDoTypeInfo = assertDoesNotThrow(() -> lNodeTypeAdapter.findMatchingDOType(signalInfo));
         //Then
         assertThat(expectedDoTypeInfo.getDoTypeId()).isEqualTo("DO1");
         assertThat(expectedDoTypeInfo.getDoTypeName().getName()).isEqualTo("P_DO12");
         assertThat(expectedDoTypeInfo.getDoTypeAdapter()).isNotNull();
-
     }
 
     @Test
-    void checkMatchingDOType_shouldThrowException_whenDOUnknown() {
+    @Tag("issue-321")
+    void checkMatchingDOType_whenDOUnknown_shouldThrowException() {
         //Given
         ExtRefSignalInfo signalInfo = DTO.createExtRefSignalInfo();
-
         SclRootAdapter sclRootAdapter = new SclRootAdapter("hID","hVersion","hRevision");
         sclRootAdapter.getCurrentElem().setDataTypeTemplates(new TDataTypeTemplates());
-        DataTypeTemplateAdapter dttAdapter = assertDoesNotThrow(
-                sclRootAdapter::getDataTypeTemplateAdapter);
+        //When Then
+        DataTypeTemplateAdapter dttAdapter = assertDoesNotThrow(sclRootAdapter::getDataTypeTemplateAdapter);
 
+        //Given
         TDO tdo= new TDO();
         tdo.setName(P_DO);
         tdo.setType("DO1");
@@ -268,16 +288,18 @@ class LNodeTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TLNo
     }
 
     @Test
-    void checkMatchingDOType_shouldThrowException_whenDONotReferenced() {
+    @Tag("issue-321")
+    void checkMatchingDOType_whenDONotReferenced_shouldThrowException() {
         //Given
         ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
         signalInfo.setPDO("P_DO");
 
         SclRootAdapter sclRootAdapter = new SclRootAdapter("hID","hVersion","hRevision");
         sclRootAdapter.getCurrentElem().setDataTypeTemplates(new TDataTypeTemplates());
-        DataTypeTemplateAdapter dttAdapter = assertDoesNotThrow(
-                sclRootAdapter::getDataTypeTemplateAdapter);
+        //When Then
+        DataTypeTemplateAdapter dttAdapter = assertDoesNotThrow(sclRootAdapter::getDataTypeTemplateAdapter);
 
+        //Given
         TDO tdo= new TDO();
         tdo.setName("P_DO");
         tdo.setType("DO2");
@@ -297,5 +319,25 @@ class LNodeTypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TLNo
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("P_DO: No referenced to DO id : DO2, scl file not valid");
     }
+
+
+    private TLNodeType createLNOdeType(){
+        TLNodeType tlNodeType = new TLNodeType();
+        tlNodeType.setId("BDA1");
+        tlNodeType.setIedType("IEDTYPE");
+        tlNodeType.getLnClass().add(DTO.HOLDER_LN_CLASS);
+        TDO tdo = new TDO();
+        tdo.setType("DO1");
+        tdo.setName("Op");
+        TDO tdo1 = new TDO();
+        tdo1.setType("DO2");
+        tdo1.setName("Beh");
+        TDO tdo2 = new TDO();
+        tdo2.setType("DO3");
+        tdo2.setName("StrVal");
+        tlNodeType.getDO().addAll(List.of(tdo,tdo1,tdo2));
+        return tlNodeType;
+    }
+
 
 }

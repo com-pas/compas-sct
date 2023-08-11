@@ -11,86 +11,101 @@ import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.scl2007b4.model.TSubstation;
 import org.lfenergy.compas.scl2007b4.model.TVoltageLevel;
-import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class SubstationAdapterTest {
 
-    private SclRootAdapter sclRootAdapter;
-    private SubstationAdapter ssAdapter;
+    private final SclRootAdapter sclRootAdapter = mock(SclRootAdapter.class);;
+    private SubstationAdapter substationAdapter;
 
     @BeforeEach
-    public void init() throws ScdException {
-        sclRootAdapter = new SclRootAdapter("hID","hVersion","hRevision");
+    public void init() {
+        SCL scl = new SCL();
         TSubstation tSubstation = new TSubstation();
         tSubstation.setName("SUBSTATION");
-        sclRootAdapter.getCurrentElem().getSubstation().add(tSubstation);
-        ssAdapter = sclRootAdapter.getSubstationAdapter("SUBSTATION");
+        scl.getSubstation().add(tSubstation);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(scl);
+        substationAdapter = new SubstationAdapter(sclRootAdapter, tSubstation);
     }
 
     @Test
-    void testAmChildElementRef()  {
-        assertTrue(ssAdapter.amChildElementRef());
+    void amChildElementRef_whenCalledWithExistingRelationBetweenSCLAndSubstation_shouldReturnTrue()  {
+        // Given : init
+        // When Then
+        assertThat(substationAdapter.amChildElementRef()).isTrue();
     }
 
     @Test
-    void testController() {
-        SubstationAdapter expectedSubstationAdapter = new SubstationAdapter(sclRootAdapter, sclRootAdapter.getCurrentElem().getSubstation().get(0));
-        assertNotNull(expectedSubstationAdapter.getParentAdapter());
-        assertNotNull(expectedSubstationAdapter.getCurrentElem());
-        assertTrue(expectedSubstationAdapter.amChildElementRef());
+    void amChildElementRef_when_no_Substation_given_should_return_false() {
+        // When
+        SubstationAdapter substationAdapter1 = new SubstationAdapter(sclRootAdapter);
+        // Then
+        assertThat(substationAdapter1.getParentAdapter()).isNotNull();
+        assertThat(substationAdapter1.getCurrentElem()).isNull();
+        assertThat(substationAdapter1.amChildElementRef()).isFalse();
     }
 
     @Test
-    void testSetCurrentElement()  {
-        SubstationAdapter ssfAdapter = new SubstationAdapter(sclRootAdapter);
+    void setCurrentElement_whenCalledWithNoRelationBetweenSCLAndSubstation_shouldThrowException()  {
+        // Given
         TSubstation tSubstation1 = new TSubstation();
-        assertThrows(IllegalArgumentException.class,
-                () ->ssfAdapter.setCurrentElem(tSubstation1));
+        // When Then
+        assertThatThrownBy(() -> substationAdapter.setCurrentElem(tSubstation1))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("No relation between SCL parent element and child");
     }
 
     @Test
-    void testGetSubstationAdapter()  {
-        assertThrows(ScdException.class,
-                () -> sclRootAdapter.getSubstationAdapter("SUBSTATION1"));
-    }
-
-    @Test
-    void testGetVoltageLevelAdapter() {
+    void getVoltageLevelAdapter_when_exist_should_return_not_empty_list_of_VoltageLevelAdapter() {
+        // Given
         TVoltageLevel tVoltageLevel = new TVoltageLevel();
-        tVoltageLevel.setName("VOLTAGE_LEVEL");
-        ssAdapter.getCurrentElem().getVoltageLevel().add(tVoltageLevel);
-        assertFalse(ssAdapter.getVoltageLevelAdapter("VOLTAGE_LEVEL1").isPresent());
+        tVoltageLevel.setName("VOLTAGE_LEVEL1");
+        substationAdapter.getCurrentElem().getVoltageLevel().add(tVoltageLevel);
+        //When Then
+        assertThat(substationAdapter.getVoltageLevelAdapter("VOLTAGE_LEVEL1")).isNotEmpty();
     }
 
     @Test
-    void addPrivate() {
+    void getVoltageLevelAdapter_when_not_exist_should_return_empty_list_of_VoltageLevelAdapter() {
+        // Given : init
+        //When Then
+        assertThat(substationAdapter.getVoltageLevelAdapter("VOLTAGE_LEVEL1")).isEmpty();
+    }
+
+    @Test
+    void addPrivate_with_type_and_source_should_create_Private() {
+        // Given
         TPrivate tPrivate = new TPrivate();
         tPrivate.setType("Private Type");
         tPrivate.setSource("Private Source");
-        assertTrue(ssAdapter.getCurrentElem().getPrivate().isEmpty());
-        ssAdapter.addPrivate(tPrivate);
-        assertEquals(1, ssAdapter.getCurrentElem().getPrivate().size());
+        assertThat(substationAdapter.getCurrentElem().getPrivate()).isEmpty();
+        // When
+        substationAdapter.addPrivate(tPrivate);
+        // Then
+        assertThat(substationAdapter.getCurrentElem().getPrivate()).isNotEmpty();
     }
 
 
     @Test
-    void getIedAndLDeviceNamesForLN0FromLNode_shouldReturnListOf1Pair_WhenLNodeContainsLN0() throws Exception {
+    void getIedAndLDeviceNamesForLN0FromLNode_whenLNodeContainsLN0_shouldReturnListOf1Pair() {
         // Given
         SCL scl = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_Template.scd");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scl);
-        SubstationAdapter substationAdapter = sclRootAdapter.getSubstationAdapter();
+        substationAdapter = sclRootAdapter.getSubstationAdapter();
         // When
         List<Pair<String, String>> iedNameLdInstList = substationAdapter.getIedAndLDeviceNamesForLN0FromLNode();
         // Then
-        assertEquals(1, iedNameLdInstList.size());
-        assertThat(iedNameLdInstList).containsExactly(Pair.of("IedName1", "LDSUIED"));
+        assertThat(iedNameLdInstList)
+                .hasSize(1)
+                .containsExactly(Pair.of("IedName1", "LDSUIED"));
     }
 
 }

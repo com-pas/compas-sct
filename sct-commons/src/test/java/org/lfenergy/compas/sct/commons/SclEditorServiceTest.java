@@ -5,6 +5,7 @@
 package org.lfenergy.compas.sct.commons;
 
 import org.assertj.core.groups.Tuple;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -26,7 +27,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.LD_SUIED;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.getDAIAdapters;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
@@ -38,7 +41,7 @@ class SclEditorServiceTest {
     @InjectMocks
     SclEditorService sclEditorService;
 
-    private static Stream<Arguments> sclProviderMissingRequiredObjects() {
+      private static Stream<Arguments> sclProviderMissingRequiredObjects() {
         SCL scl1 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_KO_MissingBeh.scd");
         SCL scl2 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_KO_MissingLDevicePrivate.scd");
         SCL scl3 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_KO_MissingLDevicePrivateAttribute.scd");
@@ -91,78 +94,86 @@ class SclEditorServiceTest {
         );
     }
 
+
     @Test
-    void testAddHistoryItem() throws ScdException {
+    void addHistoryItem_should_add_history_elements() throws ScdException {
+        //Given
         SclRootAdapter sclRootAdapter = new SclRootAdapter("hId", SclRootAdapter.VERSION, SclRootAdapter.REVISION);
         SCL scd = sclRootAdapter.getCurrentElem();
-
+        //When
         sclEditorService.addHistoryItem(scd, "who", "what", "why");
-
-        assertNotNull(scd.getHeader());
+        //Then
+        assertThat(scd.getHeader()).isNotNull();
         THeader.History history = scd.getHeader().getHistory();
-        assertNotNull(history);
-        assertEquals(1, history.getHitem().size());
+        assertThat(history).isNotNull();
+        assertThat(history.getHitem()).hasSize(1);
         THitem tHitem = history.getHitem().get(0);
-        assertEquals("who", tHitem.getWho());
-        assertEquals("what", tHitem.getWhat());
-        assertEquals("why", tHitem.getWhy());
-        assertEquals(SclRootAdapter.REVISION, tHitem.getRevision());
-        assertEquals(SclRootAdapter.VERSION, tHitem.getVersion());
+        assertThat(tHitem.getWho()).isEqualTo("who");
+        assertThat(tHitem.getWhat()).isEqualTo("what");
+        assertThat(tHitem.getWhy()).isEqualTo("why");
+        assertThat(tHitem.getRevision()).isEqualTo(SclRootAdapter.REVISION);
+        assertThat(tHitem.getVersion()).isEqualTo(SclRootAdapter.VERSION);
         assertIsMarshallable(scd);
     }
 
     @Test
-    void testAddIED() {
-
+    void addIED_should_add_ied_element() {
+        //Given
         SclRootAdapter sclRootAdapter = new SclRootAdapter("hId", SclRootAdapter.VERSION, SclRootAdapter.REVISION);
         SCL scd = sclRootAdapter.getCurrentElem();
-        assertNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
+        assertThat(sclRootAdapter.getCurrentElem().getDataTypeTemplates()).isNull();
         SCL icd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
-
+        //When Then
         assertDoesNotThrow(() -> sclEditorService.addIED(scd, "IED_NAME1", icd));
-        assertEquals("IED_NAME1", scd.getIED().get(0).getName());
-        assertNotNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
-
+        assertThat(scd.getIED().size()).isNotZero();
+        assertThat(scd.getIED().get(0).getName()).isEqualTo("IED_NAME1");
+        assertThat(scd.getDataTypeTemplates()).isNotNull();
         assertIsMarshallable(scd);
     }
 
     @Test
-    void testAddSubnetworks() {
+    @Tag("issue-321")
+    void addSubnetworks_should_add_subnetwork() {
+        //Given
         SclRootAdapter sclRootAdapter = new SclRootAdapter("hId", SclRootAdapter.VERSION, SclRootAdapter.REVISION);
         SCL scd = sclRootAdapter.getCurrentElem();
-        assertNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
+        assertThat(sclRootAdapter.getCurrentElem().getDataTypeTemplates()).isNull();
         SCL icd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
-
-        assertDoesNotThrow(() -> sclEditorService.addIED(scd, "IED_NAME1", icd));
-
+        //When Then
+        assertThatCode(() -> sclEditorService.addIED(scd, "IED_NAME1", icd)).doesNotThrowAnyException();
         SubNetworkDTO subNetworkDTO = new SubNetworkDTO();
         subNetworkDTO.setName("sName1");
         subNetworkDTO.setType("IP");
-        ConnectedApDTO connectedApDTO = new ConnectedApDTO("IED_NAME1", "AP_NAME");
+        ConnectedApDTO connectedApDTO = new ConnectedApDTO("IED_NAME1","AP_NAME");
         subNetworkDTO.addConnectedAP(connectedApDTO);
-
-        assertDoesNotThrow(() -> sclEditorService.addSubnetworks(scd, List.of(subNetworkDTO), icd));
+        //When Then
+        assertThatCode(() -> sclEditorService.addSubnetworks(scd, List.of(subNetworkDTO), icd)).doesNotThrowAnyException();
         assertIsMarshallable(scd);
     }
 
     @Test
-    void testAddSubnetworksWithoutCommunicationTagInIcd() {
+    @Tag("issue-321")
+    void addSubnetworks_whenNoCommunicationTagInIcd_should_not_add_subnetwork() {
+        //Given
         SclRootAdapter sclRootAdapter = new SclRootAdapter("hId", SclRootAdapter.VERSION, SclRootAdapter.REVISION);
         SCL scd = sclRootAdapter.getCurrentElem();
-        assertNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
+        assertThat(sclRootAdapter.getCurrentElem().getDataTypeTemplates()).isNull();
         SCL icd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
-
-        assertDoesNotThrow(() -> sclEditorService.addIED(scd, "IED_NAME1", icd));
-
-        assertDoesNotThrow(() -> sclEditorService.addSubnetworks(scd, List.of(), icd));
+        //When Then
+        assertThatCode(() -> sclEditorService.addIED(scd, "IED_NAME1", icd)).doesNotThrowAnyException();
+        //When Then
+        assertThatCode(() -> sclEditorService.addSubnetworks(scd, List.of(), icd)).doesNotThrowAnyException();
         String marshalledScd = assertIsMarshallable(scd);
         assertThat(marshalledScd).doesNotContain("<Communication");
     }
 
     @Test
     void testInitScl_With_headerId_shouldNotThrowError() {
+        //Given
         UUID headerId = UUID.randomUUID();
+        //When
         SCL scd = assertDoesNotThrow(() -> sclEditorService.initScl(headerId, "hVersion", "hRevision"));
+        //Then
         assertIsMarshallable(scd);
     }
 
@@ -178,11 +189,13 @@ class SclEditorServiceTest {
     }
 
     @Test
+    @Tag("issue-321")
     void updateHeader_should_update_header_tag() {
-        //Given
+        //When Then
         SCL scd = assertDoesNotThrow(() -> sclEditorService.initScl(UUID.randomUUID(), "hVersion", "hRevision"));
-        UUID hId = UUID.fromString(scd.getHeader().getId());
-        HeaderDTO headerDTO = DTO.createHeaderDTO(hId);
+        //Given
+        UUID headerId = UUID.fromString(scd.getHeader().getId());
+        HeaderDTO headerDTO = DTO.createHeaderDTO(headerId);
         //When
         sclEditorService.updateHeader(scd, headerDTO);
         //Then
@@ -190,14 +203,16 @@ class SclEditorServiceTest {
     }
 
     @Test
-    void testUpdateDAI() {
+    @Tag("issue-321")
+    void updateDAI_should_not_throw_error() {
+        //Given
         DataAttributeRef dataAttributeRef = new DataAttributeRef();
         dataAttributeRef.setLnType("unknownID");
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
-
-        assertThrows(ScdException.class, () -> sclEditorService.updateDAI(
-                scd, "IED", "LD", dataAttributeRef
-        ));
+        //When Then
+        assertThatThrownBy(() -> sclEditorService.updateDAI(scd, "IED", "LD", dataAttributeRef))
+                .isInstanceOf(ScdException.class);
+        //Given
         dataAttributeRef.setLnType("LNO1");
         dataAttributeRef.setLnClass(TLLN0Enum.LLN_0.value());
         DoTypeName doTypeName = new DoTypeName("Do.sdo1.d");
@@ -206,16 +221,20 @@ class SclEditorServiceTest {
         TVal tVal = new TVal();
         tVal.setValue("newValue");
         dataAttributeRef.setDaiValues(List.of(tVal));
-        assertDoesNotThrow(() -> sclEditorService.updateDAI(scd, "IED_NAME", "LD_INS1", dataAttributeRef));
+        //When Then
+        assertThatCode(() -> sclEditorService.updateDAI(scd, "IED_NAME", "LD_INS1", dataAttributeRef))
+                .doesNotThrowAnyException();
         assertIsMarshallable(scd);
     }
 
     @Test
-    void testImportSTDElementsInSCD() {
+    void testImportSTDElementsInSCD_whenCalledWithOneSTD_shouldNotThrowException() {
+        //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd.xml");
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
-
-        assertDoesNotThrow(() -> sclEditorService.importSTDElementsInSCD(scd, List.of(std), DTO.SUB_NETWORK_TYPES));
+        //When Then
+        assertThatCode(() -> sclEditorService.importSTDElementsInSCD(scd, List.of(std), DTO.SUB_NETWORK_TYPES))
+                .doesNotThrowAnyException();
         assertThat(scd.getIED()).hasSize(1);
         assertThat(scd.getDataTypeTemplates()).hasNoNullFieldsOrProperties();
         assertThat(scd.getCommunication().getSubNetwork()).hasSize(2);
@@ -223,13 +242,15 @@ class SclEditorServiceTest {
     }
 
     @Test
-    void testImportSTDElementsInSCD_with_Multiple_STD() {
+    void importSTDElementsInSCD_whenCalledWithMultipleSTD_shouldNotThrowException() {
+        //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd_lnode_with_many_compas_icdheader.xml");
         SCL std0 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SCL std1 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_SITESITE1SCU1.xml");
         SCL std2 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_SITESITE1SCU2.xml");
-
-        assertDoesNotThrow(() -> sclEditorService.importSTDElementsInSCD(scd, List.of(std0, std1, std2), DTO.SUB_NETWORK_TYPES));
+        //When Then
+        assertThatCode(() -> sclEditorService.importSTDElementsInSCD(scd, List.of(std0, std1, std2), DTO.SUB_NETWORK_TYPES))
+                .doesNotThrowAnyException();
         assertThat(scd.getIED()).hasSize(3);
         assertThat(scd.getDataTypeTemplates()).hasNoNullFieldsOrProperties();
         assertThat(scd.getCommunication().getSubNetwork()).hasSize(2);
@@ -239,46 +260,50 @@ class SclEditorServiceTest {
     }
 
     @Test
-    void testImportSTDElementsInSCD_Several_STD_Match_Compas_ICDHeader() {
+    void importSTDElementsInSCD_whenManySTDMatchCompasICDHeader_shouldThrowException() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd.xml");
-        SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SCL std1 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SCL std2 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        List<SCL> stds = List.of(std1, std2);
         //When Then
-        List<SCL> stds = List.of(std, std1);
-        assertThrows(ScdException.class, () -> sclEditorService.importSTDElementsInSCD(scd, stds, DTO.SUB_NETWORK_TYPES));
+        assertThatThrownBy(() -> sclEditorService.importSTDElementsInSCD(scd, stds, DTO.SUB_NETWORK_TYPES))
+                .isInstanceOf(ScdException.class);
         assertIsMarshallable(scd);
     }
 
     @Test
-    void test_importSTDElementsInSCD_should_not_throw_exception_when_SCD_file_contains_same_ICDHeader_in_two_different_functions() {
+    void importSTDElementsInSCD_whenSCDFileContainsSameICDHeaderInTwoDifferentFunctions_should_not_throw_exception() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd_with_same_compas_icd_header_in_different_functions.xml");
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         //When Then
-        assertDoesNotThrow(() -> sclEditorService.importSTDElementsInSCD(scd, List.of(std), DTO.SUB_NETWORK_TYPES));
+        assertThatCode(() -> sclEditorService.importSTDElementsInSCD(scd, List.of(std), DTO.SUB_NETWORK_TYPES)).doesNotThrowAnyException();
         assertIsMarshallable(scd);
     }
 
     @Test
-    void testImportSTDElementsInSCD_Compas_ICDHeader_Not_Match() {
+    void importSTDElementsInSCD_whenCompasICDHeaderNotMatch__shouldThrowException() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd.xml");
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_with_same_ICDSystemVersionUUID.xml");
         List<SCL> stdList = List.of(std);
         //When Then
-        assertThrows(ScdException.class, () -> sclEditorService.importSTDElementsInSCD(scd, stdList, DTO.SUB_NETWORK_TYPES));
+        assertThatThrownBy(() -> sclEditorService.importSTDElementsInSCD(scd, stdList, DTO.SUB_NETWORK_TYPES))
+                .isInstanceOf(ScdException.class)
+                .hasMessageContaining("COMPAS-ICDHeader is not the same in Substation and in IED");
         assertIsMarshallable(scd);
     }
 
     @Test
-    void testImportSTDElementsInSCD_No_STD_Match() {
+    void importSTDElementsInSCD_whenNoSTDMatch_shouldThrowException() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/ssd.xml");
         List<SCL> stdList = List.of();
         //When Then
-        assertThrows(ScdException.class, () -> sclEditorService.importSTDElementsInSCD(scd, stdList, DTO.SUB_NETWORK_TYPES));
-        assertIsMarshallable(scd);
+        assertThatCode(() -> sclEditorService.importSTDElementsInSCD(scd, stdList, DTO.SUB_NETWORK_TYPES))
+                .isInstanceOf(ScdException.class)
+                .hasMessage("There is no STD file found corresponding to headerId = f8dbc8c1-2db7-4652-a9d6-0b414bdeccfa, headerVersion = 01.00.00, headerRevision = 01.00.00 and ICDSystemVersionUUID = IED4d4fe1a8cda64cf88a5ee4176a1a0eef");
     }
 
     @Test
@@ -347,10 +372,10 @@ class SclEditorServiceTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("sclProviderMissingRequiredObjects")
-    void updateLDeviceStatus_shouldReturnReportWithError_MissingRequiredObject(String testCase, SCL scl, Tuple... errors) {
+    void updateLDeviceStatus_whenMissingRequiredObject_shouldReturnReportWithError(String testCase, SCL scl, Tuple... errors) {
         // Given
-        assertTrue(getLDeviceStatusValue(scl, "IedName1", "LDSUIED").isPresent());
-        assertEquals("off", getLDeviceStatusValue(scl, "IedName1", "LDSUIED").get().getValue());
+        assertThat(getLDeviceStatusValue(scl, "IedName1", "LDSUIED")).isPresent();
+        assertThat(getLDeviceStatusValue(scl, "IedName1", "LDSUIED").get().getValue()).isEqualTo("off");
         String before = MarshallerWrapper.marshall(scl);
         // When
         List<SclReportItem> sclReportItems = sclEditorService.updateLDeviceStatus(scl);
@@ -367,7 +392,7 @@ class SclEditorServiceTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("sclProviderBasedLDeviceStatus")
-    void updateLDeviceStatus_shouldReturnReportWithError_WhenLDeviceStatusActiveOrUntestedOrInactive(String testCase, SCL scl, Tuple... errors) {
+    void updateLDeviceStatus_whenLDeviceStatusActiveOrUntestedOrInactive_shouldReturnReportWithError(String testCase, SCL scl, Tuple... errors) {
         // Given
         assertThat(getLDeviceStatusValue(scl, "IedName1", "LDSUIED").get().getValue()).isEqualTo("off");
         assertThat(getLDeviceStatusValue(scl, "IedName2", "LDSUIED").get().getValue()).isEqualTo("on");
@@ -389,7 +414,7 @@ class SclEditorServiceTest {
     }
 
     @Test
-    void updateLDeviceStatus_shouldReturnReportWithError_WhenAllLDeviceInactive_Test2() {
+    void updateLDeviceStatus_whenAllLDeviceInactive_shouldReturnReportWithError() {
         // Given
         SCL scl = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test2_LD_STATUS_INACTIVE.scd");
         assertThat(getLDeviceStatusValue(scl, "IedName1", "LDSUIED").get().getValue()).isEqualTo("off");
@@ -412,7 +437,6 @@ class SclEditorServiceTest {
         assertThat(getLDeviceStatusValue(scl, "IedName3", "LDSUIED").get().getValue()).isEqualTo("off");
     }
 
-
     @Test
     void updateLDeviceStatus_shouldReturnUpdatedFile() {
         // Given
@@ -422,7 +446,6 @@ class SclEditorServiceTest {
         assertThat(getLDeviceStatusValue(givenScl, "IedName2", "LDSUIED")).isPresent();
         assertThat(getLDeviceStatusValue(givenScl, "IedName2", "LDSUIED").get().getValue()).isEqualTo("on");
         assertThat(getLDeviceStatusValue(givenScl, "IedName3", "LDSUIED")).isEmpty();
-
         // When
         List<SclReportItem> sclReportItems = sclEditorService.updateLDeviceStatus(givenScl);
         // Then
@@ -436,7 +459,7 @@ class SclEditorServiceTest {
     }
 
     @Test
-    void updateLDeviceStatus_shouldReturnUpdatedFile_when_DAI_Mod_DO_stVal_whatever_it_is_updatable_or_not() {
+    void updateLDeviceStatus_when_DAI_Mod_DO_stVal_whateverIsUpdatableOrNot_shouldReturnUpdatedFile() {
         // Given
         SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue_165_enhance_68_Test_Dai_Updatable.scd");
         assertThat(getLDeviceStatusValue(givenScl, "IedName1", "LDSUIED"))
@@ -456,25 +479,20 @@ class SclEditorServiceTest {
                 .hasValue("on");
         // When
         List<SclReportItem> sclReportItems = sclEditorService.updateLDeviceStatus(givenScl);
-
         // Then
         assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
         assertThat(getLDeviceStatusValue(givenScl, "IedName1", "LDSUIED"))
                 .map(TVal::getValue)
                 .hasValue("on");
-
         assertThat(getLDeviceStatusValue(givenScl, "IedName2", "LDSUIED"))
                 .map(TVal::getValue)
                 .hasValue("off");
-
         assertThat(getLDeviceStatusValue(givenScl, "IedName3", "LDSUIED"))
                 .map(TVal::getValue)
                 .hasValue("off");
-
         assertThat(getLDeviceStatusValue(givenScl, "IedName4", "LDSUIED"))
                 .map(TVal::getValue)
                 .hasValue("off");
-
         assertThat(getLDeviceStatusValue(givenScl, "IedName5", "LDSUIED"))
                 .map(TVal::getValue)
                 .hasValue("off");
@@ -496,10 +514,8 @@ class SclEditorServiceTest {
     void updateDoInRef_shouldReturnUpdatedFile(String testName, String ldInst, String doName, String daName, String expected) {
         // Given
         SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_issue_231_test_ok.xml");
-
         // When
         List<SclReportItem> sclReportItems = sclEditorService.updateDoInRef(givenScl);
-
         // Then
         assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
         SclTestMarshaller.assertIsMarshallable(givenScl);
@@ -520,23 +536,20 @@ class SclEditorServiceTest {
     void updateDoInRef_should_not_update_DAI(String testName, String ldInst, String doName, String daName) {
         // Given
         SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_issue_231_test_ok.xml");
-
         // When
         List<SclReportItem> sclReportItems = sclEditorService.updateDoInRef(givenScl);
-
         // Then
         assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
         assertThat(getValFromDaiName(givenScl, "IED_NAME1", ldInst, doName, daName)).isNotPresent();
     }
 
     @Test
-    void updateDoInRef_shouldReturnReportWithError_when_ExtRef_not_coherent() {
+    @Tag("issue-321")
+    void updateDoInRef_when_ExtRefNotCoherent_shouldReturnReportWithError() {
         // Given
         SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_issue_231_test_ko.xml");
-
         // When
         List<SclReportItem> sclReportItems = sclEditorService.updateDoInRef(givenScl);
-
         // Then
         assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
         assertThat(sclReportItems).hasSize(4);
@@ -577,7 +590,6 @@ class SclEditorServiceTest {
 
     @Test
     void analyzeDataGroups_should_return_errors_messages() {
-
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -624,7 +636,7 @@ class SclEditorServiceTest {
     }
 
     @Test
-    void manageMonitoringLns_should_not_update_and_not_create_lsvs_and_goose_when_no_extRef() {
+    void manageMonitoringLns_when_no_extRef_should_not_update_and_not_create_lsvs_and_goose() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/monitoring_lns/scd_monitoring_lsvs_lgos.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -645,7 +657,7 @@ class SclEditorServiceTest {
     }
 
     @Test
-    void manageMonitoringLns_should_not_update_and_not_create_lsvs_and_goose_when_dai_not_updatable() {
+    void manageMonitoringLns_when_dai_not_updatable_should_not_update_and_not_create_lsvs_and_goose() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/monitoring_lns/scd_monitoring_lsvs_lgos.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);

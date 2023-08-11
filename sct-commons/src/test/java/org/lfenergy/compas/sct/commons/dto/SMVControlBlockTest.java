@@ -15,7 +15,9 @@ import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.lfenergy.compas.scl2007b4.model.TSampledValueControl.SmvOpts;
 
 class SMVControlBlockTest {

@@ -5,7 +5,7 @@
 package org.lfenergy.compas.sct.commons.scl.com;
 
 import org.assertj.core.groups.Tuple;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -17,73 +17,108 @@ import org.lfenergy.compas.sct.commons.util.SclConstructorHelper;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class ConnectedAPAdapterTest {
 
-    private SubNetworkAdapter subNetworkAdapter;
-
-    @BeforeEach
-    void setUp() {
-        subNetworkAdapter = new SubNetworkAdapter(null, new TSubNetwork());
-        TConnectedAP tConnectedAP = newConnectedAp(DTO.HOLDER_IED_NAME, DTO.AP_NAME);
-        subNetworkAdapter.getCurrentElem().getConnectedAP().add(tConnectedAP);
+    @Test
+    void constructor_whenCalledWithNoRelationBetweenSubNetworkAndConnectedAP_shouldThrowException() {
+        //Given
+        SubNetworkAdapter subNetworkAdapter = mock(SubNetworkAdapter.class);
+        when(subNetworkAdapter.getCurrentElem()).thenReturn(new TSubNetwork());
+        TConnectedAP connectedAP = new TConnectedAP();
+        //When Then
+        assertThatCode(() -> new ConnectedAPAdapter(subNetworkAdapter, connectedAP))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("No relation between SCL parent element and child");
     }
 
     @Test
-    void testAmChildElementRef() {
-        ConnectedAPAdapter connectedAPAdapter = assertDoesNotThrow(
-                () -> subNetworkAdapter.getConnectedAPAdapter(DTO.HOLDER_IED_NAME, DTO.AP_NAME)
-        );
-
-        assertEquals(DTO.HOLDER_IED_NAME, connectedAPAdapter.getIedName());
-        assertEquals(DTO.AP_NAME, connectedAPAdapter.getApName());
+    void constructor_whenCalledWithExistingRelationBetweenSubNetworkAndConnectedAP_shouldNotThrowException() {
+        //Given
+        SubNetworkAdapter subNetworkAdapter = mock(SubNetworkAdapter.class);
+        TSubNetwork subNetwork = new TSubNetwork();
+        TConnectedAP connectedAP = new TConnectedAP();
+        subNetwork.getConnectedAP().add(connectedAP);
+        when(subNetworkAdapter.getCurrentElem()).thenReturn(subNetwork);
+        //When Then
+        assertThatCode(() -> new ConnectedAPAdapter(subNetworkAdapter, connectedAP))
+                .doesNotThrowAnyException();
     }
 
     @Test
-    void addPrivate() {
-        ConnectedAPAdapter connectedAPAdapter = subNetworkAdapter.getConnectedAPAdapter(DTO.HOLDER_IED_NAME, DTO.AP_NAME);
+    void addPrivate_with_type_and_source_should_create_Private() {
+        //Given
+        SubNetworkAdapter subNetworkAdapter = mock(SubNetworkAdapter.class);
+        TSubNetwork subNetwork = new TSubNetwork();
+        TConnectedAP connectedAP = new TConnectedAP();
+        subNetwork.getConnectedAP().add(connectedAP);
+        when(subNetworkAdapter.getCurrentElem()).thenReturn(subNetwork);
+        ConnectedAPAdapter connectedAPAdapter = new ConnectedAPAdapter(subNetworkAdapter, connectedAP);
         TPrivate tPrivate = new TPrivate();
         tPrivate.setType("Private Type");
         tPrivate.setSource("Private Source");
-        assertTrue(connectedAPAdapter.getCurrentElem().getPrivate().isEmpty());
+        assertThat(connectedAPAdapter.getCurrentElem().getPrivate()).isEmpty();
+        //When
         connectedAPAdapter.addPrivate(tPrivate);
-        assertEquals(1, connectedAPAdapter.getCurrentElem().getPrivate().size());
+        //Then
+        assertThat(connectedAPAdapter.getCurrentElem().getPrivate()).isNotEmpty();
     }
 
     @Test
-    void testCopyAddressAndPhysConnFromIcd_withFilledCommunication() {
+    void copyAddressAndPhysConnFromIcd_when_apName_exist_in_ICD_Communication_should_update_subNetwork() {
         // GIVEN
-        ConnectedAPAdapter connectedAPAdapter = assertDoesNotThrow(
-                () -> subNetworkAdapter.getConnectedAPAdapter(DTO.HOLDER_IED_NAME, DTO.AP_NAME)
-        );
-
+        SubNetworkAdapter subNetworkAdapter = mock(SubNetworkAdapter.class);
+        TSubNetwork subNetwork = new TSubNetwork();
+        TConnectedAP connectedAP = newConnectedAp(DTO.HOLDER_IED_NAME, DTO.AP_NAME);
+        subNetwork.getConnectedAP().add(connectedAP);
+        when(subNetworkAdapter.getCurrentElem()).thenReturn(subNetwork);
+        ConnectedAPAdapter connectedAPAdapter = new ConnectedAPAdapter(subNetworkAdapter, connectedAP);
         SCL icd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_with_filled_communication.xml");
         SclRootAdapter icdRootAdapter = new SclRootAdapter(icd);
-
         // WHEN
         connectedAPAdapter.copyAddressAndPhysConnFromIcd(icdRootAdapter.getCurrentElem());
-
         // THEN
         assertThat(connectedAPAdapter.getCurrentElem().getAddress()).isNotNull();
-        assertThat(connectedAPAdapter.getCurrentElem().getPhysConn()).isNotNull();
+        assertThat(connectedAPAdapter.getCurrentElem().getPhysConn()).isNotEmpty();
         assertThat(connectedAPAdapter.getCurrentElem().getGSE()).isEmpty();
     }
 
     @Test
-    void testCopyAddressAndPhysConnFromIcd_withEmptyIcd() {
+    void copyAddressAndPhysConnFromIcd_when_apName_not_exist_in_ICD_Communication_should_not_update_subNetwork() {
         // GIVEN
-        ConnectedAPAdapter connectedAPAdapter = assertDoesNotThrow(
-                () -> subNetworkAdapter.getConnectedAPAdapter(DTO.HOLDER_IED_NAME, DTO.AP_NAME)
-        );
+        SubNetworkAdapter subNetworkAdapter = mock(SubNetworkAdapter.class);
+        TSubNetwork subNetwork = new TSubNetwork();
+        TConnectedAP connectedAP = new TConnectedAP();
+        subNetwork.getConnectedAP().add(connectedAP);
+        when(subNetworkAdapter.getCurrentElem()).thenReturn(subNetwork);
+        ConnectedAPAdapter connectedAPAdapter = new ConnectedAPAdapter(subNetworkAdapter, connectedAP);
+        SCL icd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_with_filled_communication.xml");
+        SclRootAdapter icdRootAdapter = new SclRootAdapter(icd);
+        // WHEN
+        connectedAPAdapter.copyAddressAndPhysConnFromIcd(icdRootAdapter.getCurrentElem());
+        // THEN
+        assertThat(connectedAPAdapter.getCurrentElem().getAddress()).isNull();
+        assertThat(connectedAPAdapter.getCurrentElem().getPhysConn()).isEmpty();
+        assertThat(connectedAPAdapter.getCurrentElem().getGSE()).isEmpty();
+    }
 
+    @Test
+    void copyAddressAndPhysConnFromIcd_whenCalledWithEmptyIcd_shouldNotUpdateSubNetwork() {
+        // GIVEN
+        SubNetworkAdapter subNetworkAdapter = mock(SubNetworkAdapter.class);
+        TSubNetwork subNetwork = new TSubNetwork();
+        TConnectedAP connectedAP = newConnectedAp(DTO.HOLDER_IED_NAME, DTO.AP_NAME);
+        subNetwork.getConnectedAP().add(connectedAP);
+        when(subNetworkAdapter.getCurrentElem()).thenReturn(subNetwork);
+        ConnectedAPAdapter connectedAPAdapter = new ConnectedAPAdapter(subNetworkAdapter, connectedAP);
         // WHEN
         connectedAPAdapter.copyAddressAndPhysConnFromIcd(null);
-
         // THEN
         assertThat(connectedAPAdapter.getCurrentElem().getAddress()).isNull();
         assertThat(connectedAPAdapter.getCurrentElem().getPhysConn()).isEmpty();
@@ -93,7 +128,7 @@ class ConnectedAPAdapterTest {
     @ParameterizedTest
     @CsvSource(value = {"IED_NAME;AP_NAME;ConnectedAP[@apName=\"AP_NAME\" and @iedName=\"IED_NAME\"]", ";;ConnectedAP[not(@apName) and not(@iedName)]"}
             , delimiter = ';')
-    void elementXPath(String iedName, String apName, String message) {
+    void elementXPath_should_return_expected_xpath_value(String iedName, String apName, String message) {
         // Given
         ConnectedAPAdapter connectedAPAdapter = newConnectedApAdapter(iedName, apName);
         // When
@@ -122,9 +157,11 @@ class ConnectedAPAdapterTest {
     }
 
     @Test
+    @Tag("issue-321")
     void updateGseOrCreateIfNotExists_when_exists_should_update_GSE(){
         // Given
         ConnectedAPAdapter connectedAPAdapter = newConnectedApAdapter("IED_NAME", "AP_NAME");
+        // When
         connectedAPAdapter.updateGseOrCreateIfNotExists("ldinst", "cbName", List.of(SclConstructorHelper.newP("APPID", "0001")),
             newDurationInMilliSec(5), newDurationInMilliSec(10));
         // When

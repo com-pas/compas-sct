@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
@@ -13,107 +14,130 @@ import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.lfenergy.compas.sct.commons.dto.DTO.P_DA;
 import static org.lfenergy.compas.sct.commons.dto.DTO.P_DO;
 
 class ExtRefBindingInfoTest {
 
     @Test
-    void testConstruction() {
+    @Tag("issue-321")
+    void constructor_whenCalled_shouldFillValues() {
         ExtRefBindingInfo bindingInfo = DTO.createExtRefBindingInfo_Remote();
         ExtRefBindingInfo bindingInfo_bis = DTO.createExtRefBindingInfo_Remote();
+        // When
         ExtRefBindingInfo bindingInfo_ter = new ExtRefBindingInfo(DTO.createExtRef());
+        // When
         ExtRefBindingInfo bindingInfo_qt = new ExtRefBindingInfo();
 
-        assertEquals(bindingInfo, bindingInfo_ter);
-        assertEquals(bindingInfo, bindingInfo_bis);
-        assertNotEquals(null, bindingInfo);
-        assertNotEquals(bindingInfo, bindingInfo_qt);
+        // Then
+        assertThat(bindingInfo_ter).isEqualTo(bindingInfo);
+        assertThat(bindingInfo_bis).isEqualTo(bindingInfo);
+        assertThat(bindingInfo).isNotNull();
+        assertThat(bindingInfo_qt).isNotEqualTo(bindingInfo);
         bindingInfo_qt.setDaName(bindingInfo.getDaName());
-        assertNotEquals(bindingInfo, bindingInfo_qt);
+        assertThat(bindingInfo_qt).isNotEqualTo(bindingInfo);
 
         bindingInfo_qt.setDoName(bindingInfo.getDoName());
-        assertNotEquals(bindingInfo, bindingInfo_qt);
+        assertThat(bindingInfo_qt).isNotEqualTo(bindingInfo);
 
         bindingInfo_qt.setIedName(bindingInfo.getIedName());
-        assertNotEquals(bindingInfo, bindingInfo_qt);
+        assertThat(bindingInfo_qt).isNotEqualTo(bindingInfo);
 
         bindingInfo_qt.setLdInst(bindingInfo.getLdInst());
-        assertNotEquals(bindingInfo, bindingInfo_qt);
+        assertThat(bindingInfo_qt).isNotEqualTo(bindingInfo);
 
         bindingInfo_qt.setLnInst(bindingInfo.getLnInst());
-        assertNotEquals(bindingInfo, bindingInfo_qt);
+        assertThat(bindingInfo_qt).isNotEqualTo(bindingInfo);
 
         bindingInfo_qt.setLnClass(bindingInfo.getLnClass());
-        assertNotEquals(bindingInfo, bindingInfo_qt);
+        assertThat(bindingInfo_qt).isNotEqualTo(bindingInfo);
 
         bindingInfo_qt.setPrefix(bindingInfo.getPrefix());
-        assertNotEquals(bindingInfo, bindingInfo_qt);
+        assertThat(bindingInfo_qt).isNotEqualTo(bindingInfo);
 
         bindingInfo_qt.setServiceType(bindingInfo.getServiceType());
-        assertEquals(bindingInfo, bindingInfo_qt);
-        assertEquals(bindingInfo.hashCode(), bindingInfo_qt.hashCode());
+        assertThat(bindingInfo_qt).hasSameHashCodeAs(bindingInfo);
     }
 
     @Test
+    @Tag("issue-321")
     void testIsValid() {
+        // Given
         ExtRefBindingInfo bindingInfo = DTO.createExtRefBindingInfo_Remote();
-        assertTrue(bindingInfo.isValid());
+        // When Then
+        assertThat(bindingInfo.isValid()).isTrue();
         bindingInfo.setLnClass("PIOC");
         bindingInfo.setLnInst("");
-        assertFalse(bindingInfo.isValid());
+        // When Then
+        assertThat(bindingInfo.isValid()).isFalse();
         bindingInfo.setDoName(new DoTypeName("do.sdo1.sdoError"));
-        assertFalse(bindingInfo.isValid());
+        // When Then
+        assertThat(bindingInfo.isValid()).isFalse();
         bindingInfo.setDaName(new DaTypeName(""));
-        assertFalse(bindingInfo.isValid());
+        // When Then
+        assertThat(bindingInfo.isValid()).isFalse();
         bindingInfo.setLnClass("");
-        assertFalse(bindingInfo.isValid());
+        // When Then
+        assertThat(bindingInfo.isValid()).isFalse();
         bindingInfo.setLdInst("");
-        assertFalse(bindingInfo.isValid());
+        // When Then
+        assertThat(bindingInfo.isValid()).isFalse();
         bindingInfo.setIedName("");
-        assertFalse(bindingInfo.isValid());
-
+        // When Then
+        assertThat(bindingInfo.isValid()).isFalse();
     }
 
     @Test
+    @Tag("issue-321")
     void testIsWrappedIn() {
+        // Given
         TExtRef extRef = DTO.createExtRef();
         ExtRefBindingInfo bindingInfo = new ExtRefBindingInfo();
-        assertFalse(bindingInfo.isWrappedIn(extRef));
+        // When Then
+        assertThat(bindingInfo.isWrappedIn(extRef)).isFalse();
 
         bindingInfo.setIedName(extRef.getIedName());
-        assertFalse(bindingInfo.isWrappedIn(extRef));
+        // When Then
+        assertThat(bindingInfo.isWrappedIn(extRef)).isFalse();
 
         bindingInfo.setLdInst(extRef.getLdInst());
-        assertFalse(bindingInfo.isWrappedIn(extRef));
+        // When Then
+        assertThat(bindingInfo.isWrappedIn(extRef)).isFalse();
 
         if (!extRef.getLnClass().isEmpty()) {
             bindingInfo.setLnClass(extRef.getLnClass().get(0));
-            assertFalse(bindingInfo.isWrappedIn(extRef));
+            // When Then
+            assertThat(bindingInfo.isWrappedIn(extRef)).isFalse();
 
             bindingInfo.setLnInst(extRef.getLnInst());
-            assertFalse(bindingInfo.isWrappedIn(extRef));
+            // When Then
+            assertThat(bindingInfo.isWrappedIn(extRef)).isFalse();
 
             bindingInfo.setPrefix(extRef.getPrefix());
-            assertFalse(bindingInfo.isWrappedIn(extRef));
+            // When Then
+            assertThat(bindingInfo.isWrappedIn(extRef)).isFalse();
         }
-
         bindingInfo.setServiceType(extRef.getServiceType());
-        assertTrue(bindingInfo.isWrappedIn(extRef));
+        // When Then
+        assertThat(bindingInfo.isWrappedIn(extRef)).isTrue();
     }
 
     @Test
+    @Tag("issue-321")
     void testIsNull() {
+        // Given
         ExtRefBindingInfo bindingInfo = new ExtRefBindingInfo();
-        assertTrue(bindingInfo.isNull());
+        // When Then
+        assertThat(bindingInfo.isNull()).isTrue();
 
         bindingInfo.setServiceType(TServiceType.REPORT);
-        assertFalse(bindingInfo.isNull());
+        // When Then
+        assertThat(bindingInfo).isNotNull();
     }
 
     @Test
-    void compareTo_should_return_0_when_ExtRefBindingInfo_the_same() {
+    void compareTo_when_ExtRefBindingInfo_the_same_should_return_0() {
         // Given
         ExtRefBindingInfo bindingInfo1 = DTO.createExtRefBindingInfo_Remote();
         ExtRefBindingInfo bindingInfo2 = DTO.createExtRefBindingInfo_Remote();
@@ -126,7 +150,7 @@ class ExtRefBindingInfoTest {
     }
 
     @Test
-    void compareTo_should_return_positive_int_when_first_ExtRefBindingInfo_is_major_in_alphabetical_order() {
+    void compareTo_when_first_ExtRefBindingInfo_is_major_in_alphabetical_order_should_return_positive_int() {
         // Given
         ExtRefBindingInfo bindingInfo1 = DTO.createExtRefBindingInfo_Remote();
         ExtRefBindingInfo bindingInfo2 = DTO.createExtRefBindingInfo_Source();
@@ -139,7 +163,7 @@ class ExtRefBindingInfoTest {
     }
 
     @Test
-    void compareTo_should_return_negative_int_when_first_ExtRefBindingInfo_is_minor_in_alphabetical_order() {
+    void compareTo_when_first_ExtRefBindingInfo_is_minor_in_alphabetical_order_should_return_negative_int() {
         // Given
         ExtRefBindingInfo bindingInfo1 = DTO.createExtRefBindingInfo_Source();
         ExtRefBindingInfo bindingInfo2 = DTO.createExtRefBindingInfo_Remote();
@@ -152,16 +176,18 @@ class ExtRefBindingInfoTest {
     }
 
     @Test
-    void findAndUpdateDAInfos_shouldThrowException_whenDAUnknown() {
+    @Tag("issue-321")
+    void findAndUpdateDAInfos_whenDAUnknown_shouldThrowException() {
         //Given
         ExtRefBindingInfo bindingInfo = DTO.createExtRefBindingInfo_Source();
         ExtRefSignalInfo signalInfo = DTO.createExtRefSignalInfo();
 
         SclRootAdapter sclRootAdapter = new SclRootAdapter("hID","hVersion","hRevision");
         sclRootAdapter.getCurrentElem().setDataTypeTemplates(new TDataTypeTemplates());
-        DataTypeTemplateAdapter dttAdapter = assertDoesNotThrow(
-                sclRootAdapter::getDataTypeTemplateAdapter);
+        //When Then
+        DataTypeTemplateAdapter dttAdapter = assertDoesNotThrow(sclRootAdapter::getDataTypeTemplateAdapter);
 
+        //Given
         TDA tda = new TDA();
         tda.setName(P_DA);
         tda.setFc(TFCEnum.CF);
@@ -188,7 +214,8 @@ class ExtRefBindingInfoTest {
     }
 
     @Test
-    void findAndUpdateDAInfos_shouldThrowException_whenDANotCoherentWithDO() {
+    @Tag("issue-321")
+    void findAndUpdateDAInfos_whenDANotCoherentWithDO_shouldThrowException() {
         //Given
         ExtRefBindingInfo bindingInfo = DTO.createExtRefBindingInfo_Source();
         ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
@@ -196,9 +223,10 @@ class ExtRefBindingInfoTest {
         signalInfo.setPDA("P_DA");
         SclRootAdapter sclRootAdapter = new SclRootAdapter("hID","hVersion","hRevision");
         sclRootAdapter.getCurrentElem().setDataTypeTemplates(new TDataTypeTemplates());
-        DataTypeTemplateAdapter dttAdapter = assertDoesNotThrow(
-                sclRootAdapter::getDataTypeTemplateAdapter);
+        //When Then
+        DataTypeTemplateAdapter dttAdapter = assertDoesNotThrow(sclRootAdapter::getDataTypeTemplateAdapter);
 
+        //Given
         TDA tda = new TDA();
         tda.setName("P_DA");
         tda.setFc(TFCEnum.CF);

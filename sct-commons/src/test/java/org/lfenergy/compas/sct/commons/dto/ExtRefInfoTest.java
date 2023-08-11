@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -15,27 +16,32 @@ import org.lfenergy.compas.scl2007b4.model.TServiceType;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class ExtRefInfoTest {
 
     @Test
-    void testConstruction(){
+    @Tag("issue-321")
+    void constructor_whenCalled_shouldFillValues(){
+        // When
         ExtRefInfo extRefInfo = createExtRef();
 
-        assertEquals(DTO.DESC,extRefInfo.getSignalInfo().getDesc());
-        assertEquals(DTO.P_DA,extRefInfo.getSignalInfo().getPDA());
-        assertEquals(DTO.P_DO,extRefInfo.getSignalInfo().getPDO());
-        assertTrue(extRefInfo.getSignalInfo().getPLN().contains(DTO.P_LN));
-        assertEquals(DTO.INT_ADDR, extRefInfo.getSignalInfo().getIntAddr());
-        assertEquals(TServiceType.fromValue(DTO.P_SERV_T),extRefInfo.getSignalInfo().getPServT());
-        assertNotNull(extRefInfo.getBindingInfo());
-        assertNotNull(extRefInfo.getSourceInfo());
+        // Then
+        assertThat(extRefInfo.getSignalInfo().getDesc()).isEqualTo(DTO.DESC);
+        assertThat(extRefInfo.getSignalInfo().getPDA()).isEqualTo(DTO.P_DA);
+        assertThat(extRefInfo.getSignalInfo().getPDO()).isEqualTo(DTO.P_DO);
+        assertThat(extRefInfo.getSignalInfo().getPLN()).contains(DTO.P_LN);
+        assertThat(extRefInfo.getSignalInfo().getIntAddr()).isEqualTo(DTO.INT_ADDR);
+        assertThat(extRefInfo.getSignalInfo().getPServT()).isEqualTo(TServiceType.fromValue(DTO.P_SERV_T));
+        assertThat(extRefInfo.getBindingInfo()).isNotNull();
+        assertThat(extRefInfo.getSourceInfo()).isNotNull();
 
+        // Given
         TExtRef extRef = ExtRefSignalInfo.initExtRef(extRefInfo.getSignalInfo());
+        // When
         ExtRefInfo extRefInfo1 = new ExtRefInfo(extRef);
-        assertNotNull(extRefInfo1.getBindingInfo());
-        assertNotNull(extRefInfo1.getSourceInfo());
+        // Then
+        assertThat(extRefInfo1.getBindingInfo()).isNotNull();
+        assertThat(extRefInfo1.getSourceInfo()).isNotNull();
     }
 
     private ExtRefInfo createExtRef(){
@@ -48,12 +54,11 @@ class ExtRefInfoTest {
     }
 
     @Test
-    void checkMatchingFCDA_shouldreturnTrue_whenContentMatch() {
+    void checkMatchingFCDA_whenContentMatch_should_return_True() {
         //Given
         ExtRefInfo extRefInfo = new ExtRefInfo();
         extRefInfo.setBindingInfo(DTO.createExtRefBindingInfo_Remote());
         extRefInfo.setSignalInfo(DTO.createExtRefSignalInfo());
-
         TFCDA tfcda = new TFCDA();
         tfcda.setLdInst(DTO.createExtRefBindingInfo_Remote().getLdInst());
         tfcda.getLnClass().add(DTO.createExtRefBindingInfo_Remote().getLnClass());
@@ -68,7 +73,7 @@ class ExtRefInfoTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideIncompleteExtRefInfo")
-    void checkMatchingFCDA(String testCase, TFCDA fcda, ExtRefBindingInfo bindingInfo, ExtRefSignalInfo signalInfo) {
+    void checkMatchingFCDA_whenCalled_should_return_false(String testCase, TFCDA fcda, ExtRefBindingInfo bindingInfo, ExtRefSignalInfo signalInfo) {
         //Given
         ExtRefInfo extRefInfo = new ExtRefInfo();
         extRefInfo.setBindingInfo(bindingInfo);

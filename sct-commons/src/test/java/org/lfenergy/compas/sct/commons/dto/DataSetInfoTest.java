@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.TDataSet;
 import org.lfenergy.compas.scl2007b4.model.TLN;
@@ -12,26 +13,29 @@ import org.lfenergy.compas.sct.commons.scl.ied.LNAdapter;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class DataSetInfoTest {
 
     @Test
+    @Tag("issue-321")
     void testConstructor(){
         //Given When
         DataSetInfo dataSetInfo = new DataSetInfo();
-        assertNull(dataSetInfo.getName());
+        assertThat(dataSetInfo.getName()).isNull();
+        //When
         dataSetInfo = new DataSetInfo("DATA_INFO");
-        assertEquals("DATA_INFO",dataSetInfo.getName());
+        //Then
+        assertThat(dataSetInfo.getName()).isEqualTo("DATA_INFO");
+        //Given
         dataSetInfo.setName("DATA_INFO1");
         dataSetInfo.addFCDAInfo(new FCDAInfo());
-        //Then
-        assertEquals("DATA_INFO1",dataSetInfo.getName());
-        assertFalse(dataSetInfo.getFCDAInfos().isEmpty());
+        //When
+        assertThat(dataSetInfo.getName()).isEqualTo("DATA_INFO1");
+        assertThat(dataSetInfo.getFCDAInfos()).isNotEmpty();
     }
 
     @Test
-    void testFrom(){
+    void from_WhenCalledWithDataSet_ThenValuesAreFilled(){
         //Given
         TDataSet dataSet = new TDataSet();
         dataSet.setName("dataset");
@@ -39,12 +43,12 @@ class DataSetInfoTest {
         //When
         DataSetInfo dataSetInfo = DataSetInfo.from(dataSet);
         //Then
-        assertEquals("dataset", dataSetInfo.getName());
-        assertEquals(1,dataSetInfo.getFCDAInfos().size());
+        assertThat(dataSetInfo.getName()).isEqualTo("dataset");
+        assertThat(dataSetInfo.getFCDAInfos()).hasSize(1);
     }
 
     @Test
-    void getDataSets_shouldReturnEmptyList_whenNoDataSetInLN(){
+    void getDataSets_whenCalledWithNoDataSetInLN_shouldReturnEmptyList(){
         //Given
         LNAdapter lnAdapter = new LNAdapter(null, new TLN());
         //When
@@ -54,7 +58,7 @@ class DataSetInfoTest {
     }
 
     @Test
-    void getDataSets_shouldReturnDataSet_whenLNContainsMatchingFCDA(){
+    void getDataSets_whenCalledWithLNContainsMatchingFCDA_shouldReturnDataSet(){
         //Given
         TDataSet dataSet = new TDataSet();
         dataSet.setName("datasetName");
@@ -71,10 +75,10 @@ class DataSetInfoTest {
 
 
     @Test
-    void isValid_shouldReturnFalse_whenNameSizeMore32() {
+    void isValid_whenNameSizeMore32_shouldReturnFalse() {
         //Given
         DataSetInfo dataSetInfo = new DataSetInfo();
-        assertNull(dataSetInfo.getName());
+        assertThat(dataSetInfo.getName()).isNull();
         dataSetInfo = new DataSetInfo("DATA_INFO_TEST_CHARACTERE_NAME_MORE_THAN_32_CHARACTERES");
         //When
         boolean isValid = dataSetInfo.isValid();
@@ -82,9 +86,9 @@ class DataSetInfoTest {
         assertThat(isValid).isFalse();
     }
     @Test
-    void isValid_shouldReturnFalse_whenFCDAInfoEmpty() {
+    void isValid_whenFCDAInfoEmpty_shouldReturnFalse() {
         DataSetInfo dataSetInfo = new DataSetInfo();
-        assertNull(dataSetInfo.getName());
+        assertThat(dataSetInfo.getName()).isNull();
         dataSetInfo = new DataSetInfo("DATA_INFO");
         //When
         boolean isValid = dataSetInfo.isValid();
@@ -94,7 +98,7 @@ class DataSetInfoTest {
     }
 
     @Test
-    void isValid_shouldReturnTrue_whenFCDAInfosValid() {
+    void isValid_whenFCDAInfosValidshouldReturnTrue() {
         //Given
         TDataSet dataSet = new TDataSet();
         dataSet.setName("dataset");

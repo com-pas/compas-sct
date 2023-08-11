@@ -4,165 +4,202 @@
 
 package org.lfenergy.compas.sct.commons.scl.dtt;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.scl2007b4.model.TBDA;
-import org.lfenergy.compas.scl2007b4.model.TDAType;
-import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
-import org.lfenergy.compas.scl2007b4.model.TPrivate;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
 import org.lfenergy.compas.sct.commons.dto.DoTypeName;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.mockito.Mockito;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateTestUtils.SCD_DTT;
+import static org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateTestUtils.initDttAdapterFromFile;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-class DATypeAdapterTest extends AbstractDTTLevel<DataTypeTemplateAdapter,TDAType> {
+class DATypeAdapterTest {
 
-    @Override
-    protected void completeInit() {
+    @Test
+    void constructor_whenCalledWithNoRelationBetween_between_DataTypeTemplates_and_DAType() {
+        //Given
+        DataTypeTemplateAdapter dataTemplateAdapter = mock(DataTypeTemplateAdapter.class);
+        when(dataTemplateAdapter.getCurrentElem()).thenReturn(new TDataTypeTemplates());
         TDAType tdaType = new TDAType();
-        tdaType.setId("ID");
-        List<TDAType> tdaTypes = new ArrayList<>();
-        tdaTypes.add(tdaType);
-        sclElement = tdaType;
-        Mockito.when(sclElementAdapter.getCurrentElem().getDAType()).thenReturn(tdaTypes);
+        //When Then
+        assertThatCode(() -> new DATypeAdapter(dataTemplateAdapter, tdaType))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("No relation between SCL parent element and child");
     }
 
     @Test
-    void testAmChildElementRef() {
-        init();
-        assertDoesNotThrow(
-                () -> new DATypeAdapter(sclElementAdapter, sclElement)
-        );
+    void constructor_whenCalledWithExistingRelationBetween_DataTypeTemplates_and_DAType_exist() {
+        //Given
+        DataTypeTemplateAdapter dataTemplateAdapter = mock(DataTypeTemplateAdapter.class);
+        TDataTypeTemplates dataTemplate = new TDataTypeTemplates();
+        TDAType tdaType = new TDAType();
+        dataTemplate.getDAType().add(tdaType);
+        when(dataTemplateAdapter.getCurrentElem()).thenReturn(dataTemplate);
+        //When Then
+        assertThatCode(() -> new DATypeAdapter(dataTemplateAdapter, tdaType)).doesNotThrowAnyException();
     }
 
     @Test
-    void testGetBdaAdapters() {
-        init();
+    void getBdaAdapters_should_return_list_of_BDAAdapter() {
+        // Given
+        DataTypeTemplateAdapter dataTemplateAdapter = mock(DataTypeTemplateAdapter.class);
+        TDataTypeTemplates dataTemplate = new TDataTypeTemplates();
+        TDAType tdaType = new TDAType();
         TBDA tbda = new TBDA();
         tbda.setType("ID_BDA");
-        sclElement.getBDA().add(tbda);
-
-        DATypeAdapter daTypeAdapter = assertDoesNotThrow(
-                () -> new DATypeAdapter(sclElementAdapter, sclElement)
-        );
-        assertFalse(daTypeAdapter.getBdaAdapters().isEmpty());
-        assertEquals(daTypeAdapter.getBdaAdapters().get(0).getClass(), DATypeAdapter.BDAAdapter.class);
+        tdaType.getBDA().add(tbda);
+        dataTemplate.getDAType().add(tdaType);
+        when(dataTemplateAdapter.getCurrentElem()).thenReturn(dataTemplate);
+        DATypeAdapter daTypeAdapter = new DATypeAdapter(dataTemplateAdapter, tdaType);
+        // When Then
+        assertThat(daTypeAdapter.getBdaAdapters()).isNotEmpty();
+        assertThat(daTypeAdapter.getBdaAdapters().get(0).getClass()).isEqualTo(DATypeAdapter.BDAAdapter.class);
     }
 
     @Test
-    void testContainsBDAWithEnumTypeID() {
-        init();
+    void containsBDAWithEnumTypeID_should_check_if_DAType_contains_BDA_with_specific_EnumType() {
+        // Given
+        DataTypeTemplateAdapter dataTemplateAdapter = mock(DataTypeTemplateAdapter.class);
+        TDataTypeTemplates dataTemplate = new TDataTypeTemplates();
+        TDAType tdaType = new TDAType();
         TBDA tbda = new TBDA();
         tbda.setType("ID_BDA");
         tbda.setBType(TPredefinedBasicTypeEnum.ENUM);
         tbda.setType("enumTypeId");
-        sclElement.getBDA().add(tbda);
+        tdaType.getBDA().add(tbda);
+        dataTemplate.getDAType().add(tdaType);
+        when(dataTemplateAdapter.getCurrentElem()).thenReturn(dataTemplate);
 
-        DATypeAdapter daTypeAdapter = assertDoesNotThrow(
-                () -> new DATypeAdapter(sclElementAdapter, sclElement)
-        );
-        assertTrue(daTypeAdapter.containsBDAWithEnumTypeID("enumTypeId"));
-        assertFalse(daTypeAdapter.containsBDAWithEnumTypeID("no_enumTypeId"));
+        DATypeAdapter daTypeAdapter = new DATypeAdapter(dataTemplateAdapter, tdaType);
+        // When Then
+        assertThat(daTypeAdapter.containsBDAWithEnumTypeID("enumTypeId")).isTrue();
+        assertThat(daTypeAdapter.containsBDAWithEnumTypeID("no_enumTypeId")).isFalse();
     }
 
     @Test
-    void testContainsStructBdaWithDATypeId() {
-        init();
+    void containsStructBdaWithDATypeId_should_check_if_DAType_contains_StructType() {
+        // Given
+        DataTypeTemplateAdapter dataTemplateAdapter = mock(DataTypeTemplateAdapter.class);
+        TDataTypeTemplates dataTemplate = new TDataTypeTemplates();
+        TDAType tdaType = new TDAType();
         TBDA tbda = new TBDA();
         tbda.setType("ID_BDA");
         tbda.setBType(TPredefinedBasicTypeEnum.STRUCT);
         tbda.setType("daTypeId");
-        sclElement.getBDA().add(tbda);
-
-        DATypeAdapter daTypeAdapter = assertDoesNotThrow(
-                () -> new DATypeAdapter(sclElementAdapter, sclElement)
-        );
-        assertTrue(daTypeAdapter.containsStructBdaWithDATypeId("daTypeId"));
-        assertFalse(daTypeAdapter.containsStructBdaWithDATypeId("no_daTypeId"));
+        tdaType.getBDA().add(tbda);
+        dataTemplate.getDAType().add(tdaType);
+        when(dataTemplateAdapter.getCurrentElem()).thenReturn(dataTemplate);
+        DATypeAdapter daTypeAdapter = new DATypeAdapter(dataTemplateAdapter, tdaType);
+        // When Then
+        assertThat(daTypeAdapter.containsStructBdaWithDATypeId("daTypeId")).isTrue();
+        assertThat(daTypeAdapter.containsStructBdaWithDATypeId("no_daTypeId")).isFalse();
     }
 
     @Test
-    void hasSameContentAs() throws Exception {
-
-        DataTypeTemplateAdapter rcvDttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
-        assertTrue(rcvDttAdapter.getDATypeAdapters().size() > 1);
-
+    @Tag("issue-321")
+    void hasSameContentAs() {
+        // Given
+        DataTypeTemplateAdapter rcvDttAdapter = initDttAdapterFromFile(SCD_DTT);
+        assertThat(rcvDttAdapter.getDATypeAdapters()).hasSizeGreaterThan(1);
         DATypeAdapter rcvDATypeAdapter =  rcvDttAdapter.getDATypeAdapters().get(0);
-        assertTrue(rcvDATypeAdapter.hasSameContentAs(rcvDATypeAdapter.getCurrentElem()));
-        assertFalse(rcvDATypeAdapter.hasSameContentAs(rcvDttAdapter.getDATypeAdapters().get(1).getCurrentElem()));
+        // When Then
+        assertThat(rcvDATypeAdapter.hasSameContentAs(rcvDATypeAdapter.getCurrentElem())).isTrue();
+        // When Then
+        assertThat(rcvDATypeAdapter.hasSameContentAs(rcvDttAdapter.getDATypeAdapters().get(1).getCurrentElem())).isFalse();
     }
 
     @Test
-    void testCheckStructuredData() throws Exception {
-
-        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
-        DATypeAdapter daTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getDATypeAdapterById("DA1").get());
+    @Tag("issue-321")
+    void testCheckStructuredData() {
+        // Given
+        DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT);
+        DATypeAdapter daTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getDATypeAdapterById("DA1").get());
         DaTypeName daTypeName = new DaTypeName("origin","origin.ctlVal");
-
+        // When
         daTypeAdapter.check(daTypeName);
-        assertEquals(TPredefinedBasicTypeEnum.ENUM,daTypeName.getBType());
-        assertEquals("RecCycModKind",daTypeName.getType());
+        // Then
+        assertThat(daTypeName.getBType()).isEqualTo(TPredefinedBasicTypeEnum.ENUM);
+        assertThat(daTypeName.getType()).isEqualTo("RecCycModKind");
         DaTypeName daTypeName1 = new DaTypeName("origin","origin");
-        assertThrows(ScdException.class, () -> daTypeAdapter.check(daTypeName1));
-
+        // When Then
+        assertThatCode(() -> daTypeAdapter.check(daTypeName1))
+                .isInstanceOf(ScdException.class);
+        // Given
         DaTypeName daTypeName2 = new DaTypeName("d","check.ctlVal");
-        assertThrows(ScdException.class, () -> daTypeAdapter.check(daTypeName2));
+        // When Then
+        assertThatCode(() -> daTypeAdapter.check(daTypeName2))
+                .isInstanceOf(ScdException.class);
     }
 
     @Test
-    void testGetDataAttributeRefs() throws Exception {
-        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
+    void getDataAttributeRefs_should_return_list_of_dataAttribute() {
+        // Given
+        DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT);
         DATypeAdapter daTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getDATypeAdapterById("DA1").get());
         DataAttributeRef rootDataAttributeRef = new DataAttributeRef();
         rootDataAttributeRef.getDaName().setName("origin");
         rootDataAttributeRef.getDoName().setName("StrVal");
+        // When
         List<DataAttributeRef> dataAttributeRefs = daTypeAdapter.getDataAttributeRefs(rootDataAttributeRef, new DataAttributeRef());
-        assertEquals(2,dataAttributeRefs.size());
-
+        // When
+        assertThat(dataAttributeRefs).hasSize(2);
     }
 
     @Test
-    void getDataAttributeRefByDaName() throws Exception {
-
-        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(
-                AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID
-        );
+    void getDataAttributeRefByDaName_should_not_throw_exception() {
+        // Given
+        DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT);
         DaTypeName daTypeName = new DaTypeName("antRef","origin.ctlVal");
         DoTypeName doTypeName = new DoTypeName("Op.origin");
         DataAttributeRef dataAttributeRef = new DataAttributeRef();
         dataAttributeRef.setDoName(doTypeName);
         dataAttributeRef.getDaName().setName("antRef");
-        assertTrue(dataAttributeRef.getBdaNames().isEmpty());
+        assertThat(dataAttributeRef.getBdaNames()).isEmpty();
         DATypeAdapter daTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getDATypeAdapterById("DA1").get());
-        assertDoesNotThrow(() -> daTypeAdapter.getDataAttributeRefByDaName(daTypeName,0,dataAttributeRef).get());
+        // When Then
+        assertThatCode(() -> daTypeAdapter.getDataAttributeRefByDaName(daTypeName,0,dataAttributeRef).get())
+                .doesNotThrowAnyException();
     }
 
     @Test
-    void addPrivate() throws Exception {
-        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
-        DATypeAdapter daTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getDATypeAdapterById("DA1").get());
+    void addPrivate_with_type_and_source_should_create_Private() {
+        // Given
+        DataTypeTemplateAdapter dataTemplateAdapter = mock(DataTypeTemplateAdapter.class);
+        TDataTypeTemplates dataTemplate = new TDataTypeTemplates();
+        TDAType tdaType = new TDAType();
+        dataTemplate.getDAType().add(tdaType);
+        when(dataTemplateAdapter.getCurrentElem()).thenReturn(dataTemplate);
+
+        DATypeAdapter daTypeAdapter = new DATypeAdapter(dataTemplateAdapter, tdaType);
         TPrivate tPrivate = new TPrivate();
         tPrivate.setType("Private Type");
         tPrivate.setSource("Private Source");
-        assertFalse(daTypeAdapter.getCurrentElem().getPrivate().isEmpty());
+        assertThat(daTypeAdapter.getCurrentElem().getPrivate()).isEmpty();
+        // When
         daTypeAdapter.addPrivate(tPrivate);
-        assertEquals(2, daTypeAdapter.getCurrentElem().getPrivate().size());
+        // Then
+        assertThat(daTypeAdapter.getCurrentElem().getPrivate()).isNotEmpty();
     }
+
     @Test
-    void elementXPath() throws Exception {
+    void elementXPath_should_return_expected_xpath_value()  {
         // Given
-        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
+        DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT);
         DATypeAdapter daTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getDATypeAdapterById("DA1").get());
         // When
         String result = daTypeAdapter.elementXPath();
         // Then
         assertThat(result).isEqualTo("DAType[@id=\"DA1\"]");
     }
+
 
 }

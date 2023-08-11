@@ -6,6 +6,7 @@ package org.lfenergy.compas.sct.commons.util;
 
 import jakarta.xml.bind.JAXBElement;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -24,7 +25,6 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 class PrivateUtilsTest {
 
@@ -223,7 +223,7 @@ class PrivateUtilsTest {
     }
 
     @Test
-    void removePrivates_should_do_nothing_when_no_private_match_type() {
+    void removePrivates_when_no_private_match_type_should_do_nothing() {
         // Given : setUp
         TBaseElement baseElement = new SCL();
         baseElement.getPrivate().add(privateSCD);
@@ -234,11 +234,13 @@ class PrivateUtilsTest {
     }
 
     @Test
+    @Tag("issue-321")
     void removePrivates_should_remove_privates_of_given_type() {
         // Given : setUp
         TBaseElement baseElement = new SCL();
         baseElement.getPrivate().add(privateSCD);
         TCompasICDHeader tCompasICDHeader = objectFactory.createTCompasICDHeader();
+        // When
         baseElement.getPrivate().add(PrivateUtils.createPrivate(tCompasICDHeader));
         // When
         PrivateUtils.removePrivates(baseElement, PrivateEnum.COMPAS_ICDHEADER);
@@ -264,11 +266,13 @@ class PrivateUtilsTest {
     }
 
     @Test
-    void createMapICDSystemVersionUuidAndSTDFile_Should_return_empty_map_when_no_ICDSystemVersionUUID() {
+    @Tag("issue-321")
+    void createMapICDSystemVersionUuidAndSTDFile_when_no_ICDSystemVersionUUID_should_return_empty_map() {
         //Given
         SCL scl1 = new SCL();
         TIED tied1 = new TIED();
         TCompasICDHeader compasICDHeader1 = new TCompasICDHeader();
+        //When
         TPrivate tPrivate1 =  PrivateUtils.createPrivate(compasICDHeader1);
         tied1.getPrivate().add(tPrivate1);
         scl1.getIED().add(tied1);
@@ -282,6 +286,7 @@ class PrivateUtilsTest {
     }
 
     @Test
+    @Tag("issue-321")
     void createMapICDSystemVersionUuidAndSTDFile_Should_return_map_with_two_lines() {
         //Given
         SCL scl1 = new SCL();
@@ -296,9 +301,12 @@ class PrivateUtilsTest {
         compasICDHeader2.setICDSystemVersionUUID("UUID-2");
         TCompasICDHeader compasICDHeader3 = new TCompasICDHeader();
         compasICDHeader3.setICDSystemVersionUUID("UUID-2");
-        TPrivate tPrivate1 =  PrivateUtils.createPrivate(compasICDHeader1);
-        TPrivate tPrivate2 =  PrivateUtils.createPrivate(compasICDHeader2);
-        TPrivate tPrivate3 =  PrivateUtils.createPrivate(compasICDHeader3);
+        //When
+        TPrivate tPrivate1 = PrivateUtils.createPrivate(compasICDHeader1);
+        //When
+        TPrivate tPrivate2 = PrivateUtils.createPrivate(compasICDHeader2);
+        //When
+        TPrivate tPrivate3 = PrivateUtils.createPrivate(compasICDHeader3);
         tied1.getPrivate().add(tPrivate1);
         tied2.getPrivate().add(tPrivate2);
         tied3.getPrivate().add(tPrivate3);
@@ -315,6 +323,7 @@ class PrivateUtilsTest {
     }
 
     @Test
+    @Tag("issue-321")
     void checkSTDCorrespondanceWithLNodeCompasICDHeadershoul_throw_scdEception(){
         //Given
         TCompasICDHeader compasICDHeader1 = new TCompasICDHeader();
@@ -324,8 +333,10 @@ class PrivateUtilsTest {
         compasICDHeader2.setHeaderId("ID-2");
         compasICDHeader2.setHeaderVersion("VER-2");
         compasICDHeader2.setHeaderRevision("REV-2");
-        TPrivate tPrivate1 =  PrivateUtils.createPrivate(compasICDHeader1);
-        TPrivate tPrivate2 =  PrivateUtils.createPrivate(compasICDHeader2);
+        //When
+        TPrivate tPrivate1 = PrivateUtils.createPrivate(compasICDHeader1);
+        //When
+        TPrivate tPrivate2 = PrivateUtils.createPrivate(compasICDHeader2);
 
         PrivateLinkedToStds privateLinkedToSTDs1 = new PrivateLinkedToStds(tPrivate1,Collections.singletonList(new SCL()));
         PrivateLinkedToStds privateLinkedToSTDs2 = new PrivateLinkedToStds(tPrivate2, Arrays.asList(new SCL(), new SCL()));
@@ -342,14 +353,17 @@ class PrivateUtilsTest {
     }
 
     @Test
+    @Tag("issue-321")
     void checkSTDCorrespondanceWithLNodeCompasICDHeader_should_pass(){
         //Given
         TCompasICDHeader compasICDHeader1 = new TCompasICDHeader();
         compasICDHeader1.setICDSystemVersionUUID("UUID-1");
         TCompasICDHeader compasICDHeader2 = new TCompasICDHeader();
         compasICDHeader2.setICDSystemVersionUUID("UUID-2");
-        TPrivate tPrivate1 =  PrivateUtils.createPrivate(compasICDHeader1);
-        TPrivate tPrivate2 =  PrivateUtils.createPrivate(compasICDHeader2);
+        //When
+        TPrivate tPrivate1 = PrivateUtils.createPrivate(compasICDHeader1);
+        //When
+        TPrivate tPrivate2 = PrivateUtils.createPrivate(compasICDHeader2);
 
         PrivateLinkedToStds privateLinkedToSTDs1 = new PrivateLinkedToStds(tPrivate1,Collections.singletonList(new SCL()));
         PrivateLinkedToStds privateLinkedToSTDs2 = new PrivateLinkedToStds(tPrivate2, Collections.singletonList(new SCL()));
@@ -359,11 +373,13 @@ class PrivateUtilsTest {
         stringSCLMap.put("UUID-2", privateLinkedToSTDs2);
 
         //When Then
-        assertDoesNotThrow(() -> PrivateUtils.checkSTDCorrespondanceWithLNodeCompasICDHeader(stringSCLMap));
+        assertThatCode(() -> PrivateUtils.checkSTDCorrespondanceWithLNodeCompasICDHeader(stringSCLMap))
+                .doesNotThrowAnyException();
 
     }
 
     @Test
+    @Tag("issue-321")
     void stdCheckFormatExceptionMessage_should_return_formatted_message_with_Private_data() {
         //Given
         TCompasICDHeader compasICDHeader = new TCompasICDHeader();
@@ -381,6 +397,7 @@ class PrivateUtilsTest {
     }
 
     @Test
+    @Tag("issue-321")
     void createMapIEDNameAndPrivate_should_return_map_of_three_items() {
         //Given
         SCL scl = new SCL();
@@ -393,9 +410,12 @@ class PrivateUtilsTest {
         compasICDHeader2.setIEDName("IED-2");
         TCompasICDHeader compasICDHeader3 = new TCompasICDHeader();
         compasICDHeader3.setIEDName("IED-3");
-        TPrivate tPrivate1 =  PrivateUtils.createPrivate(compasICDHeader1);
-        TPrivate tPrivate2 =  PrivateUtils.createPrivate(compasICDHeader2);
-        TPrivate tPrivate3 =  PrivateUtils.createPrivate(compasICDHeader3);
+        //When
+        TPrivate tPrivate1 = PrivateUtils.createPrivate(compasICDHeader1);
+        //When
+        TPrivate tPrivate2 = PrivateUtils.createPrivate(compasICDHeader2);
+        //When
+        TPrivate tPrivate3 = PrivateUtils.createPrivate(compasICDHeader3);
         tlNode1.getPrivate().add(tPrivate1);
         tlNode2.getPrivate().add(tPrivate2);
         tlNode3.getPrivate().add(tPrivate3);
@@ -420,12 +440,14 @@ class PrivateUtilsTest {
     }
 
     @Test
-    void createMapIEDNameAndPrivate_should_return_empty_map_when_no_compasicdheader_present_under_substation() {
+    @Tag("issue-321")
+    void createMapIEDNameAndPrivate_when_no_compasIcdHeaderPresent_under_substation_should_return_empty_map() {
         //Given
         SCL scl = new SCL();
         TLNode tlNode1 = new TLNode();
         TCompasBay compasBay = new TCompasBay();
         compasBay.setUUID("UUID");
+        //When
         TPrivate tPrivate1 =  PrivateUtils.createPrivate(compasBay);
         tlNode1.getPrivate().add(tPrivate1);
         TFunction tFunction = new TFunction();
@@ -446,6 +468,7 @@ class PrivateUtilsTest {
     }
 
     @Test
+    @Tag("issue-321")
     void comparePrivateCompasICDHeaders_should_return_true_equality_not_check_for_IEDNane_BayLabel_IEDinstance() {
         // Given
         TCompasICDHeader compasICDHeader1 = new TCompasICDHeader();
@@ -453,8 +476,10 @@ class PrivateUtilsTest {
         compasICDHeader1.setBayLabel("BAY-1");
         compasICDHeader1.setIEDSubstationinstance(BigInteger.ONE);
         TCompasICDHeader compasICDHeader2 = new TCompasICDHeader();
-        TPrivate tPrivate1 =  PrivateUtils.createPrivate(compasICDHeader1);
-        TPrivate tPrivate2 =  PrivateUtils.createPrivate(compasICDHeader2);
+        // When
+        TPrivate tPrivate1 = PrivateUtils.createPrivate(compasICDHeader1);
+        // When
+        TPrivate tPrivate2 = PrivateUtils.createPrivate(compasICDHeader2);
 
         // When
         boolean result = PrivateUtils.comparePrivateCompasICDHeaders(tPrivate1,tPrivate2);
@@ -463,6 +488,7 @@ class PrivateUtilsTest {
     }
 
     @Test
+    @Tag("issue-321")
     void comparePrivateCompasICDHeaders_should_return_false_equality_not_check_for_IEDNane_BayLabel_IEDinstance() {
         // Given
         TCompasICDHeader compasICDHeader1 = new TCompasICDHeader();
@@ -472,8 +498,10 @@ class PrivateUtilsTest {
         compasICDHeader1.setICDSystemVersionUUID("UUID-1");
         TCompasICDHeader compasICDHeader2 = new TCompasICDHeader();
         compasICDHeader2.setICDSystemVersionUUID("UUID-2");
-        TPrivate tPrivate1 =  PrivateUtils.createPrivate(compasICDHeader1);
-        TPrivate tPrivate2 =  PrivateUtils.createPrivate(compasICDHeader2);
+        // When
+        TPrivate tPrivate1 = PrivateUtils.createPrivate(compasICDHeader1);
+        // When
+        TPrivate tPrivate2 = PrivateUtils.createPrivate(compasICDHeader2);
 
         // When
         boolean result = PrivateUtils.comparePrivateCompasICDHeaders(tPrivate1,tPrivate2);
@@ -482,6 +510,7 @@ class PrivateUtilsTest {
     }
 
     @Test
+    @Tag("issue-321")
     void comparePrivateCompasICDHeaders_should_return_true() {
         // Given
         TCompasICDHeader compasICDHeader1 = new TCompasICDHeader();
@@ -491,8 +520,10 @@ class PrivateUtilsTest {
         compasICDHeader1.setICDSystemVersionUUID("UUID-1");
         TCompasICDHeader compasICDHeader2 = new TCompasICDHeader();
         compasICDHeader2.setICDSystemVersionUUID("UUID-1");
-        TPrivate tPrivate1 =  PrivateUtils.createPrivate(compasICDHeader1);
-        TPrivate tPrivate2 =  PrivateUtils.createPrivate(compasICDHeader2);
+        // When
+        TPrivate tPrivate1 = PrivateUtils.createPrivate(compasICDHeader1);
+        // When
+        TPrivate tPrivate2 = PrivateUtils.createPrivate(compasICDHeader2);
 
         // When
         boolean result = PrivateUtils.comparePrivateCompasICDHeaders(tPrivate1,tPrivate2);
@@ -501,6 +532,7 @@ class PrivateUtilsTest {
     }
 
     @Test
+    @Tag("issue-321")
     void copyCompasICDHeaderFromLNodePrivateIntoSTDPrivate() {
         // Given
         TCompasICDHeader stdCompasICDHeader = new TCompasICDHeader();
@@ -510,6 +542,7 @@ class PrivateUtilsTest {
         lNodeCompasICDHeader.setIEDName("IED-1");
         lNodeCompasICDHeader.setBayLabel("BAY-1");
         lNodeCompasICDHeader.setIEDSubstationinstance(BigInteger.ONE);
+        // When
         TPrivate stdTPrivate = PrivateUtils.createPrivate(stdCompasICDHeader);
 
         // When

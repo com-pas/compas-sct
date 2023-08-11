@@ -15,7 +15,7 @@ class LdeviceStatusEnumTest {
 
     @ParameterizedTest
     @CsvSource({"on,ON", "off,OFF"})
-    void fromValue(String ldeviceStatus, String expected) {
+    void fromValue_withKnownStatus_shouldNotThrowException(String ldeviceStatus, String expected) {
         //Given
         //When
         LdeviceStatus ldeviceStatusEnum = LdeviceStatus.fromValue(ldeviceStatus);
@@ -24,7 +24,7 @@ class LdeviceStatusEnumTest {
     }
 
     @Test
-    void fromValue() {
+    void fromValue_withUnknownStatus_shouldThrowException() {
         //Given
         String ldeviceStatus = "patate";
         //When

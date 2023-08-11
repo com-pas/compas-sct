@@ -19,7 +19,7 @@ import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDa
 class DaTypeNameTest {
 
     @Test
-    void testConstructorWithRef() {
+    void constructor_whenCalledWithDaName_shouldFillValues() {
         // given : nothing
         // when
         DaTypeName daTypeName = new DaTypeName("da1.bda1.bda2");
@@ -30,7 +30,7 @@ class DaTypeNameTest {
     }
 
     @Test
-    void testConstructorWithRefWhenEmptyStruct() {
+    void constructor_whenCalledWithDaNameWithDotSeparatedValues_shouldFillValues() {
         // given : nothing
         // when
         DaTypeName daTypeName = new DaTypeName("da1");
@@ -41,18 +41,18 @@ class DaTypeNameTest {
     }
 
     @Test
-    void testConstructorWithRefWithNullName() {
+    void constructor_whenCalledWithNullDaName_shouldNotFillValues() {
         // given : nothing
         // when
         DaTypeName daTypeName = new DaTypeName(null);
         // then
-        assertThat(daTypeName.getName()).isEqualTo("");
+        assertThat(daTypeName.getName()).isEmpty();
         assertThat(daTypeName.getStructNames()).isNotNull().isEmpty();
         assertThat(daTypeName.getDaiValues()).isNotNull().isEmpty();
     }
 
     @Test
-    void testConstructor2WithRef() {
+    void constructor_whenCalledWithDaNameAndStructNames_shouldFillValues() {
         // given : nothing
         // when
         DaTypeName daTypeName = new DaTypeName("da1", "bda1.bda2");
@@ -63,7 +63,7 @@ class DaTypeNameTest {
     }
 
     @Test
-    void testConstructor2WithRefWhenEmptyStruct() {
+    void constructor_whenCalledWithNullStructNames_shouldNotFillValues() {
         // given : nothing
         // when
         DaTypeName daTypeName = new DaTypeName("da1", null);
@@ -74,18 +74,18 @@ class DaTypeNameTest {
     }
 
     @Test
-    void testConstructor2WithRefWithNullName() {
+    void constructor_whenCalledWithNullDaNameAndNullStructNames_shouldNotFillValues() {
         // given : nothing
         // when
         DaTypeName daTypeName = new DaTypeName(null, null);
         // then
-        assertThat(daTypeName.getName()).isEqualTo("");
+        assertThat(daTypeName.getName()).isEmpty();
         assertThat(daTypeName.getStructNames()).isNotNull().isEmpty();
         assertThat(daTypeName.getDaiValues()).isNotNull().isEmpty();
     }
 
     @Test
-    void testConstructorWithNameAndStructNames() {
+    void constructor_whenCalledWithNameAndStructNames_shouldFillValues() {
         // given : nothing
         // when
         DaTypeName daTypeName = new DaTypeName("da1", "bda1.bda2");
@@ -96,7 +96,7 @@ class DaTypeNameTest {
     }
 
     @Test
-    void testEquals() {
+    void equals_whenCalled_shouldReturnTrue() {
         // given : nothing
         DaTypeName da1 = createDa("da1.bda1.bda2", TFCEnum.CF, true, Map.of(0L, "value"));
         DaTypeName da2 = createDa("da1.bda1.bda2", TFCEnum.CF, true, Map.of(0L, "value"));
@@ -107,7 +107,7 @@ class DaTypeNameTest {
     }
 
     @Test
-    void testNotEquals() {
+    void equals_whenCalled_shouldReturnFalse() {
         // given : nothing
         DaTypeName da1 = createDa("da1.bda1.bda2", TFCEnum.CF, true, Map.of(0L, "value"));
         DaTypeName da2 = createDa("da1.bda1.bda2", TFCEnum.DC, true, Map.of(0L, "value"));
@@ -118,7 +118,7 @@ class DaTypeNameTest {
     }
 
     @Test
-    void testFrom() {
+    void from_whenCalledWithDaTypeName_shouldNotFillValues() {
         // given : nothing
         DaTypeName da1 = createDa("da1.bda1.bda2", TFCEnum.CF, true, Map.of(0L, "value"));
         // when
@@ -132,7 +132,7 @@ class DaTypeNameTest {
      * Fc value should be in ListFcEnum to be considered as known
      */
     @Test
-    void isUpdatable_shouldReturnTrue_whenFcKnown_And_valImportIsTrue() {
+    void isUpdatable_whenFcKnown_And_valImportIsTrue_shouldReturnTrue() {
         // given
         DaTypeName da1 = createDa("da1.bda1.bda2",  TFCEnum.CF, true, Map.of(0L, "value"));
         // when

@@ -15,23 +15,31 @@ import org.mockito.Mockito;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 class SubNetworkDTOTest {
 
     @Test
-    void testConstructor(){
+    void constructor_whenCalledWithoutParameters_shouldNotFillValues() {
+        // When
         SubNetworkDTO subNetworkDTO = new SubNetworkDTO();
-        assertTrue(subNetworkDTO.getConnectedAPs().isEmpty());
-
-        subNetworkDTO = new SubNetworkDTO("sName","IP");
-        assertEquals("sName",subNetworkDTO.getName());
-        assertEquals("IP",subNetworkDTO.getType());
+        // Then
+        assertThat(subNetworkDTO.getName()).isNull();
+        assertThat(subNetworkDTO.getConnectedAPs()).isEmpty();
     }
 
     @Test
-    void testFrom(){
+    void constructor_whenCalledWithParameters_shouldFillValues() {
+        // When
+        SubNetworkDTO subNetworkDTO = new SubNetworkDTO("sName","IP");
+        // Then
+        assertThat(subNetworkDTO.getName()).isEqualTo("sName");
+        assertThat(subNetworkDTO.getType()).isEqualTo("IP");
+    }
+
+    @Test
+    void from_whenCalledWithSubNetworkAdapter_shouldFillValues(){
+        // Given
         SubNetworkAdapter subNetworkAdapter = Mockito.mock(SubNetworkAdapter.class);
         ConnectedAPAdapter connectedAPAdapter = Mockito.mock(ConnectedAPAdapter.class);
         when(subNetworkAdapter.getConnectedAPAdapters()).thenReturn(List.of(connectedAPAdapter));
@@ -39,12 +47,12 @@ class SubNetworkDTOTest {
         when(subNetworkAdapter.getType()).thenReturn(SubNetworkDTO.SubnetworkType.IP.toString());
         when(connectedAPAdapter.getApName()).thenReturn(DTO.AP_NAME);
         when(connectedAPAdapter.getIedName()).thenReturn(DTO.HOLDER_IED_NAME);
-
+        // When
         SubNetworkDTO subNetworkDTO = SubNetworkDTO.from(subNetworkAdapter);
-        assertEquals("sName",subNetworkDTO.getName());
-        assertEquals("IP",subNetworkDTO.getType());
-        assertFalse(subNetworkDTO.getConnectedAPs().isEmpty());
-
+        // Then
+        assertThat(subNetworkDTO.getName()).isEqualTo("sName");
+        assertThat(subNetworkDTO.getType()).isEqualTo("IP");
+        assertThat(subNetworkDTO.getConnectedAPs()).isNotEmpty();
     }
 
     @Test
@@ -68,6 +76,5 @@ class SubNetworkDTOTest {
         assertThat(subNetworkDTOS).hasSize(2);
         SubNetworkDTO expectedSubNetwork = subNetworkDTOS.stream().filter(subNetworkDTO -> !subNetworkDTO.getConnectedAPs().isEmpty()).findFirst().orElse(new SubNetworkDTO());
         assertThat(expectedSubNetwork.getConnectedAPs()).hasSize(1);
-
     }
 }

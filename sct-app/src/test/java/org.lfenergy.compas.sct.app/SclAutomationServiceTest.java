@@ -114,7 +114,7 @@ class SclAutomationServiceTest {
     }
 
     @Test
-    void createSCD_should_throw_exception_when_sclEditor_initScl_Fail() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
+    void createSCD_when_sclEditor_initScl_Fail_should_throw_exception() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
         // Given
         SCL ssd = (SCL) BeanUtils.cloneBean(scl);
         SCL std = (SCL) BeanUtils.cloneBean(scl);
@@ -126,7 +126,7 @@ class SclAutomationServiceTest {
     }
 
     @Test
-    void createSCD_should_throw_exception_when_sclEditor_addHistoryItem_Fail() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
+    void createSCD_when_sclEditor_addHistoryItem_Fail_should_throw_exception() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
         // Given
         SCL ssd = (SCL) BeanUtils.cloneBean(scl);
         SCL std = (SCL) BeanUtils.cloneBean(scl);
@@ -140,7 +140,7 @@ class SclAutomationServiceTest {
     }
 
     @Test
-    void createSCD_should_throw_exception_when_substationEditor_addSubstation_Fail() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
+    void createSCD_when_substationEditor_addSubstation_Fail_should_throw_exception() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
         // Given
         SCL ssd = (SCL) BeanUtils.cloneBean(scl);
         SCL std = (SCL) BeanUtils.cloneBean(scl);
@@ -155,7 +155,7 @@ class SclAutomationServiceTest {
     }
 
     @Test
-    void createSCD_should_throw_exception_when_sclEditor_importSTDElementsInSCD_Fail() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
+    void createSCD_when_sclEditor_importSTDElementsInSCD_Fail_should_throw_exception() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
         // Given
         SCL ssd = (SCL) BeanUtils.cloneBean(scl);
         SCL std = (SCL) BeanUtils.cloneBean(scl);
@@ -172,7 +172,7 @@ class SclAutomationServiceTest {
     }
 
     @Test
-    void createSCD_should_throw_exception_when_sclEditor_removeAllControlBlocksAndDatasetsAndExtRefSrcBindings_Fail() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
+    void createSCD_when_sclEditor_removeAllControlBlocksAndDatasetsAndExtRefSrcBindings_Fail_should_throw_exception() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
         // Given
         SCL ssd = (SCL) BeanUtils.cloneBean(scl);
         SCL std = (SCL) BeanUtils.cloneBean(scl);

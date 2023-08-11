@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.scl.ied;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -18,7 +19,6 @@ import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.lfenergy.compas.sct.commons.util.MonitoringLnClassEnum;
-import org.mockito.Mockito;
 
 import java.util.HashMap;
 import java.util.List;
@@ -26,11 +26,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class IEDAdapterTest {
 
@@ -38,26 +38,55 @@ class IEDAdapterTest {
 
 
     @Test
-    void testAmChildElementRef() throws ScdException {
+    // Test should be modified to reflect each test case and remove no concerned test and assertions.
+    @Tag("issue-321")
+    void testAmChildElementRef() {
+        // Given
         SclRootAdapter sclRootAdapter = new SclRootAdapter("hID","hVersion","hRevision");
         TIED tied = new TIED();
         tied.setName(DTO.HOLDER_IED_NAME);
-
         tied.setServices(new TServices());
         sclRootAdapter.getCurrentElem().getIED().add(tied);
         IEDAdapter iAdapter = sclRootAdapter.getIEDAdapterByName(DTO.HOLDER_IED_NAME);
-        assertTrue(iAdapter.amChildElementRef());
-        assertNotNull(iAdapter.getServices());
-        assertEquals(DTO.HOLDER_IED_NAME,iAdapter.getName());
-
-        IEDAdapter fAdapter = new IEDAdapter(sclRootAdapter);
+        // When Then
+        assertThat(iAdapter.amChildElementRef()).isTrue();
+        assertThat(iAdapter.getServices()).isNotNull();
+        assertThat(iAdapter.getName()).isEqualTo(DTO.HOLDER_IED_NAME);
+        // Given
+        IEDAdapter iedAdapter = new IEDAdapter(sclRootAdapter);
         TIED tied1 = new TIED();
-        assertThrows(IllegalArgumentException.class,
-                () ->fAdapter.setCurrentElem(tied1));
+        // When Then
+        assertThatThrownBy(() -> iedAdapter.setCurrentElem(tied1))
+                .isInstanceOf(IllegalArgumentException.class);
+        // When Then: test other class here
+        assertThatThrownBy(() -> sclRootAdapter.getIEDAdapterByName(DTO.HOLDER_IED_NAME + "1"))
+                .isInstanceOf(ScdException.class);
+    }
 
-        assertThrows(ScdException.class,
-                () -> sclRootAdapter.getIEDAdapterByName(DTO.HOLDER_IED_NAME + "1"));
+    @Test
+    void constructor_whenCalledWithNoRelationBetweenSCLAndIED_shouldThrowException() {
+        //Given
+        SclRootAdapter sclRootAdapter = mock(SclRootAdapter.class);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(new SCL());
+        TIED tied = new TIED();
+        //When Then
 
+        assertThatCode(() -> new IEDAdapter(sclRootAdapter, tied))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("No relation between SCL parent element and child");
+    }
+
+    @Test
+    void constructor_whenCalledWithExistingRelationBetweenSCLAndIED_shouldNotThrowException() {
+        //Given
+        SclRootAdapter sclRootAdapter = mock(SclRootAdapter.class);
+        SCL scl = new SCL();
+        TIED tied = new TIED();
+        scl.getIED().add(tied);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(scl);
+        //When Then
+        assertThatCode(() -> new IEDAdapter(sclRootAdapter, tied))
+                .doesNotThrowAnyException();
     }
 
     @Test
@@ -121,88 +150,100 @@ class IEDAdapterTest {
     }
 
     @Test
-    void testUpdateLDeviceNodesType() {
-
+    @Tag("issue-321")
+    void updateLDeviceNodesType_should_not_throw_exception() {
+        // Given
         SCL scd = SclTestMarshaller.getSCLFromFile(SCD_IED_U_TEST);
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        // When Then
         IEDAdapter iAdapter = assertDoesNotThrow( () -> sclRootAdapter.getIEDAdapterByName(DTO.HOLDER_IED_NAME));
-
-        assertTrue(iAdapter.streamLDeviceAdapters().count() >= 2);
+        assertThat(iAdapter.streamLDeviceAdapters()).hasSizeGreaterThanOrEqualTo(2);
         Map<String,String> pairOldNewId = new HashMap<>();
         pairOldNewId.put("LNO1", DTO.HOLDER_IED_NAME + "_LNO1");
         pairOldNewId.put("LNO2", DTO.HOLDER_IED_NAME + "_LNO2");
-        assertDoesNotThrow( () ->iAdapter.updateLDeviceNodesType(pairOldNewId));
-
+        // When Then
+        assertThatCode(() -> iAdapter.updateLDeviceNodesType(pairOldNewId)).doesNotThrowAnyException();
         LDeviceAdapter lDeviceAdapter = iAdapter.streamLDeviceAdapters().findFirst().get();
-        assertEquals(DTO.HOLDER_IED_NAME + "_LNO1",lDeviceAdapter.getLN0Adapter().getLnType());
+        assertThat(lDeviceAdapter.getLN0Adapter().getLnType()).isEqualTo(DTO.HOLDER_IED_NAME + "_LNO1");
     }
 
     @Test
+    @Tag("issue-321")
     void testGetExtRefBinders() {
+        // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        // When Then
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
+        // Given
         ExtRefSignalInfo signalInfo = DTO.createExtRefSignalInfo();
         signalInfo.setPDO("Do.sdo1");
         signalInfo.setPDA("da.bda1.bda2.bda3");
-        assertDoesNotThrow(() ->iAdapter.getExtRefBinders(signalInfo));
-
+        // When Then
+        assertThatCode(() -> iAdapter.getExtRefBinders(signalInfo)).doesNotThrowAnyException();
+        // Given
         signalInfo.setPDO("Do.sdo1.errorSdo");
-        assertThrows(ScdException.class, () ->iAdapter.getExtRefBinders(signalInfo));
+        // When Then
+        assertThatThrownBy(() -> iAdapter.getExtRefBinders(signalInfo))
+                .isInstanceOf(ScdException.class);
     }
 
     @Test
-    void TestIsSettingConfig() {
+    @Tag("issue-321")
+    void testIsSettingConfig() {
+        // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        // When Then
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
-
-        assertTrue(iAdapter.isSettingConfig("LD_INS1"));
-
-        assertThrows(IllegalArgumentException.class,() -> iAdapter.isSettingConfig("UnknownLD"));
+        // When Then
+        assertThat(iAdapter.isSettingConfig("LD_INS1")).isTrue();
+        // When Then
+        assertThatThrownBy(() -> iAdapter.isSettingConfig("UnknownLD"))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
+    @Tag("issue-321")
     void testMatches() {
+        // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        // When Then
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
-
+        // Given
         ObjectReference objectReference = new ObjectReference("IED_NAMELD_INS3/LLN0.Do.da2");
         objectReference.init();
-        assertTrue(iAdapter.matches(objectReference));
-
+        // When Then
+        assertThat(iAdapter.matches(objectReference)).isTrue();
+        // Given
         objectReference = new ObjectReference("IED_NAMELD_INS2/ANCR1.dataSet");
         objectReference.init();
-        assertTrue(iAdapter.matches(objectReference));
+        // When Then
+        assertThat(iAdapter.matches(objectReference)).isTrue();
     }
 
     @Test
-    void addPrivate() {
-        SclRootAdapter sclRootAdapter = mock(SclRootAdapter.class);
-        SCL scl = mock(SCL.class);
-        Mockito.when(sclRootAdapter.getCurrentElem()).thenReturn(scl);
-        TIED tied = new TIED();
-        Mockito.when(scl.getIED()).thenReturn(List.of(tied));
-        IEDAdapter iAdapter = new IEDAdapter(sclRootAdapter, tied);
+    void addPrivate_with_type_and_source_should_create_Private() {
+        // Given
+        IEDAdapter iedAdapter = new IEDAdapter(null, new TIED());
+        assertThat(iedAdapter.getCurrentElem().getPrivate()).isEmpty();
+
         TPrivate tPrivate = new TPrivate();
         tPrivate.setType("Private Type");
         tPrivate.setSource("Private Source");
-        assertTrue(iAdapter.getCurrentElem().getPrivate().isEmpty());
-        iAdapter.addPrivate(tPrivate);
-        assertEquals(1, iAdapter.getCurrentElem().getPrivate().size());
+        // When
+        iedAdapter.addPrivate(tPrivate);
+        // Then
+        assertThat(iedAdapter.getCurrentElem().getPrivate()).isNotEmpty();
     }
 
     @Test
-    void elementXPath() {
+    void elementXPath_should_return_expected_xpath_value() {
         // Given
-        SclRootAdapter sclRootAdapter = mock(SclRootAdapter.class);
-        SCL scl = mock(SCL.class);
-        Mockito.when(sclRootAdapter.getCurrentElem()).thenReturn(scl);
         TIED tied = new TIED();
         tied.setName("iedName");
-        Mockito.when(scl.getIED()).thenReturn(List.of(tied));
-        IEDAdapter iAdapter = new IEDAdapter(sclRootAdapter, tied);
+        IEDAdapter iAdapter = new IEDAdapter(null, tied);
         // When
         String result = iAdapter.elementXPath();
         // Then
@@ -317,13 +358,15 @@ class IEDAdapterTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideLnClassAndDoType")
-    void manageMonitoringLns_should_not_update_ln_when_no_extRef(String testCase, MonitoringLnClassEnum lnClassEnum, String doName) {
+    @Tag("issue-321")
+    void manageMonitoringLns_when_no_extRef_should_not_update_ln(String testCase, MonitoringLnClassEnum lnClassEnum, String doName) {
         // Given
         IEDAdapter iedAdapter = createIedsInScl(lnClassEnum.value(), doName).getIEDAdapterByName(IED_NAME_1);
         // When
         List<SclReportItem> sclReportItems = iedAdapter.manageMonitoringLns();
-        // Then
+        // When
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(LD_SUIED);
+        // Then
         assertThat(sclReportItems).isEmpty();
         assertThat(lDeviceAdapter.getLNAdapters())
                 .hasSize(1);
@@ -332,12 +375,15 @@ class IEDAdapterTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideLnClassAndDoType")
-    void manageMonitoringLns_should_not_create_ln_when_no_init_ln(String testCase, MonitoringLnClassEnum lnClassEnum, String doName, TServiceType tServiceType) {
+    @Tag("issue-321")
+    void manageMonitoringLns_when_no_init_ln_should_not_create_ln(String testCase, MonitoringLnClassEnum lnClassEnum, String doName, TServiceType tServiceType) {
         // Given
         IEDAdapter iedAdapter = createIedsInScl(lnClassEnum.value(), doName).getIEDAdapterByName(IED_NAME_1);
         TExtRef tExtRef = createExtRefExample("CB_Name", tServiceType);
+        // When
         LDeviceAdapter lDAdapter = iedAdapter.getLDeviceAdapterByLdInst("LD_ADD");
         lDAdapter.getLN0Adapter().getCurrentElem().getInputs().getExtRef().add(tExtRef);
+        // When
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(LD_SUIED);
         lDeviceAdapter.getCurrentElem().unsetLN();
         // When
@@ -351,16 +397,19 @@ class IEDAdapterTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideLnClassAndDoType")
-    void manageMonitoringLns_should_update_ln_when_one_extRef_and_dai_updatable(String testCase, MonitoringLnClassEnum lnClassEnum, String doName, TServiceType tServiceType) {
+    @Tag("issue-321")
+    void manageMonitoringLns_when_one_extRef_and_dai_updatable_should_update_ln(String testCase, MonitoringLnClassEnum lnClassEnum, String doName, TServiceType tServiceType) {
         // Given
         IEDAdapter iedAdapter = createIedsInScl(lnClassEnum.value(), doName).getIEDAdapterByName(IED_NAME_1);
         TExtRef tExtRef = createExtRefExample("CB_Name", tServiceType);
+        // When
         LDeviceAdapter lDAdapter = iedAdapter.getLDeviceAdapterByLdInst("LD_ADD");
         lDAdapter.getLN0Adapter().getCurrentElem().getInputs().getExtRef().add(tExtRef);
         // When
         List<SclReportItem> sclReportItems = iedAdapter.manageMonitoringLns();
-        // Then
+        // When
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(LD_SUIED);
+        // Then
         assertThat(sclReportItems).isEmpty();
         assertThat(lDeviceAdapter.getLNAdapters())
                 .hasSize(1)
@@ -374,19 +423,23 @@ class IEDAdapterTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideLnClassAndDoType")
-    void manageMonitoringLns_should_not_update_ln_when_one_extRef_and_dai_not_updatable(String testCase, MonitoringLnClassEnum lnClassEnum, String doName, TServiceType tServiceType) {
+    @Tag("issue-321")
+    void manageMonitoringLns_when_one_extRef_and_dai_not_updatable_should_not_update_ln(String testCase, MonitoringLnClassEnum lnClassEnum, String doName, TServiceType tServiceType) {
         // Given
         SclRootAdapter sclRootAdapter = createIedsInScl(lnClassEnum.value(), doName);
         sclRootAdapter.getDataTypeTemplateAdapter().getDOTypeAdapterById("REF").get().getDAAdapterByName("setSrcRef")
                 .get().getCurrentElem().setValImport(false);
+        // When
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(IED_NAME_1);
         TExtRef tExtRef = createExtRefExample("CB_Name", tServiceType);
+        // When
         LDeviceAdapter lDAdapter = iedAdapter.getLDeviceAdapterByLdInst("LD_ADD");
         lDAdapter.getLN0Adapter().getCurrentElem().getInputs().getExtRef().add(tExtRef);
         // When
         List<SclReportItem> sclReportItems = iedAdapter.manageMonitoringLns();
-        // Then
+        // When
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(LD_SUIED);
+        // Then
         assertThat(sclReportItems).isNotEmpty()
                 .extracting(SclReportItem::message)
                 .containsExactly("The DAI cannot be updated");
@@ -397,17 +450,20 @@ class IEDAdapterTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideLnClassAndDoType")
-    void manageMonitoringLns_should_update_ln_when_2_extRef_and_dai_updatable(String testCase, MonitoringLnClassEnum lnClassEnum, String doName, TServiceType tServiceType) {
+    @Tag("issue-321")
+    void manageMonitoringLns_when_2_extRef_and_dai_updatable_should_update_ln(String testCase, MonitoringLnClassEnum lnClassEnum, String doName, TServiceType tServiceType) {
         // Given
         IEDAdapter iedAdapter = createIedsInScl(lnClassEnum.value(), doName).getIEDAdapterByName(IED_NAME_1);
         TExtRef tExtRef1 = createExtRefExample("CB_Name_1", tServiceType);
         TExtRef tExtRef2 = createExtRefExample("CB_Name_2", tServiceType);
+        // When
         LDeviceAdapter lDAdapter = iedAdapter.getLDeviceAdapterByLdInst("LD_ADD");
         lDAdapter.getLN0Adapter().getCurrentElem().getInputs().getExtRef().addAll(List.of(tExtRef1, tExtRef2));
         // When
         List<SclReportItem> sclReportItems = iedAdapter.manageMonitoringLns();
-        // Then
+        // When
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(LD_SUIED);
+        // Then
         assertThat(sclReportItems).isEmpty();
         assertThat(lDeviceAdapter.getLNAdapters())
                 .hasSize(2)

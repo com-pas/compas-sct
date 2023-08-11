@@ -4,8 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.scl.dtt;
 
-
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -14,208 +13,311 @@ import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateTestUtils.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class DataTypeTemplateAdapterTest {
 
-
-
-    DataTypeTemplateAdapter dataTypeTemplateAdapter;
-
-    protected void init(){
-        SclRootAdapter sclRootAdapter = null;
-        try {
-            sclRootAdapter = new SclRootAdapter("hID","hVersion","hRevision");
-        } catch (ScdException e) {
-            e.printStackTrace();
-        }
-        assert sclRootAdapter != null;
-        sclRootAdapter.getCurrentElem().setDataTypeTemplates(new TDataTypeTemplates());
-        SclRootAdapter finalSclRootAdapter = sclRootAdapter;
-        dataTypeTemplateAdapter = assertDoesNotThrow(
-                finalSclRootAdapter::getDataTypeTemplateAdapter
-        );
-    }
-
-    @BeforeEach
-    public void setUp(){
-        init();
-    }
     @Test
-    void testAmChildElementRef() {
-        SclRootAdapter sclRootAdapter = dataTypeTemplateAdapter.getParentAdapter();
-        TDataTypeTemplates dtt = new TDataTypeTemplates();
-        assertThatThrownBy(() -> new DataTypeTemplateAdapter(sclRootAdapter, dtt))
-                .isInstanceOf(IllegalArgumentException.class);
+    void constructor_whenCalledWithNoRelationBetweenSCLAndDataTypeTemplates_shouldThrowException() {
+        // Given
+        SclRootAdapter sclRootAdapter = mock(SclRootAdapter.class);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(new SCL());
+        TDataTypeTemplates dataTemplate = new TDataTypeTemplates();
+        // When Then
+        assertThatCode(() -> new DataTypeTemplateAdapter(sclRootAdapter, dataTemplate))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("No relation between SCL parent element and child");
     }
 
     @Test
+    void constructor_whenCalledWithExistingRelationBetweenSCLAndDataTypeTemplates_shouldNotThrowException() {
+        // Given
+        SclRootAdapter sclRootAdapter = mock(SclRootAdapter.class);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(new SCL());
+        SCL scl = new SCL();
+        TDataTypeTemplates dataTemplate = new TDataTypeTemplates();
+        scl.setDataTypeTemplates(dataTemplate);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(scl);
+        // When Then
+        assertThatCode(() -> new DataTypeTemplateAdapter(sclRootAdapter, dataTemplate)).doesNotThrowAnyException();
+    }
+
+
+    @Test
+    @Tag("issue-321")
     void testGetLNodeTypeAdapterById() {
+        // Given
+        SclRootAdapter sclRootAdapter = mock(SclRootAdapter.class);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(new SCL());
+        SCL scl = new SCL();
+        TDataTypeTemplates dataTemplate = new TDataTypeTemplates();
         TLNodeType tlNodeType = new TLNodeType();
         tlNodeType.setId("ID");
-        dataTypeTemplateAdapter.getCurrentElem().getLNodeType().add(tlNodeType);
-        Optional<LNodeTypeAdapter> lNodeTypeAdapter =
-                dataTypeTemplateAdapter.getLNodeTypeAdapterById("ID");
-        assertTrue(lNodeTypeAdapter.isPresent());
+        dataTemplate.getLNodeType().add(tlNodeType);
+        scl.setDataTypeTemplates(dataTemplate);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(scl);
 
-        lNodeTypeAdapter =  dataTypeTemplateAdapter.getLNodeTypeAdapterById("UNKNOWN_ID");
-        assertTrue(lNodeTypeAdapter.isEmpty());
+        DataTypeTemplateAdapter dataTypeTemplateAdapter = new DataTypeTemplateAdapter(sclRootAdapter, dataTemplate);
+        // When
+        Optional<LNodeTypeAdapter> lNodeTypeAdapter1 = dataTypeTemplateAdapter.getLNodeTypeAdapterById("ID");
+        // Then
+        assertThat(lNodeTypeAdapter1).isPresent();
+        // When
+        Optional<LNodeTypeAdapter> lNodeTypeAdapter2 =  dataTypeTemplateAdapter.getLNodeTypeAdapterById("UNKNOWN_ID");
+        // Then
+        assertThat(lNodeTypeAdapter2).isEmpty();
     }
 
     @Test
-    void testGetLNodeTypeAdapters() {
+    void getLNodeTypeAdapters_should_return_list_of_LNodeTypeAdapter() {
+        // Given
+        SclRootAdapter sclRootAdapter = mock(SclRootAdapter.class);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(new SCL());
+        SCL scl = new SCL();
+        TDataTypeTemplates dataTemplate = new TDataTypeTemplates();
         TLNodeType tlNodeType = new TLNodeType();
         tlNodeType.setId("ID");
-        dataTypeTemplateAdapter.getCurrentElem().getLNodeType().add(tlNodeType);
-        assertFalse(dataTypeTemplateAdapter.getLNodeTypeAdapters().isEmpty());
+        dataTemplate.getLNodeType().add(tlNodeType);
+        scl.setDataTypeTemplates(dataTemplate);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(scl);
+        DataTypeTemplateAdapter dataTypeTemplateAdapter = new DataTypeTemplateAdapter(sclRootAdapter, dataTemplate);
+        // When Then
+        assertThat(dataTypeTemplateAdapter.getLNodeTypeAdapters()).isNotEmpty();
     }
 
     @Test
+    @Tag("issue-321")
     void testGetDOTypeAdapterById() {
+        // Given
+        SclRootAdapter sclRootAdapter = mock(SclRootAdapter.class);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(new SCL());
+        SCL scl = new SCL();
+        TDataTypeTemplates dataTemplate = new TDataTypeTemplates();
         TDOType tdoType = new TDOType();
         tdoType.setId("ID");
-        dataTypeTemplateAdapter.getCurrentElem().getDOType().add(tdoType);
-        Optional<DOTypeAdapter> doTypeAdapter =
-                dataTypeTemplateAdapter.getDOTypeAdapterById("ID");
-        assertTrue(doTypeAdapter.isPresent());
+        dataTemplate.getDOType().add(tdoType);
+        scl.setDataTypeTemplates(dataTemplate);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(scl);
+        DataTypeTemplateAdapter dataTypeTemplateAdapter = new DataTypeTemplateAdapter(sclRootAdapter, dataTemplate);
 
-        doTypeAdapter =  dataTypeTemplateAdapter.getDOTypeAdapterById("UNKNOWN_ID");
-        assertTrue(doTypeAdapter.isEmpty());
+        // When
+        Optional<DOTypeAdapter> doTypeAdapter1 = dataTypeTemplateAdapter.getDOTypeAdapterById("ID");
+        // Then
+        assertThat(doTypeAdapter1).isPresent();
+        // When
+        Optional<DOTypeAdapter> doTypeAdapter2 = dataTypeTemplateAdapter.getDOTypeAdapterById("UNKNOWN_ID");
+        // Then
+        assertThat(doTypeAdapter2).isEmpty();
     }
 
     @Test
-    void testGetDOTypeAdapters() {
+    void getDOTypeAdapters_should_return_list_of_DOTypeAdapter() {
+        // Given
+        SclRootAdapter sclRootAdapter = mock(SclRootAdapter.class);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(new SCL());
+        SCL scl = new SCL();
+        TDataTypeTemplates dataTemplate = new TDataTypeTemplates();
         TDOType tdoType = new TDOType();
         tdoType.setId("ID");
-        dataTypeTemplateAdapter.getCurrentElem().getDOType().add(tdoType);
-        assertFalse(dataTypeTemplateAdapter.getDOTypeAdapters().isEmpty());
+        dataTemplate.getDOType().add(tdoType);
+        scl.setDataTypeTemplates(dataTemplate);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(scl);
+        DataTypeTemplateAdapter dataTypeTemplateAdapter = new DataTypeTemplateAdapter(sclRootAdapter, dataTemplate);
+        // When Then
+        assertThat(dataTypeTemplateAdapter.getDOTypeAdapters()).isNotEmpty();
     }
 
     @Test
+    @Tag("issue-321")
     void testGetDATypeAdapterById() {
+        // Given
+        SclRootAdapter sclRootAdapter = mock(SclRootAdapter.class);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(new SCL());
+        SCL scl = new SCL();
+        TDataTypeTemplates dataTemplate = new TDataTypeTemplates();
         TDAType tdaType = new TDAType();
         tdaType.setId("ID");
-        dataTypeTemplateAdapter.getCurrentElem().getDAType().add(tdaType);
-        Optional<DATypeAdapter> daTypeAdapter =
-                dataTypeTemplateAdapter.getDATypeAdapterById("ID");
-        assertTrue(daTypeAdapter.isPresent());
+        dataTemplate.getDAType().add(tdaType);
+        scl.setDataTypeTemplates(dataTemplate);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(scl);
+        DataTypeTemplateAdapter dataTypeTemplateAdapter = new DataTypeTemplateAdapter(sclRootAdapter, dataTemplate);
 
-        daTypeAdapter =  dataTypeTemplateAdapter.getDATypeAdapterById("UNKNOWN_ID");
-        assertTrue(daTypeAdapter.isEmpty());
+        // When
+        Optional<DATypeAdapter> daTypeAdapter1 = dataTypeTemplateAdapter.getDATypeAdapterById("ID");
+        // Then
+        assertThat(daTypeAdapter1).isPresent();
+        // When
+        Optional<DATypeAdapter> daTypeAdapter2 = dataTypeTemplateAdapter.getDATypeAdapterById("UNKNOWN_ID");
+        // Then
+        assertThat(daTypeAdapter2).isEmpty();
     }
 
     @Test
-    void testGetDATypeAdapters() {
+    void getDATypeAdapters_should_return_list_of_DATypeAdapter() {
+        // Given
+        SclRootAdapter sclRootAdapter = mock(SclRootAdapter.class);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(new SCL());
+        SCL scl = new SCL();
+        TDataTypeTemplates dataTemplate = new TDataTypeTemplates();
         TDAType tdaType = new TDAType();
         tdaType.setId("ID");
-        dataTypeTemplateAdapter.getCurrentElem().getDAType().add(tdaType);
-        assertFalse(dataTypeTemplateAdapter.getDATypeAdapters().isEmpty());
+        dataTemplate.getDAType().add(tdaType);
+        scl.setDataTypeTemplates(dataTemplate);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(scl);
+        DataTypeTemplateAdapter dataTypeTemplateAdapter = new DataTypeTemplateAdapter(sclRootAdapter, dataTemplate);
+        // When Then
+        assertThat(dataTypeTemplateAdapter.getDATypeAdapters()).isNotEmpty();
     }
 
     @Test
+    @Tag("issue-321")
     void testGetEnumTypeAdapterById() {
+        // Given
+        SclRootAdapter sclRootAdapter = mock(SclRootAdapter.class);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(new SCL());
+        SCL scl = new SCL();
+        TDataTypeTemplates dataTemplate = new TDataTypeTemplates();
         TEnumType tEnumType = new TEnumType();
         tEnumType.setId("ID");
-        dataTypeTemplateAdapter.getCurrentElem().getEnumType().add(tEnumType);
-        Optional<EnumTypeAdapter> enumTypeAdapter =
-                dataTypeTemplateAdapter.getEnumTypeAdapterById("ID");
-        assertTrue(enumTypeAdapter.isPresent());
+        dataTemplate.getEnumType().add(tEnumType);
+        scl.setDataTypeTemplates(dataTemplate);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(scl);
+        DataTypeTemplateAdapter dataTypeTemplateAdapter = new DataTypeTemplateAdapter(sclRootAdapter, dataTemplate);
 
-        enumTypeAdapter =  dataTypeTemplateAdapter.getEnumTypeAdapterById("UNKNOWN_ID");
-        assertTrue(enumTypeAdapter.isEmpty());
+        // When
+        Optional<EnumTypeAdapter> enumTypeAdapter1 = dataTypeTemplateAdapter.getEnumTypeAdapterById("ID");
+        // Then
+        assertThat(enumTypeAdapter1).isPresent();
+        // When
+        Optional<EnumTypeAdapter> enumTypeAdapter2 = dataTypeTemplateAdapter.getEnumTypeAdapterById("UNKNOWN_ID");
+        // Then
+        assertThat(enumTypeAdapter2).isEmpty();
     }
 
     @Test
-    void testGetEnumTypeAdapters() {
+    void getEnumTypeAdapters_should_return_list_of_EnumTypeAdapter() {
+        // Given
+        SclRootAdapter sclRootAdapter = mock(SclRootAdapter.class);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(new SCL());
+        SCL scl = new SCL();
+        TDataTypeTemplates dataTemplate = new TDataTypeTemplates();
         TEnumType tEnumType = new TEnumType();
         tEnumType.setId("ID");
-        dataTypeTemplateAdapter.getCurrentElem().getEnumType().add(tEnumType);
-        assertFalse(dataTypeTemplateAdapter.getEnumTypeAdapters().isEmpty());
+        dataTemplate.getEnumType().add(tEnumType);
+        scl.setDataTypeTemplates(dataTemplate);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(scl);
+        DataTypeTemplateAdapter dataTypeTemplateAdapter = new DataTypeTemplateAdapter(sclRootAdapter, dataTemplate);
+        // When Then
+        assertThat(dataTypeTemplateAdapter.getEnumTypeAdapters()).isNotEmpty();
     }
 
     @Test
+    @Tag("issue-321")
     void testHasSameID() {
+        // Given
         TDAType tdaType1 = new TDAType();
         tdaType1.setId("SAME_ID");
-
         TDAType tdaType2 = new TDAType();
         tdaType2.setId("SAME_ID");
-
-        assertTrue(DataTypeTemplateAdapter.hasSameID(tdaType1,tdaType2));
+        // When Then
+        assertThat(DataTypeTemplateAdapter.hasSameID(tdaType1,tdaType2)).isTrue();
+        // Given
         tdaType2.setId("ANOTHER_ID");
-        assertFalse(DataTypeTemplateAdapter.hasSameID(tdaType1,tdaType2));
+        // When Then
+        assertThat(DataTypeTemplateAdapter.hasSameID(tdaType1,tdaType2)).isFalse();
     }
 
     @Test
+    @Tag("issue-321")
     void testHasSamePrivates() {
-
+        // Given
         TDAType tdaType1 = new TDAType();
         TPrivate aPrivate1 = new TPrivate();
         aPrivate1.setType("A_PRIVATE1");
         aPrivate1.setSource("A_URI_1");
         tdaType1.getPrivate().add(aPrivate1);
-
         TDAType tdaType2 = new TDAType();
-        assertFalse(DataTypeTemplateAdapter.hasSamePrivates(tdaType1,tdaType2));
-
+        // When Then
+        assertThat(DataTypeTemplateAdapter.hasSamePrivates(tdaType1,tdaType2)).isFalse();
+        // Given
         TPrivate aPrivate2 = new TPrivate();
         aPrivate2.setType("A_PRIVATE1");
         aPrivate2.setSource("A_URI_2");
         tdaType2.getPrivate().add(aPrivate2);
-        assertFalse(DataTypeTemplateAdapter.hasSamePrivates(tdaType1,tdaType2));
-
+        // When Then
+        assertThat(DataTypeTemplateAdapter.hasSamePrivates(tdaType1,tdaType2)).isFalse();
+        // Given
         aPrivate2.setSource("A_URI_1");
-        assertTrue(DataTypeTemplateAdapter.hasSamePrivates(tdaType1,tdaType2));
+        // When Then
+        assertThat(DataTypeTemplateAdapter.hasSamePrivates(tdaType1,tdaType2)).isTrue();
 
     }
 
     @Test
-    void testFindDATypesWhichBdaContainsEnumTypeId() throws Exception {
+    void findDATypesWhichBdaContainsEnumTypeId_when_BDA_containing_specified_EnumTypeID_should_return_DATypeAdapters() {
+        // Given
         String enumTypeId = "RecCycModKind";
-        DataTypeTemplateAdapter dataTypeTemplateAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
+        DataTypeTemplateAdapter dataTypeTemplateAdapter = initDttAdapterFromFile(SCD_DTT);
+        // When
         List<DATypeAdapter> daTypeAdapters = dataTypeTemplateAdapter.findDATypesWhichBdaContainsEnumTypeId(enumTypeId);
-        assertEquals(1,daTypeAdapters.size());
+        // Then
+        assertThat(daTypeAdapters).hasSize(1);
     }
 
     @Test
-    void testFindDOTypesWhichDAContainsEnumTypeId() throws Exception {
+    @Tag("issue-321")
+    void testFindDOTypesWhichDAContainsEnumTypeId() {
+        // Given
         String enumTypeId = "PhaseAngleReferenceKind";
-        DataTypeTemplateAdapter dataTypeTemplateAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
+        DataTypeTemplateAdapter dataTypeTemplateAdapter = initDttAdapterFromFile(SCD_DTT);
+        // When
         List<DOTypeAdapter> doTypeAdapters = dataTypeTemplateAdapter.findDOTypesWhichDAContainsEnumTypeId(enumTypeId);
-        assertEquals(1,doTypeAdapters.size());
-
+        // Then
+        assertThat(doTypeAdapters).hasSize(1);
+        // Given
         enumTypeId = "RecCycModKind";
+        // When
         doTypeAdapters = dataTypeTemplateAdapter.findDOTypesWhichDAContainsEnumTypeId(enumTypeId);
-        assertTrue(doTypeAdapters.isEmpty());
+        // Then
+        assertThat(doTypeAdapters).isEmpty();
     }
 
     @Test
-    void testFindDATypesFromStructBdaWithDATypeId() throws Exception {
-        DataTypeTemplateAdapter dataTypeTemplateAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
+    @Tag("issue-321")
+    void testFindDATypesFromStructBdaWithDATypeId() {
+        // Given
+        DataTypeTemplateAdapter dataTypeTemplateAdapter = initDttAdapterFromFile(SCD_DTT);
         String daTypeId = "DA2";
+        // When
         List<DATypeAdapter> daTypeAdapters = dataTypeTemplateAdapter.findDATypesFromStructBdaWithDATypeId(daTypeId);
-
-        assertEquals(1,daTypeAdapters.size());
+        // Then
+        assertThat(daTypeAdapters).hasSize(1);
+        // Given
         daTypeId = "DA1";
-
+        // When
         daTypeAdapters = dataTypeTemplateAdapter.findDATypesFromStructBdaWithDATypeId(daTypeId);
-        assertTrue(daTypeAdapters.isEmpty());
+        // Then
+        assertThat(daTypeAdapters).isEmpty();
     }
 
     @Test
-    void testFindDOTypesWhichDAContainsStructWithDATypeId() throws Exception {
-        DataTypeTemplateAdapter dataTypeTemplateAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
+    void findDOTypesWhichDAContainsStructWithDATypeId_when_DA_containing_specific_StructDaTypeID_should_return_DOTypeAdapters() {
+        // Given
+        DataTypeTemplateAdapter dataTypeTemplateAdapter = initDttAdapterFromFile(SCD_DTT);
         String daTypeId = "DA1";
+        // When
         List<DOTypeAdapter> doTypeAdapters = dataTypeTemplateAdapter.findDOTypesWhichDAContainsStructWithDATypeId(daTypeId);
-        assertEquals(1,doTypeAdapters.size());
+        // Then
+        assertThat(doTypeAdapters).hasSize(1);
     }
 
     @Test
@@ -245,27 +347,39 @@ class DataTypeTemplateAdapterTest {
     }
 
     @Test
-    void testFindDOTypesFromSDOWithDOTypeId() throws Exception {
-        DataTypeTemplateAdapter dataTypeTemplateAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
+    @Tag("issue-321")
+    void testFindDOTypesFromSDOWithDOTypeId() {
+        // Given
+        DataTypeTemplateAdapter dataTypeTemplateAdapter = initDttAdapterFromFile(SCD_DTT);
         String doTypeId = "DO4";
+        // When
         List<DOTypeAdapter> doTypeList = dataTypeTemplateAdapter.findDOTypesFromSDOWithDOTypeId(doTypeId);
-        assertEquals(1,doTypeList.size());
-
+        // Then
+        assertThat(doTypeList).hasSize(1);
+        // Given
         doTypeId = "UnknownDOID";
+        // When
         doTypeList = dataTypeTemplateAdapter.findDOTypesFromSDOWithDOTypeId(doTypeId);
-        assertTrue(doTypeList.isEmpty());
+        // Then
+        assertThat(doTypeList).isEmpty();
     }
 
     @Test
-    void testFindLNodeTypesFromDoWithDoTypeId() throws Exception {
-        DataTypeTemplateAdapter dataTypeTemplateAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
+    @Tag("issue-321")
+    void testFindLNodeTypesFromDoWithDoTypeId() {
+        // Given
+        DataTypeTemplateAdapter dataTypeTemplateAdapter = initDttAdapterFromFile(SCD_DTT);
         String doTypeId = "DO1";
+        // When
         List<LNodeTypeAdapter> lNodeTypeAdapters = dataTypeTemplateAdapter.findLNodeTypesFromDoWithDoTypeId(doTypeId);
-        assertEquals(1,lNodeTypeAdapters.size());
-
+        // Then
+        assertThat(lNodeTypeAdapters).hasSize(1);
+        // Given
         doTypeId = "UnknownDOID";
+        // When
         lNodeTypeAdapters = dataTypeTemplateAdapter.findLNodeTypesFromDoWithDoTypeId(doTypeId);
-        assertTrue(lNodeTypeAdapters.isEmpty());
+        // Then
+        assertThat(lNodeTypeAdapters).isEmpty();
     }
 
     @ParameterizedTest
@@ -276,21 +390,32 @@ class DataTypeTemplateAdapterTest {
                     "IED_NAME_Z6A2chUEHc7a15MvIUbQTVvioCgzOcWlNMfOzNbfjLJaueNf9T2GmQP7ShgYFr3SfYex5HdwvC5tRr9oAp0lmSwtqx" +
                     "x1cHEKLMgKX7hZuUWCpKYPJ3I1fmE7NVIvVOtB1JsIOSGclfQfLGDEFjFG7vIozpkijZ0ugtZSOZuCavC5v5JL58yHO1RWCpYVdM" +
                     "Dp4JhChU4YjhAhVGbOykJi0b4pc0saXoqf0q5imWmXiiuMuq0sc25IVA"})
-    void generateDttId_shouldReturnIEdNameWithDTTId_whenBothLessThan255(String iedName, String dttId, String newDTTId) {
+    void generateDttId_whenBothLessThan255_shouldReturnIEdNameWithDTTId(String iedName, String dttId, String newDTTId) {
+        // Given
+        SclRootAdapter sclRootAdapter = mock(SclRootAdapter.class);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(new SCL());
+        SCL scl = new SCL();
+        TDataTypeTemplates dataTemplate = new TDataTypeTemplates();
+        scl.setDataTypeTemplates(dataTemplate);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(scl);
+        DataTypeTemplateAdapter dataTypeTemplateAdapter = new DataTypeTemplateAdapter(sclRootAdapter, dataTemplate);
+        // When Then
         assertThat(dataTypeTemplateAdapter.generateDttId(iedName, dttId)).hasSizeLessThan(256)
                 .isEqualTo(newDTTId);
 
     }
 
     @Test
-    void importEnumTypes_shouldAddNewEnum_whenDifferentContent() throws Exception {
+    @Tag("issue-321")
+    void importEnumTypes_whenDifferentContent_shouldAddNewEnum() {
         //Given
-        DataTypeTemplateAdapter rcvDttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
-        DataTypeTemplateAdapter prvDttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
+        DataTypeTemplateAdapter rcvDttAdapter = initDttAdapterFromFile(SCD_DTT);
+        DataTypeTemplateAdapter prvDttAdapter = initDttAdapterFromFile(SCD_DTT_DIFF_CONTENT_SAME_ID);
         Optional<EnumTypeAdapter> enumTypeAdapter = rcvDttAdapter.getEnumTypeAdapterById("PhaseAngleReferenceKind");
         int rcvDTTEnumValsSize = enumTypeAdapter.get().getCurrentElem().getEnumVal().size();
         //When
         rcvDttAdapter.importEnumType("IEDName",prvDttAdapter);
+        //When
         Optional<EnumTypeAdapter> rcvEnumTypeAdapter = rcvDttAdapter.getEnumTypeAdapterById("PhaseAngleReferenceKind");
         //Then
         assertThat(rcvDttAdapter.getEnumTypeAdapters())
@@ -299,91 +424,101 @@ class DataTypeTemplateAdapterTest {
     }
 
     @Test
-    void importEnumTypes_shouldUpdateExistingEnum_whenSameContent() throws Exception {
+    void importEnumTypes_whenSameContent_shouldUpdateExistingEnum() {
         //Given
-        DataTypeTemplateAdapter rcvDttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
-        DataTypeTemplateAdapter prvDttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
+        DataTypeTemplateAdapter rcvDttAdapter = initDttAdapterFromFile(SCD_DTT);
+        DataTypeTemplateAdapter prvDttAdapter = initDttAdapterFromFile(SCD_DTT);
         //When
         rcvDttAdapter.importEnumType("IEDName",prvDttAdapter);
         //Then
         assertThat(rcvDttAdapter.getEnumTypeAdapters()).hasSize(prvDttAdapter.getEnumTypeAdapters().size());
     }
 
-
     @Test
-    void testImportDTT() throws Exception {
-        //
-        DataTypeTemplateAdapter prvDttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
-        DataTypeTemplateAdapter rcvDttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
+    @Tag("issue-321")
+    void testImportDTT() {
+        // Given
+        DataTypeTemplateAdapter prvDttAdapter = initDttAdapterFromFile(SCD_DTT);
+        DataTypeTemplateAdapter rcvDttAdapter = initDttAdapterFromFile(SCD_DTT);
         int nbLNodeType = rcvDttAdapter.getLNodeTypeAdapters().size();
+        // When
         rcvDttAdapter.importDTT("IEDName",prvDttAdapter);
-        assertEquals(nbLNodeType,rcvDttAdapter.getLNodeTypeAdapters().size());
-
-        prvDttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
+        // Then
+        assertThat(rcvDttAdapter.getLNodeTypeAdapters()).hasSize(nbLNodeType);
+        // Given
+        prvDttAdapter = initDttAdapterFromFile(SCD_DTT_DIFF_CONTENT_SAME_ID);
+        // When
         var mapOldNewId =rcvDttAdapter.importDTT("IEDName",prvDttAdapter);
-        assertTrue(nbLNodeType < rcvDttAdapter.getLNodeTypeAdapters().size());
-        assertFalse(mapOldNewId.isEmpty());
+        // Then
+        assertThat(rcvDttAdapter.getLNodeTypeAdapters()).hasSizeGreaterThan(nbLNodeType);
+        assertThat(mapOldNewId).isNotEmpty();
     }
 
     @Test
-    void testImportLNodeType() throws Exception {
-        //
-        DataTypeTemplateAdapter prvDttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
-        DataTypeTemplateAdapter rcvDttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
-
+    @Tag("issue-321")
+    void testImportLNodeType() {
+        // Given
+        DataTypeTemplateAdapter prvDttAdapter = initDttAdapterFromFile(SCD_DTT);
+        DataTypeTemplateAdapter rcvDttAdapter = initDttAdapterFromFile(SCD_DTT);
         int nbLNodeType = rcvDttAdapter.getLNodeTypeAdapters().size();
+        // When
         rcvDttAdapter.importLNodeType("IEDName",prvDttAdapter);
-        assertEquals(nbLNodeType,rcvDttAdapter.getLNodeTypeAdapters().size());
-
-        prvDttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
+        // Then
+        assertThat(rcvDttAdapter.getLNodeTypeAdapters()).hasSize(nbLNodeType);
+        // Given
+        prvDttAdapter = initDttAdapterFromFile(SCD_DTT_DIFF_CONTENT_SAME_ID);
+        // When
         var mapOldNewId = rcvDttAdapter.importLNodeType("IEDName",prvDttAdapter);
-        assertTrue(nbLNodeType < rcvDttAdapter.getLNodeTypeAdapters().size());
-        assertFalse(mapOldNewId.isEmpty());
-
-        System.out.println(MarshallerWrapper.marshall(rcvDttAdapter.getParentAdapter().getCurrentElem()));
-        System.out.println(MarshallerWrapper.marshall(prvDttAdapter.getParentAdapter().getCurrentElem()));
+        // Then
+        assertThat(rcvDttAdapter.getLNodeTypeAdapters()).hasSizeGreaterThan(nbLNodeType);
+        assertThat(mapOldNewId).isNotEmpty();
     }
 
     @Test
-    void testImportDOType() throws Exception {
-        DataTypeTemplateAdapter prvDttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
-        DataTypeTemplateAdapter rcvDttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
-
+    @Tag("issue-321")
+    void testImportDOType() {
+        // Given
+        DataTypeTemplateAdapter prvDttAdapter = initDttAdapterFromFile(SCD_DTT);
+        DataTypeTemplateAdapter rcvDttAdapter = initDttAdapterFromFile(SCD_DTT);
         int nbDOType = rcvDttAdapter.getDOTypeAdapters().size();
+        // When
         rcvDttAdapter.importDOType("IEDName",prvDttAdapter);
-        assertEquals(nbDOType,rcvDttAdapter.getDOTypeAdapters().size());
-
-        prvDttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
+        // Then
+        assertThat(rcvDttAdapter.getDOTypeAdapters()).hasSize(nbDOType);
+        // Given
+        prvDttAdapter = initDttAdapterFromFile(SCD_DTT_DIFF_CONTENT_SAME_ID);
+        // When
         rcvDttAdapter.importDOType("IEDName",prvDttAdapter);
-        assertTrue(nbDOType < rcvDttAdapter.getDOTypeAdapters().size());
-
-        System.out.println(MarshallerWrapper.marshall(rcvDttAdapter.getParentAdapter().getCurrentElem()));
-        System.out.println(MarshallerWrapper.marshall(prvDttAdapter.getParentAdapter().getCurrentElem()));
+        // Then
+        assertThat(rcvDttAdapter.getDOTypeAdapters()).hasSizeGreaterThan(nbDOType);
     }
 
     @Test
-    void testImportDAType() throws Exception {
-        DataTypeTemplateAdapter rcvDttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
-        DataTypeTemplateAdapter prvDttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT);
+    @Tag("issue-321")
+    void testImportDAType() {
+        // Given
+        DataTypeTemplateAdapter rcvDttAdapter = initDttAdapterFromFile(SCD_DTT);
+        DataTypeTemplateAdapter prvDttAdapter = initDttAdapterFromFile(SCD_DTT);
         int nbDAType = rcvDttAdapter.getDATypeAdapters().size();
-
+        // When
         rcvDttAdapter.importDAType("IEDName",prvDttAdapter);
-        assertEquals(nbDAType,rcvDttAdapter.getDATypeAdapters().size());
-        prvDttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
-
+        // Then
+        assertThat(rcvDttAdapter.getDATypeAdapters()).hasSize(nbDAType);
+        // Given
+        prvDttAdapter = initDttAdapterFromFile(SCD_DTT_DIFF_CONTENT_SAME_ID);
+        // When
         rcvDttAdapter.importDAType("IEDName",prvDttAdapter);
-        assertTrue(nbDAType < rcvDttAdapter.getDATypeAdapters().size());
-        System.out.println(MarshallerWrapper.marshall(prvDttAdapter.getParentAdapter().getCurrentElem()));
-        System.out.println(MarshallerWrapper.marshall(rcvDttAdapter.getParentAdapter().getCurrentElem()));
+        // Then
+        assertThat(rcvDttAdapter.getDATypeAdapters()).hasSizeGreaterThan(nbDAType);
     }
 
     @ParameterizedTest
     @CsvSource({"A,LN1,No coherence or path between DOType(DO2) and DA(A)",
             "antRef,LN1,Invalid ExtRef signal: no coherence between pDO(Op.origin) and pDA(antRef)",
             "antRef.origin.ctlVal,LN_Type1,Unknown LNodeType:LN_Type1"})
-    void getBinderDataAttributeRef_shouldThrowScdException_whenDONotContainDA(String pDA, String lnType, String message) throws Exception {
+    void getBinderDataAttributeRef_whenDONotContainDA_shouldThrowScdException(String pDA, String lnType, String message) throws Exception {
         //Given
-        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
+        DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT_DIFF_CONTENT_SAME_ID);
         ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
         signalInfo.setPLN("PIOC");
         signalInfo.setPDO("Op.origin");
@@ -395,9 +530,9 @@ class DataTypeTemplateAdapterTest {
     }
 
     @Test
-    void getBinderDataAttributeRef_shouldThrowScdException_whenLnClassNotMatches() throws Exception {
+    void getBinderDataAttributeRef_whenLnClassNotMatches_shouldThrowScdException() {
         //Given
-        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
+        DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT_DIFF_CONTENT_SAME_ID);
         LNodeTypeAdapter lNodeTypeAdapter = dttAdapter.getLNodeTypeAdapterById("LN1").get();
         lNodeTypeAdapter.getCurrentElem().unsetLnClass();
 
@@ -412,9 +547,9 @@ class DataTypeTemplateAdapterTest {
     }
 
     @Test
-    void getBinderDataAttributeRef_shouldThrowScdException_whenDOIdNotFound() throws Exception {
+    void getBinderDataAttributeRef_whenDOIdNotFound_shouldThrowScdException() {
         //Given
-        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
+        DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT_DIFF_CONTENT_SAME_ID);
 
         ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
         signalInfo.setPLN("PIOC");
@@ -426,9 +561,9 @@ class DataTypeTemplateAdapterTest {
     }
 
     @Test
-    void getBinderDataAttributeRef_shouldReturnBindingInfoWithoutDO_whenSignalPDOEmpty() throws Exception {
+    void getBinderDataAttributeRef_whenSignalPDOEmpty_shouldReturnBindingInfoWithoutDO() {
         //Given
-        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
+        DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT_DIFF_CONTENT_SAME_ID);
 
         ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
         signalInfo.setPLN("PIOC");
@@ -442,9 +577,9 @@ class DataTypeTemplateAdapterTest {
     }
 
     @Test
-    void getBinderDataAttributeRef_shouldReturnBindingInfoWithoutDA_whenSignalPDAEmpty() throws Exception {
+    void getBinderDataAttributeRef_whenSignalPDAEmpty_shouldReturnBindingInfoWithoutDA() {
         //Given
-        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
+        DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT_DIFF_CONTENT_SAME_ID);
 
         ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
         signalInfo.setPLN("PIOC");
@@ -460,9 +595,9 @@ class DataTypeTemplateAdapterTest {
     }
 
     @Test
-    void getBinderDataAttributeRef_shouldReturnBindingInfo_whenExist() throws Exception {
+    void getBinderDataAttributeRef_whenExist_shouldReturnBindingInfo() {
         //Given
-        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
+        DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT_DIFF_CONTENT_SAME_ID);
 
         ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
         signalInfo.setPLN("PIOC");
@@ -476,20 +611,28 @@ class DataTypeTemplateAdapterTest {
     }
 
     @Test
-    void addPrivate() throws Exception {
-        //Given
-        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
+    void addPrivate_should_throw_exception() {
+        // Given
+        SclRootAdapter sclRootAdapter = mock(SclRootAdapter.class);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(new SCL());
+        SCL scl = new SCL();
+        TDataTypeTemplates dataTemplate = new TDataTypeTemplates();
+        scl.setDataTypeTemplates(dataTemplate);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(scl);
+
+        DataTypeTemplateAdapter dttAdapter = new DataTypeTemplateAdapter(sclRootAdapter, dataTemplate);
         TPrivate tPrivate = new TPrivate();
         tPrivate.setType("Private Type");
         tPrivate.setSource("Private Source");
         //When Then
-        assertThrows(UnsupportedOperationException.class, () -> dttAdapter.addPrivate(tPrivate));
+        assertThatCode(() -> dttAdapter.addPrivate(tPrivate))
+                .isInstanceOf(UnsupportedOperationException.class);
     }
 
     @Test
-    void elementXPath() throws Exception {
+    void elementXPath_should_return_expected_xpath_value()  {
         // Given
-        DataTypeTemplateAdapter dttAdapter = AbstractDTTLevel.initDttAdapterFromFile(AbstractDTTLevel.SCD_DTT_DIFF_CONTENT_SAME_ID);
+        DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT_DIFF_CONTENT_SAME_ID);
         // When
         String result = dttAdapter.elementXPath();
         // Then

@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.scl;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TPrivate;
@@ -15,62 +16,77 @@ import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
 
 class SclRootAdapterTest {
 
-
     @Test
+    @Tag("issue-321")
     void testConstruction() {
+        // Given
         AtomicReference<SclRootAdapter> sclRootAdapterAtomicReference = new AtomicReference<>();
-        assertDoesNotThrow(() ->
-                sclRootAdapterAtomicReference.set(new SclRootAdapter("hID", "hVersion", "hRevision"))
-        );
-
+        assertThatCode(() -> sclRootAdapterAtomicReference.set(new SclRootAdapter("hID", "hVersion", "hRevision")))
+                .doesNotThrowAnyException();
         SclRootAdapter sclRootAdapter = sclRootAdapterAtomicReference.get();
-        assertThrows(ScdException.class,
-                () ->  sclRootAdapter.addHeader("hID1","hVersion1","hRevision1"));
-
-        assertTrue(sclRootAdapter.amChildElementRef());
-        assertEquals(SclRootAdapter.RELEASE, sclRootAdapter.getSclRelease());
-        assertEquals(SclRootAdapter.VERSION, sclRootAdapter.getSclVersion());
-        assertEquals(SclRootAdapter.REVISION, sclRootAdapter.getSclRevision());
+        // When Then
+        // addHeader is not the purpose of this test
+        assertThatCode(() -> sclRootAdapter.addHeader("hID1","hVersion1","hRevision1"))
+                .isInstanceOf(ScdException.class)
+                .hasMessageContaining("SCL already contains header");
+        assertThat(sclRootAdapter.amChildElementRef()).isTrue();
+        assertThat(sclRootAdapter.getSclRelease()).isEqualTo(SclRootAdapter.RELEASE);
+        assertThat(sclRootAdapter.getSclVersion()).isEqualTo(SclRootAdapter.VERSION);
+        assertThat(sclRootAdapter.getSclRevision()).isEqualTo(SclRootAdapter.REVISION);
         assertIsMarshallable(sclRootAdapter.getCurrentElem());
-
+        // Given
         SCL scd = new SCL();
-        assertThrows(IllegalArgumentException.class, () -> new SclRootAdapter(scd));
+        // When Then
+        assertThatCode(() -> new SclRootAdapter(scd))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Invalid SCD: no tag Header found");
     }
 
     @Test
-    void addIED() {
-
+    // Test name should be modified to reflect each test case.
+    @Tag("issue-321")
+    void testAddIED() {
+        //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/add_ied_test.xml");
         SCL icd1 = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/icd1_to_add_test.xml");
         SCL icd2 = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/icd2_to_add_test.xml");
-
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         SCL icd = new SCL();
-        assertThrows(ScdException.class, () -> sclRootAdapter.addIED(icd, "IED_NAME1"));
-        assertDoesNotThrow(() -> sclRootAdapter.addIED(icd1, "IED_NAME1"));
-        assertThrows(ScdException.class, () -> sclRootAdapter.addIED(icd1, "IED_NAME1"));
-        assertDoesNotThrow(() -> sclRootAdapter.addIED(icd2, "IED_NAME2"));
+        //When Then
+        assertThatCode(() -> sclRootAdapter.addIED(icd, "IED_NAME1"))
+                .isInstanceOf(ScdException.class)
+                .hasMessageContaining("No IED to import from ICD file");
+        //When Then
+        assertThatCode(() -> sclRootAdapter.addIED(icd1, "IED_NAME1"))
+                .doesNotThrowAnyException();
+        //When Then
+        assertThatCode(() -> sclRootAdapter.addIED(icd1, "IED_NAME1"))
+                .isInstanceOf(ScdException.class)
+                .hasMessageContaining("SCL file already contains IED: IED_NAME1");
+        //When Then
+        assertThatCode(() -> sclRootAdapter.addIED(icd2, "IED_NAME2"))
+                .doesNotThrowAnyException();
         assertIsMarshallable(scd);
     }
 
     @Test
-    void addPrivate() {
+    void addPrivate_should_create_private() {
+        //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/add_ied_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         TPrivate tPrivate = new TPrivate();
         tPrivate.setType("Private Type");
         tPrivate.setSource("Private Source");
-        assertTrue(sclRootAdapter.getCurrentElem().getPrivate().isEmpty());
+        assertThat(sclRootAdapter.getCurrentElem().getPrivate()).isEmpty();
+        //When
         sclRootAdapter.addPrivate(tPrivate);
-        assertEquals(1, sclRootAdapter.getCurrentElem().getPrivate().size());
+        //Then
+        assertThat(sclRootAdapter.getCurrentElem().getPrivate()).hasSize(1);
         assertIsMarshallable(scd);
     }
 

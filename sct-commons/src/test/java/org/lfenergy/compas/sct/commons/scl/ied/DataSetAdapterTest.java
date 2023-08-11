@@ -14,16 +14,19 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class DataSetAdapterTest {
 
     @Test
-    void amChildElementRef_should_succeed() {
+    void amChildElementRef__whenCalledWithExistingRelationBetweenLNAndDatSet_shouldReturnTrue() {
         //Given
+        LN0Adapter ln0Adapter = mock(LN0Adapter.class);
         LN0 ln0 = new LN0();
         TDataSet dataSet = new TDataSet();
         ln0.getDataSet().add(dataSet);
-        LN0Adapter ln0Adapter = new LN0Adapter(null, ln0);
+        when(ln0Adapter.getCurrentElem()).thenReturn(ln0);
         DataSetAdapter dataSetAdapter = new DataSetAdapter(ln0Adapter, dataSet);
         //When
         boolean result = dataSetAdapter.amChildElementRef();
@@ -32,14 +35,14 @@ class DataSetAdapterTest {
     }
 
     @Test
-    void elementXPath_should_return_relative_xpath() {
+    void elementXPath_should_return_expected_xpath_value() {
         //Given
         TDataSet dataSet = new TDataSet();
         dataSet.setName("dataSetName");
         DataSetAdapter dataSetAdapter = new DataSetAdapter(null, dataSet);
         //When
         String elementXPath = dataSetAdapter.elementXPath();
-        //Then,
+        //Then
         assertThat(elementXPath).isEqualTo("DataSet[@name=\"dataSetName\"]");
     }
 
@@ -87,8 +90,8 @@ class DataSetAdapterTest {
     void createFCDAIfNotExists_when_FCDA_already_exists_should_not_create_FCDA() {
         //Given
         TDataSet dataSet = new TDataSet();
-        TFCDA existingFcda = createFCDA();
-        dataSet.getFCDA().add(existingFcda);
+        TFCDA existingFCDA = createFCDA();
+        dataSet.getFCDA().add(existingFCDA);
         DataSetAdapter dataSetAdapter = new DataSetAdapter(null, dataSet);
         //When
         TFCDA result = dataSetAdapter.createFCDAIfNotExists("LDINST", null, "LLN0", null, "DoName", "daName", TFCEnum.ST);
@@ -96,18 +99,18 @@ class DataSetAdapterTest {
         assertThat(dataSet.getFCDA()).hasSize(1)
             .first()
             .isSameAs(result)
-            .isSameAs(existingFcda);
+            .isSameAs(existingFCDA);
     }
 
     private static TFCDA createFCDA() {
-        TFCDA existingFcda = new TFCDA();
-        existingFcda.setLdInst("LDINST");
-        existingFcda.setPrefix("");
-        existingFcda.getLnClass().add("LLN0");
-        existingFcda.setLnInst("");
-        existingFcda.setDoName("DoName");
-        existingFcda.setDaName("daName");
-        existingFcda.setFc(TFCEnum.ST);
-        return existingFcda;
+        TFCDA existingFCDA = new TFCDA();
+        existingFCDA.setLdInst("LDINST");
+        existingFCDA.setPrefix("");
+        existingFCDA.getLnClass().add("LLN0");
+        existingFCDA.setLnInst("");
+        existingFCDA.setDoName("DoName");
+        existingFCDA.setDaName("daName");
+        existingFCDA.setFc(TFCEnum.ST);
+        return existingFCDA;
     }
 }
