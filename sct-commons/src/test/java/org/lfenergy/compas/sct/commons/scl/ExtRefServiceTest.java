@@ -77,7 +77,7 @@ class ExtRefServiceTest {
         // When
         List<SclReportItem> sclReportItems = ExtRefService.updateAllExtRefIedNames(scd);
         // Then
-        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isFatal))
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError))
                 .overridingErrorMessage(String.valueOf(sclReportItems))
                 .isTrue();
     }
@@ -90,7 +90,7 @@ class ExtRefServiceTest {
         List<SclReportItem> sclReportItems = ExtRefService.updateAllExtRefIedNames(scl);
         // Then : the sclReport should report all errors described in the comments in the SCD file
         assertThat(sclReportItems).isNotNull();
-        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isFatal)).isFalse();
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isFalse();
         assertThat(sclReportItems).containsExactlyInAnyOrder(errors);
     }
 
@@ -100,18 +100,18 @@ class ExtRefServiceTest {
                                 "Errors on ExtRefs",
                                 SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_with_extref_errors.xml"),
                                 new SclReportItem[]{
-                                        SclReportItem.fatal(
+                                        SclReportItem.error(
                                                 "/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]" +
                                                         "/LN0/Inputs/ExtRef[@desc=\"No matching compas:Flow\"]",
                                                 "The signal ExtRef has no matching compas:Flow Private"),
-                                        SclReportItem.fatal(
+                                        SclReportItem.error(
                                                 "/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]" +
                                                         "/LN0/Inputs/ExtRef[@desc=\"Matching two compas:Flow\"]",
                                                 "The signal ExtRef has more than one matching compas:Flow Private"),
-                                        SclReportItem.fatal(
+                                        SclReportItem.error(
                                                 "/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST13\"]",
                                                 "The Ldevice status test does not exist. It should be among [on, off]"),
-                                        SclReportItem.fatal(
+                                        SclReportItem.error(
                                                 "/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST14\"]",
                                                 "The LDevice status is undefined"),
                                         SclReportItem.warning(
@@ -131,12 +131,12 @@ class ExtRefServiceTest {
                                                 "/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]" +
                                                         "/LN0/Inputs/ExtRef[@desc=\"Source LDevice is off for this ExtRef\"]",
                                                 "The signal ExtRef source LDevice /SCL/IED[@name=\"IED_NAME2\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST22\"] status is off"),
-                                        SclReportItem.fatal(
+                                        SclReportItem.error(
                                                 "/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]" +
                                                         "/LN0/Inputs/ExtRef[@desc=\"Source LDevice is undefined for this ExtRef\"]",
                                                 "The signal ExtRef source LDevice /SCL/IED[@name=\"IED_NAME2\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST23\"] status is " +
                                                         "undefined"),
-                                        SclReportItem.fatal(
+                                        SclReportItem.error(
                                                 "/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]" +
                                                         "/LN0/Inputs/ExtRef[@desc=\"Source LDevice is neither on nor off for this ExtRef\"]",
                                                 "The signal ExtRef source LDevice /SCL/IED[@name=\"IED_NAME2\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST24\"] " +
@@ -146,12 +146,12 @@ class ExtRefServiceTest {
                                 "Errors on IEDs",
                                 SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_with_ied_errors.xml"),
                                 new SclReportItem[]{
-                                        SclReportItem.fatal(
+                                        SclReportItem.error(
                                                 "/SCL/IED[@name=\"IED_NAME1\"], /SCL/IED[@name=\"IED_NAME2\"]",
                                                 "/IED/Private/compas:ICDHeader[@ICDSystemVersionUUID] must be unique but the same ICDSystemVersionUUID was found on several IED."),
-                                        SclReportItem.fatal("/SCL/IED[@name=\"IED_NAME3\"]", "IED has no Private COMPAS-ICDHeader element"),
-                                        SclReportItem.fatal("/SCL/IED[@name=\"IED_NAME4\"]", "IED private COMPAS-ICDHeader as no icdSystemVersionUUID or iedName attribute"),
-                                        SclReportItem.fatal("/SCL/IED[@name=\"IED_NAME5\"]", "IED private COMPAS-ICDHeader as no icdSystemVersionUUID or iedName attribute")
+                                        SclReportItem.error("/SCL/IED[@name=\"IED_NAME3\"]", "IED has no Private COMPAS-ICDHeader element"),
+                                        SclReportItem.error("/SCL/IED[@name=\"IED_NAME4\"]", "IED private COMPAS-ICDHeader as no icdSystemVersionUUID or iedName attribute"),
+                                        SclReportItem.error("/SCL/IED[@name=\"IED_NAME5\"]", "IED private COMPAS-ICDHeader as no icdSystemVersionUUID or iedName attribute")
                                 })
                 );
     }
@@ -420,7 +420,7 @@ class ExtRefServiceTest {
         // When
         List<SclReportItem> sclReportItems = ExtRefService.configureNetworkForAllControlBlocks(scd, controlBlockNetworkSettings, RANGES_PER_CB_TYPE);
         // Then
-        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isFatal)).isTrue();
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
         TConnectedAP connectedAP = new SclRootAdapter(scd).findConnectedApAdapter("IED_NAME2", "AP_NAME").get().getCurrentElem();
         TGSE gse = connectedAP.getGSE().stream()
                 .filter(tgse -> "CB_LD_INST21_GSI".equals(tgse.getCbName()))
@@ -462,7 +462,7 @@ class ExtRefServiceTest {
         // When
         List<SclReportItem> sclReportItems = ExtRefService.configureNetworkForAllControlBlocks(scd, controlBlockNetworkSettings, RANGES_PER_CB_TYPE);
         // Then
-        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isFatal)).isTrue();
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
         assertThat(streamAllConnectedApGseP(scd, "APPID"))
                 .containsExactlyInAnyOrder("0009", "000A", "000B");
         assertThat(streamAllConnectedApGseP(scd, "MAC-Address"))
@@ -479,9 +479,9 @@ class ExtRefServiceTest {
         // When
         List<SclReportItem> sclReportItems = ExtRefService.configureNetworkForAllControlBlocks(scd, controlBlockNetworkSettings, rangesPerCbType);
         // Then
-        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isFatal)).isFalse();
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isFalse();
         assertThat(sclReportItems)
-                .extracting(SclReportItem::getMessage, SclReportItem::getXpath)
+                .extracting(SclReportItem::message, SclReportItem::xpath)
                 .contains(Tuple.tuple(expectedMessage,
                         "/SCL/IED[@name=\"IED_NAME2\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST21\"]/LN0/GSEControl[@name=\"CB_LD_INST21_GMI\"]"));
     }
@@ -704,7 +704,7 @@ class ExtRefServiceTest {
         List<SclReportItem> sclReportItems = ExtRefService.manageBindingForLDEPF(scd, settings);
         // Then
         assertThat(sclReportItems).hasSize(2)
-                .extracting(SclReportItem::getMessage)
+                .extracting(SclReportItem::message)
                 .isEqualTo(List.of("There is more than one IED source to bind the signal /IED@name=IED_NAME2/LDevice@inst=LDEPF/LN0/ExtRef@desc=DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1",
                         "There is more than one IED source to bind the signal /IED@name=IED_NAME3/LDevice@inst=LDEPF/LN0/ExtRef@desc=DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1"));
         TExtRef extRef1 = findExtRef(scd, "IED_NAME1", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");

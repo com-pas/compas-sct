@@ -61,7 +61,7 @@ class InputsAdapterTest {
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();
         // Then
         assertThat(sclReportItems).containsExactly(
-            SclReportItem.fatal("/SCL/IED[@name=\"IED_NAME1\"]",
+            SclReportItem.error("/SCL/IED[@name=\"IED_NAME1\"]",
                 "IED is missing Private/compas:Bay@UUID attribute")
         );
     }
@@ -75,7 +75,7 @@ class InputsAdapterTest {
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();
         // Then
         assertThat(sclReportItems).containsExactly(
-            SclReportItem.fatal("/SCL/IED[@name=\"IED_NAME3\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST31\"]/LN0/Inputs/ExtRef[@desc=\"Source IED is " +
+            SclReportItem.error("/SCL/IED[@name=\"IED_NAME3\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST31\"]/LN0/Inputs/ExtRef[@desc=\"Source IED is " +
                     "missing compas:Bay @UUID\"]",
                 "Source IED is missing Private/compas:Bay@UUID attribute")
         );
@@ -90,13 +90,13 @@ class InputsAdapterTest {
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();
         // Then
         assertThat(sclReportItems).containsExactlyInAnyOrder(
-            SclReportItem.fatal("/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]/LN0/Inputs/" +
+            SclReportItem.error("/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]/LN0/Inputs/" +
                     "ExtRef[@desc=\"ExtRef is missing ServiceType attribute\"]",
                 "The signal ExtRef is missing ServiceType attribute"),
-            SclReportItem.fatal("/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]/LN0/Inputs/" +
+            SclReportItem.error("/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]/LN0/Inputs/" +
                     "ExtRef[@desc=\"ExtRef is ServiceType Poll\"]",
                 "The signal ExtRef ServiceType attribute is unexpected : POLL"),
-            SclReportItem.fatal("/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]/LN0/Inputs/" +
+            SclReportItem.error("/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]/LN0/Inputs/" +
                     "ExtRef[@desc=\"ExtRef is ServiceType Report with malformed desc attribute\"]",
                 "ExtRef.serviceType=Report but ExtRef.desc attribute is malformed")
         );
@@ -236,7 +236,7 @@ class InputsAdapterTest {
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();
         // Then
         assertThat(sclReportItems).hasSize(1)
-            .first().extracting(SclReportItem::getMessage).asString()
+            .first().extracting(SclReportItem::message).asString()
             .startsWith("Could not create DataSet or ControlBlock for this ExtRef : IED/AccessPoint does not have capability to create DataSet of type GSE");
     }
 

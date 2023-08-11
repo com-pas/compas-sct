@@ -493,9 +493,9 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
         List<ExtRefInfo.ExtRefBayReference> extRefBayReferenceList = new ArrayList<>();
         IEDAdapter parentIedAdapter = getParentAdapter();
         if (parentIedAdapter.getPrivateCompasBay().isEmpty()) {
-            sclReportItems.add(SclReportItem.fatal(getXPath(), "The IED has no Private Bay"));
+            sclReportItems.add(SclReportItem.error(getXPath(), "The IED has no Private Bay"));
             if (parentIedAdapter.getCompasICDHeader().isEmpty()) {
-                sclReportItems.add(SclReportItem.fatal(getXPath(), "The IED has no Private compas:ICDHeader"));
+                sclReportItems.add(SclReportItem.error(getXPath(), "The IED has no Private compas:ICDHeader"));
             }
             return Collections.emptyList();
         }
@@ -504,7 +504,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
             if (LdeviceStatus.ON.equals(s)) {
                 extRefBayReferenceList.addAll(getLN0Adapter().getInputsAdapter().getCurrentElem().getExtRef().stream().map(extRef -> new ExtRefInfo.ExtRefBayReference(parentIedAdapter.getName(), parentIedAdapter.getPrivateCompasBay().get(), extRef)).toList());
             }
-        }, () -> sclReportItems.add(SclReportItem.fatal(getXPath(), "There is no DOI@name=" + MOD_DO_TYPE_NAME + "/DAI@name=" + STVAL_DA_TYPE_NAME + "/Val for LDevice@inst" + LDEVICE_LDEPF)));
+        }, () -> sclReportItems.add(SclReportItem.error(getXPath(), "There is no DOI@name=" + MOD_DO_TYPE_NAME + "/DAI@name=" + STVAL_DA_TYPE_NAME + "/Val for LDevice@inst" + LDEVICE_LDEPF)));
         return extRefBayReferenceList;
     }
 

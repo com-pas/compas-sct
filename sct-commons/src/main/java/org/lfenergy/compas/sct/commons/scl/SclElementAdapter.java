@@ -123,6 +123,6 @@ public abstract class SclElementAdapter<P extends SclElementAdapter, T> {
      * @return error description with message and current element xpath
      */
     public SclReportItem buildFatalReportItem(String message){
-        return SclReportItem.fatal(getXPath(), message);
+        return SclReportItem.error(getXPath(), message);
     }
 }

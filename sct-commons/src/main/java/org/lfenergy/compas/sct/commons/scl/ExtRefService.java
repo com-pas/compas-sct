@@ -95,7 +95,7 @@ public final class ExtRefService {
         return systemVersionToIedList.entrySet().stream()
                 .filter(entry -> StringUtils.isNotBlank(entry.getKey()))
                 .filter(entry -> entry.getValue().size() > 1)
-                .map(entry -> SclReportItem.fatal(entry.getValue().stream()
+                .map(entry -> SclReportItem.error(entry.getValue().stream()
                                 .map(tied -> new IEDAdapter(sclRootAdapter, tied))
                                 .map(IEDAdapter::getXPath)
                                 .collect(Collectors.joining(", ")),

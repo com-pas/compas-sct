@@ -90,7 +90,7 @@ public class AccessPointAdapter extends SclElementAdapter<IEDAdapter, TAccessPoi
                                 .map(abstractLNAdapter -> abstractLNAdapter.getCurrentElem().getDataSet())
                                 .flatMap(Collection::stream)
                                 .filter(tDataSet -> tDataSet.getFCDA().size() > max)
-                                .map(tDataSet -> SclReportItem.fatal(getXPath(), String.format("There are too much FCDA for the DataSet %s for the LDevice %s"
+                                .map(tDataSet -> SclReportItem.error(getXPath(), String.format("There are too much FCDA for the DataSet %s for the LDevice %s"
                                         + " in IED %s: %d > %d max", tDataSet.getName(), lDeviceAdapter.getInst(), parentAdapter.getName(),
                                     tDataSet.getFCDA().size(), max))
                                 ).toList()
@@ -106,7 +106,7 @@ public class AccessPointAdapter extends SclElementAdapter<IEDAdapter, TAccessPoi
     public Optional<SclReportItem> checkControlsLimitation(ServicesConfigEnum servicesConfigEnum) {
         long max = getMaxInstanceAuthorized(servicesConfigEnum);
         long value = getNumberOfItems(servicesConfigEnum);
-        return max == MAX_OCCURRENCE_NO_LIMIT_VALUE || value <= max ? Optional.empty() : Optional.of(SclReportItem.fatal(getXPath(),
+        return max == MAX_OCCURRENCE_NO_LIMIT_VALUE || value <= max ? Optional.empty() : Optional.of(SclReportItem.error(getXPath(),
             String.format("There are too much %ss for the IED %s: %d > %d max", servicesConfigEnum.getDisplayName(), parentAdapter.getName(), value, max)));
     }
 
@@ -212,7 +212,7 @@ public class AccessPointAdapter extends SclElementAdapter<IEDAdapter, TAccessPoi
                 .size();
 
         return value <= max ? Optional.empty() :
-                Optional.of(SclReportItem.fatal(getParentAdapter().getXPath(),
+                Optional.of(SclReportItem.error(getParentAdapter().getXPath(),
                     "The Client IED %s subscribes to too much FCDA: %d > %d max".formatted(getParentAdapter().getName(), value, max)));
     }
 
@@ -256,7 +256,7 @@ public class AccessPointAdapter extends SclElementAdapter<IEDAdapter, TAccessPoi
         return tExtRefs.stream()
                 .filter(tExtRef -> !tExtRef.isSetServiceType())
                 .map(tExtRef ->
-                        SclReportItem.fatal("%s/Inputs/ExtRef[%s]".formatted(xPath,
+                        SclReportItem.error("%s/Inputs/ExtRef[%s]".formatted(xPath,
                             Utils.xpathAttributeFilter("desc", tExtRef.getDesc())),
                             "ExtRef is missing ServiceType attribute"))
                 .toList();
@@ -288,7 +288,7 @@ public class AccessPointAdapter extends SclElementAdapter<IEDAdapter, TAccessPoi
         long max = getMaxInstanceAuthorizedForBoundIED(servicesConfigEnum);
         long value = tExtRefs.size();
         return max == AccessPointAdapter.MAX_OCCURRENCE_NO_LIMIT_VALUE || value <= max ? Optional.empty() :
-            Optional.of(SclReportItem.fatal(getParentAdapter().getXPath(),
+            Optional.of(SclReportItem.error(getParentAdapter().getXPath(),
                 "The Client IED %s subscribes to too much %ss: %d > %d max".formatted(getParentAdapter().getName(), servicesConfigEnum.getDisplayName(),
                     value, max)));
     }
