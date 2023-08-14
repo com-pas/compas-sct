@@ -181,7 +181,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
                     case ON -> null;
                 };
             } catch (IllegalArgumentException e) {
-                return SclReportItem.fatal(extRefXPath(extRef.getDesc()), String.format(MESSAGE_SOURCE_LDEVICE_STATUS_NEITHER_ON_NOR_OFF, sourceLDevice.getXPath()));
+                return SclReportItem.error(extRefXPath(extRef.getDesc()), String.format(MESSAGE_SOURCE_LDEVICE_STATUS_NEITHER_ON_NOR_OFF, sourceLDevice.getXPath()));
             }
         });
     }
@@ -211,7 +211,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
     }
 
     private Optional<SclReportItem> fatalReportItem(TExtRef extRef, String message) {
-        return Optional.of(SclReportItem.fatal(extRefXPath(extRef.getDesc()), message));
+        return Optional.of(SclReportItem.error(extRefXPath(extRef.getDesc()), message));
     }
 
     private String extRefXPath(String extRefDesc) {

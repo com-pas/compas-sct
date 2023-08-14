@@ -933,10 +933,10 @@ class SclServiceTest {
         List<SclReportItem> sclReportItems = SclService.updateLDeviceStatus(scl);
         // Then
         String after = MarshallerWrapper.marshall(scl);
-        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isFatal)).isFalse();
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isFalse();
         assertThat(sclReportItems)
                 .hasSize(1)
-                .extracting(SclReportItem::getMessage, SclReportItem::getXpath)
+                .extracting(SclReportItem::message, SclReportItem::xpath)
                 .containsExactly(errors);
         assertThat(getLDeviceStatusValue(scl, "IedName1", "LDSUIED").get().getValue()).isEqualTo("off");
         assertThat(before).isEqualTo(after);
@@ -954,10 +954,10 @@ class SclServiceTest {
         List<SclReportItem> sclReportItems = SclService.updateLDeviceStatus(scl);
         // Then
         String after = MarshallerWrapper.marshall(scl);
-        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isFatal)).isFalse();
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isFalse();
         assertThat(sclReportItems)
                 .hasSize(3)
-                .extracting(SclReportItem::getMessage, SclReportItem::getXpath)
+                .extracting(SclReportItem::message, SclReportItem::xpath)
                 .containsExactly(errors);
         assertThat(getLDeviceStatusValue(scl, "IedName1", "LDSUIED").get().getValue()).isEqualTo("off");
         assertThat(getLDeviceStatusValue(scl, "IedName2", "LDSUIED").get().getValue()).isEqualTo("on");
@@ -975,10 +975,10 @@ class SclServiceTest {
         // When
         List<SclReportItem> sclReportItems = SclService.updateLDeviceStatus(scl);
         // Then
-        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isFatal)).isFalse();
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isFalse();
         assertThat(sclReportItems)
                 .hasSize(2)
-                .extracting(SclReportItem::getMessage, SclReportItem::getXpath)
+                .extracting(SclReportItem::message, SclReportItem::xpath)
                 .containsExactly(Tuple.tuple("The LDevice cannot be set to 'off' but has not been selected into SSD.",
                                 "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
                         Tuple.tuple("The LDevice is not qualified into STD but has been selected into SSD.",
@@ -1003,7 +1003,7 @@ class SclServiceTest {
         // When
         List<SclReportItem> sclReportItems = SclService.updateLDeviceStatus(givenScl);
         // Then
-        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isFatal)).isTrue();
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
         assertThat(getLDeviceStatusValue(givenScl, "IedName1", "LDSUIED")).isPresent();
         assertThat(getLDeviceStatusValue(givenScl, "IedName1", "LDSUIED").get().getValue()).isEqualTo("on");
         assertThat(getLDeviceStatusValue(givenScl, "IedName2", "LDSUIED")).isPresent();
@@ -1035,7 +1035,7 @@ class SclServiceTest {
         List<SclReportItem> sclReportItems = SclService.updateLDeviceStatus(givenScl);
 
         // Then
-        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isFatal)).isTrue();
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
         assertThat(getLDeviceStatusValue(givenScl, "IedName1", "LDSUIED"))
                 .map(TVal::getValue)
                 .hasValue("on");
@@ -1078,7 +1078,7 @@ class SclServiceTest {
         List<SclReportItem> sclReportItems = SclService.updateDoInRef(givenScl);
 
         // Then
-        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isFatal)).isTrue();
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
         SclTestMarshaller.assertIsMarshallable(givenScl);
         assertThat(getValFromDaiName(givenScl, "IED_NAME1", ldInst, doName, daName)
                 .map(TVal::getValue))
@@ -1102,7 +1102,7 @@ class SclServiceTest {
         List<SclReportItem> sclReportItems = SclService.updateDoInRef(givenScl);
 
         // Then
-        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isFatal)).isTrue();
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
         assertThat(getValFromDaiName(givenScl, "IED_NAME1", ldInst, doName, daName)).isNotPresent();
     }
 
@@ -1115,7 +1115,7 @@ class SclServiceTest {
         List<SclReportItem> sclReportItems = SclService.updateDoInRef(givenScl);
 
         // Then
-        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isFatal)).isTrue();
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
         assertThat(sclReportItems).hasSize(4);
     }
 
@@ -1168,7 +1168,7 @@ class SclServiceTest {
         List<SclReportItem> sclReportItems = SclService.analyzeDataGroups(scd);
         //Then
         assertThat(sclReportItems).hasSize(11)
-                .extracting(SclReportItem::getMessage)
+                .extracting(SclReportItem::message)
                 .containsExactlyInAnyOrder(
                         "The Client IED IED_NAME1 subscribes to too much FCDA: 9 > 8 max",
                         "The Client IED IED_NAME1 subscribes to too much GOOSE Control Blocks: 3 > 2 max",
@@ -1237,7 +1237,7 @@ class SclServiceTest {
         assertThat(sclReportItems)
                 .isNotEmpty()
                 .hasSize(2)
-                .extracting(SclReportItem::getMessage)
+                .extracting(SclReportItem::message)
                 .containsExactly("The DAI cannot be updated", "The DAI cannot be updated");
         assertThat(lDeviceAdapter.getLNAdapters())
                 .hasSize(2)

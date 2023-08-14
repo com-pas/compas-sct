@@ -6,6 +6,8 @@ package org.lfenergy.compas.sct.commons.dto;
 
 import org.lfenergy.compas.sct.commons.scl.com.ConnectedAPAdapter;
 
+import java.util.Objects;
+
 /**
  * A representation of the model object <em><b>Connected AP</b></em>.
  *

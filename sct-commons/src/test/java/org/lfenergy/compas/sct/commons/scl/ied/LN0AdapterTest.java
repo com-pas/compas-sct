@@ -930,7 +930,7 @@ class LN0AdapterTest {
 
         // Then
         assertThat(sclReportItems).hasSize(1)
-                .extracting(SclReportItem::getMessage)
+                .extracting(SclReportItem::message)
                 .containsExactly("The DOI /SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"" + ldInst + "\"]/LN0/DOI[@name=\"" + doiName + "\"] can't be bound with an ExtRef");
     }
 
@@ -945,7 +945,7 @@ class LN0AdapterTest {
 
         // Then
         assertThat(sclReportItems).hasSize(1)
-                .extracting(SclReportItem::getMessage)
+                .extracting(SclReportItem::message)
                 .containsExactly("The DOI /SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"" + "LD_Without_Val_in_DAI_purpose" + "\"]/LN0 can't be bound with an ExtRef");
     }
 
@@ -1079,7 +1079,7 @@ class LN0AdapterTest {
         assertThat(finalSetTstCB).isEqualTo(expectedVal);
         assertThat(sclReportItems)
                 .hasSize(4)
-                .extracting(SclReportItem::getMessage)
+                .extracting(SclReportItem::message)
                 .containsExactly("The DAI setSrcRef cannot be updated", "The DAI setSrcCB cannot be updated",
                         "The DAI setTstRef cannot be updated", "The DAI setTstCB cannot be updated");
     }

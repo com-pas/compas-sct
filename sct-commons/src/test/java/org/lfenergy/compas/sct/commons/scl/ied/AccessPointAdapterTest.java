@@ -91,7 +91,7 @@ class AccessPointAdapterTest {
         List<SclReportItem> sclReportItems = accessPointAdapter.checkFCDALimitations();
         //Then
         assertThat(sclReportItems).hasSize(1)
-                .extracting(SclReportItem::getMessage)
+                .extracting(SclReportItem::message)
                 .containsExactlyInAnyOrder("There are too much FCDA for the DataSet dataset6 for the LDevice LD_INST21 in IED IED_NAME: 3 > 2 max");
     }
     @Test
@@ -103,7 +103,7 @@ class AccessPointAdapterTest {
         List<SclReportItem> sclReportItems = accessPointAdapter.checkFCDALimitations();
         //Then
         assertThat(sclReportItems).hasSize(4)
-                .extracting(SclReportItem::getMessage)
+                .extracting(SclReportItem::message)
                 .containsExactlyInAnyOrder("There are too much FCDA for the DataSet dataset3 for the LDevice LD_INST21 in IED IED_NAME: 2 > 1 max",
                         "There are too much FCDA for the DataSet dataset6 for the LDevice LD_INST21 in IED IED_NAME: 3 > 1 max",
                         "There are too much FCDA for the DataSet dataset6 for the LDevice LD_INST22 in IED IED_NAME: 2 > 1 max",
@@ -120,7 +120,7 @@ class AccessPointAdapterTest {
         Optional<SclReportItem> sclReportItem = accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.DATASET);
         //Then
         assertThat(sclReportItem).isPresent()
-                .get().extracting(SclReportItem::getMessage).isEqualTo("There are too much DataSets for the IED IED_NAME: 6 > 5 max");
+                .get().extracting(SclReportItem::message).isEqualTo("There are too much DataSets for the IED IED_NAME: 6 > 5 max");
     }
 
     @Test
@@ -132,7 +132,7 @@ class AccessPointAdapterTest {
         Optional<SclReportItem> sclReportItem = accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.SMV);
         //Then
         assertThat(sclReportItem).isPresent()
-                .get().extracting(SclReportItem::getMessage).isEqualTo("There are too much SMV Control Blocks for the IED IED_NAME: 3 > 2 max");
+                .get().extracting(SclReportItem::message).isEqualTo("There are too much SMV Control Blocks for the IED IED_NAME: 3 > 2 max");
     }
 
     @Test
@@ -144,7 +144,7 @@ class AccessPointAdapterTest {
         Optional<SclReportItem> sclReportItem = accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.GSE);
         //Then
         assertThat(sclReportItem).isPresent()
-                .get().extracting(SclReportItem::getMessage).isEqualTo("There are too much GOOSE Control Blocks for the IED IED_NAME: 3 > 2 max");
+                .get().extracting(SclReportItem::message).isEqualTo("There are too much GOOSE Control Blocks for the IED IED_NAME: 3 > 2 max");
     }
 
     @Test
@@ -156,7 +156,7 @@ class AccessPointAdapterTest {
         Optional<SclReportItem> sclReportItem = accessPointAdapter.checkControlsLimitation(ServicesConfigEnum.REPORT);
         //Then
         assertThat(sclReportItem).isPresent()
-                .get().extracting(SclReportItem::getMessage).isEqualTo("There are too much Report Control Blocks for the IED IED_NAME: 1 > 0 max");
+                .get().extracting(SclReportItem::message).isEqualTo("There are too much Report Control Blocks for the IED IED_NAME: 1 > 0 max");
     }
 
     public static AccessPointAdapter provideAPForCheckLimitationForIED() {
@@ -242,7 +242,7 @@ class AccessPointAdapterTest {
         //Then
         assertThat(sclReportItem).isPresent()
                 .get()
-                .extracting(SclReportItem::getMessage)
+                .extracting(SclReportItem::message)
                 .isEqualTo("The Client IED IED_NAME1 subscribes to too much FCDA: 9 > 4 max");
     }
 
@@ -259,7 +259,7 @@ class AccessPointAdapterTest {
 
         //Then
         assertThat(sclReportItems).hasSize(3)
-                .extracting(SclReportItem::getMessage)
+                .extracting(SclReportItem::message)
                 .containsExactlyInAnyOrder("The Client IED IED_NAME1 subscribes to too much GOOSE Control Blocks: 3 > 2 max",
                         "The Client IED IED_NAME1 subscribes to too much SMV Control Blocks: 2 > 1 max",
                         "The Client IED IED_NAME1 subscribes to too much Report Control Blocks: 1 > 0 max");
