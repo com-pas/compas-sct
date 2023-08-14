@@ -4,13 +4,10 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.lfenergy.compas.scl2007b4.model.*;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 public class DTO {
@@ -19,15 +16,6 @@ public class DTO {
     /*-----------------------------------------------*/
     public static final String AP_NAME = "AP_NAME";
     public static final String AP_NAME_2 = "AP_NAME_2";
-
-    public static ConnectedApDTO createCapDTO() {
-
-        ConnectedApDTO cap = new ConnectedApDTO();
-        cap.setApName(AP_NAME);
-        cap.setIedName(HOLDER_IED_NAME);
-
-        return cap;
-    }
 
     /*-----------------------------------------------*/
     /*                   ExtRefInfo                  */
@@ -313,5 +301,7 @@ public class DTO {
         return historyItem;
     }
 
-    public static final Map<Pair<String, String>, List<String>> comMap = Map.of(Pair.of("RSPACE_PROCESS_NETWORK", SubNetworkDTO.SubnetworkType.MMS.toString()), Arrays.asList("PROCESS_AP", "TOTO_AP_GE"), Pair.of("RSPACE_ADMIN_NETWORK", SubNetworkDTO.SubnetworkType.IP.toString()), Arrays.asList("ADMIN_AP", "TATA_AP_EFFACEC"));
+    public static final List<SubNetworkTypeDTO> SUB_NETWORK_TYPES = List.of(
+            new SubNetworkTypeDTO("RSPACE_PROCESS_NETWORK", SubNetworkDTO.SubnetworkType.MMS.toString(), List.of("PROCESS_AP", "TOTO_AP_GE")),
+            new SubNetworkTypeDTO("RSPACE_ADMIN_NETWORK", SubNetworkDTO.SubnetworkType.MMS.toString(), List.of("ADMIN_AP", "TATA_AP_EFFACEC")));
 }

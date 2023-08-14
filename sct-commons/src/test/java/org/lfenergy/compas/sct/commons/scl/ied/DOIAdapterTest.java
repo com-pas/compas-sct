@@ -462,7 +462,7 @@ class DOIAdapterTest {
         // Then
         assertThat(sclReportItems)
                 .isNotEmpty()
-                .extracting(SclReportItem::getMessage)
+                .extracting(SclReportItem::message)
                 .contains("The DOI /DOI[@name=\"Do\"] can't be bound with an ExtRef");
         assertThat(doiAdapter.getDataAdapterByName(SETSRCREF_DA_NAME)).isNotNull();
         assertThat(getDaiValOfDoi(doiAdapter, SETSRCREF_DA_NAME)).isNotPresent();
@@ -500,7 +500,7 @@ class DOIAdapterTest {
         assertThat(sclReportItems)
                 .isNotEmpty();
         assertThat(sclReportItems)
-                .extracting(SclReportItem::getMessage)
+                .extracting(SclReportItem::message)
                 .contains("The DOI /DOI[@name=\"Do\"] can't be bound with an ExtRef");
     }
 
@@ -624,7 +624,7 @@ class DOIAdapterTest {
 
         // Then
         assertThat(sclReportItems).isPresent()
-                .get().extracting(SclReportItem::getMessage)
+                .get().extracting(SclReportItem::message)
                 .isEqualTo("The DAI setSrcRef cannot be updated");
         assertThat(getDaiValOfDoi(doiAdapter, SETSRCREF_DA_NAME)).isPresent()
                 .get().extracting(TVal::getValue)

@@ -115,8 +115,8 @@ class SclServiceTest {
         assertNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
         SCL icd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
 
-        IEDAdapter iedAdapter = assertDoesNotThrow(() -> SclService.addIED(scd, "IED_NAME1", icd));
-        assertEquals("IED_NAME1", iedAdapter.getName());
+        assertDoesNotThrow(() -> SclService.addIED(scd, "IED_NAME1", icd));
+        assertEquals("IED_NAME1", scd.getIED().get(0).getName());
         assertNotNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
 
         assertIsMarshallable(scd);
@@ -134,12 +134,10 @@ class SclServiceTest {
         SubNetworkDTO subNetworkDTO = new SubNetworkDTO();
         subNetworkDTO.setName("sName1");
         subNetworkDTO.setType("IP");
-        ConnectedApDTO connectedApDTO = new ConnectedApDTO();
-        connectedApDTO.setApName("AP_NAME");
-        connectedApDTO.setIedName("IED_NAME1");
+        ConnectedApDTO connectedApDTO = new ConnectedApDTO("IED_NAME1", "AP_NAME");
         subNetworkDTO.addConnectedAP(connectedApDTO);
 
-        assertDoesNotThrow(() -> SclService.addSubnetworks(scd, Set.of(subNetworkDTO), Optional.of(icd)).get());
+        assertDoesNotThrow(() -> SclService.addSubnetworks(scd, List.of(subNetworkDTO), icd));
         assertIsMarshallable(scd);
     }
 
@@ -152,7 +150,7 @@ class SclServiceTest {
 
         assertDoesNotThrow(() -> SclService.addIED(scd, "IED_NAME1", icd));
 
-        assertDoesNotThrow(() -> SclService.addSubnetworks(scd, new HashSet<>(), Optional.of(icd)));
+        assertDoesNotThrow(() -> SclService.addSubnetworks(scd, List.of(), icd));
         String marshalledScd = assertIsMarshallable(scd);
         assertThat(marshalledScd).doesNotContain("<Communication");
     }
@@ -166,8 +164,8 @@ class SclServiceTest {
 
         assertDoesNotThrow(() -> SclService.addIED(scd, "IED_NAME1", icd));
 
-        Set<SubNetworkDTO> subNetworkDTOSet = new HashSet<>(SclService.getSubnetwork(icd));
-        assertDoesNotThrow(() -> SclService.addSubnetworks(scd, subNetworkDTOSet, Optional.of(icd)).get());
+        List<SubNetworkDTO> subNetworkDTOSet = SclService.getSubnetwork(icd);
+        assertDoesNotThrow(() -> SclService.addSubnetworks(scd, subNetworkDTOSet, icd));
 
         String marshalledScd = assertIsMarshallable(scd);
         assertThat(marshalledScd).contains("<Address>", "PhysConn");
@@ -182,8 +180,8 @@ class SclServiceTest {
 
         assertDoesNotThrow(() -> SclService.addIED(scd, "IED_NAME1", icd));
 
-        Set<SubNetworkDTO> subNetworkDTOSet = new HashSet<>(SclService.getSubnetwork(icd));
-        assertDoesNotThrow(() -> SclService.addSubnetworks(scd, subNetworkDTOSet, Optional.empty()).get());
+        List<SubNetworkDTO> subNetworkDTOSet = SclService.getSubnetwork(icd);
+        assertDoesNotThrow(() -> SclService.addSubnetworks(scd, subNetworkDTOSet, null));
 
         String marshalledScd = assertIsMarshallable(scd);
         assertThat(marshalledScd).doesNotContain("<Address>", "PhysConn");
@@ -201,12 +199,10 @@ class SclServiceTest {
         SubNetworkDTO subNetworkDTO = new SubNetworkDTO();
         subNetworkDTO.setName("sName1");
         subNetworkDTO.setType("IP");
-        ConnectedApDTO connectedApDTO = new ConnectedApDTO();
-        connectedApDTO.setApName("AP_NAME");
-        connectedApDTO.setIedName("IED_NAME1");
+        ConnectedApDTO connectedApDTO = new ConnectedApDTO("IED_NAME1", "AP_NAME");
         subNetworkDTO.addConnectedAP(connectedApDTO);
 
-        assertDoesNotThrow(() -> SclService.addSubnetworks(scd, Set.of(subNetworkDTO), Optional.of(icd)).get());
+        assertDoesNotThrow(() -> SclService.addSubnetworks(scd, List.of(subNetworkDTO), icd));
 
         List<SubNetworkDTO> subNetworkDTOS = assertDoesNotThrow(() -> SclService.getSubnetwork(scd));
         assertEquals(1, subNetworkDTOS.size());
@@ -731,43 +727,33 @@ class SclServiceTest {
     }
 
     @Test
-    void testInitScl() {
-        SclRootAdapter sclRootAdapter = assertDoesNotThrow(
-                () -> SclService.initScl(Optional.empty(), "hVersion", "hRevision")
-        );
-        assertIsMarshallable(sclRootAdapter.getCurrentElem());
+    void testInitScl_With_headerId_shouldNotThrowError() {
+        UUID headerId = UUID.randomUUID();
+        SCL scd = assertDoesNotThrow(() -> SclService.initScl(headerId, "hVersion", "hRevision"));
+        assertIsMarshallable(scd);
     }
 
     @Test
-    void testInitScl_With_hId_shouldNotThrowError() {
-        UUID hid = UUID.randomUUID();
-        SclRootAdapter sclRootAdapter = assertDoesNotThrow(
-                () -> SclService.initScl(Optional.of(hid), "hVersion", "hRevision")
-        );
-        assertIsMarshallable(sclRootAdapter.getCurrentElem());
+    void initScl_should_create_Private_SCL_FILETYPE() {
+        // Given
+        UUID headerId = UUID.randomUUID();
+        // When Then
+        SCL scd = assertDoesNotThrow(() -> SclService.initScl(headerId, "hVersion", "hRevision"));
+        assertThat(scd.getPrivate()).isNotEmpty();
+        assertThat(scd.getPrivate().get(0).getType()).isEqualTo(COMPAS_SCL_FILE_TYPE.getPrivateType());
+        assertIsMarshallable(scd);
     }
 
     @Test
-    void testInitScl_Create_Private_SCL_FILETYPE() {
-        UUID hid = UUID.randomUUID();
-        SclRootAdapter rootAdapter = assertDoesNotThrow(
-                () -> SclService.initScl(Optional.of(hid), "hVersion", "hRevision")
-        );
-        assertThat(rootAdapter.getCurrentElem().getPrivate()).isNotEmpty();
-        assertThat(rootAdapter.getCurrentElem().getPrivate().get(0).getType()).isEqualTo(COMPAS_SCL_FILE_TYPE.getPrivateType());
-        assertIsMarshallable(rootAdapter.getCurrentElem());
-    }
-
-    @Test
-    void testUpdateHeader() {
-
-        SclRootAdapter sclRootAdapter = assertDoesNotThrow(
-                () -> SclService.initScl(Optional.empty(), "hVersion", "hRevision")
-        );
-        UUID hId = UUID.fromString(sclRootAdapter.getHeaderAdapter().getHeaderId());
+    void updateHeader_should_update_header_tag() {
+        //Given
+        SCL scd = assertDoesNotThrow(() -> SclService.initScl(UUID.randomUUID(), "hVersion", "hRevision"));
+        UUID hId = UUID.fromString(scd.getHeader().getId());
         HeaderDTO headerDTO = DTO.createHeaderDTO(hId);
-        SclService.updateHeader(sclRootAdapter.getCurrentElem(), headerDTO);
-        assertIsMarshallable(sclRootAdapter.getCurrentElem());
+        //When
+        SclService.updateHeader(scd, headerDTO);
+        //Then
+        assertIsMarshallable(scd);
     }
 
     @Test
@@ -792,13 +778,10 @@ class SclServiceTest {
     }
 
     @Test
-    void testGetEnumTypeElements() {
+    void testGetEnumTypeValues() {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
-        assertThrows(ScdException.class, () -> SclService.getEnumTypeElements(scd, "unknwnID"));
-
-        var enumList = assertDoesNotThrow(
-                () -> SclService.getEnumTypeElements(scd, "RecCycModKind")
-        );
+        assertThrows(ScdException.class, () -> SclService.getEnumTypeValues(scd, "unknwnID"));
+        var enumList = assertDoesNotThrow(() -> SclService.getEnumTypeValues(scd, "RecCycModKind"));
         assertFalse(enumList.isEmpty());
     }
 
@@ -806,12 +789,11 @@ class SclServiceTest {
     void testImportSTDElementsInSCD() {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd.xml");
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
-        SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
 
-        SclRootAdapter expectedScdAdapter = assertDoesNotThrow(() -> SclService.importSTDElementsInSCD(scdRootAdapter, Set.of(std), DTO.comMap));
-        assertThat(expectedScdAdapter.getCurrentElem().getIED()).hasSize(1);
-        assertThat(expectedScdAdapter.getCurrentElem().getDataTypeTemplates()).hasNoNullFieldsOrProperties();
-        assertThat(expectedScdAdapter.getCurrentElem().getCommunication().getSubNetwork()).hasSize(2);
+        assertDoesNotThrow(() -> SclService.importSTDElementsInSCD(scd, List.of(std), DTO.SUB_NETWORK_TYPES));
+        assertThat(scd.getIED()).hasSize(1);
+        assertThat(scd.getDataTypeTemplates()).hasNoNullFieldsOrProperties();
+        assertThat(scd.getCommunication().getSubNetwork()).hasSize(2);
         assertIsMarshallable(scd);
     }
 
@@ -823,12 +805,12 @@ class SclServiceTest {
         SCL std2 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_SITESITE1SCU2.xml");
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
 
-        SclRootAdapter expectedScdAdapter = assertDoesNotThrow(() -> SclService.importSTDElementsInSCD(scdRootAdapter, Set.of(std0, std1, std2), DTO.comMap));
-        assertThat(expectedScdAdapter.getCurrentElem().getIED()).hasSize(3);
-        assertThat(expectedScdAdapter.getCurrentElem().getDataTypeTemplates()).hasNoNullFieldsOrProperties();
-        assertThat(expectedScdAdapter.getCurrentElem().getCommunication().getSubNetwork()).hasSize(2);
-        assertThat(expectedScdAdapter.getCurrentElem().getCommunication().getSubNetwork().get(0).getConnectedAP()).hasSizeBetween(1, 3);
-        assertThat(expectedScdAdapter.getCurrentElem().getCommunication().getSubNetwork().get(1).getConnectedAP()).hasSizeBetween(1, 3);
+        assertDoesNotThrow(() -> SclService.importSTDElementsInSCD(scd, List.of(std0, std1, std2), DTO.SUB_NETWORK_TYPES));
+        assertThat(scd.getIED()).hasSize(3);
+        assertThat(scd.getDataTypeTemplates()).hasNoNullFieldsOrProperties();
+        assertThat(scd.getCommunication().getSubNetwork()).hasSize(2);
+        assertThat(scd.getCommunication().getSubNetwork().get(0).getConnectedAP()).hasSizeBetween(1, 3);
+        assertThat(scd.getCommunication().getSubNetwork().get(1).getConnectedAP()).hasSizeBetween(1, 3);
         assertIsMarshallable(scd);
     }
 
@@ -838,10 +820,9 @@ class SclServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd.xml");
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SCL std1 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
-        SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
         //When Then
-        Set<SCL> stds = Set.of(std, std1);
-        assertThrows(ScdException.class, () -> SclService.importSTDElementsInSCD(scdRootAdapter, stds, DTO.comMap));
+        List<SCL> stds = List.of(std, std1);
+        assertThrows(ScdException.class, () -> SclService.importSTDElementsInSCD(scd, stds, DTO.SUB_NETWORK_TYPES));
         assertIsMarshallable(scd);
     }
 
@@ -850,9 +831,8 @@ class SclServiceTest {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd_with_same_compas_icd_header_in_different_functions.xml");
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
-        SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
         //When Then
-        assertDoesNotThrow(() -> SclService.importSTDElementsInSCD(scdRootAdapter, Set.of(std), DTO.comMap));
+        assertDoesNotThrow(() -> SclService.importSTDElementsInSCD(scd, List.of(std), DTO.SUB_NETWORK_TYPES));
         assertIsMarshallable(scd);
     }
 
@@ -863,8 +843,7 @@ class SclServiceTest {
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_with_same_ICDSystemVersionUUID.xml");
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
         //When Then
-        Set<SCL> stds = Set.of(std);
-        assertThrows(ScdException.class, () -> SclService.importSTDElementsInSCD(scdRootAdapter, stds, DTO.comMap));
+        assertThrows(ScdException.class, () -> SclService.importSTDElementsInSCD(scd, List.of(std), DTO.SUB_NETWORK_TYPES));
         assertIsMarshallable(scd);
     }
 
@@ -875,7 +854,7 @@ class SclServiceTest {
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
         //When Then
         Set<SCL> stds = new HashSet<>();
-        assertThrows(ScdException.class, () -> SclService.importSTDElementsInSCD(scdRootAdapter, stds, DTO.comMap));
+        assertThrows(ScdException.class, () -> SclService.importSTDElementsInSCD(scd, List.of(), DTO.SUB_NETWORK_TYPES));
         assertIsMarshallable(scd);
     }
 
@@ -951,63 +930,63 @@ class SclServiceTest {
         assertEquals("off", getLDeviceStatusValue(scl, "IedName1", "LDSUIED").get().getValue());
         String before = MarshallerWrapper.marshall(scl);
         // When
-        SclReport sclReport = SclService.updateLDeviceStatus(scl);
+        List<SclReportItem> sclReportItems = SclService.updateLDeviceStatus(scl);
         // Then
-        String after = MarshallerWrapper.marshall(sclReport.getSclRootAdapter().getCurrentElem());
-        assertFalse(sclReport.isSuccess());
-        assertThat(sclReport.getSclReportItems())
+        String after = MarshallerWrapper.marshall(scl);
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isFalse();
+        assertThat(sclReportItems)
                 .hasSize(1)
-                .extracting(SclReportItem::getMessage, SclReportItem::getXpath)
+                .extracting(SclReportItem::message, SclReportItem::xpath)
                 .containsExactly(errors);
-        assertEquals("off", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName1", "LDSUIED").get().getValue());
-        assertEquals(before, after);
+        assertThat(getLDeviceStatusValue(scl, "IedName1", "LDSUIED").get().getValue()).isEqualTo("off");
+        assertThat(before).isEqualTo(after);
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("sclProviderBasedLDeviceStatus")
     void updateLDeviceStatus_shouldReturnReportWithError_WhenLDeviceStatusActiveOrUntestedOrInactive(String testCase, SCL scl, Tuple... errors) {
         // Given
-        assertEquals("off", getLDeviceStatusValue(scl, "IedName1", "LDSUIED").get().getValue());
-        assertEquals("on", getLDeviceStatusValue(scl, "IedName2", "LDSUIED").get().getValue());
-        assertFalse(getLDeviceStatusValue(scl, "IedName3", "LDSUIED").isPresent());
+        assertThat(getLDeviceStatusValue(scl, "IedName1", "LDSUIED").get().getValue()).isEqualTo("off");
+        assertThat(getLDeviceStatusValue(scl, "IedName2", "LDSUIED").get().getValue()).isEqualTo("on");
+        assertThat(getLDeviceStatusValue(scl, "IedName3", "LDSUIED")).isEmpty();
         String before = MarshallerWrapper.marshall(scl);
         // When
-        SclReport sclReport = SclService.updateLDeviceStatus(scl);
+        List<SclReportItem> sclReportItems = SclService.updateLDeviceStatus(scl);
         // Then
-        String after = MarshallerWrapper.marshall(sclReport.getSclRootAdapter().getCurrentElem());
-        assertFalse(sclReport.isSuccess());
-        assertThat(sclReport.getSclReportItems())
+        String after = MarshallerWrapper.marshall(scl);
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isFalse();
+        assertThat(sclReportItems)
                 .hasSize(3)
-                .extracting(SclReportItem::getMessage, SclReportItem::getXpath)
+                .extracting(SclReportItem::message, SclReportItem::xpath)
                 .containsExactly(errors);
-        assertEquals("off", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName1", "LDSUIED").get().getValue());
-        assertEquals("on", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName2", "LDSUIED").get().getValue());
-        assertFalse(getLDeviceStatusValue(scl, "IedName3", "LDSUIED").isPresent());
-        assertEquals(before, after);
+        assertThat(getLDeviceStatusValue(scl, "IedName1", "LDSUIED").get().getValue()).isEqualTo("off");
+        assertThat(getLDeviceStatusValue(scl, "IedName2", "LDSUIED").get().getValue()).isEqualTo("on");
+        assertThat(getLDeviceStatusValue(scl, "IedName3", "LDSUIED")).isEmpty();
+        assertThat(before).isEqualTo(after);
     }
 
     @Test
     void updateLDeviceStatus_shouldReturnReportWithError_WhenAllLDeviceInactive_Test2() {
         // Given
         SCL scl = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test2_LD_STATUS_INACTIVE.scd");
-        assertEquals("off", getLDeviceStatusValue(scl, "IedName1", "LDSUIED").get().getValue());
-        assertEquals("on", getLDeviceStatusValue(scl, "IedName2", "LDSUIED").get().getValue());
-        assertFalse(getLDeviceStatusValue(scl, "IedName3", "LDSUIED").isPresent());
+        assertThat(getLDeviceStatusValue(scl, "IedName1", "LDSUIED").get().getValue()).isEqualTo("off");
+        assertThat(getLDeviceStatusValue(scl, "IedName2", "LDSUIED").get().getValue()).isEqualTo("on");
+        assertThat(getLDeviceStatusValue(scl, "IedName3", "LDSUIED")).isEmpty();
         // When
-        SclReport sclReport = SclService.updateLDeviceStatus(scl);
+        List<SclReportItem> sclReportItems = SclService.updateLDeviceStatus(scl);
         // Then
-        assertFalse(sclReport.isSuccess());
-        assertThat(sclReport.getSclReportItems())
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isFalse();
+        assertThat(sclReportItems)
                 .hasSize(2)
-                .extracting(SclReportItem::getMessage, SclReportItem::getXpath)
+                .extracting(SclReportItem::message, SclReportItem::xpath)
                 .containsExactly(Tuple.tuple("The LDevice cannot be set to 'off' but has not been selected into SSD.",
                                 "/SCL/IED[@name=\"IedName1\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"),
                         Tuple.tuple("The LDevice is not qualified into STD but has been selected into SSD.",
                                 "/SCL/IED[@name=\"IedName2\"]/AccessPoint/Server/LDevice[@inst=\"LDSUIED\"]/LN0"));
-        assertEquals("off", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName1", "LDSUIED").get().getValue());
-        assertEquals("on", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName2", "LDSUIED").get().getValue());
-        assertTrue(getLDeviceStatusValue(scl, "IedName3", "LDSUIED").isPresent());
-        assertEquals("off", getLDeviceStatusValue(scl, "IedName3", "LDSUIED").get().getValue());
+        assertThat(getLDeviceStatusValue(scl, "IedName1", "LDSUIED").get().getValue()).isEqualTo("off");
+        assertThat(getLDeviceStatusValue(scl, "IedName2", "LDSUIED").get().getValue()).isEqualTo("on");
+        assertThat(getLDeviceStatusValue(scl, "IedName3", "LDSUIED")).isPresent();
+        assertThat(getLDeviceStatusValue(scl, "IedName3", "LDSUIED").get().getValue()).isEqualTo("off");
     }
 
 
@@ -1015,26 +994,22 @@ class SclServiceTest {
     void updateLDeviceStatus_shouldReturnUpdatedFile() {
         // Given
         SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_Template.scd");
-        assertTrue(getLDeviceStatusValue(givenScl, "IedName1", "LDSUIED").isPresent());
-        assertEquals("off", getLDeviceStatusValue(givenScl, "IedName1", "LDSUIED").get().getValue());
-
-        assertTrue(getLDeviceStatusValue(givenScl, "IedName2", "LDSUIED").isPresent());
-        assertEquals("on", getLDeviceStatusValue(givenScl, "IedName2", "LDSUIED").get().getValue());
-
-        assertFalse(getLDeviceStatusValue(givenScl, "IedName3", "LDSUIED").isPresent());
+        assertThat(getLDeviceStatusValue(givenScl, "IedName1", "LDSUIED")).isPresent();
+        assertThat(getLDeviceStatusValue(givenScl, "IedName1", "LDSUIED").get().getValue()).isEqualTo("off");
+        assertThat(getLDeviceStatusValue(givenScl, "IedName2", "LDSUIED")).isPresent();
+        assertThat(getLDeviceStatusValue(givenScl, "IedName2", "LDSUIED").get().getValue()).isEqualTo("on");
+        assertThat(getLDeviceStatusValue(givenScl, "IedName3", "LDSUIED")).isEmpty();
 
         // When
-        SclReport sclReport = SclService.updateLDeviceStatus(givenScl);
+        List<SclReportItem> sclReportItems = SclService.updateLDeviceStatus(givenScl);
         // Then
-        assertTrue(sclReport.isSuccess());
-        assertTrue(getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName1", "LDSUIED").isPresent());
-        assertEquals("on", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName1", "LDSUIED").get().getValue());
-
-        assertTrue(getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName2", "LDSUIED").isPresent());
-        assertEquals("off", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName2", "LDSUIED").get().getValue());
-
-        assertTrue(getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName3", "LDSUIED").isPresent());
-        assertEquals("off", getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName3", "LDSUIED").get().getValue());
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
+        assertThat(getLDeviceStatusValue(givenScl, "IedName1", "LDSUIED")).isPresent();
+        assertThat(getLDeviceStatusValue(givenScl, "IedName1", "LDSUIED").get().getValue()).isEqualTo("on");
+        assertThat(getLDeviceStatusValue(givenScl, "IedName2", "LDSUIED")).isPresent();
+        assertThat(getLDeviceStatusValue(givenScl, "IedName2", "LDSUIED").get().getValue()).isEqualTo("off");
+        assertThat(getLDeviceStatusValue(givenScl, "IedName3", "LDSUIED")).isPresent();
+        assertThat(getLDeviceStatusValue(givenScl, "IedName3", "LDSUIED").get().getValue()).isEqualTo("off");
     }
 
     @Test
@@ -1056,29 +1031,28 @@ class SclServiceTest {
         assertThat(getLDeviceStatusValue(givenScl, "IedName5", "LDSUIED"))
                 .map(TVal::getValue)
                 .hasValue("on");
-
         // When
-        SclReport sclReport = SclService.updateLDeviceStatus(givenScl);
+        List<SclReportItem> sclReportItems = SclService.updateLDeviceStatus(givenScl);
 
         // Then
-        assertThat(sclReport.isSuccess()).isTrue();
-        assertThat(getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName1", "LDSUIED"))
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
+        assertThat(getLDeviceStatusValue(givenScl, "IedName1", "LDSUIED"))
                 .map(TVal::getValue)
                 .hasValue("on");
 
-        assertThat(getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName2", "LDSUIED"))
+        assertThat(getLDeviceStatusValue(givenScl, "IedName2", "LDSUIED"))
                 .map(TVal::getValue)
                 .hasValue("off");
 
-        assertThat(getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName3", "LDSUIED"))
+        assertThat(getLDeviceStatusValue(givenScl, "IedName3", "LDSUIED"))
                 .map(TVal::getValue)
                 .hasValue("off");
 
-        assertThat(getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName4", "LDSUIED"))
+        assertThat(getLDeviceStatusValue(givenScl, "IedName4", "LDSUIED"))
                 .map(TVal::getValue)
                 .hasValue("off");
 
-        assertThat(getLDeviceStatusValue(sclReport.getSclRootAdapter().getCurrentElem(), "IedName5", "LDSUIED"))
+        assertThat(getLDeviceStatusValue(givenScl, "IedName5", "LDSUIED"))
                 .map(TVal::getValue)
                 .hasValue("off");
     }
@@ -1101,15 +1075,15 @@ class SclServiceTest {
         SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_issue_231_test_ok.xml");
 
         // When
-        SclReport sclReport = SclService.updateDoInRef(givenScl);
+        List<SclReportItem> sclReportItems = SclService.updateDoInRef(givenScl);
 
         // Then
-        assertThat(sclReport.isSuccess()).isTrue();
-        SclTestMarshaller.assertIsMarshallable(sclReport.getSclRootAdapter().currentElem);
-        assertThat(getValFromDaiName(sclReport.getSclRootAdapter().getCurrentElem(), "IED_NAME1", ldInst, doName, daName)
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
+        SclTestMarshaller.assertIsMarshallable(givenScl);
+        assertThat(getValFromDaiName(givenScl, "IED_NAME1", ldInst, doName, daName)
                 .map(TVal::getValue))
                 .hasValue(expected);
-        assertIsMarshallable(sclReport.getSclRootAdapter().getCurrentElem());
+        assertIsMarshallable(givenScl);
     }
 
     @ParameterizedTest(name = "{0}")
@@ -1125,11 +1099,11 @@ class SclServiceTest {
         SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_issue_231_test_ok.xml");
 
         // When
-        SclReport sclReport = SclService.updateDoInRef(givenScl);
+        List<SclReportItem> sclReportItems = SclService.updateDoInRef(givenScl);
 
         // Then
-        assertThat(sclReport.isSuccess()).isTrue();
-        assertThat(getValFromDaiName(sclReport.getSclRootAdapter().getCurrentElem(), "IED_NAME1", ldInst, doName, daName)).isNotPresent();
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
+        assertThat(getValFromDaiName(givenScl, "IED_NAME1", ldInst, doName, daName)).isNotPresent();
     }
 
     @Test
@@ -1138,12 +1112,11 @@ class SclServiceTest {
         SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_issue_231_test_ko.xml");
 
         // When
-        SclReport sclReport = SclService.updateDoInRef(givenScl);
+        List<SclReportItem> sclReportItems = SclService.updateDoInRef(givenScl);
 
         // Then
-        assertThat(sclReport.isSuccess()).isTrue();
-        assertThat(sclReport.getSclReportItems()).isNotEmpty();
-        assertThat(sclReport.getSclReportItems()).hasSize(4);
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
+        assertThat(sclReportItems).hasSize(4);
     }
 
     private Optional<TVal> getValFromDaiName(SCL scl, String iedName, String ldInst, String doiName, String daiName) {
@@ -1173,9 +1146,9 @@ class SclServiceTest {
         iedAdapter1.getCurrentElem().getAccessPoint().get(0).getServices().getClientServices().setMaxSMV(2L);
         iedAdapter1.getCurrentElem().getAccessPoint().get(0).getServices().getClientServices().setMaxReports(1L);
         // When
-        SclReport sclReport = SclService.analyzeDataGroups(scd);
+        List<SclReportItem> sclReportItems = SclService.analyzeDataGroups(scd);
         //Then
-        assertThat(sclReport.getSclReportItems()).isEmpty();
+        assertThat(sclReportItems).isEmpty();
 
     }
 
@@ -1192,10 +1165,10 @@ class SclServiceTest {
         iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getGOOSE().setMax(2L);
         iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getConfReportControl().setMax(0L);
         // When
-        SclReport sclReport = SclService.analyzeDataGroups(scd);
+        List<SclReportItem> sclReportItems = SclService.analyzeDataGroups(scd);
         //Then
-        assertThat(sclReport.getSclReportItems()).hasSize(11)
-                .extracting(SclReportItem::getMessage)
+        assertThat(sclReportItems).hasSize(11)
+                .extracting(SclReportItem::message)
                 .containsExactlyInAnyOrder(
                         "The Client IED IED_NAME1 subscribes to too much FCDA: 9 > 8 max",
                         "The Client IED IED_NAME1 subscribes to too much GOOSE Control Blocks: 3 > 2 max",
@@ -1215,16 +1188,16 @@ class SclServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/monitoring_lns/scd_monitoring_lsvs_lgos.xml");
         // When
-        SclReport sclReport = SclService.manageMonitoringLns(scd);
+        List<SclReportItem> sclReportItems = SclService.manageMonitoringLns(scd);
         //Then
-        assertThat(sclReport.getSclReportItems()).isEmpty();
-        LDeviceAdapter lDeviceAdapter = sclReport.getSclRootAdapter().getIEDAdapterByName("IED_NAME1").getLDeviceAdapterByLdInst(LD_SUIED);
+        assertThat(sclReportItems).isEmpty();
+        LDeviceAdapter lDeviceAdapter = new SclRootAdapter(scd).getIEDAdapterByName("IED_NAME1").getLDeviceAdapterByLdInst(LD_SUIED);
         assertThat(lDeviceAdapter.getLNAdapters())
                 .hasSize(4)
                 .extracting(LNAdapter::getLNClass, LNAdapter::getLNInst).containsExactlyInAnyOrder(
                         Tuple.tuple("LGOS", "1"), Tuple.tuple("LGOS", "2"),
                         Tuple.tuple("LSVS", "1"), Tuple.tuple("LSVS", "2"));
-        SclTestMarshaller.assertIsMarshallable(sclReport.getSclRootAdapter().currentElem);
+        SclTestMarshaller.assertIsMarshallable(scd);
     }
 
     @Test
@@ -1237,15 +1210,15 @@ class SclServiceTest {
         LDeviceAdapter lDeviceAdapter21 = sclRootAdapter.getIEDAdapterByName("IED_NAME1").getLDeviceAdapterByLdInst("LD_INST21");
         lDeviceAdapter21.getLN0Adapter().getCurrentElem().setInputs(null);
         // When
-        SclReport sclReport = SclService.manageMonitoringLns(scd);
+        List<SclReportItem> sclReportItems = SclService.manageMonitoringLns(scd);
         //Then
-        assertThat(sclReport.getSclReportItems()).isEmpty();
+        assertThat(sclReportItems).isEmpty();
         LDeviceAdapter lDeviceAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1").getLDeviceAdapterByLdInst(LD_SUIED);
         assertThat(lDeviceAdapter.getLNAdapters())
                 .hasSize(2)
                 .extracting(LNAdapter::getLNClass, LNAdapter::getLNInst).containsExactlyInAnyOrder(
                         Tuple.tuple("LGOS", "3"), Tuple.tuple("LSVS", "9"));
-        SclTestMarshaller.assertIsMarshallable(sclReport.getSclRootAdapter().currentElem);
+        SclTestMarshaller.assertIsMarshallable(scd);
     }
 
     @Test
@@ -1259,18 +1232,18 @@ class SclServiceTest {
         getDAIAdapters(lDeviceAdapter, "LSVS", "SvCBRef", "setSrcRef")
                 .forEach(daiAdapter -> daiAdapter.getCurrentElem().setValImport(false));
         // When
-        SclReport sclReport = SclService.manageMonitoringLns(scd);
+        List<SclReportItem> sclReportItems = SclService.manageMonitoringLns(scd);
         //Then
-        assertThat(sclReport.getSclReportItems())
+        assertThat(sclReportItems)
                 .isNotEmpty()
                 .hasSize(2)
-                .extracting(SclReportItem::getMessage)
+                .extracting(SclReportItem::message)
                 .containsExactly("The DAI cannot be updated", "The DAI cannot be updated");
         assertThat(lDeviceAdapter.getLNAdapters())
                 .hasSize(2)
                 .extracting(LNAdapter::getLNClass, LNAdapter::getLNInst).containsExactlyInAnyOrder(
                         Tuple.tuple("LGOS", "3"), Tuple.tuple("LSVS", "9"));
-        SclTestMarshaller.assertIsMarshallable(sclReport.getSclRootAdapter().currentElem);
+        SclTestMarshaller.assertIsMarshallable(scd);
     }
 
 }
