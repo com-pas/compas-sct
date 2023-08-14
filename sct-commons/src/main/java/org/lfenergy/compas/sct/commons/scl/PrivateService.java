@@ -195,7 +195,7 @@ public final class PrivateService {
      * @return map of ICD_SYSTEM_VERSION_UUID attribute in IED/Private:COMPAS-ICDHeader and related Private coupled with
      * all corresponding STD
      */
-    public static Map<String, PrivateLinkedToSTDs> createMapICDSystemVersionUuidAndSTDFile(Set<SCL> stds) {
+    public static Map<String, PrivateLinkedToSTDs> createMapICDSystemVersionUuidAndSTDFile(List<SCL> stds) {
         Map<String, PrivateLinkedToSTDs> icdSysVerToPrivateStdsMap = new HashMap<>();
         stds.forEach(std -> std.getIED()
                 .forEach(ied -> ied.getPrivate()
@@ -252,11 +252,11 @@ public final class PrivateService {
     /**
      * Creates stream of IcdHeader for all Privates COMPAS-ICDHeader in /Substation of SCL
      *
-     * @param scdRootAdapter SCL file in which Private should be found
+     * @param scd SCL file in which Private should be found
      * @return stream of COMPAS-ICDHeader Private
      */
-    public static Stream<IcdHeader> streamIcdHeaders(SclRootAdapter scdRootAdapter) {
-        return scdRootAdapter.getCurrentElem()
+    public static Stream<IcdHeader> streamIcdHeaders(SCL scd) {
+        return scd
                 .getSubstation()
                 .get(0)
                 .getVoltageLevel()

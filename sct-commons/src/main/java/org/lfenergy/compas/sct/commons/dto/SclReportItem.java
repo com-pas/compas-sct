@@ -1,24 +1,12 @@
-// SPDX-FileCopyrightText: 2022 RTE FRANCE
+// SPDX-FileCopyrightText: 2022 2023 RTE FRANCE
 //
 // SPDX-License-Identifier: Apache-2.0
 
 package org.lfenergy.compas.sct.commons.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+public record SclReportItem(String xpath, String message, boolean isError) {
 
-@Getter
-@EqualsAndHashCode
-@AllArgsConstructor
-@ToString
-public final class SclReportItem {
-    private final String xpath;
-    private final String message;
-    private final boolean isFatal;
-
-    public static SclReportItem fatal(String xpath, String message) {
+    public static SclReportItem error(String xpath, String message) {
         return new SclReportItem(xpath, message, true);
     }
 

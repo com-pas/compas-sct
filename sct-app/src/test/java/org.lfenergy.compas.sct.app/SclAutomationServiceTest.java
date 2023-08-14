@@ -18,8 +18,8 @@ import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -33,29 +33,30 @@ class SclAutomationServiceTest {
     @BeforeEach
     void init() {
         headerDTO = new HeaderDTO();
+        headerDTO.setId(UUID.randomUUID());
         headerDTO.setRevision("hRevision");
         headerDTO.setVersion("hVersion");
     }
 
     @Test
-    void createSCD_should_return_generatedSCD() throws Exception {
+    void createSCD_should_return_generatedSCD() {
         // Given
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd.xml");
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         // When
-        SclRootAdapter expectedSCD = SclAutomationService.createSCD(ssd, headerDTO, Set.of(std));
+        SCL scd = SclAutomationService.createSCD(ssd, headerDTO, List.of(std));
         // Then
-        assertNotNull(expectedSCD.getCurrentElem().getHeader().getId());
-        assertNull(expectedSCD.getCurrentElem().getHeader().getHistory());
-        assertEquals(1, expectedSCD.getCurrentElem().getSubstation().size());
-        assertEquals(1, expectedSCD.getCurrentElem().getIED().size());
-        assertNotNull(expectedSCD.getCurrentElem().getDataTypeTemplates());
-        assertEquals(2, expectedSCD.getCurrentElem().getCommunication().getSubNetwork().size());
-        assertIsMarshallable(expectedSCD.getCurrentElem());
+        assertNotNull(scd.getHeader().getId());
+        assertNull(scd.getHeader().getHistory());
+        assertEquals(1, scd.getSubstation().size());
+        assertEquals(1, scd.getIED().size());
+        assertNotNull(scd.getDataTypeTemplates());
+        assertEquals(2, scd.getCommunication().getSubNetwork().size());
+        assertIsMarshallable(scd);
     }
 
     @Test
-    void createSCD_With_HItem() throws Exception {
+    void createSCD_With_HItem() {
         // Given
         HeaderDTO.HistoryItem historyItem = new HeaderDTO.HistoryItem();
         historyItem.setWhat("what");
@@ -67,16 +68,16 @@ class SclAutomationServiceTest {
         SCL std2 = SclTestMarshaller.getSCLFromFile("/std_2.xml");
         SCL std3 = SclTestMarshaller.getSCLFromFile("/std_3.xml");
         // When
-        SclRootAdapter expectedSCD = SclAutomationService.createSCD(ssd, headerDTO, Set.of(std1, std2, std3));
+        SCL scd = SclAutomationService.createSCD(ssd, headerDTO, List.of(std1, std2, std3));
         // Then
-        assertNotNull(expectedSCD.getCurrentElem().getHeader().getId());
-        assertEquals(1, expectedSCD.getCurrentElem().getHeader().getHistory().getHitem().size());
-        assertEquals(1, expectedSCD.getCurrentElem().getSubstation().size());
-        assertIsMarshallable(expectedSCD.getCurrentElem());
+        assertNotNull(scd.getHeader().getId());
+        assertEquals(1, scd.getHeader().getHistory().getHitem().size());
+        assertEquals(1, scd.getSubstation().size());
+        assertIsMarshallable(scd);
     }
 
     @Test
-    void createSCD_With_HItems() throws Exception {
+    void createSCD_With_HItems() {
         // Given
         HeaderDTO.HistoryItem historyItem = new HeaderDTO.HistoryItem();
         historyItem.setWhat("what");
@@ -92,26 +93,26 @@ class SclAutomationServiceTest {
         SCL std2 = SclTestMarshaller.getSCLFromFile("/std_2.xml");
         SCL std3 = SclTestMarshaller.getSCLFromFile("/std_3.xml");
         // When
-        SclRootAdapter expectedSCD = SclAutomationService.createSCD(ssd, headerDTO, Set.of(std1, std2, std3));
+        SCL scd = SclAutomationService.createSCD(ssd, headerDTO, List.of(std1, std2, std3));
         // Then
-        assertNotNull(expectedSCD.getCurrentElem().getHeader().getId());
-        assertEquals(1, expectedSCD.getCurrentElem().getHeader().getHistory().getHitem().size());
-        assertEquals("what", expectedSCD.getCurrentElem().getHeader().getHistory().getHitem().get(0).getWhat());
-        assertIsMarshallable(expectedSCD.getCurrentElem());
+        assertNotNull(scd.getHeader().getId());
+        assertEquals(1, scd.getHeader().getHistory().getHitem().size());
+        assertEquals("what", scd.getHeader().getHistory().getHitem().get(0).getWhat());
+        assertIsMarshallable(scd);
     }
 
     @Test
-    void createSCD_SSD_Without_Substation() throws Exception {
+    void createSCD_SSD_Without_Substation() {
         // Given
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd_without_substations.xml");
         // When & Then
-        Set<SCL> stdListEmpty = new HashSet<>();
+        List<SCL> stdListEmpty = List.of();
         assertThrows(ScdException.class,
                 () -> SclAutomationService.createSCD(ssd, headerDTO, stdListEmpty));
     }
 
     @Test
-    void createSCD_should_throw_exception_when_null_ssd() throws Exception {
+    void createSCD_should_throw_exception_when_null_ssd() {
         // Given
         HeaderDTO.HistoryItem historyItem = new HeaderDTO.HistoryItem();
         historyItem.setWhat("what");
@@ -119,32 +120,32 @@ class SclAutomationServiceTest {
         historyItem.setWhy("because");
         headerDTO.getHistoryItems().add(historyItem);
         SCL std1 = SclTestMarshaller.getSCLFromFile("/std_1.xml");
-        Set<SCL> stdList = Set.of(std1);
+        List<SCL> stdList = List.of(std1);
 
         // When & Then
         assertThrows(NullPointerException.class, () -> SclAutomationService.createSCD(null, headerDTO, stdList));
     }
 
     @Test
-    void createSCD_should_throw_exception_when_null_headerDTO() throws Exception {
+    void createSCD_should_throw_exception_when_null_headerDTO() {
         // Given
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
         SCL std1 = SclTestMarshaller.getSCLFromFile("/std_1.xml");
-        Set<SCL> stdList = Set.of(std1);
+        List<SCL> stdList = List.of(std1);
 
         // When & Then
         assertThrows(NullPointerException.class, () -> SclAutomationService.createSCD(ssd, null, stdList));
     }
 
     @Test
-    void createSCD_should_delete_ControlBlocks_DataSet_and_ExtRef_src_attributes() throws Exception {
+    void createSCD_should_delete_ControlBlocks_DataSet_and_ExtRef_src_attributes() {
         // Given
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/ssd.xml");
         SCL std = SclTestMarshaller.getSCLFromFile("/scl-remove-controlBlocks-dataSet-extRefSrc/scl-with-control-blocks.xml");
         // When
-        SclRootAdapter expectedSCD = SclAutomationService.createSCD(ssd, headerDTO, Set.of(std));
+        SCL scd = SclAutomationService.createSCD(ssd, headerDTO, List.of(std));
         // Then
-        LN0 ln0 = expectedSCD.streamIEDAdapters()
+        LN0 ln0 = new SclRootAdapter(scd).streamIEDAdapters()
                 .findFirst()
                 .map(iedAdapter -> iedAdapter.findLDeviceAdapterByLdInst("lDeviceInst1").orElseThrow())
                 .map(LDeviceAdapter::getLN0Adapter)
@@ -154,7 +155,7 @@ class SclAutomationServiceTest {
         assertThat(ln0.getDataSet()).isEmpty();
         assertThat(ln0.getInputs().getExtRef()).hasSize(2);
         assertFalse(ln0.getInputs().getExtRef().get(0).isSetSrcLDInst());
-        assertIsMarshallable(expectedSCD.getCurrentElem());
+        assertIsMarshallable(scd);
     }
 
     @Test

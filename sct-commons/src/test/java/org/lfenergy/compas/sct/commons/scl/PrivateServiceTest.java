@@ -274,7 +274,7 @@ class PrivateServiceTest {
         scl1.getIED().add(tied1);
 
         //When
-        Map<String, PrivateService.PrivateLinkedToSTDs> stringSCLMap = PrivateService.createMapICDSystemVersionUuidAndSTDFile(Set.of(scl1));
+        Map<String, PrivateService.PrivateLinkedToSTDs> stringSCLMap = PrivateService.createMapICDSystemVersionUuidAndSTDFile(List.of(scl1));
 
         //Then
         assertThat(stringSCLMap.keySet()).isEmpty();
@@ -307,7 +307,7 @@ class PrivateServiceTest {
         scl3.getIED().add(tied3);
 
         //When
-        Map<String, PrivateService.PrivateLinkedToSTDs> stringSCLMap = PrivateService.createMapICDSystemVersionUuidAndSTDFile(Set.of(scl1,scl2,scl3));
+        Map<String, PrivateService.PrivateLinkedToSTDs> stringSCLMap = PrivateService.createMapICDSystemVersionUuidAndSTDFile(List.of(scl1,scl2,scl3));
 
         //Then
         assertThat(stringSCLMap.keySet()).hasSize(2).containsExactly("UUID-1", "UUID-2");
@@ -327,10 +327,8 @@ class PrivateServiceTest {
         TPrivate tPrivate1 =  PrivateService.createPrivate(compasICDHeader1);
         TPrivate tPrivate2 =  PrivateService.createPrivate(compasICDHeader2);
 
-
         PrivateService.PrivateLinkedToSTDs privateLinkedToSTDs1 = new PrivateService.PrivateLinkedToSTDs(tPrivate1,Collections.singletonList(new SCL()));
         PrivateService.PrivateLinkedToSTDs privateLinkedToSTDs2 = new PrivateService.PrivateLinkedToSTDs(tPrivate2, Arrays.asList(new SCL(), new SCL()));
-
 
         Map<String, PrivateService.PrivateLinkedToSTDs> stringSCLMap = new HashMap<>();
         stringSCLMap.put("UUID-1", privateLinkedToSTDs1);
@@ -353,10 +351,8 @@ class PrivateServiceTest {
         TPrivate tPrivate1 =  PrivateService.createPrivate(compasICDHeader1);
         TPrivate tPrivate2 =  PrivateService.createPrivate(compasICDHeader2);
 
-
         PrivateService.PrivateLinkedToSTDs privateLinkedToSTDs1 = new PrivateService.PrivateLinkedToSTDs(tPrivate1,Collections.singletonList(new SCL()));
         PrivateService.PrivateLinkedToSTDs privateLinkedToSTDs2 = new PrivateService.PrivateLinkedToSTDs(tPrivate2, Collections.singletonList(new SCL()));
-
 
         Map<String, PrivateService.PrivateLinkedToSTDs> stringSCLMap = new HashMap<>();
         stringSCLMap.put("UUID-1", privateLinkedToSTDs1);
@@ -414,9 +410,7 @@ class PrivateServiceTest {
         scl.getSubstation().add(tSubstation);
 
         //When
-        SclRootAdapter sclRootAdapter = SclService.initScl(Optional.empty(), "hv", "hr");
-        sclRootAdapter.setCurrentElem(scl);
-        Stream<IcdHeader> tPrivateStream = PrivateService.streamIcdHeaders(sclRootAdapter);
+        Stream<IcdHeader> tPrivateStream = PrivateService.streamIcdHeaders(scl);
 
         //Then
         assertThat(tPrivateStream.toList())
@@ -445,9 +439,7 @@ class PrivateServiceTest {
         scl.getSubstation().add(tSubstation);
 
         //When
-        SclRootAdapter sclRootAdapter = SclService.initScl(Optional.empty(), "hv", "hr");
-        sclRootAdapter.setCurrentElem(scl);
-        Stream<IcdHeader> tPrivateStream = PrivateService.streamIcdHeaders(sclRootAdapter);
+        Stream<IcdHeader> tPrivateStream = PrivateService.streamIcdHeaders(scl);
 
         //Then
         assertThat(tPrivateStream.toList()).isEmpty();
@@ -531,7 +523,7 @@ class PrivateServiceTest {
     }
 
     @Test
-    void gettCompasICDHeaders_should_return_ICDHeaders() {
+    void getCompasICDHeaders_should_return_ICDHeaders() {
         //Given
         TIED tied = createTIED();
 

@@ -33,7 +33,7 @@ import org.lfenergy.compas.sct.commons.scl.sstation.VoltageLevelAdapter;
 public final class SubstationService {
 
     /**
-     * Private Controlller, should not be instanced
+     * Private Controller, should not be instanced
      */
     private SubstationService() {
         throw new UnsupportedOperationException("This service class cannot be instantiated");
@@ -43,29 +43,23 @@ public final class SubstationService {
      * Adds or Updates Substation section in SCL
      * @param scd SCL file in which Substation should be added/updated
      * @param ssd SCL file from which Substation should be copied
-     * @return <em>SclRootAdapter</em> object as SCD file
      * @throws ScdException throws when SCD contents already another Substation, or with different name, or contents
      * more than one Substation
      */
-    public static SclRootAdapter addSubstation(@NonNull SCL scd, @NonNull SCL ssd) throws ScdException {
-        SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
-        SclRootAdapter ssdRootAdapter = new SclRootAdapter(ssd);
-        if (scdRootAdapter.getCurrentElem().getSubstation().size() > 1) {
-            throw new ScdException(String.format("SCD file must have 0 or 1 Substation, but got %d",
-                scdRootAdapter.getCurrentElem().getSubstation().size()));
+    public static void addSubstation(@NonNull SCL scd, @NonNull SCL ssd) throws ScdException {
+        if (scd.getSubstation().size() > 1) {
+            throw new ScdException(String.format("SCD file must have 0 or 1 Substation, but got %d", scd.getSubstation().size()));
         }
-        if (ssdRootAdapter.getCurrentElem().getSubstation().size() != 1) {
-            throw new ScdException(String.format("SSD file must have exactly 1 Substation, but got %d",
-                ssdRootAdapter.getCurrentElem().getSubstation().size()));
+        if (ssd.getSubstation().size() != 1) {
+            throw new ScdException(String.format("SSD file must have exactly 1 Substation, but got %d", ssd.getSubstation().size()));
         }
-        TSubstation ssdTSubstation = ssdRootAdapter.currentElem.getSubstation().get(0);
-        if (scdRootAdapter.getCurrentElem().getSubstation().isEmpty()) {
-            scdRootAdapter.getCurrentElem().getSubstation().add(ssdTSubstation);
-            return scdRootAdapter;
+        TSubstation ssdTSubstation = ssd.getSubstation().get(0);
+        if (scd.getSubstation().isEmpty()) {
+            scd.getSubstation().add(ssdTSubstation);
         } else {
-            TSubstation scdTSubstation = scdRootAdapter.currentElem.getSubstation().get(0);
+            TSubstation scdTSubstation = scd.getSubstation().get(0);
             if (scdTSubstation.getName().equalsIgnoreCase(ssdTSubstation.getName())) {
-                SubstationAdapter scdSubstationAdapter = scdRootAdapter.getSubstationAdapter(scdTSubstation.getName());
+                SubstationAdapter scdSubstationAdapter = new SclRootAdapter(scd).getSubstationAdapter(scdTSubstation.getName());
                 for (TVoltageLevel tvl : ssdTSubstation.getVoltageLevel()) {
                     updateVoltageLevel(scdSubstationAdapter, tvl);
                 }
@@ -73,7 +67,6 @@ public final class SubstationService {
                 throw new ScdException("SCD file must have only one Substation and the Substation name from SSD file is" +
                     " different from the one in SCD file. The files are rejected.");
         }
-        return scdRootAdapter;
     }
 
     /**

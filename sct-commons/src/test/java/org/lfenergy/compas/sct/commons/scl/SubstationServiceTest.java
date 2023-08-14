@@ -7,49 +7,49 @@ package org.lfenergy.compas.sct.commons.scl;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TSubstation;
+import org.lfenergy.compas.scl2007b4.model.TVoltageLevel;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
 
 class SubstationServiceTest {
 
     @Test
-    void addSubstation_when_SCD_has_no_substation_should_succeed() throws Exception {
+    void addSubstation_when_SCD_has_no_substation_should_succeed() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/add_ied_test.xml");
-        SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
-        SclRootAdapter ssdRootAdapter = new SclRootAdapter(ssd);
+        assertThat(scd.getSubstation().size()).isZero();
         // When
-        SclRootAdapter resultScdAdapter = SubstationService.addSubstation(scd, ssd);
+        SubstationService.addSubstation(scd, ssd);
         // Then
-        assertNotEquals(scdRootAdapter, resultScdAdapter);
-        assertEquals(resultScdAdapter.getCurrentElem().getSubstation(), ssdRootAdapter.getCurrentElem().getSubstation());
         assertIsMarshallable(scd);
+        assertThat(scd.getSubstation().size()).isNotZero();
+        assertThat(scd.getSubstation()).isEqualTo(ssd.getSubstation());
     }
 
     @Test
-    void addSubstation_when_SCD_has_a_substation_should_succeed() throws Exception {
+    void addSubstation_when_SCD_has_a_substation_should_succeed() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/scd_with_substation.xml");
-        SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
-        SclRootAdapter ssdRootAdapter = new SclRootAdapter(ssd);
-        TSubstation ssdSubstation = ssdRootAdapter.getCurrentElem().getSubstation().get(0);
+        TSubstation scdSubstation = scd.getSubstation().get(0);
+        TSubstation ssdSubstation = ssd.getSubstation().get(0);
+        assertThat(scdSubstation.getVoltageLevel().stream().map(TVoltageLevel::getBay).count()).isEqualTo(1);
         // When
-        SclRootAdapter resultScdAdapter = SubstationService.addSubstation(scd, ssd);
+        SubstationService.addSubstation(scd, ssd);
         // Then
-        TSubstation resultSubstation = resultScdAdapter.getCurrentElem().getSubstation().get(0);
-        assertNotEquals(scdRootAdapter, resultScdAdapter);
-        assertEquals(ssdSubstation.getName(), resultSubstation.getName());
-        assertEquals(ssdSubstation.getVoltageLevel().size(), resultSubstation.getVoltageLevel().size());
         assertIsMarshallable(scd);
+        assertThat(scdSubstation.getName()).isEqualTo(ssdSubstation.getName());
+        assertThat(scd.getSubstation().size()).isEqualTo(ssd.getSubstation().size());
+        assertThat(scdSubstation.getVoltageLevel().stream().map(TVoltageLevel::getBay).count()).isEqualTo(2);
     }
 
     @Test
-    void addSubstation_when_SSD_with_multiple_Substations_should_throw_exception() throws Exception {
+    void addSubstation_when_SSD_with_multiple_Substations_should_throw_exception() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/add_ied_test.xml");
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd_with_2_substations.xml");
@@ -59,7 +59,7 @@ class SubstationServiceTest {
     }
 
     @Test
-    void addSubstation_when_SSD_with_no_substation_should_throw_exception() throws Exception {
+    void addSubstation_when_SSD_with_no_substation_should_throw_exception() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/add_ied_test.xml");
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd_without_substations.xml");
@@ -69,7 +69,7 @@ class SubstationServiceTest {
     }
 
     @Test
-    void addSubstation_when_substations_names_differ_should_throw_exception() throws Exception {
+    void addSubstation_when_substations_names_differ_should_throw_exception() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/scd_with_substation_name_different.xml");
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");

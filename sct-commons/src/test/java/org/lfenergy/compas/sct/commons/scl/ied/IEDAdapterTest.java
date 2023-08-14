@@ -232,7 +232,7 @@ class IEDAdapterTest {
         List<SclReportItem> sclReportItems = iedAdapter.checkDataGroupCoherence();
         //Then
         assertThat(sclReportItems)
-                .extracting(SclReportItem::getMessage)
+                .extracting(SclReportItem::message)
                 .containsExactlyInAnyOrder("There are too much FCDA for the DataSet dataset6 for the LDevice LD_INST21 in IED IED_NAME: 3 > 2 max",
                         "There are too much DataSets for the IED IED_NAME: 6 > 5 max",
                         "There are too much Report Control Blocks for the IED IED_NAME: 1 > 0 max",
@@ -263,7 +263,7 @@ class IEDAdapterTest {
         List<SclReportItem> sclReportItems = iedAdapter.checkBindingDataGroupCoherence();
         //Then
         assertThat(sclReportItems).hasSize(4)
-                .extracting(SclReportItem::getMessage)
+                .extracting(SclReportItem::message)
                 .containsExactlyInAnyOrder("The Client IED IED_NAME1 subscribes to too much FCDA: 9 > 8 max",
                     "The Client IED IED_NAME1 subscribes to too much Report Control Blocks: 1 > 0 max",
                     "The Client IED IED_NAME1 subscribes to too much SMV Control Blocks: 2 > 1 max",
@@ -344,7 +344,7 @@ class IEDAdapterTest {
         List<SclReportItem> sclReportItems = iedAdapter.manageMonitoringLns();
         // Then
         assertThat(sclReportItems).isNotEmpty()
-                .extracting(SclReportItem::getMessage)
+                .extracting(SclReportItem::message)
                 .containsExactly("There is no LN " + lnClassEnum.value() + " present in LDevice");
         assertThat(lDeviceAdapter.getLNAdapters()).isEmpty();
     }
@@ -388,7 +388,7 @@ class IEDAdapterTest {
         // Then
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(LD_SUIED);
         assertThat(sclReportItems).isNotEmpty()
-                .extracting(SclReportItem::getMessage)
+                .extracting(SclReportItem::message)
                 .containsExactly("The DAI cannot be updated");
         assertThat(lDeviceAdapter.getLNAdapters())
                 .hasSize(1);

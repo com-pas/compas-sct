@@ -485,7 +485,7 @@ class LDeviceAdapterTest {
         // Then
         assertThat(sclReportItem).isPresent();
         assertThat(sclReportItem.get())
-                .extracting(SclReportItem::getMessage)
+                .extracting(SclReportItem::message)
                 .isEqualTo("There is no LN " + lnClassEnum.value() + " present in LDevice");
         assertThat(lDeviceAdapter.getLNAdapters()).isEmpty();
     }
@@ -526,7 +526,7 @@ class LDeviceAdapterTest {
         // Then
         assertThat(sclReportItem).isPresent();
         assertThat(sclReportItem.get())
-                .extracting(SclReportItem::getMessage)
+                .extracting(SclReportItem::message)
                 .isEqualTo("The DAI cannot be updated");
         assertThat(lDeviceAdapter.getLNAdapters())
                 .hasSize(1);
@@ -589,7 +589,7 @@ class LDeviceAdapterTest {
         assertThat(extRefBayReferences).isEmpty();
         assertThat(sclReportItems).hasSize(2);
         assertThat(sclReportItems)
-                .extracting(SclReportItem::getMessage)
+                .extracting(SclReportItem::message)
                 .contains("The IED has no Private Bay", "The IED has no Private compas:ICDHeader");
     }
 
@@ -606,7 +606,7 @@ class LDeviceAdapterTest {
         assertThat(extRefBayReferences).isEmpty();
         assertThat(sclReportItems).hasSize(1);
         assertThat(sclReportItems)
-                .extracting(SclReportItem::getMessage)
+                .extracting(SclReportItem::message)
                 .containsExactly("There is no DOI@name=" + MOD_DO_TYPE_NAME + "/DAI@name=" + STVAL_DA_TYPE_NAME + "/Val for LDevice@inst" + LDEVICE_LDEPF);
     }
 

@@ -56,13 +56,12 @@ class InputsAdapterTest {
     void updateAllSourceDataSetsAndControlBlocks_should_report_Target_Ied_missing_Private_compasBay_errors() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_ied_errors.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        InputsAdapter inputsAdapter = findInputs(sclRootAdapter, "IED_NAME1", "LD_INST11");
+        InputsAdapter inputsAdapter = findInputs(scd, "IED_NAME1", "LD_INST11");
         // When
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();
         // Then
         assertThat(sclReportItems).containsExactly(
-            SclReportItem.fatal("/SCL/IED[@name=\"IED_NAME1\"]",
+            SclReportItem.error("/SCL/IED[@name=\"IED_NAME1\"]",
                 "IED is missing Private/compas:Bay@UUID attribute")
         );
     }
@@ -71,13 +70,12 @@ class InputsAdapterTest {
     void updateAllSourceDataSetsAndControlBlocks_should_report_Source_Ied_missing_Private_compasBay_errors() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_ied_errors.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        InputsAdapter inputsAdapter = findInputs(sclRootAdapter, "IED_NAME3", "LD_INST31");
+        InputsAdapter inputsAdapter = findInputs(scd, "IED_NAME3", "LD_INST31");
         // When
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();
         // Then
         assertThat(sclReportItems).containsExactly(
-            SclReportItem.fatal("/SCL/IED[@name=\"IED_NAME3\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST31\"]/LN0/Inputs/ExtRef[@desc=\"Source IED is " +
+            SclReportItem.error("/SCL/IED[@name=\"IED_NAME3\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST31\"]/LN0/Inputs/ExtRef[@desc=\"Source IED is " +
                     "missing compas:Bay @UUID\"]",
                 "Source IED is missing Private/compas:Bay@UUID attribute")
         );
@@ -87,19 +85,18 @@ class InputsAdapterTest {
     void updateAllSourceDataSetsAndControlBlocks_should_report_ExtRef_attribute_missing() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_extref_errors.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        InputsAdapter inputsAdapter = findInputs(sclRootAdapter, "IED_NAME1", "LD_INST11");
+        InputsAdapter inputsAdapter = findInputs(scd, "IED_NAME1", "LD_INST11");
         // When
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();
         // Then
         assertThat(sclReportItems).containsExactlyInAnyOrder(
-            SclReportItem.fatal("/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]/LN0/Inputs/" +
+            SclReportItem.error("/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]/LN0/Inputs/" +
                     "ExtRef[@desc=\"ExtRef is missing ServiceType attribute\"]",
                 "The signal ExtRef is missing ServiceType attribute"),
-            SclReportItem.fatal("/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]/LN0/Inputs/" +
+            SclReportItem.error("/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]/LN0/Inputs/" +
                     "ExtRef[@desc=\"ExtRef is ServiceType Poll\"]",
                 "The signal ExtRef ServiceType attribute is unexpected : POLL"),
-            SclReportItem.fatal("/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]/LN0/Inputs/" +
+            SclReportItem.error("/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]/LN0/Inputs/" +
                     "ExtRef[@desc=\"ExtRef is ServiceType Report with malformed desc attribute\"]",
                 "ExtRef.serviceType=Report but ExtRef.desc attribute is malformed")
         );
@@ -109,8 +106,7 @@ class InputsAdapterTest {
     void updateAllSourceDataSetsAndControlBlocks_should_succeed() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        InputsAdapter inputsAdapter = findInputs(sclRootAdapter, "IED_NAME1", "LD_INST11");
+        InputsAdapter inputsAdapter = findInputs(scd, "IED_NAME1", "LD_INST11");
         // When
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();
         // Then
@@ -137,7 +133,7 @@ class InputsAdapterTest {
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();
         // Then
         assertThat(sclReportItems).isEmpty();
-        DataSetAdapter dataSet = findDataSet(sclRootAdapter, expectedSourceIedName, expectedSourceLDeviceInst, expectedDataSetName);
+        DataSetAdapter dataSet = findDataSet(scd, expectedSourceIedName, expectedSourceLDeviceInst, expectedDataSetName);
         assertThat(dataSet.getCurrentElem().getFCDA())
             .extracting(TFCDA::getLdInst)
             .containsOnly(expectedSourceLDeviceInst);
@@ -234,13 +230,13 @@ class InputsAdapterTest {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         InputsAdapter inputsAdapter = keepOnlyThisExtRef(sclRootAdapter, "test bay internal");
         TExtRef extRef = inputsAdapter.getCurrentElem().getExtRef().get(0);
-        LDeviceAdapter sourceLDevice = findLDevice(sclRootAdapter, extRef.getIedName(), extRef.getLdInst());
+        LDeviceAdapter sourceLDevice = findLDevice(sclRootAdapter.getCurrentElem(), extRef.getIedName(), extRef.getLdInst());
         sourceLDevice.getAccessPoint().setServices(new TServices());
         // When
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();
         // Then
         assertThat(sclReportItems).hasSize(1)
-            .first().extracting(SclReportItem::getMessage).asString()
+            .first().extracting(SclReportItem::message).asString()
             .startsWith("Could not create DataSet or ControlBlock for this ExtRef : IED/AccessPoint does not have capability to create DataSet of type GSE");
     }
 

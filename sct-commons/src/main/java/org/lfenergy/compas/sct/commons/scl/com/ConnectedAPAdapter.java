@@ -73,19 +73,17 @@ public class ConnectedAPAdapter extends SclElementAdapter<SubNetworkAdapter, TCo
 
     /**
      * Copies Address and PhysicalConnection nodes from ICD file
-     * @param icd ICD file
+     * @param icd ICD object
      * @see <a href="https://github.com/com-pas/compas-sct/issues/76" target="_blank">Issue !76</a>
      * Copies Address and PhysicalConnection nodes from ICD file
      */
-    public void copyAddressAndPhysConnFromIcd(Optional<SCL> icd) {
-        if (icd.isPresent() && icd.get().getCommunication() != null) {
-            icd.stream()
-                    .map(SCL::getCommunication)
+    public void copyAddressAndPhysConnFromIcd(SCL icd) {
+        if (icd != null && icd.getCommunication() != null) {
+            icd.getCommunication().getSubNetwork().stream()
+                    .flatMap(tSubNetwork -> tSubNetwork.getConnectedAP().stream())
+                    .filter(connectedAP -> connectedAP.getApName().equals(currentElem.getApName()))
                     .findFirst()
-                    .flatMap(com -> com.getSubNetwork().stream()
-                            .flatMap(subNet -> subNet.getConnectedAP().stream()
-                                    .filter(connAP -> connAP.getApName().equals(currentElem.getApName())))
-                            .findFirst()).ifPresent(connectedAP -> {
+                    .ifPresent(connectedAP -> {
                         currentElem.setAddress(connectedAP.getAddress());
                         currentElem.getPhysConn().addAll(connectedAP.getPhysConn());
                     });
