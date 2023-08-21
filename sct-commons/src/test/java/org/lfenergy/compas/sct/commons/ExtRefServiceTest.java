@@ -2,16 +2,20 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.sct.commons.scl;
+package org.lfenergy.compas.sct.commons;
 
+import org.assertj.core.api.Assertions;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
+import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.DataSetAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
@@ -20,7 +24,10 @@ import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.lfenergy.compas.sct.commons.util.CsvUtils;
 import org.lfenergy.compas.sct.commons.util.ILDEPFSettings;
+import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.util.SettingLDEPFCsvHelper;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -33,15 +40,19 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.lfenergy.compas.scl2007b4.model.TFCEnum.ST;
 import static org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.*;
-import static org.lfenergy.compas.sct.commons.scl.ExtRefService.filterDuplicatedExtRefs;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 import static org.lfenergy.compas.sct.commons.util.ControlBlockEnum.*;
 import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newDurationInMilliSec;
 
+@ExtendWith(MockitoExtension.class)
 class ExtRefServiceTest {
+
+    @InjectMocks
+    ExtRefService extRefService;
 
     private static final long GSE_APP_ID_MIN = 0x9;
     private static final long SMV_APP_ID_MIN = 0x400A;
@@ -56,7 +67,7 @@ class ExtRefServiceTest {
         // Given : An ExtRef with a matching compas:Flow
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_success.xml");
         // When
-        ExtRefService.updateAllExtRefIedNames(scd);
+        extRefService.updateAllExtRefIedNames(scd);
         // Then
         TExtRef extRef = findExtRef(scd, "IED_NAME1", "LD_INST11", "STAT_LDSUIED_LPDO 1 Sortie_13_BOOLEAN_18_stVal_1");
         assertThat(extRef.getIedName()).isEqualTo("IED_NAME2");
@@ -65,7 +76,7 @@ class ExtRefServiceTest {
                 .getLN0Adapter()
                 .getCurrentElem()
                 .getInputs();
-        assertThat(PrivateService.extractCompasPrivate(inputs, TCompasFlow.class))
+        Assertions.assertThat(PrivateUtils.extractCompasPrivate(inputs, TCompasFlow.class))
                 .map(TCompasFlow::getExtRefiedName)
                 .hasValue("IED_NAME2");
     }
@@ -75,7 +86,7 @@ class ExtRefServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_success.xml");
         // When
-        List<SclReportItem> sclReportItems = ExtRefService.updateAllExtRefIedNames(scd);
+        List<SclReportItem> sclReportItems = extRefService.updateAllExtRefIedNames(scd);
         // Then
         assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError))
                 .overridingErrorMessage(String.valueOf(sclReportItems))
@@ -87,7 +98,7 @@ class ExtRefServiceTest {
     void updateAllExtRefIedNames_should_report_errors(String testCase, SCL scl, SclReportItem... errors) {
         // Given : scl parameter
         // When
-        List<SclReportItem> sclReportItems = ExtRefService.updateAllExtRefIedNames(scl);
+        List<SclReportItem> sclReportItems = extRefService.updateAllExtRefIedNames(scl);
         // Then : the sclReport should report all errors described in the comments in the SCD file
         assertThat(sclReportItems).isNotNull();
         assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isFalse();
@@ -161,7 +172,7 @@ class ExtRefServiceTest {
         // Given : see comments in SCD file
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_with_extref_errors.xml");
         // When
-        ExtRefService.updateAllExtRefIedNames(scd);
+        extRefService.updateAllExtRefIedNames(scd);
         // Then
         assertExtRefIsNotBound(findExtRef(scd, "IED_NAME1", "LD_INST12", "ExtRef target LDevice status is off"));
         assertExtRefIsNotBound(findExtRef(scd, "IED_NAME1", "LD_INST11", "Match compas:Flow but FlowStatus is INACTIVE"));
@@ -176,7 +187,7 @@ class ExtRefServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_with_extref_errors.xml");
         // When
-        List<SclReportItem> sclReportItems = ExtRefService.updateAllExtRefIedNames(scd);
+        List<SclReportItem> sclReportItems = extRefService.updateAllExtRefIedNames(scd);
         // Then
         assertThat(sclReportItems).isNotNull();
         LDeviceAdapter lDeviceAdapter = findLDeviceByLdName(scd, "IED_NAME1LD_INST12");
@@ -190,7 +201,7 @@ class ExtRefServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_with_extref_errors.xml");
         // When
-        List<SclReportItem> sclReportItems = ExtRefService.updateAllExtRefIedNames(scd);
+        List<SclReportItem> sclReportItems = extRefService.updateAllExtRefIedNames(scd);
         // Then
         assertThat(sclReportItems).isNotNull();
         LDeviceAdapter lDeviceAdapter = findLDeviceByLdName(scd, "IED_NAME1LD_INST11");
@@ -208,7 +219,7 @@ class ExtRefServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When
-        List<SclReportItem> sclReportItems = ExtRefService.createDataSetAndControlBlocks(scd);
+        List<SclReportItem> sclReportItems = extRefService.createDataSetAndControlBlocks(scd);
         // Then
         assertThat(sclReportItems).isEmpty();
         assertThat(streamAllDataSets(scd)).hasSize(6);
@@ -239,7 +250,7 @@ class ExtRefServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When
-        List<SclReportItem> sclReportItems = ExtRefService.createDataSetAndControlBlocks(scd);
+        List<SclReportItem> sclReportItems = extRefService.createDataSetAndControlBlocks(scd);
         // Then
         assertThat(sclReportItems).isEmpty();
 
@@ -272,7 +283,7 @@ class ExtRefServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When
-        List<SclReportItem> sclReportItems = ExtRefService.createDataSetAndControlBlocks(scd);
+        List<SclReportItem> sclReportItems = extRefService.createDataSetAndControlBlocks(scd);
         // Then
         assertThat(sclReportItems).isEmpty();
 
@@ -301,7 +312,7 @@ class ExtRefServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When
-        List<SclReportItem> sclReportItems = ExtRefService.createDataSetAndControlBlocks(scd, "IED_NAME1");
+        List<SclReportItem> sclReportItems = extRefService.createDataSetAndControlBlocks(scd, "IED_NAME1");
         // Then
         assertThat(sclReportItems).isEmpty();
         assertThat(streamAllDataSets(scd)).hasSize(6);
@@ -317,7 +328,7 @@ class ExtRefServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When
-        List<SclReportItem> sclReportItems = ExtRefService.createDataSetAndControlBlocks(scd, "IED_NAME2");
+        List<SclReportItem> sclReportItems = extRefService.createDataSetAndControlBlocks(scd, "IED_NAME2");
         // Then
         assertThat(sclReportItems).isEmpty();
         assertThat(streamAllDataSets(scd)).isEmpty();
@@ -328,7 +339,7 @@ class ExtRefServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When & Then
-        assertThatThrownBy(() -> ExtRefService.createDataSetAndControlBlocks(scd, "non_existing_IED_name"))
+        assertThatThrownBy(() -> extRefService.createDataSetAndControlBlocks(scd, "non_existing_IED_name"))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("IED.name 'non_existing_IED_name' not found in SCD");
     }
@@ -338,7 +349,7 @@ class ExtRefServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When
-        List<SclReportItem> sclReportItems = ExtRefService.createDataSetAndControlBlocks(scd, "IED_NAME1", "LD_INST11");
+        List<SclReportItem> sclReportItems = extRefService.createDataSetAndControlBlocks(scd, "IED_NAME1", "LD_INST11");
         // Then
         assertThat(sclReportItems).isEmpty();
     }
@@ -348,7 +359,7 @@ class ExtRefServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When & Then
-        assertThatThrownBy(() -> ExtRefService.createDataSetAndControlBlocks(scd, "non_existing_IED_name", "LD_INST11"))
+        assertThatThrownBy(() -> extRefService.createDataSetAndControlBlocks(scd, "non_existing_IED_name", "LD_INST11"))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("IED.name 'non_existing_IED_name' not found in SCD");
     }
@@ -358,7 +369,7 @@ class ExtRefServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When & Then
-        assertThatThrownBy(() -> ExtRefService.createDataSetAndControlBlocks(scd, "IED_NAME1", "non_existing_LDevice_inst"))
+        assertThatThrownBy(() -> extRefService.createDataSetAndControlBlocks(scd, "IED_NAME1", "non_existing_LDevice_inst"))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("LDevice.inst 'non_existing_LDevice_inst' not found in IED 'IED_NAME1'");
     }
@@ -368,7 +379,7 @@ class ExtRefServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When & Then
-        assertThatThrownBy(() -> ExtRefService.createDataSetAndControlBlocks(scd, null, "LD_INST11"))
+        assertThatThrownBy(() -> extRefService.createDataSetAndControlBlocks(scd, null, "LD_INST11"))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("IED.name parameter is missing");
     }
@@ -394,7 +405,7 @@ class ExtRefServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success_test_fcda_sort.xml");
         // When
-        List<SclReportItem> sclReportItems = ExtRefService.createDataSetAndControlBlocks(scd);
+        List<SclReportItem> sclReportItems = extRefService.createDataSetAndControlBlocks(scd);
         // Then
         assertThat(sclReportItems).isEmpty();
         DataSetAdapter dataSetAdapter = findDataSet(scd, "IED_NAME2", "LD_INST21", "DS_LD_INST21_GSI");
@@ -418,7 +429,7 @@ class ExtRefServiceTest {
         ControlBlockNetworkSettings controlBlockNetworkSettings = controlBlockAdapter -> new SettingsOrError(new Settings(0x1D6, (byte) 4, minTime, maxTime), null);
 
         // When
-        List<SclReportItem> sclReportItems = ExtRefService.configureNetworkForAllControlBlocks(scd, controlBlockNetworkSettings, RANGES_PER_CB_TYPE);
+        List<SclReportItem> sclReportItems = extRefService.configureNetworkForAllControlBlocks(scd, controlBlockNetworkSettings, RANGES_PER_CB_TYPE);
         // Then
         assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
         TConnectedAP connectedAP = new SclRootAdapter(scd).findConnectedApAdapter("IED_NAME2", "AP_NAME").get().getCurrentElem();
@@ -460,7 +471,7 @@ class ExtRefServiceTest {
         TDurationInMilliSec maxTime = newDurationInMilliSec(2000);
         ControlBlockNetworkSettings controlBlockNetworkSettings = controlBlockAdapter -> new SettingsOrError(new Settings(0x1D6, (byte) 4, minTime, maxTime), null);
         // When
-        List<SclReportItem> sclReportItems = ExtRefService.configureNetworkForAllControlBlocks(scd, controlBlockNetworkSettings, RANGES_PER_CB_TYPE);
+        List<SclReportItem> sclReportItems = extRefService.configureNetworkForAllControlBlocks(scd, controlBlockNetworkSettings, RANGES_PER_CB_TYPE);
         // Then
         assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
         assertThat(streamAllConnectedApGseP(scd, "APPID"))
@@ -477,7 +488,7 @@ class ExtRefServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
         // When
-        List<SclReportItem> sclReportItems = ExtRefService.configureNetworkForAllControlBlocks(scd, controlBlockNetworkSettings, rangesPerCbType);
+        List<SclReportItem> sclReportItems = extRefService.configureNetworkForAllControlBlocks(scd, controlBlockNetworkSettings, rangesPerCbType);
         // Then
         assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isFalse();
         assertThat(sclReportItems)
@@ -521,7 +532,7 @@ class ExtRefServiceTest {
         List<TExtRef> tExtRefList = List.of(tExtRef, tExtRefLnClass, createExtRefExample("CB", TServiceType.GOOSE),
                 createExtRefExample("CB", TServiceType.GOOSE));
         // When
-        List<TExtRef> result = ExtRefService.filterDuplicatedExtRefs(tExtRefList);
+        List<TExtRef> result = extRefService.filterDuplicatedExtRefs(tExtRefList);
         // Then
         assertThat(result).hasSizeLessThan(tExtRefList.size())
                 .hasSize(2);
@@ -541,7 +552,7 @@ class ExtRefServiceTest {
         List<TExtRef> tExtRefList = List.of(tExtRefIedName, tExtRefLdInst, tExtRefLnInst, tExtRefPrefix,
                 createExtRefExample("CB_1", TServiceType.GOOSE), createExtRefExample("CB_1", TServiceType.SMV));
         // When
-        List<TExtRef> result = filterDuplicatedExtRefs(tExtRefList);
+        List<TExtRef> result = extRefService.filterDuplicatedExtRefs(tExtRefList);
         // Then
         assertThat(result).hasSameSizeAs(tExtRefList)
                 .hasSize(6);
@@ -570,7 +581,7 @@ class ExtRefServiceTest {
                 .build();
 
         // When
-        List<SclReportItem> sclReportItems = ExtRefService.manageBindingForLDEPF(scd, settingLDEPFCsvHelper);
+        List<SclReportItem> sclReportItems = extRefService.manageBindingForLDEPF(scd, settingLDEPFCsvHelper);
         // Then
         assertThat(sclReportItems).isEmpty();
         TExtRef extRef1 = findExtRef(scd, "IED_NAME1", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
@@ -614,7 +625,6 @@ class ExtRefServiceTest {
 
     }
 
-
     @Test
     void manageBindingForLDEPF_should_return_no_report_when_extRef_withDifferentIedType_update_successfully() {
         String fileName = "LDEPF_Setting_file.csv";
@@ -623,7 +633,7 @@ class ExtRefServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_extref_with_BCU_BPU.xml");
         SettingLDEPFCsvHelper settingLDEPFCsvHelper = new SettingLDEPFCsvHelper(reader);
         // When
-        List<SclReportItem> sclReportItems = ExtRefService.manageBindingForLDEPF(scd, settingLDEPFCsvHelper);
+        List<SclReportItem> sclReportItems = extRefService.manageBindingForLDEPF(scd, settingLDEPFCsvHelper);
         // Then
         assertThat(sclReportItems).isEmpty();
         SclTestMarshaller.assertIsMarshallable(new SclRootAdapter(scd).getCurrentElem());
@@ -701,7 +711,7 @@ class ExtRefServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_manyIedSources_in_same_bay.xml");
         ILDEPFSettings settings = new SettingLDEPFCsvHelper(reader);
         // When
-        List<SclReportItem> sclReportItems = ExtRefService.manageBindingForLDEPF(scd, settings);
+        List<SclReportItem> sclReportItems = extRefService.manageBindingForLDEPF(scd, settings);
         // Then
         assertThat(sclReportItems).hasSize(2)
                 .extracting(SclReportItem::message)
@@ -743,7 +753,7 @@ class ExtRefServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_dataTypeTemplateValid.xml");
         SettingLDEPFCsvHelper settingLDEPFCsvHelper = new SettingLDEPFCsvHelper(reader);
         // When
-        List<SclReportItem> sclReportItems = ExtRefService.manageBindingForLDEPF(scd, settingLDEPFCsvHelper);
+        List<SclReportItem> sclReportItems = extRefService.manageBindingForLDEPF(scd, settingLDEPFCsvHelper);
         // Then
         assertThat(sclReportItems).isEmpty();
         SclTestMarshaller.assertIsMarshallable(scd);
@@ -802,6 +812,158 @@ class ExtRefServiceTest {
         return settings.stream()
                 .filter(setting -> analogNum.equals(setting.getChannelAnalogNum()))
                 .findFirst().get();
+    }
+
+    @Test
+    void updateExtRefSource_shouldThrowScdException_whenSignalInfoNullOrInvalid() {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
+        ExtRefInfo extRefInfo = new ExtRefInfo();
+        extRefInfo.setHolderIEDName("IED_NAME2");
+        extRefInfo.setHolderLDInst("LD_INST21");
+        extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
+
+        //When Then
+        assertThat(extRefInfo.getSignalInfo()).isNull();
+        assertThatThrownBy(() -> extRefService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class); // signal = null
+        extRefInfo.setSignalInfo(new ExtRefSignalInfo());
+        assertThat(extRefInfo.getSignalInfo()).isNotNull();
+        assertThatThrownBy(() -> extRefService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class);// signal invalid
+    }
+
+    @Test
+    void updateExtRefSource_shouldThrowScdException_whenBindingInfoNullOrInvalid() {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
+        ExtRefInfo extRefInfo = new ExtRefInfo();
+        extRefInfo.setHolderIEDName("IED_NAME2");
+        extRefInfo.setHolderLDInst("LD_INST21");
+        extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
+
+        ExtRefSignalInfo extRefSignalInfo = new ExtRefSignalInfo();
+        extRefSignalInfo.setIntAddr("INT_ADDR21");
+        extRefSignalInfo.setPDA("da21.bda211.bda212.bda213");
+        extRefSignalInfo.setPDO("Do21.sdo21");
+        extRefInfo.setSignalInfo(extRefSignalInfo);
+        //When Then
+        assertThat(extRefInfo.getBindingInfo()).isNull();
+        assertThatThrownBy(() -> extRefService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class); // binding = null
+        extRefInfo.setBindingInfo(new ExtRefBindingInfo());
+        assertThat(extRefInfo.getBindingInfo()).isNotNull();
+        assertThatThrownBy(() -> extRefService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class);// binding invalid
+    }
+
+    @Test
+    void updateExtRefSource_shouldThrowScdException_whenBindingInternalByIedName() {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
+        ExtRefInfo extRefInfo = new ExtRefInfo();
+        extRefInfo.setHolderIEDName("IED_NAME2");
+        extRefInfo.setHolderLDInst("LD_INST21");
+        extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
+
+        ExtRefSignalInfo extRefSignalInfo = new ExtRefSignalInfo();
+        extRefSignalInfo.setIntAddr("INT_ADDR21");
+        extRefSignalInfo.setPDA("da21.bda211.bda212.bda213");
+        extRefSignalInfo.setPDO("Do21.sdo21");
+        extRefInfo.setSignalInfo(extRefSignalInfo);
+
+        ExtRefBindingInfo extRefBindingInfo = new ExtRefBindingInfo();
+        extRefBindingInfo.setIedName("IED_NAME2"); // internal binding
+        extRefBindingInfo.setLdInst("LD_INST12");
+        extRefBindingInfo.setLnClass(TLLN0Enum.LLN_0.value());
+        extRefInfo.setBindingInfo(new ExtRefBindingInfo());
+        //When Then
+        assertThatThrownBy(() -> extRefService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class); // CB not allowed
+    }
+
+    @Test
+    void updateExtRefSource_shouldThrowScdException_whenBindingInternaByServiceType() {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
+        ExtRefInfo extRefInfo = new ExtRefInfo();
+        extRefInfo.setHolderIEDName("IED_NAME2");
+        extRefInfo.setHolderLDInst("LD_INST21");
+        extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
+
+        ExtRefSignalInfo extRefSignalInfo = new ExtRefSignalInfo();
+        extRefSignalInfo.setIntAddr("INT_ADDR21");
+        extRefSignalInfo.setPDA("da21.bda211.bda212.bda213");
+        extRefSignalInfo.setPDO("Do21.sdo21");
+        extRefInfo.setSignalInfo(extRefSignalInfo);
+
+        ExtRefBindingInfo extRefBindingInfo = new ExtRefBindingInfo();
+        extRefBindingInfo.setIedName("IED_NAME2"); // internal binding
+        extRefBindingInfo.setLdInst("LD_INST12");
+        extRefBindingInfo.setLnClass(TLLN0Enum.LLN_0.value());
+        extRefBindingInfo.setServiceType(TServiceType.POLL);
+        extRefInfo.setBindingInfo(new ExtRefBindingInfo());
+        //When Then
+        assertThatThrownBy(() -> extRefService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class); // CB not allowed
+    }
+
+    @Test
+    void updateExtRefSource_shouldThrowScdException_whenSourceInfoNullOrInvalid() {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
+        ExtRefInfo extRefInfo = new ExtRefInfo();
+        extRefInfo.setHolderIEDName("IED_NAME2");
+        extRefInfo.setHolderLDInst("LD_INST21");
+        extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
+
+        ExtRefSignalInfo extRefSignalInfo = new ExtRefSignalInfo();
+        extRefSignalInfo.setIntAddr("INT_ADDR21");
+        extRefSignalInfo.setPDA("da21.bda211.bda212.bda213");
+        extRefSignalInfo.setPDO("Do21.sdo21");
+        extRefInfo.setSignalInfo(extRefSignalInfo);
+
+        ExtRefBindingInfo extRefBindingInfo = new ExtRefBindingInfo();
+        extRefBindingInfo.setIedName("IED_NAME1"); // internal binding
+        extRefBindingInfo.setLdInst("LD_INST12");
+        extRefBindingInfo.setLnClass(TLLN0Enum.LLN_0.value());
+        extRefInfo.setBindingInfo(new ExtRefBindingInfo());
+
+        //When Then
+        assertThat(extRefInfo.getSourceInfo()).isNull();
+        assertThatThrownBy(() -> extRefService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class); // signal = null
+        extRefInfo.setSourceInfo(new ExtRefSourceInfo());
+        assertThat(extRefInfo.getSourceInfo()).isNotNull();
+        assertThatThrownBy(() -> extRefService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class);// signal invalid
+    }
+
+    @Test
+    void updateExtRefSource_shouldThrowScdException_whenBindingExternalBinding() {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
+        ExtRefInfo extRefInfo = new ExtRefInfo();
+        extRefInfo.setHolderIEDName("IED_NAME2");
+        extRefInfo.setHolderLDInst("LD_INST21");
+        extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
+
+        ExtRefSignalInfo extRefSignalInfo = new ExtRefSignalInfo();
+        extRefSignalInfo.setIntAddr("INT_ADDR21");
+        extRefSignalInfo.setPDA("da21.bda211.bda212.bda213");
+        extRefSignalInfo.setPDO("Do21.sdo21");
+        extRefInfo.setSignalInfo(extRefSignalInfo);
+
+        ExtRefBindingInfo extRefBindingInfo = new ExtRefBindingInfo();
+        extRefBindingInfo.setIedName("IED_NAME1");
+        extRefBindingInfo.setLdInst("LD_INST12");
+        extRefBindingInfo.setLnClass(TLLN0Enum.LLN_0.value());
+        extRefInfo.setBindingInfo(extRefBindingInfo);
+
+        ExtRefSourceInfo sourceInfo = new ExtRefSourceInfo();
+        sourceInfo.setSrcLDInst(extRefInfo.getBindingInfo().getLdInst());
+        sourceInfo.setSrcLNClass(extRefInfo.getBindingInfo().getLnClass());
+        sourceInfo.setSrcCBName("goose1");
+        extRefInfo.setSourceInfo(sourceInfo);
+
+        //When
+        TExtRef extRef = assertDoesNotThrow(() -> extRefService.updateExtRefSource(scd, extRefInfo));
+        //Then
+        assertThat(extRef.getSrcCBName()).isEqualTo(extRefInfo.getSourceInfo().getSrcCBName());
+        assertThat(extRef.getSrcLDInst()).isEqualTo(extRefInfo.getBindingInfo().getLdInst());
+        assertThat(extRef.getSrcLNClass()).contains(extRefInfo.getBindingInfo().getLnClass());
     }
 
 }

@@ -2,29 +2,36 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.sct.commons.scl;
+package org.lfenergy.compas.sct.commons;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TSubstation;
 import org.lfenergy.compas.scl2007b4.model.TVoltageLevel;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
 
+@ExtendWith(MockitoExtension.class)
 class SubstationServiceTest {
+
+    @InjectMocks
+    SubstationService substationService;
 
     @Test
     void addSubstation_when_SCD_has_no_substation_should_succeed() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/add_ied_test.xml");
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
-        assertThat(scd.getSubstation().size()).isZero();
+        assertThat(scd.getSubstation()).asList().isEmpty();
         // When
-        SubstationService.addSubstation(scd, ssd);
+        substationService.addSubstation(scd, ssd);
         // Then
         assertIsMarshallable(scd);
         assertThat(scd.getSubstation().size()).isNotZero();
@@ -40,11 +47,11 @@ class SubstationServiceTest {
         TSubstation ssdSubstation = ssd.getSubstation().get(0);
         assertThat(scdSubstation.getVoltageLevel().stream().map(TVoltageLevel::getBay).count()).isEqualTo(1);
         // When
-        SubstationService.addSubstation(scd, ssd);
+        substationService.addSubstation(scd, ssd);
         // Then
         assertIsMarshallable(scd);
         assertThat(scdSubstation.getName()).isEqualTo(ssdSubstation.getName());
-        assertThat(scd.getSubstation().size()).isEqualTo(ssd.getSubstation().size());
+        assertThat(scd.getSubstation()).asList().hasSameSizeAs(ssd.getSubstation());
         assertThat(scdSubstation.getVoltageLevel().stream().map(TVoltageLevel::getBay).count()).isEqualTo(2);
     }
 
@@ -55,7 +62,7 @@ class SubstationServiceTest {
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd_with_2_substations.xml");
 
         // When & Then
-        assertThrows(ScdException.class, () -> SubstationService.addSubstation(scd, ssd));
+        assertThrows(ScdException.class, () -> substationService.addSubstation(scd, ssd));
     }
 
     @Test
@@ -65,7 +72,7 @@ class SubstationServiceTest {
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd_without_substations.xml");
 
         // When & Then
-        assertThrows(ScdException.class, () -> SubstationService.addSubstation(scd, ssd));
+        assertThrows(ScdException.class, () -> substationService.addSubstation(scd, ssd));
     }
 
     @Test
@@ -74,7 +81,7 @@ class SubstationServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/scd_with_substation_name_different.xml");
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
         // When & Then
-        assertThrows(ScdException.class, () -> SubstationService.addSubstation(scd, ssd));
+        assertThrows(ScdException.class, () -> substationService.addSubstation(scd, ssd));
     }
 
 }

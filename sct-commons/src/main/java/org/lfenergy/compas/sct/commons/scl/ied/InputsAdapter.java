@@ -11,10 +11,10 @@ import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.ExtRefService;
-import org.lfenergy.compas.sct.commons.scl.PrivateService;
+import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.ExtRefService;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 import org.lfenergy.compas.sct.commons.util.FcdaCandidates;
 import org.lfenergy.compas.sct.commons.util.LdeviceStatus;
@@ -136,7 +136,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
             clearBinding(extRef);
             return sourceValidationError;
         }
-        String sourceIedName = PrivateService.extractCompasPrivate(sourceIed.getCurrentElem(), TCompasICDHeader.class)
+        String sourceIedName = PrivateUtils.extractCompasPrivate(sourceIed.getCurrentElem(), TCompasICDHeader.class)
                 .map(TCompasICDHeader::getIEDName).orElse("");
         extRef.setIedName(sourceIedName);
         compasFlow.setExtRefiedName(sourceIedName);
@@ -226,7 +226,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
      * @return list of matching CompasFlows
      */
     private List<TCompasFlow> getMatchingCompasFlows(TExtRef extRef) {
-        return PrivateService.extractCompasPrivates(currentElem, TCompasFlow.class)
+        return PrivateUtils.extractCompasPrivates(currentElem, TCompasFlow.class)
                 .filter(compasFlow -> isMatchingExtRef(compasFlow, extRef))
                 .toList();
     }

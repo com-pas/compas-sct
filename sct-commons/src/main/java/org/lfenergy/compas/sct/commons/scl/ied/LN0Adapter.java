@@ -10,7 +10,7 @@ import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.scl.LDeviceActivation;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
-import org.lfenergy.compas.sct.commons.scl.PrivateService;
+import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -187,7 +187,7 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
             return Optional.of(buildFatalReportItem("The LDevice doesn't have a DO @name='Beh' OR its associated DA@fc='ST' AND DA@name='stVal'"));
         }
         Set<String> enumValues = getEnumValues(daiBehList.get(0).getDaName().getType());
-        Optional<TCompasLDevice> optionalTCompasLDevice = PrivateService.extractCompasPrivate(getParentAdapter().getCurrentElem(), TCompasLDevice.class);
+        Optional<TCompasLDevice> optionalTCompasLDevice = PrivateUtils.extractCompasPrivate(getParentAdapter().getCurrentElem(), TCompasLDevice.class);
         if (optionalTCompasLDevice.isEmpty()) {
             return Optional.of(buildFatalReportItem("The LDevice doesn't have a Private compas:LDevice."));
         }

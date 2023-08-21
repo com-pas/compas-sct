@@ -13,11 +13,11 @@ import java.io.Reader;
 import java.util.List;
 
 /**
- * This class is a helper method to load FCDA from a CSV file for use with {@link org.lfenergy.compas.sct.commons.scl.HmiService#createAllHmiReportControlBlocks}
+ * This class is a helper method to load FCDA from a CSV file for use with {@link IHmiService#createAllHmiReportControlBlocks}
  * Use the getter to access the list of parsed FCDA.
  *
  * @see CsvUtils
- * @see org.lfenergy.compas.sct.commons.scl.HmiService#createAllHmiReportControlBlocks
+ * @see IHmiService#createAllHmiReportControlBlocks
  */
 public class FcdaCsvHelper {
 

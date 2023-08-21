@@ -12,7 +12,7 @@ import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
-import org.lfenergy.compas.sct.commons.scl.PrivateService;
+import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.util.MonitoringLnClassEnum;
@@ -322,7 +322,7 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
      * @return value of private compas:Bay if present, empty Optional otherwise
      */
     public Optional<TCompasBay> getPrivateCompasBay() {
-        return PrivateService.extractCompasPrivate(currentElem, TCompasBay.class);
+        return PrivateUtils.extractCompasPrivate(currentElem, TCompasBay.class);
     }
 
     /**
@@ -374,7 +374,7 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
      * @return COMPAS-ICDHeader private value if present, else empty Optional
      */
     public Optional<TCompasICDHeader> getCompasICDHeader() {
-        return PrivateService.extractCompasPrivate(currentElem, TCompasICDHeader.class);
+        return PrivateUtils.extractCompasPrivate(currentElem, TCompasICDHeader.class);
     }
 
     /**
@@ -383,7 +383,7 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
      * @return COMPAS-SystemVersion private value if present, else empty Optional
      */
     public Optional<TCompasSystemVersion> getCompasSystemVersion() {
-        return PrivateService.extractCompasPrivate(currentElem, TCompasSystemVersion.class);
+        return PrivateUtils.extractCompasPrivate(currentElem, TCompasSystemVersion.class);
     }
 
     /**

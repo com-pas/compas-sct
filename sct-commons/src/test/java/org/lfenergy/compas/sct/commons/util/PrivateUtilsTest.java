@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.sct.commons.scl;
+package org.lfenergy.compas.sct.commons.util;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,10 +10,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.platform.commons.support.ReflectionSupport;
 import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.dto.PrivateLinkedToStds;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.icd.IcdHeader;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
-import org.lfenergy.compas.sct.commons.util.PrivateEnum;
 
 import javax.xml.bind.JAXBElement;
 import java.lang.reflect.Constructor;
@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-class PrivateServiceTest {
+class PrivateUtilsTest {
 
     private TPrivate privateSCD;
     private TPrivate privateICD;
@@ -46,14 +46,14 @@ class PrivateServiceTest {
     @Test
     void class_should_not_be_instantiable() {
         // Given
-        Constructor<?>[] constructors = PrivateService.class.getDeclaredConstructors();
+        Constructor<?>[] constructors = PrivateUtils.class.getDeclaredConstructors();
         assertThat(constructors).hasSize(1);
         Constructor<?> constructor = constructors[0];
         constructor.setAccessible(true);
         // When & Then
         assertThatThrownBy(constructor::newInstance)
-            .isInstanceOf(InvocationTargetException.class)
-            .getCause().isInstanceOf(UnsupportedOperationException.class);
+                .isInstanceOf(InvocationTargetException.class)
+                .getCause().isInstanceOf(UnsupportedOperationException.class);
     }
 
     @Test
@@ -64,11 +64,11 @@ class PrivateServiceTest {
         baseElement.getPrivate().add(privateICD);
         // Given : setUp
         // When
-        List<TCompasSclFileType> result = PrivateService.extractCompasPrivates(baseElement, TCompasSclFileType.class).toList();
+        List<TCompasSclFileType> result = PrivateUtils.extractCompasPrivates(baseElement, TCompasSclFileType.class).toList();
         //Then
         assertThat(result)
-            .hasSize(2)
-            .containsExactly(TCompasSclFileType.SCD, TCompasSclFileType.ICD);
+                .hasSize(2)
+                .containsExactly(TCompasSclFileType.SCD, TCompasSclFileType.ICD);
     }
 
     @Test
@@ -77,7 +77,7 @@ class PrivateServiceTest {
         TBaseElement baseElement = new SCL();
         baseElement.getPrivate().add(privateSCD);
         // When
-        List<TCompasICDHeader> result = PrivateService.extractCompasPrivates(baseElement, TCompasICDHeader.class).toList();
+        List<TCompasICDHeader> result = PrivateUtils.extractCompasPrivates(baseElement, TCompasICDHeader.class).toList();
         //Then
         assertThat(result).isEmpty();
     }
@@ -88,7 +88,7 @@ class PrivateServiceTest {
         TBaseElement baseElement = new SCL();
         baseElement.getPrivate().add(privateSCD);
         // When
-        Stream<Object> compasPrivates = PrivateService.extractCompasPrivates(baseElement, Object.class);
+        Stream<Object> compasPrivates = PrivateUtils.extractCompasPrivates(baseElement, Object.class);
         // Then
         assertThatCode(compasPrivates::toList)
                 .isInstanceOf(NoSuchElementException.class)
@@ -103,7 +103,7 @@ class PrivateServiceTest {
         baseElement.getPrivate().add(privateSCD);
         Class<?> compasClass = PrivateEnum.COMPAS_BAY.getCompasClass();
 
-        Stream<?> stream = PrivateService.extractCompasPrivates(baseElement, compasClass);
+        Stream<?> stream = PrivateUtils.extractCompasPrivates(baseElement, compasClass);
         // When & Then
         assertThatCode(stream::toList)
                 .isInstanceOf(ClassCastException.class)
@@ -117,11 +117,11 @@ class PrivateServiceTest {
         baseElement.getPrivate().add(privateSCD);
         baseElement.getPrivate().add(privateICD);
         // When
-        List<TCompasSclFileType> result = PrivateService.extractCompasPrivates(baseElement, TCompasSclFileType.class).toList();
+        List<TCompasSclFileType> result = PrivateUtils.extractCompasPrivates(baseElement, TCompasSclFileType.class).toList();
         // Then
         assertThat(result)
-            .hasSize(2)
-            .containsExactly(TCompasSclFileType.SCD, TCompasSclFileType.ICD);
+                .hasSize(2)
+                .containsExactly(TCompasSclFileType.SCD, TCompasSclFileType.ICD);
     }
 
     @Test
@@ -129,7 +129,7 @@ class PrivateServiceTest {
         // Given
         TBaseElement baseElement = new SCL();
         // When
-        PrivateService.extractCompasPrivates(baseElement, TCompasSclFileType.class);
+        PrivateUtils.extractCompasPrivates(baseElement, TCompasSclFileType.class);
         // Then
         assertThat(baseElement.isSetPrivate()).isFalse();
     }
@@ -140,10 +140,10 @@ class PrivateServiceTest {
         TBaseElement baseElement = new SCL();
         baseElement.getPrivate().add(privateSCD);
         // When
-        Optional<TCompasSclFileType> result = PrivateService.extractCompasPrivate(baseElement, TCompasSclFileType.class);
+        Optional<TCompasSclFileType> result = PrivateUtils.extractCompasPrivate(baseElement, TCompasSclFileType.class);
         //Then
         assertThat(result).isPresent()
-            .hasValue(TCompasSclFileType.SCD);
+                .hasValue(TCompasSclFileType.SCD);
     }
 
     @Test
@@ -151,7 +151,7 @@ class PrivateServiceTest {
         // Given
         TBaseElement baseElement = new SCL();
         // When
-        Optional<TCompasBay> result = PrivateService.extractCompasPrivate(baseElement, TCompasBay.class);
+        Optional<TCompasBay> result = PrivateUtils.extractCompasPrivate(baseElement, TCompasBay.class);
         //Then
         assertThat(result).isNotPresent();
     }
@@ -163,7 +163,7 @@ class PrivateServiceTest {
         baseElement.getPrivate().add(privateSCD);
         baseElement.getPrivate().add(privateICD);
         // When & Then
-        assertThatCode(() -> PrivateService.extractCompasPrivate(baseElement, TCompasSclFileType.class))
+        assertThatCode(() -> PrivateUtils.extractCompasPrivate(baseElement, TCompasSclFileType.class))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("Expecting maximum 1 element of type class org.lfenergy.compas.scl2007b4.model.TCompasSclFileType in private COMPAS-SclFileType, but got more");
     }
@@ -176,7 +176,7 @@ class PrivateServiceTest {
         TCompasICDHeader tCompasICDHeader = objectFactory.createTCompasICDHeader();
         privateSCD.getContent().add(objectFactory.createICDHeader(tCompasICDHeader));
         // When
-        Optional<TCompasICDHeader> optionalResult = PrivateService.extractCompasICDHeader(privateSCD);
+        Optional<TCompasICDHeader> optionalResult = PrivateUtils.extractCompasICDHeader(privateSCD);
         //Then
         assertThat(optionalResult).isPresent().get().matches(result -> result == tCompasICDHeader);
     }
@@ -187,7 +187,7 @@ class PrivateServiceTest {
         // Given
         PrivateEnum privateEnum = PrivateEnum.fromClass(compasElement.getClass());
         assertThat(privateEnum).isNotNull();
-        Optional<Method> optionalCreatePrivateMethod = ReflectionSupport.findMethod(PrivateService.class, "createPrivate", compasElement.getClass());
+        Optional<Method> optionalCreatePrivateMethod = ReflectionSupport.findMethod(PrivateUtils.class, "createPrivate", compasElement.getClass());
         assertThat(optionalCreatePrivateMethod).isPresent();
         Method createPrivateMethod = optionalCreatePrivateMethod.get();
         // When
@@ -196,19 +196,19 @@ class PrivateServiceTest {
         assertThat(result).isInstanceOf(TPrivate.class);
         TPrivate resultPrivate = (TPrivate) result;
         assertThat(resultPrivate).isNotNull()
-            .hasFieldOrPropertyWithValue("type", privateEnum.getPrivateType());
+                .hasFieldOrPropertyWithValue("type", privateEnum.getPrivateType());
         assertThat(resultPrivate.getContent()).hasSize(1).first().satisfies(content -> assertThat(content).isInstanceOf(JAXBElement.class));
         JAXBElement<?> content = (JAXBElement<?>) resultPrivate.getContent().get(0);
         assertThat(content.isNil()).isFalse();
         assertThat(content.getValue()).isNotNull().isInstanceOf(compasElement.getClass())
-            .isEqualTo(compasElement);
+                .isEqualTo(compasElement);
     }
 
     public static Stream<Object> createPrivateTestSources() {
         return Stream.of(new TCompasBay(),
-            new TCompasICDHeader(),
-            TCompasSclFileType.SCD,
-            new TCompasSystemVersion());
+                new TCompasICDHeader(),
+                TCompasSclFileType.SCD,
+                new TCompasSystemVersion());
     }
 
     @Test
@@ -217,7 +217,7 @@ class PrivateServiceTest {
         TBaseElement baseElement = new SCL();
         baseElement.getPrivate().add(privateSCD);
         // When
-        PrivateService.removePrivates(baseElement, PrivateEnum.COMPAS_SCL_FILE_TYPE);
+        PrivateUtils.removePrivates(baseElement, PrivateEnum.COMPAS_SCL_FILE_TYPE);
         // Then
         assertThat(baseElement.isSetPrivate()).isFalse();
     }
@@ -228,7 +228,7 @@ class PrivateServiceTest {
         TBaseElement baseElement = new SCL();
         baseElement.getPrivate().add(privateSCD);
         // When
-        PrivateService.removePrivates(baseElement, PrivateEnum.COMPAS_ICDHEADER);
+        PrivateUtils.removePrivates(baseElement, PrivateEnum.COMPAS_ICDHEADER);
         // Then
         assertThat(baseElement.getPrivate()).hasSize(1);
     }
@@ -239,9 +239,9 @@ class PrivateServiceTest {
         TBaseElement baseElement = new SCL();
         baseElement.getPrivate().add(privateSCD);
         TCompasICDHeader tCompasICDHeader = objectFactory.createTCompasICDHeader();
-        baseElement.getPrivate().add(PrivateService.createPrivate(tCompasICDHeader));
+        baseElement.getPrivate().add(PrivateUtils.createPrivate(tCompasICDHeader));
         // When
-        PrivateService.removePrivates(baseElement, PrivateEnum.COMPAS_ICDHEADER);
+        PrivateUtils.removePrivates(baseElement, PrivateEnum.COMPAS_ICDHEADER);
         // Then
         assertThat(baseElement.getPrivate()).hasSize(1);
         TPrivate tPrivate = baseElement.getPrivate().get(0);
@@ -258,7 +258,7 @@ class PrivateServiceTest {
         TBaseElement baseElement = new SCL();
         baseElement.unsetPrivate();
         // When
-        PrivateService.removePrivates(baseElement, PrivateEnum.COMPAS_ICDHEADER);
+        PrivateUtils.removePrivates(baseElement, PrivateEnum.COMPAS_ICDHEADER);
         // Then
         assertThat(baseElement.isSetPrivate()).isFalse();
     }
@@ -269,12 +269,12 @@ class PrivateServiceTest {
         SCL scl1 = new SCL();
         TIED tied1 = new TIED();
         TCompasICDHeader compasICDHeader1 = new TCompasICDHeader();
-        TPrivate tPrivate1 =  PrivateService.createPrivate(compasICDHeader1);
+        TPrivate tPrivate1 =  PrivateUtils.createPrivate(compasICDHeader1);
         tied1.getPrivate().add(tPrivate1);
         scl1.getIED().add(tied1);
 
         //When
-        Map<String, PrivateService.PrivateLinkedToSTDs> stringSCLMap = PrivateService.createMapICDSystemVersionUuidAndSTDFile(List.of(scl1));
+        Map<String, PrivateLinkedToStds> stringSCLMap = PrivateUtils.createMapICDSystemVersionUuidAndSTDFile(List.of(scl1));
 
         //Then
         assertThat(stringSCLMap.keySet()).isEmpty();
@@ -296,9 +296,9 @@ class PrivateServiceTest {
         compasICDHeader2.setICDSystemVersionUUID("UUID-2");
         TCompasICDHeader compasICDHeader3 = new TCompasICDHeader();
         compasICDHeader3.setICDSystemVersionUUID("UUID-2");
-        TPrivate tPrivate1 =  PrivateService.createPrivate(compasICDHeader1);
-        TPrivate tPrivate2 =  PrivateService.createPrivate(compasICDHeader2);
-        TPrivate tPrivate3 =  PrivateService.createPrivate(compasICDHeader3);
+        TPrivate tPrivate1 =  PrivateUtils.createPrivate(compasICDHeader1);
+        TPrivate tPrivate2 =  PrivateUtils.createPrivate(compasICDHeader2);
+        TPrivate tPrivate3 =  PrivateUtils.createPrivate(compasICDHeader3);
         tied1.getPrivate().add(tPrivate1);
         tied2.getPrivate().add(tPrivate2);
         tied3.getPrivate().add(tPrivate3);
@@ -307,7 +307,7 @@ class PrivateServiceTest {
         scl3.getIED().add(tied3);
 
         //When
-        Map<String, PrivateService.PrivateLinkedToSTDs> stringSCLMap = PrivateService.createMapICDSystemVersionUuidAndSTDFile(List.of(scl1,scl2,scl3));
+        Map<String, PrivateLinkedToStds> stringSCLMap = PrivateUtils.createMapICDSystemVersionUuidAndSTDFile(List.of(scl1,scl2,scl3));
 
         //Then
         assertThat(stringSCLMap.keySet()).hasSize(2).containsExactly("UUID-1", "UUID-2");
@@ -324,18 +324,18 @@ class PrivateServiceTest {
         compasICDHeader2.setHeaderId("ID-2");
         compasICDHeader2.setHeaderVersion("VER-2");
         compasICDHeader2.setHeaderRevision("REV-2");
-        TPrivate tPrivate1 =  PrivateService.createPrivate(compasICDHeader1);
-        TPrivate tPrivate2 =  PrivateService.createPrivate(compasICDHeader2);
+        TPrivate tPrivate1 =  PrivateUtils.createPrivate(compasICDHeader1);
+        TPrivate tPrivate2 =  PrivateUtils.createPrivate(compasICDHeader2);
 
-        PrivateService.PrivateLinkedToSTDs privateLinkedToSTDs1 = new PrivateService.PrivateLinkedToSTDs(tPrivate1,Collections.singletonList(new SCL()));
-        PrivateService.PrivateLinkedToSTDs privateLinkedToSTDs2 = new PrivateService.PrivateLinkedToSTDs(tPrivate2, Arrays.asList(new SCL(), new SCL()));
+        PrivateLinkedToStds privateLinkedToSTDs1 = new PrivateLinkedToStds(tPrivate1,Collections.singletonList(new SCL()));
+        PrivateLinkedToStds privateLinkedToSTDs2 = new PrivateLinkedToStds(tPrivate2, Arrays.asList(new SCL(), new SCL()));
 
-        Map<String, PrivateService.PrivateLinkedToSTDs> stringSCLMap = new HashMap<>();
+        Map<String, PrivateLinkedToStds> stringSCLMap = new HashMap<>();
         stringSCLMap.put("UUID-1", privateLinkedToSTDs1);
         stringSCLMap.put("UUID-2", privateLinkedToSTDs2);
 
         //When Then
-        assertThatThrownBy(() -> PrivateService.checkSTDCorrespondanceWithLNodeCompasICDHeader(stringSCLMap))
+        assertThatThrownBy(() -> PrivateUtils.checkSTDCorrespondanceWithLNodeCompasICDHeader(stringSCLMap))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("There are several STD files corresponding to headerId = ID-2 headerVersion = VER-2 headerRevision = REV-2 and ICDSystemVersionUUID = UUID-2");
 
@@ -348,18 +348,18 @@ class PrivateServiceTest {
         compasICDHeader1.setICDSystemVersionUUID("UUID-1");
         TCompasICDHeader compasICDHeader2 = new TCompasICDHeader();
         compasICDHeader2.setICDSystemVersionUUID("UUID-2");
-        TPrivate tPrivate1 =  PrivateService.createPrivate(compasICDHeader1);
-        TPrivate tPrivate2 =  PrivateService.createPrivate(compasICDHeader2);
+        TPrivate tPrivate1 =  PrivateUtils.createPrivate(compasICDHeader1);
+        TPrivate tPrivate2 =  PrivateUtils.createPrivate(compasICDHeader2);
 
-        PrivateService.PrivateLinkedToSTDs privateLinkedToSTDs1 = new PrivateService.PrivateLinkedToSTDs(tPrivate1,Collections.singletonList(new SCL()));
-        PrivateService.PrivateLinkedToSTDs privateLinkedToSTDs2 = new PrivateService.PrivateLinkedToSTDs(tPrivate2, Collections.singletonList(new SCL()));
+        PrivateLinkedToStds privateLinkedToSTDs1 = new PrivateLinkedToStds(tPrivate1,Collections.singletonList(new SCL()));
+        PrivateLinkedToStds privateLinkedToSTDs2 = new PrivateLinkedToStds(tPrivate2, Collections.singletonList(new SCL()));
 
-        Map<String, PrivateService.PrivateLinkedToSTDs> stringSCLMap = new HashMap<>();
+        Map<String, PrivateLinkedToStds> stringSCLMap = new HashMap<>();
         stringSCLMap.put("UUID-1", privateLinkedToSTDs1);
         stringSCLMap.put("UUID-2", privateLinkedToSTDs2);
 
         //When Then
-        assertDoesNotThrow(() -> PrivateService.checkSTDCorrespondanceWithLNodeCompasICDHeader(stringSCLMap));
+        assertDoesNotThrow(() -> PrivateUtils.checkSTDCorrespondanceWithLNodeCompasICDHeader(stringSCLMap));
 
     }
 
@@ -370,10 +370,10 @@ class PrivateServiceTest {
         compasICDHeader.setHeaderId("ID-1");
         compasICDHeader.setHeaderVersion("VER-1");
         compasICDHeader.setICDSystemVersionUUID("UUID-1");
-        TPrivate tPrivate =  PrivateService.createPrivate(compasICDHeader);
+        TPrivate tPrivate =  PrivateUtils.createPrivate(compasICDHeader);
 
         //When
-        String message = PrivateService.stdCheckFormatExceptionMessage(tPrivate);
+        String message = PrivateUtils.stdCheckFormatExceptionMessage(tPrivate);
 
         //Then
         assertThat(message).isEqualTo("headerId = ID-1 headerVersion = VER-1 headerRevision = null and ICDSystemVersionUUID = UUID-1");
@@ -393,9 +393,9 @@ class PrivateServiceTest {
         compasICDHeader2.setIEDName("IED-2");
         TCompasICDHeader compasICDHeader3 = new TCompasICDHeader();
         compasICDHeader3.setIEDName("IED-3");
-        TPrivate tPrivate1 =  PrivateService.createPrivate(compasICDHeader1);
-        TPrivate tPrivate2 =  PrivateService.createPrivate(compasICDHeader2);
-        TPrivate tPrivate3 =  PrivateService.createPrivate(compasICDHeader3);
+        TPrivate tPrivate1 =  PrivateUtils.createPrivate(compasICDHeader1);
+        TPrivate tPrivate2 =  PrivateUtils.createPrivate(compasICDHeader2);
+        TPrivate tPrivate3 =  PrivateUtils.createPrivate(compasICDHeader3);
         tlNode1.getPrivate().add(tPrivate1);
         tlNode2.getPrivate().add(tPrivate2);
         tlNode3.getPrivate().add(tPrivate3);
@@ -410,7 +410,7 @@ class PrivateServiceTest {
         scl.getSubstation().add(tSubstation);
 
         //When
-        Stream<IcdHeader> tPrivateStream = PrivateService.streamIcdHeaders(scl);
+        Stream<IcdHeader> tPrivateStream = PrivateUtils.streamIcdHeaders(scl);
 
         //Then
         assertThat(tPrivateStream.toList())
@@ -426,7 +426,7 @@ class PrivateServiceTest {
         TLNode tlNode1 = new TLNode();
         TCompasBay compasBay = new TCompasBay();
         compasBay.setUUID("UUID");
-        TPrivate tPrivate1 =  PrivateService.createPrivate(compasBay);
+        TPrivate tPrivate1 =  PrivateUtils.createPrivate(compasBay);
         tlNode1.getPrivate().add(tPrivate1);
         TFunction tFunction = new TFunction();
         tFunction.getLNode().add(tlNode1);
@@ -439,7 +439,7 @@ class PrivateServiceTest {
         scl.getSubstation().add(tSubstation);
 
         //When
-        Stream<IcdHeader> tPrivateStream = PrivateService.streamIcdHeaders(scl);
+        Stream<IcdHeader> tPrivateStream = PrivateUtils.streamIcdHeaders(scl);
 
         //Then
         assertThat(tPrivateStream.toList()).isEmpty();
@@ -453,11 +453,11 @@ class PrivateServiceTest {
         compasICDHeader1.setBayLabel("BAY-1");
         compasICDHeader1.setIEDSubstationinstance(BigInteger.ONE);
         TCompasICDHeader compasICDHeader2 = new TCompasICDHeader();
-        TPrivate tPrivate1 =  PrivateService.createPrivate(compasICDHeader1);
-        TPrivate tPrivate2 =  PrivateService.createPrivate(compasICDHeader2);
+        TPrivate tPrivate1 =  PrivateUtils.createPrivate(compasICDHeader1);
+        TPrivate tPrivate2 =  PrivateUtils.createPrivate(compasICDHeader2);
 
         // When
-        boolean result = PrivateService.comparePrivateCompasICDHeaders(tPrivate1,tPrivate2);
+        boolean result = PrivateUtils.comparePrivateCompasICDHeaders(tPrivate1,tPrivate2);
         // Then
         assertThat(result).isTrue();
     }
@@ -472,11 +472,11 @@ class PrivateServiceTest {
         compasICDHeader1.setICDSystemVersionUUID("UUID-1");
         TCompasICDHeader compasICDHeader2 = new TCompasICDHeader();
         compasICDHeader2.setICDSystemVersionUUID("UUID-2");
-        TPrivate tPrivate1 =  PrivateService.createPrivate(compasICDHeader1);
-        TPrivate tPrivate2 =  PrivateService.createPrivate(compasICDHeader2);
+        TPrivate tPrivate1 =  PrivateUtils.createPrivate(compasICDHeader1);
+        TPrivate tPrivate2 =  PrivateUtils.createPrivate(compasICDHeader2);
 
         // When
-        boolean result = PrivateService.comparePrivateCompasICDHeaders(tPrivate1,tPrivate2);
+        boolean result = PrivateUtils.comparePrivateCompasICDHeaders(tPrivate1,tPrivate2);
         // Then
         assertThat(result).isFalse();
     }
@@ -491,11 +491,11 @@ class PrivateServiceTest {
         compasICDHeader1.setICDSystemVersionUUID("UUID-1");
         TCompasICDHeader compasICDHeader2 = new TCompasICDHeader();
         compasICDHeader2.setICDSystemVersionUUID("UUID-1");
-        TPrivate tPrivate1 =  PrivateService.createPrivate(compasICDHeader1);
-        TPrivate tPrivate2 =  PrivateService.createPrivate(compasICDHeader2);
+        TPrivate tPrivate1 =  PrivateUtils.createPrivate(compasICDHeader1);
+        TPrivate tPrivate2 =  PrivateUtils.createPrivate(compasICDHeader2);
 
         // When
-        boolean result = PrivateService.comparePrivateCompasICDHeaders(tPrivate1,tPrivate2);
+        boolean result = PrivateUtils.comparePrivateCompasICDHeaders(tPrivate1,tPrivate2);
         // Then
         assertThat(result).isTrue();
     }
@@ -510,13 +510,13 @@ class PrivateServiceTest {
         lNodeCompasICDHeader.setIEDName("IED-1");
         lNodeCompasICDHeader.setBayLabel("BAY-1");
         lNodeCompasICDHeader.setIEDSubstationinstance(BigInteger.ONE);
-        TPrivate stdTPrivate = PrivateService.createPrivate(stdCompasICDHeader);
+        TPrivate stdTPrivate = PrivateUtils.createPrivate(stdCompasICDHeader);
 
         // When
-        PrivateService.copyCompasICDHeaderFromLNodePrivateIntoSTDPrivate(stdTPrivate, lNodeCompasICDHeader);
+        PrivateUtils.copyCompasICDHeaderFromLNodePrivateIntoSTDPrivate(stdTPrivate, lNodeCompasICDHeader);
 
         // Then
-        TCompasICDHeader result = PrivateService.extractCompasICDHeader(stdTPrivate).get();
+        TCompasICDHeader result = PrivateUtils.extractCompasICDHeader(stdTPrivate).get();
         assertThat(result).extracting(TCompasICDHeader::getICDSystemVersionUUID, TCompasICDHeader::getIEDName,
                         TCompasICDHeader::getIEDSubstationinstance, TCompasICDHeader::getBayLabel)
                 .containsExactlyInAnyOrder("UUID-2", "IED-1", BigInteger.ONE, "BAY-1");
@@ -528,7 +528,7 @@ class PrivateServiceTest {
         TIED tied = createTIED();
 
         //When
-        TCompasICDHeader tCompasICDHeader = PrivateService.extractCompasPrivate(tied, TCompasICDHeader.class).orElseThrow();
+        TCompasICDHeader tCompasICDHeader = PrivateUtils.extractCompasPrivate(tied, TCompasICDHeader.class).orElseThrow();
 
         //Then
         assertThat(tCompasICDHeader)
@@ -579,7 +579,7 @@ class PrivateServiceTest {
         TCompasTopo tCompasTopo2 = new TCompasTopo();
         List<TCompasTopo> compasTopos = List.of(tCompasTopo1, tCompasTopo2);
         // When
-        TPrivate result = PrivateService.createPrivate(compasTopos);
+        TPrivate result = PrivateUtils.createPrivate(compasTopos);
         // Then
         assertThat(result.getContent())
                 .map(JAXBElement.class::cast)
