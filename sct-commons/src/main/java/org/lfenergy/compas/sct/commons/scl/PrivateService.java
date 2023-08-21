@@ -5,6 +5,7 @@
 package org.lfenergy.compas.sct.commons.scl;
 
 import lombok.NonNull;
+import lombok.experimental.UtilityClass;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.icd.IcdHeader;
@@ -26,18 +27,11 @@ import static org.lfenergy.compas.sct.commons.util.PrivateEnum.COMPAS_ICDHEADER;
  * <ol>
  *  <li>{@link PrivateService#extractCompasPrivates(TBaseElement, Class)
  *      <em>Returns the value of the <b>TPrivate </b> containment reference list from given <b>TBaseElement </b> By class type</em>}</li>
- *
- *  <li>{@link PrivateService#extractCompasPrivates(TBaseElement, Class)}
- *      <em>Returns the value of the <b>TPrivate </b> containment reference list from given <b>TPrivate </b> elements By class type</em>}
- *   </li>
  * </ol>
  * @see org.lfenergy.compas.scl2007b4.model.TPrivate
  */
+@UtilityClass
 public final class PrivateService {
-
-    private PrivateService() {
-        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
-    }
 
     private static final ObjectFactory objectFactory = new ObjectFactory();
 

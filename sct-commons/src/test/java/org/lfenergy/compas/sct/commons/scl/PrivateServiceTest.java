@@ -52,8 +52,8 @@ class PrivateServiceTest {
         constructor.setAccessible(true);
         // When & Then
         assertThatThrownBy(constructor::newInstance)
-            .isInstanceOf(InvocationTargetException.class)
-            .getCause().isInstanceOf(UnsupportedOperationException.class);
+                .isInstanceOf(InvocationTargetException.class)
+                .getCause().isInstanceOf(UnsupportedOperationException.class);
     }
 
     @Test
@@ -67,8 +67,8 @@ class PrivateServiceTest {
         List<TCompasSclFileType> result = PrivateService.extractCompasPrivates(baseElement, TCompasSclFileType.class).toList();
         //Then
         assertThat(result)
-            .hasSize(2)
-            .containsExactly(TCompasSclFileType.SCD, TCompasSclFileType.ICD);
+                .hasSize(2)
+                .containsExactly(TCompasSclFileType.SCD, TCompasSclFileType.ICD);
     }
 
     @Test
@@ -120,8 +120,8 @@ class PrivateServiceTest {
         List<TCompasSclFileType> result = PrivateService.extractCompasPrivates(baseElement, TCompasSclFileType.class).toList();
         // Then
         assertThat(result)
-            .hasSize(2)
-            .containsExactly(TCompasSclFileType.SCD, TCompasSclFileType.ICD);
+                .hasSize(2)
+                .containsExactly(TCompasSclFileType.SCD, TCompasSclFileType.ICD);
     }
 
     @Test
@@ -143,7 +143,7 @@ class PrivateServiceTest {
         Optional<TCompasSclFileType> result = PrivateService.extractCompasPrivate(baseElement, TCompasSclFileType.class);
         //Then
         assertThat(result).isPresent()
-            .hasValue(TCompasSclFileType.SCD);
+                .hasValue(TCompasSclFileType.SCD);
     }
 
     @Test
@@ -196,19 +196,19 @@ class PrivateServiceTest {
         assertThat(result).isInstanceOf(TPrivate.class);
         TPrivate resultPrivate = (TPrivate) result;
         assertThat(resultPrivate).isNotNull()
-            .hasFieldOrPropertyWithValue("type", privateEnum.getPrivateType());
+                .hasFieldOrPropertyWithValue("type", privateEnum.getPrivateType());
         assertThat(resultPrivate.getContent()).hasSize(1).first().satisfies(content -> assertThat(content).isInstanceOf(JAXBElement.class));
         JAXBElement<?> content = (JAXBElement<?>) resultPrivate.getContent().get(0);
         assertThat(content.isNil()).isFalse();
         assertThat(content.getValue()).isNotNull().isInstanceOf(compasElement.getClass())
-            .isEqualTo(compasElement);
+                .isEqualTo(compasElement);
     }
 
     public static Stream<Object> createPrivateTestSources() {
         return Stream.of(new TCompasBay(),
-            new TCompasICDHeader(),
-            TCompasSclFileType.SCD,
-            new TCompasSystemVersion());
+                new TCompasICDHeader(),
+                TCompasSclFileType.SCD,
+                new TCompasSystemVersion());
     }
 
     @Test

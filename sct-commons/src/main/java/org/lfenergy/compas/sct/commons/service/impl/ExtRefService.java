@@ -2,43 +2,37 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.sct.commons.scl;
+package org.lfenergy.compas.sct.commons.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.lfenergy.compas.sct.commons.dto.*;
-import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.ied.*;
-import org.lfenergy.compas.sct.commons.util.*;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TCompasICDHeader;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.scl2007b4.model.TIED;
 import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings;
+import org.lfenergy.compas.sct.commons.dto.LDEPFSettingData;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
+import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.scl.PrivateService;
+import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.scl.ied.*;
+import org.lfenergy.compas.sct.commons.service.IExtRefService;
+import org.lfenergy.compas.sct.commons.util.*;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.*;
+import  org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.*;
+
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 import static org.lfenergy.compas.sct.commons.util.Utils.isExtRefFeedBySameControlBlock;
 
-public final class ExtRefService {
+public class ExtRefService implements IExtRefService {
 
-    private static final String MESSAGE_MISSING_IED_NAME_PARAMETER = "IED.name parameter is missing";
-
-    private ExtRefService() {
-        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
-    }
-
-    /**
-     * Updates iedName attribute of all ExtRefs in the Scd.
-     *
-     * @return list of encountered errors
-     */
-    public static List<SclReportItem> updateAllExtRefIedNames(SCL scd) {
+    @Override
+    public List<SclReportItem> updateAllExtRefIedNames(SCL scd) {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         List<SclReportItem> iedErrors = validateIed(sclRootAdapter);
         if (!iedErrors.isEmpty()) {
@@ -62,13 +56,84 @@ public final class ExtRefService {
                 .flatMap(List::stream).toList();
     }
 
-    private static List<SclReportItem> validateIed(SclRootAdapter sclRootAdapter) {
+    @Override
+    public List<SclReportItem> createDataSetAndControlBlocks(SCL scd) {
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        Stream<LDeviceAdapter> lDeviceAdapters = sclRootAdapter.streamIEDAdapters().flatMap(IEDAdapter::streamLDeviceAdapters);
+        return createDataSetAndControlBlocks(lDeviceAdapters);
+    }
+
+    @Override
+    public List<SclReportItem> createDataSetAndControlBlocks(SCL scd, String targetIedName) {
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(targetIedName);
+        return createDataSetAndControlBlocks(iedAdapter.streamLDeviceAdapters());
+
+    }
+
+    @Override
+    public List<SclReportItem> createDataSetAndControlBlocks(SCL scd, String targetIedName, String targetLDeviceInst) {
+        if (StringUtils.isBlank(targetIedName)) {
+            throw new ScdException("IED.name parameter is missing");
+        }
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(targetIedName);
+        LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(targetLDeviceInst);
+        return createDataSetAndControlBlocks(Stream.of(lDeviceAdapter));
+    }
+
+    private List<SclReportItem> createDataSetAndControlBlocks(Stream<LDeviceAdapter> lDeviceAdapters) {
+        return lDeviceAdapters
+                .map(LDeviceAdapter::createDataSetAndControlBlocks)
+                .flatMap(List::stream)
+                .toList();
+    }
+
+    @Override
+    public List<SclReportItem> configureNetworkForAllControlBlocks(SCL scd, ControlBlockNetworkSettings controlBlockNetworkSettings,
+                                                                RangesPerCbType rangesPerCbType) {
+        List<SclReportItem> sclReportItems = new ArrayList<>();
+        sclReportItems.addAll(configureNetworkForControlBlocks(scd, controlBlockNetworkSettings, rangesPerCbType.gse(), ControlBlockEnum.GSE));
+        sclReportItems.addAll(configureNetworkForControlBlocks(scd, controlBlockNetworkSettings, rangesPerCbType.sampledValue(), ControlBlockEnum.SAMPLED_VALUE));
+        return sclReportItems;
+    }
+
+    @Override
+    public List<SclReportItem> manageBindingForLDEPF(SCL scd, ILDEPFSettings settings) {
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        List<SclReportItem> sclReportItems = new ArrayList<>();
+        sclRootAdapter.streamIEDAdapters()
+                .filter(iedAdapter -> !iedAdapter.getName().equals(IED_TEST_NAME))
+                .map(iedAdapter -> iedAdapter.findLDeviceAdapterByLdInst(LDEVICE_LDEPF))
+                .flatMap(Optional::stream)
+                .forEach(lDeviceAdapter ->
+                        lDeviceAdapter.getExtRefBayReferenceForActifLDEPF(sclReportItems)
+                                .forEach(extRefBayRef -> settings.getLDEPFSettingDataMatchExtRef(extRefBayRef.extRef())
+                                        .ifPresent(lDPFSettingMatchingExtRef -> {
+                                            List<TIED> iedSources = settings.getIedSources(sclRootAdapter, extRefBayRef.compasBay(), lDPFSettingMatchingExtRef);
+                                            if (iedSources.size() == 1) {
+                                                updateLDEPFExtRefBinding(extRefBayRef.extRef(), iedSources.get(0), lDPFSettingMatchingExtRef);
+                                                sclReportItems.addAll(updateLDEPFDos(lDeviceAdapter, extRefBayRef.extRef(), lDPFSettingMatchingExtRef));
+                                            } else {
+                                                if (iedSources.size() > 1) {
+                                                    sclReportItems.add(SclReportItem.warning(null, "There is more than one IED source to bind the signal " +
+                                                            "/IED@name=" + extRefBayRef.iedName() + "/LDevice@inst=LDEPF/LN0" +
+                                                            "/ExtRef@desc=" + extRefBayRef.extRef().getDesc()));
+                                                }
+                                            }
+                                        }))
+                );
+        return sclReportItems;
+
+    }
+
+    private List<SclReportItem> validateIed(SclRootAdapter sclRootAdapter) {
         List<SclReportItem> iedErrors = new ArrayList<>(checkIedCompasIcdHeaderAttributes(sclRootAdapter));
         iedErrors.addAll(checkIedUnityOfIcdSystemVersionUuid(sclRootAdapter));
         return iedErrors;
     }
 
-    private static List<SclReportItem> checkIedCompasIcdHeaderAttributes(SclRootAdapter sclRootAdapter) {
+    private List<SclReportItem> checkIedCompasIcdHeaderAttributes(SclRootAdapter sclRootAdapter) {
         return sclRootAdapter.streamIEDAdapters()
                 .map(iedAdapter -> {
                             Optional<TCompasICDHeader> compasPrivate = iedAdapter.getCompasICDHeader();
@@ -86,7 +151,7 @@ public final class ExtRefService {
                 .toList();
     }
 
-    private static List<SclReportItem> checkIedUnityOfIcdSystemVersionUuid(SclRootAdapter sclRootAdapter) {
+    private List<SclReportItem> checkIedUnityOfIcdSystemVersionUuid(SclRootAdapter sclRootAdapter) {
         Map<String, List<TIED>> systemVersionToIedList = sclRootAdapter.getCurrentElem().getIED().stream()
                 .collect(Collectors.groupingBy(ied -> PrivateService.extractCompasPrivate(ied, TCompasICDHeader.class)
                         .map(TCompasICDHeader::getICDSystemVersionUUID)
@@ -104,81 +169,7 @@ public final class ExtRefService {
                 .toList();
     }
 
-    /**
-     * Create All DataSet and ControlBlock in the SCL based on the ExtRef
-     *
-     * @param scd input SCD object. It could be modified by adding new DataSet and ControlBlocks
-     * @return list of encountered errors
-     */
-    public static List<SclReportItem> createDataSetAndControlBlocks(SCL scd) {
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        Stream<LDeviceAdapter> lDeviceAdapters = sclRootAdapter.streamIEDAdapters().flatMap(IEDAdapter::streamLDeviceAdapters);
-        return createDataSetAndControlBlocks(lDeviceAdapters);
-    }
-
-    /**
-     * Create All DataSet and ControlBlock for the ExtRef in given IED
-     *
-     * @param scd           input SCD object. The object will be modified with the new DataSet and ControlBlocks
-     * @param targetIedName the name of the IED where the ExtRef are
-     * @return list of encountered errors
-     */
-    public static List<SclReportItem> createDataSetAndControlBlocks(SCL scd, String targetIedName) {
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(targetIedName);
-        return createDataSetAndControlBlocks(iedAdapter.streamLDeviceAdapters());
-
-    }
-
-    /**
-     * Create All DataSet and ControlBlock for the ExtRef in this LDevice
-     *
-     * @param scd               input SCD object. The object will be modified with the new DataSet and ControlBlocks
-     * @param targetIedName     the name of the IED where the ExtRef are
-     * @param targetLDeviceInst the name of the LDevice where the ExtRef are
-     * @return list of encountered errors
-     */
-    public static List<SclReportItem> createDataSetAndControlBlocks(SCL scd, String targetIedName, String targetLDeviceInst) {
-        if (StringUtils.isBlank(targetIedName)) {
-            throw new ScdException(MESSAGE_MISSING_IED_NAME_PARAMETER);
-        }
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(targetIedName);
-        LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(targetLDeviceInst);
-        return createDataSetAndControlBlocks(Stream.of(lDeviceAdapter));
-    }
-
-    private static List<SclReportItem> createDataSetAndControlBlocks(Stream<LDeviceAdapter> lDeviceAdapters) {
-        return lDeviceAdapters
-                .map(LDeviceAdapter::createDataSetAndControlBlocks)
-                .flatMap(List::stream)
-                .toList();
-    }
-
-    /**
-     * Configure the network for all the ControlBlocks.
-     * Create (or update if already existing) these elements
-     * - the Communication/SubNetwork/ConnectedAP/GSE element, for the GSEControl blocks
-     * - the Communication/SubNetwork/ConnectedAP/SMV element, for the SampledValueControl blocks
-     *
-     * @param scd                         input SCD object. The object will be modified with the new DataGSESet and SMV elements
-     * @param controlBlockNetworkSettings a method tha gives the network configuration information for a given ControlBlock
-     * @param rangesPerCbType             provide NetworkRanges for GSEControl and SampledValueControl. NetworkRanges contains :
-     *                                    start-end app APPID range (long value), start-end MAC-Addresses (Mac-Addresses values: Ex: "01-0C-CD-01-01-FF")
-     * @return list of encountered errors
-     * @see Utils#macAddressToLong(String) for the expected MAC address format
-     * @see ControlBlockNetworkSettings
-     * @see ControlBlockNetworkSettings.RangesPerCbType
-     * @see ControlBlockNetworkSettings.NetworkRanges
-     */
-    public static List<SclReportItem> configureNetworkForAllControlBlocks(SCL scd, ControlBlockNetworkSettings controlBlockNetworkSettings,
-                                                                RangesPerCbType rangesPerCbType) {
-        List<SclReportItem> sclReportItems = new ArrayList<>();
-        sclReportItems.addAll(configureNetworkForControlBlocks(scd, controlBlockNetworkSettings, rangesPerCbType.gse(), ControlBlockEnum.GSE));
-        sclReportItems.addAll(configureNetworkForControlBlocks(scd, controlBlockNetworkSettings, rangesPerCbType.sampledValue(), ControlBlockEnum.SAMPLED_VALUE));
-        return sclReportItems;
-    }
-    private static List<SclReportItem> configureNetworkForControlBlocks(SCL scd, ControlBlockNetworkSettings controlBlockNetworkSettings,
+    private List<SclReportItem> configureNetworkForControlBlocks(SCL scd, ControlBlockNetworkSettings controlBlockNetworkSettings,
                                                                         NetworkRanges networkRanges, ControlBlockEnum controlBlockEnum) {
         PrimitiveIterator.OfLong appIdIterator = Utils.sequence(networkRanges.appIdStart(), networkRanges.appIdEnd());
         Iterator<String> macAddressIterator = Utils.macAddressSequence(networkRanges.macAddressStart(), networkRanges.macAddressEnd());
@@ -194,7 +185,7 @@ public final class ExtRefService {
                 .flatMap(Optional::stream)
                 .toList();
     }
-    private static Optional<SclReportItem> configureControlBlockNetwork(ControlBlockNetworkSettings controlBlockNetworkSettings, PrimitiveIterator.OfLong appIdIterator, Iterator<String> macAddressIterator, ControlBlockAdapter controlBlockAdapter) {
+    private Optional<SclReportItem> configureControlBlockNetwork(ControlBlockNetworkSettings controlBlockNetworkSettings, PrimitiveIterator.OfLong appIdIterator, Iterator<String> macAddressIterator, ControlBlockAdapter controlBlockAdapter) {
         SettingsOrError settingsOrError = controlBlockNetworkSettings.getNetworkSettings(controlBlockAdapter);
         if (settingsOrError.errorMessage() != null) {
             return Optional.of(controlBlockAdapter.buildFatalReportItem(
@@ -236,41 +227,7 @@ public final class ExtRefService {
         return filteredList;
     }
 
-    /**
-     * ExtRef Binding For LDevice (inst=LDEPF) that matching LDEPF configuration
-     * @param scd SCL
-     * @param settings ILDEPFSettings
-     * @return list of encountered errors
-     */
-    public static List<SclReportItem> manageBindingForLDEPF(SCL scd, ILDEPFSettings settings) {
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        List<SclReportItem> sclReportItems = new ArrayList<>();
-        sclRootAdapter.streamIEDAdapters()
-                .filter(iedAdapter -> !iedAdapter.getName().equals(IED_TEST_NAME))
-                .map(iedAdapter -> iedAdapter.findLDeviceAdapterByLdInst(LDEVICE_LDEPF))
-                .flatMap(Optional::stream)
-                .forEach(lDeviceAdapter ->
-                        lDeviceAdapter.getExtRefBayReferenceForActifLDEPF(sclReportItems)
-                                .forEach(extRefBayRef -> settings.getLDEPFSettingDataMatchExtRef(extRefBayRef.extRef())
-                                        .ifPresent(lDPFSettingMatchingExtRef -> {
-                                            List<TIED> iedSources = settings.getIedSources(sclRootAdapter, extRefBayRef.compasBay(), lDPFSettingMatchingExtRef);
-                                            if (iedSources.size() == 1) {
-                                                updateLDEPFExtRefBinding(extRefBayRef.extRef(), iedSources.get(0), lDPFSettingMatchingExtRef);
-                                                sclReportItems.addAll(updateLDEPFDos(lDeviceAdapter, extRefBayRef.extRef(), lDPFSettingMatchingExtRef));
-                                            } else {
-                                                if (iedSources.size() > 1) {
-                                                    sclReportItems.add(SclReportItem.warning(null, "There is more than one IED source to bind the signal " +
-                                                            "/IED@name=" + extRefBayRef.iedName() + "/LDevice@inst=LDEPF/LN0" +
-                                                            "/ExtRef@desc=" + extRefBayRef.extRef().getDesc()));
-                                                }
-                                            }
-                                        }))
-                );
-        return sclReportItems;
-
-    }
-
-    private static void updateLDEPFExtRefBinding(TExtRef extRef, TIED iedSource, LDEPFSettingData setting) {
+    private void updateLDEPFExtRefBinding(TExtRef extRef, TIED iedSource, LDEPFSettingData setting) {
         extRef.setIedName(iedSource.getName());
         extRef.setLdInst(setting.getLdInst());
         extRef.getLnClass().add(setting.getLnClass());
@@ -282,7 +239,7 @@ public final class ExtRefService {
         extRef.setDoName(doName);
     }
 
-    private static List<SclReportItem> updateLDEPFDos(LDeviceAdapter lDeviceAdapter, TExtRef extRef, LDEPFSettingData setting) {
+    private List<SclReportItem> updateLDEPFDos(LDeviceAdapter lDeviceAdapter, TExtRef extRef, LDEPFSettingData setting) {
         List<SclReportItem> sclReportItems = new ArrayList<>();
         List<DoNameAndDaName> doNameAndDaNameList = List.of(
                 new DoNameAndDaName(CHNUM1_DO_NAME, DU_DA_NAME),
@@ -307,7 +264,7 @@ public final class ExtRefService {
         return sclReportItems;
     }
 
-    private static Optional<SclReportItem> updateVal(AbstractLNAdapter<?> lnAdapter, String doName, String daName, TExtRef extRef, LDEPFSettingData setting) {
+    private Optional<SclReportItem> updateVal(AbstractLNAdapter<?> lnAdapter, String doName, String daName, TExtRef extRef, LDEPFSettingData setting) {
         String value = switch (daName) {
             case DU_DA_NAME -> setting.getChannelShortLabel();
             case SETVAL_DA_NAME ->
@@ -322,7 +279,7 @@ public final class ExtRefService {
     private record DoNameAndDaName(String doName, String daName) {
     }
 
-    private static String computeDaiValue(AbstractLNAdapter<?> lnAdapter, TExtRef extRef, String daName) {
+    private String computeDaiValue(AbstractLNAdapter<?> lnAdapter, TExtRef extRef, String daName) {
         if (LN_PREFIX_B.equals(lnAdapter.getPrefix()) || LN_PREFIX_A.equals(lnAdapter.getPrefix())) {
             return extRef.getIedName() +
                     extRef.getLdInst() + "/" +

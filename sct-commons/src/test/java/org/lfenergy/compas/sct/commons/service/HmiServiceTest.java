@@ -2,16 +2,20 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.sct.commons.scl;
+package org.lfenergy.compas.sct.commons.service;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.scl.ied.DataSetAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LN0Adapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LNAdapter;
+import org.lfenergy.compas.sct.commons.service.impl.HmiService;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.lfenergy.compas.sct.commons.util.CommonConstants;
 import org.lfenergy.compas.sct.commons.util.LdeviceStatus;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
@@ -19,7 +23,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
 import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newFcda;
 
+@ExtendWith(MockitoExtension.class)
 class HmiServiceTest {
+
+    @InjectMocks
+    HmiService hmiService;
 
     @Test
     void createAllIhmReportControlBlocks_with_fc_ST_should_create_dataset_and_controlblock() {
@@ -27,7 +35,7 @@ class HmiServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-hmi-create-report-cb/scd_create_dataset_and_controlblocks_for_hmi.xml");
         TFCDA fcda = newFcda("LdInst11", "ANCR", "1", null, "DoName1", null, TFCEnum.ST);
         // When
-        HmiService.createAllHmiReportControlBlocks(scd, List.of(fcda));
+        hmiService.createAllHmiReportControlBlocks(scd, List.of(fcda));
         // Then
         // Check DataSet is created
         DataSetAdapter dataSet = findDataSet(scd, "IedName1", "LdInst11", "DS_LDINST11_DQPO");
@@ -53,7 +61,7 @@ class HmiServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-hmi-create-report-cb/scd_create_dataset_and_controlblocks_for_hmi.xml");
         TFCDA fcda = newFcda("LdInst11", "PVOC", "1", null, "DoName2", null, TFCEnum.MX);
         // When
-        HmiService.createAllHmiReportControlBlocks(scd, List.of(fcda));
+        hmiService.createAllHmiReportControlBlocks(scd, List.of(fcda));
         // Then
         // Check DataSet is created
         DataSetAdapter dataSet = findDataSet(scd, "IedName1", "LdInst11", "DS_LDINST11_CYPO");
@@ -80,7 +88,7 @@ class HmiServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-hmi-create-report-cb/scd_create_dataset_and_controlblocks_for_hmi.xml");
         TFCDA fcda = newFcda("LdInst11", "LLN0", null, null, "DoName0", null, TFCEnum.ST);
         // When
-        HmiService.createAllHmiReportControlBlocks(scd, List.of(fcda));
+        hmiService.createAllHmiReportControlBlocks(scd, List.of(fcda));
         // Then
         // Check DataSet is created
         DataSetAdapter dataSet = findDataSet(scd, "IedName1", "LdInst11", "DS_LDINST11_DQPO");
@@ -108,7 +116,7 @@ class HmiServiceTest {
         ln.getCurrentElem().unsetDOI();
         TFCDA fcda = newFcda("LdInst11", "ANCR", "1", null, "DoName1", null, TFCEnum.ST);
         // When
-        HmiService.createAllHmiReportControlBlocks(scd, List.of(fcda));
+        hmiService.createAllHmiReportControlBlocks(scd, List.of(fcda));
         // Then
         // Check DataSet is created
         DataSetAdapter dataSet = findDataSet(scd, "IedName1", "LdInst11", "DS_LDINST11_DQPO");
@@ -132,7 +140,7 @@ class HmiServiceTest {
         assertThat(ln.getDaiModStValValue()).hasValue("off");
         TFCDA fcda = newFcda("LdInst11", "ANCR", "1", null, "DoName1", null, TFCEnum.ST);
         // When
-        HmiService.createAllHmiReportControlBlocks(scd, List.of(fcda));
+        hmiService.createAllHmiReportControlBlocks(scd, List.of(fcda));
         // Then
         assertThat(streamAllDataSets(scd)).isEmpty();
         assertThat(streamAllControlBlocks(scd, TReportControl.class)).isEmpty();
@@ -147,7 +155,7 @@ class HmiServiceTest {
         assertThat(findLDevice(scd, "IedName1", "LdInst11").getLDeviceStatus()).hasValue(LdeviceStatus.OFF.getValue());
         TFCDA fcda = newFcda("LdInst11", "ANCR", "1", null, "DoName1", null, TFCEnum.ST);
         // When
-        HmiService.createAllHmiReportControlBlocks(scd, List.of(fcda));
+        hmiService.createAllHmiReportControlBlocks(scd, List.of(fcda));
         // Then
         assertThat(streamAllDataSets(scd)).isEmpty();
         assertThat(streamAllControlBlocks(scd, TReportControl.class)).isEmpty();
@@ -162,7 +170,7 @@ class HmiServiceTest {
         assertThat(findLDevice(scd, "IedName1", "LdInst11").getLDeviceStatus()).isEmpty();
         TFCDA fcda = newFcda("LdInst11", "ANCR", "1", null, "DoName1", null, TFCEnum.ST);
         // When
-        HmiService.createAllHmiReportControlBlocks(scd, List.of(fcda));
+        hmiService.createAllHmiReportControlBlocks(scd, List.of(fcda));
         // Then
         assertThat(streamAllDataSets(scd)).isEmpty();
         assertThat(streamAllControlBlocks(scd, TReportControl.class)).isEmpty();

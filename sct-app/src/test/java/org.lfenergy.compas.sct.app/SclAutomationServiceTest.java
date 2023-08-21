@@ -15,18 +15,17 @@ import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
 
 class SclAutomationServiceTest {
+
+    SclAutomationService sclAutomationService = new SclAutomationService();
 
     private HeaderDTO headerDTO;
 
@@ -44,7 +43,7 @@ class SclAutomationServiceTest {
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd.xml");
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         // When
-        SCL scd = SclAutomationService.createSCD(ssd, headerDTO, List.of(std));
+        SCL scd = sclAutomationService.createSCD(ssd, headerDTO, List.of(std));
         // Then
         assertNotNull(scd.getHeader().getId());
         assertNull(scd.getHeader().getHistory());
@@ -68,7 +67,7 @@ class SclAutomationServiceTest {
         SCL std2 = SclTestMarshaller.getSCLFromFile("/std_2.xml");
         SCL std3 = SclTestMarshaller.getSCLFromFile("/std_3.xml");
         // When
-        SCL scd = SclAutomationService.createSCD(ssd, headerDTO, List.of(std1, std2, std3));
+        SCL scd = sclAutomationService.createSCD(ssd, headerDTO, List.of(std1, std2, std3));
         // Then
         assertNotNull(scd.getHeader().getId());
         assertEquals(1, scd.getHeader().getHistory().getHitem().size());
@@ -93,7 +92,7 @@ class SclAutomationServiceTest {
         SCL std2 = SclTestMarshaller.getSCLFromFile("/std_2.xml");
         SCL std3 = SclTestMarshaller.getSCLFromFile("/std_3.xml");
         // When
-        SCL scd = SclAutomationService.createSCD(ssd, headerDTO, List.of(std1, std2, std3));
+        SCL scd = sclAutomationService.createSCD(ssd, headerDTO, List.of(std1, std2, std3));
         // Then
         assertNotNull(scd.getHeader().getId());
         assertEquals(1, scd.getHeader().getHistory().getHitem().size());
@@ -108,7 +107,7 @@ class SclAutomationServiceTest {
         // When & Then
         List<SCL> stdListEmpty = List.of();
         assertThrows(ScdException.class,
-                () -> SclAutomationService.createSCD(ssd, headerDTO, stdListEmpty));
+                () -> sclAutomationService.createSCD(ssd, headerDTO, stdListEmpty));
     }
 
     @Test
@@ -123,7 +122,7 @@ class SclAutomationServiceTest {
         List<SCL> stdList = List.of(std1);
 
         // When & Then
-        assertThrows(NullPointerException.class, () -> SclAutomationService.createSCD(null, headerDTO, stdList));
+        assertThrows(NullPointerException.class, () -> sclAutomationService.createSCD(null, headerDTO, stdList));
     }
 
     @Test
@@ -134,7 +133,7 @@ class SclAutomationServiceTest {
         List<SCL> stdList = List.of(std1);
 
         // When & Then
-        assertThrows(NullPointerException.class, () -> SclAutomationService.createSCD(ssd, null, stdList));
+        assertThrows(NullPointerException.class, () -> sclAutomationService.createSCD(ssd, null, stdList));
     }
 
     @Test
@@ -143,7 +142,7 @@ class SclAutomationServiceTest {
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/ssd.xml");
         SCL std = SclTestMarshaller.getSCLFromFile("/scl-remove-controlBlocks-dataSet-extRefSrc/scl-with-control-blocks.xml");
         // When
-        SCL scd = SclAutomationService.createSCD(ssd, headerDTO, List.of(std));
+        SCL scd = sclAutomationService.createSCD(ssd, headerDTO, List.of(std));
         // Then
         LN0 ln0 = new SclRootAdapter(scd).streamIEDAdapters()
                 .findFirst()
@@ -158,16 +157,4 @@ class SclAutomationServiceTest {
         assertIsMarshallable(scd);
     }
 
-    @Test
-    void class_should_not_be_instantiable() {
-        // Given
-        Constructor<?>[] constructors = SclAutomationService.class.getDeclaredConstructors();
-        assertThat(constructors).hasSize(1);
-        Constructor<?> constructor = constructors[0];
-        constructor.setAccessible(true);
-        // When & Then
-        assertThatThrownBy(constructor::newInstance)
-                .isInstanceOf(InvocationTargetException.class)
-                .getCause().isInstanceOf(UnsupportedOperationException.class);
-    }
 }

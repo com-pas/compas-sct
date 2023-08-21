@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.sct.commons.scl;
+package org.lfenergy.compas.sct.commons.service.impl;
 
 import lombok.NonNull;
 import org.lfenergy.compas.scl2007b4.model.SCL;
@@ -10,43 +10,15 @@ import org.lfenergy.compas.scl2007b4.model.TBay;
 import org.lfenergy.compas.scl2007b4.model.TSubstation;
 import org.lfenergy.compas.scl2007b4.model.TVoltageLevel;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter;
 import org.lfenergy.compas.sct.commons.scl.sstation.VoltageLevelAdapter;
+import org.lfenergy.compas.sct.commons.service.ISubstationService;
 
-/**
- * A representation of the <em><b>{@link SubstationService SubstationService}</b></em>.
- * <p>
- * The following features are supported:
- * </p>
- * <ul>
- *   <li>{@link SubstationService#addSubstation(SCL, SCL) <em>Adds the <b>Substation </b> object from given <b>SCL </b> object</em>}</li>
- *   <li>{@link SubstationService#updateVoltageLevel(SubstationAdapter, TVoltageLevel) <em>Adds the <b>TVoltageLevel </b> element under <b>TSubstation </b> reference object</em>}</li>
- *   <li>{@link SubstationService#updateBay(VoltageLevelAdapter, TBay) <em>Adds the <b>TBay </b> element under <b>TVoltageLevel </b> reference object</em>}</li>
- * </ul>
- * @see org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter
- * @see org.lfenergy.compas.sct.commons.scl.sstation.VoltageLevelAdapter
- * @see org.lfenergy.compas.sct.commons.scl.sstation.BayAdapter
- * @see org.lfenergy.compas.sct.commons.scl.sstation.FunctionAdapter
- * @see org.lfenergy.compas.sct.commons.scl.sstation.LNodeAdapter
- * @see org.lfenergy.compas.sct.commons.scl.PrivateService
- */
-public final class SubstationService {
+public class SubstationService implements ISubstationService {
 
-    /**
-     * Private Controller, should not be instanced
-     */
-    private SubstationService() {
-        throw new UnsupportedOperationException("This service class cannot be instantiated");
-    }
-
-    /**
-     * Adds or Updates Substation section in SCL
-     * @param scd SCL file in which Substation should be added/updated
-     * @param ssd SCL file from which Substation should be copied
-     * @throws ScdException throws when SCD contents already another Substation, or with different name, or contents
-     * more than one Substation
-     */
-    public static void addSubstation(@NonNull SCL scd, @NonNull SCL ssd) throws ScdException {
+    @Override
+    public void addSubstation(@NonNull SCL scd, @NonNull SCL ssd) throws ScdException {
         if (scd.getSubstation().size() > 1) {
             throw new ScdException(String.format("SCD file must have 0 or 1 Substation, but got %d", scd.getSubstation().size()));
         }
@@ -75,7 +47,7 @@ public final class SubstationService {
      * @param vl VoltageLevel to create/update
      * @throws ScdException throws when unable to create new VoltageLevel section which is not already present in Substation
      */
-    private static void updateVoltageLevel(@NonNull SubstationAdapter scdSubstationAdapter, TVoltageLevel vl) throws ScdException {
+    private void updateVoltageLevel(@NonNull SubstationAdapter scdSubstationAdapter, TVoltageLevel vl) throws ScdException {
         if (scdSubstationAdapter.getVoltageLevelAdapter(vl.getName()).isPresent()) {
             VoltageLevelAdapter scdVoltageLevelAdapter = scdSubstationAdapter.getVoltageLevelAdapter(vl.getName())
                 .orElseThrow(() -> new ScdException("Unable to create VoltageLevelAdapter"));
@@ -92,7 +64,7 @@ public final class SubstationService {
      * @param scdVoltageLevelAdapter VoltageLevel in which Bay should be created/updated
      * @param tBay Bay to add
      */
-    private static void updateBay(@NonNull VoltageLevelAdapter scdVoltageLevelAdapter, TBay tBay) {
+    private void updateBay(@NonNull VoltageLevelAdapter scdVoltageLevelAdapter, TBay tBay) {
         if (scdVoltageLevelAdapter.getBayAdapter(tBay.getName()).isPresent()) {
             scdVoltageLevelAdapter.getCurrentElem().getBay()
                 .removeIf(t -> t.getName().equalsIgnoreCase(tBay.getName()));
