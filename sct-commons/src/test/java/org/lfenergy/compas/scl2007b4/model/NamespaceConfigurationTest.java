@@ -5,7 +5,7 @@
 package org.lfenergy.compas.scl2007b4.model;
 
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.sct.commons.scl.PrivateService;
+import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,7 +16,7 @@ class NamespaceConfigurationTest {
     void marshalling_SCL_and_Compas_Privates_should_set_correct_prefix() {
         // Given
         SCL scl = createValidScl();
-        TPrivate aCompasPrivate = PrivateService.createPrivate(TCompasSclFileType.SCD);
+        TPrivate aCompasPrivate = PrivateUtils.createPrivate(TCompasSclFileType.SCD);
         scl.getPrivate().add(aCompasPrivate);
         // When
         String result = MarshallerWrapper.marshall(scl);

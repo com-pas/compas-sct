@@ -8,7 +8,7 @@ package org.lfenergy.compas.sct.commons.service;
 import lombok.NonNull;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.PrivateService;
+import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.service.impl.SubstationService;
 import org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter;
 import org.lfenergy.compas.sct.commons.scl.sstation.VoltageLevelAdapter;
@@ -26,7 +26,7 @@ import org.lfenergy.compas.sct.commons.scl.sstation.VoltageLevelAdapter;
  * @see org.lfenergy.compas.sct.commons.scl.sstation.BayAdapter
  * @see org.lfenergy.compas.sct.commons.scl.sstation.FunctionAdapter
  * @see org.lfenergy.compas.sct.commons.scl.sstation.LNodeAdapter
- * @see PrivateService
+ * @see PrivateUtils
  */
 public interface ISubstationService {
 

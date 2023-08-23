@@ -10,7 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct. commons.dto.*;
 import org.lfenergy.compas.sct. commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.PrivateService;
+import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct. commons.scl.com.CommunicationAdapter;
 import org.lfenergy.compas.sct. commons.scl.com.ConnectedAPAdapter;
@@ -37,7 +37,7 @@ public class SclService implements ISclService {
     @Override
     public SCL initScl(final UUID hId, final String hVersion, final String hRevision) throws ScdException {
         SclRootAdapter scdAdapter = new SclRootAdapter(hId.toString(), hVersion, hRevision);
-        scdAdapter.addPrivate(org.lfenergy.compas.sct.commons.scl.PrivateService.createPrivate(TCompasSclFileType.SCD));
+        scdAdapter.addPrivate(PrivateUtils.createPrivate(TCompasSclFileType.SCD));
         return scdAdapter.getCurrentElem();
     }
 
@@ -282,13 +282,13 @@ public class SclService implements ISclService {
     public void importSTDElementsInSCD(SCL scd, List<SCL> stds, List<SubNetworkTypeDTO> subNetworkTypes) throws ScdException {
 
         //Check SCD and STD compatibilities
-        Map<String, org.lfenergy.compas.sct.commons.scl.PrivateService.PrivateLinkedToSTDs> mapICDSystemVersionUuidAndSTDFile = org.lfenergy.compas.sct.commons.scl.PrivateService.createMapICDSystemVersionUuidAndSTDFile(stds);
-        org.lfenergy.compas.sct.commons.scl.PrivateService.checkSTDCorrespondanceWithLNodeCompasICDHeader(mapICDSystemVersionUuidAndSTDFile);
+        Map<String, PrivateUtils.PrivateLinkedToSTDs> mapICDSystemVersionUuidAndSTDFile = PrivateUtils.createMapICDSystemVersionUuidAndSTDFile(stds);
+        PrivateUtils.checkSTDCorrespondanceWithLNodeCompasICDHeader(mapICDSystemVersionUuidAndSTDFile);
         // List all Private and remove duplicated one with same iedName
         // For each Private.ICDSystemVersionUUID and Private.iedName find STD File
         List<String> iedNamesUsed = new ArrayList<>();
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
-        org.lfenergy.compas.sct.commons.scl.PrivateService.streamIcdHeaders(scd)
+        PrivateUtils.streamIcdHeaders(scd)
                 .forEach(icdHeader -> {
                     if (!iedNamesUsed.contains(icdHeader.getIedName())) {
                         String iedName = icdHeader.getIedName();
@@ -301,8 +301,8 @@ public class SclService implements ISclService {
                         SclRootAdapter stdRootAdapter = new SclRootAdapter(std);
                         IEDAdapter stdIedAdapter = new IEDAdapter(stdRootAdapter, std.getIED().get(0));
                         Optional<TPrivate> optionalTPrivate = stdIedAdapter.getPrivateHeader(COMPAS_ICDHEADER.getPrivateType());
-                        if (optionalTPrivate.isPresent() && optionalTPrivate.flatMap(org.lfenergy.compas.sct.commons.scl.PrivateService::extractCompasICDHeader).map(IcdHeader::new).get().equals(icdHeader)) {
-                            PrivateService.copyCompasICDHeaderFromLNodePrivateIntoSTDPrivate(optionalTPrivate.get(), icdHeader.toTCompasICDHeader());
+                        if (optionalTPrivate.isPresent() && optionalTPrivate.flatMap(PrivateUtils::extractCompasICDHeader).map(IcdHeader::new).get().equals(icdHeader)) {
+                            PrivateUtils.copyCompasICDHeaderFromLNodePrivateIntoSTDPrivate(optionalTPrivate.get(), icdHeader.toTCompasICDHeader());
                         } else throw new ScdException("COMPAS-ICDHeader is not the same in Substation and in IED");
                         scdRootAdapter.addIED(std, iedName);
 

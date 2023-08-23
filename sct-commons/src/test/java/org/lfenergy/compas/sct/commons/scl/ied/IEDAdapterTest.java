@@ -14,7 +14,7 @@ import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
-import org.lfenergy.compas.sct.commons.scl.PrivateService;
+import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.lfenergy.compas.sct.commons.util.MonitoringLnClassEnum;
@@ -291,7 +291,7 @@ class IEDAdapterTest {
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
         TCompasICDHeader tCompasICDHeader = new TCompasICDHeader();
         tCompasICDHeader.setHeaderId("HEADER_ID");
-        iedAdapter.getCurrentElem().getPrivate().add(PrivateService.createPrivate(tCompasICDHeader));
+        iedAdapter.getCurrentElem().getPrivate().add(PrivateUtils.createPrivate(tCompasICDHeader));
 
         // When
         Optional<TCompasICDHeader> compasICDHeader = iedAdapter.getCompasICDHeader();
@@ -307,7 +307,7 @@ class IEDAdapterTest {
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
         TCompasSystemVersion tCompasSystemVersion = new TCompasSystemVersion();
         tCompasSystemVersion.setMainSystemVersion("01.00");
-        iedAdapter.getCurrentElem().getPrivate().add(PrivateService.createPrivate(tCompasSystemVersion));
+        iedAdapter.getCurrentElem().getPrivate().add(PrivateUtils.createPrivate(tCompasSystemVersion));
 
         // When
         Optional<TCompasSystemVersion> compasSystemVersion = iedAdapter.getCompasSystemVersion();

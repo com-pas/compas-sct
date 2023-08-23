@@ -14,7 +14,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.PrivateService;
+import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter;
@@ -76,7 +76,7 @@ class ExtRefServiceTest {
                 .getLN0Adapter()
                 .getCurrentElem()
                 .getInputs();
-        Assertions.assertThat(PrivateService.extractCompasPrivate(inputs, TCompasFlow.class))
+        Assertions.assertThat(PrivateUtils.extractCompasPrivate(inputs, TCompasFlow.class))
                 .map(TCompasFlow::getExtRefiedName)
                 .hasValue("IED_NAME2");
     }

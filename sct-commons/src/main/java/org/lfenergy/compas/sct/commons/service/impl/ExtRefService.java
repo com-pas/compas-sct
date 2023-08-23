@@ -13,7 +13,7 @@ import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings;
 import org.lfenergy.compas.sct.commons.dto.LDEPFSettingData;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.PrivateService;
+import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.*;
 import org.lfenergy.compas.sct.commons.service.IExtRefService;
@@ -153,7 +153,7 @@ public class ExtRefService implements IExtRefService {
 
     private List<SclReportItem> checkIedUnityOfIcdSystemVersionUuid(SclRootAdapter sclRootAdapter) {
         Map<String, List<TIED>> systemVersionToIedList = sclRootAdapter.getCurrentElem().getIED().stream()
-                .collect(Collectors.groupingBy(ied -> PrivateService.extractCompasPrivate(ied, TCompasICDHeader.class)
+                .collect(Collectors.groupingBy(ied -> PrivateUtils.extractCompasPrivate(ied, TCompasICDHeader.class)
                         .map(TCompasICDHeader::getICDSystemVersionUUID)
                         .orElse("")));
 

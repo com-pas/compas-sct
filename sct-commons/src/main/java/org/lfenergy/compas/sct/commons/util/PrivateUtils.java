@@ -2,14 +2,13 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.sct.commons.scl;
+package org.lfenergy.compas.sct.commons.util;
 
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.icd.IcdHeader;
-import org.lfenergy.compas.sct.commons.util.PrivateEnum;
 
 import javax.xml.bind.JAXBElement;
 import java.util.*;
@@ -20,18 +19,18 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 import static org.lfenergy.compas.sct.commons.util.PrivateEnum.COMPAS_ICDHEADER;
 
 /**
- * A representation of the <em><b>{@link PrivateService PrivateService}</b></em>.
+ * A representation of the <em><b>{@link PrivateUtils PrivateService}</b></em>.
  * <p>
  * The following features are supported:
  * </p>
  * <ol>
- *  <li>{@link PrivateService#extractCompasPrivates(TBaseElement, Class)
+ *  <li>{@link PrivateUtils#extractCompasPrivates(TBaseElement, Class)
  *      <em>Returns the value of the <b>TPrivate </b> containment reference list from given <b>TBaseElement </b> By class type</em>}</li>
  * </ol>
  * @see org.lfenergy.compas.scl2007b4.model.TPrivate
  */
 @UtilityClass
-public final class PrivateService {
+public final class PrivateUtils {
 
     private static final ObjectFactory objectFactory = new ObjectFactory();
 
@@ -194,7 +193,7 @@ public final class PrivateService {
         stds.forEach(std -> std.getIED()
                 .forEach(ied -> ied.getPrivate()
                         .forEach(tp ->
-                                PrivateService.extractCompasICDHeader(tp)
+                                PrivateUtils.extractCompasICDHeader(tp)
                                         .map(TCompasICDHeader::getICDSystemVersionUUID)
                                         .ifPresent(icdSysVer -> {
                                             PrivateLinkedToSTDs privateLinkedToSTDs = icdSysVerToPrivateStdsMap.get(icdSysVer);
@@ -236,7 +235,7 @@ public final class PrivateService {
      * @throws ScdException throws when parameter not present in Private
      */
     public static String stdCheckFormatExceptionMessage(TPrivate key) throws ScdException {
-        Optional<TCompasICDHeader> optionalCompasICDHeader = PrivateService.extractCompasICDHeader(key);
+        Optional<TCompasICDHeader> optionalCompasICDHeader = PrivateUtils.extractCompasICDHeader(key);
         return  HEADER_ID + " = " + optionalCompasICDHeader.map(TCompasICDHeader::getHeaderId).orElse(null) + " " +
                 HEADER_VERSION + " = " + optionalCompasICDHeader.map(TCompasICDHeader::getHeaderVersion).orElse(null) + " " +
                 HEADER_REVISION + " = " + optionalCompasICDHeader.map(TCompasICDHeader::getHeaderRevision).orElse(null) +
@@ -259,7 +258,7 @@ public final class PrivateService {
                 .map(TBay::getFunction).flatMap(Collection::stream)
                 .map(TFunction::getLNode).flatMap(Collection::stream)
                 .map(TLNode::getPrivate).flatMap(Collection::stream)
-                .map(PrivateService::extractCompasICDHeader)
+                .map(PrivateUtils::extractCompasICDHeader)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .map(IcdHeader::new);
@@ -274,9 +273,9 @@ public final class PrivateService {
      * @throws ScdException throws when Private is not COMPAS_ICDHEADER one
      */
     public static boolean comparePrivateCompasICDHeaders(TPrivate iedPrivate, TPrivate scdPrivate) throws ScdException {
-        TCompasICDHeader iedCompasICDHeader = PrivateService.extractCompasICDHeader(iedPrivate)
+        TCompasICDHeader iedCompasICDHeader = PrivateUtils.extractCompasICDHeader(iedPrivate)
                 .orElseThrow(() -> new ScdException(COMPAS_ICDHEADER + "not found in IED Private "));
-        TCompasICDHeader scdCompasICDHeader = PrivateService.extractCompasICDHeader(scdPrivate)
+        TCompasICDHeader scdCompasICDHeader = PrivateUtils.extractCompasICDHeader(scdPrivate)
                 .orElseThrow(() -> new ScdException(COMPAS_ICDHEADER + "not found in LNode Private "));
         return Objects.equals(iedCompasICDHeader.getIEDType(), scdCompasICDHeader.getIEDType())
                 && Objects.equals(iedCompasICDHeader.getICDSystemVersionUUID(), scdCompasICDHeader.getICDSystemVersionUUID())
