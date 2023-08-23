@@ -4,14 +4,15 @@
 
 package org.lfenergy.compas.sct.app;
 
+import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.sct.commons.dto.HeaderDTO;
 import org.lfenergy.compas.sct.commons.dto.SubNetworkDTO;
 import org.lfenergy.compas.sct.commons.dto.SubNetworkTypeDTO;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.service.impl.SclService;
-import org.lfenergy.compas.sct.commons.service.impl.SubstationService;
+import org.lfenergy.compas.sct.commons.service.ISclService;
+import org.lfenergy.compas.sct.commons.service.ISubstationService;
 
 import java.util.*;
 
@@ -24,10 +25,11 @@ import java.util.*;
  *   <li>{@link SclAutomationService#createSCD(SCL, HeaderDTO, List) Adds all elements under the <b>SCL </b> object from given <b>SSD </b> and <b>STD </b> files}
  *  </ul>
  */
+@AllArgsConstructor
 public class SclAutomationService {
 
-    SclService sclService = new SclService();
-    SubstationService substationService = new SubstationService();
+    private final ISclService sclService;
+    private final ISubstationService substationService;
 
     /**
      * Possible Subnetwork and ConnectedAP names which should be used in generated SCD in order a have global coherence

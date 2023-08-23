@@ -13,6 +13,10 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
+import org.lfenergy.compas.sct.commons.service.ISclService;
+import org.lfenergy.compas.sct.commons.service.ISubstationService;
+import org.lfenergy.compas.sct.commons.service.impl.SclService;
+import org.lfenergy.compas.sct.commons.service.impl.SubstationService;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.Arrays;
@@ -23,18 +27,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
 
-class SclAutomationServiceTest {
+class SclAutomationServiceIntegrationTest {
 
-    SclAutomationService sclAutomationService = new SclAutomationService();
+    private SclAutomationService sclAutomationService ;
+    private static final ISclService sclService = new SclService() ;
+    private static final ISubstationService substationService = new SubstationService() ;
 
     private HeaderDTO headerDTO;
 
     @BeforeEach
-    void init() {
+    void setUp() {
         headerDTO = new HeaderDTO();
         headerDTO.setId(UUID.randomUUID());
         headerDTO.setRevision("hRevision");
         headerDTO.setVersion("hVersion");
+        sclAutomationService = new SclAutomationService(sclService, substationService);
     }
 
     @Test
