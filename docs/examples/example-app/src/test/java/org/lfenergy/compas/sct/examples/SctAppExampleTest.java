@@ -10,38 +10,36 @@ import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 
 import javax.xml.bind.JAXBException;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class SctAppExampleTest {
+class SctAppExampleTest {
 
     @Test
-    public void initSclWithSclServiceTest() throws JAXBException {
+    void initSclWithSclServiceTest() throws JAXBException {
         // Given : Header attributes
-        Optional<UUID> headerId = Optional.of(UUID.randomUUID());
+        UUID headerId = UUID.randomUUID();
         String headerVersion = SclRootAdapter.VERSION;
         String headerRevision = SclRootAdapter.REVISION;
         // When: Sct Service
-        SclRootAdapter scl = SctAppExample
-                .initSclWithSclService(headerId, headerVersion, headerRevision);
+        SCL scl = SctAppExample.initSclWithSclService(headerId, headerVersion, headerRevision);
         // Then
-        assertNotNull(scl.getCurrentElem().getHeader());
-        assertEquals(headerId.get().toString(), scl.getCurrentElem().getHeader().getId());
-        assertEquals(headerVersion, scl.getCurrentElem().getHeader().getVersion());
-        assertEquals(headerRevision, scl.getCurrentElem().getHeader().getRevision());
-        THeader.History history = scl.getCurrentElem().getHeader().getHistory();
-        List<TSubstation> substations = scl.getCurrentElem().getSubstation();
-        TCommunication communication = scl.getCurrentElem().getCommunication();
-        List<TIED> iedList = scl.getCurrentElem().getIED();
-        TDataTypeTemplates dataTypeTemplates = scl.getCurrentElem().getDataTypeTemplates();
-        assertNull(history);
-        assertEquals(0, substations.size());
-        assertNull(communication);
-        assertEquals(0, iedList.size());
-        assertNull(dataTypeTemplates);
+        assertThat(scl.getHeader()).isNotNull();
+        assertThat(scl.getHeader().getId()).isEqualTo(headerId.toString());
+        assertThat(scl.getHeader().getVersion()).isEqualTo(headerVersion);
+        assertThat(scl.getHeader().getRevision()).isEqualTo(headerRevision);
+        THeader.History history = scl.getHeader().getHistory();
+        List<TSubstation> substations = scl.getSubstation();
+        TCommunication communication = scl.getCommunication();
+        List<TIED> iedList = scl.getIED();
+        TDataTypeTemplates dataTypeTemplates = scl.getDataTypeTemplates();
+        assertThat(history).isNull();
+        assertThat(substations).isEmpty();
+        assertThat(communication).isNull();
+        assertThat(iedList).isEmpty();
+        assertThat(dataTypeTemplates).isNull();
     }
 
 }
