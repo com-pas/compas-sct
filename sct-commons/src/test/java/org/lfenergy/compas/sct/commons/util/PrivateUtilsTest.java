@@ -10,6 +10,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.platform.commons.support.ReflectionSupport;
 import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.dto.PrivateLinkedToStds;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.icd.IcdHeader;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
@@ -273,7 +274,7 @@ class PrivateUtilsTest {
         scl1.getIED().add(tied1);
 
         //When
-        Map<String, PrivateUtils.PrivateLinkedToSTDs> stringSCLMap = PrivateUtils.createMapICDSystemVersionUuidAndSTDFile(List.of(scl1));
+        Map<String, PrivateLinkedToStds> stringSCLMap = PrivateUtils.createMapICDSystemVersionUuidAndSTDFile(List.of(scl1));
 
         //Then
         assertThat(stringSCLMap.keySet()).isEmpty();
@@ -306,7 +307,7 @@ class PrivateUtilsTest {
         scl3.getIED().add(tied3);
 
         //When
-        Map<String, PrivateUtils.PrivateLinkedToSTDs> stringSCLMap = PrivateUtils.createMapICDSystemVersionUuidAndSTDFile(List.of(scl1,scl2,scl3));
+        Map<String, PrivateLinkedToStds> stringSCLMap = PrivateUtils.createMapICDSystemVersionUuidAndSTDFile(List.of(scl1,scl2,scl3));
 
         //Then
         assertThat(stringSCLMap.keySet()).hasSize(2).containsExactly("UUID-1", "UUID-2");
@@ -326,10 +327,10 @@ class PrivateUtilsTest {
         TPrivate tPrivate1 =  PrivateUtils.createPrivate(compasICDHeader1);
         TPrivate tPrivate2 =  PrivateUtils.createPrivate(compasICDHeader2);
 
-        PrivateUtils.PrivateLinkedToSTDs privateLinkedToSTDs1 = new PrivateUtils.PrivateLinkedToSTDs(tPrivate1,Collections.singletonList(new SCL()));
-        PrivateUtils.PrivateLinkedToSTDs privateLinkedToSTDs2 = new PrivateUtils.PrivateLinkedToSTDs(tPrivate2, Arrays.asList(new SCL(), new SCL()));
+        PrivateLinkedToStds privateLinkedToSTDs1 = new PrivateLinkedToStds(tPrivate1,Collections.singletonList(new SCL()));
+        PrivateLinkedToStds privateLinkedToSTDs2 = new PrivateLinkedToStds(tPrivate2, Arrays.asList(new SCL(), new SCL()));
 
-        Map<String, PrivateUtils.PrivateLinkedToSTDs> stringSCLMap = new HashMap<>();
+        Map<String, PrivateLinkedToStds> stringSCLMap = new HashMap<>();
         stringSCLMap.put("UUID-1", privateLinkedToSTDs1);
         stringSCLMap.put("UUID-2", privateLinkedToSTDs2);
 
@@ -350,10 +351,10 @@ class PrivateUtilsTest {
         TPrivate tPrivate1 =  PrivateUtils.createPrivate(compasICDHeader1);
         TPrivate tPrivate2 =  PrivateUtils.createPrivate(compasICDHeader2);
 
-        PrivateUtils.PrivateLinkedToSTDs privateLinkedToSTDs1 = new PrivateUtils.PrivateLinkedToSTDs(tPrivate1,Collections.singletonList(new SCL()));
-        PrivateUtils.PrivateLinkedToSTDs privateLinkedToSTDs2 = new PrivateUtils.PrivateLinkedToSTDs(tPrivate2, Collections.singletonList(new SCL()));
+        PrivateLinkedToStds privateLinkedToSTDs1 = new PrivateLinkedToStds(tPrivate1,Collections.singletonList(new SCL()));
+        PrivateLinkedToStds privateLinkedToSTDs2 = new PrivateLinkedToStds(tPrivate2, Collections.singletonList(new SCL()));
 
-        Map<String, PrivateUtils.PrivateLinkedToSTDs> stringSCLMap = new HashMap<>();
+        Map<String, PrivateLinkedToStds> stringSCLMap = new HashMap<>();
         stringSCLMap.put("UUID-1", privateLinkedToSTDs1);
         stringSCLMap.put("UUID-2", privateLinkedToSTDs2);
 

@@ -7,6 +7,7 @@ package org.lfenergy.compas.sct.commons.util;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.dto.PrivateLinkedToStds;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.icd.IcdHeader;
 
@@ -188,27 +189,22 @@ public final class PrivateUtils {
      * @return map of ICD_SYSTEM_VERSION_UUID attribute in IED/Private:COMPAS-ICDHeader and related Private coupled with
      * all corresponding STD
      */
-    public static Map<String, PrivateLinkedToSTDs> createMapICDSystemVersionUuidAndSTDFile(List<SCL> stds) {
-        Map<String, PrivateLinkedToSTDs> icdSysVerToPrivateStdsMap = new HashMap<>();
+    public static Map<String, PrivateLinkedToStds> createMapICDSystemVersionUuidAndSTDFile(List<SCL> stds) {
+        Map<String, PrivateLinkedToStds> icdSysVerToPrivateStdsMap = new HashMap<>();
         stds.forEach(std -> std.getIED()
                 .forEach(ied -> ied.getPrivate()
                         .forEach(tp ->
                                 PrivateUtils.extractCompasICDHeader(tp)
                                         .map(TCompasICDHeader::getICDSystemVersionUUID)
                                         .ifPresent(icdSysVer -> {
-                                            PrivateLinkedToSTDs privateLinkedToSTDs = icdSysVerToPrivateStdsMap.get(icdSysVer);
-                                            List<SCL> list = privateLinkedToSTDs != null ? privateLinkedToSTDs.stdList() : new ArrayList<>();
+                                            PrivateLinkedToStds PrivateLinkedToStds = icdSysVerToPrivateStdsMap.get(icdSysVer);
+                                            List<SCL> list = PrivateLinkedToStds != null ? PrivateLinkedToStds.stdList() : new ArrayList<>();
                                             list.add(std);
-                                            icdSysVerToPrivateStdsMap.put(icdSysVer, new PrivateLinkedToSTDs(tp, list));
+                                            icdSysVerToPrivateStdsMap.put(icdSysVer, new PrivateLinkedToStds(tp, list));
                                         })
                         )));
         return icdSysVerToPrivateStdsMap;
     }
-
-
-    public record PrivateLinkedToSTDs (TPrivate tPrivate, List<SCL> stdList) {
-    }
-
 
     /**
      * Checks SCD and STD compatibilities by checking if there is at least one ICD_SYSTEM_VERSION_UUID in
@@ -218,9 +214,9 @@ public final class PrivateUtils {
      * @throws ScdException throws when there are several STD files corresponding to <em>ICD_SYSTEM_VERSION_UUID</em>
      *                      from Substation/../LNode/Private COMPAS-ICDHeader of SCL
      */
-    public static void checkSTDCorrespondanceWithLNodeCompasICDHeader(Map<String, PrivateLinkedToSTDs> mapICDSystemVersionUuidAndSTDFile) throws ScdException {
+    public static void checkSTDCorrespondanceWithLNodeCompasICDHeader(Map<String, PrivateLinkedToStds> mapICDSystemVersionUuidAndSTDFile) throws ScdException {
         mapICDSystemVersionUuidAndSTDFile.values().stream()
-                .filter(privateLinkedToSTDs -> privateLinkedToSTDs.stdList().size() != 1)
+                .filter(PrivateLinkedToStds -> PrivateLinkedToStds.stdList().size() != 1)
                 .findFirst()
                 .ifPresent(pToStd -> {
                     throw new ScdException("There are several STD files corresponding to " + stdCheckFormatExceptionMessage(pToStd.tPrivate()));

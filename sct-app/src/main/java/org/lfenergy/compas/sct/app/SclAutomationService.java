@@ -4,8 +4,8 @@
 
 package org.lfenergy.compas.sct.app;
 
-import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.sct.commons.dto.HeaderDTO;
 import org.lfenergy.compas.sct.commons.dto.SubNetworkDTO;
@@ -25,7 +25,7 @@ import java.util.*;
  *   <li>{@link SclAutomationService#createSCD(SCL, HeaderDTO, List) Adds all elements under the <b>SCL </b> object from given <b>SSD </b> and <b>STD </b> files}
  *  </ul>
  */
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class SclAutomationService {
 
     private final ISclService sclService;

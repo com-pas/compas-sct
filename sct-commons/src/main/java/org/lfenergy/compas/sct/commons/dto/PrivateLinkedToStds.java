@@ -9,6 +9,6 @@ import org.lfenergy.compas.scl2007b4.model.TPrivate;
 
 import java.util.List;
 
-public record PrivateLinkedToSTDs(TPrivate tPrivate, List<SCL> stdList) {
+public record PrivateLinkedToStds(TPrivate tPrivate, List<SCL> stdList) {
 
 }
