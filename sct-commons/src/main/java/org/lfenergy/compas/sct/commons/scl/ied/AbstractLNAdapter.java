@@ -752,7 +752,8 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      * @param setValImportOnCreate when this method creates the DAI, it will set DAI.valImport attribute with this parameter
      * @return adapter for existing DAI or created DAI.
      */
-    private AbstractDAIAdapter<?> createDoiSdiDaiChainIfNotExists(String dataTypeRef, boolean setValImportOnCreate) {
+    public AbstractDAIAdapter<?> createDoiSdiDaiChainIfNotExists(String dataTypeRef, boolean setValImportOnCreate) {
+        //TODO add test now public
         String[] names = dataTypeRef.split("\\.");
         if (names.length < 2 || Arrays.stream(names).anyMatch(StringUtils::isBlank)) {
             throw new IllegalArgumentException("dataTypeRef must be valid with at least a DO and a DA, but got: " + dataTypeRef);

@@ -194,6 +194,8 @@
                 <configuration>
                     <sources>
                         <source>${project.build.outputDirectory}/xsd/SCL2007B4/SCL.xsd</source>
+                        <source>${project.build.outputDirectory}/xsd/SCL2007B4/61850-90-2.xsd</source>
+                        <source>${project.build.outputDirectory}/xsd/SCL2007B4/60870-5-104.xsd</source>
                         <source>${project.build.outputDirectory}/xsd/SCL_CoMPAS.xsd</source>
                     </sources>
                     <xjbSources>

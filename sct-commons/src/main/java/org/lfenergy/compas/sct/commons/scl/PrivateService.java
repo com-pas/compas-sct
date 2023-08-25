@@ -152,6 +152,7 @@ public final class PrivateService {
 
     /**
      * Create Private of given type as parameter
+     *
      * @param compasSystemVersion type of Private to create
      * @return created Private
      */
@@ -160,8 +161,31 @@ public final class PrivateService {
     }
 
     /**
+     * Create Private of given type as parameter for eTr-IEC61850-90-2:ProxyOf
+     *
+     * @param tProxyRef type of Private to create
+     * @return created Private
+     */
+    public static TPrivate createPrivate(TProxyRef tProxyRef) {
+        //TODO add test
+        return createPrivate(objectFactory.createProxyOf(tProxyRef));
+    }
+
+    /**
+     * Create Private of given type as parameter for IEC_60870_5_104:Address
+     *
+     * @param tiec608705104Address type of Private to create
+     * @return created Private
+     */
+    public static TPrivate createPrivate(TIEC608705104Address tiec608705104Address) {
+        //TODO add test
+        return createPrivate(objectFactory.createAddress(tiec608705104Address));
+    }
+
+    /**
      * Create a single Private of type COMPAS-Topo
      * containing all given TCompasTopo
+     *
      * @param compasTopos list of TCompasTopo
      * @return created Private
      */

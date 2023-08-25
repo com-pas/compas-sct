@@ -27,11 +27,15 @@ public enum PrivateEnum {
     COMPAS_LDEVICE("COMPAS-LDevice", TCompasLDevice.class),
     COMPAS_SCL_FILE_TYPE("COMPAS-SclFileType", TCompasSclFileType.class),
     COMPAS_SYSTEM_VERSION("COMPAS-SystemVersion", TCompasSystemVersion.class),
-    COMPAS_TOPO("COMPAS-Topo", TCompasTopo.class);
+    COMPAS_TOPO("COMPAS-Topo", TCompasTopo.class),
+    //TODO add test for this 2 cases
+    ETR_IEC61850_90_2("eTr-IEC61850-90-2", TProxyRef.class),
+    IEC_60870_5_104("IEC_60870_5_104", TIEC608705104Address.class);
+
 
     private static final Map<Class<?>, PrivateEnum> classToEnum = Arrays.stream(PrivateEnum.values()).collect(Collectors.toMap(
-        compasPrivateEnum -> compasPrivateEnum.compasClass,
-        Function.identity()));
+            compasPrivateEnum -> compasPrivateEnum.compasClass,
+            Function.identity()));
 
     @Getter
     private final String privateType;

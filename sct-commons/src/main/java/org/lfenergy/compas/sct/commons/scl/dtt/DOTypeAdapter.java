@@ -252,21 +252,22 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
 
     /**
      * Find path from a SDO to DA (defined by names)
+     *
      * @param sdoName SDO from which find a path
-     * @param daName DA for which find a path to
+     * @param daName  DA for which find a path to
      * @return pair of DO/SDO and DoType. DO/SDO references the DOType
      * @throws ScdException when inconsistency are found in th SCL's
-     *                     DataTypeTemplate (unknown reference for example). Which should normally not happens.
+     *                      DataTypeTemplate (unknown reference for example). Which should normally not happens.
      */
-    Pair<String,DOTypeAdapter> findPathSDOToDA(String sdoName, String daName) throws ScdException {
-        String errMsg = String.format("No coherence or path between DO/SDO(%s) and DA(%s)", sdoName,daName);
+    public Pair<String, DOTypeAdapter> findPathSDOToDA(String sdoName, String daName) throws ScdException {
+        String errMsg = String.format("No coherence or path between DO/SDO(%s) and DA(%s)", sdoName, daName);
         Optional<TSDO> opSdo = getSDOByName(sdoName);
-        if(opSdo.isEmpty()) {
+        if (opSdo.isEmpty()) {
             throw new ScdException(errMsg);
         }
 
         DOTypeAdapter doTypeAdapter = parentAdapter.getDOTypeAdapterById(opSdo.get().getType()).orElse(null);
-        if(doTypeAdapter == null) {
+        if (doTypeAdapter == null) {
             throw new ScdException(errMsg);
         }
         if(doTypeAdapter.containsDAWithDAName(daName)){
