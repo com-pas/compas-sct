@@ -2,37 +2,37 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.sct.commons.service.impl;
+package org.lfenergy.compas.sct.commons;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct. commons.dto.*;
-import org.lfenergy.compas.sct. commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.util.PrivateUtils;
+import org.lfenergy.compas.sct.commons.api.SclEditor;
+import org.lfenergy.compas.sct.commons.dto.*;
+import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import org.lfenergy.compas.sct. commons.scl.com.CommunicationAdapter;
-import org.lfenergy.compas.sct. commons.scl.com.ConnectedAPAdapter;
-import org.lfenergy.compas.sct. commons.scl.com.SubNetworkAdapter;
-import org.lfenergy.compas.sct. commons.scl.dtt.DataTypeTemplateAdapter;
-import org.lfenergy.compas.sct. commons.scl.dtt.EnumTypeAdapter;
-import org.lfenergy.compas.sct. commons.scl.dtt.LNodeTypeAdapter;
-import org.lfenergy.compas.sct. commons.scl.header.HeaderAdapter;
-import org.lfenergy.compas.sct. commons.scl.icd.IcdHeader;
-import org.lfenergy.compas.sct. commons.scl.ied.*;
-import org.lfenergy.compas.sct. commons.scl.sstation.SubstationAdapter;
-import org.lfenergy.compas.sct.commons.service.ISclService;
-import org.lfenergy.compas.sct. commons.util.Utils;
+import org.lfenergy.compas.sct.commons.scl.com.CommunicationAdapter;
+import org.lfenergy.compas.sct.commons.scl.com.ConnectedAPAdapter;
+import org.lfenergy.compas.sct.commons.scl.com.SubNetworkAdapter;
+import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
+import org.lfenergy.compas.sct.commons.scl.dtt.EnumTypeAdapter;
+import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
+import org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter;
+import org.lfenergy.compas.sct.commons.scl.icd.IcdHeader;
+import org.lfenergy.compas.sct.commons.scl.ied.*;
+import org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter;
+import org.lfenergy.compas.sct.commons.util.PrivateUtils;
+import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.lfenergy.compas.sct. commons.util.CommonConstants.IED_TEST_NAME;
-import static org.lfenergy.compas.sct. commons.util.PrivateEnum.COMPAS_ICDHEADER;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.IED_TEST_NAME;
+import static org.lfenergy.compas.sct.commons.util.PrivateEnum.COMPAS_ICDHEADER;
 
 @Slf4j
-public class SclService implements ISclService {
+public class SclService implements SclEditor {
 
     @Override
     public SCL initScl(final UUID hId, final String hVersion, final String hRevision) throws ScdException {

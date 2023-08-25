@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 
-package org.lfenergy.compas.sct.commons.service;
+package org.lfenergy.compas.sct.commons.api;
 
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings;
@@ -13,7 +13,7 @@ import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.List;
 
-public interface IExtRefService {
+public interface ExtRefEditor {
 
     /**
      * Updates iedName attribute of all ExtRefs in the Scd.

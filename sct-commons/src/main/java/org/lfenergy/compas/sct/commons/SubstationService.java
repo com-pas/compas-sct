@@ -2,20 +2,20 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.sct.commons.service.impl;
+package org.lfenergy.compas.sct.commons;
 
 import lombok.NonNull;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TBay;
 import org.lfenergy.compas.scl2007b4.model.TSubstation;
 import org.lfenergy.compas.scl2007b4.model.TVoltageLevel;
+import org.lfenergy.compas.sct.commons.api.SubstationEditor;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter;
 import org.lfenergy.compas.sct.commons.scl.sstation.VoltageLevelAdapter;
-import org.lfenergy.compas.sct.commons.service.ISubstationService;
 
-public class SubstationService implements ISubstationService {
+public class SubstationService implements SubstationEditor {
 
     @Override
     public void addSubstation(@NonNull SCL scd, @NonNull SCL ssd) throws ScdException {

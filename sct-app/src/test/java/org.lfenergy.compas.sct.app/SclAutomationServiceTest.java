@@ -10,10 +10,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.THeader;
+import org.lfenergy.compas.sct.commons.api.SclEditor;
+import org.lfenergy.compas.sct.commons.api.SubstationEditor;
 import org.lfenergy.compas.sct.commons.dto.HeaderDTO;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.service.ISclService;
-import org.lfenergy.compas.sct.commons.service.ISubstationService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -36,9 +36,9 @@ class SclAutomationServiceTest {
     @InjectMocks
     private SclAutomationService sclAutomationService ;
     @Mock
-    private ISclService sclService;
+    private SclEditor sclEditor;
     @Mock
-    private ISubstationService substationService;
+    private SubstationEditor substationEditor;
 
     public static final short RELEASE = 4;
     public static final String REVISION = "B";
@@ -66,7 +66,7 @@ class SclAutomationServiceTest {
         // Given
         SCL ssd = (SCL) BeanUtils.cloneBean(scl);
         SCL std = (SCL) BeanUtils.cloneBean(scl);
-        Mockito.when(sclService.initScl(any(UUID.class), anyString(), anyString())).thenReturn((SCL) BeanUtils.cloneBean(scl));
+        Mockito.when(sclEditor.initScl(any(UUID.class), anyString(), anyString())).thenReturn((SCL) BeanUtils.cloneBean(scl));
         // When
         SCL scd = sclAutomationService.createSCD(ssd, headerDTO, List.of(std));
         // Then
@@ -77,11 +77,11 @@ class SclAutomationServiceTest {
         assertThat(scd.getSubstation()).isEmpty();
         assertThat(scd.getIED()).isEmpty();
         assertIsMarshallable(scd);
-        verify(sclService, times(1)).initScl(headerDTO.getId(), headerDTO.getVersion(), headerDTO.getRevision());
-        verify(sclService, times(0)).addHistoryItem(any(SCL.class), anyString(), anyString(), anyString());
-        verify(substationService, times(1)).addSubstation(any(SCL.class), any(SCL.class));
-        verify(sclService, times(1)).importSTDElementsInSCD(any(SCL.class), anyList(), anyList());
-        verify(sclService, times(1)).removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(any(SCL.class));
+        verify(sclEditor, times(1)).initScl(headerDTO.getId(), headerDTO.getVersion(), headerDTO.getRevision());
+        verify(sclEditor, times(0)).addHistoryItem(any(SCL.class), anyString(), anyString(), anyString());
+        verify(substationEditor, times(1)).addSubstation(any(SCL.class), any(SCL.class));
+        verify(sclEditor, times(1)).importSTDElementsInSCD(any(SCL.class), anyList(), anyList());
+        verify(sclEditor, times(1)).removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(any(SCL.class));
     }
 
     @Test
@@ -94,8 +94,8 @@ class SclAutomationServiceTest {
         historyItem.setWho("name");
         historyItem.setWhy("test");
         headerDTO.getHistoryItems().add(historyItem);
-        when(sclService.initScl(any(UUID.class), anyString(), anyString())).thenReturn((SCL) BeanUtils.cloneBean(scl));
-        doNothing().when(sclService).addHistoryItem(any(SCL.class), anyString(), anyString(), anyString());
+        when(sclEditor.initScl(any(UUID.class), anyString(), anyString())).thenReturn((SCL) BeanUtils.cloneBean(scl));
+        doNothing().when(sclEditor).addHistoryItem(any(SCL.class), anyString(), anyString(), anyString());
         // When
         SCL scd = sclAutomationService.createSCD(ssd, headerDTO, List.of(std));
         // Then
@@ -106,19 +106,19 @@ class SclAutomationServiceTest {
         assertThat(scd.getSubstation()).isEmpty();
         assertThat(scd.getIED()).isEmpty();
         assertIsMarshallable(scd);
-        verify(sclService, times(1)).initScl(headerDTO.getId(), headerDTO.getVersion(), headerDTO.getRevision());
-        verify(sclService, times(1)).addHistoryItem(any(SCL.class), eq(historyItem.getWho()), eq(historyItem.getWhat()), eq(historyItem.getWhy()));
-        verify(substationService, times(1)).addSubstation(any(SCL.class), any(SCL.class));
-        verify(sclService, times(1)).importSTDElementsInSCD(any(SCL.class), anyList(), anyList());
-        verify(sclService, times(1)).removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(any(SCL.class));
+        verify(sclEditor, times(1)).initScl(headerDTO.getId(), headerDTO.getVersion(), headerDTO.getRevision());
+        verify(sclEditor, times(1)).addHistoryItem(any(SCL.class), eq(historyItem.getWho()), eq(historyItem.getWhat()), eq(historyItem.getWhy()));
+        verify(substationEditor, times(1)).addSubstation(any(SCL.class), any(SCL.class));
+        verify(sclEditor, times(1)).importSTDElementsInSCD(any(SCL.class), anyList(), anyList());
+        verify(sclEditor, times(1)).removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(any(SCL.class));
     }
 
     @Test
-    void createSCD_should_throw_exception_when_sclService_initScl_Fail() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
+    void createSCD_should_throw_exception_when_sclEditor_initScl_Fail() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
         // Given
         SCL ssd = (SCL) BeanUtils.cloneBean(scl);
         SCL std = (SCL) BeanUtils.cloneBean(scl);
-        doThrow(new ScdException("initScl fail")).when(sclService).initScl(any(UUID.class), anyString(), anyString());
+        doThrow(new ScdException("initScl fail")).when(sclEditor).initScl(any(UUID.class), anyString(), anyString());
         // When Then
         assertThatThrownBy(() -> sclAutomationService.createSCD(ssd, headerDTO, List.of(std)))
                 .isInstanceOf(ScdException.class)
@@ -126,13 +126,13 @@ class SclAutomationServiceTest {
     }
 
     @Test
-    void createSCD_should_throw_exception_when_sclService_addHistoryItem_Fail() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
+    void createSCD_should_throw_exception_when_sclEditor_addHistoryItem_Fail() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
         // Given
         SCL ssd = (SCL) BeanUtils.cloneBean(scl);
         SCL std = (SCL) BeanUtils.cloneBean(scl);
         headerDTO.getHistoryItems().add(new HeaderDTO.HistoryItem());
-        when(sclService.initScl(any(UUID.class), anyString(), anyString())).thenReturn((SCL) BeanUtils.cloneBean(scl));
-        doThrow(new ScdException("addHistoryItem fail")).when(sclService).addHistoryItem(any(SCL.class), any(), any(), any());
+        when(sclEditor.initScl(any(UUID.class), anyString(), anyString())).thenReturn((SCL) BeanUtils.cloneBean(scl));
+        doThrow(new ScdException("addHistoryItem fail")).when(sclEditor).addHistoryItem(any(SCL.class), any(), any(), any());
         // When Then
         assertThatThrownBy(() -> sclAutomationService.createSCD(ssd, headerDTO, List.of(std)))
                 .isInstanceOf(ScdException.class)
@@ -140,14 +140,14 @@ class SclAutomationServiceTest {
     }
 
     @Test
-    void createSCD_should_throw_exception_when_substationService_addSubstation_Fail() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
+    void createSCD_should_throw_exception_when_substationEditor_addSubstation_Fail() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
         // Given
         SCL ssd = (SCL) BeanUtils.cloneBean(scl);
         SCL std = (SCL) BeanUtils.cloneBean(scl);
         headerDTO.getHistoryItems().add(new HeaderDTO.HistoryItem());
-        when(sclService.initScl(any(UUID.class), anyString(), anyString())).thenReturn((SCL) BeanUtils.cloneBean(scl));
-        doNothing().when(sclService).addHistoryItem(any(SCL.class), any(), any(), any());
-        doThrow(new ScdException("addSubstation fail")).when(substationService).addSubstation(any(SCL.class), any(SCL.class));
+        when(sclEditor.initScl(any(UUID.class), anyString(), anyString())).thenReturn((SCL) BeanUtils.cloneBean(scl));
+        doNothing().when(sclEditor).addHistoryItem(any(SCL.class), any(), any(), any());
+        doThrow(new ScdException("addSubstation fail")).when(substationEditor).addSubstation(any(SCL.class), any(SCL.class));
         // When Then
         assertThatThrownBy(() -> sclAutomationService.createSCD(ssd, headerDTO, List.of(std)))
                 .isInstanceOf(ScdException.class)
@@ -155,16 +155,16 @@ class SclAutomationServiceTest {
     }
 
     @Test
-    void createSCD_should_throw_exception_when_sclService_importSTDElementsInSCD_Fail() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
+    void createSCD_should_throw_exception_when_sclEditor_importSTDElementsInSCD_Fail() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
         // Given
         SCL ssd = (SCL) BeanUtils.cloneBean(scl);
         SCL std = (SCL) BeanUtils.cloneBean(scl);
         headerDTO.getHistoryItems().add(new HeaderDTO.HistoryItem());
-        when(sclService.initScl(any(UUID.class), anyString(), anyString())).thenReturn((SCL) BeanUtils.cloneBean(scl));
-        doNothing().when(sclService).addHistoryItem(any(SCL.class), any(), any(), any());
-        doNothing().when(substationService).addSubstation(any(SCL.class), any(SCL.class));
+        when(sclEditor.initScl(any(UUID.class), anyString(), anyString())).thenReturn((SCL) BeanUtils.cloneBean(scl));
+        doNothing().when(sclEditor).addHistoryItem(any(SCL.class), any(), any(), any());
+        doNothing().when(substationEditor).addSubstation(any(SCL.class), any(SCL.class));
         doThrow(new ScdException("importSTDElementsInSCD fail"))
-                .when(sclService).importSTDElementsInSCD(any(SCL.class), anyList(), anyList());
+                .when(sclEditor).importSTDElementsInSCD(any(SCL.class), anyList(), anyList());
         // When Then
         assertThatThrownBy(() -> sclAutomationService.createSCD(ssd, headerDTO, List.of(std)))
                 .isInstanceOf(ScdException.class)
@@ -172,17 +172,17 @@ class SclAutomationServiceTest {
     }
 
     @Test
-    void createSCD_should_throw_exception_when_sclService_removeAllControlBlocksAndDatasetsAndExtRefSrcBindings_Fail() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
+    void createSCD_should_throw_exception_when_sclEditor_removeAllControlBlocksAndDatasetsAndExtRefSrcBindings_Fail() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
         // Given
         SCL ssd = (SCL) BeanUtils.cloneBean(scl);
         SCL std = (SCL) BeanUtils.cloneBean(scl);
         headerDTO.getHistoryItems().add(new HeaderDTO.HistoryItem());
-        when(sclService.initScl(any(UUID.class), anyString(), anyString())).thenReturn((SCL) BeanUtils.cloneBean(scl));
-        doNothing().when(sclService).addHistoryItem(any(SCL.class), any(), any(), any());
-        doNothing().when(substationService).addSubstation(any(SCL.class), any(SCL.class));
-        doNothing().when(sclService).importSTDElementsInSCD(any(SCL.class), anyList(), anyList());
+        when(sclEditor.initScl(any(UUID.class), anyString(), anyString())).thenReturn((SCL) BeanUtils.cloneBean(scl));
+        doNothing().when(sclEditor).addHistoryItem(any(SCL.class), any(), any(), any());
+        doNothing().when(substationEditor).addSubstation(any(SCL.class), any(SCL.class));
+        doNothing().when(sclEditor).importSTDElementsInSCD(any(SCL.class), anyList(), anyList());
         doThrow(new ScdException("removeAllControlBlocksAndDatasetsAndExtRefSrcBindings fail"))
-                .when(sclService).removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(any(SCL.class));
+                .when(sclEditor).removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(any(SCL.class));
         // When Then
         assertThatThrownBy(() -> sclAutomationService.createSCD(ssd, headerDTO, List.of(std)))
                 .isInstanceOf(ScdException.class)

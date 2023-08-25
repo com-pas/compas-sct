@@ -14,7 +14,7 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import org.lfenergy.compas.sct.commons.service.impl.ExtRefService;
+import org.lfenergy.compas.sct.commons.ExtRefService;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 import org.lfenergy.compas.sct.commons.util.FcdaCandidates;
 import org.lfenergy.compas.sct.commons.util.LdeviceStatus;

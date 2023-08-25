@@ -7,12 +7,12 @@ package org.lfenergy.compas.sct.app;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.lfenergy.compas.scl2007b4.model.SCL;
+import org.lfenergy.compas.sct.commons.api.SclEditor;
+import org.lfenergy.compas.sct.commons.api.SubstationEditor;
 import org.lfenergy.compas.sct.commons.dto.HeaderDTO;
 import org.lfenergy.compas.sct.commons.dto.SubNetworkDTO;
 import org.lfenergy.compas.sct.commons.dto.SubNetworkTypeDTO;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.service.ISclService;
-import org.lfenergy.compas.sct.commons.service.ISubstationService;
 
 import java.util.*;
 
@@ -28,8 +28,8 @@ import java.util.*;
 @RequiredArgsConstructor
 public class SclAutomationService {
 
-    private final ISclService sclService;
-    private final ISubstationService substationService;
+    private final SclEditor sclEditor;
+    private final SubstationEditor substationEditor;
 
     /**
      * Possible Subnetwork and ConnectedAP names which should be used in generated SCD in order a have global coherence
@@ -49,14 +49,14 @@ public class SclAutomationService {
      * @throws ScdException
      */
     public SCL createSCD(@NonNull SCL ssd, @NonNull HeaderDTO headerDTO, List<SCL> stds) throws ScdException {
-        SCL scd = sclService.initScl(headerDTO.getId(), headerDTO.getVersion(), headerDTO.getRevision());
+        SCL scd = sclEditor.initScl(headerDTO.getId(), headerDTO.getVersion(), headerDTO.getRevision());
         if (!headerDTO.getHistoryItems().isEmpty()) {
             HeaderDTO.HistoryItem hItem = headerDTO.getHistoryItems().get(0);
-            sclService.addHistoryItem(scd, hItem.getWho(), hItem.getWhat(), hItem.getWhy());
+            sclEditor.addHistoryItem(scd, hItem.getWho(), hItem.getWhat(), hItem.getWhy());
         }
-        substationService.addSubstation(scd, ssd);
-        sclService.importSTDElementsInSCD(scd, stds, SUB_NETWORK_TYPES);
-        sclService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scd);
+        substationEditor.addSubstation(scd, ssd);
+        sclEditor.importSTDElementsInSCD(scd, stds, SUB_NETWORK_TYPES);
+        sclEditor.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scd);
         return scd;
     }
 }

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.sct.commons.service;
+package org.lfenergy.compas.sct.commons.api;
 
 import lombok.NonNull;
 import org.lfenergy.compas.scl2007b4.model.SCL;
@@ -23,43 +23,43 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * A representation of the <em><b>{@link  ISclService SclService}</b></em>.
+ * A representation of the <em><b>{@link  SclEditor SclEditor}</b></em>.
  * <p>
  * The following features are supported:
  * </p>
  * <ul>
  *   <li>Initialization functions</li>
  *   <ol>
- *      <li>{@link ISclService#initScl(UUID, String, String) <em>Initialize the <b>SCL </b> object</em>}</li>
- *      <li>{@link ISclService#addHistoryItem(SCL, String, String, String) <em>Adds <b>History </b> object under <b>THeader </b> reference object</em>}</li>
- *      <li>{@link ISclService#updateHeader(SCL, HeaderDTO) <em>Update <b>Header </b> reference object</em>}</li>
+ *      <li>{@link SclEditor#initScl(UUID, String, String) <em>Initialize the <b>SCL </b> object</em>}</li>
+ *      <li>{@link SclEditor#addHistoryItem(SCL, String, String, String) <em>Adds <b>History </b> object under <b>THeader </b> reference object</em>}</li>
+ *      <li>{@link SclEditor#updateHeader(SCL, HeaderDTO) <em>Update <b>Header </b> reference object</em>}</li>
  *   </ol>
  *   <li>IED features</li>
  *   <ol>
- *       <li>{@link ISclService#addIED(SCL, String, SCL) <em>Adds the <b>IED </b> object</em>}</li>
+ *       <li>{@link SclEditor#addIED(SCL, String, SCL) <em>Adds the <b>IED </b> object</em>}</li>
  *   </ol>
  *   <li>Communication features</li>
  *   <ol>
- *      <li>{@link ISclService#getSubnetwork(SCL) <em>Returns list of <b>SubNetworkDTO </b></em>}</li>
- *      <li>{@link ISclService#addSubnetworks(SCL, List, SCL) <em>Adds the <b>Subnetwork </b> elements under <b>TCommunication </b> reference object</em>}</li>
+ *      <li>{@link SclEditor#getSubnetwork(SCL) <em>Returns list of <b>SubNetworkDTO </b></em>}</li>
+ *      <li>{@link SclEditor#addSubnetworks(SCL, List, SCL) <em>Adds the <b>Subnetwork </b> elements under <b>TCommunication </b> reference object</em>}</li>
  *   </ol>
  *   <li>ExtRef features</li>
  *   <ol>
- *      <li>{@link ISclService#getExtRefInfo <em>Returns list of <b>ExtRefInfo </b></em>}</li>
- *      <li>{@link ISclService#getExtRefBinders <em>Returns list of <b>ExtRefBindingInfo </b></em>}</li>
- *      <li>{@link ISclService#updateExtRefBinders(SCL, ExtRefInfo) <em>Update the <b>TExtRef </b> reference object for given <b>ExtRefBindingInfo </b> model</em>}</li>
- *      <li>{@link ISclService#getExtRefSourceInfo <em>Returns list of <b>ExtRefSourceInfo </b></em>}</li>
- *      <li>{@link ISclService#updateExtRefSource(SCL, ExtRefInfo) <em>Update the <b>TExtRef </b> reference object for given <b>ExtRefSourceInfo </b> model</em>}</li>
+ *      <li>{@link SclEditor#getExtRefInfo <em>Returns list of <b>ExtRefInfo </b></em>}</li>
+ *      <li>{@link SclEditor#getExtRefBinders <em>Returns list of <b>ExtRefBindingInfo </b></em>}</li>
+ *      <li>{@link SclEditor#updateExtRefBinders(SCL, ExtRefInfo) <em>Update the <b>TExtRef </b> reference object for given <b>ExtRefBindingInfo </b> model</em>}</li>
+ *      <li>{@link SclEditor#getExtRefSourceInfo <em>Returns list of <b>ExtRefSourceInfo </b></em>}</li>
+ *      <li>{@link SclEditor#updateExtRefSource(SCL, ExtRefInfo) <em>Update the <b>TExtRef </b> reference object for given <b>ExtRefSourceInfo </b> model</em>}</li>
  *   </ol>
  *   <li>DAI features</li>
  *   <ol>
- *      <li>{@link ISclService#getDAI <em>Returns list of <b>DataAttributeRef </b></em>}</li>
- *      <li>{@link ISclService#updateDAI(SCL, String, String, DataAttributeRef)
+ *      <li>{@link SclEditor#getDAI <em>Returns list of <b>DataAttributeRef </b></em>}</li>
+ *      <li>{@link SclEditor#updateDAI(SCL, String, String, DataAttributeRef)
  *      <em>Update the <b>TDAI </b> reference object for given <b>iedName</b>, <b>ldInst </b> and <b>DataAttributeRef </b> model</em>}</li>
  *   </ol>
  *   <li>EnumType features</li>
  *   <ol>
- *      <li>{@link  ISclService#getEnumTypeValues(SCL, String) <em>Returns Map <b>(ord, enumVal) </b> of <b>TEnumType </b> reference object</em>}</li>
+ *      <li>{@link  SclEditor#getEnumTypeValues(SCL, String) <em>Returns Map <b>(ord, enumVal) </b> of <b>TEnumType </b> reference object</em>}</li>
  *   </ol>
  *
  * </ul>
@@ -70,7 +70,7 @@ import java.util.UUID;
  * @see CommunicationAdapter
  * @see DataTypeTemplateAdapter
  */
-public interface ISclService {
+public interface SclEditor {
 
     String UNKNOWN_LDEVICE_IN_IED = "Unknown LDevice (%s) in IED (%s)";
     String INVALID_OR_MISSING_ATTRIBUTES_IN_EXT_REF_BINDING_INFO = "Invalid or missing attributes in ExtRef binding info";

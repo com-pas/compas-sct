@@ -2,21 +2,24 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.sct.commons.service.impl;
+package org.lfenergy.compas.sct.commons;
 
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TCompasICDHeader;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.scl2007b4.model.TIED;
+import org.lfenergy.compas.sct.commons.api.ExtRefEditor;
 import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings;
+import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.NetworkRanges;
+import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.RangesPerCbType;
+import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.Settings;
+import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.SettingsOrError;
 import org.lfenergy.compas.sct.commons.dto.LDEPFSettingData;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.*;
-import org.lfenergy.compas.sct.commons.service.IExtRefService;
 import org.lfenergy.compas.sct.commons.util.*;
 
 import java.util.*;
@@ -24,12 +27,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import  org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.*;
-
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 import static org.lfenergy.compas.sct.commons.util.Utils.isExtRefFeedBySameControlBlock;
 
-public class ExtRefService implements IExtRefService {
+public class ExtRefService implements ExtRefEditor {
 
     @Override
     public List<SclReportItem> updateAllExtRefIedNames(SCL scd) {

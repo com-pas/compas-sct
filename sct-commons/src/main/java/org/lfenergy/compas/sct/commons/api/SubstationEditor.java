@@ -2,24 +2,23 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.sct.commons.service;
+package org.lfenergy.compas.sct.commons.api;
 
 
 import lombok.NonNull;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.util.PrivateUtils;
-import org.lfenergy.compas.sct.commons.service.impl.SubstationService;
 import org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter;
 import org.lfenergy.compas.sct.commons.scl.sstation.VoltageLevelAdapter;
+import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 
 /**
- * A representation of the <em><b>{@link SubstationService SubstationService}</b></em>.
+ * A representation of the <em><b>{@link SubstationEditor SubstationEditor}</b></em>.
  * <p>
  * The following features are supported:
  * </p>
  * <ul>
- *   <li>{@link ISubstationService#addSubstation(SCL, SCL) <em>Adds the <b>Substation </b> object from given <b>SCL </b> object</em>}</li>
+ *   <li>{@link SubstationEditor#addSubstation(SCL, SCL) <em>Adds the <b>Substation </b> object from given <b>SCL </b> object</em>}</li>
  * </ul>
  * @see SubstationAdapter
  * @see VoltageLevelAdapter
@@ -28,7 +27,7 @@ import org.lfenergy.compas.sct.commons.scl.sstation.VoltageLevelAdapter;
  * @see org.lfenergy.compas.sct.commons.scl.sstation.LNodeAdapter
  * @see PrivateUtils
  */
-public interface ISubstationService {
+public interface SubstationEditor {
 
     /**
      * Adds or Updates Substation section in SCL

@@ -8,15 +8,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.LN0;
 import org.lfenergy.compas.scl2007b4.model.SCL;
+import org.lfenergy.compas.sct.commons.SclService;
+import org.lfenergy.compas.sct.commons.SubstationService;
+import org.lfenergy.compas.sct.commons.api.SclEditor;
+import org.lfenergy.compas.sct.commons.api.SubstationEditor;
 import org.lfenergy.compas.sct.commons.dto.HeaderDTO;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
-import org.lfenergy.compas.sct.commons.service.ISclService;
-import org.lfenergy.compas.sct.commons.service.ISubstationService;
-import org.lfenergy.compas.sct.commons.service.impl.SclService;
-import org.lfenergy.compas.sct.commons.service.impl.SubstationService;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.Arrays;
@@ -30,8 +30,8 @@ import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.asse
 class SclAutomationServiceIntegrationTest {
 
     private SclAutomationService sclAutomationService ;
-    private static final ISclService sclService = new SclService() ;
-    private static final ISubstationService substationService = new SubstationService() ;
+    private static final SclEditor sclEditor = new SclService() ;
+    private static final SubstationEditor substationEditor = new SubstationService() ;
 
     private HeaderDTO headerDTO;
 
@@ -41,7 +41,7 @@ class SclAutomationServiceIntegrationTest {
         headerDTO.setId(UUID.randomUUID());
         headerDTO.setRevision("hRevision");
         headerDTO.setVersion("hVersion");
-        sclAutomationService = new SclAutomationService(sclService, substationService);
+        sclAutomationService = new SclAutomationService(sclEditor, substationEditor);
     }
 
     @Test
