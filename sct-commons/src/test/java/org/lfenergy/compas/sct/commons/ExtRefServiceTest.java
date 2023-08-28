@@ -12,10 +12,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings;
-import org.lfenergy.compas.sct.commons.dto.ControlBlockTarget;
-import org.lfenergy.compas.sct.commons.dto.LDEPFSettingData;
-import org.lfenergy.compas.sct.commons.dto.SclReportItem;
+import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
@@ -43,6 +40,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.lfenergy.compas.scl2007b4.model.TFCEnum.ST;
 import static org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.*;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
@@ -627,7 +625,6 @@ class ExtRefServiceTest {
 
     }
 
-
     @Test
     void manageBindingForLDEPF_should_return_no_report_when_extRef_withDifferentIedType_update_successfully() {
         String fileName = "LDEPF_Setting_file.csv";
@@ -815,6 +812,158 @@ class ExtRefServiceTest {
         return settings.stream()
                 .filter(setting -> analogNum.equals(setting.getChannelAnalogNum()))
                 .findFirst().get();
+    }
+
+    @Test
+    void updateExtRefSource_shouldThrowScdException_whenSignalInfoNullOrInvalid() {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
+        ExtRefInfo extRefInfo = new ExtRefInfo();
+        extRefInfo.setHolderIEDName("IED_NAME2");
+        extRefInfo.setHolderLDInst("LD_INST21");
+        extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
+
+        //When Then
+        assertThat(extRefInfo.getSignalInfo()).isNull();
+        assertThatThrownBy(() -> extRefService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class); // signal = null
+        extRefInfo.setSignalInfo(new ExtRefSignalInfo());
+        assertThat(extRefInfo.getSignalInfo()).isNotNull();
+        assertThatThrownBy(() -> extRefService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class);// signal invalid
+    }
+
+    @Test
+    void updateExtRefSource_shouldThrowScdException_whenBindingInfoNullOrInvalid() {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
+        ExtRefInfo extRefInfo = new ExtRefInfo();
+        extRefInfo.setHolderIEDName("IED_NAME2");
+        extRefInfo.setHolderLDInst("LD_INST21");
+        extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
+
+        ExtRefSignalInfo extRefSignalInfo = new ExtRefSignalInfo();
+        extRefSignalInfo.setIntAddr("INT_ADDR21");
+        extRefSignalInfo.setPDA("da21.bda211.bda212.bda213");
+        extRefSignalInfo.setPDO("Do21.sdo21");
+        extRefInfo.setSignalInfo(extRefSignalInfo);
+        //When Then
+        assertThat(extRefInfo.getBindingInfo()).isNull();
+        assertThatThrownBy(() -> extRefService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class); // binding = null
+        extRefInfo.setBindingInfo(new ExtRefBindingInfo());
+        assertThat(extRefInfo.getBindingInfo()).isNotNull();
+        assertThatThrownBy(() -> extRefService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class);// binding invalid
+    }
+
+    @Test
+    void updateExtRefSource_shouldThrowScdException_whenBindingInternalByIedName() {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
+        ExtRefInfo extRefInfo = new ExtRefInfo();
+        extRefInfo.setHolderIEDName("IED_NAME2");
+        extRefInfo.setHolderLDInst("LD_INST21");
+        extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
+
+        ExtRefSignalInfo extRefSignalInfo = new ExtRefSignalInfo();
+        extRefSignalInfo.setIntAddr("INT_ADDR21");
+        extRefSignalInfo.setPDA("da21.bda211.bda212.bda213");
+        extRefSignalInfo.setPDO("Do21.sdo21");
+        extRefInfo.setSignalInfo(extRefSignalInfo);
+
+        ExtRefBindingInfo extRefBindingInfo = new ExtRefBindingInfo();
+        extRefBindingInfo.setIedName("IED_NAME2"); // internal binding
+        extRefBindingInfo.setLdInst("LD_INST12");
+        extRefBindingInfo.setLnClass(TLLN0Enum.LLN_0.value());
+        extRefInfo.setBindingInfo(new ExtRefBindingInfo());
+        //When Then
+        assertThatThrownBy(() -> extRefService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class); // CB not allowed
+    }
+
+    @Test
+    void updateExtRefSource_shouldThrowScdException_whenBindingInternaByServiceType() {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
+        ExtRefInfo extRefInfo = new ExtRefInfo();
+        extRefInfo.setHolderIEDName("IED_NAME2");
+        extRefInfo.setHolderLDInst("LD_INST21");
+        extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
+
+        ExtRefSignalInfo extRefSignalInfo = new ExtRefSignalInfo();
+        extRefSignalInfo.setIntAddr("INT_ADDR21");
+        extRefSignalInfo.setPDA("da21.bda211.bda212.bda213");
+        extRefSignalInfo.setPDO("Do21.sdo21");
+        extRefInfo.setSignalInfo(extRefSignalInfo);
+
+        ExtRefBindingInfo extRefBindingInfo = new ExtRefBindingInfo();
+        extRefBindingInfo.setIedName("IED_NAME2"); // internal binding
+        extRefBindingInfo.setLdInst("LD_INST12");
+        extRefBindingInfo.setLnClass(TLLN0Enum.LLN_0.value());
+        extRefBindingInfo.setServiceType(TServiceType.POLL);
+        extRefInfo.setBindingInfo(new ExtRefBindingInfo());
+        //When Then
+        assertThatThrownBy(() -> extRefService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class); // CB not allowed
+    }
+
+    @Test
+    void updateExtRefSource_shouldThrowScdException_whenSourceInfoNullOrInvalid() {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
+        ExtRefInfo extRefInfo = new ExtRefInfo();
+        extRefInfo.setHolderIEDName("IED_NAME2");
+        extRefInfo.setHolderLDInst("LD_INST21");
+        extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
+
+        ExtRefSignalInfo extRefSignalInfo = new ExtRefSignalInfo();
+        extRefSignalInfo.setIntAddr("INT_ADDR21");
+        extRefSignalInfo.setPDA("da21.bda211.bda212.bda213");
+        extRefSignalInfo.setPDO("Do21.sdo21");
+        extRefInfo.setSignalInfo(extRefSignalInfo);
+
+        ExtRefBindingInfo extRefBindingInfo = new ExtRefBindingInfo();
+        extRefBindingInfo.setIedName("IED_NAME1"); // internal binding
+        extRefBindingInfo.setLdInst("LD_INST12");
+        extRefBindingInfo.setLnClass(TLLN0Enum.LLN_0.value());
+        extRefInfo.setBindingInfo(new ExtRefBindingInfo());
+
+        //When Then
+        assertThat(extRefInfo.getSourceInfo()).isNull();
+        assertThatThrownBy(() -> extRefService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class); // signal = null
+        extRefInfo.setSourceInfo(new ExtRefSourceInfo());
+        assertThat(extRefInfo.getSourceInfo()).isNotNull();
+        assertThatThrownBy(() -> extRefService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class);// signal invalid
+    }
+
+    @Test
+    void updateExtRefSource_shouldThrowScdException_whenBindingExternalBinding() {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
+        ExtRefInfo extRefInfo = new ExtRefInfo();
+        extRefInfo.setHolderIEDName("IED_NAME2");
+        extRefInfo.setHolderLDInst("LD_INST21");
+        extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
+
+        ExtRefSignalInfo extRefSignalInfo = new ExtRefSignalInfo();
+        extRefSignalInfo.setIntAddr("INT_ADDR21");
+        extRefSignalInfo.setPDA("da21.bda211.bda212.bda213");
+        extRefSignalInfo.setPDO("Do21.sdo21");
+        extRefInfo.setSignalInfo(extRefSignalInfo);
+
+        ExtRefBindingInfo extRefBindingInfo = new ExtRefBindingInfo();
+        extRefBindingInfo.setIedName("IED_NAME1");
+        extRefBindingInfo.setLdInst("LD_INST12");
+        extRefBindingInfo.setLnClass(TLLN0Enum.LLN_0.value());
+        extRefInfo.setBindingInfo(extRefBindingInfo);
+
+        ExtRefSourceInfo sourceInfo = new ExtRefSourceInfo();
+        sourceInfo.setSrcLDInst(extRefInfo.getBindingInfo().getLdInst());
+        sourceInfo.setSrcLNClass(extRefInfo.getBindingInfo().getLnClass());
+        sourceInfo.setSrcCBName("goose1");
+        extRefInfo.setSourceInfo(sourceInfo);
+
+        //When
+        TExtRef extRef = assertDoesNotThrow(() -> extRefService.updateExtRefSource(scd, extRefInfo));
+        //Then
+        assertThat(extRef.getSrcCBName()).isEqualTo(extRefInfo.getSourceInfo().getSrcCBName());
+        assertThat(extRef.getSrcLDInst()).isEqualTo(extRefInfo.getBindingInfo().getLdInst());
+        assertThat(extRef.getSrcLNClass()).contains(extRefInfo.getBindingInfo().getLnClass());
     }
 
 }

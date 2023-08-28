@@ -6,74 +6,41 @@ package org.lfenergy.compas.sct.commons.api;
 
 import lombok.NonNull;
 import org.lfenergy.compas.scl2007b4.model.SCL;
-import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.scl2007b4.model.TLNode;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import org.lfenergy.compas.sct.commons.scl.com.CommunicationAdapter;
-import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
-import org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
-import org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 /**
- * A representation of the <em><b>{@link  SclEditor SclEditor}</b></em>.
- * <p>
- * The following features are supported:
- * </p>
+ * Service class that will be used to create, update or delete elements in {@link SCL <em>SCL</em>} XML Files.
+ * <p> The following features are supported: </p>
  * <ul>
  *   <li>Initialization functions</li>
  *   <ol>
- *      <li>{@link SclEditor#initScl(UUID, String, String) <em>Initialize the <b>SCL </b> object</em>}</li>
- *      <li>{@link SclEditor#addHistoryItem(SCL, String, String, String) <em>Adds <b>History </b> object under <b>THeader </b> reference object</em>}</li>
- *      <li>{@link SclEditor#updateHeader(SCL, HeaderDTO) <em>Update <b>Header </b> reference object</em>}</li>
+ *      <li>{@link SclEditor#initScl <em>Initialize the <b>SCL </b> object</em>}</li>
+ *      <li>{@link SclEditor#addHistoryItem <em>Adds <b>History </b> object under <b>THeader </b> reference object</em>}</li>
+ *      <li>{@link SclEditor#updateHeader <em>Update <b>Header </b> reference object</em>}</li>
  *   </ol>
  *   <li>IED features</li>
  *   <ol>
- *       <li>{@link SclEditor#addIED(SCL, String, SCL) <em>Adds the <b>IED </b> object</em>}</li>
+ *       <li>{@link SclEditor#addIED <em>Adds the <b>IED </b> object</em>}</li>
  *   </ol>
  *   <li>Communication features</li>
  *   <ol>
- *      <li>{@link SclEditor#getSubnetwork(SCL) <em>Returns list of <b>SubNetworkDTO </b></em>}</li>
- *      <li>{@link SclEditor#addSubnetworks(SCL, List, SCL) <em>Adds the <b>Subnetwork </b> elements under <b>TCommunication </b> reference object</em>}</li>
- *   </ol>
- *   <li>ExtRef features</li>
- *   <ol>
- *      <li>{@link SclEditor#getExtRefInfo <em>Returns list of <b>ExtRefInfo </b></em>}</li>
- *      <li>{@link SclEditor#getExtRefBinders <em>Returns list of <b>ExtRefBindingInfo </b></em>}</li>
- *      <li>{@link SclEditor#updateExtRefBinders(SCL, ExtRefInfo) <em>Update the <b>TExtRef </b> reference object for given <b>ExtRefBindingInfo </b> model</em>}</li>
- *      <li>{@link SclEditor#getExtRefSourceInfo <em>Returns list of <b>ExtRefSourceInfo </b></em>}</li>
- *      <li>{@link SclEditor#updateExtRefSource(SCL, ExtRefInfo) <em>Update the <b>TExtRef </b> reference object for given <b>ExtRefSourceInfo </b> model</em>}</li>
+ *      <li>{@link SclEditor#addSubnetworks <em>Adds the <b>Subnetwork </b> elements under <b>TCommunication </b> reference object</em>}</li>
  *   </ol>
  *   <li>DAI features</li>
  *   <ol>
- *      <li>{@link SclEditor#getDAI <em>Returns list of <b>DataAttributeRef </b></em>}</li>
- *      <li>{@link SclEditor#updateDAI(SCL, String, String, DataAttributeRef)
- *      <em>Update the <b>TDAI </b> reference object for given <b>iedName</b>, <b>ldInst </b> and <b>DataAttributeRef </b> model</em>}</li>
+ *      <li>{@link SclEditor#updateDAI <em>Update the <b>TDAI </b> reference object for given <b>iedName</b>, <b>ldInst </b> and <b>DataAttributeRef </b> model</em>}</li>
  *   </ol>
- *   <li>EnumType features</li>
- *   <ol>
- *      <li>{@link  SclEditor#getEnumTypeValues(SCL, String) <em>Returns Map <b>(ord, enumVal) </b> of <b>TEnumType </b> reference object</em>}</li>
- *   </ol>
- *
  * </ul>
- *
- * @see HeaderAdapter
- * @see SubstationAdapter
- * @see IEDAdapter
- * @see CommunicationAdapter
- * @see DataTypeTemplateAdapter
+ * @see ExtRefEditor
+ * @see SubstationEditor
+ * @see HmiEditor
  */
 public interface SclEditor {
-
-    String UNKNOWN_LDEVICE_IN_IED = "Unknown LDevice (%s) in IED (%s)";
-    String INVALID_OR_MISSING_ATTRIBUTES_IN_EXT_REF_BINDING_INFO = "Invalid or missing attributes in ExtRef binding info";
 
     /**
      * Initialise SCD file with Header and Private SCLFileType
@@ -124,99 +91,6 @@ public interface SclEditor {
     void addSubnetworks(SCL scd, List<SubNetworkDTO> subNetworks, SCL icd) throws ScdException;
 
     /**
-     * Gets list of SCL SubNetworks
-     *
-     * @param scd SCL file in which SubNetworks should be found
-     * @return List of <em>SubNetworkDTO</em> from SCL
-     * @throws ScdException throws when no Communication in SCL and <em>createIfNotExists == false</em>
-     */
-    List<SubNetworkDTO> getSubnetwork(SCL scd) throws ScdException;
-
-    /**
-     * Gets all ExtRef from specific IED/LDevice in SCL file
-     *
-     * @param scd     SCL file in which ExtRefs should be found
-     * @param iedName name of IED in which LDevice is localized
-     * @param ldInst  LdInst of LDevice in which all ExtRefs should be found
-     * @return list of <em>ExtRefInfo</em> from specified parameter SCL/IED/LDevice
-     * @throws ScdException throws when unknown specified IED or LDevice
-     */
-    List<ExtRefInfo> getExtRefInfo(SCL scd, String iedName, String ldInst) throws ScdException;
-
-    /**
-     * Create LDevice
-     *
-     * @param scd     SCL file in which LDevice should be found
-     * @param iedName name of IED in which LDevice is localized
-     * @param ldInst  LdInst of LDevice for which adapter is created
-     * @return created LDevice adapter
-     */
-    default LDeviceAdapter createLDeviceAdapter(SCL scd, String iedName, String ldInst) {
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
-        return iedAdapter.findLDeviceAdapterByLdInst(ldInst)
-                .orElseThrow(() -> new ScdException(String.format(UNKNOWN_LDEVICE_IN_IED, ldInst, iedName)));
-    }
-
-    /**
-     * Gets all possible ExtRefs to bind in SCL file with given ExtRef (<em>signalInfo</em>) in SCL file
-     *
-     * @param scd        SCL file in which ExtRefs should be found
-     * @param iedName    name of IED in which LDevice is localized
-     * @param ldInst     ldInst of LDevice in which LN is localized
-     * @param lnClass    lnClass of LN in which ExtRef signal to find binders is localized
-     * @param lnInst     lnInst of LN in which ExtRef signal to find binders is localized
-     * @param prefix     prefix of LN in which ExtRef signal to find binders is localized
-     * @param signalInfo ExtRef signal for which we should find possible binders in SCL file binders
-     * @return list of <em>ExtRefBindingInfo</em> object (containing binding data for each LNode in current SCL file) sorted by {@link ExtRefBindingInfo#compareTo(ExtRefBindingInfo) compareTo} method.
-     * @throws ScdException throws when ExtRef contains inconsistency data
-     */
-    List<ExtRefBindingInfo> getExtRefBinders(SCL scd, String iedName, String ldInst, String lnClass, String lnInst, String prefix, ExtRefSignalInfo signalInfo) throws ScdException;
-
-    /**
-     * Updates ExtRef binding data related to given ExtRef (<em>extRefInfo</em>) in given SCL file
-     *
-     * @param scd        SCL file in which ExtRef to update should be found
-     * @param extRefInfo ExtRef signal for which we should find possible binders in SCL file
-     * @throws ScdException throws when mandatory data of ExtRef are missing
-     */
-    void updateExtRefBinders(SCL scd, ExtRefInfo extRefInfo) throws ScdException;
-
-    /**
-     * Gets all Control Blocks related to <em>extRefInfo</em> in given SCL file
-     *
-     * @param scd        SCL file in which ControlBlocks should be found
-     * @param extRefInfo ExtRef signal for which we should find related ControlBlocks
-     * @return list of <em>ControlBlock</em> object as ControlBlocks of LNode specified in <em>extRefInfo</em>
-     * @throws ScdException throws when mandatory data of ExtRef are missing
-     */
-    List<ControlBlock> getExtRefSourceInfo(SCL scd, ExtRefInfo extRefInfo) throws ScdException;
-
-    /**
-     * Updates ExtRef source binding data's based on given data in <em>extRefInfo</em>
-     *
-     * @param scd        SCL file in which ExtRef source data's to update should be found
-     * @param extRefInfo new data for ExtRef source binding data
-     * @return <em>TExtRef</em> object as update ExtRef with new source binding data
-     * @throws ScdException throws when mandatory data of ExtRef are missing
-     */
-    TExtRef updateExtRefSource(SCL scd, ExtRefInfo extRefInfo) throws ScdException;
-
-    /**
-     * Gets a list of summarized DataTypeTemplate for DataAttribute DA (updatable or not) related to the one given
-     * in <em>dataAttributeRef</em>
-     *
-     * @param scd       SCL file in which DataTypeTemplate of DAIs should be found
-     * @param iedName   name of IED in which DAs are localized
-     * @param ldInst    ldInst of LDevice in which DAIs are localized
-     * @param dataAttributeRef      reference summarized DataTypeTemplate related to IED DAIs
-     * @param updatable true to retrieve DataTypeTemplate's related to only updatable DAIs, false to retrieve all
-     * @return Set of Data Attribute Reference for DataAttribute (updatable or not)
-     * @throws ScdException SCD illegal arguments exception, missing mandatory data
-     */
-    Set<DataAttributeRef> getDAI(SCL scd, String iedName, String ldInst, DataAttributeRef dataAttributeRef, boolean updatable) throws ScdException;
-
-    /**
      * Updates DAI based on given data in <em>dataAttributeRef</em>
      *
      * @param scd     SCL file in which DataTypeTemplate of DAI should be found
@@ -227,16 +101,6 @@ public interface SclEditor {
      *                      DataTypeTemplate. Which should normally not happens.
      */
     void updateDAI(SCL scd, String iedName, String ldInst, DataAttributeRef dataAttributeRef) throws ScdException;
-
-    /**
-     * Gets EnumTypes values of ID <em>idEnum</em> from DataTypeTemplate of SCL file
-     *
-     * @param scd       SCL file in which EnumType should be found
-     * @param idEnum    ID of EnumType for which values are retrieved
-     * @return list of couple EnumType value and it's order
-     * @throws ScdException throws when unknown EnumType
-     */
-    Set<EnumValDTO> getEnumTypeValues(SCL scd, String idEnum) throws ScdException;
 
     /**
      * Imports IEDs, DataTypeTemplates and Communication nodes of STD files into SCL (SCD) file

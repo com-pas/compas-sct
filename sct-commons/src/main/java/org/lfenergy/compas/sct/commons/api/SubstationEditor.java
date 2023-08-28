@@ -4,28 +4,19 @@
 
 package org.lfenergy.compas.sct.commons.api;
 
-
 import lombok.NonNull;
 import org.lfenergy.compas.scl2007b4.model.SCL;
+import org.lfenergy.compas.scl2007b4.model.TSubstation;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter;
-import org.lfenergy.compas.sct.commons.scl.sstation.VoltageLevelAdapter;
-import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 
 /**
- * A representation of the <em><b>{@link SubstationEditor SubstationEditor}</b></em>.
- * <p>
- * The following features are supported:
- * </p>
+ * Service class that will be used to create, update or delete elements related to the {@link TSubstation <em>TSubstation</em>} object.
+ * <p> The following features are supported: </p>
  * <ul>
  *   <li>{@link SubstationEditor#addSubstation(SCL, SCL) <em>Adds the <b>Substation </b> object from given <b>SCL </b> object</em>}</li>
  * </ul>
  * @see SubstationAdapter
- * @see VoltageLevelAdapter
- * @see org.lfenergy.compas.sct.commons.scl.sstation.BayAdapter
- * @see org.lfenergy.compas.sct.commons.scl.sstation.FunctionAdapter
- * @see org.lfenergy.compas.sct.commons.scl.sstation.LNodeAdapter
- * @see PrivateUtils
  */
 public interface SubstationEditor {
 

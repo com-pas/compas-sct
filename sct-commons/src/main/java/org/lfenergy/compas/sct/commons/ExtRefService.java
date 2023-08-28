@@ -5,18 +5,13 @@
 package org.lfenergy.compas.sct.commons;
 
 import org.apache.commons.lang3.StringUtils;
-import org.lfenergy.compas.scl2007b4.model.SCL;
-import org.lfenergy.compas.scl2007b4.model.TCompasICDHeader;
-import org.lfenergy.compas.scl2007b4.model.TExtRef;
-import org.lfenergy.compas.scl2007b4.model.TIED;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.api.ExtRefEditor;
-import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings;
+import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.NetworkRanges;
 import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.RangesPerCbType;
 import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.Settings;
 import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.SettingsOrError;
-import org.lfenergy.compas.sct.commons.dto.LDEPFSettingData;
-import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.*;
@@ -31,6 +26,65 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 import static org.lfenergy.compas.sct.commons.util.Utils.isExtRefFeedBySameControlBlock;
 
 public class ExtRefService implements ExtRefEditor {
+    private static final String INVALID_OR_MISSING_ATTRIBUTES_IN_EXT_REF_BINDING_INFO = "Invalid or missing attributes in ExtRef binding info";
+
+    @Override
+    public void updateExtRefBinders(SCL scd, ExtRefInfo extRefInfo) throws ScdException {
+        if (extRefInfo.getBindingInfo() == null || extRefInfo.getSignalInfo() == null) {
+            throw new ScdException("ExtRef Signal and/or Binding information are missing");
+        }
+        String iedName = extRefInfo.getHolderIEDName();
+        String ldInst = extRefInfo.getHolderLDInst();
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
+        LDeviceAdapter lDeviceAdapter = iedAdapter.findLDeviceAdapterByLdInst(ldInst)
+                .orElseThrow(() -> new ScdException(String.format("Unknown LDevice (%s) in IED (%s)", ldInst, iedName)));
+
+        AbstractLNAdapter<?> abstractLNAdapter = AbstractLNAdapter.builder()
+                .withLDeviceAdapter(lDeviceAdapter)
+                .withLnClass(extRefInfo.getHolderLnClass())
+                .withLnInst(extRefInfo.getHolderLnInst())
+                .withLnPrefix(extRefInfo.getHolderLnPrefix())
+                .build();
+
+        abstractLNAdapter.updateExtRefBinders(extRefInfo);
+    }
+
+    @Override
+    public TExtRef updateExtRefSource(SCL scd, ExtRefInfo extRefInfo) throws ScdException {
+        String iedName = extRefInfo.getHolderIEDName();
+        String ldInst = extRefInfo.getHolderLDInst();
+        String lnClass = extRefInfo.getHolderLnClass();
+        String lnInst = extRefInfo.getHolderLnInst();
+        String prefix = extRefInfo.getHolderLnPrefix();
+
+        ExtRefSignalInfo signalInfo = extRefInfo.getSignalInfo();
+        if (signalInfo == null || !signalInfo.isValid()) {
+            throw new ScdException("Invalid or missing attributes in ExtRef signal info");
+        }
+        ExtRefBindingInfo bindingInfo = extRefInfo.getBindingInfo();
+        if (bindingInfo == null || !bindingInfo.isValid()) {
+            throw new ScdException(INVALID_OR_MISSING_ATTRIBUTES_IN_EXT_REF_BINDING_INFO);
+        }
+        if (bindingInfo.getIedName().equals(iedName) || TServiceType.POLL.equals(bindingInfo.getServiceType())) {
+            throw new ScdException("Internal binding can't have control block");
+        }
+        ExtRefSourceInfo sourceInfo = extRefInfo.getSourceInfo();
+        if (sourceInfo == null || !sourceInfo.isValid()) {
+            throw new ScdException(INVALID_OR_MISSING_ATTRIBUTES_IN_EXT_REF_BINDING_INFO);
+        }
+
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
+        LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst);
+        AbstractLNAdapter<?> anLNAdapter = AbstractLNAdapter.builder()
+                .withLDeviceAdapter(lDeviceAdapter)
+                .withLnClass(lnClass)
+                .withLnInst(lnInst)
+                .withLnPrefix(prefix)
+                .build();
+        return anLNAdapter.updateExtRefSource(extRefInfo);
+    }
 
     @Override
     public List<SclReportItem> updateAllExtRefIedNames(SCL scd) {

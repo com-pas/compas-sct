@@ -16,7 +16,6 @@ import org.lfenergy.compas.sct.commons.scl.com.CommunicationAdapter;
 import org.lfenergy.compas.sct.commons.scl.com.ConnectedAPAdapter;
 import org.lfenergy.compas.sct.commons.scl.com.SubNetworkAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
-import org.lfenergy.compas.sct.commons.scl.dtt.EnumTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter;
 import org.lfenergy.compas.sct.commons.scl.icd.IcdHeader;
@@ -26,13 +25,12 @@ import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.IED_TEST_NAME;
 import static org.lfenergy.compas.sct.commons.util.PrivateEnum.COMPAS_ICDHEADER;
 
 @Slf4j
-public class SclService implements SclEditor {
+public class SclEditorService implements SclEditor {
 
     @Override
     public SCL initScl(final UUID hId, final String hVersion, final String hRevision) throws ScdException {
@@ -102,137 +100,6 @@ public class SclService implements SclEditor {
     }
 
     @Override
-    public List<SubNetworkDTO> getSubnetwork(SCL scd) throws ScdException {
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        CommunicationAdapter communicationAdapter = sclRootAdapter.getCommunicationAdapter(false);
-        return communicationAdapter.getSubNetworkAdapters().stream()
-                .map(SubNetworkDTO::from)
-                .toList();
-    }
-
-    @Override
-    public List<ExtRefInfo> getExtRefInfo(SCL scd, String iedName, String ldInst) throws ScdException {
-        LDeviceAdapter lDeviceAdapter = createLDeviceAdapter(scd, iedName, ldInst);
-        return lDeviceAdapter.getExtRefInfo();
-    }
-
-    @Override
-    public List<ExtRefBindingInfo> getExtRefBinders(SCL scd, String iedName, String ldInst, String lnClass, String lnInst, String prefix, ExtRefSignalInfo signalInfo) throws ScdException {
-        LDeviceAdapter lDeviceAdapter = createLDeviceAdapter(scd, iedName, ldInst);
-        AbstractLNAdapter<?> abstractLNAdapter = AbstractLNAdapter.builder()
-                .withLDeviceAdapter(lDeviceAdapter)
-                .withLnClass(lnClass)
-                .withLnInst(lnInst)
-                .withLnPrefix(prefix)
-                .build();
-
-        // check for signal existence
-        abstractLNAdapter.isExtRefExist(signalInfo);
-
-        // find potential binders for the signalInfo
-        return lDeviceAdapter.getParentAdapter().getParentAdapter().streamIEDAdapters()
-                .map(iedAdapter1 -> iedAdapter1.getExtRefBinders(signalInfo))
-                .flatMap(Collection::stream)
-                .sorted()
-                .toList();
-    }
-
-    @Override
-    public void updateExtRefBinders(SCL scd, ExtRefInfo extRefInfo) throws ScdException {
-        if (extRefInfo.getBindingInfo() == null || extRefInfo.getSignalInfo() == null) {
-            throw new ScdException("ExtRef Signal and/or Binding information are missing");
-        }
-        String iedName = extRefInfo.getHolderIEDName();
-        String ldInst = extRefInfo.getHolderLDInst();
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
-        LDeviceAdapter lDeviceAdapter = iedAdapter.findLDeviceAdapterByLdInst(ldInst)
-                .orElseThrow(() -> new ScdException(String.format(UNKNOWN_LDEVICE_IN_IED, ldInst, iedName)));
-
-        AbstractLNAdapter<?> abstractLNAdapter = AbstractLNAdapter.builder()
-                .withLDeviceAdapter(lDeviceAdapter)
-                .withLnClass(extRefInfo.getHolderLnClass())
-                .withLnInst(extRefInfo.getHolderLnInst())
-                .withLnPrefix(extRefInfo.getHolderLnPrefix())
-                .build();
-
-        abstractLNAdapter.updateExtRefBinders(extRefInfo);
-    }
-
-    @Override
-    public List<ControlBlock> getExtRefSourceInfo(SCL scd, ExtRefInfo extRefInfo) throws ScdException {
-
-        ExtRefSignalInfo signalInfo = extRefInfo.getSignalInfo();
-        if (!signalInfo.isValid()) {
-            throw new ScdException("Invalid or missing attributes in ExtRef signal info");
-        }
-        ExtRefBindingInfo bindingInfo = extRefInfo.getBindingInfo();
-        if (!bindingInfo.isValid()) {
-            throw new ScdException(INVALID_OR_MISSING_ATTRIBUTES_IN_EXT_REF_BINDING_INFO);
-        }
-
-        String iedName = extRefInfo.getHolderIEDName();
-        if (bindingInfo.getIedName().equals(iedName)) {
-            throw new ScdException("Internal binding can't have control block");
-        }
-
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-
-        // Get CBs
-        IEDAdapter srcIEDAdapter = sclRootAdapter.getIEDAdapterByName(bindingInfo.getIedName());
-        LDeviceAdapter srcLDeviceAdapter = srcIEDAdapter.findLDeviceAdapterByLdInst(extRefInfo.getBindingInfo().getLdInst())
-                .orElseThrow();
-
-        List<AbstractLNAdapter<?>> aLNAdapters = srcLDeviceAdapter.getLNAdaptersIncludingLN0();
-
-        return aLNAdapters.stream()
-                .map(abstractLNAdapter1 -> abstractLNAdapter1.getControlBlocksForMatchingFCDA(extRefInfo))
-                .flatMap(Collection::stream)
-                .toList();
-    }
-
-
-    @Override
-    public TExtRef updateExtRefSource(SCL scd, ExtRefInfo extRefInfo) throws ScdException {
-        String iedName = extRefInfo.getHolderIEDName();
-        String ldInst = extRefInfo.getHolderLDInst();
-        String lnClass = extRefInfo.getHolderLnClass();
-        String lnInst = extRefInfo.getHolderLnInst();
-        String prefix = extRefInfo.getHolderLnPrefix();
-
-        ExtRefSignalInfo signalInfo = extRefInfo.getSignalInfo();
-        if (signalInfo == null || !signalInfo.isValid()) {
-            throw new ScdException("Invalid or missing attributes in ExtRef signal info");
-        }
-        ExtRefBindingInfo bindingInfo = extRefInfo.getBindingInfo();
-        if (bindingInfo == null || !bindingInfo.isValid()) {
-            throw new ScdException(INVALID_OR_MISSING_ATTRIBUTES_IN_EXT_REF_BINDING_INFO);
-        }
-        if (bindingInfo.getIedName().equals(iedName) || TServiceType.POLL.equals(bindingInfo.getServiceType())) {
-            throw new ScdException("Internal binding can't have control block");
-        }
-        ExtRefSourceInfo sourceInfo = extRefInfo.getSourceInfo();
-        if (sourceInfo == null || !sourceInfo.isValid()) {
-            throw new ScdException(INVALID_OR_MISSING_ATTRIBUTES_IN_EXT_REF_BINDING_INFO);
-        }
-
-        LDeviceAdapter lDeviceAdapter = createLDeviceAdapter(scd, iedName, ldInst);
-        AbstractLNAdapter<?> anLNAdapter = AbstractLNAdapter.builder()
-                .withLDeviceAdapter(lDeviceAdapter)
-                .withLnClass(lnClass)
-                .withLnInst(lnInst)
-                .withLnPrefix(prefix)
-                .build();
-        return anLNAdapter.updateExtRefSource(extRefInfo);
-    }
-
-    @Override
-    public Set<DataAttributeRef> getDAI(SCL scd, String iedName, String ldInst, DataAttributeRef dataAttributeRef, boolean updatable) throws ScdException {
-        LDeviceAdapter lDeviceAdapter = createLDeviceAdapter(scd, iedName, ldInst);
-        return lDeviceAdapter.getDAI(dataAttributeRef, updatable);
-    }
-
-    @Override
     public void updateDAI(SCL scd, String iedName, String ldInst, DataAttributeRef dataAttributeRef) throws ScdException {
         long startTime = System.nanoTime();
         log.info(Utils.entering());
@@ -250,7 +117,7 @@ public class SclService implements SclEditor {
 
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
         LDeviceAdapter lDeviceAdapter = iedAdapter.findLDeviceAdapterByLdInst(ldInst)
-                .orElseThrow(() -> new ScdException(String.format(UNKNOWN_LDEVICE_IN_IED, ldInst, iedName)));
+                .orElseThrow(() -> new ScdException(String.format("Unknown LDevice (%s) in IED (%s)", ldInst, iedName)));
 
         AbstractLNAdapter<?> lnAdapter = AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
@@ -265,17 +132,6 @@ public class SclService implements SclEditor {
         }
         lnAdapter.updateDAI(dataAttributeRef);
         log.info(Utils.leaving(startTime));
-    }
-
-    @Override
-    public Set<EnumValDTO> getEnumTypeValues(SCL scd, String idEnum) throws ScdException {
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        DataTypeTemplateAdapter dataTypeTemplateAdapter = sclRootAdapter.getDataTypeTemplateAdapter();
-        EnumTypeAdapter enumTypeAdapter = dataTypeTemplateAdapter.getEnumTypeAdapterById(idEnum)
-                .orElseThrow(() -> new ScdException("Unknown EnumType Id: " + idEnum));
-        return enumTypeAdapter.getCurrentElem().getEnumVal().stream()
-                .map(tEnumVal -> new EnumValDTO(tEnumVal.getOrd(), tEnumVal.getValue()))
-                .collect(Collectors.toSet());
     }
 
     @Override
