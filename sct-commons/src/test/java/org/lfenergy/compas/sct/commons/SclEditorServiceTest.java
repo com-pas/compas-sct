@@ -228,7 +228,6 @@ class SclEditorServiceTest {
         SCL std0 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SCL std1 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_SITESITE1SCU1.xml");
         SCL std2 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_SITESITE1SCU2.xml");
-        SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
 
         assertDoesNotThrow(() -> sclEditorService.importSTDElementsInSCD(scd, List.of(std0, std1, std2), DTO.SUB_NETWORK_TYPES));
         assertThat(scd.getIED()).hasSize(3);
@@ -266,9 +265,9 @@ class SclEditorServiceTest {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd.xml");
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_with_same_ICDSystemVersionUUID.xml");
-        SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
+        List<SCL> stdList = List.of(std);
         //When Then
-        assertThrows(ScdException.class, () -> sclEditorService.importSTDElementsInSCD(scd, List.of(std), DTO.SUB_NETWORK_TYPES));
+        assertThrows(ScdException.class, () -> sclEditorService.importSTDElementsInSCD(scd, stdList, DTO.SUB_NETWORK_TYPES));
         assertIsMarshallable(scd);
     }
 
@@ -276,10 +275,9 @@ class SclEditorServiceTest {
     void testImportSTDElementsInSCD_No_STD_Match() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/ssd.xml");
-        SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
+        List<SCL> stdList = List.of();
         //When Then
-        Set<SCL> stds = new HashSet<>();
-        assertThrows(ScdException.class, () -> sclEditorService.importSTDElementsInSCD(scd, List.of(), DTO.SUB_NETWORK_TYPES));
+        assertThrows(ScdException.class, () -> sclEditorService.importSTDElementsInSCD(scd, stdList, DTO.SUB_NETWORK_TYPES));
         assertIsMarshallable(scd);
     }
 

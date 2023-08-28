@@ -4,7 +4,6 @@
 
 package org.lfenergy.compas.sct.commons;
 
-import lombok.extern.slf4j.Slf4j;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.api.SclElementsProvider;
 import org.lfenergy.compas.sct.commons.dto.*;
@@ -18,7 +17,6 @@ import org.lfenergy.compas.sct.commons.scl.ied.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Slf4j
 public class SclElementsProviderService implements SclElementsProvider {
 
     @Override

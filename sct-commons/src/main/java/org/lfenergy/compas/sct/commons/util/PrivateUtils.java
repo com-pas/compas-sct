@@ -197,8 +197,8 @@ public final class PrivateUtils {
                                 PrivateUtils.extractCompasICDHeader(tp)
                                         .map(TCompasICDHeader::getICDSystemVersionUUID)
                                         .ifPresent(icdSysVer -> {
-                                            PrivateLinkedToStds PrivateLinkedToStds = icdSysVerToPrivateStdsMap.get(icdSysVer);
-                                            List<SCL> list = PrivateLinkedToStds != null ? PrivateLinkedToStds.stdList() : new ArrayList<>();
+                                            PrivateLinkedToStds privateLinkedToStds = icdSysVerToPrivateStdsMap.get(icdSysVer);
+                                            List<SCL> list = privateLinkedToStds != null ? privateLinkedToStds.stdList() : new ArrayList<>();
                                             list.add(std);
                                             icdSysVerToPrivateStdsMap.put(icdSysVer, new PrivateLinkedToStds(tp, list));
                                         })
@@ -216,7 +216,7 @@ public final class PrivateUtils {
      */
     public static void checkSTDCorrespondanceWithLNodeCompasICDHeader(Map<String, PrivateLinkedToStds> mapICDSystemVersionUuidAndSTDFile) throws ScdException {
         mapICDSystemVersionUuidAndSTDFile.values().stream()
-                .filter(PrivateLinkedToStds -> PrivateLinkedToStds.stdList().size() != 1)
+                .filter(privateLinkedToStds -> privateLinkedToStds.stdList().size() != 1)
                 .findFirst()
                 .ifPresent(pToStd -> {
                     throw new ScdException("There are several STD files corresponding to " + stdCheckFormatExceptionMessage(pToStd.tPrivate()));

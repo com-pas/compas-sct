@@ -29,7 +29,7 @@ class SubstationServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/add_ied_test.xml");
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
-        assertThat(scd.getSubstation().size()).isZero();
+        assertThat(scd.getSubstation()).asList().isEmpty();
         // When
         substationService.addSubstation(scd, ssd);
         // Then
@@ -51,7 +51,7 @@ class SubstationServiceTest {
         // Then
         assertIsMarshallable(scd);
         assertThat(scdSubstation.getName()).isEqualTo(ssdSubstation.getName());
-        assertThat(scd.getSubstation().size()).isEqualTo(ssd.getSubstation().size());
+        assertThat(scd.getSubstation()).asList().hasSameSizeAs(ssd.getSubstation());
         assertThat(scdSubstation.getVoltageLevel().stream().map(TVoltageLevel::getBay).count()).isEqualTo(2);
     }
 
