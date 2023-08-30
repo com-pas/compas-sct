@@ -17,13 +17,13 @@ First you need to add following dependencies to the pom.xml of your repository.
 <dependency>
     <groupId>org.lfenergy.compas</groupId>
     <artifactId>sct-commons</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.12</version>
 </dependency>
 <!-- SclAutomationService -->
 <dependency>
     <groupId>org.lfenergy.compas</groupId>
     <artifactId>sct-app</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.12</version>
 </dependency>
 ```
 Actually there are 4 packages available:
@@ -37,15 +37,20 @@ Actually there are 4 packages available:
 Now that you have your **compas-sct** dependency set, you can start communicating with Commons SCT services.
 
 **sct-commons** provides a collection of services to help you build SCL files for a range of use cases.
+
 Following services provides needed functions compliant with IEC 61850 :
 
-1. **SclService**
-2. **SubstationService**
+1. **SclEditorService**
+2. **SclElementsProviderService**
+3. **SubstationService**
+4. **ExtRefService**
+5. **HmiService**
 
 Let's start with a simple **SclService** call
 
 ```java
-var scl = SclService.initScl(Optional.empty(), "1.0", "1.0");
+SclEditor sclEditorService = new SclEditorService();
+SCL scl = sclEditorService.initScl(UUID.randomUUID(), "1.0", "1.0");
 marshaller.marshal(scl.getCurrentElem(), System.out);
 ```
 
@@ -78,11 +83,15 @@ Start it by using existing files of type `SSD` and `STD` and
 running the following :
 
 ```java
-// ssd : SSD 
-// std : STD 
+// ssd : SCL object represent an SSD file
+// std : SCL object represent an STD file
+SclEditor sclService = new SclEditorService();
+SubstationEditor substationService = new SubstationService();
 HeaderDTO headerDTO = new HeaderDTO(UUID.randomUUID(), "1.0", "1.0");
-var scl = SclAutomationService.createSCD(ssd, headerDTO, Set.of(std));
-marshaller.marshal(scl.getCurrentElem(), System.out);
+
+SclAutomationService sclAutomationService = new SclAutomationService(sclService, substationService);
+SCL scl = sclAutomationService.createSCD(ssd, headerDTO, List.of(std));
+marshaller.marshal(scl, System.out);
 ```
 When the command completes, it prints XML output representing completed **SCL** file.
 Its structure resembles the following:
