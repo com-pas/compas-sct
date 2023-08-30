@@ -2,13 +2,14 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.sct.commons.scl;
+package org.lfenergy.compas.sct.commons.util;
 
 import lombok.NonNull;
+import lombok.experimental.UtilityClass;
 import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.dto.PrivateLinkedToStds;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.icd.IcdHeader;
-import org.lfenergy.compas.sct.commons.util.PrivateEnum;
 
 import javax.xml.bind.JAXBElement;
 import java.util.*;
@@ -19,25 +20,18 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 import static org.lfenergy.compas.sct.commons.util.PrivateEnum.COMPAS_ICDHEADER;
 
 /**
- * A representation of the <em><b>{@link PrivateService PrivateService}</b></em>.
+ * A representation of the <em><b>{@link PrivateUtils PrivateService}</b></em>.
  * <p>
  * The following features are supported:
  * </p>
  * <ol>
- *  <li>{@link PrivateService#extractCompasPrivates(TBaseElement, Class)
+ *  <li>{@link PrivateUtils#extractCompasPrivates(TBaseElement, Class)
  *      <em>Returns the value of the <b>TPrivate </b> containment reference list from given <b>TBaseElement </b> By class type</em>}</li>
- *
- *  <li>{@link PrivateService#extractCompasPrivates(TBaseElement, Class)}
- *      <em>Returns the value of the <b>TPrivate </b> containment reference list from given <b>TPrivate </b> elements By class type</em>}
- *   </li>
  * </ol>
  * @see org.lfenergy.compas.scl2007b4.model.TPrivate
  */
-public final class PrivateService {
-
-    private PrivateService() {
-        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
-    }
+@UtilityClass
+public final class PrivateUtils {
 
     private static final ObjectFactory objectFactory = new ObjectFactory();
 
@@ -195,27 +189,22 @@ public final class PrivateService {
      * @return map of ICD_SYSTEM_VERSION_UUID attribute in IED/Private:COMPAS-ICDHeader and related Private coupled with
      * all corresponding STD
      */
-    public static Map<String, PrivateLinkedToSTDs> createMapICDSystemVersionUuidAndSTDFile(List<SCL> stds) {
-        Map<String, PrivateLinkedToSTDs> icdSysVerToPrivateStdsMap = new HashMap<>();
+    public static Map<String, PrivateLinkedToStds> createMapICDSystemVersionUuidAndSTDFile(List<SCL> stds) {
+        Map<String, PrivateLinkedToStds> icdSysVerToPrivateStdsMap = new HashMap<>();
         stds.forEach(std -> std.getIED()
                 .forEach(ied -> ied.getPrivate()
                         .forEach(tp ->
-                                PrivateService.extractCompasICDHeader(tp)
+                                PrivateUtils.extractCompasICDHeader(tp)
                                         .map(TCompasICDHeader::getICDSystemVersionUUID)
                                         .ifPresent(icdSysVer -> {
-                                            PrivateLinkedToSTDs privateLinkedToSTDs = icdSysVerToPrivateStdsMap.get(icdSysVer);
-                                            List<SCL> list = privateLinkedToSTDs != null ? privateLinkedToSTDs.stdList() : new ArrayList<>();
+                                            PrivateLinkedToStds privateLinkedToStds = icdSysVerToPrivateStdsMap.get(icdSysVer);
+                                            List<SCL> list = privateLinkedToStds != null ? privateLinkedToStds.stdList() : new ArrayList<>();
                                             list.add(std);
-                                            icdSysVerToPrivateStdsMap.put(icdSysVer, new PrivateLinkedToSTDs(tp, list));
+                                            icdSysVerToPrivateStdsMap.put(icdSysVer, new PrivateLinkedToStds(tp, list));
                                         })
                         )));
         return icdSysVerToPrivateStdsMap;
     }
-
-
-    public record PrivateLinkedToSTDs (TPrivate tPrivate, List<SCL> stdList) {
-    }
-
 
     /**
      * Checks SCD and STD compatibilities by checking if there is at least one ICD_SYSTEM_VERSION_UUID in
@@ -225,9 +214,9 @@ public final class PrivateService {
      * @throws ScdException throws when there are several STD files corresponding to <em>ICD_SYSTEM_VERSION_UUID</em>
      *                      from Substation/../LNode/Private COMPAS-ICDHeader of SCL
      */
-    public static void checkSTDCorrespondanceWithLNodeCompasICDHeader(Map<String, PrivateLinkedToSTDs> mapICDSystemVersionUuidAndSTDFile) throws ScdException {
+    public static void checkSTDCorrespondanceWithLNodeCompasICDHeader(Map<String, PrivateLinkedToStds> mapICDSystemVersionUuidAndSTDFile) throws ScdException {
         mapICDSystemVersionUuidAndSTDFile.values().stream()
-                .filter(privateLinkedToSTDs -> privateLinkedToSTDs.stdList().size() != 1)
+                .filter(privateLinkedToStds -> privateLinkedToStds.stdList().size() != 1)
                 .findFirst()
                 .ifPresent(pToStd -> {
                     throw new ScdException("There are several STD files corresponding to " + stdCheckFormatExceptionMessage(pToStd.tPrivate()));
@@ -242,7 +231,7 @@ public final class PrivateService {
      * @throws ScdException throws when parameter not present in Private
      */
     public static String stdCheckFormatExceptionMessage(TPrivate key) throws ScdException {
-        Optional<TCompasICDHeader> optionalCompasICDHeader = PrivateService.extractCompasICDHeader(key);
+        Optional<TCompasICDHeader> optionalCompasICDHeader = PrivateUtils.extractCompasICDHeader(key);
         return  HEADER_ID + " = " + optionalCompasICDHeader.map(TCompasICDHeader::getHeaderId).orElse(null) + " " +
                 HEADER_VERSION + " = " + optionalCompasICDHeader.map(TCompasICDHeader::getHeaderVersion).orElse(null) + " " +
                 HEADER_REVISION + " = " + optionalCompasICDHeader.map(TCompasICDHeader::getHeaderRevision).orElse(null) +
@@ -265,7 +254,7 @@ public final class PrivateService {
                 .map(TBay::getFunction).flatMap(Collection::stream)
                 .map(TFunction::getLNode).flatMap(Collection::stream)
                 .map(TLNode::getPrivate).flatMap(Collection::stream)
-                .map(PrivateService::extractCompasICDHeader)
+                .map(PrivateUtils::extractCompasICDHeader)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .map(IcdHeader::new);
@@ -280,9 +269,9 @@ public final class PrivateService {
      * @throws ScdException throws when Private is not COMPAS_ICDHEADER one
      */
     public static boolean comparePrivateCompasICDHeaders(TPrivate iedPrivate, TPrivate scdPrivate) throws ScdException {
-        TCompasICDHeader iedCompasICDHeader = PrivateService.extractCompasICDHeader(iedPrivate)
+        TCompasICDHeader iedCompasICDHeader = PrivateUtils.extractCompasICDHeader(iedPrivate)
                 .orElseThrow(() -> new ScdException(COMPAS_ICDHEADER + "not found in IED Private "));
-        TCompasICDHeader scdCompasICDHeader = PrivateService.extractCompasICDHeader(scdPrivate)
+        TCompasICDHeader scdCompasICDHeader = PrivateUtils.extractCompasICDHeader(scdPrivate)
                 .orElseThrow(() -> new ScdException(COMPAS_ICDHEADER + "not found in LNode Private "));
         return Objects.equals(iedCompasICDHeader.getIEDType(), scdCompasICDHeader.getIEDType())
                 && Objects.equals(iedCompasICDHeader.getICDSystemVersionUUID(), scdCompasICDHeader.getICDSystemVersionUUID())

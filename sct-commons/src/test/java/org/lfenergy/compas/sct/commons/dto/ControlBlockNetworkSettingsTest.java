@@ -14,7 +14,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TDurationInMilliSec;
 import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.SettingsOrError;
-import org.lfenergy.compas.sct.commons.scl.PrivateService;
+import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.ControlBlockAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
@@ -193,7 +193,7 @@ class ControlBlockNetworkSettingsTest {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        PrivateService.removePrivates(findIed(sclRootAdapter.getCurrentElem(), "IED_NAME2").getCurrentElem(), missingPrivate);
+        PrivateUtils.removePrivates(findIed(sclRootAdapter.getCurrentElem(), "IED_NAME2").getCurrentElem(), missingPrivate);
         ControlBlockAdapter controlBlockAdapter = findControlBlock(sclRootAdapter.getCurrentElem(), "IED_NAME2", "LD_INST21", "CB_LD_INST21_GSI", ControlBlockEnum.GSE);
 
         //When
