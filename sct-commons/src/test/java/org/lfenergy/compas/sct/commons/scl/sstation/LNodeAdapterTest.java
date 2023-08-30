@@ -4,13 +4,13 @@
 
 package org.lfenergy.compas.sct.commons.scl.sstation;
 
+import jakarta.xml.bind.JAXBElement;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.support.HierarchyTraversalMode;
 import org.junit.platform.commons.support.ReflectionSupport;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 
-import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 import java.lang.reflect.Field;
 import java.util.Collection;
