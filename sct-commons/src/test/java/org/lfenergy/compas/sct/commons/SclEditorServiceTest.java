@@ -2,11 +2,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.sct.commons.scl;
+package org.lfenergy.compas.sct.commons;
 
-import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -14,25 +14,29 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.*;
 import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDa;
-import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDo;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.LD_SUIED;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.getDAIAdapters;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
 import static org.lfenergy.compas.sct.commons.util.PrivateEnum.COMPAS_SCL_FILE_TYPE;
 
-class SclServiceTest {
+@ExtendWith(MockitoExtension.class)
+class SclEditorServiceTest {
+
+    @InjectMocks
+    SclEditorService sclEditorService;
 
     private static Stream<Arguments> sclProviderMissingRequiredObjects() {
         SCL scl1 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_KO_MissingBeh.scd");
@@ -92,7 +96,7 @@ class SclServiceTest {
         SclRootAdapter sclRootAdapter = new SclRootAdapter("hId", SclRootAdapter.VERSION, SclRootAdapter.REVISION);
         SCL scd = sclRootAdapter.getCurrentElem();
 
-        SclService.addHistoryItem(scd, "who", "what", "why");
+        sclEditorService.addHistoryItem(scd, "who", "what", "why");
 
         assertNotNull(scd.getHeader());
         THeader.History history = scd.getHeader().getHistory();
@@ -115,7 +119,7 @@ class SclServiceTest {
         assertNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
         SCL icd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
 
-        assertDoesNotThrow(() -> SclService.addIED(scd, "IED_NAME1", icd));
+        assertDoesNotThrow(() -> sclEditorService.addIED(scd, "IED_NAME1", icd));
         assertEquals("IED_NAME1", scd.getIED().get(0).getName());
         assertNotNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
 
@@ -129,7 +133,7 @@ class SclServiceTest {
         assertNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
         SCL icd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
 
-        assertDoesNotThrow(() -> SclService.addIED(scd, "IED_NAME1", icd));
+        assertDoesNotThrow(() -> sclEditorService.addIED(scd, "IED_NAME1", icd));
 
         SubNetworkDTO subNetworkDTO = new SubNetworkDTO();
         subNetworkDTO.setName("sName1");
@@ -137,7 +141,7 @@ class SclServiceTest {
         ConnectedApDTO connectedApDTO = new ConnectedApDTO("IED_NAME1", "AP_NAME");
         subNetworkDTO.addConnectedAP(connectedApDTO);
 
-        assertDoesNotThrow(() -> SclService.addSubnetworks(scd, List.of(subNetworkDTO), icd));
+        assertDoesNotThrow(() -> sclEditorService.addSubnetworks(scd, List.of(subNetworkDTO), icd));
         assertIsMarshallable(scd);
     }
 
@@ -148,588 +152,17 @@ class SclServiceTest {
         assertNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
         SCL icd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
 
-        assertDoesNotThrow(() -> SclService.addIED(scd, "IED_NAME1", icd));
+        assertDoesNotThrow(() -> sclEditorService.addIED(scd, "IED_NAME1", icd));
 
-        assertDoesNotThrow(() -> SclService.addSubnetworks(scd, List.of(), icd));
+        assertDoesNotThrow(() -> sclEditorService.addSubnetworks(scd, List.of(), icd));
         String marshalledScd = assertIsMarshallable(scd);
         assertThat(marshalledScd).doesNotContain("<Communication");
     }
 
     @Test
-    void testAddSubnetworksWithFilledCommunication() {
-        SclRootAdapter sclRootAdapter = new SclRootAdapter("hId", SclRootAdapter.VERSION, SclRootAdapter.REVISION);
-        SCL scd = sclRootAdapter.getCurrentElem();
-        assertNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
-        SCL icd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_with_filled_communication.xml");
-
-        assertDoesNotThrow(() -> SclService.addIED(scd, "IED_NAME1", icd));
-
-        List<SubNetworkDTO> subNetworkDTOSet = SclService.getSubnetwork(icd);
-        assertDoesNotThrow(() -> SclService.addSubnetworks(scd, subNetworkDTOSet, icd));
-
-        String marshalledScd = assertIsMarshallable(scd);
-        assertThat(marshalledScd).contains("<Address>", "PhysConn");
-    }
-
-    @Test
-    void testAddSubnetworksWithoutImportingIcdAddressAndPhysConn() {
-        SclRootAdapter sclRootAdapter = new SclRootAdapter("hId", SclRootAdapter.VERSION, SclRootAdapter.REVISION);
-        SCL scd = sclRootAdapter.getCurrentElem();
-        assertNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
-        SCL icd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_with_filled_communication.xml");
-
-        assertDoesNotThrow(() -> SclService.addIED(scd, "IED_NAME1", icd));
-
-        List<SubNetworkDTO> subNetworkDTOSet = SclService.getSubnetwork(icd);
-        assertDoesNotThrow(() -> SclService.addSubnetworks(scd, subNetworkDTOSet, null));
-
-        String marshalledScd = assertIsMarshallable(scd);
-        assertThat(marshalledScd).doesNotContain("<Address>", "PhysConn");
-    }
-
-    @Test
-    void testGetSubnetwork() {
-        SclRootAdapter sclRootAdapter = new SclRootAdapter("hId", SclRootAdapter.VERSION, SclRootAdapter.REVISION);
-        SCL scd = sclRootAdapter.getCurrentElem();
-        assertNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
-        SCL icd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
-
-        assertDoesNotThrow(() -> SclService.addIED(scd, "IED_NAME1", icd));
-
-        SubNetworkDTO subNetworkDTO = new SubNetworkDTO();
-        subNetworkDTO.setName("sName1");
-        subNetworkDTO.setType("IP");
-        ConnectedApDTO connectedApDTO = new ConnectedApDTO("IED_NAME1", "AP_NAME");
-        subNetworkDTO.addConnectedAP(connectedApDTO);
-
-        assertDoesNotThrow(() -> SclService.addSubnetworks(scd, List.of(subNetworkDTO), icd));
-
-        List<SubNetworkDTO> subNetworkDTOS = assertDoesNotThrow(() -> SclService.getSubnetwork(scd));
-        assertEquals(1, subNetworkDTOS.size());
-    }
-
-    @Test
-    void testGetExtRefInfo() {
-        SclRootAdapter sclRootAdapter = new SclRootAdapter("hId", SclRootAdapter.VERSION, SclRootAdapter.REVISION);
-        SCL scd = sclRootAdapter.getCurrentElem();
-        assertNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
-        SCL icd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
-
-        assertDoesNotThrow(() -> SclService.addIED(scd, "IED_NAME1", icd));
-        var extRefInfos = assertDoesNotThrow(() -> SclService.getExtRefInfo(scd, "IED_NAME1", "LD_INST11"));
-        assertEquals(1, extRefInfos.size());
-
-        assertEquals("IED_NAME1", extRefInfos.get(0).getHolderIEDName());
-
-        assertThrows(ScdException.class, () -> SclService.getExtRefInfo(scd, "IED_NAME1", "UNKNOWN_LD"));
-    }
-
-    @Test
-    void getExtRefBinders_shouldThowScdException_whenExtRefNotExist() {
-        //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_binders_test.xml");
-
-        ExtRefSignalInfo signalInfo = createSignalInfo("Do11.sdo11", "da11.bda111.bda112.bda113", "INT_ADDR11");
-        signalInfo.setPLN("ANCR");
-        //When Then
-        assertThatThrownBy(
-                () -> SclService.getExtRefBinders(scd, "IED_NAME1", "UNKNOWN_LD", "LLN0", "", "", signalInfo))
-                .isInstanceOf(ScdException.class);
-    }
-
-    @Test
-    void getExtRefBinders_shouldReturnSortedListBindingInfo_whenExtRefAndDOExist() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_binders_test.xml");
-
-        ExtRefSignalInfo signalInfo = createSignalInfo(
-                "Do11.sdo11", "da11.bda111.bda112.bda113", "INT_ADDR11"
-        );
-        signalInfo.setPLN("ANCR");
-
-        // When
-        List<ExtRefBindingInfo> potentialBinders = SclService.getExtRefBinders(scd, "IED_NAME1", "LD_INST11", "LLN0", "", "", signalInfo);
-
-        // Then
-        assertThat(potentialBinders).hasSize(4);
-        assertThat(potentialBinders)
-                .extracting(ExtRefBindingInfo::getIedName)
-                .containsExactly("IED_NAME1", "IED_NAME1", "IED_NAME2", "IED_NAME3");
-        assertThat(potentialBinders)
-                .extracting(ExtRefBindingInfo::getLdInst)
-                .containsExactly("LD_INST11", "LD_INST12", "LD_INST22", "LD_INST31");
-        assertThat(potentialBinders)
-                .extracting(ExtRefBindingInfo::getLnClass)
-                .containsExactly("ANCR", "ANCR", "ANCR", "ANCR");
-        assertThat(potentialBinders)
-                .extracting(ExtRefBindingInfo::getLnInst)
-                .containsExactly("1", "1", "2", "3");
-    }
-
-    @Test
-    void testUpdateExtRefBinders() {
-        SclRootAdapter sclRootAdapter = new SclRootAdapter("hId", SclRootAdapter.VERSION, SclRootAdapter.REVISION);
-        SCL scd = sclRootAdapter.getCurrentElem();
-        assertNull(sclRootAdapter.getCurrentElem().getDataTypeTemplates());
-        SCL icd1 = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
-        SCL icd2 = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_2_test.xml");
-
-        assertDoesNotThrow(() -> SclService.addIED(scd, "IED_NAME1", icd1));
-        assertDoesNotThrow(() -> SclService.addIED(scd, "IED_NAME2", icd2));
-
-        ExtRefSignalInfo signalInfo = createSignalInfo(
-                "Do11.sdo11", "da11.bda111.bda112.bda113", "INT_ADDR11"
-        );
-        signalInfo.setPServT(null);
-        signalInfo.setPLN(null);
-        signalInfo.setDesc(null);
-        // Signal for external binding (in IED 2 LD_INST22 - PIOC)
-        ExtRefBindingInfo bindingInfo = new ExtRefBindingInfo();
-        bindingInfo.setIedName("IED_NAME2");
-        bindingInfo.setLdInst("LD_INST22");
-        bindingInfo.setLnClass("PIOC");
-        bindingInfo.setLnInst("1");
-        bindingInfo.setLnType("LN2");
-        bindingInfo.setDoName(new DoTypeName(signalInfo.getPDO()));
-        bindingInfo.setDaName(new DaTypeName(signalInfo.getPDA()));
-        bindingInfo.setServiceType(signalInfo.getPServT());
-        LNodeDTO lNodeDTO = new LNodeDTO();
-        lNodeDTO.setNodeClass(TLLN0Enum.LLN_0.value());
-        ExtRefInfo extRefInfo = new ExtRefInfo();
-        extRefInfo.setHolderIEDName("IED_NAME1");
-        extRefInfo.setHolderLDInst("LD_INST11");
-        extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
-        extRefInfo.setSignalInfo(signalInfo);
-        extRefInfo.setBindingInfo(bindingInfo);
-        lNodeDTO.getExtRefs().add(extRefInfo);
-
-        assertDoesNotThrow(
-                () -> SclService.updateExtRefBinders(scd, extRefInfo)
-        );
-
-        extRefInfo.setHolderLDInst("UNKNOWN_LD");
-        assertThrows(
-                ScdException.class,
-                () -> SclService.updateExtRefBinders(scd, extRefInfo)
-        );
-        assertIsMarshallable(scd);
-    }
-
-    @Test
-    void getExtRefSourceInfo_shouldReturnEmptyList_whenExtRefMatchNoFCDA() {
-        //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
-        String iedName = "IED_NAME2";
-        String ldInst = "LD_INST21";
-        String lnClass = TLLN0Enum.LLN_0.value();
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iedAdapter.findLDeviceAdapterByLdInst(ldInst).get());
-        LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
-        List<TExtRef> extRefs = ln0Adapter.getExtRefs(null);
-        assertFalse(extRefs.isEmpty());
-
-        ExtRefInfo extRefInfo = new ExtRefInfo(extRefs.get(0));
-
-        extRefInfo.setHolderIEDName(iedName);
-        extRefInfo.setHolderLDInst(ldInst);
-        extRefInfo.setHolderLnClass(lnClass);
-
-        //When
-        List<ControlBlock> controlBlocks = SclService.getExtRefSourceInfo(scd, extRefInfo);
-
-        //Then
-        assertThat(controlBlocks).isEmpty();
-    }
-
-    @Test
-    void getExtRefSourceInfo_shouldReturnListOfControlBlocks_whenExtRefMatchFCDA() {
-        //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/issue_175_scd_get_cbs_test.xml");
-        String iedName = "IED_NAME2";
-        String ldInst = "LD_INST21";
-        String lnClass = TLLN0Enum.LLN_0.value();
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iedAdapter.findLDeviceAdapterByLdInst(ldInst).get());
-        LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
-        List<TExtRef> extRefs = ln0Adapter.getExtRefs(null);
-        assertFalse(extRefs.isEmpty());
-
-        ExtRefInfo extRefInfo = new ExtRefInfo(extRefs.get(0));
-
-        extRefInfo.setHolderIEDName(iedName);
-        extRefInfo.setHolderLDInst(ldInst);
-        extRefInfo.setHolderLnClass(lnClass);
-
-        //When
-        List<ControlBlock> controlBlocks = SclService.getExtRefSourceInfo(scd, extRefInfo);
-
-        //Then
-        assertThat(controlBlocks).hasSize(1);
-        assertThat(controlBlocks.get(0).getName()).isEqualTo("goose2");
-    }
-
-    @Test
-    void updateExtRefSource_shouldThrowScdException_whenSignalInfoNullOrInvalid() {
-        //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
-        ExtRefInfo extRefInfo = new ExtRefInfo();
-        extRefInfo.setHolderIEDName("IED_NAME2");
-        extRefInfo.setHolderLDInst("LD_INST21");
-        extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
-
-        //When Then
-        assertThat(extRefInfo.getSignalInfo()).isNull();
-        assertThatThrownBy(() -> SclService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class); // signal = null
-        extRefInfo.setSignalInfo(new ExtRefSignalInfo());
-        assertThat(extRefInfo.getSignalInfo()).isNotNull();
-        assertThatThrownBy(() -> SclService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class);// signal invalid
-    }
-
-    @Test
-    void updateExtRefSource_shouldThrowScdException_whenBindingInfoNullOrInvalid() {
-        //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
-        ExtRefInfo extRefInfo = new ExtRefInfo();
-        extRefInfo.setHolderIEDName("IED_NAME2");
-        extRefInfo.setHolderLDInst("LD_INST21");
-        extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
-
-        ExtRefSignalInfo extRefSignalInfo = new ExtRefSignalInfo();
-        extRefSignalInfo.setIntAddr("INT_ADDR21");
-        extRefSignalInfo.setPDA("da21.bda211.bda212.bda213");
-        extRefSignalInfo.setPDO("Do21.sdo21");
-        extRefInfo.setSignalInfo(extRefSignalInfo);
-        //When Then
-        assertThat(extRefInfo.getBindingInfo()).isNull();
-        assertThatThrownBy(() -> SclService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class); // binding = null
-        extRefInfo.setBindingInfo(new ExtRefBindingInfo());
-        assertThat(extRefInfo.getBindingInfo()).isNotNull();
-        assertThatThrownBy(() -> SclService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class);// binding invalid
-    }
-
-    @Test
-    void updateExtRefSource_shouldThrowScdException_whenBindingInternalByIedName() {
-        //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
-        ExtRefInfo extRefInfo = new ExtRefInfo();
-        extRefInfo.setHolderIEDName("IED_NAME2");
-        extRefInfo.setHolderLDInst("LD_INST21");
-        extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
-
-        ExtRefSignalInfo extRefSignalInfo = new ExtRefSignalInfo();
-        extRefSignalInfo.setIntAddr("INT_ADDR21");
-        extRefSignalInfo.setPDA("da21.bda211.bda212.bda213");
-        extRefSignalInfo.setPDO("Do21.sdo21");
-        extRefInfo.setSignalInfo(extRefSignalInfo);
-
-        ExtRefBindingInfo extRefBindingInfo = new ExtRefBindingInfo();
-        extRefBindingInfo.setIedName("IED_NAME2"); // internal binding
-        extRefBindingInfo.setLdInst("LD_INST12");
-        extRefBindingInfo.setLnClass(TLLN0Enum.LLN_0.value());
-        extRefInfo.setBindingInfo(new ExtRefBindingInfo());
-        //When Then
-        assertThatThrownBy(() -> SclService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class); // CB not allowed
-    }
-
-    @Test
-    void updateExtRefSource_shouldThrowScdException_whenBindingInternaByServiceType() {
-        //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
-        ExtRefInfo extRefInfo = new ExtRefInfo();
-        extRefInfo.setHolderIEDName("IED_NAME2");
-        extRefInfo.setHolderLDInst("LD_INST21");
-        extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
-
-        ExtRefSignalInfo extRefSignalInfo = new ExtRefSignalInfo();
-        extRefSignalInfo.setIntAddr("INT_ADDR21");
-        extRefSignalInfo.setPDA("da21.bda211.bda212.bda213");
-        extRefSignalInfo.setPDO("Do21.sdo21");
-        extRefInfo.setSignalInfo(extRefSignalInfo);
-
-        ExtRefBindingInfo extRefBindingInfo = new ExtRefBindingInfo();
-        extRefBindingInfo.setIedName("IED_NAME2"); // internal binding
-        extRefBindingInfo.setLdInst("LD_INST12");
-        extRefBindingInfo.setLnClass(TLLN0Enum.LLN_0.value());
-        extRefBindingInfo.setServiceType(TServiceType.POLL);
-        extRefInfo.setBindingInfo(new ExtRefBindingInfo());
-        //When Then
-        assertThatThrownBy(() -> SclService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class); // CB not allowed
-    }
-
-    @Test
-    void updateExtRefSource_shouldThrowScdException_whenSourceInfoNullOrInvalid() {
-        //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
-        ExtRefInfo extRefInfo = new ExtRefInfo();
-        extRefInfo.setHolderIEDName("IED_NAME2");
-        extRefInfo.setHolderLDInst("LD_INST21");
-        extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
-
-        ExtRefSignalInfo extRefSignalInfo = new ExtRefSignalInfo();
-        extRefSignalInfo.setIntAddr("INT_ADDR21");
-        extRefSignalInfo.setPDA("da21.bda211.bda212.bda213");
-        extRefSignalInfo.setPDO("Do21.sdo21");
-        extRefInfo.setSignalInfo(extRefSignalInfo);
-
-        ExtRefBindingInfo extRefBindingInfo = new ExtRefBindingInfo();
-        extRefBindingInfo.setIedName("IED_NAME1"); // internal binding
-        extRefBindingInfo.setLdInst("LD_INST12");
-        extRefBindingInfo.setLnClass(TLLN0Enum.LLN_0.value());
-        extRefInfo.setBindingInfo(new ExtRefBindingInfo());
-
-        //When Then
-        assertThat(extRefInfo.getSourceInfo()).isNull();
-        assertThatThrownBy(() -> SclService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class); // signal = null
-        extRefInfo.setSourceInfo(new ExtRefSourceInfo());
-        assertThat(extRefInfo.getSourceInfo()).isNotNull();
-        assertThatThrownBy(() -> SclService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class);// signal invalid
-    }
-
-    @Test
-    void updateExtRefSource_shouldThrowScdException_whenBindingExternalBinding() {
-        //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
-        ExtRefInfo extRefInfo = new ExtRefInfo();
-        extRefInfo.setHolderIEDName("IED_NAME2");
-        extRefInfo.setHolderLDInst("LD_INST21");
-        extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
-
-        ExtRefSignalInfo extRefSignalInfo = new ExtRefSignalInfo();
-        extRefSignalInfo.setIntAddr("INT_ADDR21");
-        extRefSignalInfo.setPDA("da21.bda211.bda212.bda213");
-        extRefSignalInfo.setPDO("Do21.sdo21");
-        extRefInfo.setSignalInfo(extRefSignalInfo);
-
-        ExtRefBindingInfo extRefBindingInfo = new ExtRefBindingInfo();
-        extRefBindingInfo.setIedName("IED_NAME1");
-        extRefBindingInfo.setLdInst("LD_INST12");
-        extRefBindingInfo.setLnClass(TLLN0Enum.LLN_0.value());
-        extRefInfo.setBindingInfo(extRefBindingInfo);
-
-        ExtRefSourceInfo sourceInfo = new ExtRefSourceInfo();
-        sourceInfo.setSrcLDInst(extRefInfo.getBindingInfo().getLdInst());
-        sourceInfo.setSrcLNClass(extRefInfo.getBindingInfo().getLnClass());
-        sourceInfo.setSrcCBName("goose1");
-        extRefInfo.setSourceInfo(sourceInfo);
-
-        //When
-        TExtRef extRef = assertDoesNotThrow(() -> SclService.updateExtRefSource(scd, extRefInfo));
-        //Then
-        assertThat(extRef.getSrcCBName()).isEqualTo(extRefInfo.getSourceInfo().getSrcCBName());
-        assertThat(extRef.getSrcLDInst()).isEqualTo(extRefInfo.getBindingInfo().getLdInst());
-        assertThat(extRef.getSrcLNClass()).contains(extRefInfo.getBindingInfo().getLnClass());
-    }
-
-    private ExtRefSignalInfo createSignalInfo(String pDO, String pDA, String intAddr) {
-
-        final String DESC = "DESC";
-        final String P_LN = TLLN0Enum.LLN_0.value();
-        final String P_SERV_T = "Report";
-
-        ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
-        signalInfo.setDesc(DESC);
-        signalInfo.setPDA(pDA);
-        signalInfo.setPDO(pDO);
-        signalInfo.setPLN(P_LN);
-        signalInfo.setPServT(TServiceType.fromValue(P_SERV_T));
-        signalInfo.setIntAddr(intAddr);
-
-        return signalInfo;
-    }
-
-    @Test
-    void getDAI_should_return_all_dai() {
-        // given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
-
-        // when
-        Set<DataAttributeRef> allResults = SclService.getDAI(scd, "IED_NAME1", "LD_INST12", new DataAttributeRef(), true);
-
-        // then
-        assertThat(allResults).hasSize(733);
-
-        List<DataAttributeRef> resultsWithDa = allResults.stream().filter(rdt -> StringUtils.isNotBlank(rdt.getDaRef())).collect(Collectors.toList());
-        assertThat(resultsWithDa).hasSize(733);
-
-        List<DataAttributeRef> resultsWithNoBda = allResults.stream().filter(rdt -> rdt.getBdaNames().isEmpty()).collect(Collectors.toList());
-        assertThat(resultsWithNoBda).hasSize(3);
-        List<DataAttributeRef> resultsWithBdaDepth1 = allResults.stream().filter(rdt -> rdt.getBdaNames().size() == 1).collect(Collectors.toList());
-        assertThat(resultsWithBdaDepth1).isEmpty();
-        List<DataAttributeRef> resultsWithBdaDepth2 = allResults.stream().filter(rdt -> rdt.getBdaNames().size() == 2).collect(Collectors.toList());
-        assertThat(resultsWithBdaDepth2).hasSize(1);
-        List<DataAttributeRef> resultsWithBdaDepth3 = allResults.stream().filter(rdt -> rdt.getBdaNames().size() == 3).collect(Collectors.toList());
-        assertThat(resultsWithBdaDepth3).hasSize(729);
-
-
-        List<DataAttributeRef> resultsWithDo = allResults.stream().filter(rdt -> StringUtils.isNotBlank(rdt.getDoRef())).collect(Collectors.toList());
-        assertThat(resultsWithDo).hasSize(733);
-
-        List<DataAttributeRef> resultsWithNoSdo = allResults.stream().filter(rdt -> rdt.getSdoNames().isEmpty()).collect(Collectors.toList());
-        assertThat(resultsWithNoSdo).hasSize(3);
-        List<DataAttributeRef> resultsWithSdoDepth1 = allResults.stream().filter(rdt -> rdt.getSdoNames().size() == 1).collect(Collectors.toList());
-        assertThat(resultsWithSdoDepth1).isEmpty();
-        List<DataAttributeRef> resultsWithSdoDepth2 = allResults.stream().filter(rdt -> rdt.getSdoNames().size() == 2).collect(Collectors.toList());
-        assertThat(resultsWithSdoDepth2).hasSize(730);
-        List<DataAttributeRef> resultsWithSdoDepth3 = allResults.stream().filter(rdt -> rdt.getSdoNames().size() == 3).collect(Collectors.toList());
-        assertThat(resultsWithSdoDepth3).isEmpty();
-    }
-
-    @Test
-    void getDAI_should_aggregate_attribute_from_DAI() {
-        // given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_test_aggregate_DAI.xml");
-
-        // when
-        Set<DataAttributeRef> dais = SclService.getDAI(scd, "VirtualBCU", "LDMODEXPF", new DataAttributeRef(), false);
-
-        // then
-        DataAttributeRef lln0 = DataAttributeRef.builder().prefix("").lnType("lntype1").lnClass("LLN0").lnInst("").build();
-        DataAttributeRef lln0DoA = lln0.toBuilder().doName(createDo("DoA", TPredefinedCDCEnum.DPL)).build();
-        DataAttributeRef lln0DoB = lln0.toBuilder().doName(createDo("DoB", TPredefinedCDCEnum.ACD)).build();
-
-        assertThat(dais).containsExactlyInAnyOrder(
-                lln0DoA.toBuilder().daName(createDa("daNotInDai", TFCEnum.CF, false, Map.of(0L, "0"))).build(),
-                lln0DoA.toBuilder().daName(createDa("daNotInDai2", TFCEnum.CF, true, Map.of())).build(),
-                lln0DoA.toBuilder().daName(createDa("daiOverrideVal", TFCEnum.CF, false, Map.of(0L, "1"))).build(),
-                lln0DoA.toBuilder().daName(createDa("daiOverrideValImport", TFCEnum.CF, true, Map.of())).build(),
-                lln0DoA.toBuilder().daName(createDa("daiOverrideValImport2", TFCEnum.CF, false, Map.of())).build(),
-
-                lln0DoB.toBuilder().daName(createDa("structDa.daNotInDai", TFCEnum.ST, false, Map.of(0L, "0"))).build(),
-                lln0DoB.toBuilder().daName(createDa("structDa.daNotInDai2", TFCEnum.ST, true, Map.of())).build(),
-                lln0DoB.toBuilder().daName(createDa("structDa.daiOverrideVal", TFCEnum.ST, false, Map.of(0L, "1"))).build(),
-                lln0DoB.toBuilder().daName(createDa("structDa.daiOverrideValImport", TFCEnum.ST, true, Map.of())).build(),
-                lln0DoB.toBuilder().daName(createDa("structDa.daiOverrideValImport2", TFCEnum.ST, false, Map.of())).build(),
-
-                DataAttributeRef.builder().prefix("").lnType("lntype2").lnClass("LPHD").lnInst("0")
-                        .doName(createDo("PhyNam", TPredefinedCDCEnum.DPS))
-                        .daName(createDa("aDa", TFCEnum.BL, false, Map.of())).build()
-        );
-    }
-
-    @Test
-    void getDAI_when_LDevice_not_found_should_throw_exception() {
-        // given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
-
-        // when & then
-        DataAttributeRef dataAttributeRef = new DataAttributeRef();
-        assertThrows(ScdException.class,
-                () -> SclService.getDAI(scd, "IED_NAME1", "UNKNOWNLD", dataAttributeRef, true));
-    }
-
-    @Test
-    void getDAI_should_filter_updatable_DA() {
-        // given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_test_updatable_DAI.xml");
-
-        // when
-        Set<DataAttributeRef> dais = SclService.getDAI(scd, "VirtualBCU", "LDMODEXPF", new DataAttributeRef(), true);
-
-        // then
-        assertThat(dais).isNotNull();
-        List<String> resultSimpleDa = dais.stream()
-                .filter(dataAttributeRef -> dataAttributeRef.getBdaNames().isEmpty()) // test only simple DA
-                .map(DataAttributeRef::getLNRef).collect(Collectors.toList());
-        assertThat(resultSimpleDa).containsExactlyInAnyOrder(
-                // ...AndTrueInDai : If ValImport is True in DAI, DA is updatable
-                "LLN0.DoA.valImportNotSetAndTrueInDai",
-                "LLN0.DoA.valImportTrueAndTrueInDai",
-                "LLN0.DoA.valImportFalseAndTrueInDai",
-                // valImportTrue : If ValImport is True in DA and DAI does not exist, DA is updatable
-                "LLN0.DoA.valImportTrue",
-                // valImportTrueAndNotSetInDai : If ValImport is True in DA and DAI exists but DAI ValImport is not set, DA is updatable
-                "LLN0.DoA.valImportTrueAndNotSetInDai",
-                // Only these FC are updatable
-                "LLN0.DoA.fcCF",
-                "LLN0.DoA.fcDC",
-                "LLN0.DoA.fcSG",
-                "LLN0.DoA.fcSP",
-                "LLN0.DoA.fcST",
-                "LLN0.DoA.fcSE"
-        );
-    }
-
-    @Test
-    void getDAI_should_filter_updatable_BDA() {
-        // given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_test_updatable_DAI.xml");
-
-        // when
-        Set<DataAttributeRef> dais = SclService.getDAI(scd, "VirtualBCU", "LDMODEXPF", new DataAttributeRef(), true);
-
-        // then
-        assertThat(dais).isNotNull();
-        List<String> resultStructDa = dais.stream()
-                .filter(dataAttributeRef -> !dataAttributeRef.getBdaNames().isEmpty()) // test only struct DA
-                .map(DataAttributeRef::getLNRef).collect(Collectors.toList());
-        assertThat(resultStructDa).containsExactlyInAnyOrder(
-                // ...AndTrueInDai : If ValImport is True in DAI, BDA is updatable
-                "LLN0.DoB.structValImportNotSet.bValImportFalseAndTrueInDai",
-                "LLN0.DoB.structValImportNotSet.bValImportNotSetAndTrueInDai",
-                "LLN0.DoB.structValImportNotSet.bValImportTrueAndTrueInDai",
-                "LLN0.DoB.structValImportTrue.bValImportFalseAndTrueInDai",
-                "LLN0.DoB.structValImportTrue.bValImportNotSetAndTrueInDai",
-                "LLN0.DoB.structValImportTrue.bValImportTrueAndTrueInDai",
-                "LLN0.DoB.structValImportFalse.bValImportFalseAndTrueInDai",
-                "LLN0.DoB.structValImportFalse.bValImportNotSetAndTrueInDai",
-                "LLN0.DoB.structValImportFalse.bValImportTrueAndTrueInDai",
-                // bValImportTrue : If ValImport is True in BDA and DAI does not exist, BDA is updatable
-                "LLN0.DoB.structValImportFalse.bValImportTrue",
-                "LLN0.DoB.structValImportTrue.bValImportTrue",
-                "LLN0.DoB.structValImportNotSet.bValImportTrue",
-                // bValImportTrueAndNotSetInDai : If ValImport is True in BDA and DAI exists but DAI ValImport is not set, BDA is updatable
-                "LLN0.DoB.structValImportTrue.bValImportTrueAndNotSetInDai",
-                "LLN0.DoB.structValImportNotSet.bValImportTrueAndNotSetInDai",
-                "LLN0.DoB.structValImportFalse.bValImportTrueAndNotSetInDai",
-                // Only these FC are updatable
-                "LLN0.DoB.structWithFcCF.bda1",
-                "LLN0.DoB.structWithFcDC.bda1",
-                "LLN0.DoB.structWithFcSG.bda1",
-                "LLN0.DoB.structWithFcSP.bda1",
-                "LLN0.DoB.structWithFcST.bda1",
-                "LLN0.DoB.structWithFcSE.bda1"
-        );
-    }
-
-    @Test
-    void getDAI_should_filter_updatable_DA_with_sGroup_Val() {
-        // given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_test_updatable_DAI.xml");
-
-        // when
-        Set<DataAttributeRef> dais = SclService.getDAI(scd, "VirtualBCU", "LDCAP", new DataAttributeRef(), true);
-
-        // then
-        assertThat(dais).isNotNull();
-        List<String> resultSimpleDa = dais.stream()
-                .filter(dataAttributeRef -> dataAttributeRef.getBdaNames().isEmpty()) // test only simple DA
-                .map(DataAttributeRef::getLNRef).collect(Collectors.toList());
-        assertThat(resultSimpleDa).containsExactlyInAnyOrder(
-                "LLN0.DoD.sGroupValImportNotSet",
-                "LLN0.DoD.sGroupValImportTrue"
-        );
-    }
-
-    @Test
-    void getDAI_should_filter_updatable_DA_with_sGroup_Val_without_ConfSg() {
-        // given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_test_updatable_DAI.xml");
-
-        // when
-        Set<DataAttributeRef> dais = SclService.getDAI(scd, "VirtualBCU", "LDMOD", new DataAttributeRef(), true);
-
-        // then
-        assertThat(dais)
-                .isNotNull()
-                .isEmpty();
-    }
-
-    @Test
     void testInitScl_With_headerId_shouldNotThrowError() {
         UUID headerId = UUID.randomUUID();
-        SCL scd = assertDoesNotThrow(() -> SclService.initScl(headerId, "hVersion", "hRevision"));
+        SCL scd = assertDoesNotThrow(() -> sclEditorService.initScl(headerId, "hVersion", "hRevision"));
         assertIsMarshallable(scd);
     }
 
@@ -738,7 +171,7 @@ class SclServiceTest {
         // Given
         UUID headerId = UUID.randomUUID();
         // When Then
-        SCL scd = assertDoesNotThrow(() -> SclService.initScl(headerId, "hVersion", "hRevision"));
+        SCL scd = assertDoesNotThrow(() -> sclEditorService.initScl(headerId, "hVersion", "hRevision"));
         assertThat(scd.getPrivate()).isNotEmpty();
         assertThat(scd.getPrivate().get(0).getType()).isEqualTo(COMPAS_SCL_FILE_TYPE.getPrivateType());
         assertIsMarshallable(scd);
@@ -747,11 +180,11 @@ class SclServiceTest {
     @Test
     void updateHeader_should_update_header_tag() {
         //Given
-        SCL scd = assertDoesNotThrow(() -> SclService.initScl(UUID.randomUUID(), "hVersion", "hRevision"));
+        SCL scd = assertDoesNotThrow(() -> sclEditorService.initScl(UUID.randomUUID(), "hVersion", "hRevision"));
         UUID hId = UUID.fromString(scd.getHeader().getId());
         HeaderDTO headerDTO = DTO.createHeaderDTO(hId);
         //When
-        SclService.updateHeader(scd, headerDTO);
+        sclEditorService.updateHeader(scd, headerDTO);
         //Then
         assertIsMarshallable(scd);
     }
@@ -762,7 +195,7 @@ class SclServiceTest {
         dataAttributeRef.setLnType("unknownID");
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
 
-        assertThrows(ScdException.class, () -> SclService.updateDAI(
+        assertThrows(ScdException.class, () -> sclEditorService.updateDAI(
                 scd, "IED", "LD", dataAttributeRef
         ));
         dataAttributeRef.setLnType("LNO1");
@@ -773,16 +206,8 @@ class SclServiceTest {
         TVal tVal = new TVal();
         tVal.setValue("newValue");
         dataAttributeRef.setDaiValues(List.of(tVal));
-        assertDoesNotThrow(() -> SclService.updateDAI(scd, "IED_NAME", "LD_INS1", dataAttributeRef));
+        assertDoesNotThrow(() -> sclEditorService.updateDAI(scd, "IED_NAME", "LD_INS1", dataAttributeRef));
         assertIsMarshallable(scd);
-    }
-
-    @Test
-    void testGetEnumTypeValues() {
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
-        assertThrows(ScdException.class, () -> SclService.getEnumTypeValues(scd, "unknwnID"));
-        var enumList = assertDoesNotThrow(() -> SclService.getEnumTypeValues(scd, "RecCycModKind"));
-        assertFalse(enumList.isEmpty());
     }
 
     @Test
@@ -790,7 +215,7 @@ class SclServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd.xml");
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
 
-        assertDoesNotThrow(() -> SclService.importSTDElementsInSCD(scd, List.of(std), DTO.SUB_NETWORK_TYPES));
+        assertDoesNotThrow(() -> sclEditorService.importSTDElementsInSCD(scd, List.of(std), DTO.SUB_NETWORK_TYPES));
         assertThat(scd.getIED()).hasSize(1);
         assertThat(scd.getDataTypeTemplates()).hasNoNullFieldsOrProperties();
         assertThat(scd.getCommunication().getSubNetwork()).hasSize(2);
@@ -803,9 +228,8 @@ class SclServiceTest {
         SCL std0 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         SCL std1 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_SITESITE1SCU1.xml");
         SCL std2 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_SITESITE1SCU2.xml");
-        SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
 
-        assertDoesNotThrow(() -> SclService.importSTDElementsInSCD(scd, List.of(std0, std1, std2), DTO.SUB_NETWORK_TYPES));
+        assertDoesNotThrow(() -> sclEditorService.importSTDElementsInSCD(scd, List.of(std0, std1, std2), DTO.SUB_NETWORK_TYPES));
         assertThat(scd.getIED()).hasSize(3);
         assertThat(scd.getDataTypeTemplates()).hasNoNullFieldsOrProperties();
         assertThat(scd.getCommunication().getSubNetwork()).hasSize(2);
@@ -822,7 +246,7 @@ class SclServiceTest {
         SCL std1 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         //When Then
         List<SCL> stds = List.of(std, std1);
-        assertThrows(ScdException.class, () -> SclService.importSTDElementsInSCD(scd, stds, DTO.SUB_NETWORK_TYPES));
+        assertThrows(ScdException.class, () -> sclEditorService.importSTDElementsInSCD(scd, stds, DTO.SUB_NETWORK_TYPES));
         assertIsMarshallable(scd);
     }
 
@@ -832,7 +256,7 @@ class SclServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd_with_same_compas_icd_header_in_different_functions.xml");
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         //When Then
-        assertDoesNotThrow(() -> SclService.importSTDElementsInSCD(scd, List.of(std), DTO.SUB_NETWORK_TYPES));
+        assertDoesNotThrow(() -> sclEditorService.importSTDElementsInSCD(scd, List.of(std), DTO.SUB_NETWORK_TYPES));
         assertIsMarshallable(scd);
     }
 
@@ -841,9 +265,9 @@ class SclServiceTest {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd.xml");
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_with_same_ICDSystemVersionUUID.xml");
-        SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
+        List<SCL> stdList = List.of(std);
         //When Then
-        assertThrows(ScdException.class, () -> SclService.importSTDElementsInSCD(scd, List.of(std), DTO.SUB_NETWORK_TYPES));
+        assertThrows(ScdException.class, () -> sclEditorService.importSTDElementsInSCD(scd, stdList, DTO.SUB_NETWORK_TYPES));
         assertIsMarshallable(scd);
     }
 
@@ -851,10 +275,9 @@ class SclServiceTest {
     void testImportSTDElementsInSCD_No_STD_Match() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/ssd.xml");
-        SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
+        List<SCL> stdList = List.of();
         //When Then
-        Set<SCL> stds = new HashSet<>();
-        assertThrows(ScdException.class, () -> SclService.importSTDElementsInSCD(scd, List.of(), DTO.SUB_NETWORK_TYPES));
+        assertThrows(ScdException.class, () -> sclEditorService.importSTDElementsInSCD(scd, stdList, DTO.SUB_NETWORK_TYPES));
         assertIsMarshallable(scd);
     }
 
@@ -863,7 +286,7 @@ class SclServiceTest {
         // Given
         SCL scl = SclTestMarshaller.getSCLFromFile("/scl-remove-controlBlocks-dataSet-extRefSrc/scl-with-control-blocks.xml");
         // When
-        SclService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scl);
+        sclEditorService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scl);
         // Then
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scl);
         List<LDeviceAdapter> lDevices = scdRootAdapter.streamIEDAdapters().flatMap(IEDAdapter::streamLDeviceAdapters).toList();
@@ -883,7 +306,7 @@ class SclServiceTest {
         // Given
         SCL scl = SclTestMarshaller.getSCLFromFile("/scl-remove-controlBlocks-dataSet-extRefSrc/scl-with-control-blocks.xml");
         // When
-        SclService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scl);
+        sclEditorService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scl);
         // Then
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scl);
         List<TLN> lns = scdRootAdapter.streamIEDAdapters()
@@ -903,7 +326,7 @@ class SclServiceTest {
         // Given
         SCL scl = SclTestMarshaller.getSCLFromFile("/scl-remove-controlBlocks-dataSet-extRefSrc/scl-with-control-blocks.xml");
         // When
-        SclService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scl);
+        sclEditorService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scl);
         // Then
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scl);
         List<TExtRef> extRefs = scdRootAdapter
@@ -930,7 +353,7 @@ class SclServiceTest {
         assertEquals("off", getLDeviceStatusValue(scl, "IedName1", "LDSUIED").get().getValue());
         String before = MarshallerWrapper.marshall(scl);
         // When
-        List<SclReportItem> sclReportItems = SclService.updateLDeviceStatus(scl);
+        List<SclReportItem> sclReportItems = sclEditorService.updateLDeviceStatus(scl);
         // Then
         String after = MarshallerWrapper.marshall(scl);
         assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isFalse();
@@ -951,7 +374,7 @@ class SclServiceTest {
         assertThat(getLDeviceStatusValue(scl, "IedName3", "LDSUIED")).isEmpty();
         String before = MarshallerWrapper.marshall(scl);
         // When
-        List<SclReportItem> sclReportItems = SclService.updateLDeviceStatus(scl);
+        List<SclReportItem> sclReportItems = sclEditorService.updateLDeviceStatus(scl);
         // Then
         String after = MarshallerWrapper.marshall(scl);
         assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isFalse();
@@ -973,7 +396,7 @@ class SclServiceTest {
         assertThat(getLDeviceStatusValue(scl, "IedName2", "LDSUIED").get().getValue()).isEqualTo("on");
         assertThat(getLDeviceStatusValue(scl, "IedName3", "LDSUIED")).isEmpty();
         // When
-        List<SclReportItem> sclReportItems = SclService.updateLDeviceStatus(scl);
+        List<SclReportItem> sclReportItems = sclEditorService.updateLDeviceStatus(scl);
         // Then
         assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isFalse();
         assertThat(sclReportItems)
@@ -1001,7 +424,7 @@ class SclServiceTest {
         assertThat(getLDeviceStatusValue(givenScl, "IedName3", "LDSUIED")).isEmpty();
 
         // When
-        List<SclReportItem> sclReportItems = SclService.updateLDeviceStatus(givenScl);
+        List<SclReportItem> sclReportItems = sclEditorService.updateLDeviceStatus(givenScl);
         // Then
         assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
         assertThat(getLDeviceStatusValue(givenScl, "IedName1", "LDSUIED")).isPresent();
@@ -1032,7 +455,7 @@ class SclServiceTest {
                 .map(TVal::getValue)
                 .hasValue("on");
         // When
-        List<SclReportItem> sclReportItems = SclService.updateLDeviceStatus(givenScl);
+        List<SclReportItem> sclReportItems = sclEditorService.updateLDeviceStatus(givenScl);
 
         // Then
         assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
@@ -1075,7 +498,7 @@ class SclServiceTest {
         SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_issue_231_test_ok.xml");
 
         // When
-        List<SclReportItem> sclReportItems = SclService.updateDoInRef(givenScl);
+        List<SclReportItem> sclReportItems = sclEditorService.updateDoInRef(givenScl);
 
         // Then
         assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
@@ -1099,7 +522,7 @@ class SclServiceTest {
         SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_issue_231_test_ok.xml");
 
         // When
-        List<SclReportItem> sclReportItems = SclService.updateDoInRef(givenScl);
+        List<SclReportItem> sclReportItems = sclEditorService.updateDoInRef(givenScl);
 
         // Then
         assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
@@ -1112,7 +535,7 @@ class SclServiceTest {
         SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_issue_231_test_ko.xml");
 
         // When
-        List<SclReportItem> sclReportItems = SclService.updateDoInRef(givenScl);
+        List<SclReportItem> sclReportItems = sclEditorService.updateDoInRef(givenScl);
 
         // Then
         assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
@@ -1146,7 +569,7 @@ class SclServiceTest {
         iedAdapter1.getCurrentElem().getAccessPoint().get(0).getServices().getClientServices().setMaxSMV(2L);
         iedAdapter1.getCurrentElem().getAccessPoint().get(0).getServices().getClientServices().setMaxReports(1L);
         // When
-        List<SclReportItem> sclReportItems = SclService.analyzeDataGroups(scd);
+        List<SclReportItem> sclReportItems = sclEditorService.analyzeDataGroups(scd);
         //Then
         assertThat(sclReportItems).isEmpty();
 
@@ -1165,7 +588,7 @@ class SclServiceTest {
         iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getGOOSE().setMax(2L);
         iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getConfReportControl().setMax(0L);
         // When
-        List<SclReportItem> sclReportItems = SclService.analyzeDataGroups(scd);
+        List<SclReportItem> sclReportItems = sclEditorService.analyzeDataGroups(scd);
         //Then
         assertThat(sclReportItems).hasSize(11)
                 .extracting(SclReportItem::message)
@@ -1188,7 +611,7 @@ class SclServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/monitoring_lns/scd_monitoring_lsvs_lgos.xml");
         // When
-        List<SclReportItem> sclReportItems = SclService.manageMonitoringLns(scd);
+        List<SclReportItem> sclReportItems = sclEditorService.manageMonitoringLns(scd);
         //Then
         assertThat(sclReportItems).isEmpty();
         LDeviceAdapter lDeviceAdapter = new SclRootAdapter(scd).getIEDAdapterByName("IED_NAME1").getLDeviceAdapterByLdInst(LD_SUIED);
@@ -1210,7 +633,7 @@ class SclServiceTest {
         LDeviceAdapter lDeviceAdapter21 = sclRootAdapter.getIEDAdapterByName("IED_NAME1").getLDeviceAdapterByLdInst("LD_INST21");
         lDeviceAdapter21.getLN0Adapter().getCurrentElem().setInputs(null);
         // When
-        List<SclReportItem> sclReportItems = SclService.manageMonitoringLns(scd);
+        List<SclReportItem> sclReportItems = sclEditorService.manageMonitoringLns(scd);
         //Then
         assertThat(sclReportItems).isEmpty();
         LDeviceAdapter lDeviceAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1").getLDeviceAdapterByLdInst(LD_SUIED);
@@ -1232,7 +655,7 @@ class SclServiceTest {
         getDAIAdapters(lDeviceAdapter, "LSVS", "SvCBRef", "setSrcRef")
                 .forEach(daiAdapter -> daiAdapter.getCurrentElem().setValImport(false));
         // When
-        List<SclReportItem> sclReportItems = SclService.manageMonitoringLns(scd);
+        List<SclReportItem> sclReportItems = sclEditorService.manageMonitoringLns(scd);
         //Then
         assertThat(sclReportItems)
                 .isNotEmpty()

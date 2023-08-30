@@ -274,8 +274,7 @@ class LN0AdapterTest {
     void testGetControlSetByBindingInfo() {
 
         LN0 ln0 = new LN0();
-        LN0Adapter ln0Adapter = mock(LN0Adapter.class);
-        ln0Adapter = Mockito.spy(ln0Adapter);
+        LN0Adapter ln0Adapter = Mockito.spy(new LN0Adapter(null, ln0));
 
         when(ln0Adapter.getCurrentElem()).thenReturn(ln0);
 

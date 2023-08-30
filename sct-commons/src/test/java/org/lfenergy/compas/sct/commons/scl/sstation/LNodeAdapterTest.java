@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.support.HierarchyTraversalMode;
 import org.junit.platform.commons.support.ReflectionSupport;
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.scl.PrivateService;
+import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
@@ -60,7 +60,7 @@ class LNodeAdapterTest {
         // Given
         TLNode tlNode = new TLNode();
         LNodeAdapter lNodeAdapter = new LNodeAdapter(null, tlNode);
-        TPrivate tPrivate = PrivateService.createPrivate(TCompasSclFileType.SCD);
+        TPrivate tPrivate = PrivateUtils.createPrivate(TCompasSclFileType.SCD);
         // When
         lNodeAdapter.addPrivate(tPrivate);
         // Then
@@ -87,7 +87,7 @@ class LNodeAdapterTest {
         tText.getContent().add("Text1");
         tText.getOtherAttributes().put(QName.valueOf("Text1_attribute1"), "Text1_value1");
         tlNode.setText(tText);
-        tlNode.getPrivate().add(PrivateService.createPrivate(TCompasSclFileType.SCD));
+        tlNode.getPrivate().add(PrivateUtils.createPrivate(TCompasSclFileType.SCD));
         tlNode.getOtherAttributes().put(QName.valueOf("tlNode_attribute1"), "tlNode_value1");
         LNodeAdapter lNodeAdapter = new LNodeAdapter(null, tlNode);
         // When
