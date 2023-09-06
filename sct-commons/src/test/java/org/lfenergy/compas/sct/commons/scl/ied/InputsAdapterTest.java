@@ -4,8 +4,8 @@
 
 package org.lfenergy.compas.sct.commons.scl.ied;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -13,9 +13,7 @@ import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.FCDARecord;
-import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.opentest4j.AssertionFailedError;
 
 import java.util.List;
@@ -27,22 +25,23 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.junit.jupiter.api.Named.named;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
 
-@ExtendWith(MockitoExtension.class)
 class InputsAdapterTest {
 
     @Test
+    @Tag("issue-321")
     void constructor_should_succeed() {
         // Given
         TInputs tInputs = new TInputs();
         LN0 ln0 = new LN0();
         ln0.setInputs(tInputs);
+        // When
         LN0Adapter ln0Adapter = new LN0Adapter(null, ln0);
         // When && Then
         assertThatNoException().isThrownBy(() -> new InputsAdapter(ln0Adapter, tInputs));
     }
 
     @Test
-    void elementXPath_should_succeed() {
+    void elementXPath_should_return_expected_xpath_value() {
         // Given
         TInputs tInputs = new TInputs();
         InputsAdapter inputsAdapter = new InputsAdapter(null, tInputs);
@@ -111,7 +110,6 @@ class InputsAdapterTest {
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();
         // Then
         assertThat(sclReportItems).isEmpty();
-        System.out.println(MarshallerWrapper.marshall(scd));
     }
 
     @ParameterizedTest
@@ -194,7 +192,7 @@ class InputsAdapterTest {
 
     @ParameterizedTest
     @MethodSource("provideDoNotCreateFCDA")
-    void updateAllSourceDataSetsAndControlBlocks_should_not_create_FCDA_when_no_valid_source_Da_found(String extRefDesc) {
+    void updateAllSourceDataSetsAndControlBlocks_when_no_valid_source_Da_found_should_not_create_FCDA(String extRefDesc) {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);

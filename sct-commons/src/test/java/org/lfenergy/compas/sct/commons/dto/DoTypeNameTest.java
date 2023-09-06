@@ -15,7 +15,7 @@ import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDo
 class DoTypeNameTest {
 
     @Test
-    void testConstructorWithRef() {
+    void constructor_whenCalledWithDoName_shouldFillValues() {
         // given : nothing
         // when
         DoTypeName doTypeName = new DoTypeName("do1.bdo1.bdo2");
@@ -25,7 +25,7 @@ class DoTypeNameTest {
     }
 
     @Test
-    void testConstructorWithRefWhenEmptyStruct() {
+    void constructor_whenCalledWithDoNameWithDotSeparatedValues_shouldFillValues() {
         // given : nothing
         // when
         DoTypeName doTypeName = new DoTypeName("do1");
@@ -35,17 +35,17 @@ class DoTypeNameTest {
     }
 
     @Test
-    void testConstructorWithRefWithNullName() {
+    void constructor_whenCalledWithNullDoName_shouldNotFillValues() {
         // given : nothing
         // when
         DoTypeName doTypeName = new DoTypeName(null);
         // then
-        assertThat(doTypeName.getName()).isEqualTo("");
+        assertThat(doTypeName.getName()).isEmpty();
         assertThat(doTypeName.getStructNames()).isNotNull().isEmpty();
     }
 
     @Test
-    void testConstructor2WithRef() {
+    void constructor_whenCalledWithDoNameAndSdoNames_shouldFillValues() {
         // given : nothing
         // when
         DoTypeName doTypeName = new DoTypeName("do1", "bdo1.bdo2");
@@ -55,7 +55,7 @@ class DoTypeNameTest {
     }
 
     @Test
-    void testConstructor2WithRefWhenEmptyStruct() {
+    void constructor_whenCalledWithNullSdoNames_shouldNotFillValues() {
         // given : nothing
         // when
         DoTypeName doTypeName = new DoTypeName("do1", null);
@@ -65,17 +65,17 @@ class DoTypeNameTest {
     }
 
     @Test
-    void testConstructor2WithRefWithNullName() {
+    void constructor_whenCalledWithNullDoNameAndNullSdoNames_shouldNotFillValues() {
         // given : nothing
         // when
         DoTypeName doTypeName = new DoTypeName(null, null);
         // then
-        assertThat(doTypeName.getName()).isEqualTo("");
+        assertThat(doTypeName.getName()).isEmpty();
         assertThat(doTypeName.getStructNames()).isNotNull().isEmpty();
     }
 
     @Test
-    void testConstructorWithNameAndStructNames() {
+    void constructor_whenCalledWithNameAndSdoNames_shouldFillValues() {
         // given : nothing
         // when
         DoTypeName doTypeName = new DoTypeName("do1", "bdo1.bdo2");
@@ -86,7 +86,7 @@ class DoTypeNameTest {
     }
 
     @Test
-    void testEquals() {
+    void equals_whenCalled_shouldReturnTrue() {
         // given : nothing
         DoTypeName do1 = createDo("do1.bdo1.bdo2", TPredefinedCDCEnum.DPS);
         DoTypeName do2 = createDo("do1.bdo1.bdo2", TPredefinedCDCEnum.DPS);
@@ -97,7 +97,7 @@ class DoTypeNameTest {
     }
 
     @Test
-    void testNotEquals() {
+    void equals_whenCalled_shouldReturnFalse() {
         // given : nothing
         DoTypeName do1 = createDo("do1.bdo1.bdo2", TPredefinedCDCEnum.DPS);
         DoTypeName do2 = createDo("do1.bdo1.bdo2", TPredefinedCDCEnum.ACD);
@@ -108,7 +108,7 @@ class DoTypeNameTest {
     }
 
     @Test
-    void testFrom() {
+    void from_whenCalledWithDoTypeName_shouldNotFillValues() {
         // given : nothing
         DoTypeName do1 = createDo("do1.bdo1.bdo2", TPredefinedCDCEnum.DPS);
         // when

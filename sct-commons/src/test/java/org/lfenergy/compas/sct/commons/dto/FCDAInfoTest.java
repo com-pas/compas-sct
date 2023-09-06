@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -14,14 +15,13 @@ import org.lfenergy.compas.scl2007b4.model.TFCEnum;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FCDAInfoTest {
 
     @Test
-    void testConstructor(){
-
+    @Tag("issue-321")
+    void constructor_whenCalled_shouldFillValues(){
+        // Given
         TFCDA tfcda = new TFCDA();
         tfcda.setDoName("doName");
         tfcda.setDaName("daName.bda1.bda2.bda3");
@@ -31,13 +31,14 @@ class FCDAInfoTest {
         tfcda.setLnInst("LNInst");
         tfcda.setPrefix("pre");
         tfcda.setIx(1L);
-
+        // When
         FCDAInfo fcdaInfo = new FCDAInfo("dataSet",tfcda);
-        assertEquals("daName",fcdaInfo.getDaName().getName());
-        assertEquals("doName",fcdaInfo.getDoName().getName());
-        assertEquals(tfcda.getDaName(),fcdaInfo.getDaName().toString());
-        assertEquals(3,fcdaInfo.getDaName().getStructNames().size());
-
+        // Then
+        assertThat(fcdaInfo.getDaName().getName()).isEqualTo("daName");
+        assertThat(fcdaInfo.getDoName().getName()).isEqualTo("doName");
+        assertThat(fcdaInfo.getDaName()).hasToString(tfcda.getDaName());
+        assertThat(fcdaInfo.getDaName().getStructNames()).hasSize(3);
+        // When
         FCDAInfo fcdaInfo1 = new FCDAInfo();
         fcdaInfo1.setIx(fcdaInfo.getIx());
         fcdaInfo1.setLdInst(fcdaInfo.getLdInst());
@@ -47,25 +48,23 @@ class FCDAInfoTest {
         fcdaInfo1.setDoName(fcdaInfo.getDoName());
         fcdaInfo1.setFc(fcdaInfo.getFc());
         fcdaInfo1.setPrefix(fcdaInfo.getPrefix());
-        assertEquals("daName",fcdaInfo1.getDaName().getName());
-        assertEquals("doName",fcdaInfo1.getDoName().getName());
-        assertEquals(tfcda.getDaName(),fcdaInfo1.getDaName().toString());
-
+        // Then
+        assertThat(fcdaInfo1.getDaName().getName()).isEqualTo("daName");
+        assertThat(fcdaInfo1.getDoName().getName()).isEqualTo("doName");
+        assertThat(fcdaInfo1.getDaName()).hasToString(tfcda.getDaName());
         TFCDA tfcda1 = fcdaInfo1.getFCDA();
-
-        assertEquals(tfcda1.getFc(),fcdaInfo1.getFc());
-
-        assertTrue(fcdaInfo1.isValid());
+        assertThat(fcdaInfo1.getFc()).isEqualTo(tfcda1.getFc());
+        assertThat(fcdaInfo1.isValid()).isTrue();
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("providerFCDAInfoObjects")
-    void checkFCDACompatibilitiesForBinding(String testCase, FCDAInfo fcdaInfo, FCDAInfo expectedFcdaInfo) {
+    void checkFCDACompatibilitiesForBinding_whenCalled_shouldReturnFalse(String testCase, FCDAInfo fcdaInfo, FCDAInfo expectedFcdaInfo) {
         assertThat(fcdaInfo.checkFCDACompatibilitiesForBinding(expectedFcdaInfo)).isFalse();
     }
 
     @Test
-    void checkFCDACompatibilitiesForBinding_shouldReturnTrue_whensameContent() {
+    void checkFCDACompatibilitiesForBinding_whenCalledWithSameContent_shouldReturnTrue() {
         //Given
         TFCDA tfcda = new TFCDA();
         tfcda.setLdInst(DTO.createExtRefBindingInfo_Remote().getLdInst());

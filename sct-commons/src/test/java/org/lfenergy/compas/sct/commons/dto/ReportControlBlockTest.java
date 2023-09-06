@@ -5,6 +5,7 @@
 package org.lfenergy.compas.sct.commons.dto;
 
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
@@ -14,7 +15,7 @@ import org.mockito.Mockito;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 class ReportControlBlockTest {
 
@@ -50,12 +51,6 @@ class ReportControlBlockTest {
     @Test
     void constructor_should_copy_all_data_from_TReportControl() {
         // Given
-        /*
-        optFields
-            rptEnabled
-            trgOps
-
-         */
         TReportControl tReportControl = createTReportControl();
         // When
         ReportControlBlock reportControlBlock = new ReportControlBlock(tReportControl);
@@ -148,61 +143,80 @@ class ReportControlBlockTest {
     }
 
     @Test
-    void testGetServiceType() {
+    void getControlBlockEnum_when_Called_should_return_expected_type() {
+        // Given
         ReportControlBlock reportControlBlock = new ReportControlBlock(NAME, ID, DATASET_REF);
-        assertEquals(TServiceType.REPORT, reportControlBlock.getServiceType());
+        // When Then
+        assertThat(reportControlBlock.getControlBlockEnum()).isEqualTo(ControlBlockEnum.REPORT);
     }
 
     @Test
+    @Tag("issue-321")
     void testValidateCB() {
+        // Given
         ReportControlBlock reportControlBlock = createReportControlBlock();
-        assertDoesNotThrow(reportControlBlock::validateCB);
+        // When Then
+        assertThatCode(reportControlBlock::validateCB).doesNotThrowAnyException();
 
         reportControlBlock.setDataSetRef(null);
-        assertDoesNotThrow(reportControlBlock::validateCB);
+        // When Then
+        assertThatCode(reportControlBlock::validateCB).doesNotThrowAnyException();
 
-        assertFalse(reportControlBlock.getTargets().isEmpty());
+        assertThat(reportControlBlock.getTargets()).isNotEmpty();
         reportControlBlock.getTargets().set(0,
             new ControlBlockTarget("AP_REF", null, DTO.HOLDER_LD_INST, DTO.HOLDER_LN_INST, DTO.HOLDER_LN_CLASS, DTO.HOLDER_LN_PREFIX));
-        assertThrows(ScdException.class, reportControlBlock::validateCB);
+        // When Then
+        assertThatCode(reportControlBlock::validateCB).isInstanceOf(ScdException.class);
 
         reportControlBlock.getTargets().set(0,
             new ControlBlockTarget("AP_REF", "", DTO.HOLDER_LD_INST, DTO.HOLDER_LN_INST, DTO.HOLDER_LN_CLASS, DTO.HOLDER_LN_PREFIX));
-        assertThrows(ScdException.class, reportControlBlock::validateCB);
+        // When Then
+        assertThatCode(reportControlBlock::validateCB).isInstanceOf(ScdException.class);
 
         reportControlBlock.getTargets().set(0,
             new ControlBlockTarget("AP_REF", DTO.HOLDER_LD_INST, "", DTO.HOLDER_LN_INST, DTO.HOLDER_LN_CLASS, DTO.HOLDER_LN_PREFIX));
-        assertThrows(ScdException.class, reportControlBlock::validateCB);
+        // When Then
+        assertThatCode(reportControlBlock::validateCB).isInstanceOf(ScdException.class);
 
         reportControlBlock.setDataSetRef("");
-        assertThrows(ScdException.class, reportControlBlock::validateCB);
+        // When Then
+        assertThatCode(reportControlBlock::validateCB).isInstanceOf(ScdException.class);
 
         reportControlBlock.setName(null);
-        assertThrows(ScdException.class, reportControlBlock::validateCB);
+        // When Then
+        assertThatCode(reportControlBlock::validateCB).isInstanceOf(ScdException.class);
 
         reportControlBlock.setName("");
-        assertThrows(ScdException.class, reportControlBlock::validateCB);
+        // When Then
+        assertThatCode(reportControlBlock::validateCB).isInstanceOf(ScdException.class);
 
         reportControlBlock.setId(null);
-        assertThrows(ScdException.class, reportControlBlock::validateCB);
+        // When Then
+        assertThatCode(reportControlBlock::validateCB).isInstanceOf(ScdException.class);
 
         reportControlBlock.setId("");
-        assertThrows(ScdException.class, reportControlBlock::validateCB);
+        // When Then
+        assertThatCode(reportControlBlock::validateCB).isInstanceOf(ScdException.class);
     }
 
     @Test
+    @Tag("issue-321")
     void testGetControlBlockServiceSetting(){
+        // Given
         ReportControlBlock reportControlBlock = createReportControlBlock();
-        assertEquals(TServiceSettingsNoDynEnum.FIX, reportControlBlock.getControlBlockServiceSetting(null));
+        // When Then
+        assertThat(reportControlBlock.getControlBlockServiceSetting(null)).isEqualTo(TServiceSettingsNoDynEnum.FIX);
 
         TServices tServices = Mockito.mock(TServices.class);
         TReportSettings reportSettings = Mockito.mock(TReportSettings.class);
         Mockito.when(tServices.getReportSettings()).thenReturn(reportSettings);
         Mockito.when(reportSettings.getCbName()).thenReturn(TServiceSettingsNoDynEnum.CONF);
-        assertEquals(TServiceSettingsNoDynEnum.CONF,reportControlBlock.getControlBlockServiceSetting(tServices));
+        // When Then
+        assertThat(reportControlBlock.getControlBlockServiceSetting(tServices)).isEqualTo(TServiceSettingsNoDynEnum.CONF);
 
         Mockito.when(tServices.getReportSettings()).thenReturn(null);
-        assertEquals(TServiceSettingsNoDynEnum.FIX,reportControlBlock.getControlBlockServiceSetting(tServices));
+        // When Then
+        assertThat(reportControlBlock.getControlBlockServiceSetting(tServices)).isEqualTo(TServiceSettingsNoDynEnum.FIX);
     }
 
     @Test

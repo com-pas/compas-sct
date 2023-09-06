@@ -346,7 +346,7 @@ public class LNodeTypeAdapter
     /**
      * Find bound DOType info
      * @param signalInfo extRef signal info for binding
-     * @return DOType info as object contening name, id and adapter
+     * @return DOType info as object containing name, id and adapter
      * @throws ScdException throws when DO unknown
      */
     public DataTypeTemplateAdapter.DOTypeInfo findMatchingDOType(ExtRefSignalInfo signalInfo)  throws ScdException{

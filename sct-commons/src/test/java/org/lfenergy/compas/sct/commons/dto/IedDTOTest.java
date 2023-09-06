@@ -10,39 +10,46 @@ import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 class IedDTOTest {
 
     @Test
-    void testConstruction(){
+    void constructor_whenCalled_shouldFillValues(){
+        // When
         IedDTO iedDTO = DTO.createIedDTO();
-
+        // Then
         assertAll("IedDTO",
-                () -> assertEquals(DTO.HOLDER_IED_NAME, iedDTO.getName()),
-                () -> assertFalse(iedDTO.getLDevices().isEmpty())
+                () -> assertThat(iedDTO.getName()).isEqualTo(DTO.HOLDER_IED_NAME),
+                () -> assertThat(iedDTO.getLDevices()).isNotEmpty()
         );
-        assertEquals(DTO.HOLDER_IED_NAME, new IedDTO(DTO.HOLDER_IED_NAME).getName());
+        assertThat(new IedDTO(DTO.HOLDER_IED_NAME).getName()).isEqualTo(DTO.HOLDER_IED_NAME);
     }
 
     @Test
-    void testFrom() throws Exception {
+    void from_whenCalledWithIEDAdapter_shouldFillValues() {
+        // When
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
-
+        // When
         IedDTO iedDTO = IedDTO.from(iAdapter,null);
-        assertFalse(iedDTO.getLDevices().isEmpty());
+        // Then
+        assertThat(iedDTO.getLDevices()).isNotEmpty();
     }
 
     @Test
-    void testAddLDevice(){
+    void addLDevice_whenCalled_shouldUpdateLDevicesList(){
+        // Given
         IedDTO iedDTO = new IedDTO();
-        assertTrue(iedDTO.getLDevices().isEmpty());
+        assertThat(iedDTO.getLDevices()).isEmpty();
+        // When
         iedDTO.addLDevice(DTO.HOLDER_LD_INST, "LDName");
-        assertFalse(iedDTO.getLDevices().isEmpty());
-
-        assertTrue(iedDTO.getLDeviceDTO(DTO.HOLDER_LD_INST).isPresent());
+        // Then
+        assertThat(iedDTO.getLDevices()).isNotEmpty();
+        assertThat(iedDTO.getLDeviceDTO(DTO.HOLDER_LD_INST)).isPresent();
     }
 
 }

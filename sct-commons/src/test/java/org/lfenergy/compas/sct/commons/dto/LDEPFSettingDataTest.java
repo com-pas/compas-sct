@@ -7,12 +7,12 @@ package org.lfenergy.compas.sct.commons.dto;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class LDEPFSettingDataTest {
 
     @Test
-    void isMatchExtRef_with_DigitalSettingData_should_return_true_when_ExtRefDescMatch() {
+    void isMatchExtRef_with_DigitalSettingData_when_ExtRefDescMatch_should_return_true() {
         //Given
         LDEPFSettingData ldepfSettingData = LDEPFSettingData.builder()
                 .channelDigitalNum(22).lnClass("PTRC")
@@ -28,7 +28,7 @@ class LDEPFSettingDataTest {
     }
 
     @Test
-    void isMatchExtRef_with_DigitalSettingData_should_return_false_when_ExtRefDesc_DigitalNum_NotMatch() {
+    void isMatchExtRef_with_DigitalSettingData_when_ExtRefDesc_DigitalNum_NotMatch_should_return_false() {
         //Given
         LDEPFSettingData ldepfSettingData = LDEPFSettingData.builder()
                 .channelDigitalNum(22).lnClass("PTRC")
@@ -45,7 +45,7 @@ class LDEPFSettingDataTest {
 
 
     @Test
-    void isMatchExtRef_with_DigitalSettingData_should_return_false_when_ExtRefDesc_DaName_NotMatch() {
+    void isMatchExtRef_with_DigitalSettingData_when_ExtRefDesc_DaName_NotMatch_should_return_false() {
         //Given
         LDEPFSettingData ldepfSettingData = LDEPFSettingData.builder()
                 .channelDigitalNum(22).lnClass("PTRC")
@@ -62,7 +62,7 @@ class LDEPFSettingDataTest {
 
 
     @Test
-    void isMatchExtRef_with_AnalogSettingData_should_return_true_when_ExtRefDescMatch() {
+    void isMatchExtRef_with_AnalogSettingData_when_ExtRefDescMatch_should_return_true() {
         //Given
         LDEPFSettingData ldepfSettingData = LDEPFSettingData.builder()
                 .channelAnalogNum(22).lnClass("PTRC")
@@ -78,7 +78,7 @@ class LDEPFSettingDataTest {
     }
 
     @Test
-    void isMatchExtRef_with_AnalogSettingData_should_return_false_when_ExtRefDesc_DigitalNum_NotMatch() {
+    void isMatchExtRef_with_AnalogSettingData_when_ExtRefDesc_DigitalNum_NotMatch_should_return_false() {
         //Given
         LDEPFSettingData ldepfSettingData = LDEPFSettingData.builder()
                 .channelAnalogNum(22).lnClass("PTRC")
@@ -95,7 +95,7 @@ class LDEPFSettingDataTest {
 
 
     @Test
-    void isMatchExtRef_with_AnalogSettingData_should_return_false_when_ExtRefDesc_DaName_NotMatch() {
+    void isMatchExtRef_with_AnalogSettingData_when_ExtRefDesc_DaName_NotMatch_should_return_false() {
         //Given
         LDEPFSettingData ldepfSettingData = LDEPFSettingData.builder()
                 .channelAnalogNum(22).lnClass("PTRC")
@@ -111,7 +111,7 @@ class LDEPFSettingDataTest {
     }
 
     @Test
-    void isMatchExtRef_should_return_true_when_ExtRefMatch() {
+    void isMatchExtRef_when_ExtRefMatch_should_return_true() {
         // Given
         LDEPFSettingData ldepfSettingData = LDEPFSettingData.builder()
                 .channelDigitalNum(22).lnClass("PTRC")
@@ -127,7 +127,7 @@ class LDEPFSettingDataTest {
     }
 
     @Test
-    void isMatchExtRef_should_return_false_when_ExtRefPLN_NotMatch() {
+    void isMatchExtRef_when_ExtRefPLN_NotMatch_should_return_false() {
         // Given
         LDEPFSettingData ldepfSettingData = LDEPFSettingData.builder()
                 .channelDigitalNum(22).lnClass("PTRC")
@@ -143,7 +143,7 @@ class LDEPFSettingDataTest {
     }
 
     @Test
-    void isMatchExtRef_should_return_false_when_ExtRefPDO_NotMatch() {
+    void isMatchExtRef_when_ExtRefPDO_NotMatch_should_return_false() {
         // Given
         LDEPFSettingData ldepfSettingData = LDEPFSettingData.builder()
                 .channelDigitalNum(22).lnClass("PTRC")

@@ -4,79 +4,91 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
-import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.scl2007b4.model.TServiceType;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@Slf4j
 class ExtRefSignalInfoTest {
-    @Test
-    void testConstruction(){
-        ExtRefSignalInfo signalInfo = DTO.createExtRefSignalInfo();
-        log.info("Signal : {}",signalInfo);
-        assertEquals(DTO.DESC,signalInfo.getDesc());
-        assertEquals(DTO.P_DA,signalInfo.getPDA());
-        assertEquals(DTO.P_DO,signalInfo.getPDO());
-        assertEquals(DTO.P_LN,signalInfo.getPLN());
-        assertEquals(DTO.INT_ADDR, signalInfo.getIntAddr());
-        assertEquals(TServiceType.fromValue(DTO.P_SERV_T),signalInfo.getPServT());
 
+    @Test
+    void constructor_whenCalled_shouldFillValues() {
+        // When
+        ExtRefSignalInfo signalInfo = DTO.createExtRefSignalInfo();
+        // Then
+        assertThat(signalInfo.getDesc()).isEqualTo(DTO.DESC);
+        assertThat(signalInfo.getPDA()).isEqualTo(DTO.P_DA);
+        assertThat(signalInfo.getPDO()).isEqualTo(DTO.P_DO);
+        assertThat(signalInfo.getPLN()).isEqualTo(DTO.P_LN);
+        assertThat(signalInfo.getIntAddr()).isEqualTo(DTO.INT_ADDR);
+        assertThat(signalInfo.getPServT()).isEqualTo(TServiceType.fromValue(DTO.P_SERV_T));
     }
 
     @Test
-    void testInitExtRef(){
+    void initExtRef_whenCalledWithExtRefSignalInfo_shouldFillValues(){
+        // When
         ExtRefSignalInfo signalInfo = DTO.createExtRefSignalInfo();
         TExtRef extRef = ExtRefSignalInfo.initExtRef(signalInfo);
-
-        assertEquals(DTO.DESC,extRef.getDesc());
-        assertEquals(DTO.P_DA,extRef.getPDA());
-        assertEquals(DTO.P_DO,extRef.getPDO());
-        assertTrue(extRef.getPLN().contains(DTO.P_LN));
-        assertEquals(DTO.INT_ADDR, extRef.getIntAddr());
-        assertEquals(TServiceType.fromValue(DTO.P_SERV_T),extRef.getPServT());
+        // Then
+        assertThat(signalInfo.getDesc()).isEqualTo(DTO.DESC);
+        assertThat(signalInfo.getPDA()).isEqualTo(DTO.P_DA);
+        assertThat(signalInfo.getPDO()).isEqualTo(DTO.P_DO);
+        assertThat(extRef.getPLN()).asList().contains(DTO.P_LN);
+        assertThat(signalInfo.getIntAddr()).isEqualTo(DTO.INT_ADDR);
+        assertThat(signalInfo.getPServT()).isEqualTo(TServiceType.fromValue(DTO.P_SERV_T));
     }
 
     @Test
+    @Tag("issue-321")
     void testIsWrappedIn(){
-
+        // Given
         TExtRef tExtRef = DTO.createExtRef();
         ExtRefSignalInfo signalInfo = new ExtRefSignalInfo(tExtRef);
         ExtRefSignalInfo signalInfo1 = new ExtRefSignalInfo();
-        assertTrue(signalInfo.isWrappedIn(tExtRef));
-
-        assertFalse(signalInfo1.isWrappedIn(tExtRef));
+        // When Then
+        assertThat(signalInfo.isWrappedIn(tExtRef)).isTrue();
+        // When Then
+        assertThat(signalInfo1.isWrappedIn(tExtRef)).isFalse();
 
         signalInfo1.setDesc(signalInfo.getDesc());
-        assertFalse(signalInfo1.isWrappedIn(tExtRef));
+        // When Then
+        assertThat(signalInfo1.isWrappedIn(tExtRef)).isFalse();
 
         signalInfo1.setPDA(signalInfo.getPDA());
-        assertFalse(signalInfo1.isWrappedIn(tExtRef));
+        // When Then
+        assertThat(signalInfo1.isWrappedIn(tExtRef)).isFalse();
 
         signalInfo1.setPDO(signalInfo.getPDO());
-        assertFalse(signalInfo1.isWrappedIn(tExtRef));
+        // When Then
+        assertThat(signalInfo1.isWrappedIn(tExtRef)).isFalse();
 
         signalInfo1.setIntAddr(signalInfo.getIntAddr());
-        assertFalse(signalInfo1.isWrappedIn(tExtRef));
+        // When Then
+        assertThat(signalInfo1.isWrappedIn(tExtRef)).isFalse();
 
         signalInfo1.setPLN(signalInfo.getPLN());
-        assertFalse(signalInfo1.isWrappedIn(tExtRef));
+        // When Then
+        assertThat(signalInfo1.isWrappedIn(tExtRef)).isFalse();
 
         signalInfo1.setPServT(signalInfo.getPServT());
-        assertTrue(signalInfo1.isWrappedIn(tExtRef));
+        // When Then
+        assertThat(signalInfo1.isWrappedIn(tExtRef)).isTrue();
     }
 
     @Test
+    @Tag("issue-321")
     void testIsValid(){
+        // Given
         ExtRefSignalInfo signalInfo = DTO.createExtRefSignalInfo();
-        assertTrue(signalInfo.isValid());
-
+        assertThat(signalInfo.isValid()).isTrue();
         signalInfo.setIntAddr("");
-        assertFalse(signalInfo.isValid());
+        // When
+        assertThat(signalInfo.isValid()).isFalse();
         signalInfo.setPDO("");
-        assertFalse(signalInfo.isValid());
+        // When
+        assertThat(signalInfo.isValid()).isFalse();
 
     }
 

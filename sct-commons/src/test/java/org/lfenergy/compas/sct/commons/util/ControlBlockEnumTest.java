@@ -4,7 +4,6 @@
 
 package org.lfenergy.compas.sct.commons.util;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -12,6 +11,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
 
 import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class ControlBlockEnumTest {
 
@@ -22,7 +24,7 @@ class ControlBlockEnumTest {
         //When
         ControlBlockEnum result = ControlBlockEnum.from(tServiceType);
         //Then
-        Assertions.assertThat(result).isEqualTo(expected);
+        assertThat(result).isEqualTo(expected);
     }
 
     @Test
@@ -30,7 +32,7 @@ class ControlBlockEnumTest {
         //Given
         TServiceType pollServiceType = TServiceType.POLL;
         //When & Then
-        Assertions.assertThatThrownBy(() -> ControlBlockEnum.from(pollServiceType))
+        assertThatThrownBy(() -> ControlBlockEnum.from(pollServiceType))
             .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -41,7 +43,7 @@ class ControlBlockEnumTest {
         //When
         ControlBlockEnum result = ControlBlockEnum.from(tControlClass);
         //Then
-        Assertions.assertThat(result).isEqualTo(expected);
+        assertThat(result).isEqualTo(expected);
     }
 
     public static Stream<Arguments> provideFromTControlClass() {

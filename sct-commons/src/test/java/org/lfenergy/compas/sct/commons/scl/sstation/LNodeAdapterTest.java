@@ -4,7 +4,6 @@
 
 package org.lfenergy.compas.sct.commons.scl.sstation;
 
-import jakarta.xml.bind.JAXBElement;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.support.HierarchyTraversalMode;
 import org.junit.platform.commons.support.ReflectionSupport;
@@ -56,18 +55,18 @@ class LNodeAdapterTest {
     }
 
     @Test
-    void addPrivate_should_succeed() {
+    void addPrivate_with_type_and_source_should_create_Private() {
         // Given
         TLNode tlNode = new TLNode();
         LNodeAdapter lNodeAdapter = new LNodeAdapter(null, tlNode);
-        TPrivate tPrivate = PrivateUtils.createPrivate(TCompasSclFileType.SCD);
+        assertThat(tlNode.getPrivate()).isEmpty();
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType("Private Type");
+        tPrivate.setSource("Private Source");
         // When
         lNodeAdapter.addPrivate(tPrivate);
         // Then
         assertThat(tlNode.getPrivate()).hasSize(1);
-        assertThat(tlNode.getPrivate().get(0).getContent()).hasSize(1).first().isInstanceOf(JAXBElement.class);
-        JAXBElement<?> jaxbElement = (JAXBElement<?>) tlNode.getPrivate().get(0).getContent().get(0);
-        assertThat(jaxbElement.getValue()).isEqualTo(TCompasSclFileType.SCD);
     }
 
     @Test

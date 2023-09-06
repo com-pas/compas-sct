@@ -5,10 +5,10 @@
 package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.assertj.core.groups.Tuple;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
-import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclHelper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
@@ -37,11 +37,14 @@ class ControlBlockAdapterTest {
     }
 
     @Test
+    @Tag("issue-321")
     void addTargetIfNotExists_should_add_target(){
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
         LN0Adapter ln0 = findLn0(scd, "IED_NAME1", "LD_INST11");
+        // When
         ln0.createDataSetIfNotExists("datSet", ControlBlockEnum.GSE);
+        // When
         ControlBlockAdapter controlBlockAdapter = ln0.createControlBlockIfNotExists("cbName", "cbId", "datSet", ControlBlockEnum.GSE);
         LNAdapter targetLn = findLn(scd, "IED_NAME2", "LD_INST21", "ANCR", "1", "prefix");
         // When
@@ -60,12 +63,15 @@ class ControlBlockAdapterTest {
     }
 
     @Test
+    @Tag("issue-321")
     void configureNetwork_should_add_GSE_element() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
         TConnectedAP connectedAP = SclHelper.addConnectedAp(scd, "SUB_NETWORK_NAME", "AP_NAME", "IED_NAME1");
         LN0Adapter ln0 = findLn0(scd, "IED_NAME1", "LD_INST11");
+        // When
         ln0.createDataSetIfNotExists("datSet", ControlBlockEnum.GSE);
+        // When
         ControlBlockAdapter controlBlockAdapter = ln0.createControlBlockIfNotExists("cbName", "cbId", "datSet", ControlBlockEnum.GSE);
         // When
         Optional<SclReportItem> sclReportItem = controlBlockAdapter.configureNetwork(10L, "00-01-02-04-05", 11, (byte) 12, SclConstructorHelper.newDurationInMilliSec(3),
@@ -89,12 +95,15 @@ class ControlBlockAdapterTest {
     }
 
     @Test
+    @Tag("issue-321")
     void configureNetwork_should_add_SMV_element() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
         TConnectedAP connectedAP = SclHelper.addConnectedAp(scd, "SUB_NETWORK_NAME", "AP_NAME", "IED_NAME1");
         LN0Adapter ln0 = findLn0(scd, "IED_NAME1", "LD_INST11");
+        // When
         ln0.createDataSetIfNotExists("datSet", ControlBlockEnum.SAMPLED_VALUE);
+        // When
         ControlBlockAdapter controlBlockAdapter = ln0.createControlBlockIfNotExists("cbName", "cbId", "datSet", ControlBlockEnum.SAMPLED_VALUE);
         // When
         Optional<SclReportItem> sclReportItem = controlBlockAdapter.configureNetwork(10L, "00-01-02-04-05", 11, (byte) 12, null, null);
@@ -113,18 +122,20 @@ class ControlBlockAdapterTest {
     }
 
     @Test
+    @Tag("issue-321")
     void configureNetwork_when_connectApNotFound_should_return_sclReportItem() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
         SclHelper.addConnectedAp(scd, "SUB_NETWORK_NAME", "AP_NAME", "IED_NAME2"); // ConnectedAp for IED_NAME2 instead of IED_NAME1
         LN0Adapter ln0 = findLn0(scd, "IED_NAME1", "LD_INST11");
+        // When
         ln0.createDataSetIfNotExists("datSet", ControlBlockEnum.SAMPLED_VALUE);
+        // When
         ControlBlockAdapter controlBlockAdapter = ln0.createControlBlockIfNotExists("cbName", "cbId", "datSet", ControlBlockEnum.SAMPLED_VALUE);
         // When
         Optional<SclReportItem> sclReportItem = controlBlockAdapter.configureNetwork(10L, "00-01-02-04-05", 11, (byte) 12, null, null);
         // Then
         assertThat(sclReportItem).isPresent();
     }
-
 
 }

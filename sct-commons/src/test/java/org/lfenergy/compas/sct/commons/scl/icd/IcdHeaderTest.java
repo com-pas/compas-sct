@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class IcdHeaderTest {
 
     @Test
-    void toTCompasICDHeader() {
+    void toTCompasICDHeader_shouldReturnCompasICDHeaderObject() {
         //Given
         IcdHeader icdHeader = new IcdHeader(createHeader());
         //When
@@ -31,7 +31,7 @@ class IcdHeaderTest {
     }
 
     @Test
-    void getIcdSystemVersionUUID() {
+    void getIcdSystemVersionUUID_shouldReturnExpectedValue() {
         //Given
         IcdHeader icdHeader = new IcdHeader(createHeader());
         //When
@@ -41,7 +41,7 @@ class IcdHeaderTest {
     }
 
     @Test
-    void testToString() {
+    void toString_shouldReturnExpectedValue() {
         //Given
         IcdHeader icdHeader = new IcdHeader(createHeader());
         //When

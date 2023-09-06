@@ -9,25 +9,23 @@ import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.sct.commons.scl.com.ConnectedAPAdapter;
 import org.mockito.Mockito;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 class ConnectedApDTOTest {
 
     @Test
-    void testConstruction(){
+    void from_whenCalledWithConnectedAPAdapter_shouldFillValues() {
+        // Given
         ConnectedAPAdapter connectedAPAdapter = Mockito.mock(ConnectedAPAdapter.class);
+        when(connectedAPAdapter.getApName()).thenReturn(DTO.AP_NAME);
+        when(connectedAPAdapter.getIedName()).thenReturn(DTO.HOLDER_IED_NAME);
 
-        Mockito.when(connectedAPAdapter.getApName()).thenReturn(DTO.AP_NAME);
-        Mockito.when(connectedAPAdapter.getIedName()).thenReturn(DTO.HOLDER_IED_NAME);
-
+        // When
         ConnectedApDTO connectedApDTO = ConnectedApDTO.from(connectedAPAdapter);
 
-        assertEquals(DTO.HOLDER_IED_NAME, connectedApDTO.iedName());
-        assertEquals(DTO.AP_NAME, connectedApDTO.apName());
-
-        connectedApDTO = ConnectedApDTO.from(connectedAPAdapter);
-
-        assertEquals(DTO.HOLDER_IED_NAME, connectedApDTO.iedName());
-        assertEquals(DTO.AP_NAME, connectedApDTO.apName());
+        //Then
+        assertThat(connectedApDTO.iedName()).isEqualTo(DTO.HOLDER_IED_NAME);
+        assertThat(connectedApDTO.apName()).isEqualTo(DTO.AP_NAME);
     }
 }

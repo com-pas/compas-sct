@@ -48,7 +48,7 @@ class ControlBlockTargetTest {
     }
 
     @Test
-    void toTClientLn_should_return_empty_lnInst_when_object_lnInst_is_null() {
+    void toTClientLn_when_object_lnInst_is_null_should_return_empty_lnInst() {
         //Given
         ControlBlockTarget controlBlockTarget = new ControlBlockTarget(
             AP_REF, IED_NAME, LD_INST, null, LN_CLASS, PREFIX, DESC);
@@ -72,7 +72,7 @@ class ControlBlockTargetTest {
     }
 
     @Test
-    void toIedName_should_return_null_lnInst_when_object_lnInst_is_empty() {
+    void toIedName_when_object_lnInst_is_empty_should_return_null_lnInst() {
         //Given
         ControlBlockTarget controlBlockTarget = new ControlBlockTarget(
             AP_REF, IED_NAME, LD_INST, "", LN_CLASS, PREFIX, DESC);
