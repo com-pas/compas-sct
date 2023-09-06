@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -17,7 +18,9 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDa;
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.MOD_DO_NAME;
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL_DA_NAME;
@@ -25,81 +28,89 @@ import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newFcda;
 
 class DataAttributeRefTest {
 
-    public static final String CTL_MODEL = "ctlModel";
     @Test
-    void testGetObjRef(){
+    void getObjRef_whenCalledWithAnyLNClassRef_should_return_expected_value(){
+        // Given
         String expected = "IEDLDTM/prelnclass1.do.sdo1.sdo2.da.bda1.bda2";
         DataAttributeRef dataAttributeRef = DTO.createDataAttributeRef("pre","lnclass","1");
+        // When
         String objRef = dataAttributeRef.getObjRef("IED","LDTM");
-        assertEquals(expected,objRef);
+        // Then
+        assertThat(objRef).isEqualTo(expected);
     }
 
     @Test
-    void testGetObjRefWhenLLN0(){
+    void getObjRef_whenCalledWithLLN0Ref_should_return_expected_value(){
         // given
         DataAttributeRef dataAttributeRef = DTO.createDataAttributeRef("pre","LLN0","1");
         // when
         String objRef = dataAttributeRef.getObjRef("IED","LDTM");
         // then
-        assertEquals("IEDLDTM/LLN0.do.sdo1.sdo2.da.bda1.bda2",objRef);
+        assertThat(objRef).isEqualTo("IEDLDTM/LLN0.do.sdo1.sdo2.da.bda1.bda2");
     }
 
     @Test
-    void testGetDataAttributes(){
+    void getDataAttributes_should_return_expected_value(){
         // given
         DataAttributeRef dataAttributeRef = DTO.createDataAttributeRef("pre","lnclass","1");
         // when
         String dataAttributes = dataAttributeRef.getDataAttributes();
         // then
         String expected = "do.sdo1.sdo2.da.bda1.bda2";
-        assertEquals(expected, dataAttributes);
+        assertThat(dataAttributes).isEqualTo(expected);
     }
 
     @Test
-    void testAddDoStructName(){
+    void addDoStructName_when_called_shouldSetDoRefValue(){
         // given
         DataAttributeRef dataAttributeRef = DTO.createDataAttributeRef("pre","lnclass","1");
         dataAttributeRef.setDaName(new DaTypeName());
+        assertThat(dataAttributeRef.getDoRef()).isEqualTo("do.sdo1.sdo2");
         // when
         dataAttributeRef.addDoStructName("added_sdo");
         // then
         String expected = "do.sdo1.sdo2.added_sdo";
-        assertEquals(expected, dataAttributeRef.getDoRef());
+        assertThat(dataAttributeRef.getDoRef()).isEqualTo(expected);
     }
 
     @Test
-    void testAddDoStructNameWhenNoDoName(){
+    void addDoStructName_when_called_with_unDefinedDoName_should_throw_exception(){
         // given
         DataAttributeRef dataAttributeRef = DTO.createDataAttributeRef("pre","lnclass","1");
         dataAttributeRef.setDaName(new DaTypeName());
         dataAttributeRef.setDoName(new DoTypeName());
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> dataAttributeRef.addDoStructName("added_sdo"));
+        assertThatCode(() -> dataAttributeRef.addDoStructName("added_sdo"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("DO name must be defined before adding DO StructName");
     }
 
     @Test
-    void testAddDaStructName(){
+    void addDaStructName_when_called_shouldSetDaRefValue(){
         // given
         DataAttributeRef dataAttributeRef = DTO.createDataAttributeRef("pre","lnclass","1");
         // when
         dataAttributeRef.addDaStructName("added_bda");
         // then
         String expected = "da.bda1.bda2.added_bda";
-        assertEquals(expected, dataAttributeRef.getDaRef());
+        assertThat(dataAttributeRef.getDaRef()).isEqualTo(expected);
     }
 
     @Test
-    void testAddDaStructNameWhenNoDoName(){
+    void addDaStructName_when_called_with_unDefinedDaName_should_throw_exception(){
         // given
         DataAttributeRef dataAttributeRef = DTO.createDataAttributeRef("pre","lnclass","1");
         dataAttributeRef.setDaName(new DaTypeName());
         dataAttributeRef.setDoName(new DoTypeName());
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> dataAttributeRef.addDaStructName("added_sda"));
+        assertThatCode(() -> dataAttributeRef.addDaStructName("added_sda"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("DA name must be defined before adding DA StructName");
+
     }
 
     @Test
-    void testSetDaiValues(){
+    void setDaiValues_when_called_shouldFillSGroupAndValue(){
         // given
         DataAttributeRef dataAttributeRef = DTO.createDataAttributeRef("pre","lnclass","1");
         TVal val = new TVal();
@@ -107,11 +118,11 @@ class DataAttributeRefTest {
         // when
         dataAttributeRef.setDaiValues(List.of(val));
         // then
-        assertEquals(Map.of(0L, "test"), dataAttributeRef.getDaName().getDaiValues());
+        assertThat(dataAttributeRef.getDaName().getDaiValues()).isEqualTo(Map.of(0L, "test"));
     }
 
     @Test
-    void testSetDaiValuesWhenMultipleVal(){
+    void setDaiValues_when_called_withMultipleVal_shouldFillSGroupAndValue(){
         // given
         DataAttributeRef dataAttributeRef = DTO.createDataAttributeRef("pre","lnclass","1");
         TVal val1 = new TVal();
@@ -123,39 +134,51 @@ class DataAttributeRefTest {
         // when
         dataAttributeRef.setDaiValues(List.of(val1, val2));
         // then
-        assertEquals(Map.of(0L, "test1", 1L, "test2"), dataAttributeRef.getDaName().getDaiValues());
+        assertThat(dataAttributeRef.getDaName().getDaiValues()).isEqualTo(Map.of(0L, "test1", 1L, "test2"));
     }
 
     @Test
+    @Tag("issue-321")
     void testCopyFrom() {
+        // Given
         DataAttributeRef dataAttributeRef = DTO.createDataAttributeRef("pre","lnclass","1");
+        // When
         DataAttributeRef dataAttributeRef_b = DataAttributeRef.copyFrom(dataAttributeRef);
-
+        // Then
         assertAll("COPY FROM",
-                () -> assertEquals(dataAttributeRef_b.getLnClass(), dataAttributeRef.getLnClass()),
-                () -> assertEquals(dataAttributeRef_b.getPrefix(), dataAttributeRef.getPrefix()),
-                () -> assertEquals(dataAttributeRef_b.getDaName(), dataAttributeRef.getDaName()),
-                () -> assertEquals(dataAttributeRef_b.getDoName(), dataAttributeRef.getDoName()),
-                () -> assertEquals(dataAttributeRef_b.getLnInst(), dataAttributeRef.getLnInst()),
-                () -> assertEquals(dataAttributeRef_b.getLnType(), dataAttributeRef.getLnType()),
+                () -> assertThat(dataAttributeRef.getLnClass()).isEqualTo(dataAttributeRef_b.getLnClass()),
+                () -> assertThat(dataAttributeRef.getPrefix()).isEqualTo(dataAttributeRef_b.getPrefix()),
+                () -> assertThat(dataAttributeRef.getDaName()).isEqualTo(dataAttributeRef_b.getDaName()),
+                () -> assertThat(dataAttributeRef.getDoName()).isEqualTo(dataAttributeRef_b.getDoName()),
+                () -> assertThat(dataAttributeRef.getLnInst()).isEqualTo(dataAttributeRef_b.getLnInst()),
+                () -> assertThat(dataAttributeRef.getLnType()).isEqualTo(dataAttributeRef_b.getLnType()),
                 () -> assertArrayEquals(dataAttributeRef_b.getSdoNames().toArray(new String[0]),
                         dataAttributeRef.getSdoNames().toArray(new String[0])),
                 () -> assertArrayEquals(dataAttributeRef_b.getBdaNames().toArray(new String[0]),
                         dataAttributeRef.getBdaNames().toArray(new String[0])),
-                () -> assertEquals(dataAttributeRef_b.getType(), dataAttributeRef.getType()),
-                () -> assertTrue(dataAttributeRef.isValImport())
+                () -> assertThat(dataAttributeRef.getType()).isEqualTo(dataAttributeRef_b.getType()),
+                () -> assertThat(dataAttributeRef.isValImport()).isTrue()
         );
+        // Given
         DataAttributeRef dataAttributeRef_t = new DataAttributeRef();
-        assertNull(dataAttributeRef_t.getFc());
-        assertNull(dataAttributeRef_t.getCdc());
-        assertNull(dataAttributeRef_t.getBType());
-        assertNull(dataAttributeRef_t.getType());
-        assertTrue(dataAttributeRef_t.getBdaNames().isEmpty());
-        assertTrue(dataAttributeRef_t.getSdoNames().isEmpty());
-        assertThrows(IllegalArgumentException.class, () -> dataAttributeRef_t.setCdc(TPredefinedCDCEnum.WYE));
-        assertThrows(IllegalArgumentException.class, () -> dataAttributeRef_t.setBType("BType"));
-        assertThrows(IllegalArgumentException.class, () -> dataAttributeRef_t.setType("Type"));
-        assertThrows(IllegalArgumentException.class, () -> dataAttributeRef_t.setFc(TFCEnum.BL));
+        assertThat(dataAttributeRef_t.getFc()).isNull();
+        assertThat(dataAttributeRef_t.getCdc()).isNull();
+        assertThat(dataAttributeRef_t.getBType()).isNull();
+        assertThat(dataAttributeRef_t.getType()).isNull();
+        assertThat(dataAttributeRef_t.getBdaNames()).isEmpty();
+        assertThat(dataAttributeRef_t.getSdoNames()).isEmpty();
+        // When Then
+        assertThatCode(() -> dataAttributeRef_t.setCdc(TPredefinedCDCEnum.WYE))
+                .isInstanceOf(IllegalArgumentException.class);
+        // When Then
+        assertThatCode(() -> dataAttributeRef_t.setBType("BType"))
+                .isInstanceOf(IllegalArgumentException.class);
+        // When Then
+        assertThatCode(() -> dataAttributeRef_t.setType("Type"))
+                .isInstanceOf(IllegalArgumentException.class);
+        // When Then
+        assertThatCode(() -> dataAttributeRef_t.setFc(TFCEnum.BL))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     /**
@@ -184,7 +207,7 @@ class DataAttributeRefTest {
                 Arguments.of("should return true when Mod", STVAL_DA_NAME, TFCEnum.MX, false),
                 Arguments.of("should return true when Mod", STVAL_DA_NAME, null, true),
                 Arguments.of("should return true when Mod", STVAL_DA_NAME, null, false),
-                Arguments.of("should return true when Mod", CTL_MODEL, TFCEnum.CF, true)
+                Arguments.of("should return true when Mod", "ctlModel", TFCEnum.CF, true)
         );
     }
 
@@ -205,11 +228,11 @@ class DataAttributeRefTest {
 
     private static Stream<Arguments> daParametersProviderNotUpdatable() {
         return Stream.of(
-                Arguments.of("should return false when Mod", CTL_MODEL, TFCEnum.CF, false),
-                Arguments.of("should return false when Mod", CTL_MODEL, TFCEnum.MX, true),
-                Arguments.of("should return false when Mod", CTL_MODEL, TFCEnum.MX, false),
-                Arguments.of("should return false when Mod", CTL_MODEL, null, true),
-                Arguments.of("should return false when Mod", CTL_MODEL, null, false)
+                Arguments.of("should return false when Mod", "ctlModel", TFCEnum.CF, false),
+                Arguments.of("should return false when Mod", "ctlModel", TFCEnum.MX, true),
+                Arguments.of("should return false when Mod", "ctlModel", TFCEnum.MX, false),
+                Arguments.of("should return false when Mod", "ctlModel", null, true),
+                Arguments.of("should return false when Mod", "ctlModel", null, false)
         );
     }
 

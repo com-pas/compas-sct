@@ -7,39 +7,38 @@ package org.lfenergy.compas.sct.commons.dto;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.THitem;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class HeaderDTOTest {
 
     @Test
-    void testConstructor(){
+    void constructor_whenCalled_shouldFillValues(){
+        // Given
         UUID id = UUID.randomUUID();
+        // When
         HeaderDTO headerDTO = DTO.createHeaderDTO(id);
-
-
-        assertEquals(id,headerDTO.getId());
-        assertEquals("1.0",headerDTO.getVersion());
-        assertEquals("1.0",headerDTO.getRevision());
-
-        assertFalse(headerDTO.getHistoryItems().isEmpty());
+        // Then
+        assertThat(headerDTO.getId()).isEqualTo(id);
+        assertThat(headerDTO.getVersion()).isEqualTo("1.0");
+        assertThat(headerDTO.getRevision()).isEqualTo("1.0");
+        assertThat(headerDTO.getHistoryItems()).asList().isNotEmpty();
         HeaderDTO.HistoryItem historyItem = headerDTO.getHistoryItems().get(0);
-        assertEquals("1.0",historyItem.getRevision());
-        assertEquals("1.0",historyItem.getVersion());
-        assertEquals("what",historyItem.getWhat());
-        assertEquals("why",historyItem.getWhy());
-        assertEquals("who",historyItem.getWho());
-        assertEquals(DTO.NOW_STR,historyItem.getWhen());
-
+        assertThat(historyItem.getRevision()).isEqualTo("1.0");
+        assertThat(historyItem.getVersion()).isEqualTo("1.0");
+        assertThat(historyItem.getWhat()).isEqualTo("what");
+        assertThat(historyItem.getWhy()).isEqualTo("why");
+        assertThat(historyItem.getWho()).isEqualTo("who");
+        assertThat(historyItem.getWhen()).isEqualTo(DTO.NOW_STR);
         headerDTO = new HeaderDTO(id,"1.0","1.0");
-        assertEquals("1.0",headerDTO.getVersion());
-        assertEquals("1.0",headerDTO.getRevision());
+        assertThat(headerDTO.getVersion()).isEqualTo("1.0");
+        assertThat(headerDTO.getRevision()).isEqualTo("1.0");
     }
 
     @Test
-    void testHItemFrom(){
+    void from_WhenCalledWithHitem_shouldFillValues(){
+        // Given
         THitem tHitem = new THitem();
         tHitem.setRevision("1.0");
         tHitem.setVersion("1.0");
@@ -47,12 +46,13 @@ class HeaderDTOTest {
         tHitem.setWho("who");
         tHitem.setWhy("why");
         tHitem.setWhen(DTO.NOW_STR);
-
+        // When
         HeaderDTO.HistoryItem historyItem = HeaderDTO.HistoryItem.from(tHitem);
-        assertEquals("1.0",historyItem.getRevision());
-        assertEquals("1.0",historyItem.getVersion());
-        assertEquals("what",historyItem.getWhat());
-        assertEquals("why",historyItem.getWhy());
-        assertEquals("who",historyItem.getWho());
+        // Then
+        assertThat(historyItem.getRevision()).isEqualTo("1.0");
+        assertThat(historyItem.getVersion()).isEqualTo("1.0");
+        assertThat(historyItem.getWhat()).isEqualTo("what");
+        assertThat(historyItem.getWhy()).isEqualTo("why");
+        assertThat(historyItem.getWho()).isEqualTo("who");
     }
 }

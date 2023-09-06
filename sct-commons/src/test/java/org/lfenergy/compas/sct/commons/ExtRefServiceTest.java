@@ -6,6 +6,7 @@ package org.lfenergy.compas.sct.commons;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.groups.Tuple;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -38,8 +39,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.lfenergy.compas.scl2007b4.model.TFCEnum.ST;
 import static org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.*;
@@ -559,7 +559,7 @@ class ExtRefServiceTest {
     }
 
     @Test
-    void manageBindingForLDEPF_should_return_noReportAndExtRefUpdateSuccessfully_whenFlowKindIsInternalAndAllExtRefInSameBay() {
+    void manageBindingForLDEPF_whenFlowKindIsInternalAndAllExtRefInSameBay_should_return_noReportAndExtRefUpdateSuccessfully() {
        //Given
         String fileName = "LDEPF_Setting_file.csv";
         InputStream inputStream = Objects.requireNonNull(CsvUtils.class.getClassLoader().getResourceAsStream(fileName), "Resource not found: " + fileName);
@@ -626,7 +626,8 @@ class ExtRefServiceTest {
     }
 
     @Test
-    void manageBindingForLDEPF_should_return_no_report_when_extRef_withDifferentIedType_update_successfully() {
+    void manageBindingForLDEPF_when_extRef_withDifferentIedType_update_successfully_should_return_no_report() {
+        // Given
         String fileName = "LDEPF_Setting_file.csv";
         InputStream inputStream = Objects.requireNonNull(CsvUtils.class.getClassLoader().getResourceAsStream(fileName), "Resource not found: " + fileName);
         InputStreamReader reader = new InputStreamReader(inputStream);
@@ -703,7 +704,7 @@ class ExtRefServiceTest {
     }
 
     @Test
-    void manageBindingForLDEPF_should_return_report_when_manyIedSourceFound() {
+    void manageBindingForLDEPF_when_manyIedSourceFound_should_return_report() {
         //Given
         String fileName = "LDEPF_Setting_file.csv";
         InputStream inputStream = Objects.requireNonNull(CsvUtils.class.getClassLoader().getResourceAsStream(fileName), "Resource not found: " + fileName);
@@ -746,7 +747,8 @@ class ExtRefServiceTest {
     }
 
     @Test
-    void manageBindingForLDEPF_should_return_no_report_when_extRefInFlowKindInternalAndExternal_update_successfully() {
+    void manageBindingForLDEPF_when_extRefInFlowKindInternalAndExternal_update_successfully_should_return_no_report() {
+        //Given
         String fileName = "LDEPF_Setting_file.csv";
         InputStream inputStream = Objects.requireNonNull(CsvUtils.class.getClassLoader().getResourceAsStream(fileName), "Resource not found: " + fileName);
         InputStreamReader reader = new InputStreamReader(inputStream);
@@ -815,24 +817,27 @@ class ExtRefServiceTest {
     }
 
     @Test
-    void updateExtRefSource_shouldThrowScdException_whenSignalInfoNullOrInvalid() {
+    @Tag("issue-321")
+    void updateExtRefSource_whenSignalInfoNullOrInvalid_shouldThrowScdException() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
         ExtRefInfo extRefInfo = new ExtRefInfo();
         extRefInfo.setHolderIEDName("IED_NAME2");
         extRefInfo.setHolderLDInst("LD_INST21");
         extRefInfo.setHolderLnClass(TLLN0Enum.LLN_0.value());
-
-        //When Then
         assertThat(extRefInfo.getSignalInfo()).isNull();
+        //When Then
         assertThatThrownBy(() -> extRefService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class); // signal = null
+        //Given
         extRefInfo.setSignalInfo(new ExtRefSignalInfo());
         assertThat(extRefInfo.getSignalInfo()).isNotNull();
+        //When Then
         assertThatThrownBy(() -> extRefService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class);// signal invalid
     }
 
     @Test
-    void updateExtRefSource_shouldThrowScdException_whenBindingInfoNullOrInvalid() {
+    @Tag("issue-321")
+    void updateExtRefSource_whenBindingInfoNullOrInvalid_shouldThrowScdException() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
         ExtRefInfo extRefInfo = new ExtRefInfo();
@@ -845,16 +850,19 @@ class ExtRefServiceTest {
         extRefSignalInfo.setPDA("da21.bda211.bda212.bda213");
         extRefSignalInfo.setPDO("Do21.sdo21");
         extRefInfo.setSignalInfo(extRefSignalInfo);
-        //When Then
         assertThat(extRefInfo.getBindingInfo()).isNull();
-        assertThatThrownBy(() -> extRefService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class); // binding = null
+        //When Then
+        assertThatThrownBy(() -> extRefService.updateExtRefSource(scd, extRefInfo))
+                .isInstanceOf(ScdException.class); // binding = null
+        //Given
         extRefInfo.setBindingInfo(new ExtRefBindingInfo());
         assertThat(extRefInfo.getBindingInfo()).isNotNull();
+        //When Then
         assertThatThrownBy(() -> extRefService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class);// binding invalid
     }
 
     @Test
-    void updateExtRefSource_shouldThrowScdException_whenBindingInternalByIedName() {
+    void updateExtRefSource_whenBindingInternalByIedName_shouldThrowScdException() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
         ExtRefInfo extRefInfo = new ExtRefInfo();
@@ -878,7 +886,7 @@ class ExtRefServiceTest {
     }
 
     @Test
-    void updateExtRefSource_shouldThrowScdException_whenBindingInternaByServiceType() {
+    void updateExtRefSource_whenBindingInternaByServiceType_shouldThrowScdException() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
         ExtRefInfo extRefInfo = new ExtRefInfo();
@@ -903,7 +911,8 @@ class ExtRefServiceTest {
     }
 
     @Test
-    void updateExtRefSource_shouldThrowScdException_whenSourceInfoNullOrInvalid() {
+    @Tag("issue-321")
+    void updateExtRefSource_whenSourceInfoNullOrInvalid_shouldThrowScdException() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
         ExtRefInfo extRefInfo = new ExtRefInfo();
@@ -923,16 +932,18 @@ class ExtRefServiceTest {
         extRefBindingInfo.setLnClass(TLLN0Enum.LLN_0.value());
         extRefInfo.setBindingInfo(new ExtRefBindingInfo());
 
-        //When Then
         assertThat(extRefInfo.getSourceInfo()).isNull();
+        //When Then
         assertThatThrownBy(() -> extRefService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class); // signal = null
+        //Given
         extRefInfo.setSourceInfo(new ExtRefSourceInfo());
         assertThat(extRefInfo.getSourceInfo()).isNotNull();
+        //When Then
         assertThatThrownBy(() -> extRefService.updateExtRefSource(scd, extRefInfo)).isInstanceOf(ScdException.class);// signal invalid
     }
 
     @Test
-    void updateExtRefSource_shouldThrowScdException_whenBindingExternalBinding() {
+    void updateExtRefSource_whenBindingExternalBinding_shouldThrowScdException() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
         ExtRefInfo extRefInfo = new ExtRefInfo();

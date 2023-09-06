@@ -6,6 +6,7 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -23,10 +24,11 @@ import org.lfenergy.compas.sct.commons.util.MonitoringLnClassEnum;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter.MOD_DO_TYPE_NAME;
 import static org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter.STVAL_DA_TYPE_NAME;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
@@ -46,28 +48,55 @@ class LDeviceAdapterTest {
     }
 
     @Test
-    void testUpdateLDName() {
+    void updateLDName_when_ldName_pass_33_characters_should_throw_exception() {
+        // Given
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.findLDeviceAdapterByLdInst("LD_INS1").get());
         lDeviceAdapter.updateLDName();
-        assertEquals("IED_NAMELD_INS1",lDeviceAdapter.getLdName());
-        iAdapter.setIEDName("VERY_VERY_VERY_VERY_VERY_VERY_LONG_IED_NAME");
-        assertThrows(ScdException.class, ()-> lDeviceAdapter.updateLDName());
-
-        assertEquals("LD_INS1", lDeviceAdapter.getInst());
+        assertThat(lDeviceAdapter.getLdName()).isEqualTo("IED_NAMELD_INS1");
+        assertThat(lDeviceAdapter.getInst()).isEqualTo("LD_INS1");
+        String iedName = new Random().ints(97, 122)
+                .limit(27)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
+        iAdapter.setIEDName(iedName);
+        // When Then
+        assertThatThrownBy(lDeviceAdapter::updateLDName)
+                .isInstanceOf(ScdException.class)
+                .hasMessageContaining("has more than 33 characters");
     }
 
     @Test
+    void updateLDName_when_ldName_less_than_33_characters_should_not_throw_exception() {
+        // Given
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.findLDeviceAdapterByLdInst("LD_INS1").get());
+        lDeviceAdapter.updateLDName();
+        assertThat(lDeviceAdapter.getLdName()).isEqualTo("IED_NAMELD_INS1");
+        assertThat(lDeviceAdapter.getInst()).isEqualTo("LD_INS1");
+        String iedName = new Random().ints(97, 122)
+                .limit(26)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
+        iAdapter.setIEDName(iedName);
+        // When Then
+        assertThatCode(lDeviceAdapter::updateLDName).doesNotThrowAnyException();
+        assertThat(lDeviceAdapter.getLdName()).isEqualTo(iedName+"LD_INS1");
+    }
+
+    @Test
+    @Tag("issue-321")
     void testGetLNAdapters()  {
+        // Given
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.findLDeviceAdapterByLdInst("LD_INS2").get());
-
-        assertEquals(1,lDeviceAdapter.getLNAdapters().size());
-
+        assertThat(lDeviceAdapter.getLNAdapters()).hasSize(1);
+        // When Then
         assertDoesNotThrow(() -> lDeviceAdapter.getLNAdapter("ANCR","1",null));
-        assertThrows(ScdException.class, () -> lDeviceAdapter.getLNAdapter("ANCR","1","pr"));
+        // When Then
+        assertThatThrownBy(() -> lDeviceAdapter.getLNAdapter("ANCR","1","pr"))
+                .isInstanceOf(ScdException.class);
     }
 
     @Test
-    void findLnAdapter_should_return_adapter(){
+    void findLnAdapter_shouldReturnAdapter(){
         // Given
         LDeviceAdapter lDeviceAdapter = iAdapter.findLDeviceAdapterByLdInst("LD_INS2").get();
         // When
@@ -78,7 +107,7 @@ class LDeviceAdapterTest {
     }
 
     @Test
-    void getExtRefBinders_shouldReturnExtRefBindingInfo_whenExist() {
+    void getExtRefBinders_whenExist_shouldReturnExtRefBindingInfo() {
         //Given
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.findLDeviceAdapterByLdInst("LD_INS2").get());
         ExtRefSignalInfo signalInfo = DTO.createExtRefSignalInfo();
@@ -90,7 +119,7 @@ class LDeviceAdapterTest {
     }
 
     @Test
-    void getExtRefBinders_shouldReturnEmptyList_whenpLNNotMatch() {
+    void getExtRefBinders_when_PLN_NotMatch_shouldReturnEmptyList() {
         //Given
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2"));
         ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
@@ -101,7 +130,7 @@ class LDeviceAdapterTest {
     }
 
     @Test
-    void getExtRefBinders_shouldReturnEmptyList_whenpLNNotSet() {
+    void getExtRefBinders_when_PLN_NotSet_shouldReturnEmptyList() {
         //Given
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2"));
         ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
@@ -111,47 +140,63 @@ class LDeviceAdapterTest {
     }
 
     @Test
-    void testGetExtRefInfo() {
+    @Tag("issue-321")
+    void getExtRefInfo_should_return_expected_list_of_ExtRefInfo() {
+        // Given
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2"));
-        List<ExtRefInfo> extRefInfoList = assertDoesNotThrow(()-> lDeviceAdapter.getExtRefInfo());
-        assertEquals(2,extRefInfoList.size());
+        // When
+        List<ExtRefInfo> extRefInfoList = assertDoesNotThrow(lDeviceAdapter::getExtRefInfo);
+        // Then
+        assertThat(extRefInfoList).hasSize(2);
     }
 
     @Test
+    @Tag("issue-321")
     void TestGetDAI() {
+        // Given
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS1"));
+        // When
         var dataAttributeRefs = lDeviceAdapter.getDAI(new DataAttributeRef(),true);
-        assertEquals(4,dataAttributeRefs.size());
+        // Then
+        assertThat(dataAttributeRefs).hasSize(4);
 
-
-
+        // Given
         DataAttributeRef filter = new DataAttributeRef();
         filter.setLnClass(TLLN0Enum.LLN_0.value());
+        // When
         dataAttributeRefs = lDeviceAdapter.getDAI(filter,true);
-        assertEquals(4,dataAttributeRefs.size());
+        // Then
+        assertThat(dataAttributeRefs).hasSize(4);
 
+        // Given
         lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.findLDeviceAdapterByLdInst("LD_INS2").get());
         filter.setLnClass("ANCR");
         filter.setLnInst("1");
+        // When
         dataAttributeRefs = lDeviceAdapter.getDAI(filter,true);
-        assertEquals(2,dataAttributeRefs.size());
+        // Then
+        assertThat(dataAttributeRefs).hasSize(2);
     }
 
     @Test
-    void addPrivate() {
+    @Tag("issue-321")
+    void addPrivate_with_type_and_source_should_create_Private() {
+        // Given
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2"));
         TPrivate tPrivate = new TPrivate();
         tPrivate.setType("Private Type");
         tPrivate.setSource("Private Source");
-        assertTrue(lDeviceAdapter.getCurrentElem().getPrivate().isEmpty());
+        assertThat(lDeviceAdapter.getCurrentElem().getPrivate()).isEmpty();
+        // When
         lDeviceAdapter.addPrivate(tPrivate);
-        assertEquals(1, lDeviceAdapter.getCurrentElem().getPrivate().size());
+        // Then
+        assertThat(lDeviceAdapter.getCurrentElem().getPrivate()).isNotEmpty();
     }
 
     @ParameterizedTest
     @CsvSource(value = {"ldInst;LDevice[@inst=\"ldInst\"]", ";LDevice[not(@inst)]"}
             , delimiter = ';')
-    void elementXPath(String ldInst, String message) {
+    void elementXPath_should_return_expected_xpath_value(String ldInst, String message) {
         // Given
         TLDevice tlDevice = new TLDevice();
         tlDevice.setInst(ldInst);
@@ -182,7 +227,7 @@ class LDeviceAdapterTest {
     }
 
     @Test
-    void getLNAdaptersInclundigLN0() {
+    void getLNAdaptersIncludingLN0_should_return_expected_list_of_AbstractLNAdapter() {
         //Given
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2"));
         //When
@@ -196,7 +241,7 @@ class LDeviceAdapterTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideHasDataSetCreationCapabilityTrue")
-    void hasDataSetCreationCapability_should_return_true_when_attribute_exists(String testCase, TServices tServices, ControlBlockEnum controlBlockEnum) {
+    void hasDataSetCreationCapability_when_attribute_exists_should_return_true(String testCase, TServices tServices, ControlBlockEnum controlBlockEnum) {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -265,7 +310,7 @@ class LDeviceAdapterTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideHasDataSetCreationCapabilityFalse")
-    void hasDataSetCreationCapability_should_return_false_when_wrong_attribute(String testCase, TServices tServices, ControlBlockEnum controlBlockEnum) {
+    void hasDataSetCreationCapability_when_wrong_attribute_should_return_false(String testCase, TServices tServices, ControlBlockEnum controlBlockEnum) {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -311,7 +356,7 @@ class LDeviceAdapterTest {
 
     @ParameterizedTest
     @EnumSource(ControlBlockEnum.class)
-    void hasDataSetCreationCapability_should_return_false_when_no_existing_services_attribute(ControlBlockEnum controlBlockEnum) {
+    void hasDataSetCreationCapability_when_no_existing_services_attribute_should_return_false(ControlBlockEnum controlBlockEnum) {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -326,7 +371,7 @@ class LDeviceAdapterTest {
     }
 
     @Test
-    void hasDataSetCreationCapability_should_throw_exception_when_parameter_is_null() {
+    void hasDataSetCreationCapability_when_parameter_is_null_should_throw_exception() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -342,7 +387,7 @@ class LDeviceAdapterTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideHasControlBlockCreationCapabilityTrue")
-    void hasControlBlockCreationCapability_should_return_true_when_attribute_exists(String testCase, TServices tServices, ControlBlockEnum controlBlockEnum) {
+    void hasControlBlockCreationCapability_when_attribute_exists_should_return_true(String testCase, TServices tServices, ControlBlockEnum controlBlockEnum) {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -387,7 +432,7 @@ class LDeviceAdapterTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideHasControlBlockCreationCapabilityFalse")
-    void hasControlBlockCreationCapability_should_return_false_when_wrong_attribute(String testCase, TServices tServices, ControlBlockEnum controlBlockEnum) {
+    void hasControlBlockCreationCapability_when_wrong_attribute_should_return_false(String testCase, TServices tServices, ControlBlockEnum controlBlockEnum) {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -432,7 +477,7 @@ class LDeviceAdapterTest {
 
     @ParameterizedTest
     @EnumSource(ControlBlockEnum.class)
-    void hasControlBlockCreationCapability_should_return_false_when_no_existing_services_attribute(ControlBlockEnum controlBlockEnum) {
+    void hasControlBlockCreationCapability_when_no_existing_services_attribute_should_return_false(ControlBlockEnum controlBlockEnum) {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -447,7 +492,7 @@ class LDeviceAdapterTest {
     }
 
     @Test
-    void hasControlBlockCreationCapability_should_throw_exception_when_parameter_is_null() {
+    void hasControlBlockCreationCapability_when_parameter_is_null_should_throw_exception() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -462,7 +507,7 @@ class LDeviceAdapterTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideLnClassAndDoType")
-    void manageMonitoringLns_should_not_update_ln_when_no_extRef(String testCase, MonitoringLnClassEnum lnClassEnum, String doName) {
+    void manageMonitoringLns_when_no_extRef_should_not_update_ln(String testCase, MonitoringLnClassEnum lnClassEnum, String doName) {
         // Given
         LDeviceAdapter lDeviceAdapter = createIedsInScl(lnClassEnum.value(), doName).getIEDAdapterByName(IED_NAME_1).getLDeviceAdapterByLdInst(LD_SUIED);
         // When
@@ -476,7 +521,7 @@ class LDeviceAdapterTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideLnClassAndDoType")
-    void manageMonitoringLns_should_not_create_ln_when_no_init_ln(String testCase, MonitoringLnClassEnum lnClassEnum, String doName) {
+    void manageMonitoringLns_when_no_init_ln_should_not_create_ln(String testCase, MonitoringLnClassEnum lnClassEnum, String doName) {
         // Given
         LDeviceAdapter lDeviceAdapter = createIedsInScl(lnClassEnum.value(), doName).getIEDAdapterByName(IED_NAME_1).getLDeviceAdapterByLdInst(LD_SUIED);
         lDeviceAdapter.getCurrentElem().unsetLN();
@@ -492,7 +537,7 @@ class LDeviceAdapterTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideLnClassAndDoType")
-    void manageMonitoringLns_should_update_ln_when_one_extRef_and_dai_updatable(String testCase, MonitoringLnClassEnum lnClassEnum, String doName, TServiceType tServiceType) {
+    void manageMonitoringLns_when_one_extRef_and_dai_updatable_should_update_ln(String testCase, MonitoringLnClassEnum lnClassEnum, String doName, TServiceType tServiceType) {
         // Given
         LDeviceAdapter lDeviceAdapter = createIedsInScl(lnClassEnum.value(), doName).getIEDAdapterByName(IED_NAME_1).getLDeviceAdapterByLdInst(LD_SUIED);
         TExtRef tExtRef = createExtRefExample("CB_Name", tServiceType);
@@ -513,7 +558,7 @@ class LDeviceAdapterTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideLnClassAndDoType")
-    void manageMonitoringLns_should_not_update_ln_when_one_extRef_and_dai_not_updatable(String testCase, MonitoringLnClassEnum lnClassEnum, String doName, TServiceType tServiceType) {
+    void manageMonitoringLns_when_one_extRef_and_dai_not_updatable_should_not_update_ln(String testCase, MonitoringLnClassEnum lnClassEnum, String doName, TServiceType tServiceType) {
         // Given
         SclRootAdapter sclRootAdapter = createIedsInScl(lnClassEnum.value(), doName);
         sclRootAdapter.getDataTypeTemplateAdapter().getDOTypeAdapterById("REF").get().getDAAdapterByName("setSrcRef")
@@ -535,7 +580,7 @@ class LDeviceAdapterTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideLnClassAndDoType")
-    void manageMonitoringLns_should_update_ln_when_2_extRef_and_dai_updatable(String testCase, MonitoringLnClassEnum lnClassEnum, String doName, TServiceType tServiceType) {
+    void manageMonitoringLns_when_2_extRef_and_dai_updatable_should_update_ln(String testCase, MonitoringLnClassEnum lnClassEnum, String doName, TServiceType tServiceType) {
         // Given
         LDeviceAdapter lDeviceAdapter = createIedsInScl(lnClassEnum.value(), doName).getIEDAdapterByName(IED_NAME_1).getLDeviceAdapterByLdInst(LD_SUIED);
         TLN copiedLN1 = copySclElement(lDeviceAdapter.getLNAdapters().get(0).getCurrentElem(), TLN.class);
@@ -561,7 +606,7 @@ class LDeviceAdapterTest {
     }
 
     @Test
-    void getExtRefBuyReferenceForActifLDEPF_should_return_existingExtRef_when_LDEPF_active_and_bay_exists() {
+    void getExtRefBuyReferenceForActifLDEPF_when_LDEPF_active_and_bay_exists_should_return_existingExtRef() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_extrefbayRef.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -575,7 +620,7 @@ class LDeviceAdapterTest {
     }
 
     @Test
-    void getExtRefBayReferenceForActifLDEPF_should_return_fatal_errors_when_NoPrivateBuyNorIcdHeader() {
+    void getExtRefBayReferenceForActifLDEPF_when_NoPrivateBuyNorIcdHeader_should_return_fatal_errors() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_extrefbayRef.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -594,7 +639,7 @@ class LDeviceAdapterTest {
     }
 
     @Test
-    void getExtRefBayReferenceForActifLDEPF_should_return_fatal_errors_when_DOI_Mod_notExists() {
+    void getExtRefBayReferenceForActifLDEPF_when_DOI_Mod_notExists_should_return_fatal_errors() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_extrefbayRef.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -611,7 +656,7 @@ class LDeviceAdapterTest {
     }
 
     @Test
-    void getExtRefBayReferenceForActifLDEPF_should_not_return_existingExtRef_when_LDEPF_NotActive() {
+    void getExtRefBayReferenceForActifLDEPF_when_LDEPF_NotActive_should_not_return_existingExtRef() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_extrefbayRef.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);

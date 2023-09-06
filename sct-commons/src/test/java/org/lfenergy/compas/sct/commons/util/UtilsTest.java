@@ -22,7 +22,6 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.createExtRefExample;
 import static org.lfenergy.compas.sct.commons.util.Utils.copySclElement;
 
@@ -43,7 +42,7 @@ class UtilsTest {
         // When
         String entering = Utils.entering();
         // Then
-        assertEquals(">>> Entering: ::entering_should_return_text", entering);
+        assertThat(entering).isEqualTo(">>> Entering: ::entering_should_return_text");
     }
 
     @Test
@@ -52,7 +51,7 @@ class UtilsTest {
         // When
         String leaving = Utils.leaving();
         // Then
-        assertEquals("<<< Leaving: ::leaving_should_return_text", leaving);
+        assertThat(leaving).isEqualTo("<<< Leaving: ::leaving_should_return_text");
     }
 
     @Test
@@ -61,7 +60,7 @@ class UtilsTest {
         // When
         String leaving = Utils.leaving(System.nanoTime());
         // Then
-        assertTrue(leaving.matches("<<< Leaving: ::leaving_should_return_text_with_time - Timer duration: .* sec."), leaving);
+        assertThat(leaving).matches("<<< Leaving: ::leaving_should_return_text_with_time - Timer duration: .* sec.");
     }
 
     @Test
@@ -70,11 +69,11 @@ class UtilsTest {
         // When
         String leaving = Utils.leaving(-1L);
         // Then
-        assertEquals("<<< Leaving: ::leaving_should_return_text_with_invalid_time", leaving);
+        assertThat(leaving).isEqualTo("<<< Leaving: ::leaving_should_return_text_with_invalid_time");
     }
 
     @Test
-    void equalsOrNotSet_should_return_true_when_both_values_are_not_set() {
+    void equalsOrNotSet_when_both_values_are_not_set_should_return_true() {
         // Given
         Optional<Long> object1 = Optional.empty();
         Optional<Long> object2 = Optional.empty();
@@ -82,12 +81,12 @@ class UtilsTest {
         boolean result1 = Utils.equalsOrNotSet(object1, object2, Optional::isPresent, Optional::get);
         boolean result2 = Utils.equalsOrNotSet(object2, object1, Optional::isPresent, Optional::get);
         // Then
-        assertTrue(result1);
-        assertTrue(result2);
+        assertThat(result1).isTrue();
+        assertThat(result2).isTrue();
     }
 
     @Test
-    void equalsOrNotSet_should_return_true_when_both_values_are_set_and_equal() {
+    void equalsOrNotSet_when_both_values_are_set_and_equal_should_return_true() {
         // Given
         Optional<Long> object1 = Optional.of(1L);
         Optional<Long> object2 = Optional.of(1L);
@@ -95,12 +94,12 @@ class UtilsTest {
         boolean result1 = Utils.equalsOrNotSet(object1, object2, Optional::isPresent, Optional::get);
         boolean result2 = Utils.equalsOrNotSet(object2, object1, Optional::isPresent, Optional::get);
         // Then
-        assertTrue(result1);
-        assertTrue(result2);
+        assertThat(result1).isTrue();
+        assertThat(result2).isTrue();
     }
 
     @Test
-    void equalsOrNotSet_should_return_false_when_both_values_are_set_but_differ() {
+    void equalsOrNotSet_when_both_values_are_set_but_differ_should_return_false() {
         // Given
         Optional<Long> object1 = Optional.of(1L);
         Optional<Long> object2 = Optional.of(2L);
@@ -108,12 +107,12 @@ class UtilsTest {
         boolean result1 = Utils.equalsOrNotSet(object1, object2, Optional::isPresent, Optional::get);
         boolean result2 = Utils.equalsOrNotSet(object2, object1, Optional::isPresent, Optional::get);
         // Then
-        assertFalse(result1);
-        assertFalse(result2);
+        assertThat(result1).isFalse();
+        assertThat(result2).isFalse();
     }
 
     @Test
-    void equalsOrNotSet_should_return_false_when_one_is_set_and_the_other_is_not() {
+    void equalsOrNotSet_when_one_is_set_and_the_other_is_not_should_return_false() {
         // Given
         Optional<Long> object1 = Optional.of(1L);
         Optional<Long> object2 = Optional.empty();
@@ -121,18 +120,20 @@ class UtilsTest {
         boolean result1 = Utils.equalsOrNotSet(object1, object2, Optional::isPresent, Optional::get);
         boolean result2 = Utils.equalsOrNotSet(object2, object1, Optional::isPresent, Optional::get);
         // Then
-        assertFalse(result1);
-        assertFalse(result2);
+        assertThat(result1).isFalse();
+        assertThat(result2).isFalse();
     }
 
     @Test
-    void equalsOrNotSet_should_throw_exception_when_value_is_null_and_isSet_is_misleading() {
+    void equalsOrNotSet_when_value_is_null_and_isSet_is_misleading_should_throw_exception() {
         // Given
         Optional<Long> object1 = Optional.of(1L);
         Optional<Long> object2 = Optional.empty();
         // When & Then
-        assertThrows(NoSuchElementException.class, () -> Utils.equalsOrNotSet(object1, object2, o -> true, Optional::get));
-        assertThrows(NoSuchElementException.class, () -> Utils.equalsOrNotSet(object2, object1, o -> true, Optional::get));
+        assertThatCode(() -> Utils.equalsOrNotSet(object1, object2, o -> true, Optional::get))
+                .isInstanceOf(NoSuchElementException.class);
+        assertThatCode(() -> Utils.equalsOrNotSet(object2, object1, o -> true, Optional::get))
+                .isInstanceOf(NoSuchElementException.class);
     }
 
     @Test
@@ -143,7 +144,7 @@ class UtilsTest {
         // When
         String result = Utils.xpathAttributeFilter(attributeName, attributeValue);
         // Then
-        assertEquals("@name=\"value\"", result);
+        assertThat(result).isEqualTo("@name=\"value\"");
     }
 
     @Test
@@ -154,7 +155,7 @@ class UtilsTest {
         // When
         String result = Utils.xpathAttributeFilter(attributeName, attributeValue);
         // Then
-        assertEquals("not(@name)", result);
+        assertThat(result).isEqualTo("not(@name)");
     }
 
     @Test
@@ -165,7 +166,7 @@ class UtilsTest {
         // When
         String result = Utils.xpathAttributeFilter(attributeName, attributeValue);
         // Then
-        assertEquals("@name=\"value1 value2\"", result);
+        assertThat(result).isEqualTo("@name=\"value1 value2\"");
     }
 
     @Test
@@ -176,7 +177,7 @@ class UtilsTest {
         // When
         String result = Utils.xpathAttributeFilter(attributeName, attributeValue);
         // Then
-        assertEquals("@name=\"value1 value2\"", result);
+        assertThat(result).isEqualTo("@name=\"value1 value2\"");
     }
 
     @ParameterizedTest
@@ -187,7 +188,7 @@ class UtilsTest {
         // When
         String result = Utils.xpathAttributeFilter(attributeName, attributeValue);
         // Then
-        assertEquals("not(@name)", result);
+        assertThat(result).isEqualTo("not(@name)");
     }
 
     public static Stream<Collection<String>> xpathAttributeFilterEmptyCollectionSource() {
@@ -435,7 +436,7 @@ class UtilsTest {
     }
 
     @Test
-    void sequence_should_throw_exception_when_MAX_VALUE(){
+    void sequence_when_MAX_VALUE_should_throw_exception(){
         // Given
         long startInclusive = 1;
         long endInclusive = Long.MAX_VALUE;

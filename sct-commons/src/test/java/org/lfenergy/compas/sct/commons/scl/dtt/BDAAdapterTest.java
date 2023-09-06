@@ -4,66 +4,108 @@
 
 package org.lfenergy.compas.sct.commons.scl.dtt;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
-import org.mockito.Mockito;
-
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-class BDAAdapterTest extends AbstractDTTLevel<DATypeAdapter,TBDA> {
+class BDAAdapterTest {
 
     @Test
-    void testAmChildElementRef()  {
-        init();
-        assertDoesNotThrow(
-                () -> new DATypeAdapter.BDAAdapter(sclElementAdapter,sclElement)
-        );
-    }
-
-    @Override
-    protected SclElementAdapter getMockedSclParentAdapter(){
-        DataTypeTemplateAdapter dataTypeTemplateAdapter = (DataTypeTemplateAdapter) super.getMockedSclParentAdapter();
-        TDAType tdaType = new TDAType();
-        tdaType.setId("ID");
-        List<TDAType> tdaTypes = List.of(tdaType);
-        Mockito.when(dataTypeTemplateAdapter.getCurrentElem().getDAType()).thenReturn(tdaTypes);
-        DATypeAdapter daTypeAdapter = assertDoesNotThrow(
-                () -> new DATypeAdapter(dataTypeTemplateAdapter,tdaType)
-        );
-        return daTypeAdapter;
+    void constructor_whenCalledWithNoRelationBetweenDATypeAndBDA_shouldThrowException() {
+        //Given
+        DATypeAdapter daTypeAdapter = mock(DATypeAdapter.class);
+        when(daTypeAdapter.getCurrentElem()).thenReturn(new TDAType());
+        TBDA tbda = new TBDA();
+        //When Then
+        assertThatCode(() -> new DATypeAdapter.BDAAdapter(daTypeAdapter, tbda))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("No relation between SCL parent element and child");
     }
 
     @Test
+    void constructor_whenCalledWithExistingRelationBetweenDATypeAndBDA_shouldNotThrowException() {
+        //Given
+        DATypeAdapter daTypeAdapter = mock(DATypeAdapter.class);
+        TDAType daType = new TDAType();
+        TBDA bda = new TBDA();
+        daType.getBDA().add(bda);
+        when(daTypeAdapter.getCurrentElem()).thenReturn(daType);
+        //When Then
+        assertThatCode(() -> new DATypeAdapter.BDAAdapter(daTypeAdapter, bda)).doesNotThrowAnyException();
+    }
+
+    @Test
+    @Tag("issue-321")
     void tesHasSameContentAs() {
-        init();
+        // Given
+        DATypeAdapter daTypeAdapter = mock(DATypeAdapter.class);
+        TDAType daType = new TDAType();
         TBDA tbda = createBDA();
-        sclElementAdapter.getCurrentElem().getBDA().add(tbda);
+        daType.getBDA().add(tbda);
+        when(daTypeAdapter.getCurrentElem()).thenReturn(daType);
+        //When Then
         DATypeAdapter.BDAAdapter bdaAdapter = assertDoesNotThrow(
-                () -> new DATypeAdapter.BDAAdapter(sclElementAdapter,tbda)
-        );
-        assertEquals("ENUM_BDA1", bdaAdapter.getType());
-        assertEquals(TPredefinedBasicTypeEnum.ENUM, bdaAdapter.getBType());
-        assertEquals("BDA1", bdaAdapter.getName());
-
+                () -> new DATypeAdapter.BDAAdapter(daTypeAdapter, tbda));
+        assertThat(bdaAdapter.getType()).isEqualTo("ENUM_BDA1");
+        assertThat(bdaAdapter.getBType()).isEqualTo(TPredefinedBasicTypeEnum.ENUM);
+        assertThat(bdaAdapter.getName()).isEqualTo("BDA1");
         TBDA tbda1 = createBDA();
         tbda1.getVal().get(0).setValue("VAL_CHANGED");
-        assertFalse(bdaAdapter.hasSameContentAs(tbda1));
-
+        //When Then
+        assertThat(bdaAdapter.hasSameContentAs(tbda1)).isFalse();
         tbda1.getCount().add("1");
-        assertFalse(bdaAdapter.hasSameContentAs(tbda1));
-
+        //When Then
+        assertThat(bdaAdapter.hasSameContentAs(tbda1)).isFalse();
         tbda1.setValImport(false);
-        assertFalse(bdaAdapter.hasSameContentAs(tbda1));
-
+        //When Then
+        assertThat(bdaAdapter.hasSameContentAs(tbda1)).isFalse();
         tbda1.setValKind(TValKindEnum.SET);
-        assertFalse(bdaAdapter.hasSameContentAs(tbda1));
-
+        //When Then
+        assertThat(bdaAdapter.hasSameContentAs(tbda1)).isFalse();
         tbda1.setSAddr("SADDR_BDA2");
-        assertFalse(bdaAdapter.hasSameContentAs(tbda1));
+        //When Then
+        assertThat(bdaAdapter.hasSameContentAs(tbda1)).isFalse();
+    }
+
+    @Test
+    void addPrivate_with_type_and_source_should_create_Private() {
+        //Given
+        DATypeAdapter daTypeAdapter = mock(DATypeAdapter.class);
+        TDAType daType = new TDAType();
+        TBDA tbda = createBDA();
+        daType.getBDA().add(tbda);
+        when(daTypeAdapter.getCurrentElem()).thenReturn(daType);
+        DATypeAdapter.BDAAdapter bdaAdapter = new DATypeAdapter.BDAAdapter(daTypeAdapter, tbda);
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType("Private Type");
+        tPrivate.setSource("Private Source");
+        assertThat(bdaAdapter.getCurrentElem().getPrivate()).isEmpty();
+        //When
+        bdaAdapter.addPrivate(tPrivate);
+        //Then
+        assertThat(bdaAdapter.getCurrentElem().getPrivate()).isNotEmpty();
+    }
+
+    @Test
+    void elementXPath_should_return_expected_xpath_value() {
+        // Given
+        DATypeAdapter daTypeAdapter = mock(DATypeAdapter.class);
+        TDAType daType = new TDAType();
+        TBDA tbda = new TBDA();
+        daType.getBDA().add(tbda);
+        when(daTypeAdapter.getCurrentElem()).thenReturn(daType);
+        DATypeAdapter.BDAAdapter bdaAdapter = new DATypeAdapter.BDAAdapter(daTypeAdapter, tbda);
+        // When
+        String result = bdaAdapter.elementXPath();
+        // Then
+        assertThat(result).isEqualTo("BDA[not(@name)]");
     }
 
     private TBDA createBDA(){
@@ -78,41 +120,8 @@ class BDAAdapterTest extends AbstractDTTLevel<DATypeAdapter,TBDA> {
         tVal.setValue("VAL1");
         TVal tVal1 = new TVal();
         tVal1.setValue("VAL1");
-
         tbda.getVal().addAll(List.of(tVal,tVal1));
-
         return tbda;
-    }
-
-    @Override
-    protected void completeInit() {
-        TBDA tbda = new TBDA();
-        tbda.setType("ID_BDA");
-        sclElement = tbda;
-        sclElementAdapter.getCurrentElem().getBDA().add(tbda);
-    }
-
-    @Test
-    void addPrivate() {
-        init();
-        DATypeAdapter.BDAAdapter bdaAdapter = new DATypeAdapter.BDAAdapter(sclElementAdapter,sclElement);
-        TPrivate tPrivate = new TPrivate();
-        tPrivate.setType("Private Type");
-        tPrivate.setSource("Private Source");
-        assertTrue(bdaAdapter.getCurrentElem().getPrivate().isEmpty());
-        bdaAdapter.addPrivate(tPrivate);
-        assertEquals(1, bdaAdapter.getCurrentElem().getPrivate().size());
-    }
-
-    @Test
-    void elementXPath() {
-        // Given
-        init();
-        DATypeAdapter.BDAAdapter bdaAdapter = new DATypeAdapter.BDAAdapter(sclElementAdapter,sclElement);
-        // When
-        String result = bdaAdapter.elementXPath();
-        // Then
-        assertThat(result).isEqualTo("BDA[not(@name)]");
     }
 
 }

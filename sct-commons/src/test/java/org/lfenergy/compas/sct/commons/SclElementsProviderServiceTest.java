@@ -5,6 +5,7 @@
 package org.lfenergy.compas.sct.commons;
 
 import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.lfenergy.compas.scl2007b4.model.*;
@@ -20,8 +21,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDa;
 import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDo;
 
@@ -32,7 +33,7 @@ class SclElementsProviderServiceTest {
     SclElementsProviderService sclElementsProviderService;
 
     @Test
-    void getExtRefBinders_shouldThrowScdException_whenExtRefNotExist() {
+    void getExtRefBinders_whenExtRefNotExist_shouldThrowScdException() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_binders_test.xml");
 
@@ -45,7 +46,7 @@ class SclElementsProviderServiceTest {
     }
 
     @Test
-    void getExtRefBinders_shouldReturnSortedListBindingInfo_whenExtRefAndDOExist() {
+    void getExtRefBinders_whenExtRefAndDOExist_shouldReturnSortedListBindingInfo() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_binders_test.xml");
 
@@ -74,7 +75,8 @@ class SclElementsProviderServiceTest {
     }
 
     @Test
-    void getExtRefSourceInfo_shouldReturnEmptyList_whenExtRefMatchNoFCDA() {
+    @Tag("issue-321")
+    void getExtRefSourceInfo_whenExtRefMatchNoFCDA_shouldReturnEmptyList() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
         String iedName = "IED_NAME2";
@@ -82,10 +84,11 @@ class SclElementsProviderServiceTest {
         String lnClass = TLLN0Enum.LLN_0.value();
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
+        // When Then
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iedAdapter.findLDeviceAdapterByLdInst(ldInst).get());
         LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
         List<TExtRef> extRefs = ln0Adapter.getExtRefs(null);
-        assertFalse(extRefs.isEmpty());
+        assertThat(extRefs).isNotEmpty();
 
         ExtRefInfo extRefInfo = new ExtRefInfo(extRefs.get(0));
 
@@ -101,7 +104,8 @@ class SclElementsProviderServiceTest {
     }
 
     @Test
-    void getExtRefSourceInfo_shouldReturnListOfControlBlocks_whenExtRefMatchFCDA() {
+    @Tag("issue-321")
+    void getExtRefSourceInfo_whenExtRefMatchFCDA_shouldReturnListOfControlBlocks() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/issue_175_scd_get_cbs_test.xml");
         String iedName = "IED_NAME2";
@@ -109,10 +113,11 @@ class SclElementsProviderServiceTest {
         String lnClass = TLLN0Enum.LLN_0.value();
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
+        // When Then
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iedAdapter.findLDeviceAdapterByLdInst(ldInst).get());
         LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
         List<TExtRef> extRefs = ln0Adapter.getExtRefs(null);
-        assertFalse(extRefs.isEmpty());
+        assertThat(extRefs).isNotEmpty();
 
         ExtRefInfo extRefInfo = new ExtRefInfo(extRefs.get(0));
 
@@ -126,23 +131,6 @@ class SclElementsProviderServiceTest {
         //Then
         assertThat(controlBlocks).hasSize(1);
         assertThat(controlBlocks.get(0).getName()).isEqualTo("goose2");
-    }
-
-    private ExtRefSignalInfo createSignalInfo(String pDO, String pDA, String intAddr) {
-
-        final String DESC = "DESC";
-        final String P_LN = TLLN0Enum.LLN_0.value();
-        final String P_SERV_T = "Report";
-
-        ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
-        signalInfo.setDesc(DESC);
-        signalInfo.setPDA(pDA);
-        signalInfo.setPDO(pDO);
-        signalInfo.setPLN(P_LN);
-        signalInfo.setPServT(TServiceType.fromValue(P_SERV_T));
-        signalInfo.setIntAddr(intAddr);
-
-        return signalInfo;
     }
 
     @Test
@@ -221,8 +209,8 @@ class SclElementsProviderServiceTest {
 
         // when & then
         DataAttributeRef dataAttributeRef = new DataAttributeRef();
-        assertThrows(ScdException.class,
-                () -> sclElementsProviderService.getDAI(scd, "IED_NAME1", "UNKNOWNLD", dataAttributeRef, true));
+        assertThatThrownBy(() -> sclElementsProviderService.getDAI(scd, "IED_NAME1", "UNKNOWNLD", dataAttributeRef, true))
+                .isInstanceOf(ScdException.class);
     }
 
     @Test
@@ -333,11 +321,41 @@ class SclElementsProviderServiceTest {
     }
 
     @Test
-    void testGetEnumTypeValues() {
+    void getEnumTypeValues_whenCalledWithUnknownId_shouldReturnException() {
+        // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
-        assertThrows(ScdException.class, () -> sclElementsProviderService.getEnumTypeValues(scd, "unknwnID"));
-        var enumList = assertDoesNotThrow(() -> sclElementsProviderService.getEnumTypeValues(scd, "RecCycModKind"));
-        assertFalse(enumList.isEmpty());
+        // When Then
+        assertThatThrownBy(() -> sclElementsProviderService.getEnumTypeValues(scd, "unknownID"))
+                .isInstanceOf(ScdException.class)
+                .hasMessageContaining("Unknown EnumType Id: unknownID");
     }
+
+    @Test
+    void getEnumTypeValues_whenCalledWithKnownId_shouldNotReturnException() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
+        // When
+        var enumList = assertDoesNotThrow(() -> sclElementsProviderService.getEnumTypeValues(scd, "RecCycModKind"));
+        // Then
+        assertThat(enumList).isNotEmpty();
+    }
+
+    private ExtRefSignalInfo createSignalInfo(String pDO, String pDA, String intAddr) {
+
+        final String DESC = "DESC";
+        final String P_LN = TLLN0Enum.LLN_0.value();
+        final String P_SERV_T = "Report";
+
+        ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
+        signalInfo.setDesc(DESC);
+        signalInfo.setPDA(pDA);
+        signalInfo.setPDO(pDO);
+        signalInfo.setPLN(P_LN);
+        signalInfo.setPServT(TServiceType.fromValue(P_SERV_T));
+        signalInfo.setIntAddr(intAddr);
+
+        return signalInfo;
+    }
+
 
 }

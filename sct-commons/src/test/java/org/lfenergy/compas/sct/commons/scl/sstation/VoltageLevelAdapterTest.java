@@ -6,75 +6,88 @@ package org.lfenergy.compas.sct.commons.scl.sstation;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.scl2007b4.model.TBay;
-import org.lfenergy.compas.scl2007b4.model.TPrivate;
-import org.lfenergy.compas.scl2007b4.model.TSubstation;
-import org.lfenergy.compas.scl2007b4.model.TVoltageLevel;
-import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.scl2007b4.model.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class VoltageLevelAdapterTest {
 
+    private final SubstationAdapter substationAdapter = mock(SubstationAdapter.class);
     private VoltageLevelAdapter vLevelAdapter;
-    private SubstationAdapter ssAdapter;
 
     @BeforeEach
-    public void init() throws ScdException {
-        SclRootAdapter sclRootAdapter = new SclRootAdapter("hID","hVersion","hRevision");
+    public void init() {
         TSubstation tSubstation = new TSubstation();
         tSubstation.setName("SUBSTATION");
-        sclRootAdapter.getCurrentElem().getSubstation().add(tSubstation);
-        ssAdapter = sclRootAdapter.getSubstationAdapter("SUBSTATION");
         TVoltageLevel tVoltageLevel = new TVoltageLevel();
         tVoltageLevel.setName("VOLTAGE_LEVEL");
-        ssAdapter.getCurrentElem().getVoltageLevel().add(tVoltageLevel);
-        vLevelAdapter = ssAdapter.getVoltageLevelAdapter("VOLTAGE_LEVEL")
-                .orElse(new VoltageLevelAdapter(ssAdapter, "VOLTAGE_LEVEL"));
+        tSubstation.getVoltageLevel().add(tVoltageLevel);
+        when(substationAdapter.getCurrentElem()).thenReturn(tSubstation);
+        vLevelAdapter = new VoltageLevelAdapter(substationAdapter, tVoltageLevel);
     }
 
     @Test
-    void testController() {
-        VoltageLevelAdapter expectedTVoltageLevel = new VoltageLevelAdapter(ssAdapter);
-        assertNotNull(expectedTVoltageLevel.getParentAdapter());
-        assertNull(expectedTVoltageLevel.getCurrentElem());
-        assertFalse(expectedTVoltageLevel.amChildElementRef());
+    void amChildElementRef_whenCalledWithExistingRelationBetweenSubstationAndVoltageLevel_shouldReturnTrue()  {
+        // Given : init
+        // When Then
+        assertThat(vLevelAdapter.amChildElementRef()).isTrue();
     }
 
     @Test
-    void testControllerWithVoltageLevelName(){
-        assertThrows(ScdException.class,
-                () -> new VoltageLevelAdapter(ssAdapter, "VOLTAGE_LEVEL_1"));
+    void amChildElementRef_when_no_VoltageLevel_given_should_return_false() {
+        // When
+        VoltageLevelAdapter voltageLevelAdapter = new VoltageLevelAdapter(substationAdapter);
+        // Then
+        assertThat(voltageLevelAdapter.getParentAdapter()).isNotNull();
+        assertThat(voltageLevelAdapter.getCurrentElem()).isNull();
+        assertThat(voltageLevelAdapter.amChildElementRef()).isFalse();
     }
 
     @Test
-    void testAmChildElementRef() {
-       assertTrue(vLevelAdapter.amChildElementRef());
-    }
-
-    @Test
-    void testSetCurrentElemInAdapter() {
+    void setCurrentElement_whenCalledWithNoRelationBetweenSubstationAndVoltageLevel_shouldThrowException()  {
+        // Given
         TVoltageLevel tVoltageLevel1 = new TVoltageLevel();
-        assertThrows(IllegalArgumentException.class,
-                () ->vLevelAdapter.setCurrentElem(tVoltageLevel1));
+        // When Then
+        assertThatThrownBy(() -> vLevelAdapter.setCurrentElem(tVoltageLevel1))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("No relation between SCL parent element and child");
     }
 
+
     @Test
-    void testGetBayAdapter() {
+    void getBayAdapter_when_no_BayAdapter_exist_should_return_empty() {
+        // Given
         TBay tBay = new TBay();
         tBay.setName("BAY");
         vLevelAdapter.getCurrentElem().getBay().add(tBay);
-        assertFalse(vLevelAdapter.getBayAdapter("BAY1").isPresent());
+        // When Then
+        assertThat(vLevelAdapter.getBayAdapter("BAY1")).isEmpty();
+    }
+
+
+    @Test
+    void getBayAdapter_when_exist_should_return_expected_BayAdapter() {
+        // Given
+        TBay tBay = new TBay();
+        tBay.setName("BAY");
+        vLevelAdapter.getCurrentElem().getBay().add(tBay);
+        // When Then
+        assertThat(vLevelAdapter.getBayAdapter("BAY")).isPresent();
     }
 
     @Test
-    void addPrivate() {
+    void addPrivate_with_type_and_source_should_create_Private() {
+        // Given
         TPrivate tPrivate = new TPrivate();
         tPrivate.setType("Private Type");
         tPrivate.setSource("Private Source");
-        assertTrue(vLevelAdapter.getCurrentElem().getPrivate().isEmpty());
+        assertThat(vLevelAdapter.getCurrentElem().getPrivate()).isEmpty();
+        // When
         vLevelAdapter.addPrivate(tPrivate);
-        assertEquals(1, vLevelAdapter.getCurrentElem().getPrivate().size());
+        // Then
+        assertThat(vLevelAdapter.getCurrentElem().getPrivate()).isNotEmpty();
     }
 }

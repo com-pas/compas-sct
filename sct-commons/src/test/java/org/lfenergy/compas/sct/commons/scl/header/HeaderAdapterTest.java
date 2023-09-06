@@ -3,79 +3,93 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.sct.commons.scl.header;
 
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.lfenergy.compas.scl2007b4.model.THeader;
-import org.lfenergy.compas.scl2007b4.model.THitem;
-import org.lfenergy.compas.scl2007b4.model.TPrivate;
-import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class HeaderAdapterTest {
 
     @Test
-    void testAmChildElementRef() throws ScdException {
-        SclRootAdapter sclRootAdapter =
-                new SclRootAdapter("hID","hVersion","hRevision");
-        sclRootAdapter.getCurrentElem().setHeader(new THeader());
-        HeaderAdapter hAdapter = sclRootAdapter.getHeaderAdapter();
-        assertTrue(hAdapter.amChildElementRef());
-
-        assertThrows(IllegalArgumentException.class,
-                () ->new HeaderAdapter(sclRootAdapter,new THeader()));
+    void constructor_whenCalledWithNoRelationBetweenSCLAndHeader_shouldThrowException() {
+        //Given
+        SclRootAdapter sclRootAdapter = mock(SclRootAdapter.class);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(new SCL());
+        THeader header = new THeader();
+        //When Then
+        assertThatCode(() -> new HeaderAdapter(sclRootAdapter, header))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("No relation between SCL parent element and child");
     }
 
     @Test
-    void testAddHistoryItem() throws ScdException {
-        SclRootAdapter sclRootAdapter =  new SclRootAdapter(
-                "hID","hVersion","hRevision"
-        );
+    void constructor_whenCalledWithExistingRelationBetweenSCLAndHeader_shouldNotThrowException() {
+        //Given
+        SclRootAdapter sclRootAdapter = mock(SclRootAdapter.class);
+        SCL scl = new SCL();
+        THeader header = new THeader();
+        scl.setHeader(header);
+        when(sclRootAdapter.getCurrentElem()).thenReturn(scl);
+        //When Then
+        assertThatCode(() -> new HeaderAdapter(sclRootAdapter, header)).doesNotThrowAnyException();
+    }
 
-        HeaderAdapter hAdapter = sclRootAdapter.getHeaderAdapter();
-        assertEquals("hID", hAdapter.getHeaderId());
-        assertEquals("hVersion", hAdapter.getHeaderVersion());
-        assertEquals("hRevision", hAdapter.getHeaderRevision());
-
-        hAdapter.addHistoryItem("who","what","why");
-
-        assertNotNull(hAdapter.getCurrentElem().getHistory());
-        Assertions.assertFalse(hAdapter.getHistoryItems().isEmpty());
-        THitem tHitem = hAdapter.getHistoryItems().get(0);
+    @Test
+    @Tag("issue-321")
+    // test here should be only for addHistoryItem method
+    void testAddHistoryItem() {
+        //Given
+        SclRootAdapter sclRootAdapter = new SclRootAdapter("hID","hVersion","hRevision");
+        HeaderAdapter headerAdapter = sclRootAdapter.getHeaderAdapter();
+        assertThat(headerAdapter.getHeaderId()).isEqualTo("hID");
+        assertThat(headerAdapter.getHeaderVersion()).isEqualTo("hVersion");
+        assertThat(headerAdapter.getHeaderRevision()).isEqualTo("hRevision");
+        //When
+        headerAdapter.addHistoryItem("who","what","why");
+        //Then
+        assertThat(headerAdapter.getCurrentElem().getHistory()).isNotNull();
+        assertThat(headerAdapter.getHistoryItems()).isNotEmpty();
+        THitem tHitem = headerAdapter.getHistoryItems().get(0);
         assertAll("HISTORY",
-                () -> assertEquals("who", tHitem.getWho()),
-                () -> assertEquals("what", tHitem.getWhat()),
-                () -> assertEquals("why", tHitem.getWhy()),
-                () -> Assertions.assertEquals(hAdapter.getCurrentElem().getRevision(), tHitem.getRevision()),
-                () -> Assertions.assertEquals(hAdapter.getCurrentElem().getVersion(), tHitem.getVersion())
-        );
-
-        hAdapter.updateRevision("newRevision");
-        hAdapter.updateVersion("newVersion");
-        assertEquals("newVersion", hAdapter.getHeaderVersion());
-        assertEquals("newRevision", hAdapter.getHeaderRevision());
+                () -> assertThat(tHitem.getWho()).isEqualTo("who"),
+                () -> assertThat(tHitem.getWhat()).isEqualTo("what"),
+                () -> assertThat(tHitem.getWhy()).isEqualTo("why"),
+                () -> assertThat(tHitem.getRevision()).isEqualTo(headerAdapter.getCurrentElem().getRevision()),
+                () -> assertThat(tHitem.getVersion()).isEqualTo(headerAdapter.getCurrentElem().getVersion()));
+        //When
+        headerAdapter.updateRevision("newRevision");
+        //When
+        headerAdapter.updateVersion("newVersion");
+        //Then
+        assertThat(headerAdapter.getHeaderVersion()).isEqualTo("newVersion");
+        assertThat(headerAdapter.getHeaderRevision()).isEqualTo("newRevision");
     }
 
     @Test
-    void addPrivate() {
-        SclRootAdapter sclRootAdapter =  new SclRootAdapter(
-                "hID","hVersion","hRevision"
-        );
-        HeaderAdapter hAdapter = sclRootAdapter.getHeaderAdapter();
+    void addPrivate_should_throw_UnsupportedOperationException() {
+        //Given
+        SclRootAdapter sclRootAdapter = new SclRootAdapter("hID","hVersion","hRevision");
+        HeaderAdapter headerAdapter = sclRootAdapter.getHeaderAdapter();
         TPrivate tPrivate = new TPrivate();
         tPrivate.setType("Private Type");
         tPrivate.setSource("Private Source");
-        assertThrows(UnsupportedOperationException.class, () -> hAdapter.addPrivate(tPrivate));
+        //When THen
+        assertThatCode(() -> headerAdapter.addPrivate(tPrivate))
+                .isInstanceOf(UnsupportedOperationException.class);
     }
 
     @ParameterizedTest
     @CsvSource(value = {"hID;hVersion;hRevision;Header[@id=\"hID\" and @version=\"hVersion\" and @revision=\"hRevision\"]", ";;;Header[not(@id) and not(@version) and not(@revision)]"}
             , delimiter = ';')
-    void elementXPath(String hID, String hVersion, String hRevision,String message) {
+    void elementXPath_should_return_expected_xpath_value(String hID, String hVersion, String hRevision,String message) {
         // Given
         THeader tHeader = new THeader();
         tHeader.setId(hID);

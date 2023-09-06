@@ -6,7 +6,8 @@ package org.lfenergy.compas.sct.commons.exception;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 class ScdExceptionTest {
     private static final String MSG = "MSG";
@@ -14,13 +15,22 @@ class ScdExceptionTest {
     private static final String CAUSE_MSG = "CAUSE_MSG";
 
     @Test
-    void testInit() {
+    void constructor_whenCalledWithMessage_shouldFillValues() {
+        // When
         ScdException exception = new ScdException(MSG);
-        assertEquals(MSG, exception.getMessage());
-        exception = new ScdException(ANOTHER_MSG, new RuntimeException(CAUSE_MSG));
-        assertEquals(ANOTHER_MSG, exception.getMessage());
-        assertEquals(RuntimeException.class, exception.getCause().getClass());
-        assertEquals(CAUSE_MSG, exception.getCause().getMessage());
+        // Then
+        assertThat(exception.getMessage()).isEqualTo(MSG);
     }
+
+    @Test
+    void constructor_whenCalledWithMessageAndThrowable_shouldFillValues() {
+        // When
+        ScdException exception = new ScdException(ANOTHER_MSG, new RuntimeException(CAUSE_MSG));
+        // Then
+        assertThat(exception.getMessage()).isEqualTo(ANOTHER_MSG);
+        assertThat(exception.getCause().getClass()).isEqualTo(RuntimeException.class);
+        assertThat(exception.getCause().getMessage()).isEqualTo(CAUSE_MSG);
+    }
+
 
 }

@@ -8,71 +8,92 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class BayAdapterTest {
 
+    private final VoltageLevelAdapter vLevelAdapter = mock(VoltageLevelAdapter.class);
     private BayAdapter bayAdapter;
-    private VoltageLevelAdapter vLevelAdapter;
+
 
     @BeforeEach
-    public void init() throws ScdException {
-
-        SclRootAdapter sclRootAdapter = new SclRootAdapter("hID","hVersion","hRevision");
+    public void init() {
         TSubstation tSubstation = new TSubstation();
         tSubstation.setName("SUBSTATION");
-        sclRootAdapter.getCurrentElem().getSubstation().add(tSubstation);
-        SubstationAdapter ssAdapter = sclRootAdapter.getSubstationAdapter("SUBSTATION");
         TVoltageLevel tVoltageLevel = new TVoltageLevel();
         tVoltageLevel.setName("VOLTAGE_LEVEL");
-        ssAdapter.getCurrentElem().getVoltageLevel().add(tVoltageLevel);
-        vLevelAdapter = ssAdapter.getVoltageLevelAdapter("VOLTAGE_LEVEL").get();
         TBay tBay = new TBay();
         tBay.setName("BAY");
         tBay.getFunction().add(new TFunction());
+
+        tVoltageLevel.getBay().add(tBay);
+        tSubstation.getVoltageLevel().add(tVoltageLevel);
+        when(vLevelAdapter.getCurrentElem()).thenReturn(tVoltageLevel);
+        bayAdapter = new BayAdapter(vLevelAdapter, tBay);
+    }
+
+    @Test
+    void amChildElementRef_whenCalledWithExistingRelationBetweenVoltageLevelAndBay_shouldReturnTrue()  {
+        // Given : init
+        // When Then
+        assertThat(bayAdapter.amChildElementRef()).isTrue();
+    }
+
+    @Test
+    void amChildElementRef_when_no_Bay_given_should_return_false() {
+        // When
+        BayAdapter bayAdapter1 = new BayAdapter(vLevelAdapter);
+        // Then
+        assertThat(bayAdapter1.getParentAdapter()).isNotNull();
+        assertThat(bayAdapter1.getCurrentElem()).isNull();
+        assertThat(bayAdapter1.amChildElementRef()).isFalse();
+    }
+
+
+    @Test
+    void constructor_whenCalledWithUnknown_shouldThrowException() {
+        // When Then
+        assertThatCode(() -> new BayAdapter(vLevelAdapter, "BAY_1"))
+                .isInstanceOf(ScdException.class)
+                .hasMessage("Unknown Bay name :BAY_1");
+    }
+
+    @Test
+    void constructor_whenCalledKnownVoltageLevelName_shouldNotThrowException() {
+        // Given
+        TBay tBay = new TBay();
+        tBay.setName("BAY_1");
         vLevelAdapter.getCurrentElem().getBay().add(tBay);
-        bayAdapter = vLevelAdapter.getBayAdapter("BAY").get();
-
+        // When Then
+        assertThatCode(() -> new BayAdapter(vLevelAdapter, "BAY_1")).doesNotThrowAnyException();
     }
 
     @Test
-    void testAmChildElementRef() {
-        assertTrue(bayAdapter.amChildElementRef());
-    }
-
-    @Test
-    void testController() {
-        BayAdapter expectedBayAdapter = new BayAdapter(vLevelAdapter);
-        assertNotNull(expectedBayAdapter.getParentAdapter());
-        assertNull(expectedBayAdapter.getCurrentElem());
-        assertFalse(expectedBayAdapter.amChildElementRef());
-    }
-
-    @Test
-    void testControllerWithVoltageLevelName() {
-        assertThrows(ScdException.class,
-                () -> new BayAdapter(vLevelAdapter, "BAY_1"));
-    }
-
-    @Test
-    void testSetCurrentElemInAdapter() {
+    void setCurrentElement_whenCalledWithNoRelationBetweenVoltageLevelAndBay_shouldThrowException()  {
+        // Given
         TBay tBay1 = new TBay();
-        assertThrows(IllegalArgumentException.class,
-                () ->bayAdapter.setCurrentElem(tBay1));
+        // When Then
+        assertThatThrownBy(() -> bayAdapter.setCurrentElem(tBay1))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("No relation between SCL parent element and child");
     }
 
     @Test
-    void addPrivate() {
+    void addPrivate_with_type_and_source_should_create_Private() {
+        // Given
         TPrivate tPrivate = new TPrivate();
         tPrivate.setType("Private Type");
         tPrivate.setSource("Private Source");
-        assertTrue(bayAdapter.getCurrentElem().getPrivate().isEmpty());
+        assertThat(bayAdapter.getCurrentElem().getPrivate()).isEmpty();
+        // When
         bayAdapter.addPrivate(tPrivate);
-        assertEquals(1, bayAdapter.getCurrentElem().getPrivate().size());
+        // Then
+        assertThat(bayAdapter.getCurrentElem().getPrivate()).isNotEmpty();
     }
 
     @Test
@@ -81,7 +102,7 @@ class BayAdapterTest {
         // When
         String result = bayAdapter.elementXPath();
         // Then
-        assertEquals("Bay[@name=\"BAY\"]", result);
+        assertThat(result).isEqualTo("Bay[@name=\"BAY\"]");
     }
 
     @Test
@@ -91,15 +112,15 @@ class BayAdapterTest {
         // When
         String result = bayAdapter.elementXPath();
         // Then
-        assertEquals("Bay[not(@name)]", result);
+        assertThat(result).isEqualTo("Bay[not(@name)]");
     }
 
     @Test
-    void streamFunctionAdapters() {
+    void streamFunctionAdapters_should_return_expected_list() {
         // Given : init
         // When
         Stream<FunctionAdapter> result = bayAdapter.streamFunctionAdapters();
         // Then
-        assertEquals(1, result.count());
+        assertThat(result).hasSize(1);
     }
 }
