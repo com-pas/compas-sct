@@ -4,9 +4,12 @@
 
 package org.lfenergy.compas.sct.commons.scl.ied;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.lfenergy.compas.scl2007b4.model.*;
@@ -865,6 +868,18 @@ class LNAdapterTest {
                 Arguments.of(TGSEControl.class),
                 Arguments.of(TSampledValueControl.class)
         );
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"ARtgHigh1.d:d", "ARtgHigh1.units.multiplier:multiplier", "Beh.d:d"}, delimiter = ':')
+    void createDoiSdiDaiChainIfNotExists_should_create_dai_if_not_exist(String dataTypeRef, String expected) {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        LNAdapter lnAdapter = findLn(scd, "IED4d4fe1a8cda64cf88a5ee4176a1a0eef", "LDSUIED", "LPAI", "1", null);
+        // When
+        AbstractDAIAdapter<?> daiAdapter = (AbstractDAIAdapter<?>) lnAdapter.createDoiSdiDaiChainIfNotExists(dataTypeRef, true);
+        //Then
+        assertThat(daiAdapter.getCurrentElem().getName()).isEqualTo(expected);
     }
 
 }
