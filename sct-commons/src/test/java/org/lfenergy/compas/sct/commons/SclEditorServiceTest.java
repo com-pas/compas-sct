@@ -23,7 +23,6 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,7 +40,7 @@ class SclEditorServiceTest {
     @InjectMocks
     SclEditorService sclEditorService;
 
-      private static Stream<Arguments> sclProviderMissingRequiredObjects() {
+    private static Stream<Arguments> sclProviderMissingRequiredObjects() {
         SCL scl1 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_KO_MissingBeh.scd");
         SCL scl2 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_KO_MissingLDevicePrivate.scd");
         SCL scl3 = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_KO_MissingLDevicePrivateAttribute.scd");
@@ -306,70 +305,6 @@ class SclEditorServiceTest {
                 .hasMessage("There is no STD file found corresponding to headerId = f8dbc8c1-2db7-4652-a9d6-0b414bdeccfa, headerVersion = 01.00.00, headerRevision = 01.00.00 and ICDSystemVersionUUID = IED4d4fe1a8cda64cf88a5ee4176a1a0eef");
     }
 
-    @Test
-    void removeControlBlocksAndDatasetAndExtRefSrc_should_remove_controlBlocks_and_Dataset_on_ln0() {
-        // Given
-        SCL scl = SclTestMarshaller.getSCLFromFile("/scl-remove-controlBlocks-dataSet-extRefSrc/scl-with-control-blocks.xml");
-        // When
-        sclEditorService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scl);
-        // Then
-        SclRootAdapter scdRootAdapter = new SclRootAdapter(scl);
-        List<LDeviceAdapter> lDevices = scdRootAdapter.streamIEDAdapters().flatMap(IEDAdapter::streamLDeviceAdapters).toList();
-        List<LN0> ln0s = lDevices.stream().map(LDeviceAdapter::getLN0Adapter).map(LN0Adapter::getCurrentElem).toList();
-        assertThat(ln0s)
-                .isNotEmpty()
-                .noneMatch(TAnyLN::isSetDataSet)
-                .noneMatch(TAnyLN::isSetLogControl)
-                .noneMatch(TAnyLN::isSetReportControl)
-                .noneMatch(LN0::isSetGSEControl)
-                .noneMatch(LN0::isSetSampledValueControl);
-        assertIsMarshallable(scl);
-    }
-
-    @Test
-    void removeControlBlocksAndDatasetAndExtRefSrc_should_remove_controlBlocks_and_Dataset_on_ln() {
-        // Given
-        SCL scl = SclTestMarshaller.getSCLFromFile("/scl-remove-controlBlocks-dataSet-extRefSrc/scl-with-control-blocks.xml");
-        // When
-        sclEditorService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scl);
-        // Then
-        SclRootAdapter scdRootAdapter = new SclRootAdapter(scl);
-        List<TLN> lns = scdRootAdapter.streamIEDAdapters()
-                .flatMap(IEDAdapter::streamLDeviceAdapters)
-                .map(LDeviceAdapter::getLNAdapters).flatMap(List::stream)
-                .map(LNAdapter::getCurrentElem).collect(Collectors.toList());
-        assertThat(lns)
-                .isNotEmpty()
-                .noneMatch(TAnyLN::isSetDataSet)
-                .noneMatch(TAnyLN::isSetLogControl)
-                .noneMatch(TAnyLN::isSetReportControl);
-        assertIsMarshallable(scl);
-    }
-
-    @Test
-    void removeControlBlocksAndDatasetAndExtRefSrc_should_remove_srcXXX_attributes_on_ExtRef() {
-        // Given
-        SCL scl = SclTestMarshaller.getSCLFromFile("/scl-remove-controlBlocks-dataSet-extRefSrc/scl-with-control-blocks.xml");
-        // When
-        sclEditorService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scl);
-        // Then
-        SclRootAdapter scdRootAdapter = new SclRootAdapter(scl);
-        List<TExtRef> extRefs = scdRootAdapter
-                .streamIEDAdapters()
-                .flatMap(IEDAdapter::streamLDeviceAdapters)
-                .map(LDeviceAdapter::getLN0Adapter)
-                .map(AbstractLNAdapter::getExtRefs).flatMap(List::stream)
-                .collect(Collectors.toList());
-        assertThat(extRefs)
-                .isNotEmpty()
-                .noneMatch(TExtRef::isSetSrcLDInst)
-                .noneMatch(TExtRef::isSetSrcPrefix)
-                .noneMatch(TExtRef::isSetSrcLNInst)
-                .noneMatch(TExtRef::isSetSrcCBName)
-                .noneMatch(TExtRef::isSetSrcLNClass);
-        assertIsMarshallable(scl);
-    }
-
     @ParameterizedTest(name = "{0}")
     @MethodSource("sclProviderMissingRequiredObjects")
     void updateLDeviceStatus_whenMissingRequiredObject_shouldReturnReportWithError(String testCase, SCL scl, Tuple... errors) {
@@ -569,53 +504,6 @@ class SclEditorServiceTest {
                 .filter(tdai -> tdai.getName().equals(daiName) && !tdai.getVal().isEmpty())
                 .map(tdai -> tdai.getVal().get(0))
                 .findFirst());
-    }
-
-    @Test
-    void analyzeDataGroups_should_success() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter1 = sclRootAdapter.getIEDAdapterByName("IED_NAME1");
-        iedAdapter1.getCurrentElem().getAccessPoint().get(0).getServices().getClientServices().setMaxAttributes(9L);
-        iedAdapter1.getCurrentElem().getAccessPoint().get(0).getServices().getClientServices().setMaxGOOSE(3L);
-        iedAdapter1.getCurrentElem().getAccessPoint().get(0).getServices().getClientServices().setMaxSMV(2L);
-        iedAdapter1.getCurrentElem().getAccessPoint().get(0).getServices().getClientServices().setMaxReports(1L);
-        // When
-        List<SclReportItem> sclReportItems = sclEditorService.analyzeDataGroups(scd);
-        //Then
-        assertThat(sclReportItems).isEmpty();
-
-    }
-
-    @Test
-    void analyzeDataGroups_should_return_errors_messages() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME2");
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getConfDataSet().setMaxAttributes(1L);
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getConfDataSet().setMax(3L);
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getSMVsc().setMax(1L);
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getGOOSE().setMax(2L);
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getConfReportControl().setMax(0L);
-        // When
-        List<SclReportItem> sclReportItems = sclEditorService.analyzeDataGroups(scd);
-        //Then
-        assertThat(sclReportItems).hasSize(11)
-                .extracting(SclReportItem::message)
-                .containsExactlyInAnyOrder(
-                        "The Client IED IED_NAME1 subscribes to too much FCDA: 9 > 8 max",
-                        "The Client IED IED_NAME1 subscribes to too much GOOSE Control Blocks: 3 > 2 max",
-                        "The Client IED IED_NAME1 subscribes to too much Report Control Blocks: 1 > 0 max",
-                        "The Client IED IED_NAME1 subscribes to too much SMV Control Blocks: 2 > 1 max",
-                        "There are too much FCDA for the DataSet dataset6 for the LDevice LD_INST21 in IED IED_NAME2: 2 > 1 max",
-                        "There are too much FCDA for the DataSet dataset6 for the LDevice LD_INST22 in IED IED_NAME2: 2 > 1 max",
-                        "There are too much FCDA for the DataSet dataset5 for the LDevice LD_INST22 in IED IED_NAME2: 2 > 1 max",
-                        "There are too much DataSets for the IED IED_NAME2: 6 > 3 max",
-                        "There are too much Report Control Blocks for the IED IED_NAME2: 1 > 0 max",
-                        "There are too much GOOSE Control Blocks for the IED IED_NAME2: 3 > 2 max",
-                        "There are too much SMV Control Blocks for the IED IED_NAME2: 3 > 1 max");
     }
 
     @Test

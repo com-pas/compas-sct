@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.THeader;
+import org.lfenergy.compas.sct.commons.api.ControlBlockEditor;
 import org.lfenergy.compas.sct.commons.api.SclEditor;
 import org.lfenergy.compas.sct.commons.api.SubstationEditor;
 import org.lfenergy.compas.sct.commons.dto.HeaderDTO;
@@ -39,6 +40,8 @@ class SclAutomationServiceTest {
     private SclEditor sclEditor;
     @Mock
     private SubstationEditor substationEditor;
+    @Mock
+    private ControlBlockEditor controlBlockEditor;
 
     public static final short RELEASE = 4;
     public static final String REVISION = "B";
@@ -81,7 +84,7 @@ class SclAutomationServiceTest {
         verify(sclEditor, times(0)).addHistoryItem(any(SCL.class), anyString(), anyString(), anyString());
         verify(substationEditor, times(1)).addSubstation(any(SCL.class), any(SCL.class));
         verify(sclEditor, times(1)).importSTDElementsInSCD(any(SCL.class), anyList(), anyList());
-        verify(sclEditor, times(1)).removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(any(SCL.class));
+        verify(controlBlockEditor, times(1)).removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(any(SCL.class));
     }
 
     @Test
@@ -110,7 +113,7 @@ class SclAutomationServiceTest {
         verify(sclEditor, times(1)).addHistoryItem(any(SCL.class), eq(historyItem.getWho()), eq(historyItem.getWhat()), eq(historyItem.getWhy()));
         verify(substationEditor, times(1)).addSubstation(any(SCL.class), any(SCL.class));
         verify(sclEditor, times(1)).importSTDElementsInSCD(any(SCL.class), anyList(), anyList());
-        verify(sclEditor, times(1)).removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(any(SCL.class));
+        verify(controlBlockEditor, times(1)).removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(any(SCL.class));
     }
 
     @Test
@@ -172,7 +175,7 @@ class SclAutomationServiceTest {
     }
 
     @Test
-    void createSCD_when_sclEditor_removeAllControlBlocksAndDatasetsAndExtRefSrcBindings_Fail_should_throw_exception() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
+    void createSCD_when_controlBlockEditor_removeAllControlBlocksAndDatasetsAndExtRefSrcBindings_Fail_should_throw_exception() throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
         // Given
         SCL ssd = (SCL) BeanUtils.cloneBean(scl);
         SCL std = (SCL) BeanUtils.cloneBean(scl);
@@ -182,7 +185,7 @@ class SclAutomationServiceTest {
         doNothing().when(substationEditor).addSubstation(any(SCL.class), any(SCL.class));
         doNothing().when(sclEditor).importSTDElementsInSCD(any(SCL.class), anyList(), anyList());
         doThrow(new ScdException("removeAllControlBlocksAndDatasetsAndExtRefSrcBindings fail"))
-                .when(sclEditor).removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(any(SCL.class));
+                .when(controlBlockEditor).removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(any(SCL.class));
         // When Then
         assertThatThrownBy(() -> sclAutomationService.createSCD(ssd, headerDTO, List.of(std)))
                 .isInstanceOf(ScdException.class)

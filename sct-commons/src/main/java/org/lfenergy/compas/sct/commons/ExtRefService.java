@@ -112,57 +112,6 @@ public class ExtRefService implements ExtRefEditor {
     }
 
     @Override
-    public List<SclReportItem> createDataSetAndControlBlocks(SCL scd, Set<FcdaForDataSetsCreation> allowedFcdas) {
-        checkFcdaInitDataPresence(allowedFcdas);
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        Stream<LDeviceAdapter> lDeviceAdapters = sclRootAdapter.streamIEDAdapters().flatMap(IEDAdapter::streamLDeviceAdapters);
-        return createDataSetAndControlBlocks(lDeviceAdapters, allowedFcdas);
-    }
-
-    @Override
-    public List<SclReportItem> createDataSetAndControlBlocks(SCL scd, String targetIedName, Set<FcdaForDataSetsCreation> allowedFcdas) {
-        checkFcdaInitDataPresence(allowedFcdas);
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(targetIedName);
-        return createDataSetAndControlBlocks(iedAdapter.streamLDeviceAdapters(), allowedFcdas);
-
-    }
-
-    @Override
-    public List<SclReportItem> createDataSetAndControlBlocks(SCL scd, String targetIedName, String targetLDeviceInst, Set<FcdaForDataSetsCreation> allowedFcdas) {
-        if (StringUtils.isBlank(targetIedName)) {
-            throw new ScdException("IED.name parameter is missing");
-        }
-        checkFcdaInitDataPresence(allowedFcdas);
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(targetIedName);
-        LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(targetLDeviceInst);
-        return createDataSetAndControlBlocks(Stream.of(lDeviceAdapter), allowedFcdas);
-    }
-
-    private void checkFcdaInitDataPresence(Set<FcdaForDataSetsCreation> allowedFcdas) {
-        if (allowedFcdas == null || allowedFcdas.isEmpty()) {
-            throw new ScdException("Accepted FCDAs list is empty, you should initialize allowed FCDA lists with CsvHelper class before");
-        }
-    }
-
-    private List<SclReportItem> createDataSetAndControlBlocks(Stream<LDeviceAdapter> lDeviceAdapters, Set<FcdaForDataSetsCreation> allowedFcdas) {
-        return lDeviceAdapters
-                .map(lDeviceAdapter -> lDeviceAdapter.createDataSetAndControlBlocks(allowedFcdas))
-                .flatMap(List::stream)
-                .toList();
-    }
-
-    @Override
-    public List<SclReportItem> configureNetworkForAllControlBlocks(SCL scd, ControlBlockNetworkSettings controlBlockNetworkSettings,
-                                                                   RangesPerCbType rangesPerCbType) {
-        List<SclReportItem> sclReportItems = new ArrayList<>();
-        sclReportItems.addAll(configureNetworkForControlBlocks(scd, controlBlockNetworkSettings, rangesPerCbType.gse(), ControlBlockEnum.GSE));
-        sclReportItems.addAll(configureNetworkForControlBlocks(scd, controlBlockNetworkSettings, rangesPerCbType.sampledValue(), ControlBlockEnum.SAMPLED_VALUE));
-        return sclReportItems;
-    }
-
-    @Override
     public List<SclReportItem> manageBindingForLDEPF(SCL scd, ILDEPFSettings settings) {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         List<SclReportItem> sclReportItems = new ArrayList<>();
@@ -231,50 +180,6 @@ public class ExtRefService implements ExtRefEditor {
                         "/IED/Private/compas:ICDHeader[@ICDSystemVersionUUID] must be unique" +
                                 " but the same ICDSystemVersionUUID was found on several IED."))
                 .toList();
-    }
-
-    private List<SclReportItem> configureNetworkForControlBlocks(SCL scd, ControlBlockNetworkSettings controlBlockNetworkSettings,
-                                                                        NetworkRanges networkRanges, ControlBlockEnum controlBlockEnum) {
-        PrimitiveIterator.OfLong appIdIterator = Utils.sequence(networkRanges.appIdStart(), networkRanges.appIdEnd());
-        Iterator<String> macAddressIterator = Utils.macAddressSequence(networkRanges.macAddressStart(), networkRanges.macAddressEnd());
-
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        return sclRootAdapter.streamIEDAdapters()
-                .flatMap(iedAdapter ->
-                        iedAdapter.streamLDeviceAdapters()
-                                .filter(LDeviceAdapter::hasLN0)
-                                .map(LDeviceAdapter::getLN0Adapter)
-                                .flatMap(ln0Adapter -> ln0Adapter.streamControlBlocks(controlBlockEnum))
-                                .map(controlBlockAdapter -> configureControlBlockNetwork(controlBlockNetworkSettings, appIdIterator, macAddressIterator, controlBlockAdapter)))
-                .flatMap(Optional::stream)
-                .toList();
-    }
-    private Optional<SclReportItem> configureControlBlockNetwork(ControlBlockNetworkSettings controlBlockNetworkSettings, PrimitiveIterator.OfLong appIdIterator, Iterator<String> macAddressIterator, ControlBlockAdapter controlBlockAdapter) {
-        SettingsOrError settingsOrError = controlBlockNetworkSettings.getNetworkSettings(controlBlockAdapter);
-        if (settingsOrError.errorMessage() != null) {
-            return Optional.of(controlBlockAdapter.buildFatalReportItem(
-                    "Cannot configure network for this ControlBlock because: " + settingsOrError.errorMessage()));
-        }
-        Settings settings = settingsOrError.settings();
-        if (settings == null) {
-            return Optional.of(controlBlockAdapter.buildFatalReportItem(
-                    "Cannot configure network for this ControlBlock because no settings was provided"));
-        }
-        if (settings.vlanId() == null) {
-            return Optional.of(controlBlockAdapter.buildFatalReportItem(
-                    "Cannot configure network for this ControlBlock because no Vlan Id was provided in the settings"));
-        }
-        if (!appIdIterator.hasNext()) {
-            return Optional.of(controlBlockAdapter.buildFatalReportItem(
-                    "Cannot configure network for this ControlBlock because range of appId is exhausted"));
-        }
-        if (!macAddressIterator.hasNext()) {
-            return Optional.of(controlBlockAdapter.buildFatalReportItem(
-                    "Cannot configure network for this ControlBlock because range of MAC Address is exhausted"));
-        }
-
-        return controlBlockAdapter.configureNetwork(appIdIterator.nextLong(), macAddressIterator.next(), settings.vlanId(), settings.vlanPriority(),
-                settings.minTime(), settings.maxTime());
     }
 
     /**

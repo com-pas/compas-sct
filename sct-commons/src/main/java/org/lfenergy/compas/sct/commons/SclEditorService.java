@@ -171,26 +171,6 @@ public class SclEditorService implements SclEditor {
     }
 
     @Override
-    public void removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(final SCL scl) {
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scl);
-        List<LDeviceAdapter> lDeviceAdapters = sclRootAdapter.streamIEDAdapters()
-                .flatMap(IEDAdapter::streamLDeviceAdapters).toList();
-
-        // LN0
-        lDeviceAdapters.stream()
-                .map(LDeviceAdapter::getLN0Adapter)
-                .forEach(ln0 -> {
-                    ln0.removeAllControlBlocksAndDatasets();
-                    ln0.removeAllExtRefSourceBindings();
-                });
-
-        // Other LN
-        lDeviceAdapters.stream()
-                .map(LDeviceAdapter::getLNAdapters).flatMap(List::stream)
-                .forEach(LNAdapter::removeAllControlBlocksAndDatasets);
-    }
-
-    @Override
     public List<SclReportItem> updateLDeviceStatus(SCL scd) {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         SubstationAdapter substationAdapter = sclRootAdapter.getSubstationAdapter();
@@ -201,18 +181,6 @@ public class SclEditorService implements SclEditor {
                 .map(ln0Adapter -> ln0Adapter.updateLDeviceStatus(iedNameLdInstList))
                 .flatMap(Optional::stream)
                 .toList();
-    }
-
-    @Override
-    public List<SclReportItem> analyzeDataGroups(SCL scd) {
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        return sclRootAdapter.streamIEDAdapters()
-                .map(iedAdapter -> {
-                    List<SclReportItem> list = new ArrayList<>();
-                    list.addAll(iedAdapter.checkDataGroupCoherence());
-                    list.addAll(iedAdapter.checkBindingDataGroupCoherence());
-                    return list;
-                }).flatMap(Collection::stream).toList();
     }
 
     @Override
