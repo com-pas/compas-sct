@@ -6,6 +6,7 @@ package org.lfenergy.compas.sct.commons;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.groups.Tuple;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,9 +35,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
@@ -53,6 +53,13 @@ class ExtRefServiceTest {
 
     @InjectMocks
     ExtRefService extRefService;
+
+    private Set<FcdaForDataSetsCreation> allowedFcdas;
+
+    @BeforeEach
+    void init() {
+        allowedFcdas = new HashSet<>(CsvUtils.parseRows("FcdaCandidates.csv", StandardCharsets.UTF_8, FcdaForDataSetsCreation.class));
+    }
 
     private static final long GSE_APP_ID_MIN = 0x9;
     private static final long SMV_APP_ID_MIN = 0x400A;
@@ -214,12 +221,30 @@ class ExtRefServiceTest {
         assertExtRefIsNotBound(extRef);
     }
 
+    private static Stream<Arguments> provideAllowedFcdaListEmptyOrNull() {
+        return Stream.of(
+                Arguments.of("Set of allowed FCDA is null", null),
+                Arguments.of("Set of allow FCDA is Empty", Collections.EMPTY_SET)
+        );
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("provideAllowedFcdaListEmptyOrNull")
+    void createDataSetAndControlBlocks_should_Throw_Exception_when_list_allowed_fcda_not_initialized(String testName, Set<FcdaForDataSetsCreation> fcdaForDataSets) {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
+        // When Then
+        assertThatCode(() -> extRefService.createDataSetAndControlBlocks(scd, fcdaForDataSets))
+                .isInstanceOf(ScdException.class)
+                .hasMessage("Accepted FCDAs list is empty, you should initialize allowed FCDA lists with CsvHelper class before");
+    }
+
     @Test
     void createDataSetAndControlBlocks_should_create_DataSet() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When
-        List<SclReportItem> sclReportItems = extRefService.createDataSetAndControlBlocks(scd);
+        List<SclReportItem> sclReportItems = extRefService.createDataSetAndControlBlocks(scd, allowedFcdas);
         // Then
         assertThat(sclReportItems).isEmpty();
         assertThat(streamAllDataSets(scd)).hasSize(6);
@@ -250,7 +275,7 @@ class ExtRefServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When
-        List<SclReportItem> sclReportItems = extRefService.createDataSetAndControlBlocks(scd);
+        List<SclReportItem> sclReportItems = extRefService.createDataSetAndControlBlocks(scd, allowedFcdas);
         // Then
         assertThat(sclReportItems).isEmpty();
 
@@ -283,7 +308,7 @@ class ExtRefServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When
-        List<SclReportItem> sclReportItems = extRefService.createDataSetAndControlBlocks(scd);
+        List<SclReportItem> sclReportItems = extRefService.createDataSetAndControlBlocks(scd, allowedFcdas);
         // Then
         assertThat(sclReportItems).isEmpty();
 
@@ -307,12 +332,23 @@ class ExtRefServiceTest {
                 .containsExactly("CB_LD_INST21_CYCI", "LD_INST21");
     }
 
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("provideAllowedFcdaListEmptyOrNull")
+    void createDataSetAndControlBlocks_with_targetIedName_should_Throw_Exception_when_list_allowed_fcda_not_initialized(String testName, Set<FcdaForDataSetsCreation> fcdaForDataSets) {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
+        // When Then
+        assertThatCode(() -> extRefService.createDataSetAndControlBlocks(scd, "IED_NAME1", fcdaForDataSets))
+                .isInstanceOf(ScdException.class)
+                .hasMessage("Accepted FCDAs list is empty, you should initialize allowed FCDA lists with CsvHelper class before");
+    }
+
     @Test
     void createDataSetAndControlBlocks_when_targetIedName_is_provided_should_succeed() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When
-        List<SclReportItem> sclReportItems = extRefService.createDataSetAndControlBlocks(scd, "IED_NAME1");
+        List<SclReportItem> sclReportItems = extRefService.createDataSetAndControlBlocks(scd, "IED_NAME1", allowedFcdas);
         // Then
         assertThat(sclReportItems).isEmpty();
         assertThat(streamAllDataSets(scd)).hasSize(6);
@@ -328,7 +364,7 @@ class ExtRefServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When
-        List<SclReportItem> sclReportItems = extRefService.createDataSetAndControlBlocks(scd, "IED_NAME2");
+        List<SclReportItem> sclReportItems = extRefService.createDataSetAndControlBlocks(scd, "IED_NAME2", allowedFcdas);
         // Then
         assertThat(sclReportItems).isEmpty();
         assertThat(streamAllDataSets(scd)).isEmpty();
@@ -339,9 +375,20 @@ class ExtRefServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When & Then
-        assertThatThrownBy(() -> extRefService.createDataSetAndControlBlocks(scd, "non_existing_IED_name"))
+        assertThatThrownBy(() -> extRefService.createDataSetAndControlBlocks(scd, "non_existing_IED_name", allowedFcdas))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("IED.name 'non_existing_IED_name' not found in SCD");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("provideAllowedFcdaListEmptyOrNull")
+    void createDataSetAndControlBlocks_with_targetIedName_and_targetLDeviceInst_should_Throw_Exception_when_list_allowed_fcda_not_initialized(String testName, Set<FcdaForDataSetsCreation> fcdaForDataSets) {
+        // Given
+        SCL scd = new SCL();
+        // When Then
+        assertThatCode(() -> extRefService.createDataSetAndControlBlocks(scd, "IED_NAME1", "LD_INST11", fcdaForDataSets))
+                .isInstanceOf(ScdException.class)
+                .hasMessage("Accepted FCDAs list is empty, you should initialize allowed FCDA lists with CsvHelper class before");
     }
 
     @Test
@@ -349,7 +396,7 @@ class ExtRefServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When
-        List<SclReportItem> sclReportItems = extRefService.createDataSetAndControlBlocks(scd, "IED_NAME1", "LD_INST11");
+        List<SclReportItem> sclReportItems = extRefService.createDataSetAndControlBlocks(scd, "IED_NAME1", "LD_INST11", allowedFcdas);
         // Then
         assertThat(sclReportItems).isEmpty();
     }
@@ -359,7 +406,7 @@ class ExtRefServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When & Then
-        assertThatThrownBy(() -> extRefService.createDataSetAndControlBlocks(scd, "non_existing_IED_name", "LD_INST11"))
+        assertThatThrownBy(() -> extRefService.createDataSetAndControlBlocks(scd, "non_existing_IED_name", "LD_INST11", allowedFcdas))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("IED.name 'non_existing_IED_name' not found in SCD");
     }
@@ -369,7 +416,7 @@ class ExtRefServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When & Then
-        assertThatThrownBy(() -> extRefService.createDataSetAndControlBlocks(scd, "IED_NAME1", "non_existing_LDevice_inst"))
+        assertThatThrownBy(() -> extRefService.createDataSetAndControlBlocks(scd, "IED_NAME1", "non_existing_LDevice_inst", allowedFcdas))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("LDevice.inst 'non_existing_LDevice_inst' not found in IED 'IED_NAME1'");
     }
@@ -379,7 +426,7 @@ class ExtRefServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When & Then
-        assertThatThrownBy(() -> extRefService.createDataSetAndControlBlocks(scd, null, "LD_INST11"))
+        assertThatThrownBy(() -> extRefService.createDataSetAndControlBlocks(scd, null, "LD_INST11", allowedFcdas))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("IED.name parameter is missing");
     }
@@ -405,7 +452,7 @@ class ExtRefServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success_test_fcda_sort.xml");
         // When
-        List<SclReportItem> sclReportItems = extRefService.createDataSetAndControlBlocks(scd);
+        List<SclReportItem> sclReportItems = extRefService.createDataSetAndControlBlocks(scd, allowedFcdas);
         // Then
         assertThat(sclReportItems).isEmpty();
         DataSetAdapter dataSetAdapter = findDataSet(scd, "IED_NAME2", "LD_INST21", "DS_LD_INST21_GSI");

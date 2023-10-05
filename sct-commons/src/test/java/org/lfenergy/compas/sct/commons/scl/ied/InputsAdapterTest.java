@@ -4,19 +4,25 @@
 
 package org.lfenergy.compas.sct.commons.scl.ied;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.dto.FcdaForDataSetsCreation;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.FCDARecord;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
+import org.lfenergy.compas.sct.commons.util.CsvUtils;
 import org.opentest4j.AssertionFailedError;
 
+import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -26,6 +32,13 @@ import static org.junit.jupiter.api.Named.named;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
 
 class InputsAdapterTest {
+
+    private Set<FcdaForDataSetsCreation> allowedFcdas;
+
+    @BeforeEach
+    void init() {
+        allowedFcdas = new HashSet<>(CsvUtils.parseRows("FcdaCandidates.csv", StandardCharsets.UTF_8, FcdaForDataSetsCreation.class));
+    }
 
     @Test
     @Tag("issue-321")
@@ -57,7 +70,7 @@ class InputsAdapterTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_ied_errors.xml");
         InputsAdapter inputsAdapter = findInputs(scd, "IED_NAME1", "LD_INST11");
         // When
-        List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();
+        List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks(allowedFcdas);
         // Then
         assertThat(sclReportItems).containsExactly(
             SclReportItem.error("/SCL/IED[@name=\"IED_NAME1\"]",
@@ -71,7 +84,7 @@ class InputsAdapterTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_ied_errors.xml");
         InputsAdapter inputsAdapter = findInputs(scd, "IED_NAME3", "LD_INST31");
         // When
-        List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();
+        List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks(allowedFcdas);
         // Then
         assertThat(sclReportItems).containsExactly(
             SclReportItem.error("/SCL/IED[@name=\"IED_NAME3\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST31\"]/LN0/Inputs/ExtRef[@desc=\"Source IED is " +
@@ -86,7 +99,7 @@ class InputsAdapterTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_extref_errors.xml");
         InputsAdapter inputsAdapter = findInputs(scd, "IED_NAME1", "LD_INST11");
         // When
-        List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();
+        List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks(allowedFcdas);
         // Then
         assertThat(sclReportItems).containsExactlyInAnyOrder(
             SclReportItem.error("/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]/LN0/Inputs/" +
@@ -107,7 +120,7 @@ class InputsAdapterTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         InputsAdapter inputsAdapter = findInputs(scd, "IED_NAME1", "LD_INST11");
         // When
-        List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();
+        List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks(allowedFcdas);
         // Then
         assertThat(sclReportItems).isEmpty();
     }
@@ -128,7 +141,7 @@ class InputsAdapterTest {
         String expectedSourceLDeviceInst = splitPath[LDEVICE_INST_PART];
         String expectedDataSetName = splitPath[DATASET_NAME_PART];
         // When
-        List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();
+        List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks(allowedFcdas);
         // Then
         assertThat(sclReportItems).isEmpty();
         DataSetAdapter dataSet = findDataSet(scd, expectedSourceIedName, expectedSourceLDeviceInst, expectedDataSetName);
@@ -198,7 +211,7 @@ class InputsAdapterTest {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         InputsAdapter inputsAdapter = keepOnlyThisExtRef(sclRootAdapter, extRefDesc);
         // When
-        List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();
+        List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks(allowedFcdas);
         // Then
         assertThat(sclReportItems).isEmpty();
         assertThat(sclRootAdapter.streamIEDAdapters()
@@ -231,7 +244,7 @@ class InputsAdapterTest {
         LDeviceAdapter sourceLDevice = findLDevice(sclRootAdapter.getCurrentElem(), extRef.getIedName(), extRef.getLdInst());
         sourceLDevice.getAccessPoint().setServices(new TServices());
         // When
-        List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks();
+        List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks(allowedFcdas);
         // Then
         assertThat(sclReportItems).hasSize(1)
             .first().extracting(SclReportItem::message).asString()
