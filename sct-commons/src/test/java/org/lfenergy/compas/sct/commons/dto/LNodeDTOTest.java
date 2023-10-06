@@ -18,9 +18,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class LNodeDTOTest {
 
@@ -88,7 +86,7 @@ class LNodeDTOTest {
         when(lnAdapter.getDataTypeTemplateAdapter()).thenReturn(dataTypeTemplateAdapter);
         LNodeTypeAdapter lNodeTypeAdapter = mock(LNodeTypeAdapter.class);
         when(dataTypeTemplateAdapter.getLNodeTypeAdapterById(any())).thenReturn(Optional.of(lNodeTypeAdapter));
-        when(lNodeTypeAdapter.getDataAttributeRefs(any())).thenReturn(List.of(DataAttributeRef.builder().build()));
+        when(lNodeTypeAdapter.getDataAttributeRefs(any(DataAttributeRef.class))).thenReturn(List.of(DataAttributeRef.builder().build()));
 
         TExtRef extRef = DTO.createExtRef();
         when(lnAdapter.getExtRefs(null)).thenReturn(List.of(extRef));

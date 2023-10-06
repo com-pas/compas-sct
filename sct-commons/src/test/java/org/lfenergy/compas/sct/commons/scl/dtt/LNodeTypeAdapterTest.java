@@ -149,6 +149,18 @@ class LNodeTypeAdapterTest {
 
     @Test
     @Tag("issue-321")
+    void testGetDataAttributeRefsString() {
+        // Given
+        DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT);
+        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("LN1").get());
+        // When
+        var dataAttributeRefs = lNodeTypeAdapter.getDataAttributeRefs("StrVal.origin.origin.ctlVal");
+        // Then
+        assertThat(dataAttributeRefs).isNotNull();
+    }
+
+    @Test
+    @Tag("issue-321")
     void testCheck() {
         // Given
         DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT);
