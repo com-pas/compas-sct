@@ -1,0 +1,39 @@
+<!-- SPDX-FileCopyrightText: 2023 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<SCL xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4">
+    <Header id="HeaderID" version="version" revision="Revision" toolID="toolID"/>
+    <DataTypeTemplates>
+        <LNodeType id="LN1" lnClass="ANCR">
+            <DO name="Do1" type="DO1"/>
+        </LNodeType>
+        <DOType cdc="WYE" id="DO1">
+            <SDO name="sdo1" type="SDO1"/>
+            <DA name="da1" bType="BOOLEAN" fc="ST"/>
+            <DA name="unused" bType="BOOLEAN" fc="ST"/>
+        </DOType>
+        <DOType cdc="WYE" id="SDO1">
+            <SDO name="unused" type="UNUSED"/>
+            <SDO name="sdo2" type="SDO2"/>
+        </DOType>
+        <DOType cdc="WYE" id="SDO2">
+            <DA name="unused" bType="BOOLEAN" fc="ST"/>
+            <DA name="da2" bType="Struct" type="DA2" fc="ST"/>
+        </DOType>
+        <DOType cdc="WYE" id="UNUSED">
+            <DA name="unused" bType="BOOLEAN" fc="ST"/>
+        </DOType>
+        <DAType id="DA2">
+            <BDA name="unused" bType="BOOLEAN"/>
+            <BDA name="bda1" bType="Struct" type="BDA1"/>
+        </DAType>
+        <DAType id="BDA1">
+            <BDA name="unused" bType="BOOLEAN"/>
+            <BDA name="bda2" bType="Enum" type="EnumType1"/>
+        </DAType>
+        <EnumType id="EnumType1">
+            <EnumVal ord="1">val1</EnumVal>
+            <EnumVal ord="2">val2</EnumVal>
+        </EnumType>
+    </DataTypeTemplates>
+</SCL>

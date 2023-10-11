@@ -13,6 +13,7 @@ import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 public class DataTypeTemplateTestUtils {
     public static final String SCD_DTT = "/dtt-test-schema-conf/scd_dtt_import_test.xml";
     public static final String SCD_DTT_DIFF_CONTENT_SAME_ID = "/dtt-test-schema-conf/scd_dtt_import_sameid-diff-content-test.xml";
+    public static final String SCD_DTT_DO_SDO_DA_BDA = "/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda.xml";
 
     public static DataTypeTemplateAdapter initDttAdapterFromFile(String fileName) {
         SCL scd = SclTestMarshaller.getSCLFromFile(fileName);
