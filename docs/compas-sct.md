@@ -5,19 +5,18 @@
 ## Introduction
 
 The CoMPAS SCT (System Configuration Tool) is part of the CoMPAS (Configuration Module for Power System Automation)
-ecosystem which is an open source project aimed at providing a tool for configuring control system and 
-profile management related to the 61850 standard. Its architecture allows an easy integration with the other 
-components of CoMPAS, in addition to being modular and flexible with a high level of abstraction, it gives 
+ecosystem which is an open source project aimed at providing a tool for configuring control system and
+profile management related to the 61850 standard. Its architecture allows an easy integration with the other
+components of CoMPAS, in addition to being modular and flexible with a high level of abstraction, it gives
 the freedom to implement the tool with the database of its choice.
 
-The below package diagram shows different part of the tool architecture. 
+The below package diagram shows different part of the tool architecture.
 
 ![Package Diagram](images/PackageDiagram-CompasSCT.png)
 
 Hence, we can distinguish four major parts:
 
 * **[sct-commons](#SCT-COMMONS)** : a library that contents shared functionalities for the bound SCL object.
-* **[sct-data](#SCT-DATA)** : It holds data models and database connectivity services.
 * **[sct-app](#SCT-APPLICATION)** : *TODO*.
 
 ## SCT COMMONS
@@ -95,43 +94,6 @@ should always return `true`:
 
         [...]
     }
-
-## SCT DATA
-Data models and connectivity to database are defined here. Data access layer is an abstract layer that defined connectivity
-interfaces. This layer manages a database with single table (SQL-Like database) or single collection (NoSQL-Like database).
-The concrete data access layers are implemented in specific packages. A data model can implement the following interface
-
-```
-public interface IScd <ID> {
-    ID getId();
-    byte[] getRawXml();
-    ID getHeaderId();
-    String getHeaderRevision();
-    String getHeaderVersion();
-    String filename();
-}
-```
-
-* ### SQL-Like Database
-An implementation of the sct-data connectivity interface with custom data models. This allows the application to work with sql-like database.
-The libraries ares use for SQL-Like databases, those that support XML type (PostgreSql, Oracle, etc)
-
-* ### NoSQL-Like Database
-Like SQL-like part, this package contains the sct-data connector interfaces implementation for NoSQL-Like databases (BaseX, existDB, etc ) 
-that support XML processing. 
-
-This can also be a local repository connector (file system). For example, with meta-data headerID, headerVersion, headerRevision and filename
-one can implement the connector to have the below output (with the constraint of having a single file in /pathTo/headerId/headerVersion/headerRevision):
-
-```
-    myRepo
-    ├───<headerID>
-    │   ├───<headerVersion1>
-    │   │   └───<headerRevision1>
-    │   │   |   ├───<fileName1.scd>
-    │   │   └───<headerRevision2>
-    │   │       ├───<fileName2.scd>
-```
 
 ## SCT APPLICATION
 **TODO**
