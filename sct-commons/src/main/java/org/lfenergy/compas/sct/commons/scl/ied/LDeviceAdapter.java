@@ -351,13 +351,13 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
         return aLNAdapters;
     }
 
-    public List<SclReportItem> createDataSetAndControlBlocks() {
+    public List<SclReportItem> createDataSetAndControlBlocks(Set<FcdaForDataSetsCreation> allowedFcdas) {
         LN0Adapter ln0Adapter = getLN0Adapter();
         if (!ln0Adapter.hasInputs()) {
             return Collections.emptyList();
         }
         return ln0Adapter.getInputsAdapter()
-                .updateAllSourceDataSetsAndControlBlocks();
+                .updateAllSourceDataSetsAndControlBlocks(allowedFcdas);
     }
 
     public Set<DataAttributeRef> findSourceDA(TExtRef extRef) {

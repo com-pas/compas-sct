@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.scl.dtt;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -240,7 +241,29 @@ class DOTypeAdapterTest {
         // Then
         assertThat(result).isNotNull()
                 .extracting(TDA::getName, TDA::getFc, TDA::getType)
-                .containsExactlyInAnyOrder(daName,TFCEnum.fromValue(fc),type);
+                .containsExactlyInAnyOrder(daName, TFCEnum.fromValue(fc), type);
     }
 
+    @Test
+    void findPathSDOToDA_should_return_pair_of_sdo_doType() {
+        // Given
+        DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT_DIFF_CONTENT_SAME_ID);
+        DOTypeAdapter doTypeAdapter = dttAdapter.getDOTypeAdapterById("DO1").get();
+        // When
+        Pair<String, DOTypeAdapter> result = doTypeAdapter.findPathSDOToDA("origin", "origin");
+        //Then
+        assertThat(result.getLeft()).isEqualTo("origin");
+        assertThat(result.getRight().getCurrentElem().getId()).isEqualTo("DO4");
+    }
+
+    @Test
+    void findPathSDOToDA_should_throw_exception() {
+        // Given
+        DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT_DIFF_CONTENT_SAME_ID);
+        DOTypeAdapter doTypeAdapter = dttAdapter.getDOTypeAdapterById("DO2").get();
+        // When Then
+        assertThatCode(() -> doTypeAdapter.findPathSDOToDA("origin", "ctVal"))
+                .isInstanceOf(ScdException.class)
+                .hasMessage("No coherence or path between DOType(DO3) and DA(ctVal)");
+    }
 }

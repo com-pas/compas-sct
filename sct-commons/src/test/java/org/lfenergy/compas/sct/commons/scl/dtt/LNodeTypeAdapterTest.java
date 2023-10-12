@@ -6,6 +6,8 @@ package org.lfenergy.compas.sct.commons.scl.dtt;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
@@ -145,6 +147,59 @@ class LNodeTypeAdapterTest {
         filter.setDaName(new DaTypeName("antRef"));
         // When Then
         assertThat(lNodeTypeAdapter.getDataAttributeRefs(filter)).isEmpty();
+    }
+
+    @Test
+    @Tag("issue-321")
+    void testGetDataAttributeRefsString() {
+        // Given
+        DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT);
+        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("LN1").get());
+        // When
+        var dataAttributeRefs = lNodeTypeAdapter.getDataAttributeRefs("StrVal.origin.origin.ctlVal");
+        // Then
+        assertThat(dataAttributeRefs).isNotNull();
+    }
+
+    @Test
+    void getDataAttributeRefs_should_find_DO_SDO_DA_and_BDA() {
+        // Given
+        DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT_DO_SDO_DA_BDA);
+        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("LN1").orElseThrow());
+        // When
+        DataAttributeRef dataAttributeRefs = lNodeTypeAdapter.getDataAttributeRefs("Do1.sdo1.sdo2.da2.bda1.bda2");
+        // Then
+        assertThat(dataAttributeRefs).extracting(DataAttributeRef::getDoRef, DataAttributeRef::getDaRef)
+                .containsExactly("Do1.sdo1.sdo2", "da2.bda1.bda2");
+        assertThat(dataAttributeRefs.getDoName().getCdc()).isEqualTo(TPredefinedCDCEnum.WYE);
+        assertThat(dataAttributeRefs.getDaName()).extracting(DaTypeName::getBType, DaTypeName::getFc)
+                .containsExactly(TPredefinedBasicTypeEnum.ENUM, TFCEnum.ST);
+    }
+
+    @Test
+    void getDataAttributeRefs_should_find_DO_and_DA() {
+        // Given
+        DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT_DO_SDO_DA_BDA);
+        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("LN1").orElseThrow());
+        // When
+        DataAttributeRef dataAttributeRefs = lNodeTypeAdapter.getDataAttributeRefs("Do1.da1");
+        // Then
+        assertThat(dataAttributeRefs).extracting(DataAttributeRef::getDoRef, DataAttributeRef::getDaRef)
+                .containsExactly("Do1", "da1");
+        assertThat(dataAttributeRefs.getDoName().getCdc()).isEqualTo(TPredefinedCDCEnum.WYE);
+        assertThat(dataAttributeRefs.getDaName()).extracting(DaTypeName::getBType, DaTypeName::getFc)
+                .containsExactly(TPredefinedBasicTypeEnum.BOOLEAN, TFCEnum.ST);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "malformed", "Do1", "InexistantDo.da1", "Do1.inexistantDa", "Do1.da1.inexistantBda", "Do1.sdo1.inexistantSdo.da2", "Do1.sdo1.sdo2.da2.bda1.inexistantBda"})
+    void getDataAttributeRefs_when_dataRef_not_found_should_throw_exception(String dataRef) {
+        // Given
+        DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT_DO_SDO_DA_BDA);
+        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("LN1").orElseThrow());
+        // When & Then
+        assertThatThrownBy(() -> lNodeTypeAdapter.getDataAttributeRefs(dataRef))
+                .isInstanceOf(ScdException.class);
     }
 
     @Test
