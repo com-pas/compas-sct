@@ -8,16 +8,16 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.ExtRefService;
 import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
+import org.lfenergy.compas.sct.commons.dto.FcdaForDataSetsCreation;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import org.lfenergy.compas.sct.commons.ExtRefService;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
-import org.lfenergy.compas.sct.commons.util.FcdaCandidates;
 import org.lfenergy.compas.sct.commons.util.LdeviceStatus;
+import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
@@ -257,7 +257,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         return parentAdapter;
     }
 
-    public List<SclReportItem> updateAllSourceDataSetsAndControlBlocks() {
+    public List<SclReportItem> updateAllSourceDataSetsAndControlBlocks(Set<FcdaForDataSetsCreation> allowedFcdas) {
         String currentBayUuid = getIedAdapter().getPrivateCompasBay().map(TCompasBay::getUUID).orElse(null);
         if (StringUtils.isBlank(currentBayUuid)) {
             return List.of(getIedAdapter().buildFatalReportItem(MESSAGE_IED_MISSING_COMPAS_BAY_UUID));
@@ -266,7 +266,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
                 .filter(this::areBindingAttributesPresent)
                 .filter(this::isExternalBound)
                 .filter(this::matchingCompasFlowIsActiveOrUntested)
-                .map(extRef -> updateSourceDataSetsAndControlBlocks(extRef, currentBayUuid))
+                .map(extRef -> updateSourceDataSetsAndControlBlocks(extRef, currentBayUuid, allowedFcdas))
                 .flatMap(Optional::stream)
                 .toList();
     }
@@ -290,7 +290,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
                 && StringUtils.isNotBlank(tExtRef.getDoName());
     }
 
-    private Optional<SclReportItem> updateSourceDataSetsAndControlBlocks(TExtRef extRef, String targetBayUuid) {
+    private Optional<SclReportItem> updateSourceDataSetsAndControlBlocks(TExtRef extRef, String targetBayUuid, Set<FcdaForDataSetsCreation> allowedFcdas) {
         if (extRef.getServiceType() == null) {
             return fatalReportItem(extRef, MESSAGE_SERVICE_TYPE_MISSING);
         }
@@ -318,7 +318,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
             return warningReportItem(extRef, String.format(MESSAGE_SOURCE_LN_NOT_FOUND, optionalSourceLDevice.get().getXPath()));
         }
 
-        Optional<SclReportItem> sclReportItem = removeFilteredSourceDas(extRef, sourceDas);
+        Optional<SclReportItem> sclReportItem = removeFilteredSourceDas(extRef, sourceDas, allowedFcdas);
         if (sclReportItem.isPresent()) {
             return sclReportItem;
         }
@@ -381,16 +381,27 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
                 + (isBayInternal ? "I" : "E");
     }
 
-    private Optional<SclReportItem> removeFilteredSourceDas(TExtRef extRef, final Set<DataAttributeRef> sourceDas) {
+    private Optional<SclReportItem> removeFilteredSourceDas(TExtRef extRef, final Set<DataAttributeRef> sourceDas, Set<FcdaForDataSetsCreation> allowedFcdas) {
         sourceDas.removeIf(da -> da.getFc() != TFCEnum.MX && da.getFc() != TFCEnum.ST);
         return switch (extRef.getServiceType()) {
             case GOOSE, SMV -> {
-                sourceDas.removeIf(Predicate.not(FcdaCandidates.SINGLETON::contains));
+                sourceDas.removeIf(Predicate.not(dataAttributeRef -> isFcdaAllowed(dataAttributeRef, allowedFcdas)));
                 yield Optional.empty();
             }
             case REPORT -> removeFilterSourceDaForReport(extRef, sourceDas);
             default -> fatalReportItem(extRef, String.format(MESSAGE_INVALID_SERVICE_TYPE, extRef.getServiceType()));
         };
+    }
+
+    private boolean isFcdaAllowed(DataAttributeRef dataAttributeRef, Set<FcdaForDataSetsCreation> allowedFcdas) {
+        String lnClass = dataAttributeRef.getLnClass();
+        String doName = dataAttributeRef.getDoName().toStringWithoutInst();
+        String daName = dataAttributeRef.getDaName().toString();
+        String fc = dataAttributeRef.getFc().value();
+        if (StringUtils.isBlank(lnClass) || StringUtils.isBlank(doName) || StringUtils.isBlank(daName) || StringUtils.isBlank(fc)) {
+            throw new IllegalArgumentException("parameters must not be blank");
+        }
+        return allowedFcdas.contains(new FcdaForDataSetsCreation(lnClass, doName, daName, fc));
     }
 
     private Optional<SclReportItem> removeFilterSourceDaForReport(TExtRef extRef, Set<DataAttributeRef> sourceDas) {
