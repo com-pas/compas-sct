@@ -30,7 +30,6 @@ Actually there are 4 packages available:
 - compas-sct
 - sct-commons
 - sct-app
-- sct-data
 
 
 #### 2. Usage
