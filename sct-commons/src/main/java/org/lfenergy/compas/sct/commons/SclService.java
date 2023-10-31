@@ -30,7 +30,7 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.IED_TEST_NAME
 import static org.lfenergy.compas.sct.commons.util.PrivateEnum.COMPAS_ICDHEADER;
 
 @Slf4j
-public class SclEditorService implements SclEditor {
+public class SclService implements SclEditor {
 
     @Override
     public SCL initScl(final UUID hId, final String hVersion, final String hRevision) throws ScdException {
