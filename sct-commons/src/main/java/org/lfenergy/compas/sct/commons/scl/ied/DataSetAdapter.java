@@ -11,6 +11,7 @@ import org.lfenergy.compas.scl2007b4.model.TDataSet;
 import org.lfenergy.compas.scl2007b4.model.TFCDA;
 import org.lfenergy.compas.scl2007b4.model.TFCEnum;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.Comparator;

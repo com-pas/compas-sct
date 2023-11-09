@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.sct.commons.scl.ied;
+package org.lfenergy.compas.sct.commons.scl.ln;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -16,6 +16,8 @@ import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.scl.ied.*;
+import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
@@ -832,13 +834,22 @@ class LNAdapterTest {
                 .withLDeviceAdapter(lDeviceAdapter)
                 .withLnClass(TLLN0Enum.LLN_0.value())
                 .build();
-        List<TDataSet> tDataSets = lnAdapter.getCurrentElem().getDataSet();
+        lnAdapter.getCurrentElem().getDataSet().forEach(tDataSet -> tDataSet.getFCDA().forEach(tfcda -> {
+            tfcda.getLnClass().add("lnClass");
+            tfcda.setDoName("FACntRs1.res");
+            tfcda.setDaName("d");
+        }));
+
+        ExtRefInfo extRefInfo = DTO.createExtRefInfo();
+        ExtRefBindingInfo extRefBindingInfo = new ExtRefBindingInfo();
+        extRefBindingInfo.setServiceType(TServiceType.GOOSE);
+        extRefBindingInfo.setLnClass("lnClass");
+        extRefInfo.setBindingInfo(extRefBindingInfo);
         //When
-        List<ControlBlock> tControls = lnAdapter.getControlBlocks(tDataSets, TServiceType.GOOSE);
+        List<ControlBlock> controlBlocks = lnAdapter.getControlBlocksForMatchingFCDA(extRefInfo).toList();
 
         //Then
-        assertThat(tControls).isNotEmpty()
-                .hasSize(1);
+        assertThat(controlBlocks).hasSize(1);
     }
 
     @Test

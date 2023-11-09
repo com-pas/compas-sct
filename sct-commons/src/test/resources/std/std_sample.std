@@ -1,0 +1,1230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ // SPDX-FileCopyrightText: 2021 RTE FRANCE
+  ~ //
+  ~ // SPDX-License-Identifier: Apache-2.0
+  -->
+<SCL xmlns:rte="http://www.rte-france.com"  xmlns:compas="https://www.lfenergy.org/compas/extension/v1" xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4">
+	<Private type="COMPAS-SclFileType">
+		<compas:SclFileType xmlns:compas="https://www.lfenergy.org/compas/extension/v1">STD</compas:SclFileType>
+	</Private>
+	<Header id="00f999bb-f152-4953-a926-0e72a76d8e09" version="01.00.00" revision="A" toolID="RTE GEN TOOL">
+		<History>
+			<Hitem version="V5" revision="A1" when="20201106" who="RTE" what="LDASRB maintenant en phase 1"/>
+		</History>
+	</Header>
+	<Communication>
+		<SubNetwork type="8-MMS" name="RSPACE_PROCESS_NETWORK">
+			<ConnectedAP iedName="IED4d4fe1a8cda64cf88a5ee4176a1a0eef" apName="PROCESS_AP" redProt="prp">
+				<Address>
+					<P type="OSI-PSEL">00000001</P>
+					<P type="OSI-SSEL">0001</P>
+					<P type="OSI-TSEL">0001</P>
+					<P type="OSI-AP-Title">1,3,9999,24</P>
+					<P type="OSI-AE-Qualifier">24</P>
+					<P type="MMS-VLANID">300</P>
+					<P type="MMS-PRIORITY">3</P>
+					<P type="PTP-VLANID">400</P>
+					<P type="PTP-PRIORITY">4</P>
+					<P type="IP-SUBNET">0.0.0.0</P>
+					<P type="IP">0.0.0.0</P>
+					<P type="IP-GATEWAY">0.0.0.0</P>
+				</Address>
+			</ConnectedAP>
+		</SubNetwork>
+		<SubNetwork type="IP" name="RSPACE_ADMIN_NETWORK">
+			<ConnectedAP iedName="IED4d4fe1a8cda64cf88a5ee4176a1a0eef" apName="ADMIN_AP" redProt="none">
+				<Address>
+					<P type="SyslogIP">Adresse IP du serveur Syslog</P>
+					<P type="SyslogProt">udp;tcp;tcp/tls</P>
+					<P type="SyslogCat">Valeur du code de la catégorie des messages</P>
+					<P type="IP-DATAREPOSITORY">0.0.0.0</P>
+					<P type="SnmpUserName">Nom d utilisateur pour la connexion</P>
+					<P type="SnmpAuthProt">none;hmac-128-sha-224;hmac-192-sha-256;hmac-256-sha-384;hmac-384-sha-512</P>
+					<P type="SnmpAuthKey">Password cle pour l'authentification</P>
+					<P type="SnmpPrivProt">none;aes-cfb-128;aes-cfb-192;aes-cfb-256</P>
+					<P type="SnmpPrivKey">Password cle pour la confidentialite</P>
+				</Address>
+			</ConnectedAP>
+		</SubNetwork>
+	</Communication>
+	<IED name="IED4d4fe1a8cda64cf88a5ee4176a1a0eef" type="ADU" manufacturer="ADU" configVersion="ADU" originalSclVersion="2007" originalSclRevision="B" originalSclRelease="4">
+		<Private type="RTE-IEDType">SAMU</Private>
+		<Private type="COMPAS-IEDType">SAMU</Private>
+		<Private type="COMPAS-SystemVersion">
+			<compas:SystemVersion MainSystemVersion="01.00" MinorSystemVersion="009.001.001"/>
+		</Private>
+		<Private type="COMPAS-ICDHeader">
+			<compas:ICDHeader IEDType="SAMU" ICDSystemVersionUUID="IED4d4fe1a8cda64cf88a5ee4176a1a0eef" IEDSystemVersioninstance="1" VendorName="RTE" IEDredundancy="A" IEDmodel="ICDfromModeling" hwRev="01.00.00" swRev="01.00.00" headerId="cacfa2df-bdb2-47a7-b7ea-07916586ebdd" headerVersion="01.00.00" headerRevision="01.00.00"/>
+		</Private>
+		<Services nameLength="64">
+			<ConfLNs fixPrefix="true" fixLnInst="true"/>
+			<ConfLdName/>
+			<ValueHandling setToRO="true"/>
+		</Services>
+		<AccessPoint name="PROCESS_AP">
+			<Server>
+				<Authentication none="true" certificate="false"/>
+				<LDevice inst="LDSUIED" ldName="VirtualSAMULDSUIED" desc="IED Monitoring Function">
+					<Private type="RTE-ProjectStage">Phase 1_Pilotes</Private>
+					<Private type="RTE-FunctionUUID">9d13ab59-1ec8-4c46-91c8-0326e6a5408e</Private>
+					<Private type="RTE-LDMaxInst">1</Private>
+					<Private type="RTE-FunctionIndice">1.0</Private>
+					<LN0 lnClass="LLN0" inst="" lnType="RTE_080BBB4D93E4E704CF69E8616CAF1A74_LLN0_V1.0.0" desc="">
+						<DOI name="Beh">
+							<DAI name="d" valKind="RO" valImport="false">
+								<Val>Ldevice current status</Val>
+							</DAI>
+						</DOI>
+						<DOI name="Health">
+							<DAI name="d" valKind="RO" valImport="false">
+								<Val>Health of the LDSUIED function</Val>
+							</DAI>
+						</DOI>
+						<DOI name="Mod">
+							<DAI name="stVal">
+								<Val>on</Val>
+							</DAI>
+							<DAI name="operTimeout" valKind="RO" valImport="true">
+								<Val>1000</Val>
+							</DAI>
+							<DAI name="d" valKind="RO" valImport="false">
+								<Val>Activation_deactivation command</Val>
+							</DAI>
+						</DOI>
+						<DOI name="NamPlt">
+							<DAI name="paramRev">
+								<Val>10</Val>
+							</DAI>
+							<DAI name="valRev">
+								<Val>10</Val>
+							</DAI>
+							<DAI name="d" valKind="RO" valImport="false">
+								<Val>Name plate of the logical node</Val>
+							</DAI>
+							<DAI name="configRev" valKind="RO" valImport="false">
+								<Val>01.01.00</Val>
+							</DAI>
+							<DAI name="swRev" valKind="RO" valImport="false">
+								<Private type="RTE-LD-ChangeLog">
+								</Private>
+								<Val>VDF</Val>
+							</DAI>
+						</DOI>
+					</LN0>
+					<LN lnClass="LPAI" inst="1" lnType="RTE_8884DBCF760D916CCE3EE9D1846CE46F_LPAI_V1.0.0" desc="">
+						<DOI name="ARtgHigh1">
+							<SDI name="units">
+								<DAI name="multiplier" valKind="RO" valImport="false">
+									<Val>m</Val>
+								</DAI>
+								<DAI name="SIUnit" valKind="RO" valImport="false">
+									<Val>A</Val>
+								</DAI>
+							</SDI>
+							<SDI name="minVal">
+								<DAI name="f" valKind="RO" valImport="false">
+									<Val>10</Val>
+								</DAI>
+							</SDI>
+							<SDI name="maxVal">
+								<DAI name="f" valKind="RO" valImport="false">
+									<Val>20</Val>
+								</DAI>
+							</SDI>
+							<SDI name="setMag">
+								<DAI name="f" valKind="RO" valImport="true">
+									<Val>20</Val>
+								</DAI>
+							</SDI>
+							<SDI name="stepSize">
+								<DAI name="f" valKind="RO" valImport="false">
+									<Val>10</Val>
+								</DAI>
+							</SDI>
+							<DAI name="d" valKind="RO" valImport="false">
+								<Val>Rated Input Current High</Val>
+							</DAI>
+						</DOI>
+						<DOI name="ARtgLow1">
+							<SDI name="units">
+								<DAI name="multiplier" valKind="RO" valImport="false">
+									<Val>m</Val>
+								</DAI>
+								<DAI name="SIUnit" valKind="RO" valImport="false">
+									<Val>A</Val>
+								</DAI>
+							</SDI>
+							<SDI name="minVal">
+								<DAI name="f" valKind="RO" valImport="false">
+									<Val>0</Val>
+								</DAI>
+							</SDI>
+							<SDI name="maxVal">
+								<DAI name="f" valKind="RO" valImport="false">
+									<Val>4</Val>
+								</DAI>
+							</SDI>
+							<SDI name="setMag">
+								<DAI name="f" valKind="RO" valImport="true">
+									<Val>4</Val>
+								</DAI>
+							</SDI>
+							<SDI name="stepSize">
+								<DAI name="f" valKind="RO" valImport="false">
+									<Val>2</Val>
+								</DAI>
+							</SDI>
+							<DAI name="d" valKind="RO" valImport="false">
+								<Val>Rated Input Current Low</Val>
+							</DAI>
+						</DOI>
+						<DOI name="AnIn1">
+							<SDI name="rangeC">
+								<SDI name="llLim">
+									<DAI name="f" valKind="RO" valImport="true">
+										<Val>ADU</Val>
+									</DAI>
+								</SDI>
+								<SDI name="hLim">
+									<DAI name="f" valKind="RO" valImport="true">
+										<Val>ADU</Val>
+									</DAI>
+								</SDI>
+								<SDI name="min">
+									<DAI name="f" valKind="RO" valImport="true">
+										<Val>ADU</Val>
+									</DAI>
+								</SDI>
+								<SDI name="lLim">
+									<DAI name="f" valKind="RO" valImport="true">
+										<Val>ADU</Val>
+									</DAI>
+								</SDI>
+								<SDI name="max">
+									<DAI name="f" valKind="RO" valImport="true">
+										<Val>ADU</Val>
+									</DAI>
+								</SDI>
+								<SDI name="hhLim">
+									<DAI name="f" valKind="RO" valImport="true">
+										<Val>ADU</Val>
+									</DAI>
+								</SDI>
+								<DAI name="limDb" valKind="RO" valImport="true">
+									<Val>ADU</Val>
+								</DAI>
+							</SDI>
+							<SDI name="units">
+								<DAI name="multiplier" valKind="RO" valImport="false">
+									<Val>m</Val>
+								</DAI>
+								<DAI name="SIUnit" valKind="RO" valImport="false">
+									<Val>A</Val>
+								</DAI>
+							</SDI>
+							<DAI name="db" valKind="RO" valImport="true">
+								<Val>ADU</Val>
+							</DAI>
+							<DAI name="zeroDb" valKind="RO" valImport="true">
+								<Val>ADU</Val>
+							</DAI>
+							<DAI name="smpRate" valKind="RO" valImport="true">
+								<Val>ADU</Val>
+							</DAI>
+							<DAI name="dbRef" valKind="RO" valImport="true">
+								<Val>ADU</Val>
+							</DAI>
+							<DAI name="zeroDbRef" valKind="RO" valImport="true">
+								<Val>ADU</Val>
+							</DAI>
+							<DAI name="d" valKind="RO" valImport="false">
+								<Val>Analogue Input One instance for each analog input</Val>
+							</DAI>
+						</DOI>
+						<DOI name="Beh">
+							<DAI name="d" valKind="RO" valImport="false">
+								<Val>Mandatory but not used</Val>
+							</DAI>
+						</DOI>
+					</LN>
+				</LDevice>
+				<LDevice inst="LDTM" ldName="VirtualSAMULDTM" desc="Instrument Transformers">
+					<Private type="RTE-ProjectStage">Phase 1_Pilotes</Private>
+					<Private type="RTE-FunctionUUID">9de78c12-6b02-4914-9944-dc87648433da</Private>
+					<Private type="RTE-LDMaxInst">1</Private>
+					<Private type="RTE-FunctionIndice">1.0</Private>
+					<LN0 lnClass="LLN0" inst="" lnType="RTE_70F5677DD1C219EE66917F2A6635F393_LLN0_V1.0.0" desc="">
+						<DOI name="Beh">
+							<DAI name="d" valKind="RO" valImport="false">
+								<Val>Ldevice current status</Val>
+							</DAI>
+						</DOI>
+						<DOI name="Health">
+							<DAI name="d" valKind="RO" valImport="false">
+								<Val>Health of the LDTM</Val>
+							</DAI>
+						</DOI>
+						<Inputs>
+							<ExtRef intAddr="VDF" pLN="TCTR" pDO="EEName" desc="STAT_LDTM_CC ferme entree courant protection Tri 4_1_BOOLEAN_1_stVal_1"/>
+							<ExtRef intAddr="VDF" pLN="TCTR" pDO="EEName" desc="STAT_LDTM_CC ferme entree courant protection Tri 4_1_BOOLEAN_1_stVal_2"/>
+							<ExtRef intAddr="VDF" pLN="TCTR" pDO="EEName" desc="STAT_LDTM_CC ferme entree courant protection Tri 4_1_BOOLEAN_1_stVal_3"/>
+						</Inputs>
+					</LN0>
+					<LN prefix="I04C" lnClass="TCTR" inst="43" lnType="RTE_336B5093F3DDA93A19E979FB89196E26_TCTR_V1.0.0" desc="">
+						<DOI name="ARtg">
+							<Private type="RTE-PARAM">
+								<rte:RTEPARAM shortLabel="I-NOM-TC-PROT-TRI-4" longLabel="COURANT NOMINAL DU TC PROTECTION TRIPHASE 4" conf="true"/>
+							</Private>
+							<SDI name="setMag">
+								<DAI name="f" valKind="RO" valImport="true">
+									<Val>1000</Val>
+								</DAI>
+							</SDI>
+							<SDI name="maxVal">
+								<DAI name="f" valKind="RO" valImport="false">
+									<Val>5000</Val>
+								</DAI>
+							</SDI>
+							<SDI name="stepSize">
+								<DAI name="f" valKind="RO" valImport="false">
+									<Val>5</Val>
+								</DAI>
+							</SDI>
+							<SDI name="units">
+								<DAI name="SIUnit" valKind="RO" valImport="false">
+									<Val>A</Val>
+								</DAI>
+								<DAI name="multiplier" valKind="RO" valImport="false">
+									<Val/>
+								</DAI>
+							</SDI>
+							<SDI name="minVal">
+								<DAI name="f" valKind="RO" valImport="false">
+									<Val>0</Val>
+								</DAI>
+							</SDI>
+							<DAI name="d" valKind="RO" valImport="false">
+								<Val>Rated primary current of current transformer</Val>
+							</DAI>
+						</DOI>
+						<DOI name="Rat">
+							<Private type="RTE-PARAM">
+								<rte:RTEPARAM shortLabel="RAPPORT-TC-PROT-TRI-4" longLabel="RAPPORT DE REDUCTION DU TC PROTECTION TRIPHASE 4" conf="true"/>
+							</Private>
+							<SDI name="setMag">
+								<DAI name="f" valKind="RO" valImport="true">
+									<Val>300</Val>
+								</DAI>
+							</SDI>
+							<SDI name="maxVal">
+								<DAI name="f" valKind="RO" valImport="false">
+									<Val>5000</Val>
+								</DAI>
+							</SDI>
+							<SDI name="stepSize">
+								<DAI name="f" valKind="RO" valImport="false">
+									<Val>10</Val>
+								</DAI>
+							</SDI>
+							<SDI name="units">
+								<DAI name="SIUnit" valKind="RO" valImport="false">
+									<Val/>
+								</DAI>
+								<DAI name="multiplier" valKind="RO" valImport="false">
+									<Val/>
+								</DAI>
+							</SDI>
+							<SDI name="minVal">
+								<DAI name="f" valKind="RO" valImport="false">
+									<Val>0</Val>
+								</DAI>
+							</SDI>
+							<DAI name="d" valKind="RO" valImport="false">
+								<Val>Winding ratio of current transformer</Val>
+							</DAI>
+						</DOI>
+					</LN>
+				</LDevice>
+			</Server>
+			<Services>
+				<DynAssociation max="4"/>
+				<GetDirectory/>
+				<GetDataObjectDefinition/>
+				<DataObjectDirectory/>
+				<GetDataSetValue/>
+				<DataSetDirectory/>
+				<ConfDataSet modify="true" maxAttributes="50" max="20"/>
+				<ReadWrite/>
+				<ConfReportControl bufMode="both" bufConf="true" max="20"/>
+				<GetCBValues/>
+				<ReportSettings rptID="Conf" optFields="Conf" bufTime="Conf" trgOps="Conf" intgPd="Conf" resvTms="true" owner="true" cbName="Conf" datSet="Conf"/>
+				<GSESettings appID="Conf" kdaParticipant="false" cbName="Conf" datSet="Conf"/>
+				<SMVSettings svID="Conf" optFields="Conf" smpRate="Conf" samplesPerSec="true" pdcTimeStamp="true" synchSrcId="true" nofASDU="Conf" kdaParticipant="false" cbName="Conf" datSet="Conf">
+					<SamplesPerSec>4800</SamplesPerSec>
+				</SMVSettings>
+				<GOOSE fixedOffs="true" goose="true" max="4"/>
+				<SMVsc sv="true" max="4"/>
+				<ClientServices goose="true" supportsLdName="true" maxGOOSE="20">
+					<TimeSyncProt iec61850_9_3="true"/>
+				</ClientServices>
+				<SupSubscription maxGo="10" maxSv="0"/>
+				<ConfSigRef max="100"/>
+				<RedProt prp="true"/>
+			</Services>
+		</AccessPoint>
+		<AccessPoint name="ADMIN_AP"/>
+	</IED>
+	<DataTypeTemplates>
+		<LNodeType lnClass="LPAI" id="RTE_8884DBCF760D916CCE3EE9D1846CE46F_LPAI_V1.0.0">
+			<DO name="NumInput1" type="RTE_X_X_X_553F8AE90EC0448B1518B00F5EAABB58_ING_V1.0.0"/>
+			<DO name="PolConnRef1" type="RTE_X_X_X_4B36044EE546B8F3482EE35532CD5856_VSG_V1.0.0"/>
+			<DO name="BrdPos" type="RTE_X_X_X_4B36044EE546B8F3482EE35532CD5856_VSG_V1.0.0"/>
+			<DO name="ConnName1" type="RTE_X_X_X_4B36044EE546B8F3482EE35532CD5856_VSG_V1.0.0"/>
+			<DO name="PhyHealth" type="RTE_X_X_X_F5FE6F6331013CC372215EB4D9E6DEAC_ENS_V1.0.0"/>
+			<DO name="ConnRef1" type="RTE_X_X_X_4B36044EE546B8F3482EE35532CD5856_VSG_V1.0.0"/>
+			<DO name="NamPlt" type="RTE_X_X_X_1E8D45ED877805EBBE610F05437F31A9_LPL_V1.0.0"/>
+			<DO name="RfHz1" type="RTE_X_X_X_DA609E4D37E5F52E41FEE27312842DAB_ING_V1.0.0"/>
+			<DO name="PhyNam" type="RTE_X_X_X_D93000A2D6F9B026504B48576A914DA3_DPL_V1.0.0"/>
+			<DO name="Beh" type="RTE_X_X_X_142AFD581884735B9E771FC5021E4567_ENS_V1.0.0"/>
+			<DO name="BrdNum" type="RTE_X_X_X_553F8AE90EC0448B1518B00F5EAABB58_ING_V1.0.0"/>
+			<DO name="ARtgLow1" type="RTE_X_X_X_14DAEEE804EEAE54170C341E065DFEAE_ASG_V1.0.0"/>
+			<DO name="ARtgHigh1" type="RTE_X_X_X_14DAEEE804EEAE54170C341E065DFEAE_ASG_V1.0.0"/>
+			<DO name="AnIn1" type="RTE_X_X_X_90274BCECAB5F2CE9400235CBC64E027_MV_V1.0.0"/>
+		</LNodeType>
+		<LNodeType lnClass="LLN0" id="RTE_70F5677DD1C219EE66917F2A6635F393_LLN0_V1.0.0">
+			<DO name="InRef34" type="RTE_X_X_X_2B1ED2756A9D37DAB2F041446293CC8E_ORG_V1.0.0"/>
+			<DO name="InRef26" type="RTE_X_X_X_2B1ED2756A9D37DAB2F041446293CC8E_ORG_V1.0.0"/>
+			<DO name="InRef32" type="RTE_X_X_X_2B1ED2756A9D37DAB2F041446293CC8E_ORG_V1.0.0"/>
+			<DO name="InRef19" type="RTE_X_X_X_2B1ED2756A9D37DAB2F041446293CC8E_ORG_V1.0.0"/>
+			<DO name="InRef33" type="RTE_X_X_X_2B1ED2756A9D37DAB2F041446293CC8E_ORG_V1.0.0"/>
+			<DO name="InRef35" type="RTE_X_X_X_2B1ED2756A9D37DAB2F041446293CC8E_ORG_V1.0.0"/>
+			<DO name="InRef31" type="RTE_X_X_X_2B1ED2756A9D37DAB2F041446293CC8E_ORG_V1.0.0"/>
+			<DO name="InRef21" type="RTE_X_X_X_2B1ED2756A9D37DAB2F041446293CC8E_ORG_V1.0.0"/>
+			<DO name="InRef30" type="RTE_X_X_X_2B1ED2756A9D37DAB2F041446293CC8E_ORG_V1.0.0"/>
+			<DO name="InRef22" type="RTE_X_X_X_2B1ED2756A9D37DAB2F041446293CC8E_ORG_V1.0.0"/>
+			<DO name="InRef28" type="RTE_X_X_X_2B1ED2756A9D37DAB2F041446293CC8E_ORG_V1.0.0"/>
+			<DO name="InRef27" type="RTE_X_X_X_2B1ED2756A9D37DAB2F041446293CC8E_ORG_V1.0.0"/>
+			<DO name="InRef20" type="RTE_X_X_X_2B1ED2756A9D37DAB2F041446293CC8E_ORG_V1.0.0"/>
+			<DO name="InRef24" type="RTE_X_X_X_2B1ED2756A9D37DAB2F041446293CC8E_ORG_V1.0.0"/>
+			<DO name="InRef29" type="RTE_X_X_X_2B1ED2756A9D37DAB2F041446293CC8E_ORG_V1.0.0"/>
+			<DO name="InRef25" type="RTE_X_X_X_2B1ED2756A9D37DAB2F041446293CC8E_ORG_V1.0.0"/>
+			<DO name="InRef23" type="RTE_X_X_X_2B1ED2756A9D37DAB2F041446293CC8E_ORG_V1.0.0"/>
+			<DO name="Health" type="RTE_X_X_X_46FFD3BD530FA6BCA3BA493B560AAFD1_ENS_V1.0.0"/>
+			<DO name="NamPlt" type="RTE_X_X_X_CF19FF016079750CB4219A7983C23ABA_LPL_V1.0.0"/>
+			<DO name="Mod" type="RTE_X_X_X_CED370672B877CDD7FBE78C5A57BFE8C_ENC_V1.0.0"/>
+			<DO name="Beh" type="RTE_X_X_X_7A170650CB603320DB207F938C86BA78_ENS_V1.0.0"/>
+		</LNodeType>
+		<LNodeType lnClass="LLN0" id="RTE_080BBB4D93E4E704CF69E8616CAF1A74_LLN0_V1.0.0">
+			<DO name="NamPlt" type="RTE_X_X_X_CF19FF016079750CB4219A7983C23ABA_LPL_V1.0.0"/>
+			<DO name="Beh" type="RTE_X_X_X_7A170650CB603320DB207F938C86BA78_ENS_V1.0.0"/>
+			<DO name="Health" type="RTE_X_X_X_46FFD3BD530FA6BCA3BA493B560AAFD1_ENS_V1.0.0"/>
+			<DO name="Mod" type="RTE_X_X_X_CED370672B877CDD7FBE78C5A57BFE8C_ENC_V1.0.0"/>
+		</LNodeType>
+		<LNodeType lnClass="TCTR" id="RTE_336B5093F3DDA93A19E979FB89196E26_TCTR_V1.0.0">
+			<DO name="NamClipRtg" type="RTE_X_X_X_4230B0762B0589752CFC9215F1554DC8_VSD_V1.0.0"/>
+			<DO name="NamARtg" type="RTE_X_X_X_4230B0762B0589752CFC9215F1554DC8_VSD_V1.0.0"/>
+			<DO name="NamAccRtg" type="RTE_X_X_X_4230B0762B0589752CFC9215F1554DC8_VSD_V1.0.0"/>
+			<DO name="NamPlt" type="RTE_X_X_X_0B8631DC8D22E3141CC32B3CCCCB8696_LPL_V1.0.0"/>
+			<DO name="EEName" type="RTE_X_X_X_48BA5C40D0913654FA5291A28C0D9716_DPL_V1.0.0"/>
+			<DO name="HzRtg" type="RTE_X_X_X_A2F8B3AD65101234EE2E461D10A21956_ASG_V1.0.0"/>
+			<DO name="Rat" type="RTE_X_X_X_14DAEEE804EEAE54170C341E065DFEAE_ASG_V1.0.0"/>
+			<DO name="Beh" type="RTE_X_X_X_7A170650CB603320DB207F938C86BA78_ENS_V1.0.0"/>
+			<DO name="ARtg" type="RTE_X_X_X_14DAEEE804EEAE54170C341E065DFEAE_ASG_V1.0.0"/>
+			<DO name="AmpSv" type="RTE_X_X_X_A8B4E5AED8390DA1D5DE9D57C4E05C37_SAV_V1.0.0"/>
+			<DO name="Mod" type="RTE_X_X_X_EBF9B63290158E4A268A3F29F00432F3_ENC_V1.0.0"/>
+		</LNodeType>
+		<LNodeType lnClass="LSET" id="RTE_0FFE4066256399D6DB5F6F7907A1770E_LSET_V1.0.0">
+			<DO name="SetPhNum" type="RTE_X_X_X_D88199787EF47F678073B414CB4EE5CF_ENG_V1.0.0"/>
+			<DO name="Beh" type="RTE_X_X_X_142AFD581884735B9E771FC5021E4567_ENS_V1.0.0"/>
+			<DO name="NamPlt" type="RTE_X_X_X_1E8D45ED877805EBBE610F05437F31A9_LPL_V1.0.0"/>
+		</LNodeType>
+		<LNodeType lnClass="LCCH" id="RTE_3E3E9785D75CCB125FBC0AF48ED3A89E_LCCH_V1.0.0">
+			<DO name="RedChLiv" type="RTE_X_X_X_777A206CEBA316C438C4678897FA07B9_SPS_V1.0.0"/>
+			<DO name="ApNam" type="RTE_X_X_X_4B36044EE546B8F3482EE35532CD5856_VSG_V1.0.0"/>
+			<DO name="ChLivTms" type="RTE_X_X_X_DA609E4D37E5F52E41FEE27312842DAB_ING_V1.0.0"/>
+			<DO name="Beh" type="RTE_X_X_X_142AFD581884735B9E771FC5021E4567_ENS_V1.0.0"/>
+			<DO name="ChLiv" type="RTE_X_X_X_777A206CEBA316C438C4678897FA07B9_SPS_V1.0.0"/>
+		</LNodeType>
+		<LNodeType lnClass="LPCP" id="RTE_D04EE33A14B5DC4DA49352FB01E0F125_LPCP_V1.0.0">
+			<DO name="PortNam" type="RTE_X_X_X_4B36044EE546B8F3482EE35532CD5856_VSG_V1.0.0"/>
+			<DO name="MauCfgCap1" type="RTE_X_X_X_A8123B65C823EADB29FDD51EE9232AC5_ING_V1.0.0"/>
+			<DO name="MauCfg" type="RTE_X_X_X_DA609E4D37E5F52E41FEE27312842DAB_ING_V1.0.0"/>
+			<DO name="AutoNgtCfg" type="RTE_X_X_X_CC633E0EFEC47FC1D44A386B7D06BAEF_SPG_V1.0.0"/>
+			<DO name="AdminCfg" type="RTE_X_X_X_CC633E0EFEC47FC1D44A386B7D06BAEF_SPG_V1.0.0"/>
+			<DO name="PortMac" type="RTE_X_X_X_4B36044EE546B8F3482EE35532CD5856_VSG_V1.0.0"/>
+			<DO name="PhyHealth" type="RTE_X_X_X_46FFD3BD530FA6BCA3BA493B560AAFD1_ENS_V1.0.0"/>
+			<DO name="AutoNgt" type="RTE_X_X_X_777A206CEBA316C438C4678897FA07B9_SPS_V1.0.0"/>
+			<DO name="Beh" type="RTE_X_X_X_142AFD581884735B9E771FC5021E4567_ENS_V1.0.0"/>
+			<DO name="PhyNam" type="RTE_X_X_X_D93000A2D6F9B026504B48576A914DA3_DPL_V1.0.0"/>
+			<DO name="PortNum" type="RTE_X_X_X_553F8AE90EC0448B1518B00F5EAABB58_ING_V1.0.0"/>
+			<DO name="Mau" type="RTE_X_X_X_806B7A4A4831854D7BDA913FF4199573_INS_V1.0.0"/>
+			<DO name="NamPlt" type="RTE_X_X_X_AB93FADCC759886FCF9C66C2D264FF32_LPL_V1.0.0"/>
+		</LNodeType>
+		<LNodeType lnClass="LGOS" id="RTE_8C29E4BA3ECBD501C7ED8DE40611597D_LGOS_V1.0.0">
+			<DO name="GoCBRef" type="RTE_X_X_X_5B6CE8AD9D4A6CFF6494E4EBADAEF175_ORG_V1.0.0"/>
+			<DO name="NdsCom" type="RTE_X_X_X_777A206CEBA316C438C4678897FA07B9_SPS_V1.0.0"/>
+			<DO name="SimSt" type="RTE_X_X_X_777A206CEBA316C438C4678897FA07B9_SPS_V1.0.0"/>
+			<DO name="LastStNum" type="RTE_X_X_X_54E3EE3759EDF5D2BE92FB47B8099A18_INS_V1.0.0"/>
+			<DO name="St" type="RTE_X_X_X_777A206CEBA316C438C4678897FA07B9_SPS_V1.0.0"/>
+			<DO name="Beh" type="RTE_X_X_X_142AFD581884735B9E771FC5021E4567_ENS_V1.0.0"/>
+			<DO name="ConfRevNum" type="RTE_X_X_X_54E3EE3759EDF5D2BE92FB47B8099A18_INS_V1.0.0"/>
+		</LNodeType>
+		<LNodeType lnClass="LTMS" id="RTE_9229A8F115925144BC4AF82C42A8B87A_LTMS_V1.0.0">
+			<DO name="TmSrcSet1" type="RTE_X_X_X_02DFA2BD4E30993B71D945EFA6575B86_VSG_V1.0.0"/>
+			<DO name="Beh" type="RTE_X_X_X_142AFD581884735B9E771FC5021E4567_ENS_V1.0.0"/>
+			<DO name="TmSrc" type="RTE_X_X_X_F7D7A4EF735C509EA5992774AB05236D_VSS_V1.0.0"/>
+			<DO name="TmAcc" type="RTE_X_X_X_54E3EE3759EDF5D2BE92FB47B8099A18_INS_V1.0.0"/>
+			<DO name="TmSyn" type="RTE_X_X_X_F2CBC6FBF42297C7A7269F7EE24A9207_ENS_V1.0.0"/>
+			<DO name="TmChSt1" type="RTE_X_X_X_777A206CEBA316C438C4678897FA07B9_SPS_V1.0.0"/>
+			<DO name="TmSrcTyp" type="RTE_X_X_X_531E3A6A55F42E867794E9928AA473E9_ENS_V1.0.0"/>
+		</LNodeType>
+		<LNodeType lnClass="XSWI" id="RTE_15D9A87B8C54B2EB4AD751EE9AF1CFE8_XSWI_V1.0.0">
+			<DO name="Loc" type="RTE_X_X_X_B0A3B032248B14AC9A885403F1B1830A_SPS_V1.0.0"/>
+			<DO name="OpCnt" type="RTE_X_X_X_56B4A6800C6CC90D518E122AB9CC40F3_INS_V1.0.0"/>
+			<DO name="SwTyp" type="RTE_X_X_X_A8AB7326A86210F7CFDE819346ADE447_ENS_V1.0.0"/>
+			<DO name="Mod" type="RTE_X_X_X_EBF9B63290158E4A268A3F29F00432F3_ENC_V1.0.0"/>
+			<DO name="BlkOpn" type="RTE_X_X_X_0B0C3BB3F573ACEDC99020587597FEE2_SPC_V1.0.0"/>
+			<DO name="BlkCls" type="RTE_X_X_X_0B0C3BB3F573ACEDC99020587597FEE2_SPC_V1.0.0"/>
+			<DO name="Beh" type="RTE_X_X_X_7A170650CB603320DB207F938C86BA78_ENS_V1.0.0"/>
+			<DO name="Pos" type="RTE_X_X_X_D21B5E1BA1E819F9DBD8B194839EF923_DPC_V1.0.0"/>
+		</LNodeType>
+		<LNodeType lnClass="GAPC" id="RTE_E3DD1555C7FFBF4415DD01C174A0B95E_GAPC_V1.0.0">
+			<DO name="Ind1" type="RTE_X_X_X_777A206CEBA316C438C4678897FA07B9_SPS_V1.0.0"/>
+			<DO name="Beh" type="RTE_X_X_X_142AFD581884735B9E771FC5021E4567_ENS_V1.0.0"/>
+		</LNodeType>
+		<LNodeType lnClass="TVTR" id="RTE_9A5950195913A54B0C9FDF44B82D6F58_TVTR_V1.0.0">
+			<DO name="NamClipRtg" type="RTE_X_X_X_4230B0762B0589752CFC9215F1554DC8_VSD_V1.0.0"/>
+			<DO name="FuFail" type="RTE_X_X_X_777A206CEBA316C438C4678897FA07B9_SPS_V1.0.0"/>
+			<DO name="Beh" type="RTE_X_X_X_7A170650CB603320DB207F938C86BA78_ENS_V1.0.0"/>
+			<DO name="NamVRtg" type="RTE_X_X_X_4230B0762B0589752CFC9215F1554DC8_VSD_V1.0.0"/>
+			<DO name="NamAccRtg" type="RTE_X_X_X_4230B0762B0589752CFC9215F1554DC8_VSD_V1.0.0"/>
+			<DO name="EEName" type="RTE_X_X_X_48BA5C40D0913654FA5291A28C0D9716_DPL_V1.0.0"/>
+			<DO name="NamPlt" type="RTE_X_X_X_0B8631DC8D22E3141CC32B3CCCCB8696_LPL_V1.0.0"/>
+			<DO name="HzRtg" type="RTE_X_X_X_A2F8B3AD65101234EE2E461D10A21956_ASG_V1.0.0"/>
+			<DO name="Rat" type="RTE_X_X_X_14DAEEE804EEAE54170C341E065DFEAE_ASG_V1.0.0"/>
+			<DO name="VRtg" type="RTE_X_X_X_14DAEEE804EEAE54170C341E065DFEAE_ASG_V1.0.0"/>
+			<DO name="VolSv" type="RTE_X_X_X_A8B4E5AED8390DA1D5DE9D57C4E05C37_SAV_V1.0.0"/>
+			<DO name="Mod" type="RTE_X_X_X_EBF9B63290158E4A268A3F29F00432F3_ENC_V1.0.0"/>
+		</LNodeType>
+		<LNodeType lnClass="LSYN" id="RTE_CA6BAD8828D612BF671275721D54B5A3_LSYN_V1.0.0">
+			<DO name="WYESyncSrcId" type="RTE_X_X_X_54E3EE3759EDF5D2BE92FB47B8099A18_INS_V1.0.0"/>
+			<DO name="NamPlt" type="RTE_X_X_X_1E8D45ED877805EBBE610F05437F31A9_LPL_V1.0.0"/>
+			<DO name="Beh" type="RTE_X_X_X_142AFD581884735B9E771FC5021E4567_ENS_V1.0.0"/>
+		</LNodeType>
+		<LNodeType lnClass="XSWI" id="RTE_A070441519089D2ABF348B1BCF25D1D4_XSWI_V1.0.0">
+			<DO name="BlkOpn" type="RTE_X_X_X_0B0C3BB3F573ACEDC99020587597FEE2_SPC_V1.0.0"/>
+			<DO name="OpCnt" type="RTE_X_X_X_56B4A6800C6CC90D518E122AB9CC40F3_INS_V1.0.0"/>
+			<DO name="SwTyp" type="RTE_X_X_X_A8AB7326A86210F7CFDE819346ADE447_ENS_V1.0.0"/>
+			<DO name="Loc" type="RTE_X_X_X_B0A3B032248B14AC9A885403F1B1830A_SPS_V1.0.0"/>
+			<DO name="Beh" type="RTE_X_X_X_7A170650CB603320DB207F938C86BA78_ENS_V1.0.0"/>
+			<DO name="BlkCls" type="RTE_X_X_X_0B0C3BB3F573ACEDC99020587597FEE2_SPC_V1.0.0"/>
+			<DO name="Pos" type="RTE_X_X_X_58E7F92A31E48EFD8279F407E239F792_DPC_V1.0.0"/>
+			<DO name="Mod" type="RTE_X_X_X_EBF9B63290158E4A268A3F29F00432F3_ENC_V1.0.0"/>
+		</LNodeType>
+		<LNodeType lnClass="LSET" id="RTE_FEC19D10D21145945C2D56F9732902FE_LSET_V1.0.0">
+			<DO name="DlTmms1" type="RTE_X_X_X_DA609E4D37E5F52E41FEE27312842DAB_ING_V1.0.0"/>
+			<DO name="DlTmms2" type="RTE_X_X_X_DA609E4D37E5F52E41FEE27312842DAB_ING_V1.0.0"/>
+			<DO name="NamPlt" type="RTE_X_X_X_1E8D45ED877805EBBE610F05437F31A9_LPL_V1.0.0"/>
+			<DO name="Beh" type="RTE_X_X_X_142AFD581884735B9E771FC5021E4567_ENS_V1.0.0"/>
+		</LNodeType>
+		<DOType cdc="DPL" id="RTE_X_X_X_48BA5C40D0913654FA5291A28C0D9716_DPL_V1.0.0">
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="vendor" bType="VisString255" valKind="RO" valImport="true"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="hwRev" bType="VisString255" valKind="RO" valImport="true"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="swRev" bType="VisString255" valKind="RO" valImport="true"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="serNum" bType="VisString255" valKind="RO" valImport="true"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="model" bType="VisString255" valKind="RO" valImport="true"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="location" bType="VisString255" valKind="RO" valImport="true"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="name" bType="VisString64" valKind="RO" valImport="true"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="INS" id="RTE_X_X_X_806B7A4A4831854D7BDA913FF4199573_INS_V1.0.0">
+			<DA fc="ST" dchg="true" qchg="false" dupd="false" name="stVal" bType="INT32"/>
+			<DA fc="ST" dchg="false" qchg="true" dupd="false" name="q" bType="Quality"/>
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="t" bType="Timestamp"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subEna" bType="BOOLEAN"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subVal" bType="INT32"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subQ" bType="Quality"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subID" bType="VisString64"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="units" bType="Struct" type="RTE_031559973E4A8641DEDCC01E82B100C1_V1.0.0"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="LPL" id="RTE_X_X_X_CF19FF016079750CB4219A7983C23ABA_LPL_V1.0.0">
+			<DA fc="ST" dchg="true" qchg="false" dupd="false" name="paramRev" bType="INT32"/>
+			<DA fc="ST" dchg="true" qchg="false" dupd="false" name="valRev" bType="INT32"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="vendor" bType="VisString255" valKind="RO" valImport="false"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="swRev" bType="VisString255" valKind="RO" valImport="false"/>
+			<DA fc="EX" dchg="false" qchg="false" dupd="false" name="ldNs" bType="VisString255">
+				<Val>IEC 61850-7-4:2007B</Val>
+			</DA>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="configRev" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="DPC" id="RTE_X_X_X_D21B5E1BA1E819F9DBD8B194839EF923_DPC_V1.0.0">
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="origin" bType="Struct" type="RTE_7934516A99160CFE6BA163118894B809_V1.0.0"/>
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="ctlNum" bType="INT8U"/>
+			<DA fc="ST" dchg="true" qchg="false" dupd="false" name="stVal" bType="Dbpos"/>
+			<DA fc="ST" dchg="false" qchg="true" dupd="false" name="q" bType="Quality"/>
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="t" bType="Timestamp"/>
+			<DA fc="OR" dchg="true" qchg="false" dupd="false" name="opRcvd" bType="BOOLEAN"/>
+			<DA fc="OR" dchg="true" qchg="false" dupd="false" name="opOk" bType="BOOLEAN"/>
+			<DA fc="OR" dchg="false" qchg="false" dupd="false" name="tOpOk" bType="Timestamp"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subEna" bType="BOOLEAN"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subVal" bType="Dbpos"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subQ" bType="Quality"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subID" bType="VisString64"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="pulseConfig" bType="Struct" type="RTE_7F420CF619467C645082C1256D4D9E54_V1.0.0"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="ctlModel" bType="Enum" valKind="RO" type="CtlModelKind3" valImport="false">
+				<Val>direct-with-enhanced-security</Val>
+			</DA>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="operTimeout" bType="INT32U" valKind="RO" valImport="true"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+			<DA fc="CO" dchg="false" qchg="false" dupd="false" name="Cancel" bType="Struct" type="RTE_B3E1545DAFFE5A192CE7CBE085AAD439_V1.0.0"/>
+			<DA fc="CO" dchg="false" qchg="false" dupd="false" name="Oper" bType="Struct" type="RTE_E7EC3E3CCEFA6092FA668AEBCD1DF710_V1.0.0"/>
+		</DOType>
+		<DOType cdc="SPC" id="RTE_X_X_X_58107502FB30F1739EC36116071EBA99_SPC_V1.0.0">
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="origin" bType="Struct" type="RTE_7934516A99160CFE6BA163118894B809_V1.0.0"/>
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="ctlNum" bType="INT8U"/>
+			<DA fc="ST" dchg="true" qchg="false" dupd="false" name="stVal" bType="BOOLEAN"/>
+			<DA fc="ST" dchg="false" qchg="true" dupd="false" name="q" bType="Quality"/>
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="t" bType="Timestamp"/>
+			<DA fc="OR" dchg="true" qchg="false" dupd="false" name="opRcvd" bType="BOOLEAN"/>
+			<DA fc="OR" dchg="true" qchg="false" dupd="false" name="opOk" bType="BOOLEAN"/>
+			<DA fc="OR" dchg="false" qchg="false" dupd="false" name="tOpOk" bType="Timestamp"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subEna" bType="BOOLEAN"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subVal" bType="BOOLEAN"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subQ" bType="Quality"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subID" bType="VisString64"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="ctlModel" bType="Enum" valKind="RO" type="CtlModelKind3" valImport="false">
+				<Val>direct-with-enhanced-security</Val>
+			</DA>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="operTimeout" bType="INT32U" valKind="RO" valImport="true"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+			<DA fc="CO" dchg="false" qchg="false" dupd="false" name="Cancel" bType="Struct" type="RTE_B3E1545DAFFE5A192CE7CBE085AAD439_V1.0.0"/>
+			<DA fc="CO" dchg="false" qchg="false" dupd="false" name="Oper" bType="Struct" type="RTE_E7EC3E3CCEFA6092FA668AEBCD1DF710_V1.0.0"/>
+		</DOType>
+		<DOType cdc="VSD" id="RTE_X_X_X_FE65923588A2AD641A3314BAF78488AA_VSD_V1.0.0">
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="val" bType="VisString255" valKind="RO" valImport="false"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="ENC" id="RTE_X_X_X_CED370672B877CDD7FBE78C5A57BFE8C_ENC_V1.0.0">
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="origin" bType="Struct" type="RTE_7934516A99160CFE6BA163118894B809_V1.0.0"/>
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="ctlNum" bType="INT8U"/>
+			<DA fc="ST" dchg="true" qchg="false" dupd="false" name="stVal" bType="Enum" type="BehaviourModeKind"/>
+			<DA fc="ST" dchg="false" qchg="true" dupd="false" name="q" bType="Quality"/>
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="t" bType="Timestamp"/>
+			<DA fc="OR" dchg="true" qchg="false" dupd="false" name="opRcvd" bType="BOOLEAN"/>
+			<DA fc="OR" dchg="true" qchg="false" dupd="false" name="opOk" bType="BOOLEAN"/>
+			<DA fc="OR" dchg="false" qchg="false" dupd="false" name="tOpOk" bType="Timestamp"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subEna" bType="BOOLEAN"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subVal" bType="Enum" type="BehaviourModeKind"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subQ" bType="Quality"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subID" bType="VisString64"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="ctlModel" bType="Enum" valKind="RO" type="CtlModelKind03" valImport="true">
+				<Val>status-only</Val>
+			</DA>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="operTimeout" bType="INT32U" valKind="RO" valImport="true"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+			<DA fc="CO" dchg="false" qchg="false" dupd="false" name="Cancel" bType="Struct" type="RTE_5A41B3113CC639FA4A198B4DF532D1CC_V1.0.0"/>
+			<DA fc="CO" dchg="false" qchg="false" dupd="false" name="Oper" bType="Struct" type="RTE_352BE3C45AC7386B3D20C5D496FDD990_V1.0.0"/>
+		</DOType>
+		<DOType cdc="SPC" id="RTE_X_X_X_D3D1EA6F2C542A648457FBEF3897EA4D_SPC_V1.0.0">
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="origin" bType="Struct" type="RTE_7934516A99160CFE6BA163118894B809_V1.0.0"/>
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="ctlNum" bType="INT8U"/>
+			<DA fc="ST" dchg="true" qchg="false" dupd="false" name="stVal" bType="BOOLEAN"/>
+			<DA fc="ST" dchg="false" qchg="true" dupd="false" name="q" bType="Quality"/>
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="t" bType="Timestamp"/>
+			<DA fc="OR" dchg="true" qchg="false" dupd="false" name="opRcvd" bType="BOOLEAN"/>
+			<DA fc="OR" dchg="true" qchg="false" dupd="false" name="opOk" bType="BOOLEAN"/>
+			<DA fc="OR" dchg="false" qchg="false" dupd="false" name="tOpOk" bType="Timestamp"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subEna" bType="BOOLEAN"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subVal" bType="BOOLEAN"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subQ" bType="Quality"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subID" bType="VisString64"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="pulseConfig" bType="Struct" type="RTE_7F420CF619467C645082C1256D4D9E54_V1.0.0"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="ctlModel" bType="Enum" valKind="RO" type="CtlModelKind3" valImport="false">
+				<Val>direct-with-enhanced-security</Val>
+			</DA>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="operTimeout" bType="INT32U" valKind="RO" valImport="true"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+			<DA fc="CO" dchg="false" qchg="false" dupd="false" name="Cancel" bType="Struct" type="RTE_B3E1545DAFFE5A192CE7CBE085AAD439_V1.0.0"/>
+			<DA fc="CO" dchg="false" qchg="false" dupd="false" name="Oper" bType="Struct" type="RTE_E7EC3E3CCEFA6092FA668AEBCD1DF710_V1.0.0"/>
+		</DOType>
+		<DOType cdc="INS" id="RTE_X_X_X_54E3EE3759EDF5D2BE92FB47B8099A18_INS_V1.0.0">
+			<DA fc="ST" dchg="true" qchg="false" dupd="false" name="stVal" bType="INT32"/>
+			<DA fc="ST" dchg="false" qchg="true" dupd="false" name="q" bType="Quality"/>
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="t" bType="Timestamp"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subEna" bType="BOOLEAN"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subVal" bType="INT32"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subQ" bType="Quality"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subID" bType="VisString64"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="VSG" id="RTE_X_X_X_02DFA2BD4E30993B71D945EFA6575B86_VSG_V1.0.0">
+			<DA fc="SP" dchg="true" qchg="false" dupd="false" name="setVal" bType="VisString255" valKind="RO" valImport="true"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="ING" id="RTE_X_X_X_A8123B65C823EADB29FDD51EE9232AC5_ING_V1.0.0">
+			<DA fc="SP" dchg="true" qchg="false" dupd="false" name="setVal" bType="INT32" valKind="RO" valImport="false"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="units" bType="Struct" type="RTE_031559973E4A8641DEDCC01E82B100C1_V1.0.0"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="VSD" id="RTE_X_X_X_4230B0762B0589752CFC9215F1554DC8_VSD_V1.0.0">
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="val" bType="VisString255" valKind="RO" valImport="true"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="INS" id="RTE_X_X_X_56B4A6800C6CC90D518E122AB9CC40F3_INS_V1.0.0">
+			<DA fc="ST" dchg="true" qchg="false" dupd="false" name="stVal" bType="INT32"/>
+			<DA fc="ST" dchg="false" qchg="true" dupd="false" name="q" bType="Quality"/>
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="t" bType="Timestamp"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="ENS" id="RTE_X_X_X_46FFD3BD530FA6BCA3BA493B560AAFD1_ENS_V1.0.0">
+			<DA fc="ST" dchg="true" qchg="false" dupd="false" name="stVal" bType="Enum" type="HealthKind"/>
+			<DA fc="ST" dchg="false" qchg="true" dupd="false" name="q" bType="Quality"/>
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="t" bType="Timestamp"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subEna" bType="BOOLEAN"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subVal" bType="Enum" type="HealthKind"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subQ" bType="Quality"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subID" bType="VisString64"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="ENS" id="RTE_X_X_X_7A170650CB603320DB207F938C86BA78_ENS_V1.0.0">
+			<DA fc="ST" dchg="true" qchg="false" dupd="false" name="stVal" bType="Enum" type="BehaviourModeKind"/>
+			<DA fc="ST" dchg="false" qchg="true" dupd="false" name="q" bType="Quality"/>
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="t" bType="Timestamp"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subEna" bType="BOOLEAN"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subVal" bType="Enum" type="BehaviourModeKind"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subQ" bType="Quality"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subID" bType="VisString64"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="SPS" id="RTE_X_X_X_B0A3B032248B14AC9A885403F1B1830A_SPS_V1.0.0">
+			<DA fc="ST" dchg="true" qchg="false" dupd="false" name="stVal" bType="BOOLEAN"/>
+			<DA fc="ST" dchg="false" qchg="true" dupd="false" name="q" bType="Quality"/>
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="t" bType="Timestamp"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="ASG" id="RTE_X_X_X_A2F8B3AD65101234EE2E461D10A21956_ASG_V1.0.0">
+			<DA fc="SP" dchg="true" qchg="false" dupd="false" name="setMag" bType="Struct" type="RTE_4EA352A99168EE0B87B2930D18CA941E_V1.0.0"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="SAV" id="RTE_X_X_X_A8B4E5AED8390DA1D5DE9D57C4E05C37_SAV_V1.0.0">
+			<DA fc="MX" dchg="false" qchg="false" dupd="false" name="instMag" bType="Struct" type="RTE_80DD8686761D734233ED39989660EF5D_V1.0.0"/>
+			<DA fc="MX" dchg="false" qchg="true" dupd="false" name="q" bType="Quality"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="units" bType="Struct" type="RTE_031559973E4A8641DEDCC01E82B100C1_V1.0.0"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="sVC" bType="Struct" type="RTE_B1EAD5268599EA63F0721BA2150AB25D_V1.0.0"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="min" bType="Struct" type="RTE_C05674EDE2DD190F6FA282B96D6401C2_V1.0.0"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="max" bType="Struct" type="RTE_C05674EDE2DD190F6FA282B96D6401C2_V1.0.0"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="MV" id="RTE_X_X_X_90274BCECAB5F2CE9400235CBC64E027_MV_V1.0.0">
+			<DA fc="MX" dchg="false" qchg="false" dupd="false" name="instMag" bType="Struct" type="RTE_F427CA1F87FB52FA8F936719F00645A6_V1.0.0"/>
+			<DA fc="MX" dchg="false" qchg="false" dupd="true" name="mag" bType="Struct" type="RTE_F427CA1F87FB52FA8F936719F00645A6_V1.0.0"/>
+			<DA fc="MX" dchg="true" qchg="false" dupd="false" name="range" bType="Enum" type="RangeKind"/>
+			<DA fc="MX" dchg="false" qchg="true" dupd="false" name="q" bType="Quality"/>
+			<DA fc="MX" dchg="false" qchg="false" dupd="false" name="t" bType="Timestamp"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subEna" bType="BOOLEAN"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subMag" bType="Struct" type="RTE_F427CA1F87FB52FA8F936719F00645A6_V1.0.0"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subQ" bType="Quality"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subID" bType="VisString64"/>
+			<DA fc="BL" dchg="false" qchg="false" dupd="false" name="blkEna" bType="BOOLEAN"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="units" bType="Struct" type="RTE_031559973E4A8641DEDCC01E82B100C1_V1.0.0"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="db" bType="INT32U" valKind="RO" valImport="true"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="zeroDb" bType="INT32U" valKind="RO" valImport="true"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="rangeC" bType="Struct" type="RTE_A938C367ABE115DA6A35B8663C1142DC_V1.0.0"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="smpRate" bType="INT32U" valKind="RO" valImport="true"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="dbRef" bType="FLOAT32" valKind="RO" valImport="true"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="zeroDbRef" bType="FLOAT32" valKind="RO" valImport="true"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="ASG" id="RTE_X_X_X_14DAEEE804EEAE54170C341E065DFEAE_ASG_V1.0.0">
+			<DA fc="SP" dchg="true" qchg="false" dupd="false" name="setMag" bType="Struct" type="RTE_0E1A613237D780705550F7E781EA4447_V1.0.0"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="units" bType="Struct" type="RTE_031559973E4A8641DEDCC01E82B100C1_V1.0.0"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="minVal" bType="Struct" type="RTE_4EA352A99168EE0B87B2930D18CA941E_V1.0.0"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="maxVal" bType="Struct" type="RTE_4EA352A99168EE0B87B2930D18CA941E_V1.0.0"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="stepSize" bType="Struct" type="RTE_4EA352A99168EE0B87B2930D18CA941E_V1.0.0"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="ENG" id="RTE_X_X_X_D88199787EF47F678073B414CB4EE5CF_ENG_V1.0.0">
+			<DA fc="SP" dchg="true" qchg="false" dupd="false" name="setVal" bType="Enum" valKind="RO" type="SetPhNumKind123456" valImport="true"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="ENS" id="RTE_X_X_X_2D7E5A71E82BDDBE7AC53CE44FBB4458_ENS_V1.0.0">
+			<DA fc="ST" dchg="true" qchg="false" dupd="false" name="stVal" bType="Enum" type="HealthKind"/>
+			<DA fc="ST" dchg="false" qchg="true" dupd="false" name="q" bType="Quality"/>
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="t" bType="Timestamp"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="ENS" id="RTE_X_X_X_A8AB7326A86210F7CFDE819346ADE447_ENS_V1.0.0">
+			<DA fc="ST" dchg="true" qchg="false" dupd="false" name="stVal" bType="Enum" type="SwitchFunctionKind2"/>
+			<DA fc="ST" dchg="false" qchg="true" dupd="false" name="q" bType="Quality"/>
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="t" bType="Timestamp"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="ENG" id="RTE_X_X_X_64480674466CD9284BA24D3FCE3AF125_ENG_V1.0.0">
+			<DA fc="SP" dchg="true" qchg="false" dupd="false" name="setVal" bType="Enum" valKind="RO" type="LedBlkKind" valImport="true"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="ENG" id="RTE_X_X_X_1123523DB35723B069739CA184DE31F9_ENG_V1.0.0">
+			<DA fc="SP" dchg="true" qchg="false" dupd="false" name="setVal" bType="Enum" valKind="RO" type="LedOffColKind" valImport="true"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="VSS" id="RTE_X_X_X_F7D7A4EF735C509EA5992774AB05236D_VSS_V1.0.0">
+			<DA fc="ST" dchg="true" qchg="false" dupd="false" name="stVal" bType="VisString255"/>
+			<DA fc="ST" dchg="false" qchg="true" dupd="false" name="q" bType="Quality"/>
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="t" bType="Timestamp"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="ORG" id="RTE_X_X_X_5B6CE8AD9D4A6CFF6494E4EBADAEF175_ORG_V1.0.0">
+			<DA fc="SP" dchg="true" qchg="false" dupd="false" name="setSrcRef" bType="ObjRef"/>
+			<DA fc="SP" dchg="true" qchg="false" dupd="false" name="setSrcCB" bType="ObjRef"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="SPS" id="RTE_X_X_X_777A206CEBA316C438C4678897FA07B9_SPS_V1.0.0">
+			<DA fc="ST" dchg="true" qchg="false" dupd="false" name="stVal" bType="BOOLEAN"/>
+			<DA fc="ST" dchg="false" qchg="true" dupd="false" name="q" bType="Quality"/>
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="t" bType="Timestamp"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subEna" bType="BOOLEAN"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subVal" bType="BOOLEAN"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subQ" bType="Quality"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subID" bType="VisString64"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="ENS" id="RTE_X_X_X_F2CBC6FBF42297C7A7269F7EE24A9207_ENS_V1.0.0">
+			<DA fc="ST" dchg="true" qchg="false" dupd="false" name="stVal" bType="Enum" type="ClockSyncKind12"/>
+			<DA fc="ST" dchg="false" qchg="true" dupd="false" name="q" bType="Quality"/>
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="t" bType="Timestamp"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subEna" bType="BOOLEAN"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subVal" bType="Enum" type="ClockSyncKind12"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subQ" bType="Quality"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subID" bType="VisString64"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="VSG" id="RTE_X_X_X_4B36044EE546B8F3482EE35532CD5856_VSG_V1.0.0">
+			<DA fc="SP" dchg="true" qchg="false" dupd="false" name="setVal" bType="VisString255" valKind="RO" valImport="false"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="ENS" id="RTE_X_X_X_F5FE6F6331013CC372215EB4D9E6DEAC_ENS_V1.0.0">
+			<DA fc="ST" dchg="true" qchg="false" dupd="false" name="stVal" bType="Enum" type="PhyHealthKind"/>
+			<DA fc="ST" dchg="false" qchg="true" dupd="false" name="q" bType="Quality"/>
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="t" bType="Timestamp"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subEna" bType="BOOLEAN"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subVal" bType="Enum" type="PhyHealthKind"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subQ" bType="Quality"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subID" bType="VisString64"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="ENS" id="RTE_X_X_X_531E3A6A55F42E867794E9928AA473E9_ENS_V1.0.0">
+			<DA fc="ST" dchg="true" qchg="false" dupd="false" name="stVal" bType="Enum" type="ClockSourceKind13"/>
+			<DA fc="ST" dchg="false" qchg="true" dupd="false" name="q" bType="Quality"/>
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="t" bType="Timestamp"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subEna" bType="BOOLEAN"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subVal" bType="Enum" type="ClockSourceKind13"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subQ" bType="Quality"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subID" bType="VisString64"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="ENG" id="RTE_X_X_X_B01CC9742C3C821CF29525568A50B5F4_ENG_V1.0.0">
+			<DA fc="SP" dchg="true" qchg="false" dupd="false" name="setVal" bType="Enum" valKind="RO" type="LatModKind" valImport="false"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="SPG" id="RTE_X_X_X_CC633E0EFEC47FC1D44A386B7D06BAEF_SPG_V1.0.0">
+			<DA fc="SP" dchg="true" qchg="false" dupd="false" name="setVal" bType="BOOLEAN" valKind="RO" valImport="true"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="ING" id="RTE_X_X_X_DA609E4D37E5F52E41FEE27312842DAB_ING_V1.0.0">
+			<DA fc="SP" dchg="true" qchg="false" dupd="false" name="setVal" bType="INT32" valKind="RO" valImport="true"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="minVal" bType="INT32" valKind="RO" valImport="false"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="maxVal" bType="INT32" valKind="RO" valImport="false"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="stepSize" bType="INT32U" valKind="RO" valImport="false"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="units" bType="Struct" type="RTE_031559973E4A8641DEDCC01E82B100C1_V1.0.0"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="ING" id="RTE_X_X_X_553F8AE90EC0448B1518B00F5EAABB58_ING_V1.0.0">
+			<DA fc="SP" dchg="true" qchg="false" dupd="false" name="setVal" bType="INT32" valKind="RO" valImport="false"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="DPL" id="RTE_X_X_X_D93000A2D6F9B026504B48576A914DA3_DPL_V1.0.0">
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="vendor" bType="VisString255" valKind="RO" valImport="false"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="hwRev" bType="VisString255" valKind="RO" valImport="false"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="swRev" bType="VisString255" valKind="RO" valImport="false"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="serNum" bType="VisString255" valKind="RO" valImport="false"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="model" bType="VisString255" valKind="RO" valImport="false"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="location" bType="VisString255" valKind="RO" valImport="true"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="name" bType="VisString64" valKind="RO" valImport="true"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="ORG" id="RTE_X_X_X_2B1ED2756A9D37DAB2F041446293CC8E_ORG_V1.0.0">
+			<DA fc="SP" dchg="true" qchg="false" dupd="false" name="setSrcRef" bType="ObjRef"/>
+			<DA fc="SP" dchg="true" qchg="false" dupd="false" name="setSrcCB" bType="ObjRef"/>
+			<DA fc="SP" dchg="true" qchg="false" dupd="false" name="intAddr" bType="VisString255" valKind="RO" valImport="false"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="purpose" bType="VisString255" valKind="RO" valImport="false"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="ENG" id="RTE_X_X_X_3DADF78A87876F436840ABB95FE99959_ENG_V1.0.0">
+			<DA fc="SP" dchg="true" qchg="false" dupd="false" name="setVal" bType="Enum" valKind="RO" type="OutModKind" valImport="true"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="ENG" id="RTE_X_X_X_69BAB8E83EC4A6BD5498A13BABD7FD84_ENG_V1.0.0">
+			<DA fc="SP" dchg="true" qchg="false" dupd="false" name="setVal" bType="Enum" valKind="RO" type="LedOnColKind" valImport="true"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="ENS" id="RTE_X_X_X_142AFD581884735B9E771FC5021E4567_ENS_V1.0.0">
+			<DA fc="ST" dchg="true" qchg="false" dupd="false" name="stVal" bType="Enum" type="BehaviourModeKind"/>
+			<DA fc="ST" dchg="false" qchg="true" dupd="false" name="q" bType="Quality"/>
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="t" bType="Timestamp"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="LPL" id="RTE_X_X_X_0B8631DC8D22E3141CC32B3CCCCB8696_LPL_V1.0.0">
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="vendor" bType="VisString255" valKind="RO" valImport="false"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="swRev" bType="VisString255" valKind="RO" valImport="false"/>
+			<DA fc="EX" dchg="false" qchg="false" dupd="false" name="lnNs" bType="VisString255">
+				<Val>IEC 61869-9:2016</Val>
+			</DA>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="ENC" id="RTE_X_X_X_EBF9B63290158E4A268A3F29F00432F3_ENC_V1.0.0">
+			<DA fc="ST" dchg="true" qchg="false" dupd="false" name="stVal" bType="Enum" type="BehaviourModeKind15"/>
+			<DA fc="ST" dchg="false" qchg="true" dupd="false" name="q" bType="Quality"/>
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="t" bType="Timestamp"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subEna" bType="BOOLEAN"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subVal" bType="Enum" type="BehaviourModeKind15"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subQ" bType="Quality"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subID" bType="VisString64"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="ctlModel" bType="Enum" valKind="RO" type="CtlModelKind0" valImport="false">
+				<Val>status-only</Val>
+			</DA>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="DPC" id="RTE_X_X_X_58E7F92A31E48EFD8279F407E239F792_DPC_V1.0.0">
+			<DA fc="ST" dchg="true" qchg="false" dupd="false" name="stVal" bType="Dbpos"/>
+			<DA fc="ST" dchg="false" qchg="true" dupd="false" name="q" bType="Quality"/>
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="t" bType="Timestamp"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subEna" bType="BOOLEAN"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subVal" bType="Dbpos"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subQ" bType="Quality"/>
+			<DA fc="SV" dchg="false" qchg="false" dupd="false" name="subID" bType="VisString64"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="ctlModel" bType="Enum" valKind="RO" type="CtlModelKind0" valImport="false">
+				<Val>status-only</Val>
+			</DA>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="SPC" id="RTE_X_X_X_0B0C3BB3F573ACEDC99020587597FEE2_SPC_V1.0.0">
+			<DA fc="ST" dchg="true" qchg="false" dupd="false" name="stVal" bType="BOOLEAN"/>
+			<DA fc="ST" dchg="false" qchg="true" dupd="false" name="q" bType="Quality"/>
+			<DA fc="ST" dchg="false" qchg="false" dupd="false" name="t" bType="Timestamp"/>
+			<DA fc="CF" dchg="true" qchg="false" dupd="false" name="ctlModel" bType="Enum" valKind="RO" type="CtlModelKind0" valImport="false">
+				<Val>status-only</Val>
+			</DA>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="LPL" id="RTE_X_X_X_AB93FADCC759886FCF9C66C2D264FF32_LPL_V1.0.0">
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="vendor" bType="VisString255" valKind="RO" valImport="false"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="swRev" bType="VisString255" valKind="RO" valImport="false"/>
+			<DA fc="EX" dchg="false" qchg="false" dupd="false" name="lnNs" bType="VisString255">
+				<Val>(Tr)IEC 61850-90-4:2013</Val>
+			</DA>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DOType cdc="LPL" id="RTE_X_X_X_1E8D45ED877805EBBE610F05437F31A9_LPL_V1.0.0">
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="vendor" bType="VisString255" valKind="RO" valImport="false"/>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="swRev" bType="VisString255" valKind="RO" valImport="false"/>
+			<DA fc="EX" dchg="false" qchg="false" dupd="false" name="lnNs" bType="VisString255">
+				<Val>RTE:2019A</Val>
+			</DA>
+			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+		</DOType>
+		<DAType id="RTE_B1EAD5268599EA63F0721BA2150AB25D_V1.0.0">
+			<BDA name="scaleFactor" bType="FLOAT32" valKind="RO" valImport="false"/>
+			<BDA name="offset" bType="FLOAT32" valKind="RO" valImport="false"/>
+		</DAType>
+		<DAType id="RTE_7934516A99160CFE6BA163118894B809_V1.0.0">
+			<BDA name="orCat" bType="Enum" type="OriginatorCategoryKind"/>
+			<BDA name="orIdent" bType="Octet64"/>
+		</DAType>
+		<DAType id="RTE_B18B834DC8584C5D9C468E79625A7AEE_V1.0.0">
+			<BDA name="orCat" bType="Enum" type="OriginatorCategoryKind"/>
+			<BDA name="orIdent" bType="Octet64"/>
+		</DAType>
+		<DAType id="RTE_031559973E4A8641DEDCC01E82B100C1_V1.0.0">
+			<BDA name="SIUnit" bType="Enum" valKind="RO" type="SIUnitKind" valImport="false"/>
+			<BDA name="multiplier" bType="Enum" valKind="RO" type="MultiplierKind" valImport="false"/>
+		</DAType>
+		<DAType id="RTE_A938C367ABE115DA6A35B8663C1142DC_V1.0.0">
+			<BDA name="hhLim" bType="Struct" type="RTE_EDDE3CD9CA68BB36B4162396C85B653D_V1.0.0"/>
+			<BDA name="hLim" bType="Struct" type="RTE_EDDE3CD9CA68BB36B4162396C85B653D_V1.0.0"/>
+			<BDA name="lLim" bType="Struct" type="RTE_EDDE3CD9CA68BB36B4162396C85B653D_V1.0.0"/>
+			<BDA name="llLim" bType="Struct" type="RTE_EDDE3CD9CA68BB36B4162396C85B653D_V1.0.0"/>
+			<BDA name="min" bType="Struct" type="RTE_EDDE3CD9CA68BB36B4162396C85B653D_V1.0.0"/>
+			<BDA name="max" bType="Struct" type="RTE_EDDE3CD9CA68BB36B4162396C85B653D_V1.0.0"/>
+			<BDA name="limDb" bType="INT32U" valKind="RO" valImport="true"/>
+		</DAType>
+		<DAType id="RTE_C05674EDE2DD190F6FA282B96D6401C2_V1.0.0">
+			<BDA name="i" bType="INT32" valKind="RO" valImport="false"/>
+		</DAType>
+		<DAType id="RTE_B3E1545DAFFE5A192CE7CBE085AAD439_V1.0.0">
+			<BDA name="ctlVal" bType="BOOLEAN"/>
+			<BDA name="origin" bType="Struct" type="RTE_B18B834DC8584C5D9C468E79625A7AEE_V1.0.0"/>
+			<BDA name="ctlNum" bType="INT8U"/>
+			<BDA name="T" bType="Timestamp"/>
+			<BDA name="Test" bType="BOOLEAN"/>
+			<ProtNs type="8-MMS">IEC 61850-8-1:2003</ProtNs>
+		</DAType>
+		<DAType id="RTE_7F420CF619467C645082C1256D4D9E54_V1.0.0">
+			<BDA name="cmdQual" bType="Enum" valKind="RO" type="OutputSignalKind" valImport="true"/>
+			<BDA name="onDur" bType="INT32U" valKind="RO" valImport="true"/>
+			<BDA name="offDur" bType="INT32U" valKind="RO" valImport="false"/>
+			<BDA name="numPls" bType="INT32U" valKind="RO" valImport="false"/>
+		</DAType>
+		<DAType id="RTE_0E1A613237D780705550F7E781EA4447_V1.0.0">
+			<BDA name="f" bType="FLOAT32" valKind="RO" valImport="true"/>
+		</DAType>
+		<DAType id="RTE_EDDE3CD9CA68BB36B4162396C85B653D_V1.0.0">
+			<BDA name="f" bType="FLOAT32" valKind="RO" valImport="true"/>
+		</DAType>
+		<DAType id="RTE_4EA352A99168EE0B87B2930D18CA941E_V1.0.0">
+			<BDA name="f" bType="FLOAT32" valKind="RO" valImport="false"/>
+		</DAType>
+		<DAType id="RTE_F427CA1F87FB52FA8F936719F00645A6_V1.0.0">
+			<BDA name="f" bType="FLOAT32"/>
+		</DAType>
+		<DAType id="RTE_80DD8686761D734233ED39989660EF5D_V1.0.0">
+			<BDA name="i" bType="INT32"/>
+		</DAType>
+		<DAType id="RTE_352BE3C45AC7386B3D20C5D496FDD990_V1.0.0">
+			<BDA name="ctlVal" bType="Enum" type="BehaviourModeKind"/>
+			<BDA name="origin" bType="Struct" type="RTE_B18B834DC8584C5D9C468E79625A7AEE_V1.0.0"/>
+			<BDA name="ctlNum" bType="INT8U"/>
+			<BDA name="T" bType="Timestamp"/>
+			<BDA name="Test" bType="BOOLEAN"/>
+			<BDA name="Check" bType="Check"/>
+			<ProtNs type="8-MMS">IEC 61850-8-1:2003</ProtNs>
+		</DAType>
+		<DAType id="RTE_E7EC3E3CCEFA6092FA668AEBCD1DF710_V1.0.0">
+			<BDA name="ctlVal" bType="BOOLEAN"/>
+			<BDA name="origin" bType="Struct" type="RTE_B18B834DC8584C5D9C468E79625A7AEE_V1.0.0"/>
+			<BDA name="ctlNum" bType="INT8U"/>
+			<BDA name="T" bType="Timestamp"/>
+			<BDA name="Test" bType="BOOLEAN"/>
+			<BDA name="Check" bType="Check"/>
+			<ProtNs type="8-MMS">IEC 61850-8-1:2003</ProtNs>
+		</DAType>
+		<DAType id="RTE_5A41B3113CC639FA4A198B4DF532D1CC_V1.0.0">
+			<BDA name="ctlVal" bType="Enum" type="BehaviourModeKind"/>
+			<BDA name="origin" bType="Struct" type="RTE_B18B834DC8584C5D9C468E79625A7AEE_V1.0.0"/>
+			<BDA name="ctlNum" bType="INT8U"/>
+			<BDA name="T" bType="Timestamp"/>
+			<BDA name="Test" bType="BOOLEAN"/>
+			<ProtNs type="8-MMS">IEC 61850-8-1:2003</ProtNs>
+		</DAType>
+		<EnumType id="HealthKind">
+			<EnumVal ord="1">Ok</EnumVal>
+			<EnumVal ord="2">Warning</EnumVal>
+			<EnumVal ord="3">Alarm</EnumVal>
+		</EnumType>
+		<EnumType id="BehaviourModeKind">
+			<EnumVal ord="1">on</EnumVal>
+			<EnumVal ord="2">blocked</EnumVal>
+			<EnumVal ord="3">test</EnumVal>
+			<EnumVal ord="4">test/blocked</EnumVal>
+			<EnumVal ord="5">off</EnumVal>
+		</EnumType>
+		<EnumType id="ClockSyncKind12">
+			<EnumVal ord="1">InternalClock</EnumVal>
+			<EnumVal ord="2">LocalAreaClock</EnumVal>
+		</EnumType>
+		<EnumType id="LedOnColKind">
+			<EnumVal ord="1">red</EnumVal>
+			<EnumVal ord="2">orange</EnumVal>
+			<EnumVal ord="3">yellow</EnumVal>
+			<EnumVal ord="4">green</EnumVal>
+			<EnumVal ord="5">blue</EnumVal>
+			<EnumVal ord="6">white</EnumVal>
+			<EnumVal ord="7">off</EnumVal>
+		</EnumType>
+		<EnumType id="MultiplierKind">
+			<EnumVal ord="-24">y</EnumVal>
+			<EnumVal ord="-21">z</EnumVal>
+			<EnumVal ord="-18">a</EnumVal>
+			<EnumVal ord="-15">f</EnumVal>
+			<EnumVal ord="-12">p</EnumVal>
+			<EnumVal ord="-9">n</EnumVal>
+			<EnumVal ord="-6">µ</EnumVal>
+			<EnumVal ord="-3">m</EnumVal>
+			<EnumVal ord="-2">c</EnumVal>
+			<EnumVal ord="-1">d</EnumVal>
+			<EnumVal ord="0"/>
+			<EnumVal ord="1">da</EnumVal>
+			<EnumVal ord="2">h</EnumVal>
+			<EnumVal ord="3">k</EnumVal>
+			<EnumVal ord="6">M</EnumVal>
+			<EnumVal ord="9">G</EnumVal>
+			<EnumVal ord="12">T</EnumVal>
+			<EnumVal ord="15">P</EnumVal>
+			<EnumVal ord="18">E</EnumVal>
+			<EnumVal ord="21">Z</EnumVal>
+			<EnumVal ord="24">Y</EnumVal>
+		</EnumType>
+		<EnumType id="OutModKind">
+			<EnumVal ord="1">Active high</EnumVal>
+			<EnumVal ord="2">Active low</EnumVal>
+		</EnumType>
+		<EnumType id="RangeKind">
+			<EnumVal ord="0">normal</EnumVal>
+			<EnumVal ord="1">high</EnumVal>
+			<EnumVal ord="2">low</EnumVal>
+			<EnumVal ord="3">high-high</EnumVal>
+			<EnumVal ord="4">low-low</EnumVal>
+		</EnumType>
+		<EnumType id="PhyHealthKind">
+			<EnumVal ord="1">ok</EnumVal>
+			<EnumVal ord="2">warning</EnumVal>
+			<EnumVal ord="3">alarm</EnumVal>
+		</EnumType>
+		<EnumType id="ClockSourceKind13">
+			<EnumVal ord="1">Unknown</EnumVal>
+			<EnumVal ord="3">PTP</EnumVal>
+		</EnumType>
+		<EnumType id="LedOffColKind">
+			<EnumVal ord="1">red</EnumVal>
+			<EnumVal ord="2">orange</EnumVal>
+			<EnumVal ord="3">yellow</EnumVal>
+			<EnumVal ord="4">green</EnumVal>
+			<EnumVal ord="5">blue</EnumVal>
+			<EnumVal ord="6">white</EnumVal>
+			<EnumVal ord="7">off</EnumVal>
+		</EnumType>
+		<EnumType id="LedBlkKind">
+			<EnumVal ord="1">fix</EnumVal>
+			<EnumVal ord="2">slow blinking</EnumVal>
+			<EnumVal ord="3">fast blinking</EnumVal>
+		</EnumType>
+		<EnumType id="SetPhNumKind123456">
+			<EnumVal ord="1">ph0</EnumVal>
+			<EnumVal ord="2">ph3</EnumVal>
+			<EnumVal ord="3">ph4</EnumVal>
+			<EnumVal ord="4">ph7</EnumVal>
+			<EnumVal ord="5">ph8</EnumVal>
+			<EnumVal ord="6">ph11</EnumVal>
+		</EnumType>
+		<EnumType id="OutputSignalKind">
+			<EnumVal ord="0">pulse</EnumVal>
+			<EnumVal ord="1">persistent</EnumVal>
+			<EnumVal ord="2">persistent-feedback</EnumVal>
+		</EnumType>
+		<EnumType id="SIUnitKind">
+			<EnumVal ord="1"/>
+			<EnumVal ord="2">m</EnumVal>
+			<EnumVal ord="3">kg</EnumVal>
+			<EnumVal ord="4">s</EnumVal>
+			<EnumVal ord="5">A</EnumVal>
+			<EnumVal ord="6">K</EnumVal>
+			<EnumVal ord="7">mol</EnumVal>
+			<EnumVal ord="8">cd</EnumVal>
+			<EnumVal ord="9">deg</EnumVal>
+			<EnumVal ord="10">rad</EnumVal>
+			<EnumVal ord="11">sr</EnumVal>
+			<EnumVal ord="21">Gy</EnumVal>
+			<EnumVal ord="22">Bq</EnumVal>
+			<EnumVal ord="23">°C</EnumVal>
+			<EnumVal ord="24">Sv</EnumVal>
+			<EnumVal ord="25">F</EnumVal>
+			<EnumVal ord="26">C</EnumVal>
+			<EnumVal ord="27">S</EnumVal>
+			<EnumVal ord="28">H</EnumVal>
+			<EnumVal ord="29">V</EnumVal>
+			<EnumVal ord="30">ohm</EnumVal>
+			<EnumVal ord="31">J</EnumVal>
+			<EnumVal ord="32">N</EnumVal>
+			<EnumVal ord="33">Hz</EnumVal>
+			<EnumVal ord="34">lx</EnumVal>
+			<EnumVal ord="35">Lm</EnumVal>
+			<EnumVal ord="36">Wb</EnumVal>
+			<EnumVal ord="37">T</EnumVal>
+			<EnumVal ord="38">W</EnumVal>
+			<EnumVal ord="39">Pa</EnumVal>
+			<EnumVal ord="41">m²</EnumVal>
+			<EnumVal ord="42">m³</EnumVal>
+			<EnumVal ord="43">m/s</EnumVal>
+			<EnumVal ord="44">m/s²</EnumVal>
+			<EnumVal ord="45">m³/s</EnumVal>
+			<EnumVal ord="46">m/m³</EnumVal>
+			<EnumVal ord="47">M</EnumVal>
+			<EnumVal ord="48">kg/m³</EnumVal>
+			<EnumVal ord="49">m²/s</EnumVal>
+			<EnumVal ord="50">W/m K</EnumVal>
+			<EnumVal ord="51">J/K</EnumVal>
+			<EnumVal ord="52">ppm</EnumVal>
+			<EnumVal ord="53">1/s</EnumVal>
+			<EnumVal ord="54">rad/s</EnumVal>
+			<EnumVal ord="55">W/m²</EnumVal>
+			<EnumVal ord="56">J/m²</EnumVal>
+			<EnumVal ord="57">S/m</EnumVal>
+			<EnumVal ord="58">K/s</EnumVal>
+			<EnumVal ord="59">Pa/s</EnumVal>
+			<EnumVal ord="60">J/kg K</EnumVal>
+			<EnumVal ord="61">VA</EnumVal>
+			<EnumVal ord="62">Watts</EnumVal>
+			<EnumVal ord="63">VAr</EnumVal>
+			<EnumVal ord="64">phi</EnumVal>
+			<EnumVal ord="65">cos(phi)</EnumVal>
+			<EnumVal ord="66">Vs</EnumVal>
+			<EnumVal ord="67">V²</EnumVal>
+			<EnumVal ord="68">As</EnumVal>
+			<EnumVal ord="69">A²</EnumVal>
+			<EnumVal ord="70">A²t</EnumVal>
+			<EnumVal ord="71">VAh</EnumVal>
+			<EnumVal ord="72">Wh</EnumVal>
+			<EnumVal ord="73">VArh</EnumVal>
+			<EnumVal ord="74">V/Hz</EnumVal>
+			<EnumVal ord="75">Hz/s</EnumVal>
+			<EnumVal ord="76">char</EnumVal>
+			<EnumVal ord="77">char/s</EnumVal>
+			<EnumVal ord="78">kgm²</EnumVal>
+			<EnumVal ord="79">dB</EnumVal>
+			<EnumVal ord="80">J/Wh</EnumVal>
+			<EnumVal ord="81">W/s</EnumVal>
+			<EnumVal ord="82">l/s</EnumVal>
+			<EnumVal ord="83">dBm</EnumVal>
+			<EnumVal ord="84">h</EnumVal>
+			<EnumVal ord="85">min</EnumVal>
+			<EnumVal ord="86">Ohm/m</EnumVal>
+			<EnumVal ord="87">percent/s</EnumVal>
+			<EnumVal ord="88">A/V</EnumVal>
+			<EnumVal ord="89">A/Vs</EnumVal>
+		</EnumType>
+		<EnumType id="CtlModelKind0">
+			<EnumVal ord="0">status-only</EnumVal>
+		</EnumType>
+		<EnumType id="CtlModelKind03">
+			<EnumVal ord="0">status-only</EnumVal>
+			<EnumVal ord="3">direct-with-enhanced-security</EnumVal>
+		</EnumType>
+		<EnumType id="BehaviourModeKind15">
+			<EnumVal ord="1">on</EnumVal>
+			<EnumVal ord="5">off</EnumVal>
+		</EnumType>
+		<EnumType id="CtlModelKind3">
+			<EnumVal ord="3">direct-with-enhanced-security</EnumVal>
+		</EnumType>
+		<EnumType id="SwitchFunctionKind2">
+			<EnumVal ord="2">Disconnector</EnumVal>
+		</EnumType>
+		<EnumType id="OriginatorCategoryKind">
+			<EnumVal ord="0">not-supported</EnumVal>
+			<EnumVal ord="1">bay-control</EnumVal>
+			<EnumVal ord="2">station-control</EnumVal>
+			<EnumVal ord="3">remote-control</EnumVal>
+			<EnumVal ord="4">automatic-bay</EnumVal>
+			<EnumVal ord="5">automatic-station</EnumVal>
+			<EnumVal ord="6">automatic-remote</EnumVal>
+			<EnumVal ord="7">maintenance</EnumVal>
+			<EnumVal ord="8">process</EnumVal>
+		</EnumType>
+		<EnumType id="LatModKind">
+			<EnumVal ord="1">latched</EnumVal>
+			<EnumVal ord="2">non latched</EnumVal>
+		</EnumType>
+	</DataTypeTemplates>
+</SCL>

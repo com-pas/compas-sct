@@ -19,7 +19,11 @@ import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter;
 import org.lfenergy.compas.sct.commons.scl.icd.IcdHeader;
-import org.lfenergy.compas.sct.commons.scl.ied.*;
+import org.lfenergy.compas.sct.commons.scl.ied.DAITracker;
+import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
+import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
 import org.lfenergy.compas.sct.commons.scl.sstation.SubstationAdapter;
 import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.util.Utils;
@@ -107,7 +111,7 @@ public class SclService implements SclEditor {
         DataTypeTemplateAdapter dttAdapter = sclRootAdapter.getDataTypeTemplateAdapter();
         LNodeTypeAdapter lNodeTypeAdapter = dttAdapter.getLNodeTypeAdapterById(dataAttributeRef.getLnType())
                 .orElseThrow(() -> new ScdException("Unknown LNodeType : " + dataAttributeRef.getLnType()));
-        lNodeTypeAdapter.check(dataAttributeRef.getDoName(), dataAttributeRef.getDaName());
+        lNodeTypeAdapter.checkDoAndDaTypeName(dataAttributeRef.getDoName(), dataAttributeRef.getDaName());
 
         if (TPredefinedBasicTypeEnum.OBJ_REF == dataAttributeRef.getBType()) {
             Long sGroup = dataAttributeRef.getDaName().getDaiValues().keySet().stream().findFirst().orElse(-1L);

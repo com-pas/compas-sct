@@ -10,7 +10,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.scl.ied.LNAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
 
 import java.util.List;
 import java.util.Map;

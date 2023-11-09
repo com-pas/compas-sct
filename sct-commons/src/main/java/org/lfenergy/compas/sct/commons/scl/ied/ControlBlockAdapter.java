@@ -11,6 +11,8 @@ import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.com.ConnectedAPAdapter;
+import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 import org.lfenergy.compas.sct.commons.util.Utils;
 

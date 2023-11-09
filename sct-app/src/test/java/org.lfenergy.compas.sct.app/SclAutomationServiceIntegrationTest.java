@@ -18,7 +18,7 @@ import org.lfenergy.compas.sct.commons.dto.HeaderDTO;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
+import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.Arrays;

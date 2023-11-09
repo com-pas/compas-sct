@@ -39,8 +39,8 @@ import java.util.stream.Collectors;
  */
 @Getter
 @Setter
-public class SMVControlBlock extends ControlBlock{
-
+public class SMVControlBlock extends ControlBlock {
+    //TODO this is a DTO object; it's meant to be used for carry information; he must be created be the one responsible for carying the info
     private TSampledValueControl.SmvOpts smvOpts = newDefaultSmvOpts();
     private TProtocol protocol;
     private boolean multicast = true;

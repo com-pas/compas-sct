@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.sct.commons.scl.ied;
+package org.lfenergy.compas.sct.commons.scl.ldevice;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +17,10 @@ import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
+import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 import org.lfenergy.compas.sct.commons.util.MonitoringLnClassEnum;
@@ -29,8 +33,8 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter.MOD_DO_TYPE_NAME;
-import static org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter.STVAL_DA_TYPE_NAME;
+import static org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter.MOD_DO_TYPE_NAME;
+import static org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter.STVAL_DA_TYPE_NAME;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.LDEVICE_LDEPF;
 import static org.lfenergy.compas.sct.commons.util.ControlBlockEnum.*;

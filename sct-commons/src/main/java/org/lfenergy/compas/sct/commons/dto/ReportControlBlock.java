@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class ReportControlBlock extends ControlBlock {
-
+    //TODO this is a DTO object; it's meant to be used for carry information; he must be created be the one responsible for carying the info
     private TReportControl.OptFields optFields = newDefaultOptFields();
     protected TTrgOps trgOps = newDefaultTrgOps();
     protected long intgPd = 60000L;
