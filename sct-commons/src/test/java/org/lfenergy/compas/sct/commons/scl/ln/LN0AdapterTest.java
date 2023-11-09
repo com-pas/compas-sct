@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.sct.commons.scl.ied;
+package org.lfenergy.compas.sct.commons.scl.ln;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -15,6 +15,8 @@ import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.scl.ied.*;
+import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 import org.mockito.Mockito;
@@ -212,103 +214,115 @@ class LN0AdapterTest {
         // Given
         TDataSet tDataSet = new TDataSet();
         ln0.getDataSet().add(tDataSet);
-        // When
-        List<TDataSet> tDataSets = ln0Adapter.getDataSetMatchingExtRefInfo(null);
-        // Then
-        assertThat(tDataSets).isNotEmpty();
-
-        // Given
         ExtRefInfo extRefInfo = DTO.createExtRefInfo();
         extRefInfo = Mockito.spy(extRefInfo);
-
         TFCDA tfcda = new TFCDA();
         tDataSet.getFCDA().add(tfcda);
         // When
-        tDataSets = ln0Adapter.getDataSetMatchingExtRefInfo(extRefInfo);
+        List<TDataSet> tDataSets = ln0Adapter.getDataSetMatchingExtRefInfo(extRefInfo).toList();
         // Then
         assertThat(tDataSets).isEmpty();
 
         doReturn(true).when(extRefInfo).checkMatchingFCDA(any(TFCDA.class));
         // When
-        tDataSets = ln0Adapter.getDataSetMatchingExtRefInfo(extRefInfo);
+        tDataSets = ln0Adapter.getDataSetMatchingExtRefInfo(extRefInfo).toList();
         // Then
         assertThat(tDataSets).isNotEmpty();
     }
 
     @Test
-    @Tag("issue-321")
     void testGetControlBlocks() {
         // Given
-        LDeviceAdapter lDeviceAdapter = mock(LDeviceAdapter.class);
-        IEDAdapter iedAdapter = mock(IEDAdapter.class);
-        TLDevice tlDevice = mock(TLDevice.class);
-        when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
-        when(lDeviceAdapter.getParentAdapter()).thenReturn(iedAdapter);
-        when(iedAdapter.getName()).thenReturn("IED_NAME");
         LN0 ln0 = new LN0();
-        when(tlDevice.getLN0()).thenReturn(ln0);
-        // When Then
-        LN0Adapter ln0Adapter = assertDoesNotThrow(() -> new LN0Adapter(lDeviceAdapter, ln0));
-        // Given
-        TGSEControl tgseControl = new TGSEControl();
-        tgseControl.setDatSet("GSE_REF");
-        TSampledValueControl tSampledValueControl = new TSampledValueControl();
-        tSampledValueControl.setDatSet("SMV_REF");
         TReportControl tReportControl = new TReportControl();
-        tReportControl.setDatSet("RPT_REF");
-        ln0Adapter.getCurrentElem().getGSEControl().add(tgseControl);
-        ln0Adapter.getCurrentElem().getSampledValueControl().add(tSampledValueControl);
-        ln0Adapter.getCurrentElem().getReportControl().add(tReportControl);
+        tReportControl.setDatSet("dataSetName");
+        ln0.getReportControl().add(tReportControl);
+        TSampledValueControl tSampledValueControl = new TSampledValueControl();
+        tSampledValueControl.setDatSet("dataSetName");
+        ln0.getSampledValueControl().add(tSampledValueControl);
+        TGSEControl tgseControl = new TGSEControl();
+        tgseControl.setDatSet("dataSetName");
+        ln0.getGSEControl().add(tgseControl);
 
-        TDataSet tDataSetGSE = new TDataSet();
-        tDataSetGSE.setName(DTO.CB_DATASET_REF);
-
-        // When Then
-        List<ControlBlock> controlBlocks = ln0Adapter.getControlBlocks(List.of(tDataSetGSE), null);
-        assertThat(controlBlocks).isEmpty();
-
-        tDataSetGSE.setName("GSE_REF");
-        TDataSet tDataSetSMV = new TDataSet();
-        tDataSetSMV.setName("SMV_REF");
-        TDataSet tDataSetRPT = new TDataSet();
-        tDataSetRPT.setName("RPT_REF");
-
-        List<TDataSet> tDataSets = List.of(tDataSetGSE, tDataSetSMV, tDataSetRPT);
-
-        // When Then
-        controlBlocks = ln0Adapter.getControlBlocks(tDataSets, TServiceType.REPORT);
-        assertThat(controlBlocks).hasSize(1);
-        // When Then
-        controlBlocks = ln0Adapter.getControlBlocks(tDataSets, TServiceType.SMV);
-        assertThat(controlBlocks).hasSize(1);
-        // When Then
-        controlBlocks = ln0Adapter.getControlBlocks(tDataSets, TServiceType.GOOSE);
-        assertThat(controlBlocks).hasSize(1);
-        // When Then
-        controlBlocks = ln0Adapter.getControlBlocks(tDataSets, null);
-        assertThat(controlBlocks).hasSize(3);
-    }
-
-    @Test
-    void getControlBlocksForMatchingFCDA_should_return_expected_Items() {
-        // Given
-        LN0 ln0 = new LN0();
-        LN0Adapter ln0Adapter = Mockito.spy(new LN0Adapter(null, ln0));
-
-        when(ln0Adapter.getCurrentElem()).thenReturn(ln0);
         TInputs tInputs = new TInputs();
         TExtRef extRef = DTO.createExtRef();
         tInputs.getExtRef().add(extRef);
         ln0.setInputs(tInputs);
-        ExtRefInfo extRefBindingInfo = DTO.createExtRefInfo();
-        doReturn(List.of(new TDataSet())).when(ln0Adapter).getDataSetMatchingExtRefInfo(any(ExtRefInfo.class));
-        doReturn(List.of(new ReportControlBlock("rpt", "rptID", "rptDatSet")))
-                .when(ln0Adapter).getControlBlocks(any(List.class), any(TServiceType.class));
+        TDataSet tDataSet = new TDataSet();
+        tDataSet.setName("dataSetName");
+        TFCDA tfcda = new TFCDA();
+        tfcda.setDaName("d");
+        tfcda.setDoName("FACntRs1.res");
+        tfcda.setPrefix("LN_PREFIX_R");
+        tfcda.setLdInst("LD_INST_R");
+        tfcda.setLnInst("1");
+        tfcda.getLnClass().add("LN_CLASS_R");
+        tDataSet.getFCDA().add(tfcda);
+        ln0.getDataSet().add(tDataSet);
+        ExtRefInfo extRefInfo = DTO.createExtRefInfo();
+        ExtRefBindingInfo extRefBindingInfo = DTO.createExtRefBindingInfo_Remote();
+        extRefBindingInfo.setServiceType(null);
+        extRefInfo.setBindingInfo(extRefBindingInfo);
+
+        LN0Adapter ln0Adapter = new LN0Adapter(null, ln0);
+
         // When
-        List<ControlBlock> controlBlocks = ln0Adapter.getControlBlocksForMatchingFCDA(extRefBindingInfo);
+        List<ControlBlock> controlBlocks = ln0Adapter.getControlBlocksForMatchingFCDA(extRefInfo).toList();
         // Then
-        assertThat(controlBlocks).isNotEmpty();
-        assertThat(controlBlocks.get(0).getServiceType()).isEqualTo(TServiceType.REPORT);
+        assertThat(controlBlocks).hasSize(3);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideServiceType")
+    void getControlBlocksForMatchingFCDA_should_return_expected_Items(LN0 ln0, TServiceType serviceType) {
+        // Given
+        TInputs tInputs = new TInputs();
+        TExtRef extRef = DTO.createExtRef();
+        tInputs.getExtRef().add(extRef);
+        ln0.setInputs(tInputs);
+        TDataSet tDataSet = new TDataSet();
+        tDataSet.setName("dataSetName");
+        TFCDA tfcda = new TFCDA();
+        tfcda.setDaName("d");
+        tfcda.setDoName("FACntRs1.res");
+        tfcda.setPrefix("LN_PREFIX_R");
+        tfcda.setLdInst("LD_INST_R");
+        tfcda.setLnInst("1");
+        tfcda.getLnClass().add("LN_CLASS_R");
+        tDataSet.getFCDA().add(tfcda);
+        ln0.getDataSet().add(tDataSet);
+        ExtRefInfo extRefInfo = DTO.createExtRefInfo();
+        ExtRefBindingInfo extRefBindingInfo = DTO.createExtRefBindingInfo_Remote();
+        extRefBindingInfo.setServiceType(serviceType);
+        extRefInfo.setBindingInfo(extRefBindingInfo);
+
+        LN0Adapter ln0Adapter = new LN0Adapter(null, ln0);
+
+        // When
+        List<ControlBlock> controlBlocks = ln0Adapter.getControlBlocksForMatchingFCDA(extRefInfo).toList();
+        // Then
+        assertThat(controlBlocks).hasSize(1);
+        assertThat(controlBlocks.get(0).getServiceType()).isEqualTo(serviceType);
+    }
+
+    private static Stream<Arguments> provideServiceType() {
+        LN0 ln0Report = new LN0();
+        TReportControl tReportControl = new TReportControl();
+        tReportControl.setDatSet("dataSetName");
+        ln0Report.getReportControl().add(tReportControl);
+        LN0 ln0Smv = new LN0();
+        TSampledValueControl tSampledValueControl = new TSampledValueControl();
+        tSampledValueControl.setDatSet("dataSetName");
+        ln0Smv.getSampledValueControl().add(tSampledValueControl);
+        LN0 ln0Goose = new LN0();
+        TGSEControl tgseControl = new TGSEControl();
+        tgseControl.setDatSet("dataSetName");
+        ln0Goose.getGSEControl().add(tgseControl);
+        return Stream.of(
+                Arguments.of(ln0Report, TServiceType.REPORT),
+                Arguments.of(ln0Smv, TServiceType.SMV),
+                Arguments.of(ln0Goose, TServiceType.GOOSE)
+        );
     }
 
     @Test
@@ -386,7 +400,6 @@ class LN0AdapterTest {
         when(iedAdapter.getName()).thenReturn("IED_NAME");
         LDeviceAdapter lDeviceAdapter = mock(LDeviceAdapter.class);
         TLDevice tlDevice = new TLDevice();
-        when(lDeviceAdapter.amChildElementRef()).thenReturn(true);
         when(lDeviceAdapter.getCurrentElem()).thenReturn(tlDevice);
         when(lDeviceAdapter.getParentAdapter()).thenReturn(iedAdapter);
         LN0 ln0 = new LN0();

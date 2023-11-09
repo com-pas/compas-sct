@@ -10,32 +10,27 @@ import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
+import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
-
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.lfenergy.compas.sct.commons.dto.DTO.HOLDER_LD_INST;
+import static org.lfenergy.compas.sct.commons.dto.DTO.LD_NAME;
 
 class LDeviceDTOTest {
 
     @Test
-    void constructor_whenCalled_shouldFillValues() {
+    void constructor_should_fill_values() {
+        // Given
         // When
-        LDeviceDTO lDeviceDTO = DTO.createLdDTO();
-        // Then
-        assertAll("LD_DTO",
-                () -> assertThat(lDeviceDTO.getLdInst()).isEqualTo(DTO.HOLDER_LD_INST),
-                () -> assertThat(lDeviceDTO.getLdName()).isEqualTo(DTO.LD_NAME),
-                () -> assertThat(lDeviceDTO.getLNodes()).isNotEmpty()
-        );
-        Set<LNodeDTO> nodeDTOs = Set.of(DTO.createLNodeDTO(),DTO.createLNodeDTO());
-        lDeviceDTO.addAll(nodeDTOs);
-        assertThat(lDeviceDTO.getLNodes()).hasSize(3);
-    }
+        LDeviceDTO lDeviceDTO = new LDeviceDTO(HOLDER_LD_INST, LD_NAME);
 
+        // Then
+        assertThat(lDeviceDTO.getLdInst()).isEqualTo(HOLDER_LD_INST);
+        assertThat(lDeviceDTO.getLdName()).isEqualTo(LD_NAME);
+        assertThat(lDeviceDTO.getLNodes()).isEmpty();
+    }
 
     @Test
     void addLNode_whenCalled_shouldNotUpdateLNodeList(){

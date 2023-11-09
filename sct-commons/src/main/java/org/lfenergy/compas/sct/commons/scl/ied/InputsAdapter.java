@@ -15,8 +15,11 @@ import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
+import org.lfenergy.compas.sct.commons.util.ActiveStatus;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
-import org.lfenergy.compas.sct.commons.util.LdeviceStatus;
 import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
@@ -96,12 +99,11 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
             return List.of(getLDeviceAdapter().buildFatalReportItem(MESSAGE_LDEVICE_STATUS_UNDEFINED));
         }
         try {
-            LdeviceStatus lDeviceStatus = LdeviceStatus.fromValue(optionalLDeviceStatus.get());
+            ActiveStatus lDeviceStatus = ActiveStatus.fromValue(optionalLDeviceStatus.get());
             return switch (lDeviceStatus) {
                 case ON -> getExtRefs().stream()
                         .filter(tExtRef -> StringUtils.isNotBlank(tExtRef.getIedName()) && StringUtils.isNotBlank(tExtRef.getDesc()))
-                        .map(extRef ->
-                                updateExtRefIedName(extRef, icdSystemVersionToIed.get(extRef.getIedName())))
+                        .map(extRef -> updateExtRefIedName(extRef, icdSystemVersionToIed.get(extRef.getIedName())))
                         .flatMap(Optional::stream)
                         .toList();
                 case OFF -> {
@@ -175,7 +177,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         }
         return optionalSourceLDeviceStatus.map(sourceLDeviceStatus -> {
             try {
-                LdeviceStatus lDeviceStatus = LdeviceStatus.fromValue(sourceLDeviceStatus);
+                ActiveStatus lDeviceStatus = ActiveStatus.fromValue(sourceLDeviceStatus);
                 return switch (lDeviceStatus) {
                     case OFF -> SclReportItem.warning(extRefXPath(extRef.getDesc()), String.format(MESSAGE_SOURCE_LDEVICE_STATUS_OFF, sourceLDevice.getXPath()));
                     case ON -> null;

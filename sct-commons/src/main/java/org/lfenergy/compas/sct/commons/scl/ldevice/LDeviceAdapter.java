@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.sct.commons.scl.ied;
+package org.lfenergy.compas.sct.commons.scl.ldevice;
 
 
 import lombok.extern.slf4j.Slf4j;
@@ -12,15 +12,21 @@ import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
+import org.lfenergy.compas.sct.commons.scl.ied.ControlBlockAdapter;
+import org.lfenergy.compas.sct.commons.scl.ied.DataSetAdapter;
+import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
+import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
+import org.lfenergy.compas.sct.commons.util.ActiveStatus;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
-import org.lfenergy.compas.sct.commons.util.LdeviceStatus;
 import org.lfenergy.compas.sct.commons.util.MonitoringLnClassEnum;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
 
-import static org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter.MOD_DO_TYPE_NAME;
-import static org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter.STVAL_DA_TYPE_NAME;
+import static org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter.MOD_DO_TYPE_NAME;
+import static org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter.STVAL_DA_TYPE_NAME;
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 import static org.lfenergy.compas.sct.commons.util.Utils.copySclElement;
 
@@ -47,8 +53,8 @@ import static org.lfenergy.compas.sct.commons.util.Utils.copySclElement;
  *    </ul>
  * </ol>
  *
- * @see org.lfenergy.compas.sct.commons.scl.ied.LNAdapter
- * @see org.lfenergy.compas.sct.commons.scl.ied.LN0Adapter
+ * @see LNAdapter
+ * @see LN0Adapter
  * @see org.lfenergy.compas.scl2007b4.model.TLDevice
  * @see org.lfenergy.compas.scl2007b4.model.TDOI
  * @see org.lfenergy.compas.scl2007b4.model.TDAI
@@ -79,13 +85,13 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
      */
     public void createHmiReportControlBlocks(List<TFCDA> fcdas) {
         LN0Adapter ln0 = getLN0Adapter();
-        if (!ln0.getDaiModStValValue().map(LdeviceStatus::fromValue).map(LdeviceStatus.ON::equals).orElse(false)) return;
+        if (!ln0.getDaiModStValValue().map(ActiveStatus::fromValue).map(ActiveStatus.ON::equals).orElse(false)) return;
         fcdas.stream()
                 .filter(fcda -> getInst().equals(fcda.getLdInst()) && fcda.isSetLnClass())
                 .forEach(fcda -> (fcda.getLnClass().get(0).equals(TLLN0Enum.LLN_0.value()) ?
                         Optional.of(ln0) // ln0 Mod stVal "ON" has already been checked, no need to check it again
                         :
-                        findLnAdapter(fcda.getLnClass().get(0), fcda.getLnInst(), fcda.getPrefix()).filter(lnAdapter -> lnAdapter.getDaiModStValValue().map(LdeviceStatus::fromValue).map(LdeviceStatus.ON::equals).orElse(true)))
+                        findLnAdapter(fcda.getLnClass().get(0), fcda.getLnInst(), fcda.getPrefix()).filter(lnAdapter -> lnAdapter.getDaiModStValValue().map(ActiveStatus::fromValue).map(ActiveStatus.ON::equals).orElse(true)))
                         .map(sourceLn -> sourceLn.getDAI(new DataAttributeRef(fcda), false))
                         .filter(das -> das.stream().anyMatch(da -> fcda.getFc() == da.getFc())) // getDAI does not filter on DA.
                         .ifPresent(dataAttributeRefs -> createHmiReportCB(ln0, fcda)));
@@ -94,12 +100,12 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
     private void createHmiReportCB(LN0Adapter ln0, TFCDA fcda) {
         boolean isFcMx = fcda.getFc() == TFCEnum.MX;
         String dataSetSuffix = getInst().toUpperCase(Locale.ENGLISH) + ATTRIBUTE_VALUE_SEPARATOR + (isFcMx ? "CYPO" : "DQPO");
-        DataSetAdapter dataSet = ln0.createDataSetIfNotExists(DATASET_NAME_PREFIX + dataSetSuffix, ControlBlockEnum.REPORT);
+        String dataSetName = DATASET_NAME_PREFIX + dataSetSuffix;
+        DataSetAdapter dataSet = ln0.createDataSetIfNotExists(dataSetName, ControlBlockEnum.REPORT);
         dataSet.createFCDAIfNotExists(fcda.getLdInst(), fcda.getPrefix(), fcda.getLnClass().get(0), fcda.getLnInst(), fcda.getDoName(), fcda.getDaName(), fcda.getFc());
         String cbName = CONTROLBLOCK_NAME_PREFIX + dataSetSuffix;
         String cbId = ln0.generateControlBlockId(getLdName(), cbName);
-        String datSet = dataSet.getCurrentElem().getName();
-        ControlBlockAdapter controlBlockAdapter = ln0.createControlBlockIfNotExists(cbName, cbId, datSet, ControlBlockEnum.REPORT);
+        ControlBlockAdapter controlBlockAdapter = ln0.createControlBlockIfNotExists(cbName, cbId, dataSetName, ControlBlockEnum.REPORT);
         if (isFcMx) {
             TReportControl tReportControl = (TReportControl) controlBlockAdapter.getCurrentElem();
             tReportControl.setIntgPd(INTG_PD_VALUE_FOR_FC_MX);
@@ -378,7 +384,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
      * @param controlBlockEnum the type of DataSet we want to check for creation capability.
      * @return true if parent AccessPoint has the capability, false otherwise
      */
-    protected boolean hasDataSetCreationCapability(ControlBlockEnum controlBlockEnum) {
+    public boolean hasDataSetCreationCapability(ControlBlockEnum controlBlockEnum) {
         Objects.requireNonNull(controlBlockEnum);
         TAccessPoint accessPoint = getAccessPoint();
         if (!accessPoint.isSetServices()) {
@@ -404,7 +410,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
      * @param controlBlockEnum the type of ControlBlock we want to check for creation capability.
      * @return true if parent AccessPoint has the capability, false otherwise
      */
-    protected boolean hasControlBlockCreationCapability(ControlBlockEnum controlBlockEnum) {
+    public boolean hasControlBlockCreationCapability(ControlBlockEnum controlBlockEnum) {
         Objects.requireNonNull(controlBlockEnum);
         TAccessPoint accessPoint = getAccessPoint();
         if (!accessPoint.isSetServices()) {
@@ -500,8 +506,8 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
             return Collections.emptyList();
         }
 
-        getLDeviceStatus().map(LdeviceStatus::fromValue).ifPresentOrElse(s -> {
-            if (LdeviceStatus.ON.equals(s)) {
+        getLDeviceStatus().map(ActiveStatus::fromValue).ifPresentOrElse(s -> {
+            if (ActiveStatus.ON.equals(s)) {
                 extRefBayReferenceList.addAll(getLN0Adapter().getInputsAdapter().getCurrentElem().getExtRef().stream().map(extRef -> new ExtRefInfo.ExtRefBayReference(parentIedAdapter.getName(), parentIedAdapter.getPrivateCompasBay().get(), extRef)).toList());
             }
         }, () -> sclReportItems.add(SclReportItem.error(getXPath(), "There is no DOI@name=" + MOD_DO_TYPE_NAME + "/DAI@name=" + STVAL_DA_TYPE_NAME + "/Val for LDevice@inst" + LDEVICE_LDEPF)));

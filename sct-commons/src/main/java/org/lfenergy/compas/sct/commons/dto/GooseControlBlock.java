@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class GooseControlBlock extends ControlBlock {
+    //TODO this is a DTO object; it's meant to be used for carry information; he must be created be the one responsible for carying the info
     private boolean fixedOffs = false;
     private TProtocol protocol;
     private TGSEControlTypeEnum type = TGSEControlTypeEnum.GOOSE;

@@ -14,6 +14,7 @@ import org.lfenergy.compas.sct.commons.dto.DoTypeName;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
 
 import java.util.List;
 import java.util.Map;

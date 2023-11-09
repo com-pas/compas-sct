@@ -4,16 +4,21 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.lfenergy.compas.scl2007b4.model.TAnyLN;
-import org.lfenergy.compas.scl2007b4.model.TExtRef;
+import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.DataSetService;
+import org.lfenergy.compas.sct.commons.ExtRefReaderService;
+import org.lfenergy.compas.sct.commons.LnodeTypeService;
+import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.LNAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
+import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.LnKey;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.HashSet;
@@ -41,21 +46,25 @@ import java.util.stream.Collectors;
  *
  * @see org.lfenergy.compas.scl2007b4.model.TLNode
  */
-
 @Slf4j
 @Getter
 @NoArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class LNodeDTO {
+    //TODO this is a DTO object; it's meant to be used for carry information; he must be created be the one responsible for carying the info
+    @EqualsAndHashCode.Include
     private String inst;
+    @EqualsAndHashCode.Include
     private String nodeClass;
     private String nodeType;
+    @EqualsAndHashCode.Include
     private String prefix;
-    private Set<ExtRefInfo> extRefs = new HashSet<>();
-    private Set<GooseControlBlock> gooseControlBlocks = new HashSet<>();
-    private Set<SMVControlBlock> smvControlBlocks = new HashSet<>();
-    private Set<ReportControlBlock> reportControlBlocks = new HashSet<>();
+    private final Set<ExtRefInfo> extRefs = new HashSet<>();
+    private final Set<GooseControlBlock> gooseControlBlocks = new HashSet<>();
+    private final Set<SMVControlBlock> smvControlBlocks = new HashSet<>();
+    private final Set<ReportControlBlock> reportControlBlocks = new HashSet<>();
     private Set<DataSetInfo> datSets = new HashSet<>();
-    private Set<DataAttributeRef> dataAttributeRefs = new HashSet<>();
+    private final Set<DataAttributeRef> dataAttributeRefs = new HashSet<>();
 
     /**
      * Constructor
@@ -110,7 +119,8 @@ public class LNodeDTO {
         }
 
         if(options.isWithDatSet()) {
-            lNodeDTO.datSets = DataSetInfo.getDataSets(nodeAdapter);
+            DataSetService dataSetService = new DataSetService();
+            lNodeDTO.datSets = dataSetService.getDataSets(nodeAdapter.getCurrentElem()).map(DataSetInfo::new).collect(Collectors.toSet());
         }
 
         if(options.isWithDataAttributeRef()) {
@@ -135,6 +145,50 @@ public class LNodeDTO {
 
         if(options.isWithCB()) {
             //TODO
+        }
+        log.info(Utils.leaving());
+        return lNodeDTO;
+    }
+
+    public static LNodeDTO from(TAnyLN tAnyLN, LogicalNodeOptions options, String iedName, String ldInst, SCL scl) {
+        log.info(Utils.entering());
+        LnKey lnKey = switch (tAnyLN) {
+            case LN0 ln0 -> new LnKey(ln0);
+            case TLN tln -> new LnKey(tln);
+            default -> throw new IllegalStateException("Unexpected value: " + tAnyLN);
+        };
+        String inst = lnKey.getInst();
+        String lnClass = lnKey.getLnClass();
+        String prefix = lnKey.getPrefix();
+        String lnType = tAnyLN.getLnType();
+        LNodeDTO lNodeDTO = new LNodeDTO(inst, lnClass, prefix, lnType);
+        if (options.isWithExtRef()) {
+            List<ExtRefInfo> extRefInfos = new ExtRefReaderService().getExtRefs(tAnyLN)
+                    .map(extRef -> ExtRefInfo.from(extRef, iedName, ldInst, lnClass, inst, prefix))
+                    .toList();
+            lNodeDTO.addAllExtRefInfo(extRefInfos);
+        }
+        if (options.isWithDatSet()) {
+            List<DataSetInfo> dataSetInfos = new DataSetService().getDataSets(tAnyLN)
+                    .map(DataSetInfo::new)
+                    .distinct()
+                    .toList();
+            lNodeDTO.addAllDatSets(dataSetInfos);
+        }
+
+        if (options.isWithDataAttributeRef()) {
+            DataAttributeRef filter = DataAttributeRef.builder()
+                    .lnInst(inst)
+                    .lnClass(lnClass)
+                    .prefix(prefix)
+                    .lnType(lnType)
+                    .build();
+
+            TLNodeType lnodeType = new LnodeTypeService().findLnodeType(scl.getDataTypeTemplates(), lnodeType1 -> lnodeType1.getId().equals(lnType))
+                    .orElseThrow(() -> new IllegalArgumentException("Corrupted SCD file: reference to unknown lnType(" + lnType + ")"));
+            List<DataAttributeRef> dataAttributeRefList = new LNodeTypeAdapter(new DataTypeTemplateAdapter(new SclRootAdapter(scl), scl.getDataTypeTemplates()), lnodeType)
+                    .getDataAttributeRefs(filter);
+            lNodeDTO.addAllDataAttributeRef(dataAttributeRefList);
         }
         log.info(Utils.leaving());
         return lNodeDTO;

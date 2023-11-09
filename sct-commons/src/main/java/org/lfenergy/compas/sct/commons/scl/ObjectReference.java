@@ -9,6 +9,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
 import org.lfenergy.compas.sct.commons.dto.ExtrefTarget;
+import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
+import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
 
 /**
  * A representation of the model object
@@ -31,8 +33,8 @@ import org.lfenergy.compas.sct.commons.dto.ExtrefTarget;
  *      <b>LDName</b> = "name" attribute of IEDName element + "inst" attribute of LDevice element
  *      <b>LNName</b> = "prefix" + "lnClass" + "lnInst"
  *  </pre>
- * @see org.lfenergy.compas.sct.commons.scl.ied.LNAdapter
- * @see org.lfenergy.compas.sct.commons.scl.ied.LN0Adapter
+ * @see LNAdapter
+ * @see LN0Adapter
  * @see org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter
  */
 @Getter

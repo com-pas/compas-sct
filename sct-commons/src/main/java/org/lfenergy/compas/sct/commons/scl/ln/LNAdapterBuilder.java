@@ -2,14 +2,15 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.sct.commons.scl.ied;
+package org.lfenergy.compas.sct.commons.scl.ln;
 
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 
 /**
  * A representation of the model object
- * <em><b>{@link org.lfenergy.compas.sct.commons.scl.ied.LNAdapterBuilder LNAdapterBuilder}</b></em>.
+ * <em><b>{@link LNAdapterBuilder LNAdapterBuilder}</b></em>.
  * <p>
  * The following features are supported:
  * </p>

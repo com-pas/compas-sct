@@ -110,15 +110,22 @@ class DOTypeAdapterTest {
     void testCheckAndCompleteStructData() {
         //Given
         DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT_DIFF_CONTENT_SAME_ID);
-        //When Then
         DOTypeAdapter doTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getDOTypeAdapterById("DO2").get());
         DoTypeName doTypeName = new DoTypeName("Op","origin");
-        //When Then
+        //When
         assertThatCode(() -> doTypeAdapter.checkAndCompleteStructData(doTypeName)).doesNotThrowAnyException();
         assertThat(doTypeName.getCdc()).isEqualTo(TPredefinedCDCEnum.WYE);
-        DoTypeName doTypeName1 = new DoTypeName("Op","toto");
+    }
+
+    @Test
+    @Tag("issue-321")
+    void testCheckAndCompleteStructData2() {
+        //Given
+        DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT_DIFF_CONTENT_SAME_ID);
+        DOTypeAdapter doTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getDOTypeAdapterById("DO2").get());
+        DoTypeName doTypeName = new DoTypeName("Op","toto");
         //When Then
-        assertThatThrownBy(() -> doTypeAdapter.checkAndCompleteStructData(doTypeName1)).isInstanceOf(ScdException.class);
+        assertThatThrownBy(() -> doTypeAdapter.checkAndCompleteStructData(doTypeName)).isInstanceOf(ScdException.class);
     }
 
     @Test

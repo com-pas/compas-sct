@@ -2,13 +2,13 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.sct.commons.scl;
+package org.lfenergy.compas.sct.commons.scl.ldevice;
 
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lfenergy.compas.scl2007b4.model.TCompasLDeviceStatus;
-import org.lfenergy.compas.sct.commons.util.LdeviceStatus;
+import org.lfenergy.compas.sct.commons.util.ActiveStatus;
 
 import java.util.List;
 import java.util.Set;
@@ -38,15 +38,15 @@ public class LDeviceActivation {
      * @param enumValues enum values
      */
     public void checkLDeviceActivationStatus(String iedName, String ldInst, TCompasLDeviceStatus compasLDeviceStatus, Set<String> enumValues) {
-        if (!enumValues.contains(LdeviceStatus.ON.getValue()) && !enumValues.contains(LdeviceStatus.OFF.getValue())) {
+        if (!enumValues.contains(ActiveStatus.ON.getValue()) && !enumValues.contains(ActiveStatus.OFF.getValue())) {
             errorMessage = "The LDevice cannot be activated or desactivated because its BehaviourKind Enum contains NOT 'on' AND NOT 'off'.";
         }
-        if (!enumValues.contains(LdeviceStatus.ON.getValue()) && enumValues.contains(LdeviceStatus.OFF.getValue())) {
+        if (!enumValues.contains(ActiveStatus.ON.getValue()) && enumValues.contains(ActiveStatus.OFF.getValue())) {
             if (isDeclaredInSubstation(iedName, ldInst)) {
                 errorMessage = "The LDevice cannot be set to 'on' but has been selected into SSD.";
             } else {
                 isUpdatable = true;
-                newVal = LdeviceStatus.OFF.getValue();
+                newVal = ActiveStatus.OFF.getValue();
             }
         }
         if(compasLDeviceStatus.equals(TCompasLDeviceStatus.ACTIVE) ||
@@ -65,20 +65,20 @@ public class LDeviceActivation {
      * @param enumValues enum values
      */
     private void checkAuthorisationToActivateLDevice(String iedName, String ldInst, Set<String> enumValues) {
-        if (!enumValues.contains(LdeviceStatus.OFF.getValue()) && enumValues.contains(LdeviceStatus.ON.getValue())) {
+        if (!enumValues.contains(ActiveStatus.OFF.getValue()) && enumValues.contains(ActiveStatus.ON.getValue())) {
             if (isDeclaredInSubstation(iedName, ldInst)) {
                 isUpdatable = true;
-                newVal = LdeviceStatus.ON.getValue();
+                newVal = ActiveStatus.ON.getValue();
             } else {
                 errorMessage = "The LDevice cannot be set to 'off' but has not been selected into SSD.";
             }
         }
-        if (enumValues.contains(LdeviceStatus.ON.getValue()) && enumValues.contains(LdeviceStatus.OFF.getValue())) {
+        if (enumValues.contains(ActiveStatus.ON.getValue()) && enumValues.contains(ActiveStatus.OFF.getValue())) {
             isUpdatable = true;
             if (isDeclaredInSubstation(iedName, ldInst)) {
-                newVal = LdeviceStatus.ON.getValue();
+                newVal = ActiveStatus.ON.getValue();
             } else {
-                newVal = LdeviceStatus.OFF.getValue();
+                newVal = ActiveStatus.OFF.getValue();
             }
         }
 
@@ -91,19 +91,19 @@ public class LDeviceActivation {
      * @param enumValues enum values
      */
     private void checkAuthorisationToDeactivateLDevice(String iedName, String ldInst, Set<String> enumValues) {
-        if (!enumValues.contains(LdeviceStatus.OFF.getValue()) && enumValues.contains(LdeviceStatus.ON.getValue())) {
+        if (!enumValues.contains(ActiveStatus.OFF.getValue()) && enumValues.contains(ActiveStatus.ON.getValue())) {
             if (isDeclaredInSubstation(iedName, ldInst)) {
                 errorMessage = "The LDevice is not qualified into STD but has been selected into SSD.";
             } else {
                 errorMessage = "The LDevice cannot be set to 'off' but has not been selected into SSD.";
             }
         }
-        if (enumValues.contains(LdeviceStatus.ON.getValue()) && enumValues.contains(LdeviceStatus.OFF.getValue())) {
+        if (enumValues.contains(ActiveStatus.ON.getValue()) && enumValues.contains(ActiveStatus.OFF.getValue())) {
             if (isDeclaredInSubstation(iedName, ldInst)) {
                 errorMessage = "The LDevice is not qualified into STD but has been selected into SSD.";
             } else {
                 isUpdatable = true;
-                newVal = LdeviceStatus.OFF.getValue();
+                newVal = ActiveStatus.OFF.getValue();
             }
         }
     }
