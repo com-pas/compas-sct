@@ -23,8 +23,6 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 @EqualsAndHashCode
 public class IcdHeader {
 
-    @EqualsAndHashCode.Exclude
-    private final String content;
     private final String icdSystemVersionUUID;
     private final TCompasIEDType iedType;
     @EqualsAndHashCode.Exclude
@@ -45,7 +43,6 @@ public class IcdHeader {
     private final String headerRevision;
 
     public IcdHeader(TCompasICDHeader compasICDHeader) {
-        this.content = compasICDHeader.getContent();
         this.icdSystemVersionUUID = compasICDHeader.getICDSystemVersionUUID();
         this.iedType = compasICDHeader.getIEDType();
         this.iedSubstationinstance = compasICDHeader.getIEDSubstationinstance();
@@ -64,7 +61,6 @@ public class IcdHeader {
 
     public TCompasICDHeader toTCompasICDHeader() {
         TCompasICDHeader tCompasICDHeader = new TCompasICDHeader();
-        tCompasICDHeader.setContent(content);
         tCompasICDHeader.setICDSystemVersionUUID(icdSystemVersionUUID);
         tCompasICDHeader.setIEDType(iedType);
         tCompasICDHeader.setIEDSubstationinstance(iedSubstationinstance);

@@ -566,7 +566,6 @@ class PrivateUtilsTest {
         //Then
         assertThat(tCompasICDHeader)
                 .extracting(
-                        TCompasICDHeader::getContent,
                         TCompasICDHeader::getICDSystemVersionUUID,
                         TCompasICDHeader::getIEDType,
                         TCompasICDHeader::getIEDSubstationinstance,
@@ -582,7 +581,7 @@ class PrivateUtilsTest {
                         TCompasICDHeader::getHeaderVersion,
                         TCompasICDHeader::getHeaderRevision
                 )
-                .containsExactly("",
+                .containsExactly(
                         "IED4d4fe1a8cda64cf88a5ee4176a1a0eef",
                         TCompasIEDType.SCU,
                         BigInteger.ONE,
