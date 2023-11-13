@@ -131,27 +131,12 @@ public interface SclEditor {
     void importSTDElementsInSCD(SCL scd, List<SCL> stds, List<SubNetworkTypeDTO> subNetworkTypes) throws ScdException;
 
     /**
-     * Removes all ControlBlocks and DataSets for all LNs in SCL
-     *
-     * @param scl SCL file for which ControlBlocks and DataSets should be deleted
-     */
-    void removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(final SCL scl);
-
-    /**
      * Activate used LDevice and Deactivate unused LDevice in {@link TLNode <em><b>TLNode </b></em>}
      *
      * @param scd SCL file for which LDevice should be activated or deactivated
      * @return list of encountered errors
      */
     List<SclReportItem> updateLDeviceStatus(SCL scd);
-
-    /**
-     * Checks Control Blocks, DataSets and FCDA number limitation into Access Points
-     *
-     * @param scd SCL file for which LDevice should be activated or deactivated
-     * @return list of encountered errors
-     */
-    List<SclReportItem> analyzeDataGroups(SCL scd);
 
     /**
      * Update DAIs of DO InRef in all LN0 of the SCD using matching ExtRef information.
