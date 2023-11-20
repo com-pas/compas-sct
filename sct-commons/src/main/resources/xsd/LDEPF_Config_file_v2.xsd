@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+SPDX-FileCopyrightText: 2023 RTE FRANCE
+SPDX-License-Identifier: Apache-2.0
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.rte-france.com"
+		   targetNamespace="http://www.rte-france.com" elementFormDefault="qualified"
+		   attributeFormDefault="unqualified" version="1">
+
+	<xs:element name="EPF">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="History"/>
+				<xs:element ref="Version"/>
+				<xs:element ref="Channels"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="History" >
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Hitem" type="tHitem" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:complexType name="tHitem" mixed="true">
+		<xs:attribute name="version" type="xs:normalizedString" use="required"/>
+		<xs:attribute name="when" type="xs:normalizedString" use="required"/>
+		<xs:attribute name="who" type="xs:normalizedString"/>
+		<xs:attribute name="what" type="xs:normalizedString"/>
+	</xs:complexType>
+
+	<xs:element name="Version" >
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="SystemVersion" type="tSystemVersion" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:complexType name="tSystemVersion" mixed="true">
+		<xs:attribute name="MainSystemVersion" type="xs:normalizedString" use="required"/>
+	</xs:complexType>
+
+	<xs:element name="Channels" >
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Channel" type="tChannel" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:complexType name="tChannel">
+		<xs:attribute name="BayScope" type="tCBscopeType" use="required"/>
+		<xs:attribute name="ChannelType" type="tChannelType" use="optional"/>
+		<xs:attribute name="ChannelLongLabel" type="xs:string" use="optional"/>
+		<xs:attribute name="IEDType" type="xs:string" use="optional"/>
+		<xs:attribute name="IEDSystemVersionInstance" type="xs:string" use="optional"/>
+		<xs:attribute name="IEDRedundancy" type="tIEDredundancy" use="optional"/>
+		<xs:attribute name="ChannelShortLabel" type="xs:string" use="optional"/>
+		<xs:attribute name="ChannelMREP" type="tChannelMREP" use="optional"/>
+		<xs:attribute name="ChannelLevModQ" type="tChannelLevMod" use="optional"/>
+		<xs:attribute name="ChannelLevMod" type="tChannelLevMod" use="optional"/>
+		<xs:attribute name="BAPVariant" type="tBAPVariant" use="optional"/>
+		<xs:attribute name="BAPIgnoredValue" type="xs:string" use="optional"/>
+		<xs:attribute name="LDInst" type="xs:string" use="optional"/>
+		<xs:attribute name="LNPrefix" type="xs:string" use="optional"/>
+		<xs:attribute name="LNClass" type="xs:string" use="optional"/>
+		<xs:attribute name="LNInst" type="xs:string" use="optional"/>
+		<xs:attribute name="DOName" type="xs:string" use="optional"/>
+		<xs:attribute name="DOInst" type="xs:string" use="optional"/>
+		<xs:attribute name="SDOName" type="xs:string" use="optional"/>
+		<xs:attribute name="DAName" type="xs:string" use="optional"/>
+		<xs:attribute name="BDAName" type="xs:string" use="optional"/>
+		<xs:attribute name="sBDAName" type="xs:string" use="optional"/>
+		<xs:attribute name="ChannelNum" type="xs:string" use="optional"/>
+		<xs:attribute name="Opt" type="tOpt" use="optional"/>
+	</xs:complexType>
+
+	<xs:simpleType name="tCBscopeType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="BAY_EXTERNAL"/>
+			<xs:enumeration value="BAY_INTERNAL"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="tChannelType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="DIGITAL"/>
+			<xs:enumeration value="ANALOG"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="tIEDredundancy">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="A"/>
+			<xs:enumeration value="B"/>
+			<xs:enumeration value="C"/>
+			<xs:enumeration value="D"/>
+			<xs:enumeration value="None"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="tChannelMREP">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="X"/>
+			<xs:enumeration value=""/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="tChannelLevMod">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Other"/>
+			<xs:enumeration value="Negative or Falling"/>
+			<xs:enumeration value="Both"/>
+			<xs:enumeration value="NA"/>
+			<xs:enumeration value="Positive or Rising"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="tBAPVariant">
+		<xs:restriction base="xs:normalizedString">
+			<xs:enumeration value="N/A"/>
+			<xs:enumeration value="1: basic status input"/>
+			<xs:enumeration value="2: non essential status input"/>
+			<xs:enumeration value="3: essential status input"/>
+			<xs:enumeration value="4: basic analog input"/>
+			<xs:enumeration value="5: non essential analog input"/>
+			<xs:enumeration value="6: essential analog input"/>
+			<xs:enumeration value="7: critical analog input"/>
+			<xs:enumeration value="8: processed analog data"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="tOpt">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="P0"/>
+			<xs:enumeration value="P1"/>
+			<xs:enumeration value="P2"/>
+			<xs:enumeration value=""/>
+		</xs:restriction>
+	</xs:simpleType>
+
+</xs:schema>

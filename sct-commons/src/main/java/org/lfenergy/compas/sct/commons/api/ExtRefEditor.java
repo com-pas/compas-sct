@@ -9,7 +9,7 @@ import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.util.ILDEPFSettings;
+import org.lfenergy.compas.sct.commons.model.epf.EPF;
 
 import java.util.List;
 
@@ -55,11 +55,11 @@ public interface ExtRefEditor {
     List<SclReportItem> updateAllExtRefIedNames(SCL scd);
 
     /**
-     * ExtRef Binding For LDevice (inst=LDEPF) that matching LDEPF configuration
+     * ExtRef Binding For LDevice (inst=LDEPF) that matching EPF configuration
      * @param scd SCL
-     * @param settings ILDEPFSettings
+     * @param epf EPF
      * @return list of encountered errors
      */
-    List<SclReportItem> manageBindingForLDEPF(SCL scd, ILDEPFSettings settings);
+    List<SclReportItem> manageBindingForLDEPF(SCL scd, EPF epf);
 
 }

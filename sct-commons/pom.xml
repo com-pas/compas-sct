@@ -161,23 +161,41 @@
                 <version>3.1.0</version>
                 <executions>
                     <execution>
-                        <id>xjc</id>
+                        <id>scl</id>
                         <goals>
                             <goal>xjc</goal>
                         </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.outputDirectory}/xsd/SCL2007B4/SCL.xsd</source>
+                                <source>${project.build.outputDirectory}/xsd/SCL_CoMPAS.xsd</source>
+                            </sources>
+                            <xjbSources>
+                                <xjbSource>${project.basedir}/src/main/resources/binding_configuration.xjb</xjbSource>
+                            </xjbSources>
+                            <packageName>org.lfenergy.compas.scl2007b4.model</packageName>
+                            <noPackageLevelAnnotations>true</noPackageLevelAnnotations>
+                            <clearOutputDir>false</clearOutputDir>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>epf</id>
+                        <goals>
+                            <goal>xjc</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.basedir}/src/main/resources/xsd/LDEPF_Config_file_v2.xsd</source>
+                            </sources>
+                            <xjbSources>
+                                <xjbSource>${project.basedir}/src/main/resources/binding_configuration.xjb</xjbSource>
+                            </xjbSources>
+                            <packageName>org.lfenergy.compas.sct.commons.model.epf</packageName>
+                            <noPackageLevelAnnotations>true</noPackageLevelAnnotations>
+                            <clearOutputDir>false</clearOutputDir>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <sources>
-                        <source>${project.build.outputDirectory}/xsd/SCL2007B4/SCL.xsd</source>
-                        <source>${project.build.outputDirectory}/xsd/SCL_CoMPAS.xsd</source>
-                    </sources>
-                    <xjbSources>
-                        <xjbSource>${project.basedir}/src/main/resources/binding_configuration.xjb</xjbSource>
-                    </xjbSources>
-                    <packageName>org.lfenergy.compas.scl2007b4.model</packageName>
-                    <noPackageLevelAnnotations>true</noPackageLevelAnnotations>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
