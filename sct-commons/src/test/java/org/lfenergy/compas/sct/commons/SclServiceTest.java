@@ -17,8 +17,7 @@ import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.*;
-import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
-import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
+import org.lfenergy.compas.sct.commons.testhelpers.*;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -453,7 +452,7 @@ class SclServiceTest {
         List<SclReportItem> sclReportItems = sclService.updateDoInRef(givenScl);
         // Then
         assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
-        SclTestMarshaller.assertIsMarshallable(givenScl);
+        assertIsMarshallable(givenScl);
         assertThat(getValFromDaiName(givenScl, "IED_NAME1", ldInst, doName, daName)
                 .map(TVal::getValue))
                 .hasValue(expected);
@@ -520,7 +519,7 @@ class SclServiceTest {
                 .extracting(LNAdapter::getLNClass, LNAdapter::getLNInst).containsExactlyInAnyOrder(
                         Tuple.tuple("LGOS", "1"), Tuple.tuple("LGOS", "2"),
                         Tuple.tuple("LSVS", "1"), Tuple.tuple("LSVS", "2"));
-        SclTestMarshaller.assertIsMarshallable(scd);
+        assertIsMarshallable(scd);
     }
 
     @Test
@@ -541,7 +540,7 @@ class SclServiceTest {
                 .hasSize(2)
                 .extracting(LNAdapter::getLNClass, LNAdapter::getLNInst).containsExactlyInAnyOrder(
                         Tuple.tuple("LGOS", "3"), Tuple.tuple("LSVS", "9"));
-        SclTestMarshaller.assertIsMarshallable(scd);
+        assertIsMarshallable(scd);
     }
 
     @Test
@@ -566,7 +565,7 @@ class SclServiceTest {
                 .hasSize(2)
                 .extracting(LNAdapter::getLNClass, LNAdapter::getLNInst).containsExactlyInAnyOrder(
                         Tuple.tuple("LGOS", "3"), Tuple.tuple("LSVS", "9"));
-        SclTestMarshaller.assertIsMarshallable(scd);
+        assertIsMarshallable(scd);
     }
 
 }

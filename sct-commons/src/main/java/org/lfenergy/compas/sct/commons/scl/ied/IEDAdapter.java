@@ -5,7 +5,6 @@
 package org.lfenergy.compas.sct.commons.scl.ied;
 
 import lombok.NonNull;
-import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.ExtRefBindingInfo;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
@@ -22,6 +21,8 @@ import org.lfenergy.compas.sct.commons.util.Utils;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * A representation of the model object
@@ -169,7 +170,7 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
      * @return optional of <em>LDeviceAdapter</em>  object
      */
     public Optional<LDeviceAdapter> findLDeviceAdapterByLdInst(String ldInst) {
-        if (StringUtils.isBlank(ldInst)) {
+        if (isBlank(ldInst)) {
             return Optional.empty();
         }
         return streamLDevices()
@@ -230,7 +231,7 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
      * @return <em>Boolean</em> value of check result
      */
     public boolean matches(ObjectReference objRef) {
-        if (StringUtils.isBlank(getName())
+        if (isBlank(getName())
                 || !objRef.getLdName().startsWith(getName())) {
             return false;
         }

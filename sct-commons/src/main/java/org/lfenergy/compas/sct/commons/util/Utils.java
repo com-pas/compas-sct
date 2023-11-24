@@ -12,14 +12,7 @@ import jakarta.xml.bind.util.JAXBSource;
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
-import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
-import org.lfenergy.compas.sct.commons.dto.DaTypeName;
-import org.lfenergy.compas.sct.commons.dto.DoTypeName;
-import org.lfenergy.compas.sct.commons.dto.LDEPFSettingData;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
 
 import javax.xml.namespace.QName;
 import java.util.*;
@@ -392,75 +385,6 @@ public final class Utils {
                 && Utils.equalsOrBothBlank(t1.getSrcPrefix(), t2.getSrcPrefix())
                 && Utils.equalsOrBothBlank(t1.getSrcCBName(), t2.getSrcCBName())
                 && Objects.equals(t1.getServiceType(), t2.getServiceType());
-    }
-
-    /**
-     * verify whether the IED satisfies the LDEPF settings for  the private element `TCompasICDHeader`
-     */
-    public static boolean isIcdHeaderMatch(IEDAdapter iedAdapter,LDEPFSettingData setting) {
-        return iedAdapter.getCompasICDHeader()
-                .map(compasICDHeader -> compasICDHeader.getIEDType().value().equals(setting.getIedType())
-                        && compasICDHeader.getIEDredundancy().value().equals(setting.getIedRedundancy())
-                        && compasICDHeader.getIEDSystemVersioninstance().equals(setting.getIedInstance()))
-                .orElse(false);
-    }
-
-    /**
-     * provides Active LDevice for LDEPF setting's inst attribute
-     */
-    public static Optional<LDeviceAdapter> getActiveSourceLDevice(IEDAdapter iedAdapter, LDEPFSettingData setting) {
-        return iedAdapter.findLDeviceAdapterByLdInst(setting.getLdInst())
-                .filter(lDeviceAdapter -> lDeviceAdapter.getLDeviceStatus()
-                        .map(status -> status.equals(LdeviceStatus.ON.getValue()))
-                        .orElse(false))
-                .stream().findFirst();
-    }
-
-    /**
-     * provides Active LN Object that satisfies the LDEPF settings attributes (lnClass, lnInst, prefix)
-     */
-    public static Optional<AbstractLNAdapter<?>> getActiveLNodeSource(LDeviceAdapter lDeviceAdapter, LDEPFSettingData setting) {
-        return lDeviceAdapter.getLNAdaptersIncludingLN0().stream()
-                .filter(lnAdapter -> lnAdapter.getLNClass().equals(setting.getLnClass())
-                        && lnAdapter.getLNInst().equals(setting.getLnInst())
-                        && Utils.equalsOrBothBlank(setting.getLnPrefix(), lnAdapter.getPrefix()))
-                .findFirst()
-                .filter(lnAdapter -> lnAdapter.getDaiModStValValue()
-                        .map(status -> status.equals(LdeviceStatus.ON.getValue()))
-                        .orElse(true));
-    }
-
-
-    /**
-     * verify whether the LN satisfies the LDEPF settings for Data Type Template elements.
-     */
-    public static boolean isValidDataTypeTemplate(AbstractLNAdapter<?> lnAdapter,LDEPFSettingData setting) {
-        if(StringUtils.isEmpty(setting.getDoName()) || StringUtils.isBlank(setting.getDoName())){
-            return true;
-        }
-        String doName = StringUtils.isEmpty(setting.getDoInst()) || StringUtils.isBlank(setting.getDoInst()) || setting.getDoInst().equals("0")
-                ? setting.getDoName() : setting.getDoName() + setting.getDoInst();
-        DoTypeName doTypeName = new DoTypeName(doName);
-        if(!StringUtils.isEmpty(setting.getSdoName()) && !StringUtils.isBlank(setting.getSdoName())){
-            doTypeName.getStructNames().add(setting.getSdoName());
-        }
-        DaTypeName daTypeName = new DaTypeName(setting.getDaName());
-        if(!StringUtils.isEmpty(setting.getBdaName()) && !StringUtils.isBlank(setting.getBdaName())){
-            daTypeName.setBType(TPredefinedBasicTypeEnum.STRUCT);
-            daTypeName.getStructNames().add(setting.getBdaName());
-        }
-        if(!StringUtils.isEmpty(setting.getSbdaName()) && !StringUtils.isBlank(setting.getSbdaName())){
-            daTypeName.getStructNames().add(setting.getSbdaName());
-        }
-        return lnAdapter.getDataTypeTemplateAdapter().getLNodeTypeAdapterById(lnAdapter.getLnType())
-                .filter(lNodeTypeAdapter -> {
-                    try {
-                        lNodeTypeAdapter.check(doTypeName, daTypeName);
-                    } catch (Exception ex) {
-                        return false;
-                    }
-                    return true;
-                }).isPresent();
     }
 
 }
