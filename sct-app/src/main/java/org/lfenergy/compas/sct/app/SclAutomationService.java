@@ -7,6 +7,7 @@ package org.lfenergy.compas.sct.app;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.lfenergy.compas.scl2007b4.model.SCL;
+import org.lfenergy.compas.sct.commons.api.ControlBlockEditor;
 import org.lfenergy.compas.sct.commons.api.SclEditor;
 import org.lfenergy.compas.sct.commons.api.SubstationEditor;
 import org.lfenergy.compas.sct.commons.dto.HeaderDTO;
@@ -30,6 +31,7 @@ public class SclAutomationService {
 
     private final SclEditor sclEditor;
     private final SubstationEditor substationEditor;
+    private final ControlBlockEditor controlBlockEditor;
 
     /**
      * Possible Subnetwork and ConnectedAP names which should be used in generated SCD in order a have global coherence
@@ -56,7 +58,7 @@ public class SclAutomationService {
         }
         substationEditor.addSubstation(scd, ssd);
         sclEditor.importSTDElementsInSCD(scd, stds, SUB_NETWORK_TYPES);
-        sclEditor.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scd);
+        controlBlockEditor.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scd);
         return scd;
     }
 }

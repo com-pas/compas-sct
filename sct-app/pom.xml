@@ -29,11 +29,6 @@
         </dependency>
         <dependency>
             <groupId>org.lfenergy.compas</groupId>
-            <artifactId>sct-data</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.lfenergy.compas</groupId>
             <artifactId>sct-commons</artifactId>
             <type>test-jar</type>
             <version>${project.version}</version>

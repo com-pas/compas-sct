@@ -8,8 +8,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.LN0;
 import org.lfenergy.compas.scl2007b4.model.SCL;
-import org.lfenergy.compas.sct.commons.SclEditorService;
+import org.lfenergy.compas.sct.commons.ControlBlockService;
+import org.lfenergy.compas.sct.commons.SclService;
 import org.lfenergy.compas.sct.commons.SubstationService;
+import org.lfenergy.compas.sct.commons.api.ControlBlockEditor;
 import org.lfenergy.compas.sct.commons.api.SclEditor;
 import org.lfenergy.compas.sct.commons.api.SubstationEditor;
 import org.lfenergy.compas.sct.commons.dto.HeaderDTO;
@@ -29,8 +31,9 @@ import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.asse
 class SclAutomationServiceIntegrationTest {
 
     private SclAutomationService sclAutomationService ;
-    private static final SclEditor sclEditor = new SclEditorService() ;
+    private static final SclEditor sclEditor = new SclService() ;
     private static final SubstationEditor substationEditor = new SubstationService() ;
+    private static final ControlBlockEditor controlBlockEditor = new ControlBlockService() ;
 
     private HeaderDTO headerDTO;
 
@@ -40,7 +43,7 @@ class SclAutomationServiceIntegrationTest {
         headerDTO.setId(UUID.randomUUID());
         headerDTO.setRevision("hRevision");
         headerDTO.setVersion("hVersion");
-        sclAutomationService = new SclAutomationService(sclEditor, substationEditor);
+        sclAutomationService = new SclAutomationService(sclEditor, substationEditor, controlBlockEditor);
     }
 
     @Test
