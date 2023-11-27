@@ -211,26 +211,26 @@ class LNodeTypeAdapterTest {
         DoTypeName doTypeName1 = new DoTypeName("");
         DaTypeName daTypeName1 = new DaTypeName("");
         // When Then
-        assertThatThrownBy(() -> lNodeTypeAdapter.check(doTypeName1,daTypeName1)).isInstanceOf(ScdException.class);
+        assertThatThrownBy(() -> lNodeTypeAdapter.checkDoAndDaTypeName(doTypeName1,daTypeName1)).isInstanceOf(ScdException.class);
         DoTypeName doTypeName2 = new DoTypeName("do");
         DaTypeName daTypeName2 = new DaTypeName("");
         // When Then
-        assertThatThrownBy(() -> lNodeTypeAdapter.check(doTypeName2,daTypeName2)).isInstanceOf(ScdException.class);
+        assertThatThrownBy(() -> lNodeTypeAdapter.checkDoAndDaTypeName(doTypeName2,daTypeName2)).isInstanceOf(ScdException.class);
         DoTypeName doTypeName3 = new DoTypeName("do");
         DaTypeName daTypeName3 = new DaTypeName("da");
         // When Then
-        assertThatThrownBy(() -> lNodeTypeAdapter.check(doTypeName3,daTypeName3)).isInstanceOf(ScdException.class);
+        assertThatThrownBy(() -> lNodeTypeAdapter.checkDoAndDaTypeName(doTypeName3,daTypeName3)).isInstanceOf(ScdException.class);
         DoTypeName doTypeName = new DoTypeName("Op.res");
         DaTypeName daTypeName = new DaTypeName("d");
         // When Then
-        assertThatCode(() -> lNodeTypeAdapter.check(doTypeName,daTypeName)).doesNotThrowAnyException();
+        assertThatCode(() -> lNodeTypeAdapter.checkDoAndDaTypeName(doTypeName,daTypeName)).doesNotThrowAnyException();
         doTypeName.setName("StrVal");
         doTypeName.getStructNames().clear();
         daTypeName.setName("origin");
         daTypeName.getStructNames().clear();
         daTypeName.setStructNames(List.of("origin","ctlVal"));
         // When Then
-        assertThatCode(() -> lNodeTypeAdapter.check(doTypeName,daTypeName)).doesNotThrowAnyException();
+        assertThatCode(() -> lNodeTypeAdapter.checkDoAndDaTypeName(doTypeName,daTypeName)).doesNotThrowAnyException();
 
     }
 

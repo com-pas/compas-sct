@@ -11,6 +11,9 @@ import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
+import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
 import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
@@ -52,8 +55,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  *    </ul>
  * </ol>
  *
- * @see org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter
- * @see org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter
+ * @see LDeviceAdapter
+ * @see AbstractLNAdapter
  * @see org.lfenergy.compas.sct.commons.scl.ied.AbstractDAIAdapter
  * @see org.lfenergy.compas.scl2007b4.model.TSettingGroups
  * @see <a href="https://github.com/com-pas/compas-sct/issues/3" target="_blank">Issue !3 (Add new IEDs)</a>

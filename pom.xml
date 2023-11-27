@@ -134,6 +134,7 @@
                     <configuration>
                         <source>${java.version}</source>
                         <target>${java.version}</target>
+                        <compilerArgs>--enable-preview</compilerArgs>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -145,6 +146,11 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>2.22.2</version>
+                    <configuration>
+                        <!--keep the existing values using @{argLine} syntax-->
+                        <!-- https://maven.apache.org/surefire/maven-surefire-plugin/test-mojo.html#argLine -->
+                        <argLine>@{argLine} --enable-preview</argLine>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

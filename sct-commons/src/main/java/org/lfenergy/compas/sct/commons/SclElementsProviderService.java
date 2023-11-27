@@ -13,6 +13,8 @@ import org.lfenergy.compas.sct.commons.scl.com.CommunicationAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.EnumTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.*;
+import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -78,18 +80,14 @@ public class SclElementsProviderService implements SclElementsProvider {
             throw new ScdException("Internal binding can't have control block");
         }
 
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-
         // Get CBs
-        IEDAdapter srcIEDAdapter = sclRootAdapter.getIEDAdapterByName(bindingInfo.getIedName());
-        LDeviceAdapter srcLDeviceAdapter = srcIEDAdapter.findLDeviceAdapterByLdInst(extRefInfo.getBindingInfo().getLdInst())
-                .orElseThrow();
-
-        List<AbstractLNAdapter<?>> aLNAdapters = srcLDeviceAdapter.getLNAdaptersIncludingLN0();
-
-        return aLNAdapters.stream()
-                .map(abstractLNAdapter1 -> abstractLNAdapter1.getControlBlocksForMatchingFCDA(extRefInfo))
-                .flatMap(Collection::stream)
+        return new SclRootAdapter(scd)
+                .getIEDAdapterByName(bindingInfo.getIedName())
+                .findLDeviceAdapterByLdInst(extRefInfo.getBindingInfo().getLdInst())
+                .orElseThrow()
+                .getLNAdaptersIncludingLN0()
+                .stream()
+                .flatMap(lnAdapter -> lnAdapter.getControlBlocksForMatchingFCDA(extRefInfo))
                 .toList();
     }
 

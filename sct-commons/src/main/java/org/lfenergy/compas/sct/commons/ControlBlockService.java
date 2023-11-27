@@ -5,17 +5,23 @@
 package org.lfenergy.compas.sct.commons;
 
 import org.apache.commons.lang3.StringUtils;
-import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.sct.commons.api.ControlBlockEditor;
-import org.lfenergy.compas.sct.commons.dto.*;
+import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings;
 import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.NetworkRanges;
 import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.RangesPerCbType;
 import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.Settings;
 import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.SettingsOrError;
+import org.lfenergy.compas.sct.commons.dto.FcdaForDataSetsCreation;
+import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.*;
-import org.lfenergy.compas.sct.commons.util.*;
+import org.lfenergy.compas.sct.commons.scl.ied.ControlBlockAdapter;
+import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
+import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
+import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
+import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
 import java.util.stream.Stream;

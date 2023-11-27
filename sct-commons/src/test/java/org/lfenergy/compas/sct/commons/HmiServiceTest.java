@@ -8,11 +8,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.scl.ied.DataSetAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.LN0Adapter;
-import org.lfenergy.compas.sct.commons.scl.ied.LNAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
+import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.lfenergy.compas.sct.commons.util.CommonConstants;
-import org.lfenergy.compas.sct.commons.util.LdeviceStatus;
+import org.lfenergy.compas.sct.commons.util.ActiveStatus;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -151,7 +151,7 @@ class HmiServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-hmi-create-report-cb/scd_create_dataset_and_controlblocks_for_hmi.xml");
         LN0Adapter ln0 = findLn0(scd, "IedName1", "LdInst11");
         ln0.getDOIAdapterByName(CommonConstants.MOD_DO_NAME).getDataAdapterByName(CommonConstants.STVAL_DA_NAME).setVal("off");
-        assertThat(findLDevice(scd, "IedName1", "LdInst11").getLDeviceStatus()).hasValue(LdeviceStatus.OFF.getValue());
+        assertThat(findLDevice(scd, "IedName1", "LdInst11").getLDeviceStatus()).hasValue(ActiveStatus.OFF.getValue());
         TFCDA fcda = newFcda("LdInst11", "ANCR", "1", null, "DoName1", null, TFCEnum.ST);
         // When
         hmiService.createAllHmiReportControlBlocks(scd, List.of(fcda));

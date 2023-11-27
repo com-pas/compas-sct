@@ -2,14 +2,16 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.sct.commons.scl.ied;
+package org.lfenergy.compas.sct.commons.scl.ln;
 
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
-import org.lfenergy.compas.sct.commons.scl.LDeviceActivation;
+import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceActivation;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
+import org.lfenergy.compas.sct.commons.scl.ied.InputsAdapter;
+import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 
 import java.util.List;
@@ -22,7 +24,7 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL_DA_NAME
 
 /**
  * A representation of the model object
- * <em><b>{@link org.lfenergy.compas.sct.commons.scl.ied.LN0Adapter LN0Adapter}</b></em>.
+ * <em><b>{@link LN0Adapter LN0Adapter}</b></em>.
  * <p>
  * The following features are supported:
  * </p>
@@ -65,7 +67,7 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL_DA_NAME
  *  </pre>
  *
  * @see org.lfenergy.compas.scl2007b4.model.TLN0
- * @see org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter
+ * @see AbstractLNAdapter
  */
 public class LN0Adapter extends AbstractLNAdapter<LN0> {
 

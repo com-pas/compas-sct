@@ -10,8 +10,8 @@ import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.LNAdapter;
+import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
 
 import java.util.List;
 import java.util.Optional;

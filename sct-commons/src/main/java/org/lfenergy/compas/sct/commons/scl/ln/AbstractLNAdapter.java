@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: 2021 RTE FRANCE
 //
 // SPDX-License-Identifier: Apache-2.0
-package org.lfenergy.compas.sct.commons.scl.ied;
+package org.lfenergy.compas.sct.commons.scl.ln;
 
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.DataSetService;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
@@ -16,6 +17,8 @@ import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.EnumTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
+import org.lfenergy.compas.sct.commons.scl.ied.*;
+import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 
 import java.util.*;
@@ -28,7 +31,7 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL_DA_NAME
 
 /**
  * A representation of the model object
- * <em><b>{@link org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter AbstractLNAdapter}</b></em>.
+ * <em><b>{@link AbstractLNAdapter AbstractLNAdapter}</b></em>.
  * <p>
  * The following features are supported:
  * </p>
@@ -321,22 +324,10 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      * @param extRefInfo ExtRef signal data for which Control Blocks should be found (contain binding info to match with FCDA)
      * @return list of <em>ControlBlock</em> object as ControlBlocks of LNode matching FCDA and ExtRef
      */
-    public List<ControlBlock> getControlBlocksForMatchingFCDA(@NonNull ExtRefInfo extRefInfo) {
-        List<TDataSet> tDataSets = this.getDataSetMatchingExtRefInfo(extRefInfo);
-        return getControlBlocks(tDataSets, extRefInfo.getBindingInfo().getServiceType());
-    }
-
-    /**
-     * Gets all Control Blocks from LNode for specified Service Type (GOOSE, SMV and REPORT) and Data Sets
-     *
-     * @param tDataSets   Data Sets for which Control Blocks are needed
-     * @param serviceType Service Type of Control Blocks needed
-     * @return list of <em>ControlBlock</em> objects
-     */
-    protected List<ControlBlock> getControlBlocks(List<TDataSet> tDataSets, TServiceType serviceType) {
-        return tDataSets.stream()
-                .map(tDataSet -> getControlBlocksByDataSetRef(tDataSet.getName(), serviceType))
-                .flatMap(Collection::stream).toList();
+    public Stream<ControlBlock> getControlBlocksForMatchingFCDA(@NonNull ExtRefInfo extRefInfo) {
+        return getDataSetMatchingExtRefInfo(extRefInfo)
+                .map(TDataSet::getName)
+                .flatMap(dataSetName -> getControlBlocksByDataSetRef(dataSetName, extRefInfo.getBindingInfo().getServiceType()));
     }
 
     /**
@@ -346,34 +337,39 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      * @param serviceType service type to be filtered
      * @return all Control Blocks matching dataSetRef and a Service Type or all Service Types
      */
-    private List<ControlBlock> getControlBlocksByDataSetRef(String dataSetRef, TServiceType serviceType) {
+    public Stream<ControlBlock> getControlBlocksByDataSetRef(String dataSetRef, TServiceType serviceType) {
         Stream<ControlBlock> streamGSEControl = Stream.empty();
         Stream<ControlBlock> streamSMVControl = Stream.empty();
         Stream<ControlBlock> streamReportControl = Stream.empty();
         LNodeMetaData metaData = LNodeMetaData.from(this);
-        if (isLN0() && (serviceType == null || serviceType == TServiceType.GOOSE)) {
-            streamGSEControl = getTControlsByType(TGSEControl.class)
-                    .stream()
-                    .filter(tControl -> dataSetRef.equals(tControl.getDatSet()))
-                    .map(tgseControl -> {
-                        GooseControlBlock gseCbl = new GooseControlBlock(tgseControl);
-                        gseCbl.setMetaData(metaData);
-                        return gseCbl;
-                    });
 
+        if (isLN0()) {
+            LN0 ln0 = (LN0) currentElem;
+            if (serviceType == null || serviceType == TServiceType.GOOSE) {
+                streamGSEControl = ln0.getGSEControl()
+                        .stream()
+                        .filter(tControl -> dataSetRef.equals(tControl.getDatSet()))
+                        .map(tgseControl -> {
+                            GooseControlBlock gseCbl = new GooseControlBlock(tgseControl);
+                            gseCbl.setMetaData(metaData);
+                            return gseCbl;
+                        });
+
+            }
+            if (serviceType == null || serviceType == TServiceType.SMV) {
+                streamSMVControl = ln0.getSampledValueControl()
+                        .stream()
+                        .filter(tControl -> dataSetRef.equals(tControl.getDatSet()))
+                        .map(sampledValueControl -> {
+                            SMVControlBlock smvCbl = new SMVControlBlock(sampledValueControl);
+                            smvCbl.setMetaData(metaData);
+                            return smvCbl;
+                        });
+            }
         }
-        if (isLN0() && (serviceType == null || serviceType == TServiceType.SMV)) {
-            streamSMVControl = getTControlsByType(TSampledValueControl.class)
-                    .stream()
-                    .filter(tControl -> dataSetRef.equals(tControl.getDatSet()))
-                    .map(sampledValueControl -> {
-                        SMVControlBlock smvCbl = new SMVControlBlock(sampledValueControl);
-                        smvCbl.setMetaData(metaData);
-                        return smvCbl;
-                    });
-        }
+        //REPORT
         if (serviceType == null || serviceType == TServiceType.REPORT) {
-            streamReportControl = getTControlsByType(TReportControl.class)
+            streamReportControl = currentElem.getReportControl()
                     .stream()
                     .filter(tControl -> dataSetRef.equals(tControl.getDatSet()))
                     .map(reportControl -> {
@@ -382,7 +378,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                         return rptCbl;
                     });
         }
-        return Stream.concat(Stream.concat(streamGSEControl, streamSMVControl), streamReportControl).toList();
+        return Stream.concat(Stream.concat(streamGSEControl, streamSMVControl), streamReportControl);
     }
 
     /**
@@ -400,7 +396,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         } else if (TReportControl.class.equals(cls)) {
             return (List<V>) currentElem.getReportControl();
         }
-        throw new IllegalArgumentException("Unsupported ControlBlock %s for %s element".formatted(cls.getSimpleName(), elementXPath()));
+        throw new IllegalArgumentException("Unsupported ControlBlock "+cls.getSimpleName()+" for Lnode");
     }
 
     /**
@@ -431,20 +427,13 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
     /**
      * retrieves all DataSets for which at least one FCDA matches with data given in ExtRefInfo for external binding
      *
-     * @param filter contains data for external binding which should match with FCDAs values
+     * @param extRefInfo contains data for external binding which should match with FCDAs values
      * @return list of Data for which at least one FCDA matches with filter datas
      */
-    public List<TDataSet> getDataSetMatchingExtRefInfo(ExtRefInfo filter) {
-        if (filter == null) {
-            return currentElem.getDataSet();
-        }
+    public Stream<TDataSet> getDataSetMatchingExtRefInfo(@NonNull ExtRefInfo extRefInfo) {
         return currentElem.getDataSet()
                 .stream()
-                .filter(tDataSet -> tDataSet.getFCDA()
-                        .stream()
-                        .anyMatch(filter::checkMatchingFCDA)
-                )
-                .toList();
+                .filter(tDataSet -> tDataSet.getFCDA().stream().anyMatch(extRefInfo::checkMatchingFCDA));
     }
 
     /**
@@ -835,20 +824,6 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
     }
 
     /**
-     * Gets Data Set in LNode by its name
-     *
-     * @param dataSetName Data Set name
-     * @return optional of <em>DataSetInfo</em>
-     */
-    public Optional<DataSetInfo> getDataSetByName(String dataSetName) {
-        return currentElem.getDataSet()
-                .stream()
-                .filter(tDataSet -> tDataSet.getName().equals(dataSetName))
-                .map(DataSetInfo::from)
-                .findFirst();
-    }
-
-    /**
      * Gets DAI values for specified DA in summaraized Data Type Template
      *
      * @param dataAttributeRef summaraized Data Type Template containing DA datas
@@ -917,16 +892,16 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      * @see LDeviceAdapter#hasDataSetCreationCapability
      */
     public DataSetAdapter createDataSetIfNotExists(String dataSetName, ControlBlockEnum controlBlockEnum) {
-        return findDataSetByName(dataSetName).orElseGet(() -> {
-            if (!getParentLDevice().hasDataSetCreationCapability(controlBlockEnum)) {
-                throw new ScdException("IED/AccessPoint does not have capability to create DataSet of type %s in %s"
-                        .formatted(controlBlockEnum, getXPath()));
-            }
-            TDataSet newDataSet = new TDataSet();
-            newDataSet.setName(dataSetName);
-            currentElem.getDataSet().add(newDataSet);
-            return new DataSetAdapter(this, newDataSet);
-        });
+        return findDataSetByName(dataSetName)
+                .orElseGet(() -> {
+                    if (!getParentLDevice().hasDataSetCreationCapability(controlBlockEnum)) {
+                        throw new ScdException("IED/AccessPoint does not have capability to create DataSet of type " + controlBlockEnum + " in " + getXPath());
+                    }
+                    TDataSet newDataSet = new TDataSet();
+                    newDataSet.setName(dataSetName);
+                    getCurrentElem().getDataSet().add(newDataSet);
+                    return new DataSetAdapter(this, newDataSet);
+                });
     }
 
     /**
@@ -952,7 +927,8 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
             );
         }
 
-        if (this.getDataSetByName(controlBlock.getDataSetRef()).isEmpty()) {
+        DataSetService dataSetService = new DataSetService();
+        if (dataSetService.findDataSet(currentElem, tDataSet -> tDataSet.getName().equals(controlBlock.getDataSetRef())).isEmpty()) {
             throw new ScdException("Cannot create ControlBlock %s %s because target DataSet %s does not exists in %s"
                     .formatted(controlBlock.getClass().getSimpleName(), controlBlock.getName(), controlBlock.getDataSetRef(), getXPath())
             );

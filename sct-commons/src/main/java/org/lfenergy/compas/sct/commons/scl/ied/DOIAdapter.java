@@ -8,6 +8,7 @@ import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
@@ -51,7 +52,7 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
      * @param parentAdapter Parent container reference
      * @param currentElem   Current reference
      */
-    protected DOIAdapter(AbstractLNAdapter<? extends TAnyLN> parentAdapter, TDOI currentElem) {
+    public DOIAdapter(AbstractLNAdapter<? extends TAnyLN> parentAdapter, TDOI currentElem) {
         super(parentAdapter, currentElem);
     }
 

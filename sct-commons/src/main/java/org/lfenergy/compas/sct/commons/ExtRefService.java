@@ -8,10 +8,19 @@ import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.api.ExtRefEditor;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.model.epf.*;
+import org.lfenergy.compas.sct.commons.model.epf.EPF;
+import org.lfenergy.compas.sct.commons.model.epf.TCBscopeType;
+import org.lfenergy.compas.sct.commons.model.epf.TChannel;
+import org.lfenergy.compas.sct.commons.model.epf.TChannelType;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.*;
-import org.lfenergy.compas.sct.commons.util.*;
+import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
+import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
+import org.lfenergy.compas.sct.commons.util.ActiveStatus;
+import org.lfenergy.compas.sct.commons.util.PrivateEnum;
+import org.lfenergy.compas.sct.commons.util.PrivateUtils;
+import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
 import java.util.function.Function;
@@ -19,7 +28,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.*;
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
-import static org.lfenergy.compas.sct.commons.util.Utils.*;
+import static org.lfenergy.compas.sct.commons.util.Utils.isExtRefFeedBySameControlBlock;
 
 public class ExtRefService implements ExtRefEditor {
     private static final String INVALID_OR_MISSING_ATTRIBUTES_IN_EXT_REF_BINDING_INFO = "Invalid or missing attributes in ExtRef binding info";
@@ -217,7 +226,9 @@ public class ExtRefService implements ExtRefEditor {
                                 .map(lnAdapter -> isValidDataTypeTemplate(lnAdapter, channel))
                                 .orElse(false))
                         .orElse(false))
-                .map(IEDAdapter::getCurrentElem).limit(2).toList();
+                .map(IEDAdapter::getCurrentElem)
+                .limit(2)
+                .toList();
     }
 
     /**
@@ -259,10 +270,10 @@ public class ExtRefService implements ExtRefEditor {
      * @return LDeviceAdapter object that matches the EPF channel
      */
     private static Optional<LDeviceAdapter> getActiveSourceLDeviceByLDEPFChannel(IEDAdapter iedAdapter, TChannel channel) {
-        return iedAdapter.findLDeviceAdapterByLdInst(channel.getLDInst())
-                .filter(lDeviceAdapter -> new Ldevice(lDeviceAdapter.getCurrentElem()).getLdeviceStatus()
-                        .map(status -> status.equals(LdeviceStatus.ON))
-                        .orElse(false));
+        LdeviceService ldeviceService = new LdeviceService();
+        return ldeviceService.findLdevice(iedAdapter.getCurrentElem(), tlDevice -> tlDevice.getInst().equals(channel.getLDInst()))
+                .filter(tlDevice -> ldeviceService.getLdeviceStatus(tlDevice).map(ActiveStatus.ON::equals).orElse(false))
+                .map(tlDevice -> new LDeviceAdapter(iedAdapter, tlDevice));
     }
 
     /**
@@ -272,13 +283,14 @@ public class ExtRefService implements ExtRefEditor {
      * @return AbstractLNAdapter object that matches the EPF channel
      */
     private static Optional<AbstractLNAdapter<?>> getActiveLNSourceByLDEPFChannel(LDeviceAdapter lDeviceAdapter, TChannel channel) {
-        return lDeviceAdapter.getLNAdaptersIncludingLN0().stream()
+        return lDeviceAdapter.getLNAdaptersIncludingLN0()
+                .stream()
                 .filter(lnAdapter -> lnAdapter.getLNClass().equals(channel.getLNClass())
                         && lnAdapter.getLNInst().equals(channel.getLNInst())
                         && trimToEmpty(channel.getLNPrefix()).equals(trimToEmpty(lnAdapter.getPrefix())))
                 .findFirst()
                 .filter(lnAdapter -> lnAdapter.getDaiModStValValue()
-                        .map(status -> status.equals(LdeviceStatus.ON.getValue()))
+                        .map(status -> status.equals(ActiveStatus.ON.getValue()))
                         .orElse(true));
     }
 
@@ -308,7 +320,7 @@ public class ExtRefService implements ExtRefEditor {
         return lnAdapter.getDataTypeTemplateAdapter().getLNodeTypeAdapterById(lnAdapter.getLnType())
                 .filter(lNodeTypeAdapter -> {
                     try {
-                        lNodeTypeAdapter.check(doTypeName, daTypeName);
+                        lNodeTypeAdapter.checkDoAndDaTypeName(doTypeName, daTypeName);
                     } catch (ScdException ex) {
                         return false;
                     }
@@ -358,7 +370,7 @@ public class ExtRefService implements ExtRefEditor {
             case DU_DA_NAME -> setting.getChannelShortLabel();
             case SETVAL_DA_NAME ->
                     LN_PREFIX_B.equals(lnAdapter.getPrefix()) || LN_PREFIX_A.equals(lnAdapter.getPrefix()) ? setting.getChannelLevModQ().value() : setting.getChannelLevMod().value();
-            case STVAL_DA_NAME -> LdeviceStatus.ON.getValue();
+            case STVAL_DA_NAME -> ActiveStatus.ON.getValue();
             case SETSRCREF_DA_NAME -> computeDaiValue(lnAdapter, extRef, setting.getDAName());
             default -> null;
         };

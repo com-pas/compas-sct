@@ -2,13 +2,14 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.sct.commons.scl.ied;
+package org.lfenergy.compas.sct.commons.scl.ln;
 
 import org.lfenergy.compas.scl2007b4.model.TLN;
 import org.lfenergy.compas.scl2007b4.model.TServiceType;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
+import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.List;
 
 /**
  * A representation of the model object
- * <em><b>{@link org.lfenergy.compas.sct.commons.scl.ied.LNAdapter LNAdapter}</b></em>.
+ * <em><b>{@link LNAdapter LNAdapter}</b></em>.
  * <p>
  * The following features are supported:
  * </p>
@@ -58,9 +59,9 @@ import java.util.List;
  *      <b>LNName</b> = "prefix" + "lnClass" + "lnInst"
  *  </pre>
  * @see org.lfenergy.compas.scl2007b4.model.TAnyLN
- * @see org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter
+ * @see AbstractLNAdapter
  */
-public class LNAdapter extends AbstractLNAdapter<TLN>{
+public class LNAdapter extends AbstractLNAdapter<TLN> {
 
     /**
      * Constructor

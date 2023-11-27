@@ -8,8 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
-import org.lfenergy.compas.sct.commons.scl.ied.AbstractLNAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.LDeviceAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
+import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 
 /**
  * A representation of common attributes that defines <em><b>LDName, LNName</b></em>.

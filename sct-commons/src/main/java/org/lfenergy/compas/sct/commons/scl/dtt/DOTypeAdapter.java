@@ -466,9 +466,8 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
                 }
                 DataAttributeRef currentDataAttributeRef = DataAttributeRef.copyFrom(rootDataAttributeRef);
                 currentDataAttributeRef.addDoStructName(tsdo.getName());
-                parentAdapter.getDOTypeAdapterById(tsdo.getType()).ifPresent(
-                    doTypeAdapter ->
-                        resultDataAttributeRefs.addAll(doTypeAdapter.getDataAttributeRefs(currentDataAttributeRef, filter)));
+                parentAdapter.getDOTypeAdapterById(tsdo.getType())
+                        .ifPresent(doTypeAdapter -> resultDataAttributeRefs.addAll(doTypeAdapter.getDataAttributeRefs(currentDataAttributeRef, filter)));
             }
         }
         return resultDataAttributeRefs;
@@ -486,8 +485,8 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
      * @param da DA containing information to summarize
      * @return list of completed Data Attribute References beginning from this DoType.
      */
-    private List<DataAttributeRef> getDataAttributeRefsOfDA(DataAttributeRef rootDataAttributeRef, DataAttributeRef filter, TDA da){
-        if(excludedByFilter(filter, da)){
+    private List<DataAttributeRef> getDataAttributeRefsOfDA(DataAttributeRef rootDataAttributeRef, DataAttributeRef filter, TDA da) {
+        if (excludedByFilter(filter, da)) {
             return Collections.emptyList();
         }
         DataAttributeRef currentDataAttributeRef = DataAttributeRef.copyFrom(rootDataAttributeRef);
@@ -496,8 +495,8 @@ public class DOTypeAdapter extends AbstractDataTypeAdapter<TDOType> {
         currentDataAttributeRef.getDaName().setBType(da.getBType());
         if(da.getBType() == TPredefinedBasicTypeEnum.STRUCT){
             return parentAdapter.getDATypeAdapterById(da.getType())
-                .map(daTypeAdapter -> daTypeAdapter.getDataAttributeRefs(currentDataAttributeRef, filter))
-                .orElse(Collections.emptyList());
+                    .map(daTypeAdapter -> daTypeAdapter.getDataAttributeRefs(currentDataAttributeRef, filter))
+                    .orElse(Collections.emptyList());
         } else {
             currentDataAttributeRef.getDaName().setType(da.getType());
             currentDataAttributeRef.getDaName().setValImport(da.isValImport());

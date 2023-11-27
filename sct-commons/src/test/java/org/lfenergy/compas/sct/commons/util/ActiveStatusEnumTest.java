@@ -11,16 +11,16 @@ import org.junit.jupiter.params.provider.CsvSource;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
-class LdeviceStatusEnumTest {
+class ActiveStatusEnumTest {
 
     @ParameterizedTest
     @CsvSource({"on,ON", "off,OFF"})
     void fromValue_withKnownStatus_shouldNotThrowException(String ldeviceStatus, String expected) {
         //Given
         //When
-        LdeviceStatus ldeviceStatusEnum = LdeviceStatus.fromValue(ldeviceStatus);
+        ActiveStatus activeStatusEnum = ActiveStatus.fromValue(ldeviceStatus);
         //Then
-        assertThat(ldeviceStatusEnum).isEqualTo(LdeviceStatus.valueOf(expected));
+        assertThat(activeStatusEnum).isEqualTo(ActiveStatus.valueOf(expected));
     }
 
     @Test
@@ -29,8 +29,8 @@ class LdeviceStatusEnumTest {
         String ldeviceStatus = "patate";
         //When
         //Then
-        assertThatCode(() -> LdeviceStatus.fromValue(ldeviceStatus))
+        assertThatCode(() -> ActiveStatus.fromValue(ldeviceStatus))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("The Ldevice status patate does not exist. It should be among [on, off]");
+                .hasMessage("The status patate does not exist. It should be among [on, off]");
     }
 }
