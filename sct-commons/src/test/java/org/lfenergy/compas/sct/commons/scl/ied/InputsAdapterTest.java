@@ -11,36 +11,33 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.dto.FcdaForDataSetsCreation;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
+import org.lfenergy.compas.sct.commons.model.cb_po.PO;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
 import org.lfenergy.compas.sct.commons.testhelpers.FCDARecord;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
-import org.lfenergy.compas.sct.commons.util.CsvUtils;
 import org.opentest4j.AssertionFailedError;
 
-import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.junit.jupiter.api.Named.named;
+import static org.lfenergy.compas.sct.commons.testhelpers.FcdaTestHelper.createFcdaFilterList;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
 
 class InputsAdapterTest {
 
-    private Set<FcdaForDataSetsCreation> allowedFcdas;
+    private PO allowedFcdas;
 
     @BeforeEach
     void init() {
-        allowedFcdas = new HashSet<>(CsvUtils.parseRows("FcdaCandidates.csv", StandardCharsets.UTF_8, FcdaForDataSetsCreation.class));
+        allowedFcdas = createFcdaFilterList();
     }
 
     @Test
@@ -189,20 +186,20 @@ class InputsAdapterTest {
                 List.of(new FCDARecord("LD_INST21", "ANCR", "1", "", "DoName", null, TFCEnum.ST))),
             Arguments.of(named("for Report, should get source daName from ExtRef.desc to deduce FC MX",
                     "test ServiceType is Report_daReportMX_1"),
-                "IED_NAME2/LD_INST21/DS_LD_INST21_CYCI",
-                List.of(new FCDARecord("LD_INST21", "ANCR", "1", "", "DoName", null, TFCEnum.MX))),
-            Arguments.of(named("should ignore instance number when checking FCDA Candidate file",
-                    "test no daName and doName with instance number"),
-                "IED_NAME2/LD_INST21/DS_LD_INST21_GSI",
-                List.of(new FCDARecord("LD_INST21", "ANCR", "1", "", "DoWithInst1", "daNameST", TFCEnum.ST))),
-            Arguments.of(named("should ignore instance number when checking FCDA Candidate file (DO with SDO)",
-                    "test no daName and doName with instance number and SDO"),
-                "IED_NAME2/LD_INST21/DS_LD_INST21_GSI",
-                List.of(new FCDARecord("LD_INST21", "ANCR", "1", "", "DoWithInst2.subDo", "daNameST", TFCEnum.ST))),
-            Arguments.of(named("hould include UNTESTED FlowStatus",
-                    "test include compas:Flow.FlowStatus UNTESTED"),
-                "IED_NAME2/LD_INST21/DS_LD_INST21_GSI",
-                List.of(new FCDARecord("LD_INST21", "ANCR", "1", "", "DoName", "daNameST", TFCEnum.ST)))
+                    "IED_NAME2/LD_INST21/DS_LD_INST21_CYCI",
+                    List.of(new FCDARecord("LD_INST21", "ANCR", "1", "", "DoName", null, TFCEnum.MX))),
+                Arguments.of(named("should ignore instance number when checking FCDA Candidate file",
+                                "test no daName and doName with instance number"),
+                        "IED_NAME2/LD_INST21/DS_LD_INST21_GSI",
+                        List.of(new FCDARecord("LD_INST21", "ANCR", "1", "", "DoWithInst1", "daNameST", TFCEnum.ST))),
+                Arguments.of(named("should ignore instance number when checking FCDA Candidate file (DO with SDO)",
+                                "test no daName and doName with instance number and SDO"),
+                        "IED_NAME2/LD_INST21/DS_LD_INST21_GSI",
+                        List.of(new FCDARecord("LD_INST21", "ANCR", "1", "", "DoWithInst2.subDo", "daNameST", TFCEnum.ST))),
+                Arguments.of(named("should include UNTESTED FlowStatus",
+                                "test include compas:Flow.FlowStatus UNTESTED"),
+                        "IED_NAME2/LD_INST21/DS_LD_INST21_GSI",
+                        List.of(new FCDARecord("LD_INST21", "ANCR", "1", "", "DoName", "daNameST", TFCEnum.ST)))
         );
     }
 

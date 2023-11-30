@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+SPDX-FileCopyrightText: 2023 RTE FRANCE
+SPDX-License-Identifier: Apache-2.0
+-->
+<xs:schema xmlns="http://www.rte-france.com"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.rte-france.com" elementFormDefault="qualified" attributeFormDefault="unqualified"
+           version="1">
+
+    <xs:element name="PO">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="History"/>
+                <xs:element ref="Version"/>
+                <xs:element ref="FCDAs"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="History">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="Hitem" type="tHitem" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="tHitem" mixed="true">
+        <xs:attribute name="version" type="xs:normalizedString" use="required"/>
+        <xs:attribute name="when" type="xs:normalizedString" use="required"/>
+        <xs:attribute name="who" type="xs:normalizedString"/>
+        <xs:attribute name="what" type="xs:normalizedString"/>
+    </xs:complexType>
+
+    <xs:element name="Version">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="SystemVersion" type="tSystemVersion" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="tSystemVersion" mixed="true">
+        <xs:attribute name="MainSystemVersion" type="xs:normalizedString" use="required"/>
+    </xs:complexType>
+
+    <xs:element name="FCDAs">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="FCDA" type="tFcdaFilter" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="tFcdaFilter">
+        <xs:attribute name="ldInst" type="xs:string" use="required"/>
+        <xs:attribute name="prefix" type="xs:string" use="optional"/>
+        <xs:attribute name="lnClass" type="xs:string" use="required"/>
+        <xs:attribute name="lnInst" type="xs:string" use="required"/>
+        <xs:attribute name="doName" type="xs:string" use="required"/>
+        <xs:attribute name="daName" type="xs:string" use="required"/>
+        <xs:attribute name="fc" type="tfc" use="required"/>
+    </xs:complexType>
+
+    <xs:simpleType name="tfc">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="ST"/>
+            <xs:enumeration value="MX"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+</xs:schema>

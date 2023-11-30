@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.model.cb_po.PO;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.ControlBlockAdapter;
@@ -357,7 +358,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
         return aLNAdapters;
     }
 
-    public List<SclReportItem> createDataSetAndControlBlocks(Set<FcdaForDataSetsCreation> allowedFcdas) {
+    public List<SclReportItem> createDataSetAndControlBlocks(PO allowedFcdas) {
         LN0Adapter ln0Adapter = getLN0Adapter();
         if (!ln0Adapter.hasInputs()) {
             return Collections.emptyList();
