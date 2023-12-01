@@ -45,7 +45,7 @@ public class DAAdapter extends AbstractDataAttributeAdapter<DOTypeAdapter, TDA> 
      * @param parentAdapter Parent container reference
      * @param currentElem Current reference
      */
-    protected DAAdapter(DOTypeAdapter parentAdapter, TDA currentElem) {
+    public DAAdapter(DOTypeAdapter parentAdapter, TDA currentElem) {
         super(parentAdapter, currentElem);
     }
 
