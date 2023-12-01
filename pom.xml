@@ -36,7 +36,7 @@
         <sonar.coverage.exclusions>sct-coverage/**</sonar.coverage.exclusions>
         <aggregate.report.dir>../sct-coverage/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>
         <sonar.coverage.jacoco.xmlReportPaths>${basedir}/${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
-        <compas-core.version>0.15.0</compas-core.version>
+        <compas-core.version>0.17.0</compas-core.version>
         <compas-scl-xsd.version>0.0.4</compas-scl-xsd.version>
         <maven.plugin.javadoc>3.4.1</maven.plugin.javadoc>
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
