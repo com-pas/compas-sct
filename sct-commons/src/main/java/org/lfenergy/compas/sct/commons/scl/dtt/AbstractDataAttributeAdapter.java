@@ -168,7 +168,7 @@ public abstract class AbstractDataAttributeAdapter<P extends SclElementAdapter,T
         if(getBType() == TPredefinedBasicTypeEnum.ENUM){
             EnumTypeAdapter enumTypeAdapter = getDataTypeTemplateAdapter().getEnumTypeAdapterById(getType())
                     .orElseThrow(
-                            () -> new ScdException("")
+                            () -> new ScdException(String.format("Unknown EnumType(%s) referenced by DA/BDA(%s)", getType(), getName()))
                     );
             String val = daTypeName.getDaiValues().values().stream().findFirst().orElse(null);
             if(val != null && !enumTypeAdapter.hasValue(val)){

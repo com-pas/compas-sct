@@ -62,8 +62,6 @@ class IcdHeaderTest {
     }
 
     private static Stream<Arguments> provideIcdHeaderForEquals() {
-        TCompasICDHeader tCompasICDHeaderModifiedContent = createHeader();
-        tCompasICDHeaderModifiedContent.setContent("patate");
         TCompasICDHeader tCompasICDHeaderModifiedIedSubstationinstance = createHeader();
         tCompasICDHeaderModifiedIedSubstationinstance.setIEDSubstationinstance(BigInteger.TEN);
         TCompasICDHeader tCompasICDHeaderModifiediedSystemVersioninstance = createHeader();
@@ -73,7 +71,6 @@ class IcdHeaderTest {
         TCompasICDHeader tCompasICDHeaderModifiedbayLabel = createHeader();
         tCompasICDHeaderModifiedbayLabel.setBayLabel("patate");
         return Stream.of(
-                Arguments.of(new IcdHeader(tCompasICDHeaderModifiedContent)),
                 Arguments.of(new IcdHeader(tCompasICDHeaderModifiedIedSubstationinstance)),
                 Arguments.of(new IcdHeader(tCompasICDHeaderModifiediedSystemVersioninstance)),
                 Arguments.of(new IcdHeader(tCompasICDHeaderModifiediedName)),
@@ -150,7 +147,6 @@ class IcdHeaderTest {
 
     private static TCompasICDHeader createHeader() {
         TCompasICDHeader tCompasICDHeader = new TCompasICDHeader();
-        tCompasICDHeader.setContent("content");
         tCompasICDHeader.setICDSystemVersionUUID("icdSystemVersionUUID");
         tCompasICDHeader.setIEDType(TCompasIEDType.SCU);
         tCompasICDHeader.setIEDSubstationinstance(BigInteger.ONE);
