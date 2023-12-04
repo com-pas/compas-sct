@@ -9,6 +9,7 @@ import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings;
 import org.lfenergy.compas.sct.commons.dto.FcdaForDataSetsCreation;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
+import org.lfenergy.compas.sct.commons.model.cbcom.CBCom;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.List;
@@ -85,17 +86,14 @@ public interface ControlBlockEditor {
      * - the Communication/SubNetwork/ConnectedAP/GSE element, for the GSEControl blocks
      * - the Communication/SubNetwork/ConnectedAP/SMV element, for the SampledValueControl blocks
      *
-     * @param scd                         input SCD object. The object will be modified with the new DataGSESet and SMV elements
-     * @param controlBlockNetworkSettings a method tha gives the network configuration information for a given ControlBlock
-     * @param rangesPerCbType             provide NetworkRanges for GSEControl and SampledValueControl. NetworkRanges contains :
-     *                                    start-end app APPID range (long value), start-end MAC-Addresses (Mac-Addresses values: Ex: "01-0C-CD-01-01-FF")
+     * @param scd   input SCD object. The object will be modified with the new DataGSESet and SMV elements
+     * @param cbCom
      * @return list of encountered errors
      * @see Utils#macAddressToLong(String) for the expected MAC address format
      * @see ControlBlockNetworkSettings
      * @see ControlBlockNetworkSettings.RangesPerCbType
      * @see ControlBlockNetworkSettings.NetworkRanges
      */
-    List<SclReportItem> configureNetworkForAllControlBlocks(SCL scd, ControlBlockNetworkSettings controlBlockNetworkSettings,
-                                                            ControlBlockNetworkSettings.RangesPerCbType rangesPerCbType);
+    List<SclReportItem> configureNetworkForAllControlBlocks(SCL scd, CBCom cbCom);
 
 }

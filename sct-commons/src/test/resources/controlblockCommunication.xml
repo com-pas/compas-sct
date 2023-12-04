@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-FileCopyrightText: 2023 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+<CBCom xmlns="http://www.rte-france.com/cbcom">
+    <History>
+        <Hitem Version="01.00.00" When="20231127" Who="BMA" What="Conversion en XML du fichier 2023.04.14_LDEPF_Setting_file.xlsx"/>
+    </History>
+    <Version>
+        <SystemVersion MainSystemVersion="01.01"/>
+    </Version>
+    <AppIdRanges>
+        <AppIdRange CBType="GOOSE" Start="0000" End="3FFF"/>
+        <AppIdRange CBType="SV" Start="4000" End="7FFF"/>
+    </AppIdRanges>
+    <MacRanges>
+        <MacRange CBType="GOOSE" Start="01-0C-CD-01-00-00" End="01-0C-CD-01-01-FF"/>
+        <MacRange CBType="SV" Start="01-0C-CD-04-00-00" End="01-0C-CD-04-FF-FF"/>
+    </MacRanges>
+    <Vlans>
+            <Vlan CBType="SV" XY="01.00" ZW="009.001" IEDType="AUT" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="None" VlanPriority="None" MinTime="" MaxTime=""/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="009.001" IEDType="AUT" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_EXTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="009.001" IEDType="AUT" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="SV" XY="01.00" ZW="009.001" IEDType="GRP" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="None" VlanPriority="None" MinTime="" MaxTime=""/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="009.001" IEDType="GRP" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_EXTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="009.001" IEDType="GRP" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="SV" XY="01.00" ZW="009.001" IEDType="GW" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="None" VlanPriority="None" MinTime="" MaxTime=""/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="009.001" IEDType="GW" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_EXTERNAL" VlanId="None" VlanPriority="None" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="009.001" IEDType="GW" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="None" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="SV" XY="01.00" ZW="009.001" IEDType="SCU-TG" IEDRedundancy="A" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="None" VlanPriority="None" MinTime="" MaxTime=""/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="009.001" IEDType="SCU-TG" IEDRedundancy="A" IEDSystemVersionInstance="1" BayIntOrExt="BAY_EXTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="009.001" IEDType="SCU-TG" IEDRedundancy="A" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="SV" XY="01.00" ZW="009.001" IEDType="SCU-TG" IEDRedundancy="B" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="None" VlanPriority="None" MinTime="" MaxTime=""/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="009.001" IEDType="SCU-TG" IEDRedundancy="B" IEDSystemVersionInstance="1" BayIntOrExt="BAY_EXTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="009.001" IEDType="SCU-TG" IEDRedundancy="B" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="SV" XY="01.00" ZW="009.001" IEDType="SCU-MCB" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="None" VlanPriority="None" MinTime="" MaxTime=""/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="009.001" IEDType="SCU-MCB" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_EXTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="009.001" IEDType="SCU-MCB" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="SV" XY="01.00" ZW="009.001" IEDType="TG" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="None" VlanPriority="None" MinTime="" MaxTime=""/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="009.001" IEDType="TG" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_EXTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="009.001" IEDType="TG" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="SV" XY="01.00" ZW="009.001" IEDType="TOPO" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="None" VlanPriority="None" MinTime="" MaxTime=""/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="009.001" IEDType="TOPO" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_EXTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="009.001" IEDType="TOPO" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="SV" XY="01.00" ZW="004.001" IEDType="BCU" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="101" VlanPriority="5" MinTime="" MaxTime=""/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="004.001" IEDType="BCU" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_EXTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="004.001" IEDType="BCU" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="301" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="SV" XY="01.00" ZW="004.001" IEDType="SAMU" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="101" VlanPriority="5" MinTime="" MaxTime=""/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="004.001" IEDType="SAMU" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_EXTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="004.001" IEDType="SAMU" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="301" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="SV" XY="01.00" ZW="004.001" IEDType="SCU-ORG" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="None" VlanPriority="None" MinTime="" MaxTime=""/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="004.001" IEDType="SCU-ORG" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_EXTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="004.001" IEDType="SCU-ORG" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="301" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="SV" XY="01.00" ZW="001.001" IEDType="BCU" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="None" VlanPriority="None" MinTime="" MaxTime=""/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="001.001" IEDType="BCU" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_EXTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="001.001" IEDType="BCU" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="302" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="SV" XY="01.00" ZW="001.001" IEDType="BPU" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="102" VlanPriority="5" MinTime="" MaxTime=""/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="001.001" IEDType="BPU" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_EXTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="001.001" IEDType="BPU" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="302" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="SV" XY="01.00" ZW="001.001" IEDType="SAMU" IEDRedundancy="A" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="102" VlanPriority="5" MinTime="" MaxTime=""/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="001.001" IEDType="SAMU" IEDRedundancy="A" IEDSystemVersionInstance="1" BayIntOrExt="BAY_EXTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="001.001" IEDType="SAMU" IEDRedundancy="A" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="302" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="SV" XY="01.00" ZW="001.001" IEDType="SAMU" IEDRedundancy="B" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="102" VlanPriority="5" MinTime="" MaxTime=""/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="001.001" IEDType="SAMU" IEDRedundancy="B" IEDSystemVersionInstance="1" BayIntOrExt="BAY_EXTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="001.001" IEDType="SAMU" IEDRedundancy="B" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="302" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="SV" XY="01.00" ZW="001.001" IEDType="SCU-ORG" IEDRedundancy="A" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="None" VlanPriority="None" MinTime="" MaxTime=""/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="001.001" IEDType="SCU-ORG" IEDRedundancy="A" IEDSystemVersionInstance="1" BayIntOrExt="BAY_EXTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="001.001" IEDType="SCU-ORG" IEDRedundancy="A" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="302" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="SV" XY="01.00" ZW="001.001" IEDType="SCU-ORG" IEDRedundancy="B" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="None" VlanPriority="None" MinTime="" MaxTime=""/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="001.001" IEDType="SCU-ORG" IEDRedundancy="B" IEDSystemVersionInstance="1" BayIntOrExt="BAY_EXTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="001.001" IEDType="SCU-ORG" IEDRedundancy="B" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="302" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="SV" XY="01.00" ZW="001.002" IEDType="BCU" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="103" VlanPriority="5" MinTime="" MaxTime=""/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="001.002" IEDType="BCU" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_EXTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="001.002" IEDType="BCU" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="303" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="SV" XY="01.00" ZW="001.002" IEDType="BPU" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="103" VlanPriority="5" MinTime="" MaxTime=""/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="001.002" IEDType="BPU" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_EXTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="001.002" IEDType="BPU" IEDRedundancy="None" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="303" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="SV" XY="01.00" ZW="001.002" IEDType="SAMU" IEDRedundancy="A" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="103" VlanPriority="5" MinTime="" MaxTime=""/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="001.002" IEDType="SAMU" IEDRedundancy="A" IEDSystemVersionInstance="1" BayIntOrExt="BAY_EXTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="001.002" IEDType="SAMU" IEDRedundancy="A" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="303" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="SV" XY="01.00" ZW="001.002" IEDType="SAMU" IEDRedundancy="B" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="103" VlanPriority="5" MinTime="" MaxTime=""/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="001.002" IEDType="SAMU" IEDRedundancy="B" IEDSystemVersionInstance="1" BayIntOrExt="BAY_EXTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="001.002" IEDType="SAMU" IEDRedundancy="B" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="303" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="SV" XY="01.00" ZW="001.002" IEDType="SCU-ORG" IEDRedundancy="A" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="None" VlanPriority="None" MinTime="" MaxTime=""/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="001.002" IEDType="SCU-ORG" IEDRedundancy="A" IEDSystemVersionInstance="1" BayIntOrExt="BAY_EXTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="001.002" IEDType="SCU-ORG" IEDRedundancy="A" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="303" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="SV" XY="01.00" ZW="001.002" IEDType="SCU-ORG" IEDRedundancy="B" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="None" VlanPriority="None" MinTime="" MaxTime=""/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="001.002" IEDType="SCU-ORG" IEDRedundancy="B" IEDSystemVersionInstance="1" BayIntOrExt="BAY_EXTERNAL" VlanId="300" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+            <Vlan CBType="GOOSE" XY="01.00" ZW="001.002" IEDType="SCU-ORG" IEDRedundancy="B" IEDSystemVersionInstance="1" BayIntOrExt="BAY_INTERNAL" VlanId="303" VlanPriority="4" MinTime="10" MaxTime="2000"/>
+    </Vlans>
+</CBCom>

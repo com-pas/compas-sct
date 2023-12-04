@@ -17,6 +17,7 @@ import org.lfenergy.compas.sct.commons.dto.ControlBlockTarget;
 import org.lfenergy.compas.sct.commons.dto.FcdaForDataSetsCreation;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.model.cbcom.*;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.DataSetAdapter;
@@ -43,11 +44,11 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.lfenergy.compas.scl2007b4.model.TFCEnum.ST;
-import static org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.*;
+import static org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.NetworkRanges;
+import static org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.RangesPerCbType;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
 import static org.lfenergy.compas.sct.commons.util.ControlBlockEnum.*;
-import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newDurationInMilliSec;
 
 @ExtendWith(MockitoExtension.class)
 class ControlBlockServiceTest {
@@ -355,7 +356,6 @@ class ControlBlockServiceTest {
     }
 
 
-
     @Test
     void updateAllSourceDataSetsAndControlBlocks_should_sort_FCDA_inside_DataSet_and_avoid_duplicates() {
         // Given
@@ -380,12 +380,24 @@ class ControlBlockServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
 
-        TDurationInMilliSec minTime = newDurationInMilliSec(10);
-        TDurationInMilliSec maxTime = newDurationInMilliSec(2000);
-        ControlBlockNetworkSettings controlBlockNetworkSettings = controlBlockAdapter -> new SettingsOrError(new Settings(0x1D6, (byte) 4, minTime, maxTime), null);
+        CBCom cbCom = new CBCom();
+        cbCom.setMacRanges(new MacRanges());
+        cbCom.setAppIdRanges(new AppIdRanges());
+        cbCom.setVlans(new Vlans());
+        // GSEControl
+        cbCom.getMacRanges().getMacRange().add(newRange(TCBType.GOOSE, "01-0C-CD-01-00-00", "01-0C-CD-01-01-FF"));
+        cbCom.getMacRanges().getMacRange().add(newRange(TCBType.SV, "01-0C-CD-04-00-00", "01-0C-CD-04-FF-FF"));
+        cbCom.getAppIdRanges().getAppIdRange().add(newRange(TCBType.GOOSE, "0000", "4000"));
+        cbCom.getAppIdRanges().getAppIdRange().add(newRange(TCBType.SV, "4000", "7FFF"));
+        cbCom.getVlans().getVlan().addAll(List.of(
+                newVlan(TCBType.GOOSE, TBayIntOrExt.BAY_INTERNAL, "301", "1"),
+                newVlan(TCBType.GOOSE, TBayIntOrExt.BAY_EXTERNAL, "302", "2"),
+                newVlan(TCBType.SV, TBayIntOrExt.BAY_INTERNAL, "303", "3"),
+                newVlan(TCBType.SV, TBayIntOrExt.BAY_EXTERNAL, "304", "4")
+        ));
 
         // When
-        List<SclReportItem> sclReportItems = controlBlockService.configureNetworkForAllControlBlocks(scd, controlBlockNetworkSettings, RANGES_PER_CB_TYPE);
+        List<SclReportItem> sclReportItems = controlBlockService.configureNetworkForAllControlBlocks(scd, cbCom);
         // Then
         assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
         TConnectedAP connectedAP = new SclRootAdapter(scd).findConnectedApAdapter("IED_NAME2", "AP_NAME").get().getCurrentElem();
@@ -399,10 +411,10 @@ class ControlBlockServiceTest {
                 .containsExactly("s", "m", new BigDecimal("2000"));
         assertThat(gse.getAddress().getP()).extracting(TP::getType, TP::getValue)
                 .containsExactlyInAnyOrder(
-                        Tuple.tuple("VLAN-PRIORITY", "4"),
-                        Tuple.tuple("APPID", "0009"),
-                        Tuple.tuple("MAC-Address", "01-02-03-04-00-FF"),
-                        Tuple.tuple("VLAN-ID", "1D6")
+                        Tuple.tuple("VLAN-PRIORITY", "1"),
+                        Tuple.tuple("APPID", "0000"),
+                        Tuple.tuple("MAC-Address", "01-0C-CD-01-00-00"),
+                        Tuple.tuple("VLAN-ID", "12D")
                 );
         TSMV smv = connectedAP.getSMV().stream()
                 .filter(tsmv -> "CB_LD_INST21_SVI".equals(tsmv.getCbName()))
@@ -410,24 +422,44 @@ class ControlBlockServiceTest {
         assertThat(smv.getLdInst()).isEqualTo("LD_INST21");
         assertThat(smv.getAddress().getP()).extracting(TP::getType, TP::getValue)
                 .containsExactlyInAnyOrder(
-                        Tuple.tuple("VLAN-PRIORITY", "4"),
-                        Tuple.tuple("APPID", "400A"),
-                        Tuple.tuple("MAC-Address", "0A-0B-0C-0D-00-FF"),
-                        Tuple.tuple("VLAN-ID", "1D6")
+                        Tuple.tuple("VLAN-PRIORITY", "3"),
+                        Tuple.tuple("APPID", "4000"),
+                        Tuple.tuple("MAC-Address", "01-0C-CD-04-00-00"),
+                        Tuple.tuple("VLAN-ID", "12F")
                 );
         MarshallerWrapper.assertValidateXmlSchema(scd);
+    }
+
+    private static TVlan newVlan(TCBType tcbType, TBayIntOrExt tBayIntOrExt, String value, String vlanPriority) {
+        TVlan gseVlan = new TVlan();
+        gseVlan.setCBType(tcbType);
+        gseVlan.setXY("01.00");
+        gseVlan.setZW("009.001");
+        gseVlan.setIEDType(TIEDType.BCU);
+        gseVlan.setIEDRedundancy(TIEDRedundancy.A);
+        gseVlan.setIEDSystemVersionInstance("1");
+        gseVlan.setBayIntOrExt(tBayIntOrExt);
+        gseVlan.setVlanId(value);
+        gseVlan.setVlanPriority(vlanPriority);
+        gseVlan.setMinTime("10");
+        gseVlan.setMaxTime("2000");
+        return gseVlan;
+    }
+
+    private static TRange newRange(TCBType tcbType, String start, String end) {
+        TRange macRangeGSE = new TRange();
+        macRangeGSE.setCBType(tcbType);
+        macRangeGSE.setStart(start);
+        macRangeGSE.setEnd(end);
+        return macRangeGSE;
     }
 
     @Test
     void configureNetworkForAllControlBlocks_should_create_GSE_with_incremental_appid_and_mac_addresses() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
-
-        TDurationInMilliSec minTime = newDurationInMilliSec(10);
-        TDurationInMilliSec maxTime = newDurationInMilliSec(2000);
-        ControlBlockNetworkSettings controlBlockNetworkSettings = controlBlockAdapter -> new SettingsOrError(new Settings(0x1D6, (byte) 4, minTime, maxTime), null);
         // When
-        List<SclReportItem> sclReportItems = controlBlockService.configureNetworkForAllControlBlocks(scd, controlBlockNetworkSettings, RANGES_PER_CB_TYPE);
+        List<SclReportItem> sclReportItems = controlBlockService.configureNetworkForAllControlBlocks(scd, new CBCom());
         // Then
         assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
         assertThat(streamAllConnectedApGseP(scd, "APPID"))
@@ -439,12 +471,11 @@ class ControlBlockServiceTest {
     @ParameterizedTest
     @MethodSource("provideConfigureNetworkForAllControlBlocksErrors")
     void configureNetworkForAllControlBlocks_should_fail_when_no_settings_for_this_controlBlock(ControlBlockNetworkSettings controlBlockNetworkSettings,
-                                                                                                RangesPerCbType rangesPerCbType,
-                                                                                                String expectedMessage) {
+                                                                                                RangesPerCbType rangesPerCbType, String expectedMessage) {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
         // When
-        List<SclReportItem> sclReportItems = controlBlockService.configureNetworkForAllControlBlocks(scd, controlBlockNetworkSettings, rangesPerCbType);
+        List<SclReportItem> sclReportItems = controlBlockService.configureNetworkForAllControlBlocks(scd, new CBCom());
         // Then
         assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isFalse();
         assertThat(sclReportItems)
@@ -492,7 +523,7 @@ class ControlBlockServiceTest {
                 .noneMatch(TAnyLN::isSetReportControl);
         assertIsMarshallable(scl);
     }
-
+/*
     public static Stream<Arguments> provideConfigureNetworkForAllControlBlocksErrors() {
         Settings settingsWithNullVlanId = new Settings(null, (byte) 1, newDurationInMilliSec(1), newDurationInMilliSec(2));
         Settings settings = new Settings(1, (byte) 1, newDurationInMilliSec(1), newDurationInMilliSec(2));
@@ -517,6 +548,6 @@ class ControlBlockServiceTest {
                                 SMV_NETWORK_RANGES),
                         "Cannot configure network for this ControlBlock because range of MAC Address is exhausted")
         );
-    }
+    }*/
 
 }

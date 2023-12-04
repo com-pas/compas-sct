@@ -5,7 +5,11 @@
 package org.lfenergy.compas.sct.commons.dto;
 
 import org.lfenergy.compas.scl2007b4.model.TDurationInMilliSec;
-import org.lfenergy.compas.sct.commons.scl.ied.ControlBlockAdapter;
+import org.lfenergy.compas.sct.commons.model.cbcom.TIEDRedundancy;
+import org.lfenergy.compas.sct.commons.model.cbcom.TIEDType;
+import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
+
+import java.math.BigInteger;
 
 /**
  * This interface has a single method which provides network settings for a ControlBlock.
@@ -16,18 +20,7 @@ import org.lfenergy.compas.sct.commons.scl.ied.ControlBlockAdapter;
  *
  * @see org.lfenergy.compas.sct.commons.util.ControlBlockNetworkSettingsCsvHelper
  */
-@FunctionalInterface
-public interface ControlBlockNetworkSettings {
-
-    /**
-     * This method provides a vlanId, vlanPriority, minTime, maxTime for this ControlBlock.
-     * vlanPriority will be ignored when vlanId is null.
-     *
-     * @param controlBlockAdapter ControlBlock for which we want to configure the communication section
-     * @return network settings to use for configuring Communication section for this ControlBlock.
-     * An error message can be provided (i.e. errorMessage not null) or a null settings, in order to avoid configuring the ControlBlock.
-     */
-    SettingsOrError getNetworkSettings(ControlBlockAdapter controlBlockAdapter);
+public class ControlBlockNetworkSettings {
 
     /**
      * Network settings for ControlBlock communication
@@ -37,7 +30,7 @@ public interface ControlBlockNetworkSettings {
      * @param minTime      minTime for GSE communication element
      * @param maxTime      maxTime for GSE communication element
      */
-    record Settings(Integer vlanId, Byte vlanPriority, TDurationInMilliSec minTime, TDurationInMilliSec maxTime) {
+    public record Settings(Integer vlanId, Byte vlanPriority, TDurationInMilliSec minTime, TDurationInMilliSec maxTime) {
     }
 
     /**
@@ -46,7 +39,7 @@ public interface ControlBlockNetworkSettings {
      * @param settings     Network settings for ControlBlock communication. Can be null when errorMessage is provided
      * @param errorMessage should be null if settings is provided
      */
-    record SettingsOrError(Settings settings, String errorMessage) {
+    public record SettingsOrError(Settings settings, String errorMessage) {
     }
 
     /**
@@ -55,7 +48,7 @@ public interface ControlBlockNetworkSettings {
      * @param gse          NetworkRanges for GSEControl
      * @param sampledValue NetworkRanges for SampledValueControl
      */
-    record RangesPerCbType(NetworkRanges gse, NetworkRanges sampledValue) {
+    public record RangesPerCbType(NetworkRanges gse, NetworkRanges sampledValue) {
     }
 
     /**
@@ -66,6 +59,15 @@ public interface ControlBlockNetworkSettings {
      * @param macAddressStart range start for MAC-Addresses (inclusive). Ex: "01-0C-CD-01-00-00"
      * @param macAddressEnd   range end for MAC-Addresses (inclusive). Ex: "01-0C-CD-01-01-FF"
      */
-    record NetworkRanges(long appIdStart, long appIdEnd, String macAddressStart, String macAddressEnd) {
+    public record NetworkRanges(long appIdStart, long appIdEnd, String macAddressStart, String macAddressEnd) {
+    }
+
+    public record Criteria(
+            ControlBlockEnum controlBlockEnum,
+            String systemVersionWithoutV,
+            TIEDType iedType,
+            TIEDRedundancy iedRedundancy,
+            BigInteger iedSystemVersionInstance,
+            boolean isBayInternal) {
     }
 }
