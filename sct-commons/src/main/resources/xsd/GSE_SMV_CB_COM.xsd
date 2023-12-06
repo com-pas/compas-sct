@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-FileCopyrightText: 2023 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+<xs:schema xmlns="http://www.rte-france.com/cbcom"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.rte-france.com/cbcom" elementFormDefault="qualified" attributeFormDefault="unqualified" version="1">
+
+    <xs:element name="CBCom">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="History"/>
+                <xs:element ref="Version"/>
+                <xs:element ref="AppIdRanges"/>
+                <xs:element ref="MacRanges"/>
+                <xs:element ref="Vlans"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="History">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="Hitem" type="tHitem" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="tHitem" mixed="true">
+        <xs:attribute name="Version" type="xs:normalizedString" use="required"/>
+        <xs:attribute name="When" type="xs:normalizedString" use="required"/>
+        <xs:attribute name="Who" type="xs:normalizedString"/>
+        <xs:attribute name="What" type="xs:normalizedString"/>
+    </xs:complexType>
+
+    <xs:element name="Version">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="SystemVersion" type="tSystemVersion" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="tSystemVersion" mixed="true">
+        <xs:attribute name="MainSystemVersion" type="xs:normalizedString" use="required"/>
+    </xs:complexType>
+
+    <xs:element name="Vlans">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="Vlan" type="tVlan" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="tVlan">
+        <xs:attribute name="CBType" type="tCBType" use="required"/>
+        <xs:attribute name="XY" type="xs:string" use="required"/>
+        <xs:attribute name="ZW" type="xs:string" use="required"/>
+        <xs:attribute name="IEDType" type="tIEDType" use="required"/>
+        <xs:attribute name="IEDRedundancy" type="tIEDRedundancy" use="required"/>
+        <xs:attribute name="IEDSystemVersionInstance" type="xs:string" use="required"/>
+        <xs:attribute name="BayIntOrExt" type="tBayIntOrExt" use="required"/>
+        <xs:attribute name="VlanId" type="xs:string" use="required"/>
+        <xs:attribute name="VlanPriority" type="xs:string" use="optional"/>
+        <xs:attribute name="MinTime" type="xs:string" use="optional"/>
+        <xs:attribute name="MaxTime" type="xs:string" use="optional"/>
+    </xs:complexType>
+
+    <xs:simpleType name="tCBType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="SV"/>
+            <xs:enumeration value="GOOSE"/>
+            <xs:enumeration value="GOOSE-TRIP"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="tIEDRedundancy">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="A"/>
+            <xs:enumeration value="B"/>
+            <xs:enumeration value="C"/>
+            <xs:enumeration value="D"/>
+            <xs:enumeration value="None"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="tBayIntOrExt">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="BAY_INTERNAL"/>
+            <xs:enumeration value="BAY_EXTERNAL"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:element name="MacRanges">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="MacRange" type="tRange" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="tRange">
+        <xs:attribute name="CBType" type="tCBType" use="required"/>
+        <xs:attribute name="Start" type="xs:string" use="required"/>
+        <xs:attribute name="End" type="xs:string" use="required"/>
+    </xs:complexType>
+
+    <xs:element name="AppIdRanges">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="AppIdRange" type="tRange" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:simpleType name="tIEDType">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                IED type to be used to identity the set of LDevice.inst handled by the IED
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="SCU"/>
+            <xs:enumeration value="SCU-MCB"/>
+            <xs:enumeration value="SCU-TG"/>
+            <xs:enumeration value="SCU-ORG"/>
+            <xs:enumeration value="STD"/>
+            <xs:enumeration value="BCU"/>
+            <xs:enumeration value="BCU-LIGNE"/>
+            <xs:enumeration value="BCU-CBO"/>
+            <xs:enumeration value="BPU"/>
+            <xs:enumeration value="MU"/>
+            <xs:enumeration value="SAMU"/>
+            <xs:enumeration value="PROT"/>
+            <xs:enumeration value="TAC"/>
+            <xs:enumeration value="PX"/>
+            <xs:enumeration value="PDIS"/>
+            <xs:enumeration value="PDB"/>
+            <xs:enumeration value="AUT"/>
+            <xs:enumeration value="PDIF"/>
+            <xs:enumeration value="GRP"/>
+            <xs:enumeration value="GW"/>
+            <xs:enumeration value="TG"/>
+            <xs:enumeration value="TOPO"/>
+            <xs:enumeration value="ADEFINIR"/>
+            <xs:enumeration value="IEDTEST"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+</xs:schema>
