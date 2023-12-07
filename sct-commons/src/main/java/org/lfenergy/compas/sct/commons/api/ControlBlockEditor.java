@@ -7,12 +7,11 @@ package org.lfenergy.compas.sct.commons.api;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings;
-import org.lfenergy.compas.sct.commons.dto.FcdaForDataSetsCreation;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
+import org.lfenergy.compas.sct.commons.model.cb_po.PO;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * Service class that will be used to create, update or delete elements related to the {@link TExtRef <em>TExtRef</em>} object.
@@ -20,9 +19,9 @@ import java.util.Set;
  * <ul>
  *   <li>ExtRef features</li>
  *   <ol>
- *      <li>{@link ControlBlockEditor#createDataSetAndControlBlocks(SCL, Set) <em>Create DataSet and ControlBlock based on the <b>TExtRef</b></em>}</li>
- *      <li>{@link ControlBlockEditor#createDataSetAndControlBlocks(SCL, String, Set) <em>Create DataSet and ControlBlock based on the <b>TExtRef</b> in given <b>IED</b></em>}</li>
- *      <li>{@link ControlBlockEditor#createDataSetAndControlBlocks(SCL, String,String, Set) <em>Create DataSet and ControlBlock based on the <b>TExtRef</b> in given <b>IED</b> and <b>LDevice</b></em>}</li>
+ *      <li>{@link ControlBlockEditor#createDataSetAndControlBlocks(SCL, PO) <em>Create DataSet and ControlBlock based on the <b>TExtRef</b></em>}</li>
+ *      <li>{@link ControlBlockEditor#createDataSetAndControlBlocks(SCL, PO) <em>Create DataSet and ControlBlock based on the <b>TExtRef</b> in given <b>IED</b></em>}</li>
+ *      <li>{@link ControlBlockEditor#createDataSetAndControlBlocks(SCL, String, PO) <em>Create DataSet and ControlBlock based on the <b>TExtRef</b> in given <b>IED</b> and <b>LDevice</b></em>}</li>
  *      <li>{@link ControlBlockEditor#configureNetworkForAllControlBlocks <em>Configure the network for the <b>ControlBlocks</b></em>}</li>
  *      <li>{@link ControlBlockEditor#removeAllControlBlocksAndDatasetsAndExtRefSrcBindings <em>Removes all ControlBlocks and DataSets for all LNs in <b>SCL</b></em>}</li>
  *      <li>{@link ControlBlockEditor#analyzeDataGroups(SCL)} <em>Checks Control Blocks, DataSets and FCDA number limitation into Access Points </em>}</li>
@@ -53,20 +52,20 @@ public interface ControlBlockEditor {
      * Create All DataSet and ControlBlock in the SCL based on the ExtRef
      *
      * @param scd          input SCD object. It could be modified by adding new DataSet and ControlBlocks
-     * @param allowedFcdas List of allowed FCDA for DataSets and Control Blocks creation
+     * @param allowedFcdas object containing list of allowed FCDA for DataSets and Control Blocks creation
      * @return list of encountered errors
      */
-    List<SclReportItem> createDataSetAndControlBlocks(SCL scd, Set<FcdaForDataSetsCreation> allowedFcdas);
+    List<SclReportItem> createDataSetAndControlBlocks(SCL scd, PO allowedFcdas);
 
     /**
      * Create All DataSet and ControlBlock for the ExtRef in given IED
      *
      * @param scd           input SCD object. The object will be modified with the new DataSet and ControlBlocks
      * @param targetIedName the name of the IED where the ExtRef are
-     * @param allowedFcdas  List of allowed FCDA for DataSets and Control Blocks creation
+     * @param allowedFcdas  object containing list of allowed FCDA for DataSets and Control Blocks creation
      * @return list of encountered errors
      */
-    List<SclReportItem> createDataSetAndControlBlocks(SCL scd, String targetIedName, Set<FcdaForDataSetsCreation> allowedFcdas);
+    List<SclReportItem> createDataSetAndControlBlocks(SCL scd, String targetIedName, PO allowedFcdas);
 
     /**
      * Create All DataSet and ControlBlock for the ExtRef in given IED and LDevice
@@ -74,10 +73,10 @@ public interface ControlBlockEditor {
      * @param scd               input SCD object. The object will be modified with the new DataSet and ControlBlocks
      * @param targetIedName     the name of the IED where the ExtRef are
      * @param targetLDeviceInst the name of the LDevice where the ExtRef are
-     * @param allowedFcdas      List of allowed FCDA for DataSets and Control Blocks creation
+     * @param allowedFcdas      object containing list of allowed FCDA for DataSets and Control Blocks creation
      * @return list of encountered errors
      */
-    List<SclReportItem> createDataSetAndControlBlocks(SCL scd, String targetIedName, String targetLDeviceInst, Set<FcdaForDataSetsCreation> allowedFcdas);
+    List<SclReportItem> createDataSetAndControlBlocks(SCL scd, String targetIedName, String targetLDeviceInst, PO allowedFcdas);
 
     /**
      * Configure the network for all the ControlBlocks.

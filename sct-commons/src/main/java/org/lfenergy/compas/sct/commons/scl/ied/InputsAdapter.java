@@ -10,9 +10,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.ExtRefService;
 import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
-import org.lfenergy.compas.sct.commons.dto.FcdaForDataSetsCreation;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.model.cb_po.PO;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
@@ -71,6 +71,17 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
      */
     public InputsAdapter(LN0Adapter parentAdapter, TInputs tInputs) {
         super(parentAdapter, tInputs);
+    }
+
+    private static String generateDataSetSuffix(TExtRef extRef, DataAttributeRef sourceDa, boolean isBayInternal) {
+        return extRef.getLdInst().toUpperCase(Locale.ENGLISH) + ATTRIBUTE_VALUE_SEPARATOR
+                + switch (extRef.getServiceType()) {
+            case GOOSE -> "G" + ((sourceDa.getFc() == TFCEnum.ST) ? "S" : "M");
+            case SMV -> "SV";
+            case REPORT -> (sourceDa.getFc() == TFCEnum.ST) ? "DQC" : "CYC";
+            case POLL -> throw new IllegalArgumentException(MESSAGE_POLL_SERVICE_TYPE_NOT_SUPPORTED);
+        }
+                + (isBayInternal ? "I" : "E");
     }
 
     /**
@@ -179,7 +190,8 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
             try {
                 ActiveStatus lDeviceStatus = ActiveStatus.fromValue(sourceLDeviceStatus);
                 return switch (lDeviceStatus) {
-                    case OFF -> SclReportItem.warning(extRefXPath(extRef.getDesc()), String.format(MESSAGE_SOURCE_LDEVICE_STATUS_OFF, sourceLDevice.getXPath()));
+                    case OFF ->
+                            SclReportItem.warning(extRefXPath(extRef.getDesc()), String.format(MESSAGE_SOURCE_LDEVICE_STATUS_OFF, sourceLDevice.getXPath()));
                     case ON -> null;
                 };
             } catch (IllegalArgumentException e) {
@@ -259,7 +271,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         return parentAdapter;
     }
 
-    public List<SclReportItem> updateAllSourceDataSetsAndControlBlocks(Set<FcdaForDataSetsCreation> allowedFcdas) {
+    public List<SclReportItem> updateAllSourceDataSetsAndControlBlocks(PO allowedFcdas) {
         String currentBayUuid = getIedAdapter().getPrivateCompasBay().map(TCompasBay::getUUID).orElse(null);
         if (StringUtils.isBlank(currentBayUuid)) {
             return List.of(getIedAdapter().buildFatalReportItem(MESSAGE_IED_MISSING_COMPAS_BAY_UUID));
@@ -292,7 +304,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
                 && StringUtils.isNotBlank(tExtRef.getDoName());
     }
 
-    private Optional<SclReportItem> updateSourceDataSetsAndControlBlocks(TExtRef extRef, String targetBayUuid, Set<FcdaForDataSetsCreation> allowedFcdas) {
+    private Optional<SclReportItem> updateSourceDataSetsAndControlBlocks(TExtRef extRef, String targetBayUuid, PO allowedFcdas) {
         if (extRef.getServiceType() == null) {
             return fatalReportItem(extRef, MESSAGE_SERVICE_TYPE_MISSING);
         }
@@ -372,18 +384,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         extRef.unsetSrcLNClass();
     }
 
-    private static String generateDataSetSuffix(TExtRef extRef, DataAttributeRef sourceDa, boolean isBayInternal) {
-        return extRef.getLdInst().toUpperCase(Locale.ENGLISH) + ATTRIBUTE_VALUE_SEPARATOR
-                + switch (extRef.getServiceType()) {
-            case GOOSE -> "G" + ((sourceDa.getFc() == TFCEnum.ST) ? "S" : "M");
-            case SMV -> "SV";
-            case REPORT -> (sourceDa.getFc() == TFCEnum.ST) ? "DQC" : "CYC";
-            case POLL -> throw new IllegalArgumentException(MESSAGE_POLL_SERVICE_TYPE_NOT_SUPPORTED);
-        }
-                + (isBayInternal ? "I" : "E");
-    }
-
-    private Optional<SclReportItem> removeFilteredSourceDas(TExtRef extRef, final Set<DataAttributeRef> sourceDas, Set<FcdaForDataSetsCreation> allowedFcdas) {
+    private Optional<SclReportItem> removeFilteredSourceDas(TExtRef extRef, final Set<DataAttributeRef> sourceDas, PO allowedFcdas) {
         sourceDas.removeIf(da -> da.getFc() != TFCEnum.MX && da.getFc() != TFCEnum.ST);
         return switch (extRef.getServiceType()) {
             case GOOSE, SMV -> {
@@ -395,7 +396,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         };
     }
 
-    private boolean isFcdaAllowed(DataAttributeRef dataAttributeRef, Set<FcdaForDataSetsCreation> allowedFcdas) {
+    private boolean isFcdaAllowed(DataAttributeRef dataAttributeRef, PO allowedFcdas) {
         String lnClass = dataAttributeRef.getLnClass();
         String doName = dataAttributeRef.getDoName().toStringWithoutInst();
         String daName = dataAttributeRef.getDaName().toString();
@@ -403,7 +404,11 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         if (StringUtils.isBlank(lnClass) || StringUtils.isBlank(doName) || StringUtils.isBlank(daName) || StringUtils.isBlank(fc)) {
             throw new IllegalArgumentException("parameters must not be blank");
         }
-        return allowedFcdas.contains(new FcdaForDataSetsCreation(lnClass, doName, daName, fc));
+        return allowedFcdas.getFCDAs().getFCDA().stream()
+                .anyMatch(tFcdaFilter -> lnClass.equals(tFcdaFilter.getLnClass())
+                        && doName.equals(tFcdaFilter.getDoName())
+                        && daName.equals(tFcdaFilter.getDaName())
+                        && fc.equals(tFcdaFilter.getFc().value()));
     }
 
     private Optional<SclReportItem> removeFilterSourceDaForReport(TExtRef extRef, Set<DataAttributeRef> sourceDas) {

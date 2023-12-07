@@ -14,9 +14,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings;
 import org.lfenergy.compas.sct.commons.dto.ControlBlockTarget;
-import org.lfenergy.compas.sct.commons.dto.FcdaForDataSetsCreation;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.model.cb_po.FCDAs;
+import org.lfenergy.compas.sct.commons.model.cb_po.PO;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.DataSetAdapter;
@@ -28,22 +29,18 @@ import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.FCDARecord;
 import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
-import org.lfenergy.compas.sct.commons.util.CsvUtils;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.lfenergy.compas.scl2007b4.model.TFCEnum.ST;
 import static org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.*;
+import static org.lfenergy.compas.sct.commons.testhelpers.FcdaTestHelper.createFcdaFilterList;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
 import static org.lfenergy.compas.sct.commons.util.ControlBlockEnum.*;
@@ -55,7 +52,7 @@ class ControlBlockServiceTest {
     @InjectMocks
     ControlBlockService controlBlockService;
 
-    private Set<FcdaForDataSetsCreation> allowedFcdas;
+    private PO allowedFcdas;
 
     private static final long GSE_APP_ID_MIN = 0x9;
     private static final long SMV_APP_ID_MIN = 0x400A;
@@ -68,7 +65,7 @@ class ControlBlockServiceTest {
 
     @BeforeEach
     void init() {
-        allowedFcdas = new HashSet<>(CsvUtils.parseRows("FcdaCandidates.csv", StandardCharsets.UTF_8, FcdaForDataSetsCreation.class));
+        allowedFcdas = createFcdaFilterList();
     }
 
     @Test
@@ -145,19 +142,23 @@ class ControlBlockServiceTest {
 
 
     private static Stream<Arguments> provideAllowedFcdaListEmptyOrNull() {
+        PO po = new PO();
+        FCDAs fcdAs = new FCDAs();
+        po.setFCDAs(fcdAs);
         return Stream.of(
-                Arguments.of("Set of allowed FCDA is null", null),
-                Arguments.of("Set of allow FCDA is Empty", Collections.EMPTY_SET)
+                Arguments.of("PO for List of allowed FCDA is null", null),
+                Arguments.of("FCDAs List of allowed FCDA is null", new PO()),
+                Arguments.of("List of allowed FCDA is Empty", po)
         );
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideAllowedFcdaListEmptyOrNull")
-    void createDataSetAndControlBlocks_should_Throw_Exception_when_list_allowed_fcda_not_initialized(String testName, Set<FcdaForDataSetsCreation> fcdaForDataSets) {
+    void createDataSetAndControlBlocks_should_Throw_Exception_when_list_allowed_fcda_not_initialized(String testName, PO fcdas) {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When Then
-        assertThatCode(() -> controlBlockService.createDataSetAndControlBlocks(scd, fcdaForDataSets))
+        assertThatCode(() -> controlBlockService.createDataSetAndControlBlocks(scd, fcdas))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("Accepted FCDAs list is empty, you should initialize allowed FCDA lists with CsvHelper class before");
     }
@@ -257,11 +258,11 @@ class ControlBlockServiceTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideAllowedFcdaListEmptyOrNull")
-    void createDataSetAndControlBlocks_with_targetIedName_should_Throw_Exception_when_list_allowed_fcda_not_initialized(String testName, Set<FcdaForDataSetsCreation> fcdaForDataSets) {
+    void createDataSetAndControlBlocks_with_targetIedName_should_Throw_Exception_when_list_allowed_fcda_not_initialized(String testName, PO fcdas) {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When Then
-        assertThatCode(() -> controlBlockService.createDataSetAndControlBlocks(scd, "IED_NAME1", fcdaForDataSets))
+        assertThatCode(() -> controlBlockService.createDataSetAndControlBlocks(scd, "IED_NAME1", fcdas))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("Accepted FCDAs list is empty, you should initialize allowed FCDA lists with CsvHelper class before");
     }
@@ -305,11 +306,11 @@ class ControlBlockServiceTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideAllowedFcdaListEmptyOrNull")
-    void createDataSetAndControlBlocks_with_targetIedName_and_targetLDeviceInst_should_Throw_Exception_when_list_allowed_fcda_not_initialized(String testName, Set<FcdaForDataSetsCreation> fcdaForDataSets) {
+    void createDataSetAndControlBlocks_with_targetIedName_and_targetLDeviceInst_should_Throw_Exception_when_list_allowed_fcda_not_initialized(String testName, PO fcdas) {
         // Given
         SCL scd = new SCL();
         // When Then
-        assertThatCode(() -> controlBlockService.createDataSetAndControlBlocks(scd, "IED_NAME1", "LD_INST11", fcdaForDataSets))
+        assertThatCode(() -> controlBlockService.createDataSetAndControlBlocks(scd, "IED_NAME1", "LD_INST11", fcdas))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("Accepted FCDAs list is empty, you should initialize allowed FCDA lists with CsvHelper class before");
     }
