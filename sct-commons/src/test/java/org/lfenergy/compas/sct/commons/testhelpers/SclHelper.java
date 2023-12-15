@@ -13,6 +13,7 @@ import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
+import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.util.Utils;
 import org.opentest4j.AssertionFailedError;
 
@@ -69,7 +70,14 @@ public final class SclHelper {
                 .stream()
                 .filter(extRef -> extRefDesc.equals(extRef.getDesc()))
                 .findFirst()
-                .orElseThrow(() -> new AssertionFailedError(String.format("ExtRef.des=%s not found in IED.name=%s,LDevice.inst=%s", extRefDesc, iedName, ldInst)));
+                .orElseThrow(() -> new AssertionFailedError(String.format("ExtRef.desc=%s not found in IED.name=%s,LDevice.inst=%s", extRefDesc, iedName, ldInst)));
+    }
+
+    public static TCompasFlow findCompasFlow(SCL scl, String iedName, String ldInst, String compasFlowDataStreamKey) {
+        return PrivateUtils.extractCompasPrivates(findInputs(scl, iedName, ldInst).getCurrentElem(), TCompasFlow.class)
+                .filter(compasFlow -> compasFlowDataStreamKey.equals(compasFlow.getDataStreamKey()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionFailedError(String.format("CompasFlow.dataStreamKey=%s not found in IED.name=%s,LDevice.inst=%s", compasFlowDataStreamKey, iedName, ldInst)));
     }
 
     public static LN0Adapter findLn0(SCL scl, String iedName, String ldInst) {

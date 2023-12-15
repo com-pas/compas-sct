@@ -1,10 +1,11 @@
-// SPDX-FileCopyrightText: 2022 RTE FRANCE
+// SPDX-FileCopyrightText: 2023 RTE FRANCE
 //
 // SPDX-License-Identifier: Apache-2.0
 
 package org.lfenergy.compas.sct.commons;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.api.ExtRefEditor;
 import org.lfenergy.compas.sct.commons.dto.*;
@@ -24,13 +25,13 @@ import org.lfenergy.compas.sct.commons.util.PrivateEnum;
 import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
+import java.math.BigInteger;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.*;
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
-import static org.lfenergy.compas.sct.commons.util.Utils.isExtRefFeedBySameControlBlock;
 
 @RequiredArgsConstructor
 public class ExtRefEditorService implements ExtRefEditor {
@@ -42,21 +43,9 @@ public class ExtRefEditorService implements ExtRefEditor {
             "6", "THT",
             "7", "THT"
     );
-    private final ExtRefService extRefService;
 
-    /**
-     * Remove ExtRef which are fed by same Control Block
-     *
-     * @return list ExtRefs without duplication
-     */
-    public static List<TExtRef> filterDuplicatedExtRefs(List<TExtRef> tExtRefs) {
-        List<TExtRef> filteredList = new ArrayList<>();
-        tExtRefs.forEach(tExtRef -> {
-            if (filteredList.stream().noneMatch(t -> isExtRefFeedBySameControlBlock(tExtRef, t)))
-                filteredList.add(tExtRef);
-        });
-        return filteredList;
-    }
+    private final LdeviceService ldeviceService;
+    private final ExtRefService extRefService;
 
     /**
      * Provides valid IED sources according to EPF configuration.<br/>
@@ -427,8 +416,7 @@ public class ExtRefEditorService implements ExtRefEditor {
                         .filter(tlDevice -> tlDevice.getLN0().isSetInputs())
                         .forEach(tlDevice -> {
                             String flowSource = voltageCodification.get(tVoltageLevelName);
-                            TInputs tInputs = tlDevice.getLN0().getInputs();
-                            PrivateUtils.getPrivateStream(tInputs.getPrivate(), TCompasFlow.class)
+                            extRefService.getCompasFlows(tlDevice)
                                     .filter(TCompasFlow::isSetFlowSourceVoltageLevel)
                                     .filter(TCompasFlow::isSetExtRefiedName)
                                     .forEach(tCompasFlow -> {
@@ -437,19 +425,66 @@ public class ExtRefEditorService implements ExtRefEditor {
                                             extRefService.clearCompasFlowBinding(tCompasFlow);
                                         } else if (!tCompasFlow.getFlowSourceVoltageLevel().equals(flowSource)) {
                                             //debind extRef
-                                            extRefService.getMatchingExtRef(tInputs, tCompasFlow)
+                                            extRefService.getMatchingExtRefs(tlDevice, tCompasFlow)
                                                     .forEach(extRefService::clearExtRefBinding);
                                             //debind compas flow
                                             extRefService.clearCompasFlowBinding(tCompasFlow);
-
                                         }
                                     });
                         })
                 );
     }
 
-    private record DoNameAndDaName(String doName, String daName) {
+
+    @Override
+    public void updateIedNameBasedOnLnode(SCL scl) {
+        Map<TopoKey, TBay> bayByTopoKey = scl.getSubstation().stream()
+                .flatMap(tSubstation -> tSubstation.getVoltageLevel().stream())
+                .flatMap(tVoltageLevel -> tVoltageLevel.getBay().stream())
+                .map(tBay -> PrivateUtils.extractCompasPrivate(tBay, TCompasTopo.class)
+                        .filter(tCompasTopo -> isNotBlank(tCompasTopo.getNode()) && Objects.nonNull(tCompasTopo.getNodeOrder()))
+                        .map(tCompasTopo -> new BayTopoKey(tBay, new TopoKey(tCompasTopo.getNode(), tCompasTopo.getNodeOrder())))
+                )
+                .flatMap(Optional::stream)
+                .collect(Collectors.toMap(BayTopoKey::topoKey, BayTopoKey::bay));
+
+        scl.getIED().stream()
+                .flatMap(ldeviceService::getLdevices)
+                .forEach(tlDevice ->
+                        extRefService.getCompasFlows(tlDevice)
+                                .filter(tCompasFlow -> Objects.nonNull(tCompasFlow.getFlowSourceBayNode()) && Objects.nonNull(tCompasFlow.getFlowSourceBayNodeOrder()))
+                                .forEach(tCompasFlow ->
+                                        Optional.ofNullable(bayByTopoKey.get(new TopoKey(tCompasFlow.getFlowSourceBayNode().toString(), tCompasFlow.getFlowSourceBayNodeOrder())))
+                                                .flatMap(tBay -> tBay.getFunction().stream()
+                                                        .flatMap(tFunction -> tFunction.getLNode().stream())
+                                                        .filter(tlNode -> Objects.equals(tlNode.getLdInst(), tCompasFlow.getExtRefldinst())
+                                                                && Objects.equals(tlNode.getLnInst(), tCompasFlow.getExtReflnInst())
+                                                                && Utils.lnClassEquals(tlNode.getLnClass(), tCompasFlow.getExtReflnClass())
+                                                                && Objects.equals(tlNode.getPrefix(), tCompasFlow.getExtRefprefix()))
+                                                        .map(TLNode::getIedName)
+                                                        .filter(StringUtils::isNotBlank)
+                                                        .findFirst()
+                                                )
+                                                .ifPresentOrElse(iedName -> {
+                                                            extRefService.getMatchingExtRefs(tlDevice, tCompasFlow).forEach(tExtRef -> tExtRef.setIedName(iedName));
+                                                            tCompasFlow.setExtRefiedName(iedName);
+                                                        },
+                                                        () -> {
+                                                            extRefService.getMatchingExtRefs(tlDevice, tCompasFlow).forEach(extRefService::clearExtRefBinding);
+                                                            extRefService.clearCompasFlowBinding(tCompasFlow);
+                                                        }
+                                                )
+                                )
+                );
     }
 
+    record TopoKey(String FlowNode, BigInteger FlowNodeOrder) {
+    }
+
+    record BayTopoKey(TBay bay, TopoKey topoKey) {
+    }
+
+    private record DoNameAndDaName(String doName, String daName) {
+    }
 
 }

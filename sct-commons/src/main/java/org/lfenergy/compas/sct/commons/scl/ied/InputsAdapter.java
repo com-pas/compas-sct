@@ -8,7 +8,6 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.ExtRefEditorService;
 import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
 import org.lfenergy.compas.sct.commons.dto.FcdaForDataSetsCreation;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
@@ -104,13 +103,13 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         try {
             ActiveStatus lDeviceStatus = ActiveStatus.fromValue(optionalLDeviceStatus.get());
             return switch (lDeviceStatus) {
-                case ON -> extRefService.getExtRefs(currentElem)
+                case ON -> currentElem.getExtRef().stream()
                         .filter(tExtRef -> StringUtils.isNotBlank(tExtRef.getIedName()) && StringUtils.isNotBlank(tExtRef.getDesc()))
                         .map(extRef -> updateExtRefIedName(extRef, icdSystemVersionToIed.get(extRef.getIedName())))
                         .flatMap(Optional::stream)
                         .toList();
                 case OFF -> {
-                    extRefService.getExtRefs(currentElem).forEach(extRefService::clearExtRefBinding);
+                    currentElem.getExtRef().forEach(extRefService::clearExtRefBinding);
                     yield Collections.emptyList();
                 }
             };
@@ -209,7 +208,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         if (StringUtils.isBlank(currentBayUuid)) {
             return List.of(getIedAdapter().buildFatalReportItem(MESSAGE_IED_MISSING_COMPAS_BAY_UUID));
         }
-        return extRefService.getExtRefs(currentElem)
+        return currentElem.getExtRef().stream()
                 .filter(this::areBindingAttributesPresent)
                 .filter(this::isExternalBound)
                 .filter(this::matchingCompasFlowIsActiveOrUntested)
@@ -374,7 +373,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
      * @return list ExtRefs without duplication
      */
     public List<TExtRef> filterDuplicatedExtRefs() {
-        return ExtRefEditorService.filterDuplicatedExtRefs(extRefService.getExtRefs(currentElem).toList());
+      return new ExtRefService().filterDuplicatedExtRefs(currentElem.getExtRef());
     }
 
 }

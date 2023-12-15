@@ -7,6 +7,7 @@
 package org.lfenergy.compas.sct.commons.scl;
 
 import org.assertj.core.groups.Tuple;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -18,38 +19,74 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Named.named;
+import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.createExtRefExample;
 
 
 class ExtRefServiceTest {
 
-    private static final ObjectFactory objectFactory = new ObjectFactory();
-    ExtRefService extRefService = new ExtRefService();
+    ExtRefService extRefService;
 
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("provideTAnyLns")
-    void getExtRefs(String testCase, TInputs tInputs, int size) {
-        //Given
-        //When
-        //Then
-        assertThat(extRefService.getExtRefs(tInputs)).hasSize(size);
+    @BeforeEach
+    void setUp() {
+        extRefService = new ExtRefService();
     }
 
-    private static Stream<Arguments> provideTAnyLns() {
-        TInputs tInputsEmpty = new TInputs();
+    @Test
+    void getExtRefs_should_return_extRefs() {
+        //Given
+        TLDevice tlDevice = new TLDevice();
+        tlDevice.setLN0(new LN0());
         TInputs tInputs = new TInputs();
+        tlDevice.getLN0().setInputs(tInputs);
         TExtRef tExtRef1 = new TExtRef();
         TExtRef tExtRef2 = new TExtRef();
         tInputs.getExtRef().add(tExtRef1);
         tInputs.getExtRef().add(tExtRef2);
+        //When
+        Stream<TExtRef> result = extRefService.getExtRefs(tlDevice);
+        //Then
+        assertThat(result).hasSize(2);
+    }
 
+    @ParameterizedTest
+    @MethodSource("provideLDevices")
+    void getExtRefs_should_return_empty_stream(TLDevice tlDevice) {
+        //Given : parameters
+        //When
+        Stream<TExtRef> result = extRefService.getExtRefs(tlDevice);
+        //Then
+        assertThat(result).isEmpty();
+    }
+
+    private static Stream<Arguments> provideLDevices() {
+        TLDevice tlDeviceWithoutLn0 = new TLDevice();
+        tlDeviceWithoutLn0.setLN0(new LN0());
         return Stream.of(
-                Arguments.of("Ln without Inputs node should return empty stream", null, 0),
-                Arguments.of("Ln with empty Inputs should return empty stream", tInputsEmpty, 0),
-                Arguments.of("Ln0 with Inputs node should return stream 2 extrefs", tInputs, 2));
+                Arguments.of(named("LDevice without LN0 should return empty stream", tlDeviceWithoutLn0)),
+                Arguments.of(named("LDevice with empty Inputs should return empty stream", new TLDevice()))
+        );
     }
 
     @Test
-    void getMatchingCompasFlows() {
+    void getCompasFlows_should_return_compasFlow() {
+        // Given
+        TLDevice tlDevice = new TLDevice();
+        tlDevice.setLN0(new LN0());
+        TInputs tInputs = new TInputs();
+        tlDevice.getLN0().setInputs(tInputs);
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType(PrivateEnum.COMPAS_FLOW.getPrivateType());
+        tPrivate.getContent().add(new ObjectFactory().createFlow(new TCompasFlow()));
+        tInputs.getPrivate().add(tPrivate);
+        // When
+        Stream<TCompasFlow> result = extRefService.getCompasFlows(tlDevice);
+        // Then
+        assertThat(result).hasSize(1);
+    }
+
+    @Test
+    void getMatchingCompasFlows_should_succeed() {
         //Given
         TInputs tInputs = new TInputs();
         TExtRef tExtRef1 = createExtRef("Desc_1", "IED_Name_1", "LD_INST_1");
@@ -66,18 +103,19 @@ class ExtRefServiceTest {
     }
 
     @Test
-    void getMatchingTextRef() {
+    void getMatchingExtRefs_should_succeed() {
         //Given
-        TLN tln = new TLN();
+        TLDevice tlDevice = new TLDevice();
+        tlDevice.setLN0(new LN0());
         TInputs tInputs = new TInputs();
         TExtRef tExtRef1 = createExtRef("Desc_1", "IED_Name_1", "LD_INST_1");
         TExtRef tExtRef2 = createExtRef("Desc_2", "IED_Name_2", "LD_INST_2");
         tInputs.getExtRef().add(tExtRef1);
         tInputs.getExtRef().add(tExtRef2);
         TCompasFlow tCompasFlow = createCompasFlow("Desc_1", "IED_Name_1", "LD_INST_1");
-        tln.setInputs(tInputs);
+        tlDevice.getLN0().setInputs(tInputs);
         //When
-        Stream<TExtRef> tExtRefStream = extRefService.getMatchingExtRef(tInputs, tCompasFlow);
+        Stream<TExtRef> tExtRefStream = extRefService.getMatchingExtRefs(tlDevice, tCompasFlow);
         //Then
         assertThat(tExtRefStream).hasSize(1)
                 .map(TExtRef::getIedName, TExtRef::getLdInst, TExtRef::getDesc)
@@ -85,28 +123,7 @@ class ExtRefServiceTest {
     }
 
     @Test
-    void getMatchingTextRef_success_when_lnclass_null() {
-        //Given
-        TLN tln = new TLN();
-        TInputs tInputs = new TInputs();
-        TExtRef tExtRef1 = createExtRef("Desc_1", "IED_Name_1", "LD_INST_1");
-        tExtRef1.getLnClass().clear();
-        TExtRef tExtRef2 = createExtRef("Desc_2", "IED_Name_2", "LD_INST_2");
-        tInputs.getExtRef().add(tExtRef1);
-        tInputs.getExtRef().add(tExtRef2);
-        TCompasFlow tCompasFlow = createCompasFlow("Desc_1", "IED_Name_1", "LD_INST_1");
-        tCompasFlow.setExtReflnClass(null);
-        tln.setInputs(tInputs);
-        //When
-        Stream<TExtRef> tExtRefStream = extRefService.getMatchingExtRef(tInputs, tCompasFlow);
-        //Then
-        assertThat(tExtRefStream).hasSize(1)
-                .map(TExtRef::getIedName, TExtRef::getLdInst, TExtRef::getDesc)
-                .containsExactly(Tuple.tuple("IED_Name_1", "LD_INST_1", "Desc_1"));
-    }
-
-    @Test
-    void clearBinding() {
+    void clearExtRefBinding_should_remove_binding() {
         //Given
         TExtRef tExtRef = createExtRef("Desc_1", "IED_Name_1", "LD_INST_1");
         //When
@@ -119,7 +136,7 @@ class ExtRefServiceTest {
     }
 
     @Test
-    void clearCompasFlowBinding() {
+    void clearCompasFlowBinding_should_remove_binding() {
         //Given
         TCompasFlow compasFlow = createCompasFlow("Desc_1", "IED_Name_1", "LD_INST_1");
         //When
@@ -131,10 +148,106 @@ class ExtRefServiceTest {
         assertThat(compasFlow.getDataStreamKey()).isEqualTo("Desc_1");
     }
 
+    @ParameterizedTest
+    @MethodSource("provideExtRefsFedBySameControlBlock")
+    void isExtRefFeedBySameControlBlock_should_return_true(TExtRef tExtRef1, TExtRef tExtRef2) {
+        // Given : parameter
+        // When
+        boolean result = extRefService.isExtRefFeedBySameControlBlock(tExtRef1, tExtRef2);
+        // Then
+        assertThat(result).isTrue();
+    }
+
+    private static Stream<Arguments> provideExtRefsFedBySameControlBlock() {
+        TExtRef tExtRefLnClass = createExtRefExample("CB_1", TServiceType.GOOSE);
+        tExtRefLnClass.getSrcLNClass().add(TLLN0Enum.LLN_0.value());
+
+        return Stream.of(
+                Arguments.of(createExtRefExample("CB_1", TServiceType.GOOSE), createExtRefExample("CB_1", TServiceType.GOOSE)),
+                Arguments.of(tExtRefLnClass, createExtRefExample("CB_1", TServiceType.GOOSE)),
+                Arguments.of(createExtRefExample("CB_1", TServiceType.GOOSE), tExtRefLnClass)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideExtRefsToCompare")
+    void isExtRefFeedBySameControlBlock_should_return_false(TExtRef tExtRef1, TExtRef tExtRef2) {
+        // Given : parameters
+        // When
+        boolean result = extRefService.isExtRefFeedBySameControlBlock(tExtRef1, tExtRef2);
+        // Then
+        assertThat(result).isFalse();
+    }
+
+    private static Stream<Arguments> provideExtRefsToCompare() {
+        TExtRef tExtRefLnClass = createExtRefExample("CB_1", TServiceType.GOOSE);
+        tExtRefLnClass.getSrcLNClass().add("XXX");
+        TExtRef tExtRefIedName = createExtRefExample("CB_1", TServiceType.GOOSE);
+        tExtRefIedName.setIedName("IED_XXX");
+        TExtRef tExtRefLdInst = createExtRefExample("CB_1", TServiceType.GOOSE);
+        tExtRefLdInst.setSrcLDInst("LD_XXX");
+        TExtRef tExtRefLnInst = createExtRefExample("CB_1", TServiceType.GOOSE);
+        tExtRefLnInst.setSrcLNInst("X");
+        TExtRef tExtRefPrefix = createExtRefExample("CB_1", TServiceType.GOOSE);
+        tExtRefPrefix.setSrcPrefix("X");
+
+        return Stream.of(
+                Arguments.of(named("ExtRef is not fed by same CB when different ServiceType", createExtRefExample("CB_1", TServiceType.GOOSE)),
+                        createExtRefExample("CB_1", TServiceType.SMV)),
+                Arguments.of(named("ExtRef is not fed by same CB when different SrcCBName", createExtRefExample("CB_1", TServiceType.GOOSE)),
+                        createExtRefExample("CB_2", TServiceType.GOOSE)),
+                Arguments.of(named("ExtRef is not fed by same CB when different SrcLnClass", createExtRefExample("CB_1", TServiceType.GOOSE)),
+                        tExtRefLnClass),
+                Arguments.of(named("ExtRef is not fed by same CB when different IedName", createExtRefExample("CB_1", TServiceType.GOOSE)),
+                        tExtRefIedName),
+                Arguments.of(named("ExtRef is not fed by same CB when different SrcLdInst", createExtRefExample("CB_1", TServiceType.GOOSE)),
+                        tExtRefLdInst),
+                Arguments.of(named("ExtRef is not fed by same CB when different SrcLnInst", createExtRefExample("CB_1", TServiceType.GOOSE)),
+                        tExtRefLnInst),
+                Arguments.of(named("ExtRef is not fed by same CB when different SrcPrefix", createExtRefExample("CB_1", TServiceType.GOOSE)),
+                        tExtRefPrefix)
+        );
+    }
+
+    @Test
+    void filterDuplicatedExtRefs_should_remove_duplicated_extrefs() {
+        // Given
+        TExtRef tExtRefLnClass = createExtRefExample("CB_Name1", TServiceType.GOOSE);
+        tExtRefLnClass.getSrcLNClass().add(TLLN0Enum.LLN_0.value());
+        TExtRef tExtRef = createExtRefExample("CB_Name1", TServiceType.GOOSE);
+        List<TExtRef> tExtRefList = List.of(tExtRef, tExtRefLnClass, createExtRefExample("CB", TServiceType.GOOSE),
+                createExtRefExample("CB", TServiceType.GOOSE));
+        // When
+        List<TExtRef> result = extRefService.filterDuplicatedExtRefs(tExtRefList);
+        // Then
+        assertThat(result).hasSizeLessThan(tExtRefList.size())
+                .hasSize(2);
+    }
+
+    @Test
+    void filterDuplicatedExtRefs_should_not_remove_not_duplicated_extrefs() {
+        // Given
+        TExtRef tExtRefIedName = createExtRefExample("CB_1", TServiceType.GOOSE);
+        tExtRefIedName.setIedName("IED_XXX");
+        TExtRef tExtRefLdInst = createExtRefExample("CB_1", TServiceType.GOOSE);
+        tExtRefLdInst.setSrcLDInst("LD_XXX");
+        TExtRef tExtRefLnInst = createExtRefExample("CB_1", TServiceType.GOOSE);
+        tExtRefLnInst.setSrcLNInst("X");
+        TExtRef tExtRefPrefix = createExtRefExample("CB_1", TServiceType.GOOSE);
+        tExtRefPrefix.setSrcPrefix("X");
+        List<TExtRef> tExtRefList = List.of(tExtRefIedName, tExtRefLdInst, tExtRefLnInst, tExtRefPrefix,
+                createExtRefExample("CB_1", TServiceType.GOOSE), createExtRefExample("CB_1", TServiceType.SMV));
+        // When
+        List<TExtRef> result = extRefService.filterDuplicatedExtRefs(tExtRefList);
+        // Then
+        assertThat(result).hasSameSizeAs(tExtRefList)
+                .hasSize(6);
+    }
+
     private static TPrivate createPrivateCompasFlow(List<TCompasFlow> compasFlows) {
         TPrivate tPrivate = new TPrivate();
         tPrivate.setType(PrivateEnum.COMPAS_FLOW.getPrivateType());
-        tPrivate.getContent().addAll(compasFlows.stream().map(objectFactory::createFlow).toList());
+        tPrivate.getContent().addAll(compasFlows.stream().map(value -> new ObjectFactory().createFlow(value)).toList());
         return tPrivate;
     }
 
