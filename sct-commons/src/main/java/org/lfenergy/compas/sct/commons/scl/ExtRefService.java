@@ -6,26 +6,38 @@
 
 package org.lfenergy.compas.sct.commons.scl;
 
-import org.lfenergy.compas.scl2007b4.model.TCompasFlow;
-import org.lfenergy.compas.scl2007b4.model.TExtRef;
-import org.lfenergy.compas.scl2007b4.model.TInputs;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class ExtRefService {
 
     /**
-     * List all ExtRefs in this Inputs
+     * List all ExtRefs in this LDevice
      *
      * @return list of ExtRefs. List is modifiable.
      */
-    public Stream<TExtRef> getExtRefs(TInputs inputs) {
-        if (inputs == null || !inputs.isSetExtRef()) {
-            return Stream.empty();
-        }
-        return inputs.getExtRef().stream();
+    public Stream<TExtRef> getExtRefs(TLDevice tlDevice) {
+        return getInputs(tlDevice)
+                .filter(TInputs::isSetExtRef)
+                .stream()
+                .flatMap(tInputs -> tInputs.getExtRef().stream());
+    }
+
+    /**
+     * List all CompasFlows in this LDevice
+     *
+     * @return list of ExtRefs. List is modifiable.
+     */
+    public Stream<TCompasFlow> getCompasFlows(TLDevice tlDevice) {
+        return getInputs(tlDevice).stream()
+                .flatMap(tInputs -> PrivateUtils.extractCompasPrivates(tlDevice.getLN0().getInputs(), TCompasFlow.class));
     }
 
     /**
@@ -43,12 +55,12 @@ public class ExtRefService {
     /**
      * Retrieves ExtRefs corresponding to given CompasFlow
      *
-     * @param inputs      node containing CompasFlows and ExtRefs
+     * @param tlDevice      LDevice containing CompasFlows and ExtRefs
      * @param tCompasFlow corresponding to Extrefs we are searching
      * @return stream of matching ExtRefs
      */
-    public Stream<TExtRef> getMatchingExtRef(TInputs inputs, TCompasFlow tCompasFlow) {
-        return getExtRefs(inputs)
+    public Stream<TExtRef> getMatchingExtRefs(TLDevice tlDevice, TCompasFlow tCompasFlow) {
+        return getExtRefs(tlDevice)
                 .filter(tExtRef -> isMatchingExtRef(tCompasFlow, tExtRef));
     }
 
@@ -103,4 +115,45 @@ public class ExtRefService {
                 && Utils.equalsOrBothBlank(compasFlow.getExtReflnClass(), extRefLnClass)
                 && Utils.equalsOrBothBlank(compasFlow.getExtReflnInst(), extRef.getLnInst());
     }
+
+    /**
+     * Checks if two ExtRefs fed by same Control Block
+     *
+     * @param t1 extref to compare
+     * @param t2 extref to compare
+     * @return true if the two ExtRef are fed by same Control Block, otherwise false
+     */
+    public boolean isExtRefFeedBySameControlBlock(TExtRef t1, TExtRef t2) {
+        String srcLNClass1 = (t1.isSetSrcLNClass()) ? t1.getSrcLNClass().get(0) : TLLN0Enum.LLN_0.value();
+        String srcLNClass2 = (t2.isSetSrcLNClass()) ? t2.getSrcLNClass().get(0) : TLLN0Enum.LLN_0.value();
+        return Utils.equalsOrBothBlank(t1.getIedName(), t2.getIedName())
+                && Utils.equalsOrBothBlank(t1.getSrcLDInst(), t2.getSrcLDInst())
+                && srcLNClass1.equals(srcLNClass2)
+                && Utils.equalsOrBothBlank(t1.getSrcLNInst(), t2.getSrcLNInst())
+                && Utils.equalsOrBothBlank(t1.getSrcPrefix(), t2.getSrcPrefix())
+                && Utils.equalsOrBothBlank(t1.getSrcCBName(), t2.getSrcCBName())
+                && Objects.equals(t1.getServiceType(), t2.getServiceType());
+    }
+
+    /**
+     * Remove ExtRef which are fed by same Control Block
+     *
+     * @return list ExtRefs without duplication
+     */
+    public List<TExtRef> filterDuplicatedExtRefs(List<TExtRef> tExtRefs) {
+        List<TExtRef> filteredList = new ArrayList<>();
+        tExtRefs.forEach(tExtRef -> {
+            if (filteredList.stream().noneMatch(t -> isExtRefFeedBySameControlBlock(tExtRef, t)))
+                filteredList.add(tExtRef);
+        });
+        return filteredList;
+    }
+
+    private Optional<TInputs> getInputs(TLDevice tlDevice){
+        if (!tlDevice.isSetLN0() || !tlDevice.getLN0().isSetInputs()) {
+            return Optional.empty();
+        }
+        return Optional.of(tlDevice.getLN0().getInputs());
+    }
+
 }

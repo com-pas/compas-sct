@@ -9,6 +9,7 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.scl.ExtRefService;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
@@ -18,8 +19,6 @@ import org.lfenergy.compas.sct.commons.util.Utils;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static org.lfenergy.compas.sct.commons.ExtRefEditorService.filterDuplicatedExtRefs;
 
 /**
  * A representation of the model object
@@ -245,7 +244,7 @@ public class AccessPointAdapter extends SclElementAdapter<IEDAdapter, TAccessPoi
                     return extRefs;
                 }).flatMap(Collection::stream)
                 .toList();
-        return new ExtRefAnalyzeRecord(sclReportItems, filterDuplicatedExtRefs(tExtRefList));
+        return new ExtRefAnalyzeRecord(sclReportItems, new ExtRefService().filterDuplicatedExtRefs(tExtRefList));
     }
 
     /**

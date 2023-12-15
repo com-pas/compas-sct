@@ -70,4 +70,9 @@ public interface ExtRefEditor {
      */
     void debindCompasFlowsAndExtRefsBasedOnVoltageLevel(SCL scd);
 
+    /**
+     * Update compas:Flow.ExtRefiedName and ExtRef.iedName, based on Substation LNode iedName
+     */
+    void updateIedNameBasedOnLnode(SCL scd);
+
 }

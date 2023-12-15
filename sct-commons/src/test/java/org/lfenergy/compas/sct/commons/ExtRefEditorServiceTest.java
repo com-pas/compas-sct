@@ -30,7 +30,6 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.lfenergy.compas.sct.commons.ExtRefEditorService.filterDuplicatedExtRefs;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 
@@ -40,7 +39,7 @@ class ExtRefEditorServiceTest {
 
     @BeforeEach
     void init() {
-        extRefEditorService = new ExtRefEditorService(new ExtRefService());
+        extRefEditorService = new ExtRefEditorService(new LdeviceService(), new ExtRefService());
     }
 
     @Test
@@ -209,41 +208,6 @@ class ExtRefEditorServiceTest {
         assertThat(extRef.isSetSrcLNClass()).isFalse();
         assertThat(extRef.isSetSrcLNInst()).isFalse();
         assertThat(extRef.isSetSrcCBName()).isFalse();
-    }
-
-    @Test
-    void filterDuplicatedExtRefs_should_remove_duplicated_extrefs() {
-        // Given
-        TExtRef tExtRefLnClass = createExtRefExample("CB_Name1", TServiceType.GOOSE);
-        tExtRefLnClass.getSrcLNClass().add(TLLN0Enum.LLN_0.value());
-        TExtRef tExtRef = createExtRefExample("CB_Name1", TServiceType.GOOSE);
-        List<TExtRef> tExtRefList = List.of(tExtRef, tExtRefLnClass, createExtRefExample("CB", TServiceType.GOOSE),
-                createExtRefExample("CB", TServiceType.GOOSE));
-        // When
-        List<TExtRef> result = filterDuplicatedExtRefs(tExtRefList);
-        // Then
-        assertThat(result).hasSizeLessThan(tExtRefList.size())
-                .hasSize(2);
-    }
-
-    @Test
-    void filterDuplicatedExtRefs_should_not_remove_not_duplicated_extrefs() {
-        // Given
-        TExtRef tExtRefIedName = createExtRefExample("CB_1", TServiceType.GOOSE);
-        tExtRefIedName.setIedName("IED_XXX");
-        TExtRef tExtRefLdInst = createExtRefExample("CB_1", TServiceType.GOOSE);
-        tExtRefLdInst.setSrcLDInst("LD_XXX");
-        TExtRef tExtRefLnInst = createExtRefExample("CB_1", TServiceType.GOOSE);
-        tExtRefLnInst.setSrcLNInst("X");
-        TExtRef tExtRefPrefix = createExtRefExample("CB_1", TServiceType.GOOSE);
-        tExtRefPrefix.setSrcPrefix("X");
-        List<TExtRef> tExtRefList = List.of(tExtRefIedName, tExtRefLdInst, tExtRefLnInst, tExtRefPrefix,
-                createExtRefExample("CB_1", TServiceType.GOOSE), createExtRefExample("CB_1", TServiceType.SMV));
-        // When
-        List<TExtRef> result = filterDuplicatedExtRefs(tExtRefList);
-        // Then
-        assertThat(result).hasSameSizeAs(tExtRefList)
-                .hasSize(6);
     }
 
     @Test
@@ -532,7 +496,6 @@ class ExtRefEditorServiceTest {
         assertThat(extRefBindExternally.getIedName()).isEqualTo("IED_NAME2");
         assertExtRefIsBoundAccordingTOLDEPF(extRefBindExternally, analogueChannel10WithBayExternalBayScope);
     }
-
     private void assertExtRefIsBoundAccordingTOLDEPF(TExtRef extRef, TChannel setting) {
         assertThat(extRef.getLdInst()).isEqualTo(setting.getLDInst());
         assertThat(extRef.getLnClass()).contains(setting.getLNClass());
@@ -829,4 +792,32 @@ class ExtRefEditorServiceTest {
 
     }
 
+    @Test
+    void updateIedNameBasedOnLnode_should_update_CompasFlow_and_ExtRef_iedName(){
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_based_on_lnode_success.xml");
+        // When
+        extRefEditorService.updateIedNameBasedOnLnode(scd);
+        // Then
+        assertThat(findCompasFlow(scd, "IED_NAME1", "LD_INST11", "STAT_LDSUIED_LPDO 1 Sortie_13_BOOLEAN_18_stVal_1").getExtRefiedName())
+                .isEqualTo("IED_NAME2");
+        assertThat(findExtRef(scd, "IED_NAME1", "LD_INST11", "STAT_LDSUIED_LPDO 1 Sortie_13_BOOLEAN_18_stVal_1").getIedName())
+                .isEqualTo("IED_NAME2");
+    }
+
+    @Test
+    void updateIedNameBasedOnLnode_when_no_matching_lnode_should_clear_binding(){
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_based_on_lnode_success.xml");
+        PrivateUtils.extractCompasPrivate(scd.getSubstation().get(0).getVoltageLevel().get(0).getBay().get(0), TCompasTopo.class).orElseThrow().setNode("99");
+        // When
+        extRefEditorService.updateIedNameBasedOnLnode(scd);
+        // Then
+        TCompasFlow compasFlow = findCompasFlow(scd, "IED_NAME1", "LD_INST11", "STAT_LDSUIED_LPDO 1 Sortie_13_BOOLEAN_18_stVal_1");
+        assertThat(compasFlow)
+                .extracting(TCompasFlow::getExtRefiedName, TCompasFlow::getExtRefldinst, TCompasFlow::getExtRefprefix, TCompasFlow::getExtReflnClass, TCompasFlow::getExtReflnInst)
+                .containsOnlyNulls();
+        assertExtRefIsNotBound(findExtRef(scd, "IED_NAME1", "LD_INST11", "STAT_LDSUIED_LPDO 1 Sortie_13_BOOLEAN_18_stVal_1"));
+
+    }
 }
