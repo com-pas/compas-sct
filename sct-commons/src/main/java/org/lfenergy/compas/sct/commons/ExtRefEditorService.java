@@ -423,6 +423,8 @@ public class ExtRefEditorService implements ExtRefEditor {
                 .filter(tVoltageLevelName -> !"0".equals(tVoltageLevelName))
                 .forEach(tVoltageLevelName -> scd.getIED().stream()
                         .flatMap(ldeviceService::getLdevices)
+                        .filter(TLDevice::isSetLN0)
+                        .filter(tlDevice -> tlDevice.getLN0().isSetInputs())
                         .forEach(tlDevice -> {
                             String flowSource = voltageCodification.get(tVoltageLevelName);
                             TInputs tInputs = tlDevice.getLN0().getInputs();
