@@ -7,16 +7,16 @@ package org.lfenergy.compas.sct.commons;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings;
 import org.lfenergy.compas.sct.commons.dto.ControlBlockTarget;
 import org.lfenergy.compas.sct.commons.dto.FcdaForDataSetsCreation;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.model.cbcom.*;
+import org.lfenergy.compas.sct.commons.scl.ControlService;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.DataSetAdapter;
@@ -29,45 +29,33 @@ import org.lfenergy.compas.sct.commons.testhelpers.FCDARecord;
 import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.lfenergy.compas.sct.commons.util.CsvUtils;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.lfenergy.compas.sct.commons.util.PrivateEnum;
+import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.lfenergy.compas.scl2007b4.model.TFCEnum.ST;
-import static org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings.*;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
 import static org.lfenergy.compas.sct.commons.util.ControlBlockEnum.*;
-import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newDurationInMilliSec;
 
-@ExtendWith(MockitoExtension.class)
-class ControlBlockServiceTest {
+class ControlBlockEditorServiceTest {
 
-    @InjectMocks
-    ControlBlockService controlBlockService;
+    ControlBlockEditorService controlBlockEditorService;
 
     private Set<FcdaForDataSetsCreation> allowedFcdas;
 
-    private static final long GSE_APP_ID_MIN = 0x9;
-    private static final long SMV_APP_ID_MIN = 0x400A;
-    private static final String GSE_MAC_ADDRESS_PREFIX = "01-02-03-04-";
-    private static final String SMV_MAC_ADDRESS_PREFIX = "0A-0B-0C-0D-";
-    private static final NetworkRanges GSE_NETWORK_RANGES = new NetworkRanges(GSE_APP_ID_MIN, GSE_APP_ID_MIN + 10, GSE_MAC_ADDRESS_PREFIX + "00-FF", GSE_MAC_ADDRESS_PREFIX + "01-AA");
-    private static final NetworkRanges SMV_NETWORK_RANGES = new NetworkRanges(SMV_APP_ID_MIN, SMV_APP_ID_MIN + 10, SMV_MAC_ADDRESS_PREFIX + "00-FF", SMV_MAC_ADDRESS_PREFIX + "01-AA");
-    private static final RangesPerCbType RANGES_PER_CB_TYPE = new RangesPerCbType(GSE_NETWORK_RANGES, SMV_NETWORK_RANGES);
-
-
     @BeforeEach
     void init() {
+        controlBlockEditorService = new ControlBlockEditorService(new ControlService());
         allowedFcdas = new HashSet<>(CsvUtils.parseRows("FcdaCandidates.csv", StandardCharsets.UTF_8, FcdaForDataSetsCreation.class));
     }
 
@@ -82,7 +70,7 @@ class ControlBlockServiceTest {
         iedAdapter1.getCurrentElem().getAccessPoint().get(0).getServices().getClientServices().setMaxSMV(2L);
         iedAdapter1.getCurrentElem().getAccessPoint().get(0).getServices().getClientServices().setMaxReports(1L);
         // When
-        List<SclReportItem> sclReportItems = controlBlockService.analyzeDataGroups(scd);
+        List<SclReportItem> sclReportItems = controlBlockEditorService.analyzeDataGroups(scd);
         //Then
         assertThat(sclReportItems).isEmpty();
 
@@ -100,7 +88,7 @@ class ControlBlockServiceTest {
         iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getGOOSE().setMax(2L);
         iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getConfReportControl().setMax(0L);
         // When
-        List<SclReportItem> sclReportItems = controlBlockService.analyzeDataGroups(scd);
+        List<SclReportItem> sclReportItems = controlBlockEditorService.analyzeDataGroups(scd);
         //Then
         assertThat(sclReportItems).hasSize(11)
                 .extracting(SclReportItem::message)
@@ -118,13 +106,12 @@ class ControlBlockServiceTest {
                         "There are too much SMV Control Blocks for the IED IED_NAME2: 3 > 1 max");
     }
 
-
     @Test
     void removeControlBlocksAndDatasetAndExtRefSrc_should_remove_srcXXX_attributes_on_ExtRef() {
         // Given
         SCL scl = SclTestMarshaller.getSCLFromFile("/scl-remove-controlBlocks-dataSet-extRefSrc/scl-with-control-blocks.xml");
         // When
-        controlBlockService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scl);
+        controlBlockEditorService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scl);
         // Then
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scl);
         List<TExtRef> extRefs = scdRootAdapter
@@ -157,7 +144,7 @@ class ControlBlockServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When Then
-        assertThatCode(() -> controlBlockService.createDataSetAndControlBlocks(scd, fcdaForDataSets))
+        assertThatCode(() -> controlBlockEditorService.createDataSetAndControlBlocks(scd, fcdaForDataSets))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("Accepted FCDAs list is empty, you should initialize allowed FCDA lists with CsvHelper class before");
     }
@@ -167,7 +154,7 @@ class ControlBlockServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When
-        List<SclReportItem> sclReportItems = controlBlockService.createDataSetAndControlBlocks(scd, allowedFcdas);
+        List<SclReportItem> sclReportItems = controlBlockEditorService.createDataSetAndControlBlocks(scd, allowedFcdas);
         // Then
         assertThat(sclReportItems).isEmpty();
         assertThat(streamAllDataSets(scd)).hasSize(6);
@@ -198,7 +185,7 @@ class ControlBlockServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When
-        List<SclReportItem> sclReportItems = controlBlockService.createDataSetAndControlBlocks(scd, allowedFcdas);
+        List<SclReportItem> sclReportItems = controlBlockEditorService.createDataSetAndControlBlocks(scd, allowedFcdas);
         // Then
         assertThat(sclReportItems).isEmpty();
 
@@ -231,7 +218,7 @@ class ControlBlockServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When
-        List<SclReportItem> sclReportItems = controlBlockService.createDataSetAndControlBlocks(scd, allowedFcdas);
+        List<SclReportItem> sclReportItems = controlBlockEditorService.createDataSetAndControlBlocks(scd, allowedFcdas);
         // Then
         assertThat(sclReportItems).isEmpty();
 
@@ -261,7 +248,7 @@ class ControlBlockServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When Then
-        assertThatCode(() -> controlBlockService.createDataSetAndControlBlocks(scd, "IED_NAME1", fcdaForDataSets))
+        assertThatCode(() -> controlBlockEditorService.createDataSetAndControlBlocks(scd, "IED_NAME1", fcdaForDataSets))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("Accepted FCDAs list is empty, you should initialize allowed FCDA lists with CsvHelper class before");
     }
@@ -271,7 +258,7 @@ class ControlBlockServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When
-        List<SclReportItem> sclReportItems = controlBlockService.createDataSetAndControlBlocks(scd, "IED_NAME1", allowedFcdas);
+        List<SclReportItem> sclReportItems = controlBlockEditorService.createDataSetAndControlBlocks(scd, "IED_NAME1", allowedFcdas);
         // Then
         assertThat(sclReportItems).isEmpty();
         assertThat(streamAllDataSets(scd)).hasSize(6);
@@ -287,7 +274,7 @@ class ControlBlockServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When
-        List<SclReportItem> sclReportItems = controlBlockService.createDataSetAndControlBlocks(scd, "IED_NAME2", allowedFcdas);
+        List<SclReportItem> sclReportItems = controlBlockEditorService.createDataSetAndControlBlocks(scd, "IED_NAME2", allowedFcdas);
         // Then
         assertThat(sclReportItems).isEmpty();
         assertThat(streamAllDataSets(scd)).isEmpty();
@@ -298,7 +285,7 @@ class ControlBlockServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When & Then
-        assertThatThrownBy(() -> controlBlockService.createDataSetAndControlBlocks(scd, "non_existing_IED_name", allowedFcdas))
+        assertThatThrownBy(() -> controlBlockEditorService.createDataSetAndControlBlocks(scd, "non_existing_IED_name", allowedFcdas))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("IED.name 'non_existing_IED_name' not found in SCD");
     }
@@ -309,7 +296,7 @@ class ControlBlockServiceTest {
         // Given
         SCL scd = new SCL();
         // When Then
-        assertThatCode(() -> controlBlockService.createDataSetAndControlBlocks(scd, "IED_NAME1", "LD_INST11", fcdaForDataSets))
+        assertThatCode(() -> controlBlockEditorService.createDataSetAndControlBlocks(scd, "IED_NAME1", "LD_INST11", fcdaForDataSets))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("Accepted FCDAs list is empty, you should initialize allowed FCDA lists with CsvHelper class before");
     }
@@ -319,7 +306,7 @@ class ControlBlockServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When
-        List<SclReportItem> sclReportItems = controlBlockService.createDataSetAndControlBlocks(scd, "IED_NAME1", "LD_INST11", allowedFcdas);
+        List<SclReportItem> sclReportItems = controlBlockEditorService.createDataSetAndControlBlocks(scd, "IED_NAME1", "LD_INST11", allowedFcdas);
         // Then
         assertThat(sclReportItems).isEmpty();
     }
@@ -329,7 +316,7 @@ class ControlBlockServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When & Then
-        assertThatThrownBy(() -> controlBlockService.createDataSetAndControlBlocks(scd, "non_existing_IED_name", "LD_INST11", allowedFcdas))
+        assertThatThrownBy(() -> controlBlockEditorService.createDataSetAndControlBlocks(scd, "non_existing_IED_name", "LD_INST11", allowedFcdas))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("IED.name 'non_existing_IED_name' not found in SCD");
     }
@@ -339,7 +326,7 @@ class ControlBlockServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When & Then
-        assertThatThrownBy(() -> controlBlockService.createDataSetAndControlBlocks(scd, "IED_NAME1", "non_existing_LDevice_inst", allowedFcdas))
+        assertThatThrownBy(() -> controlBlockEditorService.createDataSetAndControlBlocks(scd, "IED_NAME1", "non_existing_LDevice_inst", allowedFcdas))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("LDevice.inst 'non_existing_LDevice_inst' not found in IED 'IED_NAME1'");
     }
@@ -349,11 +336,10 @@ class ControlBlockServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         // When & Then
-        assertThatThrownBy(() -> controlBlockService.createDataSetAndControlBlocks(scd, null, "LD_INST11", allowedFcdas))
+        assertThatThrownBy(() -> controlBlockEditorService.createDataSetAndControlBlocks(scd, null, "LD_INST11", allowedFcdas))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("IED.name parameter is missing");
     }
-
 
 
     @Test
@@ -361,7 +347,7 @@ class ControlBlockServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success_test_fcda_sort.xml");
         // When
-        List<SclReportItem> sclReportItems = controlBlockService.createDataSetAndControlBlocks(scd, allowedFcdas);
+        List<SclReportItem> sclReportItems = controlBlockEditorService.createDataSetAndControlBlocks(scd, allowedFcdas);
         // Then
         assertThat(sclReportItems).isEmpty();
         DataSetAdapter dataSetAdapter = findDataSet(scd, "IED_NAME2", "LD_INST21", "DS_LD_INST21_GSI");
@@ -376,45 +362,73 @@ class ControlBlockServiceTest {
     }
 
     @Test
-    void configureNetworkForAllControlBlocks_should_create_GSE_and_SMV_elements() {
+    void configureNetworkForAllControlBlocks_should_create_GSE_elements() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
-
-        TDurationInMilliSec minTime = newDurationInMilliSec(10);
-        TDurationInMilliSec maxTime = newDurationInMilliSec(2000);
-        ControlBlockNetworkSettings controlBlockNetworkSettings = controlBlockAdapter -> new SettingsOrError(new Settings(0x1D6, (byte) 4, minTime, maxTime), null);
-
+        CBCom cbCom = createCbCom();
         // When
-        List<SclReportItem> sclReportItems = controlBlockService.configureNetworkForAllControlBlocks(scd, controlBlockNetworkSettings, RANGES_PER_CB_TYPE);
+        List<SclReportItem> sclReportItems = controlBlockEditorService.configureNetworkForAllControlBlocks(scd, cbCom);
         // Then
         assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
-        TConnectedAP connectedAP = new SclRootAdapter(scd).findConnectedApAdapter("IED_NAME2", "AP_NAME").get().getCurrentElem();
-        TGSE gse = connectedAP.getGSE().stream()
-                .filter(tgse -> "CB_LD_INST21_GSI".equals(tgse.getCbName()))
-                .findFirst().get();
-        assertThat(gse.getLdInst()).isEqualTo("LD_INST21");
-        assertThat(gse.getMinTime()).extracting(TDurationInMilliSec::getUnit, TDurationInMilliSec::getMultiplier, TDurationInMilliSec::getValue)
-                .containsExactly("s", "m", new BigDecimal("10"));
-        assertThat(gse.getMaxTime()).extracting(TDurationInMilliSec::getUnit, TDurationInMilliSec::getMultiplier, TDurationInMilliSec::getValue)
-                .containsExactly("s", "m", new BigDecimal("2000"));
-        assertThat(gse.getAddress().getP()).extracting(TP::getType, TP::getValue)
-                .containsExactlyInAnyOrder(
-                        Tuple.tuple("VLAN-PRIORITY", "4"),
-                        Tuple.tuple("APPID", "0009"),
-                        Tuple.tuple("MAC-Address", "01-02-03-04-00-FF"),
-                        Tuple.tuple("VLAN-ID", "1D6")
-                );
-        TSMV smv = connectedAP.getSMV().stream()
-                .filter(tsmv -> "CB_LD_INST21_SVI".equals(tsmv.getCbName()))
-                .findFirst().get();
-        assertThat(smv.getLdInst()).isEqualTo("LD_INST21");
-        assertThat(smv.getAddress().getP()).extracting(TP::getType, TP::getValue)
-                .containsExactlyInAnyOrder(
-                        Tuple.tuple("VLAN-PRIORITY", "4"),
-                        Tuple.tuple("APPID", "400A"),
-                        Tuple.tuple("MAC-Address", "0A-0B-0C-0D-00-FF"),
-                        Tuple.tuple("VLAN-ID", "1D6")
-                );
+        TGSE gse1 = getCommunicationGSE(scd, "IED_NAME2", "CB_LD_INST21_GSI");
+        assertThat(gse1.getLdInst()).isEqualTo("LD_INST21");
+        assertThat(SclDuration.from(gse1.getMinTime())).isEqualTo(new SclDuration("10", "s", "m"));
+        assertThat(SclDuration.from(gse1.getMaxTime())).isEqualTo(new SclDuration("2000", "s", "m"));
+        assertThat(gse1.getAddress().getP()).extracting(TP::getType, TP::getValue).containsExactlyInAnyOrder(
+                Tuple.tuple("VLAN-PRIORITY", "1"),
+                Tuple.tuple("APPID", "0000"),
+                Tuple.tuple("MAC-Address", "01-0C-CD-01-00-00"),
+                Tuple.tuple("VLAN-ID", "12D")
+        );
+        TGSE gse2 = getCommunicationGSE(scd, "IED_NAME2", "CB_LD_INST21_GMI");
+        assertThat(gse2.getLdInst()).isEqualTo("LD_INST21");
+        assertThat(SclDuration.from(gse2.getMinTime())).isEqualTo(new SclDuration("10", "s", "m"));
+        assertThat(SclDuration.from(gse2.getMaxTime())).isEqualTo(new SclDuration("2000", "s", "m"));
+        assertThat(gse2.getAddress().getP()).extracting(TP::getType, TP::getValue).containsExactlyInAnyOrder(
+                Tuple.tuple("VLAN-PRIORITY", "1"),
+                Tuple.tuple("APPID", "0001"),
+                Tuple.tuple("MAC-Address", "01-0C-CD-01-00-01"),
+                Tuple.tuple("VLAN-ID", "12D")
+        );
+        TGSE gse3 = getCommunicationGSE(scd, "IED_NAME3", "CB_LD_INST31_GSE");
+        assertThat(gse3.getLdInst()).isEqualTo("LD_INST31");
+        assertThat(SclDuration.from(gse3.getMinTime())).isEqualTo(new SclDuration("10", "s", "m"));
+        assertThat(SclDuration.from(gse3.getMaxTime())).isEqualTo(new SclDuration("2000", "s", "m"));
+        assertThat(gse3.getAddress().getP()).extracting(TP::getType, TP::getValue).containsExactlyInAnyOrder(
+                Tuple.tuple("VLAN-PRIORITY", "2"),
+                Tuple.tuple("APPID", "0002"),
+                Tuple.tuple("MAC-Address", "01-0C-CD-01-00-02"),
+                Tuple.tuple("VLAN-ID", "12E")
+        );
+        MarshallerWrapper.assertValidateXmlSchema(scd);
+    }
+
+    @Test
+    void configureNetworkForAllControlBlocks_should_create_SMV_elements() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
+        CBCom cbCom = createCbCom();
+        // When
+        List<SclReportItem> sclReportItems = controlBlockEditorService.configureNetworkForAllControlBlocks(scd, cbCom);
+        // Then
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
+        TSMV smv1 = getCommunicationSMV(scd, "IED_NAME2", "CB_LD_INST21_SVI");
+        assertThat(smv1.getLdInst()).isEqualTo("LD_INST21");
+        assertThat(smv1.getAddress().getP()).extracting(TP::getType, TP::getValue).containsExactlyInAnyOrder(
+                Tuple.tuple("VLAN-PRIORITY", "3"),
+                Tuple.tuple("APPID", "4000"),
+                Tuple.tuple("MAC-Address", "01-0C-CD-04-00-00"),
+                Tuple.tuple("VLAN-ID", "12F")
+        );
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
+        TSMV smv2 = getCommunicationSMV(scd, "IED_NAME3", "CB_LD_INST31_SVE");
+        assertThat(smv2.getLdInst()).isEqualTo("LD_INST31");
+        assertThat(smv2.getAddress().getP()).extracting(TP::getType, TP::getValue).containsExactlyInAnyOrder(
+                Tuple.tuple("VLAN-PRIORITY", "4"),
+                Tuple.tuple("APPID", "4001"),
+                Tuple.tuple("MAC-Address", "01-0C-CD-04-00-01"),
+                Tuple.tuple("VLAN-ID", "130")
+        );
         MarshallerWrapper.assertValidateXmlSchema(scd);
     }
 
@@ -422,12 +436,13 @@ class ControlBlockServiceTest {
     void configureNetworkForAllControlBlocks_should_create_GSE_with_incremental_appid_and_mac_addresses() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
-
-        TDurationInMilliSec minTime = newDurationInMilliSec(10);
-        TDurationInMilliSec maxTime = newDurationInMilliSec(2000);
-        ControlBlockNetworkSettings controlBlockNetworkSettings = controlBlockAdapter -> new SettingsOrError(new Settings(0x1D6, (byte) 4, minTime, maxTime), null);
+        CBCom cbCom = createCbCom();
+        cbCom.getAppIdRanges().getAppIdRange().get(0).setStart("0009");
+        cbCom.getAppIdRanges().getAppIdRange().get(0).setEnd("000B");
+        cbCom.getMacRanges().getMacRange().get(0).setStart("01-02-03-04-00-FF");
+        cbCom.getMacRanges().getMacRange().get(0).setEnd("01-02-03-04-01-01");
         // When
-        List<SclReportItem> sclReportItems = controlBlockService.configureNetworkForAllControlBlocks(scd, controlBlockNetworkSettings, RANGES_PER_CB_TYPE);
+        List<SclReportItem> sclReportItems = controlBlockEditorService.configureNetworkForAllControlBlocks(scd, cbCom);
         // Then
         assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
         assertThat(streamAllConnectedApGseP(scd, "APPID"))
@@ -438,19 +453,160 @@ class ControlBlockServiceTest {
 
     @ParameterizedTest
     @MethodSource("provideConfigureNetworkForAllControlBlocksErrors")
-    void configureNetworkForAllControlBlocks_should_fail_when_no_settings_for_this_controlBlock(ControlBlockNetworkSettings controlBlockNetworkSettings,
-                                                                                                RangesPerCbType rangesPerCbType,
-                                                                                                String expectedMessage) {
+    void configureNetworkForAllControlBlocks_should_fail_when_no_settings_for_this_controlBlock(CBCom cbCom, String expectedMessage, String expectedXPath) {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
         // When
-        List<SclReportItem> sclReportItems = controlBlockService.configureNetworkForAllControlBlocks(scd, controlBlockNetworkSettings, rangesPerCbType);
+        List<SclReportItem> sclReportItems = controlBlockEditorService.configureNetworkForAllControlBlocks(scd, cbCom);
         // Then
         assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isFalse();
         assertThat(sclReportItems)
-                .extracting(SclReportItem::message, SclReportItem::xpath)
-                .contains(Tuple.tuple(expectedMessage,
-                        "/SCL/IED[@name=\"IED_NAME2\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST21\"]/LN0/GSEControl[@name=\"CB_LD_INST21_GMI\"]"));
+                .contains(SclReportItem.error(expectedXPath, expectedMessage));
+    }
+
+    public static Stream<Arguments> provideConfigureNetworkForAllControlBlocksErrors() {
+        CBCom cbComWithNoVlan = createCbCom();
+        cbComWithNoVlan.getVlans().getVlan().clear();
+        CBCom cbComWithMissingVlanId = createCbCom();
+        cbComWithMissingVlanId.getVlans().getVlan().get(0).setVlanId(null);
+        CBCom cbComWithNotEnoughAppId = createCbCom();
+        cbComWithNotEnoughAppId.getAppIdRanges().getAppIdRange().get(0).setStart("0000");
+        cbComWithNotEnoughAppId.getAppIdRanges().getAppIdRange().get(0).setEnd("00001");
+        CBCom cbComWithNotEnoughMacAddress = createCbCom();
+        cbComWithNotEnoughMacAddress.getMacRanges().getMacRange().get(0).setStart("01-0C-CD-01-00-00");
+        cbComWithNotEnoughMacAddress.getMacRanges().getMacRange().get(0).setEnd("01-0C-CD-01-00-01");
+
+        return Stream.of(
+                Arguments.of(cbComWithNoVlan, "Cannot configure communication for this ControlBlock because: No controlBlock communication settings found with these Criteria[cbType=GOOSE, systemVersionWithoutV=01.00.009.001, iedType=BCU, iedRedundancy=A, iedSystemVersionInstance=1, bayIntOrExt=BAY_INTERNAL]",
+                        "/SCL/IED[@name=\"IED_NAME2\"]/AccessPoint[@name=\"AP_NAME\"]/Server/LDevice[@inst=\"LD_INST21\"]/LN0/GSEControl[@name=\"CB_LD_INST21_GMI\"]"),
+                Arguments.of(cbComWithMissingVlanId, "Cannot configure communication for this ControlBlock because no Vlan Id was provided in the settings",
+                        "/SCL/IED[@name=\"IED_NAME2\"]/AccessPoint[@name=\"AP_NAME\"]/Server/LDevice[@inst=\"LD_INST21\"]/LN0/GSEControl[@name=\"CB_LD_INST21_GMI\"]"),
+                Arguments.of(cbComWithNotEnoughAppId, "Cannot configure communication for this ControlBlock because range of appId is exhausted",
+                        "/SCL/IED[@name=\"IED_NAME3\"]/AccessPoint[@name=\"AP_NAME\"]/Server/LDevice[@inst=\"LD_INST31\"]/LN0/GSEControl[@name=\"CB_LD_INST31_GSE\"]"),
+                Arguments.of(cbComWithNotEnoughMacAddress, "Cannot configure communication for this ControlBlock because range of MAC Address is exhausted",
+                        "/SCL/IED[@name=\"IED_NAME3\"]/AccessPoint[@name=\"AP_NAME\"]/Server/LDevice[@inst=\"LD_INST31\"]/LN0/GSEControl[@name=\"CB_LD_INST31_GSE\"]")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideBlankCriteria")
+    void configureNetworkForAllControlBlocks_when_setting_files_has_blank_criteria_should_return_error(Consumer<TVlan> setCriteriaBlank) {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
+        CBCom cbCom = createCbCom();
+        setCriteriaBlank.accept(cbCom.getVlans().getVlan().get(0));
+        //When
+        List<SclReportItem> sclReportItems = controlBlockEditorService.configureNetworkForAllControlBlocks(scd, cbCom);
+        //Then
+        assertThat(sclReportItems).hasSize(1);
+        assertThat(sclReportItems.get(0)).extracting(SclReportItem::isError, SclReportItem::xpath)
+                .containsExactly(true, "Control Block Communication setting files");
+        assertThat(sclReportItems.get(0).message()).matches("Error in Control Block communication setting file: vlan is missing attribute .*");
+    }
+
+    private static Stream<Arguments> provideBlankCriteria() {
+        return Stream.of(Arguments.of(
+                (Consumer<TVlan>) tVlan -> tVlan.setXY(null),
+                (Consumer<TVlan>) tVlan -> tVlan.setZW(null),
+                (Consumer<TVlan>) tVlan -> tVlan.setIEDType(null),
+                (Consumer<TVlan>) tVlan -> tVlan.setIEDRedundancy(null),
+                (Consumer<TVlan>) tVlan -> tVlan.setIEDSystemVersionInstance(null),
+                (Consumer<TVlan>) tVlan -> tVlan.setBayIntOrExt(null)
+        ));
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideMalformedNumbers")
+    void configureNetworkForAllControlBlocks_when_malformed_numbers_should_return_error(Consumer<TVlan> setMalformedNumber) {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
+        CBCom cbCom = createCbCom();
+        setMalformedNumber.accept(cbCom.getVlans().getVlan().get(0));
+        //When
+        List<SclReportItem> sclReportItems = controlBlockEditorService.configureNetworkForAllControlBlocks(scd, cbCom);
+        //Then
+        assertThat(sclReportItems).hasSize(1);
+        assertThat(sclReportItems.get(0)).extracting(SclReportItem::isError, SclReportItem::xpath)
+                .containsExactly(true, "Control Block Communication setting files");
+        assertThat(sclReportItems.get(0).message()).matches("Error in Control Block communication setting file: .+ must be an integer( or 'none')?, but got : XXX");
+    }
+
+    private static Stream<Arguments> provideMalformedNumbers() {
+        return Stream.of(
+                Arguments.of((Consumer<TVlan>) tVlan -> tVlan.setIEDSystemVersionInstance("XXX")),
+                Arguments.of((Consumer<TVlan>) tVlan -> tVlan.setVlanId("XXX")),
+                Arguments.of((Consumer<TVlan>) tVlan -> tVlan.setVlanPriority("XXX")),
+                Arguments.of((Consumer<TVlan>) tVlan -> tVlan.setMinTime("XXX")),
+                Arguments.of((Consumer<TVlan>) tVlan -> tVlan.setMaxTime("XXX"))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideOutOfBoundNumbers")
+    void configureNetworkForAllControlBlocks_when_out_of_bound_numbers_should_return_error(Consumer<TVlan> setMalformedNumber) {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
+        CBCom cbCom = createCbCom();
+        setMalformedNumber.accept(cbCom.getVlans().getVlan().get(0));
+        //When
+        List<SclReportItem> sclReportItems = controlBlockEditorService.configureNetworkForAllControlBlocks(scd, cbCom);
+        //Then
+        assertThat(sclReportItems).hasSize(1);
+        assertThat(sclReportItems.get(0)).extracting(SclReportItem::isError, SclReportItem::xpath)
+                .containsExactly(true, "Control Block Communication setting files");
+        assertThat(sclReportItems.get(0).message()).matches("Error in Control Block communication setting file: VLAN (ID|PRIORITY) must be between 0 and [0-9]+, but got : .*");
+    }
+
+    private static Stream<Arguments> provideOutOfBoundNumbers() {
+        return Stream.of(
+                Arguments.of((Consumer<TVlan>) tVlan -> tVlan.setVlanId("4096")), // VlanId > MAX_VLAN_ID
+                Arguments.of((Consumer<TVlan>) tVlan -> tVlan.setVlanId("-1")), // VlanId < 0
+                Arguments.of((Consumer<TVlan>) tVlan -> tVlan.setVlanPriority("8")), // VlanPriority > MAX_VLAN_PRIORITY
+                Arguments.of((Consumer<TVlan>) tVlan -> tVlan.setVlanPriority("-1")) // VlanPriority < 0
+        );
+    }
+
+    @Test
+    void configureNetworkForAllControlBlocks_when_missing_connectedAp_should_return_error() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
+        scd.getCommunication().getSubNetwork().get(0).getConnectedAP().remove(0);
+        CBCom cbCom = createCbCom();
+        //When
+        List<SclReportItem> sclReportItems = controlBlockEditorService.configureNetworkForAllControlBlocks(scd, cbCom);
+        //Then
+        assertThat(sclReportItems).hasSize(3);
+        assertThat(sclReportItems).extracting(SclReportItem::isError).containsOnly(true);
+        assertThat(sclReportItems).extracting(SclReportItem::message).containsOnly("Cannot configure communication for ControlBlock because no ConnectedAP found for AccessPoint");
+        assertThat(sclReportItems).extracting(SclReportItem::xpath).allMatch(xpath -> xpath.startsWith("""
+                /SCL/IED[@name="IED_NAME2"]/AccessPoint[@name="AP_NAME"]/Server/LDevice[@inst="LD_INST21"]/LN0/"""));
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideRemovePrivateInfo")
+    void configureNetworkForAllControlBlocks_when_missing_IED_privates_should_return_error(Consumer<TIED> removePrivateInfo) {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
+        CBCom cbCom = createCbCom();
+        removePrivateInfo.accept(scd.getIED().get(1));
+        //When
+        List<SclReportItem> sclReportItems = controlBlockEditorService.configureNetworkForAllControlBlocks(scd, cbCom);
+        //Then
+        assertThat(sclReportItems).hasSize(3);
+        assertThat(sclReportItems).extracting(SclReportItem::isError, SclReportItem::xpath)
+                .containsOnly(Tuple.tuple(true, """
+                        /SCL/IED[@name="IED_NAME2"]/AccessPoint[@name="AP_NAME"]/Server/LDevice[@inst="LD_INST21"]"""));
+        assertThat(sclReportItems).extracting(SclReportItem::message).allSatisfy(message -> assertThat(message).containsAnyOf("COMPAS-ICDHeader", "COMPAS-SystemVersion"));
+    }
+
+    private static Stream<Arguments> provideRemovePrivateInfo() {
+        return Stream.of(
+                Arguments.of((Consumer<TIED>) tied -> PrivateUtils.removePrivates(tied, PrivateEnum.COMPAS_SYSTEM_VERSION)),
+                Arguments.of((Consumer<TIED>) tied -> PrivateUtils.extractCompasPrivate(tied, TCompasSystemVersion.class).ifPresent(tCompasSystemVersion -> tCompasSystemVersion.setMainSystemVersion(null))),
+                Arguments.of((Consumer<TIED>) tied -> PrivateUtils.extractCompasPrivate(tied, TCompasSystemVersion.class).ifPresent(tCompasSystemVersion -> tCompasSystemVersion.setMinorSystemVersion(null))),
+                Arguments.of((Consumer<TIED>) tied -> PrivateUtils.removePrivates(tied, PrivateEnum.COMPAS_ICDHEADER)),
+                Arguments.of((Consumer<TIED>) tied -> PrivateUtils.extractCompasPrivate(tied, TCompasICDHeader.class).ifPresent(tCompasICDHeader -> tCompasICDHeader.setIEDSystemVersioninstance(null)))
+        );
     }
 
     @Test
@@ -458,7 +614,7 @@ class ControlBlockServiceTest {
         // Given
         SCL scl = SclTestMarshaller.getSCLFromFile("/scl-remove-controlBlocks-dataSet-extRefSrc/scl-with-control-blocks.xml");
         // When
-        controlBlockService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scl);
+        controlBlockEditorService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scl);
         // Then
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scl);
         List<LDeviceAdapter> lDevices = scdRootAdapter.streamIEDAdapters().flatMap(IEDAdapter::streamLDeviceAdapters).toList();
@@ -478,7 +634,7 @@ class ControlBlockServiceTest {
         // Given
         SCL scl = SclTestMarshaller.getSCLFromFile("/scl-remove-controlBlocks-dataSet-extRefSrc/scl-with-control-blocks.xml");
         // When
-        controlBlockService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scl);
+        controlBlockEditorService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scl);
         // Then
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scl);
         List<TLN> lns = scdRootAdapter.streamIEDAdapters()
@@ -493,30 +649,70 @@ class ControlBlockServiceTest {
         assertIsMarshallable(scl);
     }
 
-    public static Stream<Arguments> provideConfigureNetworkForAllControlBlocksErrors() {
-        Settings settingsWithNullVlanId = new Settings(null, (byte) 1, newDurationInMilliSec(1), newDurationInMilliSec(2));
-        Settings settings = new Settings(1, (byte) 1, newDurationInMilliSec(1), newDurationInMilliSec(2));
-        return Stream.of(
-                Arguments.of((ControlBlockNetworkSettings) controlBlockAdapter -> new SettingsOrError(null, null),
-                        RANGES_PER_CB_TYPE,
-                        "Cannot configure network for this ControlBlock because no settings was provided"),
-                Arguments.of((ControlBlockNetworkSettings) controlBlockAdapter -> new SettingsOrError(null, "Custom error message"),
-                        RANGES_PER_CB_TYPE,
-                        "Cannot configure network for this ControlBlock because: Custom error message"),
-                Arguments.of((ControlBlockNetworkSettings) controlBlockAdapter -> new SettingsOrError(settingsWithNullVlanId, null),
-                        RANGES_PER_CB_TYPE,
-                        "Cannot configure network for this ControlBlock because no Vlan Id was provided in the settings"),
-                Arguments.of((ControlBlockNetworkSettings) controlBlockAdapter -> new SettingsOrError(settings, null),
-                        new RangesPerCbType(
-                                new NetworkRanges(GSE_APP_ID_MIN, GSE_APP_ID_MIN, GSE_MAC_ADDRESS_PREFIX + "00-FF", GSE_MAC_ADDRESS_PREFIX + "01-AA"),
-                                SMV_NETWORK_RANGES),
-                        "Cannot configure network for this ControlBlock because range of appId is exhausted"),
-                Arguments.of((ControlBlockNetworkSettings) controlBlockAdapter -> new SettingsOrError(settings, null),
-                        new RangesPerCbType(
-                                new NetworkRanges(GSE_APP_ID_MIN, GSE_APP_ID_MIN + 10, GSE_MAC_ADDRESS_PREFIX + "00-FF", GSE_MAC_ADDRESS_PREFIX + "00-FF"),
-                                SMV_NETWORK_RANGES),
-                        "Cannot configure network for this ControlBlock because range of MAC Address is exhausted")
-        );
+    private static TGSE getCommunicationGSE(SCL scd, String iedName, String cbName) {
+        return new SclRootAdapter(scd).findConnectedApAdapter(iedName, "AP_NAME").orElseThrow()
+                .getCurrentElem()
+                .getGSE().stream()
+                .filter(tgse -> cbName.equals(tgse.getCbName()))
+                .findFirst().orElseThrow();
     }
 
+    private static TSMV getCommunicationSMV(SCL scd, String iedName, String cbName) {
+        return new SclRootAdapter(scd).findConnectedApAdapter(iedName, "AP_NAME").orElseThrow()
+                .getCurrentElem()
+                .getSMV().stream()
+                .filter(tsmv -> cbName.equals(tsmv.getCbName()))
+                .findFirst().orElseThrow();
+    }
+
+    private static CBCom createCbCom() {
+        CBCom cbCom = new CBCom();
+        cbCom.setMacRanges(new MacRanges());
+        cbCom.setAppIdRanges(new AppIdRanges());
+        cbCom.setVlans(new Vlans());
+        cbCom.getMacRanges().getMacRange().add(newRange(TCBType.GOOSE, "01-0C-CD-01-00-00", "01-0C-CD-01-01-FF"));
+        cbCom.getMacRanges().getMacRange().add(newRange(TCBType.SV, "01-0C-CD-04-00-00", "01-0C-CD-04-FF-FF"));
+        cbCom.getAppIdRanges().getAppIdRange().add(newRange(TCBType.GOOSE, "0000", "4000"));
+        cbCom.getAppIdRanges().getAppIdRange().add(newRange(TCBType.SV, "4000", "7FFF"));
+        cbCom.getVlans().getVlan().addAll(List.of(
+                newVlan(TCBType.GOOSE, TBayIntOrExt.BAY_INTERNAL, "301", "1"),
+                newVlan(TCBType.GOOSE, TBayIntOrExt.BAY_EXTERNAL, "302", "2"),
+                newVlan(TCBType.SV, TBayIntOrExt.BAY_INTERNAL, "303", "3"),
+                newVlan(TCBType.SV, TBayIntOrExt.BAY_EXTERNAL, "304", "4")
+        ));
+        return cbCom;
+    }
+
+    private static TRange newRange(TCBType tcbType, String start, String end) {
+        TRange macRangeGSE = new TRange();
+        macRangeGSE.setCBType(tcbType);
+        macRangeGSE.setStart(start);
+        macRangeGSE.setEnd(end);
+        return macRangeGSE;
+    }
+
+    private static TVlan newVlan(TCBType tcbType, TBayIntOrExt tBayIntOrExt, String vlanId, String vlanPriority) {
+        TVlan gseVlan = new TVlan();
+        gseVlan.setCBType(tcbType);
+        gseVlan.setXY("01.00");
+        gseVlan.setZW("009.001");
+        gseVlan.setIEDType(TIEDType.BCU);
+        gseVlan.setIEDRedundancy(TIEDRedundancy.A);
+        gseVlan.setIEDSystemVersionInstance("1");
+        gseVlan.setBayIntOrExt(tBayIntOrExt);
+        gseVlan.setVlanId(vlanId);
+        gseVlan.setVlanPriority(vlanPriority);
+        gseVlan.setMinTime("10");
+        gseVlan.setMaxTime("2000");
+        return gseVlan;
+    }
+
+    /**
+     * Help comparing TDurationInMilliSec
+     */
+    record SclDuration(String value, String unit, String multiplier) {
+        static SclDuration from(TDurationInMilliSec tDurationInMilliSec) {
+            return new SclDuration(tDurationInMilliSec.getValue().toString(), tDurationInMilliSec.getUnit(), tDurationInMilliSec.getMultiplier());
+        }
+    }
 }

@@ -7,21 +7,10 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.ControlBlockTarget;
-import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
-import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import org.lfenergy.compas.sct.commons.scl.com.ConnectedAPAdapter;
-import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
-import org.lfenergy.compas.sct.commons.util.Utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newDurationInMilliSec;
-import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newP;
 import static org.lfenergy.compas.sct.commons.util.Utils.xpathAttributeFilter;
 
 /**
@@ -52,12 +41,6 @@ import static org.lfenergy.compas.sct.commons.util.Utils.xpathAttributeFilter;
 public class ControlBlockAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TAnyLN>, TControl> {
 
     private static final long RPT_ENABLED_MAX_DEFAULT = 1L;
-    private static final String APPID_P_TYPE = "APPID";
-    private static final String MAC_ADDRESS_P_TYPE = "MAC-Address";
-    private static final String VLAN_ID_P_TYPE = "VLAN-ID";
-    private static final String VLAN_PRIORITY_P_TYPE = "VLAN-PRIORITY";
-    private static final int APPID_LENGTH = 4;
-    private static final int VLAN_ID_LENGTH = 3;
 
     public ControlBlockAdapter(AbstractLNAdapter<? extends TAnyLN> parentAdapter, TControl tControl) {
         super(parentAdapter, tControl);
@@ -128,67 +111,4 @@ public class ControlBlockAdapter extends SclElementAdapter<AbstractLNAdapter<? e
         }
     }
 
-    /**
-     * Configure the Communication section for this ControlBlock
-     *  - Communication/SubNetwork/ConnectedAP/GSE for GSEControl block
-     *  - Communication/SubNetwork/ConnectedAP/SMV for SampledValueControl block
-     * @param appId value for P type APPID
-     * @param macAddress value for P type MAC-Address
-     * @param vlanId value for P type VLAN-ID
-     * @param vlanPriority value for P type VLAN-PRIORITY
-     * @param minTime MinTime Element
-     * @param maxTime MaxTime Element
-     * @return An empty Optional if network have been configured, else a SclReportItem.
-     */
-    public Optional<SclReportItem> configureNetwork(long appId, String macAddress, Integer vlanId, Byte vlanPriority, TDurationInMilliSec minTime,
-                                                    TDurationInMilliSec maxTime) {
-        String accessPointName = getParentLDeviceAdapter().getAccessPoint().getName();
-
-        Optional<ConnectedAPAdapter> optConApAdapter = getSclRootAdapter().findConnectedApAdapter(getParentIedAdapter().getName(), accessPointName);
-        if (optConApAdapter.isEmpty()) {
-            return Optional.of(buildFatalReportItem("Cannot configure network for ControlBlock because no ConnectAP found for parent AccessPoint"));
-        }
-        ConnectedAPAdapter connectedAPAdapter = optConApAdapter.get();
-        List<TP> listOfPs = new ArrayList<>();
-        listOfPs.add(newP(APPID_P_TYPE, Utils.toHex(appId, APPID_LENGTH)));
-        listOfPs.add(newP(MAC_ADDRESS_P_TYPE, macAddress));
-        if (vlanId != null) {
-            listOfPs.add(newP(VLAN_ID_P_TYPE, Utils.toHex(vlanId, VLAN_ID_LENGTH)));
-            if (vlanPriority != null) {
-                listOfPs.add(newP(VLAN_PRIORITY_P_TYPE, String.valueOf(vlanPriority)));
-            }
-        }
-        switch (getControlBlockEnum()) {
-            case GSE -> connectedAPAdapter.updateGseOrCreateIfNotExists(getParentLDeviceAdapter().getInst(), currentElem.getName(), listOfPs, newDurationInMilliSec(minTime), newDurationInMilliSec(maxTime));
-            case SAMPLED_VALUE -> connectedAPAdapter.updateSmvOrCreateIfNotExists(getParentLDeviceAdapter().getInst(), currentElem.getName(), listOfPs);
-            default -> {
-                return Optional.of(buildFatalReportItem("configureNetwork not yet implemented for %s ControlBlocks".formatted(getControlBlockEnum())));
-            }
-        }
-        return Optional.empty();
-    }
-
-    /**
-     * Get parent LDevice
-     * @return ControlBlock's parent lDeviceAdapter
-     */
-    private LDeviceAdapter getParentLDeviceAdapter() {
-        return getParentAdapter().getParentAdapter();
-    }
-
-    /**
-     * Get parent IED
-     * @return ControlBlock's parent IEDAdapter
-     */
-    public IEDAdapter getParentIedAdapter() {
-        return getParentAdapter().getParentIed();
-    }
-
-    /**
-     * Get SCL Root
-     * @return sclRootAdapter
-     */
-    private SclRootAdapter getSclRootAdapter() {
-        return getParentIedAdapter().getParentAdapter();
-    }
 }
