@@ -8,11 +8,12 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.ExtRefService;
+import org.lfenergy.compas.sct.commons.ExtRefEditorService;
 import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
 import org.lfenergy.compas.sct.commons.dto.FcdaForDataSetsCreation;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.scl.ExtRefService;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
@@ -63,6 +64,8 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
 
     private static final int EXTREF_DESC_DA_NAME_POSITION = -2;
 
+    private final ExtRefService extRefService = new ExtRefService();
+
     /**
      * Constructor
      *
@@ -101,13 +104,13 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         try {
             ActiveStatus lDeviceStatus = ActiveStatus.fromValue(optionalLDeviceStatus.get());
             return switch (lDeviceStatus) {
-                case ON -> getExtRefs().stream()
+                case ON -> extRefService.getExtRefs(currentElem)
                         .filter(tExtRef -> StringUtils.isNotBlank(tExtRef.getIedName()) && StringUtils.isNotBlank(tExtRef.getDesc()))
                         .map(extRef -> updateExtRefIedName(extRef, icdSystemVersionToIed.get(extRef.getIedName())))
                         .flatMap(Optional::stream)
                         .toList();
                 case OFF -> {
-                    getExtRefs().forEach(this::clearBinding);
+                    extRefService.getExtRefs(currentElem).forEach(extRefService::clearExtRefBinding);
                     yield Collections.emptyList();
                 }
             };
@@ -123,19 +126,19 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
      * @return Error if ExtRef could not be updated
      */
     private Optional<SclReportItem> updateExtRefIedName(TExtRef extRef, IEDAdapter sourceIed) {
-        List<TCompasFlow> matchingCompasFlows = getMatchingCompasFlows(extRef);
+        List<TCompasFlow> matchingCompasFlows = extRefService.getMatchingCompasFlows(currentElem, extRef).toList();
         if (!singleMatch(matchingCompasFlows)) {
             return fatalReportItem(extRef,
                     matchingCompasFlows.isEmpty() ? MESSAGE_NO_MATCHING_COMPAS_FLOW : MESSAGE_TOO_MANY_MATCHING_COMPAS_FLOWS);
         }
         TCompasFlow compasFlow = matchingCompasFlows.get(0);
         if (compasFlow.getFlowStatus() == TCompasFlowStatus.INACTIVE) {
-            clearBinding(extRef);
+            extRefService.clearExtRefBinding(extRef);
             return Optional.empty();
         }
         Optional<SclReportItem> sourceValidationError = validateExtRefSource(extRef, sourceIed);
         if (sourceValidationError.isPresent()) {
-            clearBinding(extRef);
+            extRefService.clearExtRefBinding(extRef);
             return sourceValidationError;
         }
         String sourceIedName = PrivateUtils.extractCompasPrivate(sourceIed.getCurrentElem(), TCompasICDHeader.class)
@@ -144,18 +147,6 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         compasFlow.setExtRefiedName(sourceIedName);
         log.debug(String.format("extRef.desc=%s, iedName=%s%n", extRef.getDesc(), sourceIedName));
         return Optional.empty();
-    }
-
-    /**
-     * List all ExtRefs in this Inputs
-     *
-     * @return list of ExtRefs. List is modifiable.
-     */
-    private List<TExtRef> getExtRefs() {
-        if (!currentElem.isSetExtRef()) {
-            return Collections.emptyList();
-        }
-        return currentElem.getExtRef();
     }
 
     private Optional<SclReportItem> validateExtRefSource(TExtRef extRef, IEDAdapter sourceIed) {
@@ -192,22 +183,6 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         return matchingCompasFlows.size() == 1;
     }
 
-    private void clearBinding(TExtRef extRef) {
-        extRef.setIedName(null);
-        extRef.setLdInst(null);
-        extRef.setPrefix(null);
-        extRef.setLnInst(null);
-        extRef.setDoName(null);
-        extRef.setDaName(null);
-        extRef.setServiceType(null);
-        extRef.setSrcLDInst(null);
-        extRef.setSrcPrefix(null);
-        extRef.setSrcLNInst(null);
-        extRef.setSrcCBName(null);
-        extRef.unsetLnClass();
-        extRef.unsetSrcLNClass();
-    }
-
     private Optional<SclReportItem> warningReportItem(TExtRef extRef, String message) {
         return Optional.of(SclReportItem.warning(extRefXPath(extRef.getDesc()), message));
     }
@@ -219,36 +194,6 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
     private String extRefXPath(String extRefDesc) {
         return getXPath() + String.format("/ExtRef[%s]",
                 Utils.xpathAttributeFilter("desc", extRefDesc));
-    }
-
-    /**
-     * Find CompasFlows that match given ExtRef
-     *
-     * @param extRef extRef to match
-     * @return list of matching CompasFlows
-     */
-    private List<TCompasFlow> getMatchingCompasFlows(TExtRef extRef) {
-        return PrivateUtils.extractCompasPrivates(currentElem, TCompasFlow.class)
-                .filter(compasFlow -> isMatchingExtRef(compasFlow, extRef))
-                .toList();
-    }
-
-    /**
-     * Check if extRef matches CompasFlow
-     *
-     * @param compasFlow compasFlow
-     * @param extRef     extRef
-     * @return true if all required attributes matches. Note that empty string, whitespaces only string and null values are considered as matching
-     * (missing attributes matches attribute with empty string value or whitespaces only). Return false otherwise.
-     */
-    private boolean isMatchingExtRef(TCompasFlow compasFlow, TExtRef extRef) {
-        String extRefLnClass = extRef.isSetLnClass() ? extRef.getLnClass().get(0) : null;
-        return Utils.equalsOrBothBlank(compasFlow.getDataStreamKey(), extRef.getDesc())
-                && Utils.equalsOrBothBlank(compasFlow.getExtRefiedName(), extRef.getIedName())
-                && Utils.equalsOrBothBlank(compasFlow.getExtRefldinst(), extRef.getLdInst())
-                && Utils.equalsOrBothBlank(compasFlow.getExtRefprefix(), extRef.getPrefix())
-                && Utils.equalsOrBothBlank(compasFlow.getExtReflnClass(), extRefLnClass)
-                && Utils.equalsOrBothBlank(compasFlow.getExtReflnInst(), extRef.getLnInst());
     }
 
     private LDeviceAdapter getLDeviceAdapter() {
@@ -264,7 +209,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         if (StringUtils.isBlank(currentBayUuid)) {
             return List.of(getIedAdapter().buildFatalReportItem(MESSAGE_IED_MISSING_COMPAS_BAY_UUID));
         }
-        return getExtRefs().stream()
+        return extRefService.getExtRefs(currentElem)
                 .filter(this::areBindingAttributesPresent)
                 .filter(this::isExternalBound)
                 .filter(this::matchingCompasFlowIsActiveOrUntested)
@@ -274,7 +219,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
     }
 
     private boolean matchingCompasFlowIsActiveOrUntested(TExtRef extRef) {
-        return getMatchingCompasFlows(extRef).stream().findFirst()
+        return extRefService.getMatchingCompasFlows(currentElem, extRef).findFirst()
                 .map(TCompasFlow::getFlowStatus)
                 .filter(flowStatus -> flowStatus == TCompasFlowStatus.ACTIVE || flowStatus == TCompasFlowStatus.UNTESTED)
                 .isPresent();
@@ -429,7 +374,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
      * @return list ExtRefs without duplication
      */
     public List<TExtRef> filterDuplicatedExtRefs() {
-        return ExtRefService.filterDuplicatedExtRefs(getExtRefs());
+        return ExtRefEditorService.filterDuplicatedExtRefs(extRefService.getExtRefs(currentElem).toList());
     }
 
 }

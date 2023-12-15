@@ -19,7 +19,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.lfenergy.compas.sct.commons.ExtRefService.filterDuplicatedExtRefs;
+import static org.lfenergy.compas.sct.commons.ExtRefEditorService.filterDuplicatedExtRefs;
 
 /**
  * A representation of the model object

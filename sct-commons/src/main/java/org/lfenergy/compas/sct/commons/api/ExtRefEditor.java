@@ -56,10 +56,18 @@ public interface ExtRefEditor {
 
     /**
      * ExtRef Binding For LDevice (inst=LDEPF) that matching EPF configuration
+     *
      * @param scd SCL
      * @param epf EPF
      * @return list of encountered errors
      */
     List<SclReportItem> manageBindingForLDEPF(SCL scd, EPF epf);
+
+    /**
+     * Debinding of Private CompasFlows and ExtRef signals based on voltageLevel
+     *
+     * @param scd SCL file in which ExtRef and Private CompasFlow should be debind
+     */
+    void debindCompasFlowsAndExtRefsBasedOnVoltageLevel(SCL scd);
 
 }
