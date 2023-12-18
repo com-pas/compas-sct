@@ -185,12 +185,48 @@
                         </goals>
                         <configuration>
                             <sources>
-                                <source>${project.basedir}/src/main/resources/xsd/LDEPF_Config_file_v2.xsd</source>
+                                <source>${project.basedir}/src/main/resources/xsd/LDEPF.xsd</source>
                             </sources>
                             <xjbSources>
                                 <xjbSource>${project.basedir}/src/main/resources/binding_configuration.xjb</xjbSource>
                             </xjbSources>
                             <packageName>org.lfenergy.compas.sct.commons.model.epf</packageName>
+                            <noPackageLevelAnnotations>true</noPackageLevelAnnotations>
+                            <clearOutputDir>false</clearOutputDir>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>cb_po</id>
+                        <goals>
+                            <goal>xjc</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>
+                                    ${project.basedir}/src/main/resources/xsd/CB_REPORT_SUPERVISION_Config_file.xsd
+                                </source>
+                            </sources>
+                            <xjbSources>
+                                <xjbSource>${project.basedir}/src/main/resources/binding_configuration.xjb</xjbSource>
+                            </xjbSources>
+                            <packageName>org.lfenergy.compas.sct.commons.model.cb_po</packageName>
+                            <noPackageLevelAnnotations>true</noPackageLevelAnnotations>
+                            <clearOutputDir>false</clearOutputDir>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>cbcom</id>
+                        <goals>
+                            <goal>xjc</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.basedir}/src/main/resources/xsd/GSE_SMV_CB_COM.xsd</source>
+                            </sources>
+                            <xjbSources>
+                                <xjbSource>${project.basedir}/src/main/resources/binding_configuration.xjb</xjbSource>
+                            </xjbSources>
+                            <packageName>org.lfenergy.compas.sct.commons.model.cbcom</packageName>
                             <noPackageLevelAnnotations>true</noPackageLevelAnnotations>
                             <clearOutputDir>false</clearOutputDir>
                         </configuration>

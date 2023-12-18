@@ -10,12 +10,7 @@ import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
 import jakarta.xml.bind.util.JAXBSource;
 import org.apache.commons.lang3.StringUtils;
-import org.lfenergy.compas.scl2007b4.model.TExtRef;
-import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
-import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 
 import javax.xml.namespace.QName;
 import java.util.*;
@@ -369,25 +364,6 @@ public final class Utils {
         } catch (JAXBException e) {
             throw new ScdException(e.getMessage(), e);
         }
-    }
-
-    /**
-     * Checks if two ExtRefs fed by same Control Block
-     *
-     * @param t1 extref to compare
-     * @param t2 extref to compare
-     * @return true if the two ExtRef are fed by same Control Block, otherwise false
-     */
-    public static boolean isExtRefFeedBySameControlBlock(TExtRef t1, TExtRef t2) {
-        String srcLNClass1 = (t1.isSetSrcLNClass()) ? t1.getSrcLNClass().get(0) : TLLN0Enum.LLN_0.value();
-        String srcLNClass2 = (t2.isSetSrcLNClass()) ? t2.getSrcLNClass().get(0) : TLLN0Enum.LLN_0.value();
-        return Utils.equalsOrBothBlank(t1.getIedName(), t2.getIedName())
-                && Utils.equalsOrBothBlank(t1.getSrcLDInst(), t2.getSrcLDInst())
-                && srcLNClass1.equals(srcLNClass2)
-                && Utils.equalsOrBothBlank(t1.getSrcLNInst(), t2.getSrcLNInst())
-                && Utils.equalsOrBothBlank(t1.getSrcPrefix(), t2.getSrcPrefix())
-                && Utils.equalsOrBothBlank(t1.getSrcCBName(), t2.getSrcCBName())
-                && Objects.equals(t1.getServiceType(), t2.getServiceType());
     }
 
 }

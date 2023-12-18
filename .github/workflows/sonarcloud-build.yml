@@ -27,7 +27,7 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -55,7 +55,7 @@ jobs:
         run: echo ${{ github.event.number }} > PR_NUMBER.txt
       - name: Archive PR number
         if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: PR_NUMBER
           path: PR_NUMBER.txt

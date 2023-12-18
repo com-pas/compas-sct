@@ -5,23 +5,23 @@
 package org.lfenergy.compas.sct.commons.util;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.model.cbcom.TCBType;
 
 import java.util.Arrays;
 import java.util.Objects;
 
 @Getter
+@RequiredArgsConstructor
 public enum ControlBlockEnum {
-    GSE(TGSEControl.class),
-    SAMPLED_VALUE(TSampledValueControl.class),
-    REPORT(TReportControl.class),
-    LOG(TLogControl.class);
+    GSE(TGSEControl.class, "GSEControl"),
+    SAMPLED_VALUE(TSampledValueControl.class, "SampledValueControl"),
+    REPORT(TReportControl.class, "ReportControl"),
+    LOG(TLogControl.class, "LogControl");
 
     private final Class<? extends TControl> controlBlockClass;
-
-    ControlBlockEnum(Class<? extends TControl> controlBlockClass) {
-        this.controlBlockClass = controlBlockClass;
-    }
+    private final String elementName;
 
     public static ControlBlockEnum from(TServiceType tServiceType) {
         Objects.requireNonNull(tServiceType);
@@ -38,6 +38,14 @@ public enum ControlBlockEnum {
             .filter(controlBlockEnum -> controlBlockEnum.controlBlockClass.isAssignableFrom(tControlClass))
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("Unsupported TControl class : " + tControlClass.getSimpleName()));
+    }
+
+    public static ControlBlockEnum from(TCBType tcbType) {
+        return switch (tcbType){
+            case GOOSE -> GSE;
+            case SV -> SAMPLED_VALUE;
+            default -> throw new IllegalArgumentException("Unsupported TCBType: " + tcbType);
+        };
     }
 
 }

@@ -6,9 +6,9 @@ package org.lfenergy.compas.sct.commons.api;
 
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
-import org.lfenergy.compas.sct.commons.dto.ControlBlockNetworkSettings;
 import org.lfenergy.compas.sct.commons.dto.FcdaForDataSetsCreation;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
+import org.lfenergy.compas.sct.commons.model.cbcom.CBCom;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.List;
@@ -22,7 +22,7 @@ import java.util.Set;
  *   <ol>
  *      <li>{@link ControlBlockEditor#createDataSetAndControlBlocks(SCL, Set) <em>Create DataSet and ControlBlock based on the <b>TExtRef</b></em>}</li>
  *      <li>{@link ControlBlockEditor#createDataSetAndControlBlocks(SCL, String, Set) <em>Create DataSet and ControlBlock based on the <b>TExtRef</b> in given <b>IED</b></em>}</li>
- *      <li>{@link ControlBlockEditor#createDataSetAndControlBlocks(SCL, String,String, Set) <em>Create DataSet and ControlBlock based on the <b>TExtRef</b> in given <b>IED</b> and <b>LDevice</b></em>}</li>
+ *      <li>{@link ControlBlockEditor#createDataSetAndControlBlocks(SCL, String, String, Set) <em>Create DataSet and ControlBlock based on the <b>TExtRef</b> in given <b>IED</b> and <b>LDevice</b></em>}</li>
  *      <li>{@link ControlBlockEditor#configureNetworkForAllControlBlocks <em>Configure the network for the <b>ControlBlocks</b></em>}</li>
  *      <li>{@link ControlBlockEditor#removeAllControlBlocksAndDatasetsAndExtRefSrcBindings <em>Removes all ControlBlocks and DataSets for all LNs in <b>SCL</b></em>}</li>
  *      <li>{@link ControlBlockEditor#analyzeDataGroups(SCL)} <em>Checks Control Blocks, DataSets and FCDA number limitation into Access Points </em>}</li>
@@ -85,17 +85,11 @@ public interface ControlBlockEditor {
      * - the Communication/SubNetwork/ConnectedAP/GSE element, for the GSEControl blocks
      * - the Communication/SubNetwork/ConnectedAP/SMV element, for the SampledValueControl blocks
      *
-     * @param scd                         input SCD object. The object will be modified with the new DataGSESet and SMV elements
-     * @param controlBlockNetworkSettings a method tha gives the network configuration information for a given ControlBlock
-     * @param rangesPerCbType             provide NetworkRanges for GSEControl and SampledValueControl. NetworkRanges contains :
-     *                                    start-end app APPID range (long value), start-end MAC-Addresses (Mac-Addresses values: Ex: "01-0C-CD-01-01-FF")
+     * @param scd   input SCD object. The object will be modified with the new GSE and SMV elements
+     * @param cbCom communication settings to configure Control Block Communication
      * @return list of encountered errors
      * @see Utils#macAddressToLong(String) for the expected MAC address format
-     * @see ControlBlockNetworkSettings
-     * @see ControlBlockNetworkSettings.RangesPerCbType
-     * @see ControlBlockNetworkSettings.NetworkRanges
      */
-    List<SclReportItem> configureNetworkForAllControlBlocks(SCL scd, ControlBlockNetworkSettings controlBlockNetworkSettings,
-                                                            ControlBlockNetworkSettings.RangesPerCbType rangesPerCbType);
+    List<SclReportItem> configureNetworkForAllControlBlocks(SCL scd, CBCom cbCom);
 
 }

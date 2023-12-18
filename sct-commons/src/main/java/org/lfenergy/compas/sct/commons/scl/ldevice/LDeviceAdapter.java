@@ -10,6 +10,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.model.cb_po.PO;
+import org.lfenergy.compas.sct.commons.model.cb_po.TFCDAFilter;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.ControlBlockAdapter;
@@ -81,20 +83,20 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
      * Create DataSet and ReportControl Blocks for the HMI with the given FCDAs.
      * DataSet and ReportControl are created in LN0, even if FCDA refers to another LN.
      *
-     * @param fcdas List of FCDA for which we must create the DataSet and ReportControl
+     * @param po object containing list  of FCDA for which we must create the DataSet and ReportControl
      */
-    public void createHmiReportControlBlocks(List<TFCDA> fcdas) {
+    public void createHmiReportControlBlocks(PO po) {
         LN0Adapter ln0 = getLN0Adapter();
         if (!ln0.getDaiModStValValue().map(ActiveStatus::fromValue).map(ActiveStatus.ON::equals).orElse(false)) return;
-        fcdas.stream()
-                .filter(fcda -> getInst().equals(fcda.getLdInst()) && fcda.isSetLnClass())
-                .forEach(fcda -> (fcda.getLnClass().get(0).equals(TLLN0Enum.LLN_0.value()) ?
+        po.getFCDAs().getFCDA().stream()
+                .filter(tfcdaFilter -> getInst().equals(tfcdaFilter.getLdInst()) && tfcdaFilter.isSetLnClass())
+                .forEach(tfcdaFilter -> (tfcdaFilter.getLnClass().equals(TLLN0Enum.LLN_0.value()) ?
                         Optional.of(ln0) // ln0 Mod stVal "ON" has already been checked, no need to check it again
                         :
-                        findLnAdapter(fcda.getLnClass().get(0), fcda.getLnInst(), fcda.getPrefix()).filter(lnAdapter -> lnAdapter.getDaiModStValValue().map(ActiveStatus::fromValue).map(ActiveStatus.ON::equals).orElse(true)))
-                        .map(sourceLn -> sourceLn.getDAI(new DataAttributeRef(fcda), false))
-                        .filter(das -> das.stream().anyMatch(da -> fcda.getFc() == da.getFc())) // getDAI does not filter on DA.
-                        .ifPresent(dataAttributeRefs -> createHmiReportCB(ln0, fcda)));
+                        findLnAdapter(tfcdaFilter.getLnClass(), tfcdaFilter.getLnInst(), tfcdaFilter.getPrefix()).filter(lnAdapter -> lnAdapter.getDaiModStValValue().map(ActiveStatus::fromValue).map(ActiveStatus.ON::equals).orElse(true)))
+                        .map(sourceLn -> sourceLn.getDAI(new DataAttributeRef(toFCDA(tfcdaFilter)), false))
+                        .filter(das -> das.stream().anyMatch(da -> TFCEnum.fromValue(tfcdaFilter.getFc().value()) == da.getFc())) // getDAI does not filter on DA.
+                        .ifPresent(dataAttributeRefs -> createHmiReportCB(ln0, toFCDA(tfcdaFilter))));
     }
 
     private void createHmiReportCB(LN0Adapter ln0, TFCDA fcda) {
@@ -512,6 +514,17 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
             }
         }, () -> sclReportItems.add(SclReportItem.error(getXPath(), "There is no DOI@name=" + MOD_DO_TYPE_NAME + "/DAI@name=" + STVAL_DA_TYPE_NAME + "/Val for LDevice@inst" + LDEVICE_LDEPF)));
         return extRefBayReferenceList;
+    }
+
+    private TFCDA toFCDA(TFCDAFilter tfcdaFilter) {
+        TFCDA tfcda = new TFCDA();
+        tfcda.setLdInst(tfcdaFilter.getLdInst());
+        tfcda.getLnClass().add(tfcdaFilter.getLnClass());
+        tfcda.setPrefix(tfcdaFilter.getPrefix());
+        tfcda.setLnInst(tfcdaFilter.getLnInst());
+        tfcda.setDoName(tfcdaFilter.getDoName());
+        tfcda.setFc(TFCEnum.fromValue(tfcdaFilter.getFc().value()));
+        return tfcda;
     }
 
 }

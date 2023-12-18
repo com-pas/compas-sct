@@ -5,10 +5,8 @@
 package org.lfenergy.compas.sct.commons.api;
 
 import org.lfenergy.compas.scl2007b4.model.SCL;
-import org.lfenergy.compas.scl2007b4.model.TFCDA;
 import org.lfenergy.compas.scl2007b4.model.TReportControl;
-
-import java.util.List;
+import org.lfenergy.compas.sct.commons.model.cb_po.PO;
 
 /**
  * Service class that will be used to manage elements related to the HMI {@link TReportControl <em>Report Control Blocks</em>}.
@@ -20,7 +18,7 @@ public interface HmiEditor {
     /**
      * Create the DataSet and ReportControl Blocks for the HMI with the given FCDAs.
      *
-     * @param fcdas List of FCDA for which we must create the DataSet and ReportControl Blocks
+     * @param po object containing list of FCDA for which we must create the DataSet and ReportControl Blocks
      */
-    void createAllHmiReportControlBlocks(SCL scd, List<TFCDA> fcdas);
+    void createAllHmiReportControlBlocks(SCL scd, PO po);
 }
