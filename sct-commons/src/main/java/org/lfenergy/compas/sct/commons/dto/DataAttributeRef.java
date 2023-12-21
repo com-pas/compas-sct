@@ -98,7 +98,7 @@ public class DataAttributeRef {
      * @return true if updatable, false otherwise
      */
     public boolean isUpdatable() {
-        return isDOModDAstVal() || daName.isDefined() && daName.isUpdatable();
+        return (daName.isDefined() && daName.isUpdatable()) || isDOModDAstVal();
     }
 
     /**

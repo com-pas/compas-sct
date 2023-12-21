@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.DataSetService;
+import org.lfenergy.compas.sct.commons.InstantiatedDataService;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
@@ -53,9 +54,6 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL_DA_NAME
  *      <li>{@link AbstractLNAdapter#getDAI <em>Returns the value of the <b>DataAttributeRef </b> containment reference By filter</em>}</li>
  *      <li>{@link AbstractLNAdapter#getDAIValues(DataAttributeRef) <em>Returns <b>DAI (sGroup, value) </b> containment reference list By <b>DataAttributeRef </b> filter</em>}</li>
  *
- *      <li>{@link AbstractLNAdapter#getDataSetByName(String) <em>Returns the value of the <b>TDataSet </b>object reference By the value of the <b>name </b>attribute </em>}</li>
- *
- *      <li>{@link AbstractLNAdapter#getControlBlocks(List, TServiceType) <em>Returns the value of the <b>ControlBlock </b>containment reference list that match <b>datSet </b> value of given <b>TDataSet</b> </em>}</li>
  *      <li>{@link AbstractLNAdapter#addPrivate <em>Add <b>TPrivate </b>under this object</em>}</li>
  *      <li>{@link AbstractLNAdapter#removeAllControlBlocksAndDatasets() <em>Remove all <b>ControlBlock</b></em>}</li>
  *    </ul>
@@ -712,51 +710,15 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      * @throws ScdException when given dataAttributeRef is missing DoName or DaName
      */
     public void updateDAI(@NonNull DataAttributeRef dataAttributeRef) throws ScdException {
-
         if (!dataAttributeRef.isDoNameDefined() || !dataAttributeRef.isDaNameDefined()) {
             throw new ScdException("Cannot update undefined DAI");
         }
         if (!dataAttributeRef.isUpdatable() || dataAttributeRef.getDaName().getDaiValues().isEmpty()) {
             return;
         }
-
-        AbstractDAIAdapter<?> daiAdapter = (AbstractDAIAdapter<?>) createDoiSdiDaiChainIfNotExists(dataAttributeRef.getDataAttributes(), dataAttributeRef.isUpdatable());
-        daiAdapter.update(dataAttributeRef.getDaName().getDaiValues());
-    }
-
-    /**
-     * Return the DAI (in DOI/SDI/DAI chain) matching the given data reference name
-     * If it does not exist, create the missing DOI/SDI/DAI elements in this LN/LN0 if needed, based on the given parameters
-     * DOI is the equivalent of the DO
-     * SDI is the equivalent of a type with bType="Struct". It can be a SDO, DA or BDA.
-     * DOI is the equivalent of the final leaf : DA or BDA with bType != "Struct".
-     * Be careful, this method does not check that the given data type is allowed by the lnType of this LN/LN0.
-     * It does not even check if the data type exists in DataTypeTemplate section.
-     * That means that it will create the missing DOI/SDI/DAI, even if it is not consistent with DataTypeTemplate section.
-     * It is the caller responsibility to ensure the consistency between the given data type and the lnType of this LN/LN0 (which refer to DataTypeTemplate section).
-     * See 9.3.5 "LN0 and other Logical Nodes" of IEC 61850-6.
-     *
-     * @param dataTypeRef          Reference name of data : DO/SDO/DA/BDA names, in order from parent to child, separated by a period
-     *                             (Ex: "Do1.da1", "Do2.sdoA.sdoB.da2.bdaA.bdaB")
-     * @param setValImportOnCreate when this method creates the DAI, it will set DAI.valImport attribute with this parameter
-     * @return adapter for existing DAI or created DAI.
-     */
-    public Object createDoiSdiDaiChainIfNotExists(String dataTypeRef, boolean setValImportOnCreate) {
-        String[] names = dataTypeRef.split("\\.");
-        if (names.length < 2 || Arrays.stream(names).anyMatch(StringUtils::isBlank)) {
-            throw new IllegalArgumentException("dataTypeRef must be valid with at least a DO and a DA, but got: " + dataTypeRef);
-        }
-        String doiName = names[0];
-        String daiName = names[names.length - 1];
-        ListIterator<String> sdiNames = Arrays.asList(names).subList(1, names.length - 1).listIterator();
-        IDataParentAdapter parentDoiOrSdi = findDoiAdapterByName(doiName).orElseGet(() -> addDOI(doiName));
-        while (sdiNames.hasNext()) {
-            String currenSdiName = sdiNames.next();
-            final IDataParentAdapter parent = parentDoiOrSdi;
-            parentDoiOrSdi = parentDoiOrSdi.findStructuredDataAdapterByName(currenSdiName).orElseGet(() -> parent.addSDOI(currenSdiName));
-        }
-        final IDataParentAdapter lastParent = parentDoiOrSdi;
-        return lastParent.findDataAdapterByName(daiName).orElseGet(() -> lastParent.addDAI(daiName, setValImportOnCreate));
+        // from here dataAttributeRef.isUpdatable() is true
+        TDAI tdai = new InstantiatedDataService().createDoiSdiDaiChainIfNotExists(getCurrentElem(), dataAttributeRef.getDataAttributes(), true);
+        new RootSDIAdapter.DAIAdapter(null, tdai).update(dataAttributeRef.getDaName().getDaiValues());
     }
 
     /**

@@ -81,7 +81,7 @@ public abstract class AbstractDAIAdapter<P extends SclElementAdapter> extends Sc
      * @throws ScdException throws when DAI for which SGroup should be updated is not updatable
      */
     public void update(Long sGroup, String val) throws ScdException {
-        if (!isDOModDAstVal() && currentElem.isSetValImport() && !currentElem.isValImport()) {
+        if (currentElem.isSetValImport() && !currentElem.isValImport() && !isDOModDAstVal()) {
             String msg = String.format(
                     "DAI(%s) cannot be updated : valImport(false) %s", currentElem.getName(), getXPath()
             );

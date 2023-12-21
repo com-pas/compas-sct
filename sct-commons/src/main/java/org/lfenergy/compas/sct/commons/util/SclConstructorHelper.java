@@ -145,4 +145,41 @@ public final class SclConstructorHelper {
         tfcda.setFc(fc);
         return tfcda;
     }
+
+    /**
+     * Create new instance of TDOI
+     *
+     * @param name name of the DOI to create
+     * @return new instance of TDOI initialized with the given parameters
+     */
+    public static TDOI newDoi(String name){
+        TDOI tdoi = new TDOI();
+        tdoi.setName(name);
+        return tdoi;
+    }
+
+    /**
+     * Create new instance of TSDI
+     *
+     * @param name name of the SDI to create
+     * @return new instance of TSDI initialized with the given parameters
+     */
+    public static TSDI newSdi(String name){
+        TSDI tSDI = new TSDI();
+        tSDI.setName(name);
+        return tSDI;
+    }
+
+    /**
+     * Create new instance of TDAI
+     *
+     * @param name name of the DAI to create
+     * @return new instance of TDAI initialized with the given parameters
+     */
+    public static TDAI newDai(String name){
+        TDAI tDAI = new TDAI();
+        tDAI.setName(name);
+        return tDAI;
+    }
+
 }
