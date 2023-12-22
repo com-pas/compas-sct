@@ -7,6 +7,7 @@ package org.lfenergy.compas.sct.commons.dto;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.TClientLN;
+import org.lfenergy.compas.sct.commons.scl.ln.LnKey;
 
 import java.util.List;
 
@@ -26,13 +27,12 @@ class ControlBlockTargetTest {
     void constructor_without_desc_parameter_should_set_desc_to_null() {
         //Given : constructor parameters
         //When
-        ControlBlockTarget controlBlockTarget = new ControlBlockTarget(
-            AP_REF, IED_NAME, LD_INST, LN_INST, LN_CLASS, PREFIX);
+        ControlBlockTarget controlBlockTarget = new ControlBlockTarget(AP_REF, IED_NAME, LD_INST, new LnKey(LN_INST, LN_CLASS, PREFIX));
         //Then
         Assertions.assertThat(controlBlockTarget).extracting(
-                ControlBlockTarget::apRef, ControlBlockTarget::iedName, ControlBlockTarget::ldInst,
-                ControlBlockTarget::lnInst, ControlBlockTarget::lnClass, ControlBlockTarget::prefix, ControlBlockTarget::desc)
-            .containsExactly(AP_REF, IED_NAME, LD_INST, LN_INST, LN_CLASS, PREFIX, null);
+                        ControlBlockTarget::apRef, ControlBlockTarget::iedName, ControlBlockTarget::ldInst,
+                        ControlBlockTarget::lnKey, ControlBlockTarget::desc)
+                .containsExactly(AP_REF, IED_NAME, LD_INST, new LnKey(LN_INST, LN_CLASS, PREFIX), null);
     }
 
     @Test
@@ -43,15 +43,14 @@ class ControlBlockTargetTest {
         TClientLN tClientLN = controlBlockTarget.toTClientLn();
         //Then
         Assertions.assertThat(tClientLN).extracting(TClientLN::getApRef, TClientLN::getIedName, TClientLN::getLdInst,
-                TClientLN::getLnInst, TClientLN::getLnClass, TClientLN::getPrefix, TClientLN::getDesc)
-            .containsExactly(AP_REF, IED_NAME, LD_INST, LN_INST, List.of(LN_CLASS), PREFIX, DESC);
+                        TClientLN::getLnInst, TClientLN::getLnClass, TClientLN::getPrefix, TClientLN::getDesc)
+                .containsExactly(AP_REF, IED_NAME, LD_INST, LN_INST, List.of(LN_CLASS), PREFIX, DESC);
     }
 
     @Test
     void toTClientLn_when_object_lnInst_is_null_should_return_empty_lnInst() {
         //Given
-        ControlBlockTarget controlBlockTarget = new ControlBlockTarget(
-            AP_REF, IED_NAME, LD_INST, null, LN_CLASS, PREFIX, DESC);
+        ControlBlockTarget controlBlockTarget = new ControlBlockTarget(AP_REF, IED_NAME, LD_INST, new LnKey(null, LN_CLASS, PREFIX), DESC);
         //When
         TClientLN tClientLN = controlBlockTarget.toTClientLn();
         //Then
@@ -66,16 +65,15 @@ class ControlBlockTargetTest {
         IEDName iedName = controlBlockTarget.toIedName();
         //Then
         Assertions.assertThat(iedName).extracting(
-                IEDName::getApRef, IEDName::getValue, IEDName::getLdInst,
-                IEDName::getLnInst, IEDName::getLnClass, IEDName::getPrefix)
-            .containsExactly(AP_REF, IED_NAME, LD_INST, LN_INST, List.of(LN_CLASS), PREFIX);
+                        IEDName::getApRef, IEDName::getValue, IEDName::getLdInst,
+                        IEDName::getLnInst, IEDName::getLnClass, IEDName::getPrefix)
+                .containsExactly(AP_REF, IED_NAME, LD_INST, LN_INST, List.of(LN_CLASS), PREFIX);
     }
 
     @Test
     void toIedName_when_object_lnInst_is_empty_should_return_null_lnInst() {
         //Given
-        ControlBlockTarget controlBlockTarget = new ControlBlockTarget(
-            AP_REF, IED_NAME, LD_INST, "", LN_CLASS, PREFIX, DESC);
+        ControlBlockTarget controlBlockTarget = new ControlBlockTarget(AP_REF, IED_NAME, LD_INST,new LnKey("", LN_CLASS, PREFIX), DESC);
         //When
         IEDName iedName = controlBlockTarget.toIedName();
         //Then
@@ -90,9 +88,9 @@ class ControlBlockTargetTest {
         ControlBlockTarget controlBlockTarget = ControlBlockTarget.from(tClientLN);
         //Then
         Assertions.assertThat(controlBlockTarget).extracting(
-                ControlBlockTarget::apRef, ControlBlockTarget::iedName, ControlBlockTarget::ldInst,
-                ControlBlockTarget::lnInst, ControlBlockTarget::lnClass, ControlBlockTarget::prefix, ControlBlockTarget::desc)
-            .containsExactly(AP_REF, IED_NAME, LD_INST, LN_INST, LN_CLASS, PREFIX, DESC);
+                        ControlBlockTarget::apRef, ControlBlockTarget::iedName, ControlBlockTarget::ldInst,
+                        ControlBlockTarget::lnKey, ControlBlockTarget::desc)
+                .containsExactly(AP_REF, IED_NAME, LD_INST,new LnKey(LN_INST, LN_CLASS, PREFIX), DESC);
     }
 
     @Test
@@ -103,9 +101,9 @@ class ControlBlockTargetTest {
         ControlBlockTarget controlBlockTarget = ControlBlockTarget.from(iedName);
         //Then
         Assertions.assertThat(controlBlockTarget).extracting(
-                ControlBlockTarget::apRef, ControlBlockTarget::iedName, ControlBlockTarget::ldInst,
-                ControlBlockTarget::lnInst, ControlBlockTarget::lnClass, ControlBlockTarget::prefix, ControlBlockTarget::desc)
-            .containsExactly(AP_REF, IED_NAME, LD_INST, LN_INST, LN_CLASS, PREFIX, null);
+                        ControlBlockTarget::apRef, ControlBlockTarget::iedName, ControlBlockTarget::ldInst,
+                        ControlBlockTarget::lnKey, ControlBlockTarget::desc)
+                .containsExactly(AP_REF, IED_NAME, LD_INST, new LnKey(LN_INST, LN_CLASS, PREFIX), null);
     }
 
     @Test
@@ -125,7 +123,7 @@ class ControlBlockTargetTest {
         TClientLN tClientLN = createTClientLN();
         tClientLN.setLnInst("");
         ControlBlockTarget controlBlockTarget = new ControlBlockTarget(
-            AP_REF, IED_NAME, LD_INST, null, LN_CLASS, PREFIX, DESC);
+                AP_REF, IED_NAME, LD_INST,new LnKey(null, LN_CLASS, PREFIX), DESC);
         //When
         boolean result = controlBlockTarget.equalsTClientLn(tClientLN);
         //Then
@@ -161,7 +159,7 @@ class ControlBlockTargetTest {
         IEDName iedName = createIedName();
         iedName.setLnInst(null);
         ControlBlockTarget controlBlockTarget = new ControlBlockTarget(
-            AP_REF, IED_NAME, LD_INST, "", LN_CLASS, PREFIX, DESC);
+                AP_REF, IED_NAME, LD_INST, new LnKey("", LN_CLASS, PREFIX), DESC);
         //When
         boolean result = controlBlockTarget.equalsIedName(iedName);
         //Then
@@ -182,7 +180,7 @@ class ControlBlockTargetTest {
 
     private static ControlBlockTarget createControlBlockTarget() {
         return new ControlBlockTarget(
-            AP_REF, IED_NAME, LD_INST, LN_INST, LN_CLASS, PREFIX, DESC);
+                AP_REF, IED_NAME, LD_INST, new LnKey(LN_INST, LN_CLASS, PREFIX), DESC);
     }
 
     private static TClientLN createTClientLN() {

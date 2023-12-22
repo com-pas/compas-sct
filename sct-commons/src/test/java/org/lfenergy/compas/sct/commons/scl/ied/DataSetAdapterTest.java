@@ -10,6 +10,7 @@ import org.lfenergy.compas.scl2007b4.model.TDataSet;
 import org.lfenergy.compas.scl2007b4.model.TFCDA;
 import org.lfenergy.compas.scl2007b4.model.TFCEnum;
 import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
+import org.lfenergy.compas.sct.commons.scl.ln.LnKey;
 
 import java.util.List;
 import java.util.Optional;
@@ -55,7 +56,7 @@ class DataSetAdapterTest {
         dataSet.getFCDA().add(fcda);
         DataSetAdapter dataSetAdapter = new DataSetAdapter(null, dataSet);
         //When
-        Optional<TFCDA> result = dataSetAdapter.findFCDA("LDINST", null, "LLN0", null, "DoName", "daName", TFCEnum.ST);
+        Optional<TFCDA> result = dataSetAdapter.findFCDA("LDINST", LnKey.LN0_KEY, "DoName", "daName", TFCEnum.ST);
         //Then
         assertThat(result).isPresent();
     }
@@ -66,7 +67,7 @@ class DataSetAdapterTest {
         TDataSet dataSet = new TDataSet();
         DataSetAdapter dataSetAdapter = new DataSetAdapter(null, dataSet);
         //When
-        Optional<TFCDA> result = dataSetAdapter.findFCDA("any", "any", "any", "any", "any", "any", TFCEnum.ST);
+        Optional<TFCDA> result = dataSetAdapter.findFCDA("any", new LnKey("any", "any", "any"), "any", "any", TFCEnum.ST);
         //Then
         assertThat(result).isEmpty();
     }
@@ -77,7 +78,7 @@ class DataSetAdapterTest {
         TDataSet dataSet = new TDataSet();
         DataSetAdapter dataSetAdapter = new DataSetAdapter(null, dataSet);
         //When
-        TFCDA result = dataSetAdapter.createFCDAIfNotExists("LDINST", null, "LLN0", null, "DoName", "daName", TFCEnum.ST);
+        TFCDA result = dataSetAdapter.createFCDAIfNotExists("LDINST", LnKey.LN0_KEY, "DoName", "daName", TFCEnum.ST);
         //Then
         assertThat(dataSet.getFCDA()).hasSize(1)
             .first()
@@ -95,7 +96,7 @@ class DataSetAdapterTest {
         dataSet.getFCDA().add(existingFCDA);
         DataSetAdapter dataSetAdapter = new DataSetAdapter(null, dataSet);
         //When
-        TFCDA result = dataSetAdapter.createFCDAIfNotExists("LDINST", null, "LLN0", null, "DoName", "daName", TFCEnum.ST);
+        TFCDA result = dataSetAdapter.createFCDAIfNotExists("LDINST", LnKey.LN0_KEY, "DoName", "daName", TFCEnum.ST);
         //Then
         assertThat(dataSet.getFCDA()).hasSize(1)
             .first()

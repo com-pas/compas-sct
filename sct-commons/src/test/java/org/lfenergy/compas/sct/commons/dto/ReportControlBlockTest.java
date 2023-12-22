@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.scl.ln.LnKey;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 import org.mockito.Mockito;
 
@@ -31,19 +32,19 @@ class ReportControlBlockTest {
         ReportControlBlock reportControlBlock = new ReportControlBlock(NAME, ID, DATASET_REF);
         // Then
         assertThat(reportControlBlock)
-            .extracting(ControlBlock::getName, ControlBlock::getDataSetRef, ControlBlock::getId, ControlBlock::getConfRev,
-                ReportControlBlock::isBuffered, ReportControlBlock::getBufTime, ReportControlBlock::isIndexed, ReportControlBlock::getIntgPd)
-            .containsExactly(NAME, DATASET_REF, ID, 1L, true, 0L, true, 60000L);
+                .extracting(ControlBlock::getName, ControlBlock::getDataSetRef, ControlBlock::getId, ControlBlock::getConfRev,
+                        ReportControlBlock::isBuffered, ReportControlBlock::getBufTime, ReportControlBlock::isIndexed, ReportControlBlock::getIntgPd)
+                .containsExactly(NAME, DATASET_REF, ID, 1L, true, 0L, true, 60000L);
 
         assertThat(reportControlBlock.getTrgOps())
-            .extracting(TTrgOps::isDchg, TTrgOps::isQchg, TTrgOps::isPeriod, TTrgOps::isGi)
-            .containsOnly(true);
+                .extracting(TTrgOps::isDchg, TTrgOps::isQchg, TTrgOps::isPeriod, TTrgOps::isGi)
+                .containsOnly(true);
         assertThat(reportControlBlock.getTrgOps().isDupd()).isFalse();
 
         assertThat(reportControlBlock.getOptFields())
-            .extracting(TReportControl.OptFields::isSeqNum, TReportControl.OptFields::isTimeStamp, TReportControl.OptFields::isDataSet, TReportControl.OptFields::isReasonCode,
-                TReportControl.OptFields::isDataRef, TReportControl.OptFields::isEntryID, TReportControl.OptFields::isConfigRef)
-            .containsOnly(false);
+                .extracting(TReportControl.OptFields::isSeqNum, TReportControl.OptFields::isTimeStamp, TReportControl.OptFields::isDataSet, TReportControl.OptFields::isReasonCode,
+                        TReportControl.OptFields::isDataRef, TReportControl.OptFields::isEntryID, TReportControl.OptFields::isConfigRef)
+                .containsOnly(false);
         assertThat(reportControlBlock.getOptFields().isBufOvfl()).isTrue();
 
     }
@@ -56,18 +57,18 @@ class ReportControlBlockTest {
         ReportControlBlock reportControlBlock = new ReportControlBlock(tReportControl);
         // Then
         assertThat(reportControlBlock)
-            .extracting(ControlBlock::getName, ControlBlock::getDataSetRef, ControlBlock::getId, ControlBlock::getConfRev,
-                ReportControlBlock::isBuffered, ReportControlBlock::getBufTime, ReportControlBlock::isIndexed, ReportControlBlock::getIntgPd)
-            .containsExactly(NAME, DATASET_REF, ID, 5L, false, 1L, false, 1L);
+                .extracting(ControlBlock::getName, ControlBlock::getDataSetRef, ControlBlock::getId, ControlBlock::getConfRev,
+                        ReportControlBlock::isBuffered, ReportControlBlock::getBufTime, ReportControlBlock::isIndexed, ReportControlBlock::getIntgPd)
+                .containsExactly(NAME, DATASET_REF, ID, 5L, false, 1L, false, 1L);
 
         assertThat(reportControlBlock.getOptFields())
-            .extracting(TReportControl.OptFields::isSeqNum, TReportControl.OptFields::isTimeStamp, TReportControl.OptFields::isDataSet, TReportControl.OptFields::isReasonCode,
-                TReportControl.OptFields::isDataRef, TReportControl.OptFields::isEntryID, TReportControl.OptFields::isConfigRef, TReportControl.OptFields::isBufOvfl)
-            .containsOnly(false);
+                .extracting(TReportControl.OptFields::isSeqNum, TReportControl.OptFields::isTimeStamp, TReportControl.OptFields::isDataSet, TReportControl.OptFields::isReasonCode,
+                        TReportControl.OptFields::isDataRef, TReportControl.OptFields::isEntryID, TReportControl.OptFields::isConfigRef, TReportControl.OptFields::isBufOvfl)
+                .containsOnly(false);
 
         assertThat(reportControlBlock.getTrgOps())
-            .extracting(TTrgOps::isDchg, TTrgOps::isQchg, TTrgOps::isPeriod, TTrgOps::isGi, TTrgOps::isDupd)
-            .containsOnly(false);
+                .extracting(TTrgOps::isDchg, TTrgOps::isQchg, TTrgOps::isPeriod, TTrgOps::isGi, TTrgOps::isDupd)
+                .containsOnly(false);
     }
 
     @Test
@@ -99,17 +100,17 @@ class ReportControlBlockTest {
         TReportControl tReportControl = reportControlBlock.toTControl();
         // Then
         assertThat(tReportControl)
-            .extracting(TControl::getName, TControl::getDatSet, TReportControl::getRptID, TReportControl::getConfRev, TUnNaming::getDesc,
-                TReportControl::isBuffered, TReportControl::getBufTime, TReportControl::isIndexed, TControlWithTriggerOpt::getIntgPd)
-            .containsExactly(NAME, DATASET_REF, ID, 5L, DESC, false, 1L, false, 1L);
+                .extracting(TControl::getName, TControl::getDatSet, TReportControl::getRptID, TReportControl::getConfRev, TUnNaming::getDesc,
+                        TReportControl::isBuffered, TReportControl::getBufTime, TReportControl::isIndexed, TControlWithTriggerOpt::getIntgPd)
+                .containsExactly(NAME, DATASET_REF, ID, 5L, DESC, false, 1L, false, 1L);
         assertThat(tReportControl.getOptFields())
-            .extracting(TReportControl.OptFields::isSeqNum, TReportControl.OptFields::isTimeStamp, TReportControl.OptFields::isDataSet, TReportControl.OptFields::isReasonCode,
-                TReportControl.OptFields::isDataRef, TReportControl.OptFields::isEntryID, TReportControl.OptFields::isConfigRef, TReportControl.OptFields::isBufOvfl)
-            .containsOnly(false);
+                .extracting(TReportControl.OptFields::isSeqNum, TReportControl.OptFields::isTimeStamp, TReportControl.OptFields::isDataSet, TReportControl.OptFields::isReasonCode,
+                        TReportControl.OptFields::isDataRef, TReportControl.OptFields::isEntryID, TReportControl.OptFields::isConfigRef, TReportControl.OptFields::isBufOvfl)
+                .containsOnly(false);
 
         assertThat(tReportControl.getTrgOps())
-            .extracting(TTrgOps::isDchg, TTrgOps::isQchg, TTrgOps::isPeriod, TTrgOps::isGi, TTrgOps::isDupd)
-            .containsOnly(false);
+                .extracting(TTrgOps::isDchg, TTrgOps::isQchg, TTrgOps::isPeriod, TTrgOps::isGi, TTrgOps::isDupd)
+                .containsOnly(false);
     }
 
     @Test
@@ -121,10 +122,10 @@ class ReportControlBlockTest {
         TReportControl tReportControl = reportControlBlock.addToLN(ln0);
         // Then
         assertThat(ln0.getReportControl()).hasSize(1)
-            .first()
-            .isSameAs(tReportControl);
+                .first()
+                .isSameAs(tReportControl);
         assertThat(tReportControl).extracting(TControl::getName, TControl::getDatSet, TReportControl::getRptID)
-            .containsExactly(NAME, DATASET_REF, ID);
+                .containsExactly(NAME, DATASET_REF, ID);
     }
 
     @Test
@@ -136,10 +137,10 @@ class ReportControlBlockTest {
         TReportControl tReportControl = reportControlBlock.addToLN(ln);
         // Then
         assertThat(ln.getReportControl()).hasSize(1)
-            .first()
-            .isSameAs(tReportControl);
+                .first()
+                .isSameAs(tReportControl);
         assertThat(tReportControl).extracting(TControl::getName, TControl::getDatSet, TReportControl::getRptID)
-            .containsExactly(NAME, DATASET_REF, ID);
+                .containsExactly(NAME, DATASET_REF, ID);
     }
 
     @Test
@@ -164,17 +165,17 @@ class ReportControlBlockTest {
 
         assertThat(reportControlBlock.getTargets()).isNotEmpty();
         reportControlBlock.getTargets().set(0,
-            new ControlBlockTarget("AP_REF", null, DTO.HOLDER_LD_INST, DTO.HOLDER_LN_INST, DTO.HOLDER_LN_CLASS, DTO.HOLDER_LN_PREFIX));
+                new ControlBlockTarget("AP_REF", null, DTO.HOLDER_LD_INST, new LnKey(DTO.HOLDER_LN_INST, DTO.HOLDER_LN_CLASS, DTO.HOLDER_LN_PREFIX)));
         // When Then
         assertThatCode(reportControlBlock::validateCB).isInstanceOf(ScdException.class);
 
         reportControlBlock.getTargets().set(0,
-            new ControlBlockTarget("AP_REF", "", DTO.HOLDER_LD_INST, DTO.HOLDER_LN_INST, DTO.HOLDER_LN_CLASS, DTO.HOLDER_LN_PREFIX));
+                new ControlBlockTarget("AP_REF", "", DTO.HOLDER_LD_INST, new LnKey(DTO.HOLDER_LN_INST, DTO.HOLDER_LN_CLASS, DTO.HOLDER_LN_PREFIX)));
         // When Then
         assertThatCode(reportControlBlock::validateCB).isInstanceOf(ScdException.class);
 
         reportControlBlock.getTargets().set(0,
-            new ControlBlockTarget("AP_REF", DTO.HOLDER_LD_INST, "", DTO.HOLDER_LN_INST, DTO.HOLDER_LN_CLASS, DTO.HOLDER_LN_PREFIX));
+                new ControlBlockTarget("AP_REF", DTO.HOLDER_LD_INST, "", new LnKey(DTO.HOLDER_LN_INST, DTO.HOLDER_LN_CLASS, DTO.HOLDER_LN_PREFIX)));
         // When Then
         assertThatCode(reportControlBlock::validateCB).isInstanceOf(ScdException.class);
 
@@ -201,7 +202,7 @@ class ReportControlBlockTest {
 
     @Test
     @Tag("issue-321")
-    void testGetControlBlockServiceSetting(){
+    void testGetControlBlockServiceSetting() {
         // Given
         ReportControlBlock reportControlBlock = createReportControlBlock();
         // When Then
@@ -225,7 +226,7 @@ class ReportControlBlockTest {
         ReportControlBlock reportControlBlock = new ReportControlBlock(NAME, ID, DATASET_REF);
         // When & Then
         Assertions.assertThatCode(() -> reportControlBlock.validateSecurityEnabledValue(new TServices()))
-            .doesNotThrowAnyException();
+                .doesNotThrowAnyException();
     }
 
     private static ReportControlBlock createReportControlBlock() {
@@ -243,7 +244,7 @@ class ReportControlBlockTest {
         trgOps.setGi(false);
         reportControlBlock.setTrgOps(trgOps);
         reportControlBlock.setRptEnabledMax(10L);
-        reportControlBlock.getTargets().add(new ControlBlockTarget("apRef", "iedName", "ldInst", "lnInst", "lnClass", "prefix", "desc"));
+        reportControlBlock.getTargets().add(new ControlBlockTarget("apRef", "iedName", "ldInst", new LnKey("lnInst", "lnClass", "prefix"), "desc"));
         return reportControlBlock;
     }
 

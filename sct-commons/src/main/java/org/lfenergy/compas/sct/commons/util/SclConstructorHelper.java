@@ -8,6 +8,7 @@ package org.lfenergy.compas.sct.commons.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.scl.ln.LnKey;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -134,12 +135,14 @@ public final class SclConstructorHelper {
         return newVal(value, null);
     }
 
-    public static TFCDA newFcda(String ldInst, String lnClass, String lnInst, String prefix, String doName, String daName, TFCEnum fc) {
+    public static TFCDA newFcda(String ldInst, LnKey lnKey, String doName, String daName, TFCEnum fc) {
         TFCDA tfcda = new TFCDA();
         tfcda.setLdInst(ldInst);
-        if (StringUtils.isNotBlank(lnClass)) tfcda.getLnClass().add(lnClass);
-        tfcda.setLnInst(lnInst);
-        tfcda.setPrefix(prefix);
+        if (StringUtils.isNotBlank(lnKey.lnClass())){
+            tfcda.getLnClass().add(lnKey.lnClass());
+        }
+        tfcda.setLnInst(StringUtils.trimToNull(lnKey.inst()));
+        tfcda.setPrefix(StringUtils.trimToNull(lnKey.prefix()));
         tfcda.setDoName(doName);
         tfcda.setDaName(daName);
         tfcda.setFc(fc);

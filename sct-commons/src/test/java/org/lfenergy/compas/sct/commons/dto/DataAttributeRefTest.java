@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.LnKey;
 
 import java.util.List;
 import java.util.Map;
@@ -323,7 +324,7 @@ class DataAttributeRefTest {
     @Test
     void constructor_from_TFCDA_should_create_new_instance_with_same_attributes() {
         //Given
-        TFCDA tfcda = newFcda("ldInst", "lnClass", "lnInst", "prefix", "DoName.sdo", "daName.bda", TFCEnum.ST);
+        TFCDA tfcda = newFcda("ldInst", new LnKey("lnInst","lnClass", "prefix"), "DoName.sdo", "daName.bda", TFCEnum.ST);
         //When
         DataAttributeRef dataAttributeRef = new DataAttributeRef(tfcda);
         //Then
@@ -337,7 +338,7 @@ class DataAttributeRefTest {
     @Test
     void constructor_from_TFCDA_should_ignore_blank_DaName() {
         //Given
-        TFCDA tfcda = newFcda("ldInst", "lnClass", "lnInst", "prefix", "DoName.sdo", "", TFCEnum.ST);
+        TFCDA tfcda = newFcda("ldInst", new LnKey("lnInst","lnClass", "prefix"), "DoName.sdo", "", TFCEnum.ST);
         //When
         DataAttributeRef dataAttributeRef = new DataAttributeRef(tfcda);
         //Then
@@ -348,7 +349,7 @@ class DataAttributeRefTest {
     @Test
     void constructor_from_TFCDA_should_ignore_blank_fc() {
         //Given
-        TFCDA tfcda = newFcda("ldInst", "lnClass", "lnInst", "prefix", "DoName.sdo", "daName.bda", null);
+        TFCDA tfcda = newFcda("ldInst", new LnKey("lnInst", "lnClass", "prefix"), "DoName.sdo", "daName.bda", null);
         //When
         DataAttributeRef dataAttributeRef = new DataAttributeRef(tfcda);
         //Then

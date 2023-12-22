@@ -10,14 +10,13 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.scl.ln.LnKey;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.lfenergy.compas.scl2007b4.model.TSampledValueControl.SmvOpts;
 
 class SMVControlBlockTest {
@@ -34,15 +33,15 @@ class SMVControlBlockTest {
         SMVControlBlock smvControlBlock = new SMVControlBlock(NAME, ID, DATASET_REF);
         // Then
         assertThat(smvControlBlock)
-            .extracting(ControlBlock::getName, ControlBlock::getDataSetRef, ControlBlock::getId, SMVControlBlock::isMulticast, SMVControlBlock::getSmpRate,
-                SMVControlBlock::getNofASDU, SMVControlBlock::getSmpMod, ControlBlock::getConfRev, SMVControlBlock::getSecurityEnable)
-            .containsExactly(NAME, DATASET_REF, ID, true, 4800L, 2L, TSmpMod.SMP_PER_SEC, 10000L, TPredefinedTypeOfSecurityEnum.NONE);
+                .extracting(ControlBlock::getName, ControlBlock::getDataSetRef, ControlBlock::getId, SMVControlBlock::isMulticast, SMVControlBlock::getSmpRate,
+                        SMVControlBlock::getNofASDU, SMVControlBlock::getSmpMod, ControlBlock::getConfRev, SMVControlBlock::getSecurityEnable)
+                .containsExactly(NAME, DATASET_REF, ID, true, 4800L, 2L, TSmpMod.SMP_PER_SEC, 10000L, TPredefinedTypeOfSecurityEnum.NONE);
 
         assertThat(smvControlBlock.getSmvOpts())
-            .extracting(
-                SmvOpts::isRefreshTime, SmvOpts::isSampleSynchronized, SmvOpts::isSampleRate, SmvOpts::isDataSet, SmvOpts::isSecurity,
-                SmvOpts::isTimestamp, SmvOpts::isSynchSourceId)
-            .containsExactly(false, true, true, false, false, false, false);
+                .extracting(
+                        SmvOpts::isRefreshTime, SmvOpts::isSampleSynchronized, SmvOpts::isSampleRate, SmvOpts::isDataSet, SmvOpts::isSecurity,
+                        SmvOpts::isTimestamp, SmvOpts::isSynchSourceId)
+                .containsExactly(false, true, true, false, false, false, false);
     }
 
     @Test
@@ -54,17 +53,17 @@ class SMVControlBlockTest {
         SMVControlBlock smvControlBlock = new SMVControlBlock(tSampledValueControl);
         // Then
         assertThat(smvControlBlock)
-            .extracting(ControlBlock::getName,
-                ControlBlock::getDataSetRef,
-                ControlBlock::getId,
-                ControlBlock::getConfRev,
-                ControlBlock::getDesc,
-                SMVControlBlock::isMulticast,
-                SMVControlBlock::getSmpRate,
-                SMVControlBlock::getNofASDU,
-                SMVControlBlock::getSmpMod,
-                SMVControlBlock::getSecurityEnable)
-            .containsExactly(NAME, DATASET_REF, ID, 5L, DESC, false, 200L, 10L, TSmpMod.SMP_PER_PERIOD, TPredefinedTypeOfSecurityEnum.NONE);
+                .extracting(ControlBlock::getName,
+                        ControlBlock::getDataSetRef,
+                        ControlBlock::getId,
+                        ControlBlock::getConfRev,
+                        ControlBlock::getDesc,
+                        SMVControlBlock::isMulticast,
+                        SMVControlBlock::getSmpRate,
+                        SMVControlBlock::getNofASDU,
+                        SMVControlBlock::getSmpMod,
+                        SMVControlBlock::getSecurityEnable)
+                .containsExactly(NAME, DATASET_REF, ID, 5L, DESC, false, 200L, 10L, TSmpMod.SMP_PER_PERIOD, TPredefinedTypeOfSecurityEnum.NONE);
         assertThat(smvControlBlock.getTargets()).hasSize(1);
         assertThat(smvControlBlock.getProtocol()).isNotNull();
     }
@@ -98,13 +97,13 @@ class SMVControlBlockTest {
         TSampledValueControl tSampledValueControl = smvControlBlock.toTControl();
         // Then
         assertThat(tSampledValueControl)
-            .extracting(TControl::getName, TControl::getDatSet, TSampledValueControl::getSmvID, TControlWithIEDName::getConfRev, TUnNaming::getDesc,
-                TSampledValueControl::isMulticast, TSampledValueControl::getSmpRate, TSampledValueControl::getNofASDU, TSampledValueControl::getSmpMod,
-                TSampledValueControl::getSecurityEnable)
-            .containsExactly(NAME, DATASET_REF, ID, 5L, DESC, false, 100L, 10L, TSmpMod.SMP_PER_PERIOD, TPredefinedTypeOfSecurityEnum.SIGNATURE_AND_ENCRYPTION);
+                .extracting(TControl::getName, TControl::getDatSet, TSampledValueControl::getSmvID, TControlWithIEDName::getConfRev, TUnNaming::getDesc,
+                        TSampledValueControl::isMulticast, TSampledValueControl::getSmpRate, TSampledValueControl::getNofASDU, TSampledValueControl::getSmpMod,
+                        TSampledValueControl::getSecurityEnable)
+                .containsExactly(NAME, DATASET_REF, ID, 5L, DESC, false, 100L, 10L, TSmpMod.SMP_PER_PERIOD, TPredefinedTypeOfSecurityEnum.SIGNATURE_AND_ENCRYPTION);
         assertThat(tSampledValueControl.getProtocol())
-            .extracting(TProtocol::getValue, TProtocol::isMustUnderstand)
-            .containsExactly("PROTO", true);
+                .extracting(TProtocol::getValue, TProtocol::isMustUnderstand)
+                .containsExactly("PROTO", true);
         assertThat(tSampledValueControl.getIEDName()).hasSize(1);
     }
 
@@ -117,10 +116,10 @@ class SMVControlBlockTest {
         TSampledValueControl tSampledValueControl = smvControlBlock.addToLN(ln0);
         // Then
         assertThat(ln0.getSampledValueControl()).hasSize(1)
-            .first()
-            .isSameAs(tSampledValueControl);
+                .first()
+                .isSameAs(tSampledValueControl);
         assertThat(tSampledValueControl).extracting(TControl::getName, TControl::getDatSet, TSampledValueControl::getSmvID)
-            .containsExactly(NAME, DATASET_REF, ID);
+                .containsExactly(NAME, DATASET_REF, ID);
     }
 
     @Test
@@ -130,7 +129,7 @@ class SMVControlBlockTest {
         TLN ln = new TLN();
         // When & Then
         assertThatThrownBy(() -> smvControlBlock.addToLN(ln))
-            .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @ParameterizedTest
@@ -141,7 +140,7 @@ class SMVControlBlockTest {
         smvControlBlock.setSecurityEnable(securityEnable);
         // When & Then
         assertThatCode(() -> smvControlBlock.validateSecurityEnabledValue(tServices))
-            .doesNotThrowAnyException();
+                .doesNotThrowAnyException();
     }
 
     private static Stream<Arguments> provideCorrectValueForValidateSecurityEnabledValue() {
@@ -150,15 +149,15 @@ class SMVControlBlockTest {
         nullMcSecurity.setSMVSettings(new TSMVSettings());
 
         return Stream.of(
-            Arguments.of(null, TPredefinedTypeOfSecurityEnum.NONE),
-            Arguments.of(nullGSESettings, TPredefinedTypeOfSecurityEnum.NONE),
-            Arguments.of(nullMcSecurity, TPredefinedTypeOfSecurityEnum.NONE),
-            Arguments.of(newTServices(true, false), TPredefinedTypeOfSecurityEnum.NONE),
-            Arguments.of(newTServices(true, false), TPredefinedTypeOfSecurityEnum.SIGNATURE),
-            Arguments.of(newTServices(false, true), TPredefinedTypeOfSecurityEnum.NONE),
-            Arguments.of(newTServices(true, true), TPredefinedTypeOfSecurityEnum.NONE),
-            Arguments.of(newTServices(true, true), TPredefinedTypeOfSecurityEnum.SIGNATURE),
-            Arguments.of(newTServices(true, true), TPredefinedTypeOfSecurityEnum.SIGNATURE_AND_ENCRYPTION)
+                Arguments.of(null, TPredefinedTypeOfSecurityEnum.NONE),
+                Arguments.of(nullGSESettings, TPredefinedTypeOfSecurityEnum.NONE),
+                Arguments.of(nullMcSecurity, TPredefinedTypeOfSecurityEnum.NONE),
+                Arguments.of(newTServices(true, false), TPredefinedTypeOfSecurityEnum.NONE),
+                Arguments.of(newTServices(true, false), TPredefinedTypeOfSecurityEnum.SIGNATURE),
+                Arguments.of(newTServices(false, true), TPredefinedTypeOfSecurityEnum.NONE),
+                Arguments.of(newTServices(true, true), TPredefinedTypeOfSecurityEnum.NONE),
+                Arguments.of(newTServices(true, true), TPredefinedTypeOfSecurityEnum.SIGNATURE),
+                Arguments.of(newTServices(true, true), TPredefinedTypeOfSecurityEnum.SIGNATURE_AND_ENCRYPTION)
         );
     }
 
@@ -170,7 +169,7 @@ class SMVControlBlockTest {
         smvControlBlock.setSecurityEnable(securityEnable);
         // When & Then
         assertThatThrownBy(() -> smvControlBlock.validateSecurityEnabledValue(tServices))
-            .isInstanceOf(ScdException.class);
+                .isInstanceOf(ScdException.class);
     }
 
     private static Stream<Arguments> provideInvalidValueForValidateSecurityEnabledValue() {
@@ -179,21 +178,21 @@ class SMVControlBlockTest {
         nullMcSecurity.setSMVSettings(new TSMVSettings());
 
         return Stream.of(
-            Arguments.of(null, TPredefinedTypeOfSecurityEnum.SIGNATURE),
-            Arguments.of(null, TPredefinedTypeOfSecurityEnum.SIGNATURE_AND_ENCRYPTION),
-            Arguments.of(nullGSESettings, TPredefinedTypeOfSecurityEnum.SIGNATURE),
-            Arguments.of(nullGSESettings, TPredefinedTypeOfSecurityEnum.SIGNATURE_AND_ENCRYPTION),
-            Arguments.of(nullMcSecurity, TPredefinedTypeOfSecurityEnum.SIGNATURE),
-            Arguments.of(nullMcSecurity, TPredefinedTypeOfSecurityEnum.SIGNATURE_AND_ENCRYPTION),
-            Arguments.of(newTServices(false, false), TPredefinedTypeOfSecurityEnum.SIGNATURE),
-            Arguments.of(newTServices(false, false), TPredefinedTypeOfSecurityEnum.SIGNATURE_AND_ENCRYPTION),
-            Arguments.of(newTServices(true, false), TPredefinedTypeOfSecurityEnum.SIGNATURE_AND_ENCRYPTION),
-            Arguments.of(newTServices(false, true), TPredefinedTypeOfSecurityEnum.SIGNATURE),
-            Arguments.of(newTServices(false, true), TPredefinedTypeOfSecurityEnum.SIGNATURE_AND_ENCRYPTION)
+                Arguments.of(null, TPredefinedTypeOfSecurityEnum.SIGNATURE),
+                Arguments.of(null, TPredefinedTypeOfSecurityEnum.SIGNATURE_AND_ENCRYPTION),
+                Arguments.of(nullGSESettings, TPredefinedTypeOfSecurityEnum.SIGNATURE),
+                Arguments.of(nullGSESettings, TPredefinedTypeOfSecurityEnum.SIGNATURE_AND_ENCRYPTION),
+                Arguments.of(nullMcSecurity, TPredefinedTypeOfSecurityEnum.SIGNATURE),
+                Arguments.of(nullMcSecurity, TPredefinedTypeOfSecurityEnum.SIGNATURE_AND_ENCRYPTION),
+                Arguments.of(newTServices(false, false), TPredefinedTypeOfSecurityEnum.SIGNATURE),
+                Arguments.of(newTServices(false, false), TPredefinedTypeOfSecurityEnum.SIGNATURE_AND_ENCRYPTION),
+                Arguments.of(newTServices(true, false), TPredefinedTypeOfSecurityEnum.SIGNATURE_AND_ENCRYPTION),
+                Arguments.of(newTServices(false, true), TPredefinedTypeOfSecurityEnum.SIGNATURE),
+                Arguments.of(newTServices(false, true), TPredefinedTypeOfSecurityEnum.SIGNATURE_AND_ENCRYPTION)
         );
     }
 
-    public static TServices newTServices(boolean isSignature, boolean isEncryption){
+    public static TServices newTServices(boolean isSignature, boolean isEncryption) {
         TServices tServices = new TServices();
         tServices.setSMVSettings(new TSMVSettings());
         tServices.getSMVSettings().setMcSecurity(new TMcSecurity());
@@ -236,7 +235,7 @@ class SMVControlBlockTest {
         smvControlBlock.setSmpMod(TSmpMod.SMP_PER_PERIOD);
         smvControlBlock.setSecurityEnable(TPredefinedTypeOfSecurityEnum.SIGNATURE_AND_ENCRYPTION);
         smvControlBlock.getTargets().add(
-            new ControlBlockTarget("AP_REF", DTO.HOLDER_LD_INST, "", DTO.HOLDER_LN_INST, DTO.HOLDER_LN_CLASS, DTO.HOLDER_LN_PREFIX));
+                new ControlBlockTarget("AP_REF", DTO.HOLDER_LD_INST, "", new LnKey(DTO.HOLDER_LN_INST, DTO.HOLDER_LN_CLASS, DTO.HOLDER_LN_PREFIX)));
         return smvControlBlock;
     }
 
@@ -251,7 +250,9 @@ class SMVControlBlockTest {
         tSampledValueControl.setSmpRate(200L);
         tSampledValueControl.setNofASDU(10L);
         tSampledValueControl.setSmpMod(TSmpMod.SMP_PER_PERIOD);
-        tSampledValueControl.getIEDName().add(new TControlWithIEDName.IEDName());
+        TControlWithIEDName.IEDName iedName = new TControlWithIEDName.IEDName();
+        iedName.getLnClass().add(TLLN0Enum.LLN_0.value());
+        tSampledValueControl.getIEDName().add(iedName);
         tSampledValueControl.setProtocol(new TProtocol());
         return tSampledValueControl;
     }

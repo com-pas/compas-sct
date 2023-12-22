@@ -9,6 +9,7 @@ import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.ControlBlockTarget;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.LnKey;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 
 import static org.lfenergy.compas.sct.commons.util.Utils.xpathAttributeFilter;
@@ -93,9 +94,7 @@ public class ControlBlockAdapter extends SclElementAdapter<AbstractLNAdapter<? e
             targetLn.getParentLDevice().getAccessPoint().getName(),
             targetLn.getParentIed().getName(),
             targetLn.getParentLDevice().getInst(),
-            targetLn.getLNInst(),
-            targetLn.getLNClass(),
-            targetLn.getPrefix());
+            LnKey.from(targetLn.getCurrentElem()));
         if (currentElem instanceof TControlWithIEDName tControlWithIEDName) {
             if (tControlWithIEDName.getIEDName().stream().noneMatch(controlBlockTarget::equalsIedName)) {
                 tControlWithIEDName.getIEDName().add(controlBlockTarget.toIedName());

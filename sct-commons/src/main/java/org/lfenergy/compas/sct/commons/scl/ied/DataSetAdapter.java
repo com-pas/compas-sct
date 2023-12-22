@@ -12,6 +12,7 @@ import org.lfenergy.compas.scl2007b4.model.TFCDA;
 import org.lfenergy.compas.scl2007b4.model.TFCEnum;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.LnKey;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.Comparator;
@@ -87,24 +88,20 @@ public class DataSetAdapter extends SclElementAdapter<AbstractLNAdapter<? extend
      * Find a FCDA matching all given criteria.
      *
      * @param ldInst  FCDA ldInst attribute
-     * @param prefix  FCDA prefix attribute
-     * @param lnClass FCDA lnClass attribute
-     * @param lnInst  FCDA lnInst attribute
+     * @param lnKey   FCDA lnInst, lnClass, prefix attributes
      * @param doName  FCDA doName attribute
      * @param daName  FCDA daNae attribute
      * @param fc      FCDA fc attribute
      * @return Matching FCDA in this DataSet when found, empty Optional otherwise.
      */
-    public Optional<TFCDA> findFCDA(String ldInst, String prefix, String lnClass, String lnInst, String doName, String daName, TFCEnum fc) {
+    public Optional<TFCDA> findFCDA(String ldInst, LnKey lnKey, String doName, String daName, TFCEnum fc) {
         if (!currentElem.isSetFCDA()) {
             return Optional.empty();
         }
         return currentElem.getFCDA().stream()
                 .filter(tfcda ->
                         Objects.equals(ldInst, tfcda.getLdInst())
-                                && equalsOrBothBlank(prefix, tfcda.getPrefix())
-                                && Utils.lnClassEquals(tfcda.getLnClass(), lnClass)
-                                && equalsOrBothBlank(lnInst, tfcda.getLnInst())
+                                && Objects.equals(lnKey, LnKey.from(tfcda))
                                 && Objects.equals(doName, tfcda.getDoName())
                                 && Objects.equals(fc, tfcda.getFc())
                                 && equalsOrBothBlank(daName, tfcda.getDaName()))
@@ -116,24 +113,20 @@ public class DataSetAdapter extends SclElementAdapter<AbstractLNAdapter<? extend
      * Does nothing if a FCDA with the given attribute already exists in this DataSet.
      *
      * @param ldInst  FCDA ldInst attribute
-     * @param prefix  FCDA prefix attribute
-     * @param lnClass FCDA lnClass attribute
-     * @param lnInst  FCDA lnInst attribute
+     * @param lnKey   FCDA lnInst, lnClass, prefix attributes
      * @param doName  FCDA doName attribute
      * @param daName  FCDA daNae attribute
      * @param fc      FCDA fc attribute
      * @return created FCDA, or existing FCDA with the given attributes
      */
-    public TFCDA createFCDAIfNotExists(String ldInst, String prefix, String lnClass, String lnInst, String doName, String daName, TFCEnum fc) {
+    public TFCDA createFCDAIfNotExists(String ldInst, LnKey lnKey, String doName, String daName, TFCEnum fc) {
         Objects.requireNonNull(fc); // fc is required by XSD
-        Optional<TFCDA> fcda = findFCDA(ldInst, prefix, lnClass, lnInst, doName, daName, fc);
+        Optional<TFCDA> fcda = findFCDA(ldInst, lnKey, doName, daName, fc);
         return fcda
                 .orElseGet(() -> {
                     TFCDA newFcda = newFcda(
                             StringUtils.trimToNull(ldInst),
-                            lnClass,
-                            StringUtils.trimToNull(lnInst),
-                            StringUtils.trimToNull(prefix),
+                            lnKey,
                             StringUtils.trimToNull(doName),
                             StringUtils.trimToNull(daName),
                             fc);

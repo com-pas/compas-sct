@@ -7,6 +7,7 @@ package org.lfenergy.compas.sct.commons.util;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.support.ReflectionSupport;
 import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.scl.ln.LnKey;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -22,7 +23,7 @@ class SclConstructorHelperTest {
         Class<SclConstructorHelper> testedClass = SclConstructorHelper.class;
         // When & Then
         assertThatThrownBy(() -> ReflectionSupport.newInstance(testedClass))
-            .isInstanceOf(UnsupportedOperationException.class);
+                .isInstanceOf(UnsupportedOperationException.class);
     }
 
     @Test
@@ -34,7 +35,7 @@ class SclConstructorHelperTest {
         TP tp = SclConstructorHelper.newP(pType, pValue);
         //Then
         assertThat(tp).extracting(TP::getType, TP::getValue)
-            .containsExactly(pType, pValue);
+                .containsExactly(pType, pValue);
     }
 
     @Test
@@ -47,7 +48,7 @@ class SclConstructorHelperTest {
         TDurationInMilliSec durationInMilliSec = SclConstructorHelper.newDurationInMilliSec(value, unit, multiplier);
         //Then
         assertThat(durationInMilliSec).extracting(TDurationInMilliSec::getValue, TDurationInMilliSec::getUnit, TDurationInMilliSec::getMultiplier)
-            .containsExactly(value, unit, multiplier);
+                .containsExactly(value, unit, multiplier);
     }
 
     @Test
@@ -85,8 +86,8 @@ class SclConstructorHelperTest {
         //When
         TAddress tAddress = SclConstructorHelper.newAddress(listOfP);
         //Then
-         assertThat(tAddress.getP())
-             .containsExactlyInAnyOrder(listOfP.toArray(new TP[0]));
+        assertThat(tAddress.getP())
+                .containsExactlyInAnyOrder(listOfP.toArray(new TP[0]));
     }
 
     @Test
@@ -98,7 +99,7 @@ class SclConstructorHelperTest {
         TConnectedAP tConnectedAP = SclConstructorHelper.newConnectedAp(iedName, apName);
         //Then
         assertThat(tConnectedAP).extracting(TConnectedAP::getIedName, TConnectedAP::getApName)
-            .containsExactly(iedName, apName);
+                .containsExactly(iedName, apName);
     }
 
     @Test
@@ -109,7 +110,7 @@ class SclConstructorHelperTest {
         TVal tVal = SclConstructorHelper.newVal(value);
         //Then
         assertThat(tVal).extracting(TVal::getValue, TVal::isSetSGroup)
-            .containsExactly(value, false);
+                .containsExactly(value, false);
     }
 
     @Test
@@ -135,25 +136,10 @@ class SclConstructorHelperTest {
         String daName = "daName";
         TFCEnum fc = TFCEnum.ST;
         //When
-        TFCDA tfcda = SclConstructorHelper.newFcda(ldinst, lnClass, lnInst, prefix, doName, daName, fc);
+        TFCDA tfcda = SclConstructorHelper.newFcda(ldinst, new LnKey(lnInst, lnClass, prefix), doName, daName, fc);
         //Then
         assertThat(tfcda).extracting(TFCDA::getLdInst, TFCDA::getLnClass, TFCDA::getLnInst, TFCDA::getPrefix, TFCDA::getDoName, TFCDA::getDaName, TFCDA::getFc)
                 .containsExactly(ldinst, List.of(lnClass), lnInst, prefix, doName, daName, fc);
     }
 
-    @Test
-    void newFcda_should_when_blank_lnClass_should_not_set_lnClass() {
-        //Given
-        String ldinst = "ldinst";
-        String lnClass = "";
-        String lnInst = "lnInst";
-        String prefix = "prefix";
-        String doName = "doName";
-        String daName = "daName";
-        TFCEnum fc = TFCEnum.ST;
-        //When
-        TFCDA tfcda = SclConstructorHelper.newFcda(ldinst, lnClass, lnInst, prefix, doName, daName, fc);
-        //Then
-        assertThat(tfcda.isSetLnClass()).isFalse();
-    }
 }

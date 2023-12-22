@@ -18,6 +18,7 @@ import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
+import org.lfenergy.compas.sct.commons.scl.ln.LnKey;
 import org.lfenergy.compas.sct.commons.util.ActiveStatus;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 import org.lfenergy.compas.sct.commons.util.PrivateUtils;
@@ -289,8 +290,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
     private void createDataSetWithFCDA(TExtRef extRef, LDeviceAdapter sourceLDevice, DataAttributeRef sourceDa, String dataSetName) {
         DataSetAdapter dataSetAdapter = sourceLDevice.getLN0Adapter().createDataSetIfNotExists(dataSetName, ControlBlockEnum.from(extRef.getServiceType()));
         String fcdaDaName = extRef.getServiceType() == TServiceType.REPORT ? null : sourceDa.getDaRef();
-        String fcdaLnClass = extRef.getLnClass().stream().findFirst().orElse(null);
-        dataSetAdapter.createFCDAIfNotExists(extRef.getLdInst(), extRef.getPrefix(), fcdaLnClass, extRef.getLnInst(),
+        dataSetAdapter.createFCDAIfNotExists(extRef.getLdInst(), LnKey.from(extRef),
                 sourceDa.getDoRef(),
                 fcdaDaName,
                 sourceDa.getFc());

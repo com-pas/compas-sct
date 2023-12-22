@@ -25,6 +25,7 @@ import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.LnKey;
 import org.lfenergy.compas.sct.commons.testhelpers.FCDARecord;
 import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
@@ -210,7 +211,7 @@ class ControlBlockEditorServiceTest {
         assertThat(tReportControl.getRptEnabled().getMax()).isEqualTo(1L);
         assertThat(tReportControl.getRptEnabled().getClientLN().stream().map(ControlBlockTarget::from))
                 .containsExactly(
-                        new ControlBlockTarget("AP_NAME", "IED_NAME1", "LD_INST11", "", "LLN0", "", ""));
+                        new ControlBlockTarget("AP_NAME", "IED_NAME1", "LD_INST11", LnKey.LN0_KEY, ""));
     }
 
     @Test

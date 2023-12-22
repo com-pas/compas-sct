@@ -8,15 +8,18 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.scl2007b4.model.SCL;
+import org.lfenergy.compas.scl2007b4.model.TAnyLN;
+import org.lfenergy.compas.scl2007b4.model.TExtRef;
+import org.lfenergy.compas.scl2007b4.model.TLNodeType;
 import org.lfenergy.compas.sct.commons.DataSetService;
 import org.lfenergy.compas.sct.commons.ExtRefReaderService;
 import org.lfenergy.compas.sct.commons.LnodeTypeService;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
-import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LnKey;
 import org.lfenergy.compas.sct.commons.util.Utils;
@@ -152,14 +155,10 @@ public class LNodeDTO {
 
     public static LNodeDTO from(TAnyLN tAnyLN, LogicalNodeOptions options, String iedName, String ldInst, SCL scl) {
         log.info(Utils.entering());
-        LnKey lnKey = switch (tAnyLN) {
-            case LN0 ln0 -> new LnKey(ln0);
-            case TLN tln -> new LnKey(tln);
-            default -> throw new IllegalStateException("Unexpected value: " + tAnyLN);
-        };
-        String inst = lnKey.getInst();
-        String lnClass = lnKey.getLnClass();
-        String prefix = lnKey.getPrefix();
+        LnKey lnKey = LnKey.from(tAnyLN);
+        String inst = lnKey.inst();
+        String lnClass = lnKey.lnClass();
+        String prefix = lnKey.prefix();
         String lnType = tAnyLN.getLnType();
         LNodeDTO lNodeDTO = new LNodeDTO(inst, lnClass, prefix, lnType);
         if (options.isWithExtRef()) {

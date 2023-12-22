@@ -20,6 +20,7 @@ import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.LnKey;
 import org.lfenergy.compas.sct.commons.util.ActiveStatus;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 import org.lfenergy.compas.sct.commons.util.MonitoringLnClassEnum;
@@ -104,7 +105,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
         String dataSetSuffix = getInst().toUpperCase(Locale.ENGLISH) + ATTRIBUTE_VALUE_SEPARATOR + (isFcMx ? "CYPO" : "DQPO");
         String dataSetName = DATASET_NAME_PREFIX + dataSetSuffix;
         DataSetAdapter dataSet = ln0.createDataSetIfNotExists(dataSetName, ControlBlockEnum.REPORT);
-        dataSet.createFCDAIfNotExists(fcda.getLdInst(), fcda.getPrefix(), fcda.getLnClass().get(0), fcda.getLnInst(), fcda.getDoName(), fcda.getDaName(), fcda.getFc());
+        dataSet.createFCDAIfNotExists(fcda.getLdInst(), LnKey.from(fcda), fcda.getDoName(), fcda.getDaName(), fcda.getFc());
         String cbName = CONTROLBLOCK_NAME_PREFIX + dataSetSuffix;
         String cbId = ln0.generateControlBlockId(getLdName(), cbName);
         ControlBlockAdapter controlBlockAdapter = ln0.createControlBlockIfNotExists(cbName, cbId, dataSetName, ControlBlockEnum.REPORT);
