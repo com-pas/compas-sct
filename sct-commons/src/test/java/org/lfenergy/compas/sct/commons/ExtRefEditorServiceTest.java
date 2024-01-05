@@ -774,7 +774,7 @@ class ExtRefEditorServiceTest {
         return Stream.of(
                 Arguments.of("case known voltageLevel should debind THT flow and corresponding ExtRef", scd, tupleExtRef1, tupleFlow1, tupleExtRefDebind, tupleFlowDebind),
                 Arguments.of("case voltageLevel 0 should do nothing", scdVoltageLevel0, tupleExtRef1, tupleFlow1, tupleExtRef2, tupleFlow2),
-                Arguments.of("case unknown voltageLevel should debind all", scdVoltageLevelUnknown, tupleExtRef1, tupleFlowDebind, tupleExtRef2, tupleFlowDebind),
+                Arguments.of("case unknown voltageLevel should debind all CompasFlow and corresponding ExtRef", scdVoltageLevelUnknown, tupleExtRefDebind, tupleFlowDebind, tupleExtRefDebind, tupleFlowDebind),
                 Arguments.of("case known voltageLevel should not debind because no ExtRefIedName", scdUnsetExtRefIedName, tupleExtRef1, tupleFlow1, tupleExtRef2, tupleFlowNoExtRefIedName),
                 Arguments.of("case unknown voltageLevel should not debind because unset FlowSourceVoltageLevel", scdVLevelUnknownUnsetFlowSourceVoltageLevel, tupleExtRef1, tupleFlow1, tupleExtRef2, tupleFlow2)
         );
