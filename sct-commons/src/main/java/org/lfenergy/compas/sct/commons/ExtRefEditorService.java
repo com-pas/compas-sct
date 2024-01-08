@@ -420,14 +420,11 @@ public class ExtRefEditorService implements ExtRefEditor {
                                     .filter(TCompasFlow::isSetFlowSourceVoltageLevel)
                                     .filter(TCompasFlow::isSetExtRefiedName)
                                     .forEach(tCompasFlow -> {
-                                        if (flowSource == null) {
-                                            //debind all compas flow
-                                            extRefService.clearCompasFlowBinding(tCompasFlow);
-                                        } else if (!tCompasFlow.getFlowSourceVoltageLevel().equals(flowSource)) {
-                                            //debind extRef
+                                        if (!tCompasFlow.getFlowSourceVoltageLevel().equals(flowSource)) {
+                                            //debind extRefs correspondind to compas flow
                                             extRefService.getMatchingExtRefs(tlDevice, tCompasFlow)
                                                     .forEach(extRefService::clearExtRefBinding);
-                                            //debind compas flow
+                                            //debind all compas flow
                                             extRefService.clearCompasFlowBinding(tCompasFlow);
                                         }
                                     });
