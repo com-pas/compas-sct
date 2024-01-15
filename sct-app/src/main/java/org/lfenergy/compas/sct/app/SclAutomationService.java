@@ -57,7 +57,7 @@ public class SclAutomationService {
             sclEditor.addHistoryItem(scd, hItem.getWho(), hItem.getWhat(), hItem.getWhy());
         }
         substationEditor.addSubstation(scd, ssd);
-        sclEditor.importSTDElementsInSCD(scd, stds, SUB_NETWORK_TYPES);
+        sclEditor.importSTDElementsInSCD(scd, stds);
         controlBlockEditor.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scd);
         return scd;
     }

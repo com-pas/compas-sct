@@ -23,8 +23,6 @@ import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
-import org.lfenergy.compas.sct.commons.scl.ied.*;
-import org.lfenergy.compas.sct.commons.testhelpers.*;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -175,6 +173,91 @@ class SclServiceTest {
     }
 
     @Test
+    void addSubnetworks_shouldNotUpdateScd_when_noCommunicationInICDExist() {
+        //Givens
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl_update_communication/scd_without_communication.xml");
+        SCL icd = SclTestMarshaller.getSCLFromFile("/scl_update_communication/std_without_communication.xml");
+        assertThat(scd.getCommunication()).isNull();
+        //When
+        //Then
+        assertThatCode(() -> sclService.addSubnetworks(scd, icd, "IED_NAME1")).doesNotThrowAnyException();
+        String marshalledScd = assertIsMarshallable(scd);
+        assertThat(scd.getCommunication()).isNull();
+        assertThat(marshalledScd).doesNotContain("<Communication");
+        assertIsMarshallable(scd);
+    }
+
+    @Test
+    void addSubnetworks_shouldAddSubNetwork_and_ConnectedAp_and_updateConnectedApIEDName() {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl_update_communication/scd_without_communication.xml");
+        SCL std = SclTestMarshaller.getSCLFromFile("/scl_update_communication/std_with_communication.xml");
+        assertThat(scd.getCommunication()).isNull();
+        //When
+        //Then
+        assertThatCode(() -> sclService.addSubnetworks(scd, std, "IED_NAME1")).doesNotThrowAnyException();
+        assertThat(scd.getCommunication()).isNotNull();
+        String marshalledScd = assertIsMarshallable(scd);
+        assertThat(marshalledScd).contains("<Communication");
+        // assertion succeeds as subNetwork.connectedAP.iedName field is ignored.
+        assertThat(scd.getCommunication())
+                .usingRecursiveComparison()
+                .ignoringFields("subNetwork.connectedAP.iedName")
+                .isEqualTo(std.getCommunication());
+        assertThat(scd.getCommunication().getSubNetwork().get(0).getConnectedAP().get(0).getIedName())
+                .isEqualTo("IED_NAME1");
+        assertIsMarshallable(scd);
+    }
+
+
+    @Test
+    void addSubnetworks_shouldCopyAddressAndPhysConnFromIcd() {
+        //Givens
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl_update_communication/scd_without_communication.xml");
+        SCL std = SclTestMarshaller.getSCLFromFile("/scl_update_communication/std_with_full_filled_communication.xml");
+        assertThat(scd.getCommunication()).isNull();
+        //When
+        //Then
+        assertThatCode(() -> sclService.addSubnetworks(scd, std, "IED_NAME1")).doesNotThrowAnyException();
+        assertThat(scd.getCommunication()).isNotNull();
+        // assertion succeeds as subNetwork.connectedAP.iedName and subNetwork.connectedAP.gse fields are ignored.
+        // Only subNetwork.connectedAP.address and subNetwork.connectedAP.physConn added: see https://github.com/com-pas/compas-sct/issues/76
+        assertThat(scd.getCommunication())
+                .usingRecursiveComparison()
+                .ignoringFields("subNetwork.connectedAP.iedName", "subNetwork.connectedAP.gse")
+                .isEqualTo(std.getCommunication());
+        assertIsMarshallable(scd);
+    }
+
+    @Test
+    void addSubnetworks_shouldDoNothing_when_subNetworkAlreadyExist() {
+        //Givens
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl_update_communication/scd_without_communication.xml");
+        SCL std = SclTestMarshaller.getSCLFromFile("/scl_update_communication/std_with_communication.xml");
+        std.getCommunication().getSubNetwork().get(0).getConnectedAP().get(0).getPhysConn().clear();
+        std.getCommunication().getSubNetwork().get(0).getConnectedAP().get(0).setAddress(null);
+        std.getCommunication().getSubNetwork().get(0).getConnectedAP().get(0).unsetGSE();
+        //When
+        //Then
+        assertThatCode(() -> sclService.addSubnetworks(scd, std, "IED_NAME1")).doesNotThrowAnyException();
+        String marshalledScd = assertIsMarshallable(scd);
+        assertThat(marshalledScd).contains("<Communication");
+    }
+
+    @Test
+    void addSubnetworks_shouldThrowError_When_IedNameNotExistInScd() {
+        //Givens
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl_update_communication/scd_without_communication.xml");
+        SCL icd = SclTestMarshaller.getSCLFromFile("/scl_update_communication/std_with_communication.xml");
+        //When
+        //Then
+        assertThatCode(() -> sclService.addSubnetworks(scd, icd, "UnknownIedName"))
+                .isInstanceOf(ScdException.class)
+                .hasMessage("Unknown AccessPoint :ConnectedAP_Name in IED :UnknownIedName");
+        assertIsMarshallable(scd);
+    }
+
+    @Test
     void testInitScl_With_headerId_shouldNotThrowError() {
         //Given
         UUID headerId = UUID.randomUUID();
@@ -240,7 +323,7 @@ class SclServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd.xml");
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         //When Then
-        assertThatCode(() -> sclService.importSTDElementsInSCD(scd, List.of(std), DTO.SUB_NETWORK_TYPES))
+        assertThatCode(() -> sclService.importSTDElementsInSCD(scd, List.of(std)))
                 .doesNotThrowAnyException();
         assertThat(scd.getIED()).hasSize(1);
         assertThat(scd.getDataTypeTemplates()).hasNoNullFieldsOrProperties();
@@ -256,7 +339,7 @@ class SclServiceTest {
         SCL std1 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_SITESITE1SCU1.xml");
         SCL std2 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_SITESITE1SCU2.xml");
         //When Then
-        assertThatCode(() -> sclService.importSTDElementsInSCD(scd, List.of(std0, std1, std2), DTO.SUB_NETWORK_TYPES))
+        assertThatCode(() -> sclService.importSTDElementsInSCD(scd, List.of(std0, std1, std2)))
                 .doesNotThrowAnyException();
         assertThat(scd.getIED()).hasSize(3);
         assertThat(scd.getDataTypeTemplates()).hasNoNullFieldsOrProperties();
@@ -274,7 +357,7 @@ class SclServiceTest {
         SCL std2 = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         List<SCL> stds = List.of(std1, std2);
         //When Then
-        assertThatThrownBy(() -> sclService.importSTDElementsInSCD(scd, stds, DTO.SUB_NETWORK_TYPES))
+        assertThatThrownBy(() -> sclService.importSTDElementsInSCD(scd, stds))
                 .isInstanceOf(ScdException.class);
         assertIsMarshallable(scd);
     }
@@ -285,7 +368,7 @@ class SclServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd_with_same_compas_icd_header_in_different_functions.xml");
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
         //When Then
-        assertThatCode(() -> sclService.importSTDElementsInSCD(scd, List.of(std), DTO.SUB_NETWORK_TYPES)).doesNotThrowAnyException();
+        assertThatCode(() -> sclService.importSTDElementsInSCD(scd, List.of(std))).doesNotThrowAnyException();
         assertIsMarshallable(scd);
     }
 
@@ -296,7 +379,7 @@ class SclServiceTest {
         SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std_with_same_ICDSystemVersionUUID.xml");
         List<SCL> stdList = List.of(std);
         //When Then
-        assertThatThrownBy(() -> sclService.importSTDElementsInSCD(scd, stdList, DTO.SUB_NETWORK_TYPES))
+        assertThatThrownBy(() -> sclService.importSTDElementsInSCD(scd, stdList))
                 .isInstanceOf(ScdException.class)
                 .hasMessageContaining("COMPAS-ICDHeader is not the same in Substation and in IED");
         assertIsMarshallable(scd);
@@ -308,7 +391,7 @@ class SclServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/ssd.xml");
         List<SCL> stdList = List.of();
         //When Then
-        assertThatCode(() -> sclService.importSTDElementsInSCD(scd, stdList, DTO.SUB_NETWORK_TYPES))
+        assertThatCode(() -> sclService.importSTDElementsInSCD(scd, stdList))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("There is no STD file found corresponding to headerId = f8dbc8c1-2db7-4652-a9d6-0b414bdeccfa, headerVersion = 01.00.00, headerRevision = 01.00.00 and ICDSystemVersionUUID = IED4d4fe1a8cda64cf88a5ee4176a1a0eef");
     }
