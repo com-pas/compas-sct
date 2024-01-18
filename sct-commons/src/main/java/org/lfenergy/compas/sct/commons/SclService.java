@@ -81,10 +81,8 @@ public class SclService implements SclEditor {
 
     @Override
     public void addSubnetworks(SCL scd, List<SubNetworkDTO> subNetworks, SCL icd) throws ScdException {
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        CommunicationAdapter communicationAdapter;
         if (!subNetworks.isEmpty()) {
-            communicationAdapter = sclRootAdapter.getCommunicationAdapter(true);
+            CommunicationAdapter communicationAdapter = new SclRootAdapter(scd).getCommunicationAdapter(true);
             for (SubNetworkDTO subNetworkDTO : subNetworks) {
                 String snName = subNetworkDTO.getName();
                 String snType = subNetworkDTO.getType();
@@ -104,54 +102,20 @@ public class SclService implements SclEditor {
     }
 
     @Override
-    public void addSubnetworks(SCL scd, SCL std, String iedName) throws ScdException {
-        Optional.ofNullable(std.getCommunication()).ifPresent(tCommunication ->
-                tCommunication.getSubNetwork().forEach(stdSubNetwork ->
-                        stdSubNetwork.getConnectedAP().forEach(stdConnectedAP -> {
-                        // verify if exist SCD/IED/ConnectedAP/apName equal to STD/Communication/SubNetwork/ConnectedAP/apName
-                        if (scd.getIED().stream().filter(ied -> Objects.equals(ied.getName(), iedName))
-                                .flatMap(tied -> tied.getAccessPoint().stream())
-                                .noneMatch(tAccessPoint -> tAccessPoint.getName().equals(stdConnectedAP.getApName()))) {
-                            throw new ScdException("Unknown AccessPoint :" + stdConnectedAP.getApName() + " in IED :" + iedName);
-                        }
-                        // add SubNetwork if not exist
-                        if(scd.getCommunication() == null) {
-                            scd.setCommunication(new TCommunication());
-                        }
-                        TSubNetwork tSubNetwork = scd.getCommunication().getSubNetwork().stream()
-                                .filter(subNetwork -> subNetwork.getName().equals(stdSubNetwork.getName()))
-                                .findFirst()
-                                .orElseGet(() -> {
-                                    TSubNetwork newSubNetwork = new TSubNetwork();
-                                    newSubNetwork.setName(stdSubNetwork.getName());
-                                    newSubNetwork.setType(stdSubNetwork.getType());
-                                    scd.getCommunication().getSubNetwork().add(newSubNetwork);
-                                    return newSubNetwork;
-                                });
-                        // add ConnectedAP to SubNetwork if not exist
-                        String apName = stdConnectedAP.getApName();
-                        TConnectedAP tConnectedAP = tSubNetwork.getConnectedAP().stream()
-                                .filter(connectedAP -> Objects.equals(connectedAP.getIedName(), iedName)
-                                        && Objects.equals(connectedAP.getApName(), apName))
-                                .findFirst()
-                                .orElseGet(() -> {
-                                    TConnectedAP newConnectedAP = new TConnectedAP();
-                                    newConnectedAP.setIedName(iedName);
-                                    newConnectedAP.setApName(apName);
-                                    tSubNetwork.getConnectedAP().add(newConnectedAP);
-                                    return newConnectedAP;
-                                });
-                        //copy Address And PhysConn From Icd to Scd
-                        std.getCommunication().getSubNetwork().stream()
-                                .flatMap(subNetwork -> subNetwork.getConnectedAP().stream())
-                                .filter(connectedAP -> connectedAP.getApName().equals(tConnectedAP.getApName()))
-                                .findFirst()
-                                .ifPresent(connectedAP -> {
-                                    Optional.ofNullable(connectedAP.getAddress()).ifPresent(tConnectedAP::setAddress);
-                                    tConnectedAP.getPhysConn().addAll(connectedAP.getPhysConn());
-                                });
-            }))
-        );
+    public void addSubnetworks(SCL scd, SCL icd, String iedName) throws ScdException {
+        Optional.ofNullable(icd.getCommunication()).ifPresent(tCommunication ->
+                tCommunication.getSubNetwork().forEach(icdSubNetwork ->
+                        icdSubNetwork.getConnectedAP().forEach(icdConnectedAP -> {
+                            // init Communication if not exist
+                            CommunicationAdapter communicationAdapter = new SclRootAdapter(scd).getCommunicationAdapter(true);
+                            // add SubNetwork if not exist, add ConnectedAP to SubNetwork if not exist
+                            SubNetworkAdapter subNetworkAdapter = communicationAdapter
+                                    .addSubnetwork(icdSubNetwork.getName(), icdSubNetwork.getType(), iedName, icdConnectedAP.getApName());
+                            // copy Address And PhysConn From Icd to Scd
+                            subNetworkAdapter.getConnectedAPAdapter(iedName, icdConnectedAP.getApName())
+                                    .copyAddressAndPhysConnFromIcd(icd);
+                        })
+                ));
     }
 
     @Override

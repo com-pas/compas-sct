@@ -84,7 +84,7 @@ public class ConnectedAPAdapter extends SclElementAdapter<SubNetworkAdapter, TCo
                     .filter(connectedAP -> connectedAP.getApName().equals(currentElem.getApName()))
                     .findFirst()
                     .ifPresent(connectedAP -> {
-                        currentElem.setAddress(connectedAP.getAddress());
+                        Optional.ofNullable(connectedAP.getAddress()).ifPresent(currentElem::setAddress);
                         currentElem.getPhysConn().addAll(connectedAP.getPhysConn());
                     });
         }

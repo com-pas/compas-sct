@@ -11,8 +11,6 @@ import org.lfenergy.compas.sct.commons.api.ControlBlockEditor;
 import org.lfenergy.compas.sct.commons.api.SclEditor;
 import org.lfenergy.compas.sct.commons.api.SubstationEditor;
 import org.lfenergy.compas.sct.commons.dto.HeaderDTO;
-import org.lfenergy.compas.sct.commons.dto.SubNetworkDTO;
-import org.lfenergy.compas.sct.commons.dto.SubNetworkTypeDTO;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
 import java.util.*;
@@ -32,14 +30,6 @@ public class SclAutomationService {
     private final SclEditor sclEditor;
     private final SubstationEditor substationEditor;
     private final ControlBlockEditor controlBlockEditor;
-
-    /**
-     * Possible Subnetwork and ConnectedAP names which should be used in generated SCD in order a have global coherence
-     * Configuration based on used framework can be used to externalize this datas
-     */
-    public static final List<SubNetworkTypeDTO> SUB_NETWORK_TYPES = List.of(
-            new SubNetworkTypeDTO("RSPACE_PROCESS_NETWORK", SubNetworkDTO.SubnetworkType.MMS.toString(), List.of("PROCESS_AP", "TOTO_AP_GE")),
-            new SubNetworkTypeDTO("RSPACE_ADMIN_NETWORK", SubNetworkDTO.SubnetworkType.IP.toString(), List.of("ADMIN_AP", "TATA_AP_EFFACEC")));
 
     /**
      * Create an SCD file from specified parameters, it calls all functions defined in the process one by one, every step

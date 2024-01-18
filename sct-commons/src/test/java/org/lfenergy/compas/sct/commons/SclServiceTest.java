@@ -173,8 +173,9 @@ class SclServiceTest {
     }
 
     @Test
-    void addSubnetworks_shouldNotUpdateScd_when_noCommunicationInICDExist() {
+    void addSubnetworks_shouldNotUpdateScd_when_noCommunicationInSTDExist() {
         //Givens
+        SCL initial = SclTestMarshaller.getSCLFromFile("/scl_update_communication/scd_without_communication.xml");
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl_update_communication/scd_without_communication.xml");
         SCL icd = SclTestMarshaller.getSCLFromFile("/scl_update_communication/std_without_communication.xml");
         assertThat(scd.getCommunication()).isNull();
@@ -211,8 +212,8 @@ class SclServiceTest {
 
 
     @Test
-    void addSubnetworks_shouldCopyAddressAndPhysConnFromIcd() {
-        //Givens
+    void addSubnetworks_shouldCopyAddressAndPhysConnFromStd() {
+        //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl_update_communication/scd_without_communication.xml");
         SCL std = SclTestMarshaller.getSCLFromFile("/scl_update_communication/std_with_full_filled_communication.xml");
         assertThat(scd.getCommunication()).isNull();
@@ -246,15 +247,14 @@ class SclServiceTest {
 
     @Test
     void addSubnetworks_shouldThrowError_When_IedNameNotExistInScd() {
-        //Givens
+        //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl_update_communication/scd_without_communication.xml");
         SCL icd = SclTestMarshaller.getSCLFromFile("/scl_update_communication/std_with_communication.xml");
         //When
         //Then
         assertThatCode(() -> sclService.addSubnetworks(scd, icd, "UnknownIedName"))
                 .isInstanceOf(ScdException.class)
-                .hasMessage("Unknown AccessPoint :ConnectedAP_Name in IED :UnknownIedName");
-        assertIsMarshallable(scd);
+                .hasMessage("IED.name 'UnknownIedName' not found in SCD");
     }
 
     @Test
