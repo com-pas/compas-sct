@@ -7,7 +7,6 @@ package org.lfenergy.compas.sct.commons.dto;
 import org.lfenergy.compas.scl2007b4.model.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 public class DTO {
@@ -301,7 +300,4 @@ public class DTO {
         return historyItem;
     }
 
-    public static final List<SubNetworkTypeDTO> SUB_NETWORK_TYPES = List.of(
-            new SubNetworkTypeDTO("RSPACE_PROCESS_NETWORK", SubNetworkDTO.SubnetworkType.MMS.toString(), List.of("PROCESS_AP", "TOTO_AP_GE")),
-            new SubNetworkTypeDTO("RSPACE_ADMIN_NETWORK", SubNetworkDTO.SubnetworkType.MMS.toString(), List.of("ADMIN_AP", "TATA_AP_EFFACEC")));
 }

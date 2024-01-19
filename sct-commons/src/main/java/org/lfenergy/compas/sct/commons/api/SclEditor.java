@@ -91,6 +91,14 @@ public interface SclEditor {
     void addSubnetworks(SCL scd, List<SubNetworkDTO> subNetworks, SCL icd) throws ScdException;
 
     /**
+     * Add or update SubNetworks in SCL file from ICD file and rename ConnectedAP/@iedName
+     * @param scd         SCL file in which SubNetworks should be added
+     * @param std         STD file from which SubNetworks functional data are copied from
+     * @param stdIedName     Ied Name
+     */
+    void addSubnetworks(SCL scd, SCL std, String stdIedName) throws ScdException;
+
+    /**
      * Updates DAI based on given data in <em>dataAttributeRef</em>
      *
      * @param scd     SCL file in which DataTypeTemplate of DAI should be found
@@ -118,7 +126,6 @@ public interface SclEditor {
      *
      * @param scd               SCL object in which content of STD files are imported
      * @param stds              list of STD files contenting datas to import into SCD
-     * @param subNetworkTypes   couple of Subnetwork name and possible corresponding ConnectedAP names
      * @throws ScdException     throws when inconsistency between Substation of SCL content and gien STD files as :
      *                          <ul>
      *                              <li>ICD_SYSTEM_VERSION_UUID in IED/Private of STD is not present in COMPAS-ICDHeader in Substation/../LNode of SCL</li>
@@ -128,7 +135,7 @@ public interface SclEditor {
      *                              <li>COMPAS_ICDHEADER in Substation/../LNode of SCL not found in IED/Private of STD</li>
      *                          </ul>
      */
-    void importSTDElementsInSCD(SCL scd, List<SCL> stds, List<SubNetworkTypeDTO> subNetworkTypes) throws ScdException;
+    void importSTDElementsInSCD(SCL scd, List<SCL> stds) throws ScdException;
 
     /**
      * Activate used LDevice and Deactivate unused LDevice in {@link TLNode <em><b>TLNode </b></em>}
