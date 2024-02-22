@@ -39,7 +39,7 @@ class ExtRefEditorServiceTest {
 
     @BeforeEach
     void init() {
-        extRefEditorService = new ExtRefEditorService(new LdeviceService(), new ExtRefService());
+        extRefEditorService = new ExtRefEditorService(new LdeviceService(), new ExtRefService(), new DataTypeTemplatesService());
     }
 
     @Test
@@ -102,9 +102,11 @@ class ExtRefEditorServiceTest {
                                         SclReportItem.error(
                                                 "/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST13\"]",
                                                 "The status test does not exist. It should be among [on, off]"),
-                                        SclReportItem.error(
-                                                "/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST14\"]",
-                                                "The LDevice status is undefined"),
+                                        SclReportItem.warning(
+                                                "/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/" +
+                                                        "LDevice[@inst=\"LD_INST14\"]/LN0/Inputs/ExtRef[@desc=\"STAT_LDSUIED_LPDO 1 Sortie_13_BOOLEAN_18_stVal_1\"]",
+                                                "The signal ExtRef lninst, doName or daName does not match any source " +
+                                                        "in LDevice /SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST14\"]"),
                                         SclReportItem.warning(
                                                 "/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]" +
                                                         "/LN0/Inputs/ExtRef[@desc=\"ExtRef does not match any ICDSystemVersionUUID\"]",
@@ -496,6 +498,112 @@ class ExtRefEditorServiceTest {
         assertThat(extRefBindExternally.getIedName()).isEqualTo("IED_NAME2");
         assertExtRefIsBoundAccordingTOLDEPF(extRefBindExternally, analogueChannel10WithBayExternalBayScope);
     }
+
+    @Test
+    void getExtRefBayReferenceForActifLDEPF_when_DOI_Mod_and_DAI_stVal_notExists_should_precede() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_withoutModStValInLN0.xml");
+        // When
+        TChannel channel = new TChannel();
+        channel.setBayScope(TCBscopeType.BAY_INTERNAL);
+        channel.setChannelType(TChannelType.DIGITAL);
+        channel.setChannelNum("1");
+        channel.setChannelShortLabel("MR.PX1");
+        channel.setChannelLevMod(TChannelLevMod.POSITIVE_OR_RISING);
+        channel.setChannelLevModQ(TChannelLevMod.OTHER);
+        channel.setIEDType("BCU");
+        channel.setIEDRedundancy(TIEDredundancy.NONE);
+        channel.setIEDSystemVersionInstance("1");
+        channel.setLDInst("LDPX");
+        channel.setLNClass("PTRC");
+        channel.setLNInst("0");
+        channel.setDOName("Str");
+        channel.setDOInst("0");
+        channel.setDAName("general");
+
+        EPF epf = new EPF();
+        Channels channels = new Channels();
+        channels.getChannel().add(channel);
+        epf.setChannels(channels);
+        List<SclReportItem> sclReportItems = extRefEditorService.manageBindingForLDEPF(scd, epf);
+        // Then
+        assertThat(sclReportItems).isEmpty();
+        TExtRef extRef1 = findExtRef(scd, "IED_NAME1", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
+        assertThat(extRef1.getIedName()).isEqualTo("IED_NAME1");
+        TExtRef extRef2 = findExtRef(scd, "IED_NAME2", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
+        assertThat(extRef2.getIedName()).isEqualTo("IED_NAME2");
+        TExtRef extRef3 = findExtRef(scd, "IED_NAME3", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
+        assertThat(extRef3.getIedName()).isEqualTo("IED_NAME1");
+
+        assertExtRefIsBoundAccordingTOLDEPF(extRef1, channel);
+        assertExtRefIsBoundAccordingTOLDEPF(extRef2, channel);
+        assertExtRefIsBoundAccordingTOLDEPF(extRef3, channel);
+    }
+
+    @Test
+    void manageBindingForLDEPF_when_LDEPF_NotActive_should_precede() {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_with_inactive_ldevice_ldepf.xml");
+        TChannel channel = new TChannel();
+        channel.setBayScope(TCBscopeType.BAY_INTERNAL);
+        channel.setChannelType(TChannelType.DIGITAL);
+        channel.setChannelNum("1");
+        channel.setChannelShortLabel("MR.PX1");
+        channel.setChannelLevMod(TChannelLevMod.POSITIVE_OR_RISING);
+        channel.setChannelLevModQ(TChannelLevMod.OTHER);
+        channel.setIEDType("BCU");
+        channel.setIEDRedundancy(TIEDredundancy.NONE);
+        channel.setIEDSystemVersionInstance("1");
+        channel.setLDInst("LDPX");
+        channel.setLNClass("PTRC");
+        channel.setLNInst("0");
+        channel.setDOName("Str");
+        channel.setDOInst("0");
+        channel.setDAName("general");
+
+        EPF epf = new EPF();
+        Channels channels = new Channels();
+        channels.getChannel().add(channel);
+        epf.setChannels(channels);
+        // When
+        List<SclReportItem> sclReportItems = extRefEditorService.manageBindingForLDEPF(scd, epf);
+        // Then
+        assertThat(sclReportItems).isEmpty();
+        TExtRef extRef1 = findExtRef(scd, "IED_NAME1", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
+        assertThat(extRef1.getIedName()).isEqualTo("IED_NAME1");
+        TExtRef extRef2 = findExtRef(scd, "IED_NAME2", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
+        assertThat(extRef2.getIedName()).isEqualTo("IED_NAME2");
+        TExtRef extRef3 = findExtRef(scd, "IED_NAME3", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
+        assertThat(extRef3.getIedName()).isEqualTo("IED_NAME1");
+
+        assertExtRefIsBoundAccordingTOLDEPF(extRef1, channel);
+        assertExtRefIsBoundAccordingTOLDEPF(extRef2, channel);
+        assertExtRefIsBoundAccordingTOLDEPF(extRef3, channel);
+    }
+
+    @Test
+    void getExtRefBayReferenceForActifLDEPF_when_DO_Mod_and_DA_stVal_NotFoundInDataTypeTemplate_should_return_error() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_withoutModStValInDataTypeTemplate.xml");
+        // When
+        EPF epf = new EPF();
+        epf.setChannels(new Channels());
+        List<SclReportItem> sclReportItems = extRefEditorService.manageBindingForLDEPF(scd, epf);
+        // Then
+        assertThat(sclReportItems).hasSize(3);
+        assertThat(sclReportItems)
+                .extracting(SclReportItem::message, SclReportItem::xpath)
+                .containsExactly(
+                        Tuple.tuple("DO@name=Mod/DA@name=stVal not found in DataTypeTemplate",
+                         "/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LDEPF\"]"),
+                        Tuple.tuple("DO@name=Mod/DA@name=stVal not found in DataTypeTemplate",
+                                "/SCL/IED[@name=\"IED_NAME2\"]/AccessPoint/Server/LDevice[@inst=\"LDEPF\"]"),
+                        Tuple.tuple("DO@name=Mod/DA@name=stVal not found in DataTypeTemplate",
+                                "/SCL/IED[@name=\"IED_NAME3\"]/AccessPoint/Server/LDevice[@inst=\"LDEPF\"]")
+                );
+    }
+
+
     private void assertExtRefIsBoundAccordingTOLDEPF(TExtRef extRef, TChannel setting) {
         assertThat(extRef.getLdInst()).isEqualTo(setting.getLDInst());
         assertThat(extRef.getLnClass()).contains(setting.getLNClass());

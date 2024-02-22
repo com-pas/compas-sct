@@ -50,7 +50,6 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
     private static final String MESSAGE_INVALID_SERVICE_TYPE = "The signal ExtRef ServiceType attribute is unexpected : %s";
     private static final String MESSAGE_IED_MISSING_COMPAS_BAY_UUID = "IED is missing Private/compas:Bay@UUID attribute";
     private static final String MESSAGE_EXTREF_DESC_MALFORMED = "ExtRef.serviceType=Report but ExtRef.desc attribute is malformed";
-    private static final String MESSAGE_LDEVICE_STATUS_UNDEFINED = "The LDevice status is undefined";
     private static final String MESSAGE_EXTREF_IEDNAME_DOES_NOT_MATCH_ANY_SYSTEM_VERSION_UUID = "The signal ExtRef iedName does not match any " +
             "IED/Private/compas:ICDHeader@ICDSystemVersionUUID";
     private static final String MESSAGE_SOURCE_LDEVICE_STATUS_UNDEFINED = "The signal ExtRef source LDevice %s status is undefined";
@@ -98,7 +97,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
     public List<SclReportItem> updateAllExtRefIedNames(Map<String, IEDAdapter> icdSystemVersionToIed) {
         Optional<String> optionalLDeviceStatus = getLDeviceAdapter().getLDeviceStatus();
         if (optionalLDeviceStatus.isEmpty()) {
-            return List.of(getLDeviceAdapter().buildFatalReportItem(MESSAGE_LDEVICE_STATUS_UNDEFINED));
+            optionalLDeviceStatus = Optional.of(ActiveStatus.ON.getValue());
         }
         try {
             ActiveStatus lDeviceStatus = ActiveStatus.fromValue(optionalLDeviceStatus.get());

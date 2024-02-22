@@ -23,14 +23,11 @@ import org.lfenergy.compas.sct.commons.util.CsvUtils;
 import org.opentest4j.AssertionFailedError;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Named.named;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
 
@@ -308,6 +305,17 @@ class InputsAdapterTest {
         // Then
         assertThat(result).hasSameSizeAs(tExtRefList)
                 .hasSize(6);
+    }
+
+    @Test
+    void updateAllExtRefIedNames_when_DOI_Mod_and_DAI_stVal_notExists_should_not_produce_error() {
+        // Given
+        SCL scl = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/Test_Missing_ModstVal_In_LN0_when_binding.scd");
+        InputsAdapter inputsAdapter = findInputs(scl, "IedName1", "LDSUIED");
+        // When
+        List<SclReportItem> sclReportItems = inputsAdapter.updateAllExtRefIedNames(Map.of());
+        // Then
+        assertThat(sclReportItems).isEmpty();
     }
 
 }

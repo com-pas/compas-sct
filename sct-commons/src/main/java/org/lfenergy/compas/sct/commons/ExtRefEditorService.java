@@ -46,6 +46,7 @@ public class ExtRefEditorService implements ExtRefEditor {
 
     private final LdeviceService ldeviceService;
     private final ExtRefService extRefService;
+    private final DataTypeTemplatesService dataTypeTemplatesService;
 
     /**
      * Provides valid IED sources according to EPF configuration.<br/>
@@ -76,6 +77,37 @@ public class ExtRefEditorService implements ExtRefEditor {
                 .map(IEDAdapter::getCurrentElem)
                 .limit(2)
                 .toList();
+    }
+
+    /**
+     * Provides a list of ExtRef and associated Bay <br/>
+     * - The location of ExtRef should be in LDevice (inst=LDEPF) <br/>
+     * - ExtRef that lacks Bay or ICDHeader Private is not returned <br/>
+     *
+     * @param sclReportItems List of SclReportItem
+     * @return list of ExtRef and associated Bay
+     */
+    private List<ExtRefInfo.ExtRefWithBayReference> getExtRefWithBayReferenceInLDEPF(final LDeviceAdapter lDeviceAdapter, final List<SclReportItem> sclReportItems) {
+        List<ExtRefInfo.ExtRefWithBayReference> extRefBayReferenceList = new ArrayList<>();
+        IEDAdapter iedAdapter = lDeviceAdapter.getParentAdapter();
+        if (iedAdapter.getPrivateCompasBay().isEmpty()) {
+            sclReportItems.add(SclReportItem.error(lDeviceAdapter.getXPath(), "The IED has no Private Bay"));
+            if (iedAdapter.getCompasICDHeader().isEmpty()) {
+                sclReportItems.add(SclReportItem.error(lDeviceAdapter.getXPath(), "The IED has no Private compas:ICDHeader"));
+            }
+            return Collections.emptyList();
+        }
+
+        if(dataTypeTemplatesService.isDoModAndDaStValExist(iedAdapter.getParentAdapter().getDataTypeTemplateAdapter().getCurrentElem(),
+                lDeviceAdapter.getLN0Adapter().getLnType())) {
+            extRefBayReferenceList.addAll(lDeviceAdapter.getLN0Adapter()
+                    .getInputsAdapter().getCurrentElem()
+                    .getExtRef().stream()
+                    .map(extRef -> new ExtRefInfo.ExtRefWithBayReference(iedAdapter.getName(), iedAdapter.getPrivateCompasBay().get(), extRef)).toList());
+        } else {
+            sclReportItems.add(SclReportItem.error(lDeviceAdapter.getXPath(), "DO@name=Mod/DA@name=stVal not found in DataTypeTemplate"));
+        }
+        return extRefBayReferenceList;
     }
 
     /**
@@ -272,7 +304,7 @@ public class ExtRefEditorService implements ExtRefEditor {
                 .filter(iedAdapter -> !iedAdapter.getName().contains("TEST"))
                 .map(iedAdapter -> iedAdapter.findLDeviceAdapterByLdInst(LDEVICE_LDEPF))
                 .flatMap(Optional::stream)
-                .forEach(lDeviceAdapter -> lDeviceAdapter.getExtRefBayReferenceForActifLDEPF(sclReportItems)
+                .forEach(lDeviceAdapter -> getExtRefWithBayReferenceInLDEPF(lDeviceAdapter, sclReportItems)
                         .forEach(extRefBayRef -> epf.getChannels().getChannel().stream().filter(tChannel -> doesExtRefMatchLDEPFChannel(extRefBayRef.extRef(), tChannel))
                                 .findFirst().ifPresent(channel -> {
                                     List<TIED> iedSources = getIedSources(sclRootAdapter, extRefBayRef.compasBay(), channel);
