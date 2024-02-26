@@ -39,7 +39,7 @@ class ExtRefEditorServiceTest {
 
     @BeforeEach
     void init() {
-        extRefEditorService = new ExtRefEditorService(new LdeviceService(), new ExtRefService(), new DataTypeTemplatesService());
+        extRefEditorService = new ExtRefEditorService(new IedService(), new LdeviceService(), new ExtRefService(), new DataTypeTemplatesService());
     }
 
     @Test
@@ -500,7 +500,7 @@ class ExtRefEditorServiceTest {
     }
 
     @Test
-    void getExtRefBayReferenceForActifLDEPF_when_DOI_Mod_and_DAI_stVal_notExists_should_precede() {
+    void manageBindingForLDEPF_when_DOI_Mod_and_DAI_stVal_notExists_should_precede() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_withoutModStValInLN0.xml");
         // When
@@ -582,7 +582,7 @@ class ExtRefEditorServiceTest {
     }
 
     @Test
-    void getExtRefBayReferenceForActifLDEPF_when_DO_Mod_and_DA_stVal_NotFoundInDataTypeTemplate_should_return_error() {
+    void manageBindingForLDEPF_when_DO_Mod_and_DA_stVal_NotFoundInDataTypeTemplate_should_return_error() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_withoutModStValInDataTypeTemplate.xml");
         // When
@@ -595,11 +595,11 @@ class ExtRefEditorServiceTest {
                 .extracting(SclReportItem::message, SclReportItem::xpath)
                 .containsExactly(
                         Tuple.tuple("DO@name=Mod/DA@name=stVal not found in DataTypeTemplate",
-                         "/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LDEPF\"]"),
+                         "SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LDEPF\"]"),
                         Tuple.tuple("DO@name=Mod/DA@name=stVal not found in DataTypeTemplate",
-                                "/SCL/IED[@name=\"IED_NAME2\"]/AccessPoint/Server/LDevice[@inst=\"LDEPF\"]"),
+                                "SCL/IED[@name=\"IED_NAME2\"]/AccessPoint/Server/LDevice[@inst=\"LDEPF\"]"),
                         Tuple.tuple("DO@name=Mod/DA@name=stVal not found in DataTypeTemplate",
-                                "/SCL/IED[@name=\"IED_NAME3\"]/AccessPoint/Server/LDevice[@inst=\"LDEPF\"]")
+                                "SCL/IED[@name=\"IED_NAME3\"]/AccessPoint/Server/LDevice[@inst=\"LDEPF\"]")
                 );
     }
 

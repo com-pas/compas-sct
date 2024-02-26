@@ -32,13 +32,13 @@ public class DataTypeTemplatesService {
      * @return true if the Data Object (Mod) and Data attribute (stVal) present, false otherwise
      */
     public boolean isDoModAndDaStValExist(TDataTypeTemplates dtt, String lNodeTypeId) {
-        return lnodeTypeService.findLnodeType(dtt, lNodeType -> lNodeType.getId().equals(lNodeTypeId))
-                .map(lNodeType -> doService.findDo(lNodeType, tdo -> tdo.getName().equals(MOD_DO_NAME))
-                        .map(tdo -> doTypeService.findDoType(dtt, doType -> doType.getId().equals(tdo.getType()))
+        return lnodeTypeService.findLnodeType(dtt, lNodeType -> lNodeTypeId.equals(lNodeType.getId()))
+                .map(lNodeType -> doService.findDo(lNodeType, tdo -> MOD_DO_NAME.equals(tdo.getName()))
+                        .map(tdo -> doTypeService.findDoType(dtt, doType -> tdo.getType().equals(doType.getId()))
                                 .map(doType -> doType.getSDOOrDA().stream()
-                                                .filter(unNaming -> unNaming.getClass().equals(TDA.class))
+                                                .filter(sdoOrDa -> sdoOrDa.getClass().equals(TDA.class))
                                                 .map(TDA.class::cast)
-                                                .anyMatch(tda -> tda.getName().equals(STVAL_DA_NAME)))
+                                                .anyMatch(tda -> STVAL_DA_NAME.equals(tda.getName())))
                                  .orElse(false))
                          .orElse(false))
                  .orElse(false);
