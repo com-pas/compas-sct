@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.LnKey;
 
 import java.util.List;
 import java.util.Map;
@@ -355,5 +356,40 @@ class DataAttributeRefTest {
         assertThat(dataAttributeRef.getLNRef())
                 .isEqualTo("prefixlnClasslnInst.DoName.sdo.daName.bda");
         assertThat(dataAttributeRef.getFc()).isNull();
+    }
+
+    @Test
+    void test_updateDataRef_withLN() {
+        //Given
+        DataAttributeRef dataAttributeRef = new DataAttributeRef();
+        TLN ln = new TLN();
+        ln.setLnType("LnTypeAny");
+        ln.setInst("1");
+        ln.getLnClass().add(TSystemLNGroupEnum.LGOS.value());
+        // When
+        DataAttributeRef result = DataAttributeRef.updateDataRef(ln, dataAttributeRef);
+        // Then
+        assertThat(result).extracting(DataAttributeRef::getLnType,
+                        DataAttributeRef::getPrefix,
+                        DataAttributeRef::getLnClass,
+                        DataAttributeRef::getLnInst)
+                .containsExactly("LnTypeAny", "", "LGOS", "1");
+    }
+
+    @Test
+    void test_updateDataRef_withLN0() {
+        //Given
+        DataAttributeRef dataAttributeRef = new DataAttributeRef();
+        LN0 ln0 = new LN0();
+        ln0.setLnType("LnType0");
+        ln0.getLnClass().add(TLLN0Enum.LLN_0.value());
+        // When
+        DataAttributeRef result = DataAttributeRef.updateDataRef(ln0, dataAttributeRef);
+        // Then
+        assertThat(result).extracting(DataAttributeRef::getLnType,
+                        DataAttributeRef::getPrefix,
+                        DataAttributeRef::getLnClass,
+                        DataAttributeRef::getLnInst)
+                .containsExactly("LnType0", "", "LLN0", null);
     }
 }
