@@ -1,0 +1,43 @@
+<!-- SPDX-FileCopyrightText: 2023 2024 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<SCL xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4">
+    <Header id="HeaderID" version="version" revision="Revision" toolID="toolID"/>
+    <DataTypeTemplates>
+        <LNodeType id="LN1" lnClass="LLN0">
+            <DO name="Do11" type="DO1" transient="true"/>
+        </LNodeType>
+        <LNodeType id="LN2" lnClass="LLN0">
+            <DO name="Do21" type="DO2"/>
+            <DO name="Do22" type="DO2"/>
+        </LNodeType>
+        <DOType cdc="WYE" id="DO1">
+            <DA name="sampleDa11" bType="Enum" fc="ST" type="RecCycModKind" valImport="true"/>
+            <SDO name="sdo11" type="DO2"/>
+            <DA name="objRefDa12" bType="ObjRef" fc="SP" valImport="true"/>
+            <SDO name="sdo12" type="DO2"/>
+        </DOType>
+        <DOType cdc="WYE" id="DO2">
+            <SDO name="sdo21" type="DO3"/>
+            <SDO name="sdo22" type="DO3"/>
+        </DOType>
+        <DOType cdc="WYE" id="DO3">
+            <DA name="sampleDa2" bType="Enum" fc="ST" type="RecCycModKind" valImport="true"/>
+            <DA fc="ST" name="structDa1" bType="Struct" type="DA1"/>
+        </DOType>
+        <DAType id="DA1">
+            <BDA name="structBda1" bType="Struct" type="DA2"/>
+            <BDA name="sampleBda1" bType="VisString255"/>
+        </DAType>
+        <DAType id="DA2">
+            <BDA name="sampleBda2" bType="VisString255"/>
+            <BDA name="structBda2" bType="Struct" type="DA3"/>
+        </DAType>
+        <DAType id="DA3">
+            <BDA name="sampleBda3" bType="Enum" type="RecCycModKind" valImport="true"/>
+        </DAType>
+        <EnumType id="RecCycModKind">
+            <EnumVal ord="1">Completed-diff</EnumVal>
+        </EnumType>
+    </DataTypeTemplates>
+</SCL>

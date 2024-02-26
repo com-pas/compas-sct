@@ -6,8 +6,7 @@ package org.lfenergy.compas.sct.commons.scl.ln;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
-import org.lfenergy.compas.scl2007b4.model.LN0;
-import org.lfenergy.compas.scl2007b4.model.TLN;
+import org.lfenergy.compas.scl2007b4.model.*;
 
 @Getter
 @EqualsAndHashCode
@@ -33,5 +32,6 @@ public class LnKey {
         this.lnClass = tln.getLnClass().get(0);
         this.prefix = tln.getPrefix();
     }
+
 }
 

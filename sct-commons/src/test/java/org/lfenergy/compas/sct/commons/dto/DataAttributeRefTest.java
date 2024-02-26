@@ -356,4 +356,5 @@ class DataAttributeRefTest {
                 .isEqualTo("prefixlnClasslnInst.DoName.sdo.daName.bda");
         assertThat(dataAttributeRef.getFc()).isNull();
     }
+
 }
