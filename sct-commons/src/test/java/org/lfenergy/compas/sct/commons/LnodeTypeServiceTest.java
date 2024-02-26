@@ -6,15 +6,14 @@ package org.lfenergy.compas.sct.commons;
 
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.scl2007b4.model.SCL;
-import org.lfenergy.compas.scl2007b4.model.TDO;
-import org.lfenergy.compas.scl2007b4.model.TDataTypeTemplates;
-import org.lfenergy.compas.scl2007b4.model.TLNodeType;
+import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateTestUtils.*;
 
 class LnodeTypeServiceTest {
 
@@ -82,5 +81,58 @@ class LnodeTypeServiceTest {
         assertThat(tlnodeType)
                 .extracting(TLNodeType::getLnClass, TLNodeType::getId)
                 .containsExactly(List.of("LPAI"), "RTE_8884DBCF760D916CCE3EE9D1846CE46F_LPAI_V1.0.0");
+    }
+
+    @Test
+    void getDataAttributeRefs_should_return_expected_dataReference() {
+        //Given
+        TDataTypeTemplates dtt = initDttFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda_test.xml");
+        TLNodeType tdoType = dtt.getLNodeType().stream().filter(tlNodeType -> tlNodeType.getId()
+                .equals("LNodeType0")).findFirst().get();
+        //When
+        LnodeTypeService lnodeTypeService = new LnodeTypeService();
+        List<DataAttributeRef> result = lnodeTypeService.getDataAttributes(dtt, tdoType, new DataAttributeRef()).toList();
+        //Then
+        assertThat(result).hasSize(9).extracting(
+                        DataAttributeRef::getDoRef, DataAttributeRef::getSdoNames,
+                        DataAttributeRef::getDaRef, DataAttributeRef::getBdaNames, DataAttributeRef::getBType, DataAttributeRef::getType)
+                .containsExactlyInAnyOrder(
+                        Tuple.tuple("FirstDoName", List.of(),
+                                "sampleDaName1", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
+                        Tuple.tuple("FirstDoName.sdoName1", List.of("sdoName1"),
+                                "sampleDaName21", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
+                        Tuple.tuple("FirstDoName.sdoName1.sdoName21", List.of("sdoName1", "sdoName21"),
+                                "sampleDaName31", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
+                        Tuple.tuple("FirstDoName.sdoName1.sdoName21.sdoName31", List.of("sdoName1", "sdoName21", "sdoName31"),
+                                "sampleDaName41", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
+                        Tuple.tuple("FirstDoName.sdoName2", List.of("sdoName2"),
+                                "sampleDaName11", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
+                        Tuple.tuple("FirstDoName.sdoName2", List.of("sdoName2"),
+                                "structDaName1.sampleBdaName1", List.of("sampleBdaName1"), TPredefinedBasicTypeEnum.BOOLEAN, null),
+                        Tuple.tuple("FirstDoName.sdoName2", List.of("sdoName2"),
+                                "structDaName1.structBdaName1.sampleBdaName21", List.of("structBdaName1", "sampleBdaName21"), TPredefinedBasicTypeEnum.BOOLEAN, null),
+                        Tuple.tuple("FirstDoName.sdoName2", List.of("sdoName2"),
+                                "structDaName1.structBdaName1.enumBdaName22", List.of("structBdaName1", "enumBdaName22"), TPredefinedBasicTypeEnum.ENUM, "EnumType1"),
+                        Tuple.tuple("SecondDoName", List.of(),
+                                "sampleDaName41", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null)
+                );
+    }
+
+    @Test
+    void getDataAttributeRefs_should_return_all_dai() {
+        // given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
+        TDataTypeTemplates dtt = scd.getDataTypeTemplates();
+
+        // when
+        LnodeTypeService lnodeTypeService = new LnodeTypeService();
+        TLNodeType tdoType = lnodeTypeService.findLnodeType(dtt, tlNodeType -> tlNodeType.getId()
+                .equals("LN2")).get();
+        //When
+//        List<DataAttributeRef> result = lnodeTypeService.getDataAttributeRefs(dtt, tdoType);
+        List<DataAttributeRef> result = lnodeTypeService.getDataAttributes(dtt, tdoType, new DataAttributeRef())
+                .toList();
+        //Then
+        assertThat(result).hasSize(1622);
     }
 }

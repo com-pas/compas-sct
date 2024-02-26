@@ -136,39 +136,49 @@ class SclElementsProviderServiceTest {
     }
 
     @Test
-    void getDAI_should_return_all_dai() {
+    void getDAI_should_return_all_dai_when_notUpdatable() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
+        // When
+        Set<DataAttributeRef> result = sclElementsProviderService.getDAI(scd, "IED_NAME1", "LD_INST12", new DataAttributeRef(), false);
+        // THEN
+        assertThat(result).hasSize(2433);
+    }
+
+    @Test
+    void getDAI_should_return_all_dai_when_updatable() {
         // given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
 
         // when
-        Set<DataAttributeRef> allResults = sclElementsProviderService.getDAI(scd, "IED_NAME1", "LD_INST12", new DataAttributeRef(), true);
+        Set<DataAttributeRef> result = sclElementsProviderService.getDAI(scd, "IED_NAME1", "LD_INST12", new DataAttributeRef(), true);
 
         // then
-        assertThat(allResults).hasSize(733);
+        assertThat(result).hasSize(733);
 
-        List<DataAttributeRef> resultsWithDa = allResults.stream().filter(rdt -> StringUtils.isNotBlank(rdt.getDaRef())).collect(Collectors.toList());
+        List<DataAttributeRef> resultsWithDa = result.stream().filter(rdt -> StringUtils.isNotBlank(rdt.getDaRef())).collect(Collectors.toList());
         assertThat(resultsWithDa).hasSize(733);
 
-        List<DataAttributeRef> resultsWithNoBda = allResults.stream().filter(rdt -> rdt.getBdaNames().isEmpty()).collect(Collectors.toList());
+        List<DataAttributeRef> resultsWithNoBda = result.stream().filter(rdt -> rdt.getBdaNames().isEmpty()).collect(Collectors.toList());
         assertThat(resultsWithNoBda).hasSize(3);
-        List<DataAttributeRef> resultsWithBdaDepth1 = allResults.stream().filter(rdt -> rdt.getBdaNames().size() == 1).collect(Collectors.toList());
+        List<DataAttributeRef> resultsWithBdaDepth1 = result.stream().filter(rdt -> rdt.getBdaNames().size() == 1).collect(Collectors.toList());
         assertThat(resultsWithBdaDepth1).isEmpty();
-        List<DataAttributeRef> resultsWithBdaDepth2 = allResults.stream().filter(rdt -> rdt.getBdaNames().size() == 2).collect(Collectors.toList());
+        List<DataAttributeRef> resultsWithBdaDepth2 = result.stream().filter(rdt -> rdt.getBdaNames().size() == 2).collect(Collectors.toList());
         assertThat(resultsWithBdaDepth2).hasSize(1);
-        List<DataAttributeRef> resultsWithBdaDepth3 = allResults.stream().filter(rdt -> rdt.getBdaNames().size() == 3).collect(Collectors.toList());
+        List<DataAttributeRef> resultsWithBdaDepth3 = result.stream().filter(rdt -> rdt.getBdaNames().size() == 3).collect(Collectors.toList());
         assertThat(resultsWithBdaDepth3).hasSize(729);
 
 
-        List<DataAttributeRef> resultsWithDo = allResults.stream().filter(rdt -> StringUtils.isNotBlank(rdt.getDoRef())).collect(Collectors.toList());
+        List<DataAttributeRef> resultsWithDo = result.stream().filter(rdt -> StringUtils.isNotBlank(rdt.getDoRef())).collect(Collectors.toList());
         assertThat(resultsWithDo).hasSize(733);
 
-        List<DataAttributeRef> resultsWithNoSdo = allResults.stream().filter(rdt -> rdt.getSdoNames().isEmpty()).collect(Collectors.toList());
+        List<DataAttributeRef> resultsWithNoSdo = result.stream().filter(rdt -> rdt.getSdoNames().isEmpty()).collect(Collectors.toList());
         assertThat(resultsWithNoSdo).hasSize(3);
-        List<DataAttributeRef> resultsWithSdoDepth1 = allResults.stream().filter(rdt -> rdt.getSdoNames().size() == 1).collect(Collectors.toList());
+        List<DataAttributeRef> resultsWithSdoDepth1 = result.stream().filter(rdt -> rdt.getSdoNames().size() == 1).collect(Collectors.toList());
         assertThat(resultsWithSdoDepth1).isEmpty();
-        List<DataAttributeRef> resultsWithSdoDepth2 = allResults.stream().filter(rdt -> rdt.getSdoNames().size() == 2).collect(Collectors.toList());
+        List<DataAttributeRef> resultsWithSdoDepth2 = result.stream().filter(rdt -> rdt.getSdoNames().size() == 2).collect(Collectors.toList());
         assertThat(resultsWithSdoDepth2).hasSize(730);
-        List<DataAttributeRef> resultsWithSdoDepth3 = allResults.stream().filter(rdt -> rdt.getSdoNames().size() == 3).collect(Collectors.toList());
+        List<DataAttributeRef> resultsWithSdoDepth3 = result.stream().filter(rdt -> rdt.getSdoNames().size() == 3).collect(Collectors.toList());
         assertThat(resultsWithSdoDepth3).isEmpty();
     }
 
@@ -185,7 +195,7 @@ class SclElementsProviderServiceTest {
         DataAttributeRef lln0DoA = lln0.toBuilder().doName(createDo("DoA", TPredefinedCDCEnum.DPL)).build();
         DataAttributeRef lln0DoB = lln0.toBuilder().doName(createDo("DoB", TPredefinedCDCEnum.ACD)).build();
 
-        assertThat(dais).containsExactlyInAnyOrder(
+        assertThat(dais).hasSize(11).containsExactlyInAnyOrder(
                 lln0DoA.toBuilder().daName(createDa("daNotInDai", TFCEnum.CF, false, Map.of(0L, "0"))).build(),
                 lln0DoA.toBuilder().daName(createDa("daNotInDai2", TFCEnum.CF, true, Map.of())).build(),
                 lln0DoA.toBuilder().daName(createDa("daiOverrideVal", TFCEnum.CF, false, Map.of(0L, "1"))).build(),
@@ -271,6 +281,8 @@ class SclElementsProviderServiceTest {
                 "LLN0.DoB.structValImportFalse.bValImportFalseAndTrueInDai",
                 "LLN0.DoB.structValImportFalse.bValImportNotSetAndTrueInDai",
                 "LLN0.DoB.structValImportFalse.bValImportTrueAndTrueInDai",
+//                "LLN0.DoB.structValImportTrue.bValImportNotSet",
+//                "LLN0.DoB.structValImportTrue.bValImportNotSetAndNotSetInDai",
                 // bValImportTrue : If ValImport is True in BDA and DAI does not exist, BDA is updatable
                 "LLN0.DoB.structValImportFalse.bValImportTrue",
                 "LLN0.DoB.structValImportTrue.bValImportTrue",
@@ -317,9 +329,7 @@ class SclElementsProviderServiceTest {
         Set<DataAttributeRef> dais = sclElementsProviderService.getDAI(scd, "VirtualBCU", "LDMOD", new DataAttributeRef(), true);
 
         // then
-        assertThat(dais)
-                .isNotNull()
-                .isEmpty();
+        assertThat(dais).isEmpty();
     }
 
     @Test

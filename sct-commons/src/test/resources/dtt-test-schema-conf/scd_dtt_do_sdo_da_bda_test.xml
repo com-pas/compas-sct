@@ -1,0 +1,44 @@
+<!-- SPDX-FileCopyrightText: 2023 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<SCL xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4">
+    <Header id="HeaderID" version="version" revision="Revision" toolID="toolID"/>
+    <DataTypeTemplates>
+        <LNodeType id="LNodeType0" lnClass="ANCR">
+            <DO name="FirstDoName" type="DOType0"/>
+            <DO name="SecondDoName" type="DOType4"/>
+        </LNodeType>
+        <DOType cdc="WYE" id="DOType0">
+            <SDO name="sdoName1" type="DOType1"/>
+            <SDO name="sdoName2" type="DOType2"/>
+            <DA name="sampleDaName1" bType="BOOLEAN" fc="ST"/>
+        </DOType>
+        <DOType cdc="WYE" id="DOType1">
+            <SDO name="sdoName21" type="DOType3"/>
+            <DA name="sampleDaName21" bType="BOOLEAN" fc="ST"/>
+        </DOType>
+        <DOType cdc="WYE" id="DOType2">
+            <DA name="sampleDaName11" bType="BOOLEAN" fc="ST"/>
+            <DA name="structDaName1" bType="Struct" type="DAType0" fc="ST"/>
+        </DOType>
+        <DOType cdc="WYE" id="DOType3">
+            <SDO name="sdoName31" type="DOType4"/>
+            <DA name="sampleDaName31" bType="BOOLEAN" fc="ST"/>
+        </DOType>
+        <DOType cdc="WYE" id="DOType4">
+            <DA name="sampleDaName41" bType="BOOLEAN" fc="ST"/>
+        </DOType>
+        <DAType id="DAType0">
+            <BDA name="sampleBdaName1" bType="BOOLEAN"/>
+            <BDA name="structBdaName1" bType="Struct" type="DAType1"/>
+        </DAType>
+        <DAType id="DAType1">
+            <BDA name="sampleBdaName21" bType="BOOLEAN"/>
+            <BDA name="enumBdaName22" bType="Enum" type="EnumType1"/>
+        </DAType>
+        <EnumType id="EnumType1">
+            <EnumVal ord="1">val1</EnumVal>
+            <EnumVal ord="2">val2</EnumVal>
+        </EnumType>
+    </DataTypeTemplates>
+</SCL>
