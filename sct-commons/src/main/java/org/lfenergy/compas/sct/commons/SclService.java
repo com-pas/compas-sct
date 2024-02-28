@@ -81,10 +81,8 @@ public class SclService implements SclEditor {
 
     @Override
     public void addSubnetworks(SCL scd, List<SubNetworkDTO> subNetworks, SCL icd) throws ScdException {
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        CommunicationAdapter communicationAdapter;
         if (!subNetworks.isEmpty()) {
-            communicationAdapter = sclRootAdapter.getCommunicationAdapter(true);
+            CommunicationAdapter communicationAdapter = new SclRootAdapter(scd).getCommunicationAdapter(true);
             for (SubNetworkDTO subNetworkDTO : subNetworks) {
                 String snName = subNetworkDTO.getName();
                 String snType = subNetworkDTO.getType();
@@ -101,6 +99,23 @@ public class SclService implements SclEditor {
                 }
             }
         }
+    }
+
+    @Override
+    public void addSubnetworks(SCL scd, SCL icd, String iedName) throws ScdException {
+        Optional.ofNullable(icd.getCommunication()).ifPresent(tCommunication ->
+                tCommunication.getSubNetwork().forEach(icdSubNetwork ->
+                        icdSubNetwork.getConnectedAP().forEach(icdConnectedAP -> {
+                            // init Communication if not exist
+                            CommunicationAdapter communicationAdapter = new SclRootAdapter(scd).getCommunicationAdapter(true);
+                            // add SubNetwork if not exist, add ConnectedAP to SubNetwork if not exist
+                            SubNetworkAdapter subNetworkAdapter = communicationAdapter
+                                    .addSubnetwork(icdSubNetwork.getName(), icdSubNetwork.getType(), iedName, icdConnectedAP.getApName());
+                            // copy Address And PhysConn From Icd to Scd
+                            subNetworkAdapter.getConnectedAPAdapter(iedName, icdConnectedAP.getApName())
+                                    .copyAddressAndPhysConnFromIcd(icd);
+                        })
+                ));
     }
 
     @Override
@@ -139,7 +154,7 @@ public class SclService implements SclEditor {
     }
 
     @Override
-    public void importSTDElementsInSCD(SCL scd, List<SCL> stds, List<SubNetworkTypeDTO> subNetworkTypes) throws ScdException {
+    public void importSTDElementsInSCD(SCL scd, List<SCL> stds) throws ScdException {
 
         //Check SCD and STD compatibilities
         Map<String, PrivateLinkedToStds> mapICDSystemVersionUuidAndSTDFile = PrivateUtils.createMapICDSystemVersionUuidAndSTDFile(stds);
@@ -167,9 +182,7 @@ public class SclService implements SclEditor {
                         scdRootAdapter.addIED(std, iedName);
 
                         //import connectedAP and rename ConnectedAP/@iedName
-                        TCommunication communication = stdRootAdapter.getCurrentElem().getCommunication();
-                        List<SubNetworkDTO> subNetworkDTOSet = SubNetworkDTO.createDefaultSubnetwork(iedName, communication, subNetworkTypes);
-                        addSubnetworks(scdRootAdapter.getCurrentElem(), subNetworkDTOSet, std);
+                        addSubnetworks(scdRootAdapter.getCurrentElem(), std, iedName);
                     }
                 });
     }

@@ -83,7 +83,7 @@ class SclAutomationServiceTest {
         verify(sclEditor, times(1)).initScl(headerDTO.getId(), headerDTO.getVersion(), headerDTO.getRevision());
         verify(sclEditor, times(0)).addHistoryItem(any(SCL.class), anyString(), anyString(), anyString());
         verify(substationEditor, times(1)).addSubstation(any(SCL.class), any(SCL.class));
-        verify(sclEditor, times(1)).importSTDElementsInSCD(any(SCL.class), anyList(), anyList());
+        verify(sclEditor, times(1)).importSTDElementsInSCD(any(SCL.class), anyList());
         verify(controlBlockEditor, times(1)).removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(any(SCL.class));
     }
 
@@ -112,7 +112,7 @@ class SclAutomationServiceTest {
         verify(sclEditor, times(1)).initScl(headerDTO.getId(), headerDTO.getVersion(), headerDTO.getRevision());
         verify(sclEditor, times(1)).addHistoryItem(any(SCL.class), eq(historyItem.getWho()), eq(historyItem.getWhat()), eq(historyItem.getWhy()));
         verify(substationEditor, times(1)).addSubstation(any(SCL.class), any(SCL.class));
-        verify(sclEditor, times(1)).importSTDElementsInSCD(any(SCL.class), anyList(), anyList());
+        verify(sclEditor, times(1)).importSTDElementsInSCD(any(SCL.class), anyList());
         verify(controlBlockEditor, times(1)).removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(any(SCL.class));
     }
 
@@ -167,7 +167,7 @@ class SclAutomationServiceTest {
         doNothing().when(sclEditor).addHistoryItem(any(SCL.class), any(), any(), any());
         doNothing().when(substationEditor).addSubstation(any(SCL.class), any(SCL.class));
         doThrow(new ScdException("importSTDElementsInSCD fail"))
-                .when(sclEditor).importSTDElementsInSCD(any(SCL.class), anyList(), anyList());
+                .when(sclEditor).importSTDElementsInSCD(any(SCL.class), anyList());
         // When Then
         assertThatThrownBy(() -> sclAutomationService.createSCD(ssd, headerDTO, List.of(std)))
                 .isInstanceOf(ScdException.class)
@@ -183,7 +183,7 @@ class SclAutomationServiceTest {
         when(sclEditor.initScl(any(UUID.class), anyString(), anyString())).thenReturn((SCL) BeanUtils.cloneBean(scl));
         doNothing().when(sclEditor).addHistoryItem(any(SCL.class), any(), any(), any());
         doNothing().when(substationEditor).addSubstation(any(SCL.class), any(SCL.class));
-        doNothing().when(sclEditor).importSTDElementsInSCD(any(SCL.class), anyList(), anyList());
+        doNothing().when(sclEditor).importSTDElementsInSCD(any(SCL.class), anyList());
         doThrow(new ScdException("removeAllControlBlocksAndDatasetsAndExtRefSrcBindings fail"))
                 .when(controlBlockEditor).removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(any(SCL.class));
         // When Then
