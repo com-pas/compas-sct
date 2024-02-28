@@ -44,8 +44,10 @@ public class ExtRefEditorService implements ExtRefEditor {
             "7", "THT"
     );
 
+    private final IedService iedService;
     private final LdeviceService ldeviceService;
     private final ExtRefService extRefService;
+    private final DataTypeTemplatesService dataTypeTemplatesService;
 
     /**
      * Provides valid IED sources according to EPF configuration.<br/>
@@ -76,6 +78,37 @@ public class ExtRefEditorService implements ExtRefEditor {
                 .map(IEDAdapter::getCurrentElem)
                 .limit(2)
                 .toList();
+    }
+
+    /**
+     * Provides a list of ExtRef and associated Bay <br/>
+     * - The location of ExtRef should be in LDevice (inst=LDEPF) <br/>
+     * - ExtRef that lacks Bay or ICDHeader Private is not returned <br/>
+     *
+     * @param sclReportItems List of SclReportItem
+     * @return list of ExtRef and associated Bay
+     */
+    private List<ExtRefInfo.ExtRefWithBayReference> getExtRefWithBayReferenceInLDEPF(TDataTypeTemplates dataTypeTemplates, TIED tied, final TLDevice tlDevice, final List<SclReportItem> sclReportItems) {
+        List<ExtRefInfo.ExtRefWithBayReference> extRefBayReferenceList = new ArrayList<>();
+        String lDevicePath = "SCL/IED[@name=\""+ tied.getName() + "\"]/AccessPoint/Server/LDevice[@inst=\"" + tlDevice.getInst() + "\"]";
+        Optional<TCompasBay> tCompasBay = PrivateUtils.extractCompasPrivate(tied, TCompasBay.class);
+        if (tCompasBay.isEmpty()) {
+            sclReportItems.add(SclReportItem.error(lDevicePath, "The IED has no Private Bay"));
+            if (PrivateUtils.extractCompasPrivate(tied, TCompasICDHeader.class).isEmpty()) {
+                sclReportItems.add(SclReportItem.error(lDevicePath, "The IED has no Private compas:ICDHeader"));
+            }
+            return Collections.emptyList();
+        }
+
+        if (dataTypeTemplatesService.isDoModAndDaStValExist(dataTypeTemplates, tlDevice.getLN0().getLnType())) {
+            extRefBayReferenceList.addAll(tlDevice.getLN0()
+                    .getInputs()
+                    .getExtRef().stream()
+                    .map(extRef -> new ExtRefInfo.ExtRefWithBayReference(tied.getName(), tCompasBay.get(), extRef)).toList());
+        } else {
+            sclReportItems.add(SclReportItem.error(lDevicePath, "DO@name=Mod/DA@name=stVal not found in DataTypeTemplate"));
+        }
+        return extRefBayReferenceList;
     }
 
     /**
@@ -266,29 +299,27 @@ public class ExtRefEditorService implements ExtRefEditor {
     @Override
     public List<SclReportItem> manageBindingForLDEPF(SCL scd, EPF epf) {
         List<SclReportItem> sclReportItems = new ArrayList<>();
-        if (!epf.isSetChannels()) return sclReportItems;
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        sclRootAdapter.streamIEDAdapters()
-                .filter(iedAdapter -> !iedAdapter.getName().contains("TEST"))
-                .map(iedAdapter -> iedAdapter.findLDeviceAdapterByLdInst(LDEVICE_LDEPF))
-                .flatMap(Optional::stream)
-                .forEach(lDeviceAdapter -> lDeviceAdapter.getExtRefBayReferenceForActifLDEPF(sclReportItems)
-                        .forEach(extRefBayRef -> epf.getChannels().getChannel().stream().filter(tChannel -> doesExtRefMatchLDEPFChannel(extRefBayRef.extRef(), tChannel))
-                                .findFirst().ifPresent(channel -> {
-                                    List<TIED> iedSources = getIedSources(sclRootAdapter, extRefBayRef.compasBay(), channel);
-                                    if (iedSources.size() == 1) {
-                                        updateLDEPFExtRefBinding(extRefBayRef.extRef(), iedSources.get(0), channel);
-                                        sclReportItems.addAll(updateLDEPFDos(lDeviceAdapter, extRefBayRef.extRef(), channel));
-                                    } else {
-                                        if (iedSources.size() > 1) {
-                                            sclReportItems.add(SclReportItem.warning(null, "There is more than one IED source to bind the signal " +
-                                                    "/IED@name=" + extRefBayRef.iedName() + "/LDevice@inst=LDEPF/LN0" +
-                                                    "/ExtRef@desc=" + extRefBayRef.extRef().getDesc()));
-                                        }
-                                        // If the source IED is not found, there will be no update or report message.
-                                    }
-                                }))
-                );
+        if (!epf.isSetChannels()) return sclReportItems;
+        iedService.getFilteredIeds(scd, ied -> !ied.getName().contains("TEST"))
+                .forEach(tied -> ldeviceService.findLdevice(tied, tlDevice -> LDEVICE_LDEPF.equals(tlDevice.getInst()))
+                        .ifPresent(tlDevice -> getExtRefWithBayReferenceInLDEPF(scd.getDataTypeTemplates(), tied, tlDevice, sclReportItems)
+                                .forEach(extRefBayRef -> epf.getChannels().getChannel().stream().filter(tChannel -> doesExtRefMatchLDEPFChannel(extRefBayRef.extRef(), tChannel))
+                                        .findFirst().ifPresent(channel -> {
+                                            List<TIED> iedSources = getIedSources(sclRootAdapter, extRefBayRef.compasBay(), channel);
+                                            if (iedSources.size() == 1) {
+                                                updateLDEPFExtRefBinding(extRefBayRef.extRef(), iedSources.get(0), channel);
+                                                LDeviceAdapter lDeviceAdapter = new LDeviceAdapter(new IEDAdapter(sclRootAdapter, tied.getName()), tlDevice);
+                                                sclReportItems.addAll(updateLDEPFDos(lDeviceAdapter, extRefBayRef.extRef(), channel));
+                                            } else {
+                                                if (iedSources.size() > 1) {
+                                                    sclReportItems.add(SclReportItem.warning(null, "There is more than one IED source to bind the signal " +
+                                                            "/IED@name=" + extRefBayRef.iedName() + "/LDevice@inst=LDEPF/LN0" +
+                                                            "/ExtRef@desc=" + extRefBayRef.extRef().getDesc()));
+                                                }
+                                                // If the source IED is not found, there will be no update or report message.
+                                            }
+                                        }))));
         return sclReportItems;
     }
 
@@ -404,7 +435,6 @@ public class ExtRefEditorService implements ExtRefEditor {
 
     @Override
     public void debindCompasFlowsAndExtRefsBasedOnVoltageLevel(SCL scd) {
-        LdeviceService ldeviceService = new LdeviceService();
         scd.getSubstation()
                 .stream()
                 .flatMap(tSubstation -> tSubstation.getVoltageLevel().stream())

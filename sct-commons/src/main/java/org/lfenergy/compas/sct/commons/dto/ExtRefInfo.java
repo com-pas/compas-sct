@@ -99,6 +99,6 @@ public class ExtRefInfo extends LNodeMetaDataEmbedder{
      * @param compasBay The Bay object
      * @param extRef The ExtRef object
      */
-    public record ExtRefBayReference(String iedName, TCompasBay compasBay, TExtRef extRef){ }
+    public record ExtRefWithBayReference(String iedName, TCompasBay compasBay, TExtRef extRef){ }
 
 }
