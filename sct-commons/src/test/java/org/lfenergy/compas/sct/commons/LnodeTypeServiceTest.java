@@ -84,14 +84,14 @@ class LnodeTypeServiceTest {
     }
 
     @Test
-    void getFilteredDataAttributes_should_return_expected_dataReference() {
+    void getFilteredDOAndDA_should_return_expected_dataReference() {
         //Given
         TDataTypeTemplates dtt = initDttFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda_test.xml");
         DataAttributeRef dataAttributeRef = new DataAttributeRef();
         dataAttributeRef.setLnType("LNodeType0");
         //When
         LnodeTypeService lnodeTypeService = new LnodeTypeService();
-        List<DataAttributeRef> result = lnodeTypeService.getFilteredDataAttributes(dtt, dataAttributeRef).toList();
+        List<DataAttributeRef> result = lnodeTypeService.getFilteredDOAndDA(dtt, dataAttributeRef).toList();
         //Then
         assertThat(result).hasSize(9).extracting(
                         DataAttributeRef::getDoRef, DataAttributeRef::getSdoNames,
@@ -119,7 +119,7 @@ class LnodeTypeServiceTest {
     }
 
     @Test
-    void getFilteredDataAttributes_should_return_all_dai() {
+    void getFilteredDOAndDA_should_return_all_dai() {
         // given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
         TDataTypeTemplates dtt = scd.getDataTypeTemplates();
@@ -127,7 +127,7 @@ class LnodeTypeServiceTest {
         dataAttributeRef.setLnType("LN2");
         //When
         LnodeTypeService lnodeTypeService = new LnodeTypeService();
-        List<DataAttributeRef> result = lnodeTypeService.getFilteredDataAttributes(dtt, dataAttributeRef).toList();
+        List<DataAttributeRef> result = lnodeTypeService.getFilteredDOAndDA(dtt, dataAttributeRef).toList();
         //Then
         assertThat(result).hasSize(1622);
     }

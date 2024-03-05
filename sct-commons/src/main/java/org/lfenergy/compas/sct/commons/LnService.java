@@ -67,13 +67,14 @@ public class LnService implements LNEditor {
         return Stream.concat(ln0Stream, tlnStream);
     }
 
-    public Optional<TDAI> isDOAndDAInstanceExists(TAnyLN anyLN, DoTypeName doTypeName, DaTypeName daTypeName) {
+    public Optional<TDAI> isDOAndDAInstancesExist(TAnyLN anyLN, DoTypeName doTypeName, DaTypeName daTypeName) {
+        LinkedList<String> structNamesList = new LinkedList<>(doTypeName.getStructNames());
+        structNamesList.addLast(daTypeName.getName());
+        daTypeName.getStructNames().forEach(structNamesList::addLast);
+
         return anyLN.getDOI().stream().filter(doi -> doTypeName.getName().equals(doi.getName()))
                 .findFirst()
                 .flatMap(doi -> {
-                    LinkedList<String> structNamesList = new LinkedList<>(doTypeName.getStructNames());
-                    structNamesList.addLast(daTypeName.getName());
-                    daTypeName.getStructNames().forEach(structNamesList::addLast);
                     if(structNamesList.size() > 1) {
                         String firstSDIName = structNamesList.remove();
                         return doi.getSDIOrDAI().stream()
@@ -114,13 +115,11 @@ public class LnService implements LNEditor {
                     // Here it's a convention criteria for creating or changing DAI value with settings group
                     // If 0 given as key that means No Settings Group list to add in DAI, only one value for that key(0) will be added or updated
                     // for more details see DaTypeName#addDaiValues
-                    if(!hasSettingGroup(tdai) && daiValMap.keySet().stream().anyMatch(key -> key.equals(0L))) {
-                        if(daiValMap.keySet().stream().anyMatch(key -> key.equals(0L))) {
-                            String value = daiValMap.values().stream().findFirst().get();
-                            tdai.getVal().stream().findFirst()
-                                    .ifPresentOrElse(tVal -> tVal.setValue(value),
-                                            () -> tdai.getVal().add(newVal(value)));
-                        }
+                    if(!hasSettingGroup(tdai) && daiValMap.size() == 1 && daiValMap.containsKey(0L)) {
+                        String value = daiValMap.values().stream().findFirst().get();
+                        tdai.getVal().stream().findFirst()
+                                .ifPresentOrElse(tVal -> tVal.setValue(value),
+                                        () -> tdai.getVal().add(newVal(value)));
                     } else {
                         for (Map.Entry<Long, String> mapVal: daiValMap.entrySet()) {
                             tdai.getVal().stream()
@@ -133,8 +132,8 @@ public class LnService implements LNEditor {
         });
     }
 
-    public void completeFromDataAttributeInstance(TIED tied, String ldInst, TAnyLN anyLN, DataAttributeRef dataRef) {
-        isDOAndDAInstanceExists(anyLN, dataRef.getDoName(), dataRef.getDaName())
+    public void completeFromDAInstance(TIED tied, String ldInst, TAnyLN anyLN, DataAttributeRef dataRef) {
+        isDOAndDAInstancesExist(anyLN, dataRef.getDoName(), dataRef.getDaName())
                 .ifPresent(tdai -> {
                     if(tdai.isSetVal()) dataRef.setDaiValues(tdai.getVal());
                     if(dataRef.getFc() == TFCEnum.SG || dataRef.getFc() == TFCEnum.SE) {
@@ -258,7 +257,7 @@ public class LnService implements LNEditor {
     /**
      *
      * @param sdi TSDI
-     * @param structName start with doi name
+     * @param structName linked list start with doi name
      * @return already existing TSDI or newly created TSDI from given TSDI
      */
     private TSDI findOrCreateSDIByStructName(TSDI sdi, LinkedList<String> structName) {

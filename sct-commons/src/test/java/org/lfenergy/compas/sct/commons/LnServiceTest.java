@@ -98,7 +98,7 @@ class LnServiceTest {
         DaTypeName daTypeName = new DaTypeName("antRef.bda1.bda2.bda3");
         //When
         LnService lnService = new LnService();
-        Optional<TDAI> optionalTDAI = lnService.isDOAndDAInstanceExists(tAnyLN, doTypeName, daTypeName);
+        Optional<TDAI> optionalTDAI = lnService.isDOAndDAInstancesExist(tAnyLN, doTypeName, daTypeName);
         //Then
         assertThat(optionalTDAI).isPresent();
     }
@@ -115,7 +115,7 @@ class LnServiceTest {
         DaTypeName daTypeName = new DaTypeName("antRef.unknown.bda2.bda3");
         //When
         LnService lnService = new LnService();
-        Optional<TDAI> optionalTDAI = lnService.isDOAndDAInstanceExists(tAnyLN, doTypeName, daTypeName);
+        Optional<TDAI> optionalTDAI = lnService.isDOAndDAInstancesExist(tAnyLN, doTypeName, daTypeName);
         //Then
         assertThat(optionalTDAI).isPresent();
     }
@@ -138,7 +138,7 @@ class LnServiceTest {
         dataAttributeRef.setDoName(doTypeName);
         //When
         LnService lnService = new LnService();
-        lnService.completeFromDataAttributeInstance(tied, "ldInst", tAnyLN, dataAttributeRef);
+        lnService.completeFromDAInstance(tied, "ldInst", tAnyLN, dataAttributeRef);
         //Then
         assertThat(dataAttributeRef.isValImport()).isEqualTo(expectedValImport);
     }
@@ -196,7 +196,7 @@ class LnServiceTest {
 
         //When
         LnService lnService = new LnService();
-        lnService.completeFromDataAttributeInstance(tied, "ldInst", tAnyLN, dataAttributeRef);
+        lnService.completeFromDAInstance(tied, "ldInst", tAnyLN, dataAttributeRef);
         //Then
         assertThat(dataAttributeRef.isValImport()).isEqualTo(expectedValImport);
     }
@@ -214,7 +214,7 @@ class LnServiceTest {
         dataAttributeRef.setDoName(doTypeName);
         //When
         LnService lnService = new LnService();
-        lnService.completeFromDataAttributeInstance(tied, "ldInst",  tAnyLN, dataAttributeRef);
+        lnService.completeFromDAInstance(tied, "ldInst",  tAnyLN, dataAttributeRef);
         //Then
         assertThat(dataAttributeRef.isValImport()).isFalse();//initialValue
     }
@@ -236,7 +236,7 @@ class LnServiceTest {
         dataAttributeRef.setDoName(doTypeName);
         //When
         LnService lnService = new LnService();
-        lnService.completeFromDataAttributeInstance(tied, "ldInst",  tAnyLN, dataAttributeRef);
+        lnService.completeFromDAInstance(tied, "ldInst",  tAnyLN, dataAttributeRef);
         //Then
         assertThat(dataAttributeRef.isValImport()).isEqualTo(expected);
     }

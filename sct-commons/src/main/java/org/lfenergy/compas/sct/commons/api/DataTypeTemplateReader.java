@@ -15,10 +15,10 @@ public interface DataTypeTemplateReader {
 
     boolean isDoModAndDaStValExist(TDataTypeTemplates dtt, String lNodeTypeId);
 
-    Stream<DataAttributeRef> getAllDataObjectsAndDataAttributes(TDataTypeTemplates tDataTypeTemplates);
+    Stream<DataAttributeRef> getAllDOAndDA(TDataTypeTemplates tDataTypeTemplates);
 
-    Stream<DataAttributeRef> getFilteredDataObjectsAndDataAttributes(TDataTypeTemplates dtt, TAnyLN anyLn, DataAttributeRef filter);
+    Stream<DataAttributeRef> getFilteredDOAndDA(TDataTypeTemplates dtt, TAnyLN anyLn, DataAttributeRef filter);
 
-    Optional<DataAttributeRef> findDataObjectAndDataAttribute(TDataTypeTemplates dtt, String lNodeTypeId, DataAttributeRef dataAttributeRef);
+    Optional<DataAttributeRef> findDOAndDA(TDataTypeTemplates dtt, String lNodeTypeId, DataAttributeRef dataAttributeRef);
 
 }

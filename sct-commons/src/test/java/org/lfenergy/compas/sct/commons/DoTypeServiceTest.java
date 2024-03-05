@@ -74,7 +74,7 @@ class DoTypeServiceTest {
 
 
     @Test
-    void getDataAttributeRefs_should_return_expected_dataReference() {
+    void getAllSDOAndDA_should_return_expected_dataReference() {
         //Given
         String SCD_DTT_DO_SDO_DA_BDA = "/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda_test.xml";
         TDataTypeTemplates dtt = initDttFromFile(SCD_DTT_DO_SDO_DA_BDA);
@@ -91,7 +91,7 @@ class DoTypeServiceTest {
         dataRef.setDaName(daTypeName);
 
         //When
-        List<DataAttributeRef> list = doTypeService.getDataAttributes(dtt, tdoType, dataRef);
+        List<DataAttributeRef> list = doTypeService.getAllSDOAndDA(dtt, tdoType, dataRef);
         //Then
         assertThat(list).hasSize(8);
         assertThat(list.stream().map(DataAttributeRef::getDoRef))
@@ -117,7 +117,7 @@ class DoTypeServiceTest {
     }
 
     @Test
-    void getDataAttributeRefs_should_return_all_dai() {
+    void getAllSDOAndDA_should_return_all_dai() {
         // GIVEN
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
         TDataTypeTemplates dtt = scd.getDataTypeTemplates();
@@ -132,7 +132,7 @@ class DoTypeServiceTest {
         dataRef.setDoName(doTypeName);
         dataRef.setDaName(daTypeName);
         // When
-        List<DataAttributeRef> list = doTypeService.getDataAttributes(dtt, tdoType, dataRef);
+        List<DataAttributeRef> list = doTypeService.getAllSDOAndDA(dtt, tdoType, dataRef);
         // Then
         assertThat(list).hasSize(811);
     }

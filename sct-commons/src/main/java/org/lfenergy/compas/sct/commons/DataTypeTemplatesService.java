@@ -50,51 +50,49 @@ public class DataTypeTemplatesService implements DataTypeTemplateReader {
     }
 
     @Override
-    public Stream<DataAttributeRef> getAllDataObjectsAndDataAttributes(TDataTypeTemplates dtt) {
+    public Stream<DataAttributeRef> getAllDOAndDA(TDataTypeTemplates dtt) {
         return dtt.getLNodeType().stream()
-                .flatMap(tlNodeType -> lnodeTypeService.getDataAttributes(dtt, tlNodeType, new DataAttributeRef()));
+                .flatMap(tlNodeType -> lnodeTypeService.getAllDOAndDA(dtt, tlNodeType, new DataAttributeRef()));
     }
 
     @Override
-    public Stream<DataAttributeRef> getFilteredDataObjectsAndDataAttributes(TDataTypeTemplates dtt, TAnyLN anyLn, DataAttributeRef filter) {
+    public Stream<DataAttributeRef> getFilteredDOAndDA(TDataTypeTemplates dtt, TAnyLN anyLn, DataAttributeRef filter) {
         return lnodeTypeService.findLnodeType(dtt, tlNodeType -> tlNodeType.getId().equals(anyLn.getLnType()))
                 .stream()
-                .flatMap(tlNodeType -> lnodeTypeService.getFilteredDataAttributes(dtt, filter));
+                .flatMap(tlNodeType -> lnodeTypeService.getFilteredDOAndDA(dtt, filter));
     }
 
     @Override
-    public Optional<DataAttributeRef> findDataObjectAndDataAttribute(TDataTypeTemplates dtt, String lNodeTypeId, DataAttributeRef dataAttributeRef) {
+    public Optional<DataAttributeRef> findDOAndDA(TDataTypeTemplates dtt, String lNodeTypeId, DataAttributeRef dataAttributeRef) {
         LinkedList<String> dataRefList = new LinkedList<>(dataAttributeRef.getSdoNames());
         dataAttributeRef.getBdaNames().forEach(dataRefList::addLast);
 
         return lnodeTypeService.findLnodeType(dtt, lNodeType -> lNodeTypeId.equals(lNodeType.getId()))
                 .flatMap(lNodeType -> doService.findDo(lNodeType, tdo -> tdo.getName().equals(dataAttributeRef.getDoName().getName()))
-                        // Search first DoType from DO (LNodeType)
+                        // Search DoType for each DO
                         .flatMap(tdo -> doTypeService.findDoType(dtt, doType -> doType.getId().equals(tdo.getType()))
                                 .flatMap(tdoType -> {
-                                    // Search last DoType from SDO (DOType) > SDO (DOType) > SDO (DOType)
+                                    // Search last DoType from DOType (SDO) > DOType (SDO)
                                     TDOType lastDoType = findDOTypeBySdoName(dtt, tdoType, dataRefList);
-                                    // Search DA (DOType) > BDA (DAType) > BDA (DAType) > BDA (DAType)
                                     // Search first DA from last DoType
-                                    return sdoOrDAService.findSDOOrDA(lastDoType, TDA.class,
-                                            tda1 -> tda1.getName().equals(dataAttributeRef.getDaName().getName()))
+                                    return sdoOrDAService.findSDOOrDA(lastDoType, TDA.class, tda1 -> tda1.getName().equals(dataAttributeRef.getDaName().getName()))
                                             .flatMap(tda -> {
-                                                // Check if first DA (DOType) is STRUCT
-                                                if(tda.getBType() != TPredefinedBasicTypeEnum.STRUCT) {
+                                                // Check if first DA is STRUCT or not
+                                                if(!tda.getBType().equals(TPredefinedBasicTypeEnum.STRUCT)) {
                                                     return Optional.of(dataAttributeRef);
                                                 }
-                                                // Search first BDA (DaType) from DA (DOType)
+                                                // Search first DaType from DOType (from last DOType where DA is STRUCT)
                                                 return getDATypeByDaName(dtt, lastDoType, tda.getName())
                                                         .flatMap(tdaType -> {
-                                                            // Search last DAType (BDA) from DAType (BDA) > DAType (BDA)
+                                                            // Search last DAType from first DAType
                                                             TDAType lastDAType = findDATypeByBdaName(dtt, tdaType, tbda -> tbda.isSetBType()
-                                                                            && tbda.getBType() == TPredefinedBasicTypeEnum.STRUCT, dataRefList);
+                                                                            && tbda.getBType().equals(TPredefinedBasicTypeEnum.STRUCT), dataRefList);
 
-                                                            // last DAType (BDA) should contain BDA not STRUCT
+                                                            // last DAType should contain BDA not STRUCT
                                                             if(dataRefList.size() != 1) return Optional.empty();
                                                             String lastBdaName = dataRefList.getFirst();
                                                             return bdaService.findBDA(lastDAType, tbda -> tbda.getName().equals(lastBdaName)
-                                                                            && tbda.getBType() != TPredefinedBasicTypeEnum.STRUCT)
+                                                                            && !tbda.getBType().equals(TPredefinedBasicTypeEnum.STRUCT))
                                                                     .flatMap(tbda -> Optional.of(dataAttributeRef));
                                                         });
                                     });

@@ -28,7 +28,7 @@ public class LnodeTypeService {
         return getFilteredLnodeTypes(tDataTypeTemplates, tlNodeTypePredicate).findFirst();
     }
 
-    public Stream<DataAttributeRef> getDataAttributes(TDataTypeTemplates dtt, TLNodeType tlNodeType, DataAttributeRef dataRef)  {
+    public Stream<DataAttributeRef> getAllDOAndDA(TDataTypeTemplates dtt, TLNodeType tlNodeType, DataAttributeRef dataRef)  {
         return tlNodeType.getDO().stream()
                 .flatMap(tdo -> {
                     dataRef.setLnType(tlNodeType.getId());
@@ -37,13 +37,13 @@ public class LnodeTypeService {
                     return doTypeService.findDoType(dtt, tdoType -> tdoType.getId().equals(tdo.getType()))
                             .stream().flatMap(tdoType -> {
                                 dataRef.getDoName().setCdc(tdoType.getCdc());
-                                return doTypeService.getDataAttributes(dtt, tdoType, dataRef).stream();
+                                return doTypeService.getAllSDOAndDA(dtt, tdoType, dataRef).stream();
                             });
                 });
     }
 
 
-    public Stream<DataAttributeRef> getFilteredDataAttributes(TDataTypeTemplates dtt, DataAttributeRef dataRef)  {
+    public Stream<DataAttributeRef> getFilteredDOAndDA(TDataTypeTemplates dtt, DataAttributeRef dataRef)  {
        return getFilteredLnodeTypes(dtt, tlNodeType -> tlNodeType.getId().equals(dataRef.getLnType()))
                 .flatMap(tlNodeType -> tlNodeType.getDO().stream()
                         .flatMap(tdo -> {
@@ -51,7 +51,7 @@ public class LnodeTypeService {
                             return doTypeService.findDoType(dtt, tdoType -> tdoType.getId().equals(tdo.getType()))
                                     .stream().flatMap(tdoType -> {
                                         dataRef.getDoName().setCdc(tdoType.getCdc());
-                                        return doTypeService.getDataAttributes(dtt, tdoType, dataRef).stream();
+                                        return doTypeService.getAllSDOAndDA(dtt, tdoType, dataRef).stream();
                                     });
                         }));
 
