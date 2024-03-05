@@ -164,6 +164,7 @@ public class LnService implements LNEditor {
         LinkedList<String> structInstances = new LinkedList<>(doTypeName.getStructNames());
         structInstances.addLast(daTypeName.getName());
         daTypeName.getStructNames().forEach(structInstances::addLast);
+
         TDOI doi = tAnyLN.getDOI().stream().filter(doi1 -> doi1.getName().equals(doTypeName.getName()))
                 .findFirst()
                 .orElseGet(()-> {
@@ -257,7 +258,7 @@ public class LnService implements LNEditor {
     /**
      *
      * @param sdi TSDI
-     * @param structName linked list start with doi name
+     * @param structName linked list start with sdi name
      * @return already existing TSDI or newly created TSDI from given TSDI
      */
     private TSDI findOrCreateSDIByStructName(TSDI sdi, LinkedList<String> structName) {

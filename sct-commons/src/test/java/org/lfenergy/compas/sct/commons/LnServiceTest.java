@@ -273,8 +273,12 @@ class LnServiceTest {
     void updateOrCreateDOAndDAInstances_should_create_given_DO_and_DA_instances_when_struct_and_without_settingGroup() {
         //Given
         TAnyLN tAnyLN = new LN0();
-        DoTypeName doTypeName = new DoTypeName("Do.sdo1.d");
-        DaTypeName daTypeName = new DaTypeName("antRef.bda1");
+        DoTypeName doTypeName = new DoTypeName();
+        doTypeName.setName("Do");
+        doTypeName.setStructNames(List.of("sdo1", "d"));
+        DaTypeName daTypeName = new DaTypeName();
+        daTypeName.setName("antRef");
+        daTypeName.setStructNames(List.of("bda1"));
         daTypeName.getDaiValues().put(0L, "new value");
         DataAttributeRef dataAttributeRef = createDataAttributeRef(doTypeName, daTypeName);
 
