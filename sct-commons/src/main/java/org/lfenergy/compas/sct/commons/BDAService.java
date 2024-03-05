@@ -17,12 +17,12 @@ public class BDAService {
         return tdaType.getBDA().stream();
     }
 
-    public Stream<TBDA> getFilteredSDOOrDAs(TDAType tdaType, Predicate<TBDA> tTBDAPredicate) {
+    public Stream<TBDA> getFilteredBDAs(TDAType tdaType, Predicate<TBDA> tTBDAPredicate) {
         return getBDAs(tdaType).filter(tTBDAPredicate);
     }
 
     public Optional<TBDA> findBDA(TDAType tdaType, Predicate<TBDA> tBDAPredicate) {
-        return getFilteredSDOOrDAs(tdaType, tBDAPredicate).findFirst();
+        return getFilteredBDAs(tdaType, tBDAPredicate).findFirst();
     }
 
 }

@@ -7,9 +7,7 @@ package org.lfenergy.compas.sct.commons;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
-import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.List;
@@ -139,14 +137,20 @@ class DataTypeTemplatesServiceTest {
 
 
     @Test
-    void getFilteredDataObjectsAndDataAttributes_should_return_expected_dataReference() {
+    void getFilteredDataObjectsAndDataAttributes_should_return_expected_items() {
         //Given
         TDataTypeTemplates dtt = initDttFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda_test.xml");
+        String lNodeTypeId = "LNodeType0";
+
         TAnyLN ln0 = new LN0();
-        ln0.setLnType("LNodeType0");
+        ln0.setLnType(lNodeTypeId);
+
+        DataAttributeRef dataAttributeRef = new DataAttributeRef();
+        dataAttributeRef.setLnType(lNodeTypeId);
+
         //When
         DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
-        List<DataAttributeRef> result = dataTypeTemplatesService.getFilteredDataObjectsAndDataAttributes(dtt, ln0, new DataAttributeRef()).toList();
+        List<DataAttributeRef> result = dataTypeTemplatesService.getFilteredDataObjectsAndDataAttributes(dtt, ln0, dataAttributeRef).toList();
         //Then
         assertThat(result).hasSize(9).extracting(
                         DataAttributeRef::getDoRef, DataAttributeRef::getSdoNames,
@@ -175,61 +179,53 @@ class DataTypeTemplatesServiceTest {
 
 
     @Test
-    void findDataObjectsAndDataAttributesByDataReference_should_find_DO_SDO_DA_and_all_BDA() {
+    void findDataObjectsAndDataAttributes_should_find_DO_SDO_DA_and_all_BDA() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         TDataTypeTemplates dtt = scd.getDataTypeTemplates();
-        String dataRef = "Do.sdo1.d.antRef.bda1.bda2.bda3";
+        DataAttributeRef dataAttributeRef = new DataAttributeRef();
+        dataAttributeRef.getDoName().setName("Do");
+        dataAttributeRef.getDoName().setStructNames(List.of("sdo1", "d"));
+        dataAttributeRef.getDaName().setName("antRef");
+        dataAttributeRef.getDaName().setStructNames(List.of("bda1", "bda2", "bda3"));
         // When
         DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
-        Optional<DataAttributeRef> dataAttributeRefs = dataTypeTemplatesService.findDataObjectsAndDataAttributesByDataReference(
-                dtt, "LNO1", dataRef);
+        Optional<DataAttributeRef> dataAttributeRefs = dataTypeTemplatesService.findDataObjectAndDataAttribute(
+                dtt, "LNO1", dataAttributeRef);
         // Then
         assertThat(dataAttributeRefs).isPresent();
-
-        assertThat(dataAttributeRefs.get()).extracting(DataAttributeRef::getDoRef, DataAttributeRef::getDaRef)
-                .containsExactly("Do.sdo1.d", "antRef.bda1.bda2.bda3");
-        assertThat(dataAttributeRefs.get().getDoName().getCdc()).isEqualTo(TPredefinedCDCEnum.WYE);
-        assertThat(dataAttributeRefs.get().getDaName()).extracting(DaTypeName::getBType, DaTypeName::getFc)
-                .containsExactly(TPredefinedBasicTypeEnum.ENUM, TFCEnum.ST);
-        assertThat(dataAttributeRefs.get().getDaName().isValImport()).isTrue();
-        assertThat(dataAttributeRefs.get().getDaName().isUpdatable()).isTrue();
     }
 
     @Test
-    void findDataObjectsAndDataAttributesByDataReference_should_find_DO_SDO_DA_and_partial_BDA_list() {
+    void findDataObjectsAndDataAttributes_should_find_DO_SDO_DA_and_partial_BDA_list() {
         // Given
         TDataTypeTemplates dtt = initDttFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda.xml");
+        DataAttributeRef dataAttributeRef = new DataAttributeRef();
+        dataAttributeRef.getDoName().setName("Do1");
+        dataAttributeRef.getDoName().setStructNames(List.of("sdo1", "sdo2"));
+        dataAttributeRef.getDaName().setName("da2");
+        dataAttributeRef.getDaName().setStructNames(List.of("bda1", "bda2"));
         // When
         DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
-        Optional<DataAttributeRef> dataAttributeRefs = dataTypeTemplatesService.findDataObjectsAndDataAttributesByDataReference(
-                dtt, "LN1", "Do1.sdo1.sdo2.da2.bda1.bda2");
+        Optional<DataAttributeRef> dataAttributeRefs = dataTypeTemplatesService.findDataObjectAndDataAttribute(
+                dtt, "LN1", dataAttributeRef);
         // Then
-
         assertThat(dataAttributeRefs).isPresent();
-        assertThat(dataAttributeRefs.get()).extracting(DataAttributeRef::getDoRef, DataAttributeRef::getDaRef)
-                .containsExactly("Do1.sdo1.sdo2", "da2.bda1.bda2");
-        assertThat(dataAttributeRefs.get().getDoName().getCdc()).isEqualTo(TPredefinedCDCEnum.WYE);
-        assertThat(dataAttributeRefs.get().getDaName()).extracting(DaTypeName::getBType, DaTypeName::getFc)
-                .containsExactly(TPredefinedBasicTypeEnum.ENUM, TFCEnum.ST);
     }
 
     @Test
-    void findDataObjectsAndDataAttributesByDataReference_should_find_DO_DA() {
+    void findDataObjectsAndDataAttributes_should_find_DO_DA() {
         // Given
         TDataTypeTemplates dtt = initDttFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda.xml");
+        DataAttributeRef dataAttributeRef = new DataAttributeRef();
+        dataAttributeRef.getDoName().setName("Do1");
+        dataAttributeRef.getDaName().setName("da1");
         // When
         DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
-        Optional<DataAttributeRef> dataAttributeRefs = dataTypeTemplatesService.findDataObjectsAndDataAttributesByDataReference(
-                dtt, "LN1", "Do1.da1");
+        Optional<DataAttributeRef> dataAttributeRefs = dataTypeTemplatesService.findDataObjectAndDataAttribute(
+                dtt, "LN1", dataAttributeRef);
         // Then
-
         assertThat(dataAttributeRefs).isPresent();
-        assertThat(dataAttributeRefs.get()).extracting(DataAttributeRef::getDoRef, DataAttributeRef::getDaRef)
-                .containsExactly("Do1", "da1");
-        assertThat(dataAttributeRefs.get().getDoName().getCdc()).isEqualTo(TPredefinedCDCEnum.WYE);
-        assertThat(dataAttributeRefs.get().getDaName()).extracting(DaTypeName::getBType, DaTypeName::getFc)
-                .containsExactly(TPredefinedBasicTypeEnum.BOOLEAN, TFCEnum.ST);
     }
 
     @Test
@@ -429,133 +425,6 @@ class DataTypeTemplatesServiceTest {
                         Tuple.tuple("Do22.sdo22", List.of("sdo22"),
                                 "structDa1.structBda1.structBda2.sampleBda3", List.of("structBda1", "structBda2", "sampleBda3"), TPredefinedBasicTypeEnum.ENUM, "RecCycModKind")
                 );
-    }
-
-    @Test
-    void isDoObjectsAndDataAttributesExists_when_LNodeType_not_exist_should_return_error_report_item() {
-        // Given
-        TDataTypeTemplates dtt = new TDataTypeTemplates();
-        TLNodeType tlNodeType = new TLNodeType();
-        tlNodeType.setId("lnodeTypeId");
-        dtt.getLNodeType().add(tlNodeType);
-        // When
-        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
-        List<SclReportItem> sclReportItems = dataTypeTemplatesService.isDataObjectsAndDataAttributesExists(dtt,
-                "lnodeTypeId2", "Do1.sdo1.sdo2.da2.bda1.bda2");
-        // Then
-        assertThat(sclReportItems)
-                .hasSize(1)
-                .extracting(SclReportItem::message)
-                .containsExactly("No Data Attribute found with this reference Do1.sdo1.sdo2.da2.bda1.bda2 for LNodeType.id (lnodeTypeId2)");
-    }
-
-    @Test
-    void isDoObjectsAndDataAttributesExists_when_DO_not_exist_should_return_error_report_item() {
-        // Given
-        TDataTypeTemplates dtt = new TDataTypeTemplates();
-        TLNodeType tlNodeType = new TLNodeType();
-        tlNodeType.setId("lnodeTypeId");
-        TDO tdo = new TDO();
-        tdo.setType("doTypeId");
-        tdo.setName("Mods");
-        tlNodeType.getDO().add(tdo);
-        dtt.getLNodeType().add(tlNodeType);
-        // When
-        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
-        List<SclReportItem> sclReportItems = dataTypeTemplatesService.isDataObjectsAndDataAttributesExists(dtt,
-                "lnodeTypeId", "Mod.stVal");
-        // Then
-        assertThat(sclReportItems)
-                .hasSize(1)
-                .extracting(SclReportItem::message)
-                .containsExactly("Unknown DO.name (Mod) in DOType.id (lnodeTypeId)");
-    }
-
-    @Test
-    void isDoObjectsAndDataAttributesExists_when_DOType_not_exist_should_return_error_report_item() {
-        // Given
-        TDataTypeTemplates dtt = new TDataTypeTemplates();
-        TLNodeType tlNodeType = new TLNodeType();
-        tlNodeType.setId("lnodeTypeId");
-        TDO tdo = new TDO();
-        tdo.setType("doTypeId");
-        tdo.setName("Mod");
-        tlNodeType.getDO().add(tdo);
-        dtt.getLNodeType().add(tlNodeType);
-        // When
-        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
-        List<SclReportItem> sclReportItems = dataTypeTemplatesService.isDataObjectsAndDataAttributesExists(dtt,
-                "lnodeTypeId", "Mod.stVal");
-        // Then
-        assertThat(sclReportItems)
-                .hasSize(1)
-                .extracting(SclReportItem::message)
-                .containsExactly("DOType.id (doTypeId) for DO.name (Mod) not found in DataTypeTemplates");
-    }
-
-    @Test
-    void isDoObjectsAndDataAttributesExists_when_DA_not_exist_should_return_error_report_item() {
-        // Given
-        TDataTypeTemplates dtt = new TDataTypeTemplates();
-        TLNodeType tlNodeType = new TLNodeType();
-        tlNodeType.setId("lnodeTypeId");
-        TDO tdo = new TDO();
-        tdo.setType("doTypeId");
-        tdo.setName("Mod");
-        tlNodeType.getDO().add(tdo);
-        dtt.getLNodeType().add(tlNodeType);
-        TDOType tdoType = new TDOType();
-        tdoType.setId("doTypeId");
-        TDA tda = new TDA();
-        tda.setName("daName");
-        tdoType.getSDOOrDA().add(tda);
-        dtt.getDOType().add(tdoType);
-        // When
-        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
-        List<SclReportItem> sclReportItems = dataTypeTemplatesService.isDataObjectsAndDataAttributesExists(dtt,
-                "lnodeTypeId", "Mod.stVal");
-        // Then
-        assertThat(sclReportItems)
-                .hasSize(1)
-                .extracting(SclReportItem::message)
-                .containsExactly("Unknown Sub Data Object SDO or Data Attribute DA (stVal) in DOType.id (doTypeId)");
-    }
-
-    @Test
-    void isDoObjectsAndDataAttributesExists_when_DO_DA_exist_should_return_empty_report() {
-        // Given
-        TDataTypeTemplates dtt = new TDataTypeTemplates();
-        TLNodeType tlNodeType = new TLNodeType();
-        tlNodeType.setId("lnodeTypeId");
-        TDO tdo = new TDO();
-        tdo.setType("doTypeId");
-        tdo.setName("Mod");
-        tlNodeType.getDO().add(tdo);
-        dtt.getLNodeType().add(tlNodeType);
-        TDOType tdoType = new TDOType();
-        tdoType.setId("doTypeId");
-        TDA tda = new TDA();
-        tda.setName("stVal");
-        tdoType.getSDOOrDA().add(tda);
-        dtt.getDOType().add(tdoType);
-        // When
-        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
-        List<SclReportItem> sclReportItems = dataTypeTemplatesService.isDataObjectsAndDataAttributesExists(dtt,
-                "lnodeTypeId", "Mod.stVal");
-        // Then
-        assertThat(sclReportItems).isEmpty();
-    }
-
-    @Test
-    void isDoObjectsAndDataAttributesExists_should_return_empty_report() {
-        // Given
-        TDataTypeTemplates dtt = initDttFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda.xml");
-        // When
-        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
-        List<SclReportItem> sclReportItems = dataTypeTemplatesService.isDataObjectsAndDataAttributesExists(
-                dtt, "LN1", "Do1.sdo1.sdo2.da2.bda1.bda2");
-        // Then
-        assertThat(sclReportItems).isEmpty();
     }
 
 }

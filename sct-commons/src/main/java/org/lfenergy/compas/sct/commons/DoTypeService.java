@@ -30,7 +30,7 @@ public class DoTypeService {
         return getFilteredDoTypes(tDataTypeTemplates, tdoTypePredicate).findFirst();
     }
 
-    public List<DataAttributeRef> getDataAttributeRefs(TDataTypeTemplates dtt, TDOType tdoType, DataAttributeRef dataRef) {
+    public List<DataAttributeRef> getDataAttributes(TDataTypeTemplates dtt, TDOType tdoType, DataAttributeRef dataRef) {
         List<DataAttributeRef> result = new ArrayList<>();
         // DA -> BDA -> BDA..
         tdoType.getSDOOrDA().stream().filter(tUnNaming -> tUnNaming.getClass().equals(TDA.class)).map(TDA.class::cast).toList()
@@ -56,7 +56,7 @@ public class DoTypeService {
                             newDataAttributeRef.getDoName().getStructNames().add(tsdo.getName());
                             if(nextDoType.isSetCdc()) newDataAttributeRef.getDoName().setCdc(nextDoType.getCdc());
 
-                            result.addAll(getDataAttributeRefs(dtt, nextDoType, newDataAttributeRef));
+                            result.addAll(getDataAttributes(dtt, nextDoType, newDataAttributeRef));
                         }));
         return result;
     }
@@ -80,7 +80,7 @@ public class DoTypeService {
         return result;
     }
 
-    public static <T extends TAbstractDataAttribute> void updateFromAbstractDataAttribute(T daOrBda, DaTypeName daTypeName) {
+    private <T extends TAbstractDataAttribute> void updateFromAbstractDataAttribute(T daOrBda, DaTypeName daTypeName) {
         if(daOrBda.isSetType()) daTypeName.setType(daOrBda.getType());
         if(daOrBda.isSetBType()) daTypeName.setBType(daOrBda.getBType());
         if(daOrBda.isSetValImport()) daTypeName.setValImport(daOrBda.isValImport());

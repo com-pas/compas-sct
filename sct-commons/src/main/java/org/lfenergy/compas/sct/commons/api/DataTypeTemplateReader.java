@@ -19,6 +19,6 @@ public interface DataTypeTemplateReader {
 
     Stream<DataAttributeRef> getFilteredDataObjectsAndDataAttributes(TDataTypeTemplates dtt, TAnyLN anyLn, DataAttributeRef filter);
 
-    Optional<DataAttributeRef> findDataObjectsAndDataAttributesByDataReference(TDataTypeTemplates dtt, String lNodeTypeId, String dataAttributeRef);
+    Optional<DataAttributeRef> findDataObjectAndDataAttribute(TDataTypeTemplates dtt, String lNodeTypeId, DataAttributeRef dataAttributeRef);
 
 }

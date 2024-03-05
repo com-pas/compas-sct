@@ -91,7 +91,7 @@ class DoTypeServiceTest {
         dataRef.setDaName(daTypeName);
 
         //When
-        List<DataAttributeRef> list = doTypeService.getDataAttributeRefs(dtt, tdoType, dataRef);
+        List<DataAttributeRef> list = doTypeService.getDataAttributes(dtt, tdoType, dataRef);
         //Then
         assertThat(list).hasSize(8);
         assertThat(list.stream().map(DataAttributeRef::getDoRef))
@@ -132,7 +132,7 @@ class DoTypeServiceTest {
         dataRef.setDoName(doTypeName);
         dataRef.setDaName(daTypeName);
         // When
-        List<DataAttributeRef> list = doTypeService.getDataAttributeRefs(dtt, tdoType, dataRef);
+        List<DataAttributeRef> list = doTypeService.getDataAttributes(dtt, tdoType, dataRef);
         // Then
         assertThat(list).hasSize(811);
     }

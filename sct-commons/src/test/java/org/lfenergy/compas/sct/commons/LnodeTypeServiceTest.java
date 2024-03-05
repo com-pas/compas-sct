@@ -84,14 +84,14 @@ class LnodeTypeServiceTest {
     }
 
     @Test
-    void getDataAttributeRefs_should_return_expected_dataReference() {
+    void getFilteredDataAttributes_should_return_expected_dataReference() {
         //Given
         TDataTypeTemplates dtt = initDttFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda_test.xml");
-        TLNodeType tdoType = dtt.getLNodeType().stream().filter(tlNodeType -> tlNodeType.getId()
-                .equals("LNodeType0")).findFirst().get();
+        DataAttributeRef dataAttributeRef = new DataAttributeRef();
+        dataAttributeRef.setLnType("LNodeType0");
         //When
         LnodeTypeService lnodeTypeService = new LnodeTypeService();
-        List<DataAttributeRef> result = lnodeTypeService.getDataAttributes(dtt, tdoType, new DataAttributeRef()).toList();
+        List<DataAttributeRef> result = lnodeTypeService.getFilteredDataAttributes(dtt, dataAttributeRef).toList();
         //Then
         assertThat(result).hasSize(9).extracting(
                         DataAttributeRef::getDoRef, DataAttributeRef::getSdoNames,
@@ -119,19 +119,15 @@ class LnodeTypeServiceTest {
     }
 
     @Test
-    void getDataAttributeRefs_should_return_all_dai() {
+    void getFilteredDataAttributes_should_return_all_dai() {
         // given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
         TDataTypeTemplates dtt = scd.getDataTypeTemplates();
-
-        // when
-        LnodeTypeService lnodeTypeService = new LnodeTypeService();
-        TLNodeType tdoType = lnodeTypeService.findLnodeType(dtt, tlNodeType -> tlNodeType.getId()
-                .equals("LN2")).get();
+        DataAttributeRef dataAttributeRef = new DataAttributeRef();
+        dataAttributeRef.setLnType("LN2");
         //When
-//        List<DataAttributeRef> result = lnodeTypeService.getDataAttributeRefs(dtt, tdoType);
-        List<DataAttributeRef> result = lnodeTypeService.getDataAttributes(dtt, tdoType, new DataAttributeRef())
-                .toList();
+        LnodeTypeService lnodeTypeService = new LnodeTypeService();
+        List<DataAttributeRef> result = lnodeTypeService.getFilteredDataAttributes(dtt, dataAttributeRef).toList();
         //Then
         assertThat(result).hasSize(1622);
     }

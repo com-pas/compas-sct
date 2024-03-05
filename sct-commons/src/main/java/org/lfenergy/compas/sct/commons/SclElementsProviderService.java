@@ -104,17 +104,18 @@ public class SclElementsProviderService implements SclElementsProvider {
                 .toList();
     }
 
+    @Override
     public Set<DataAttributeRef> getDAI(SCL scd, String iedName, String ldInst, DataAttributeRef dataAttributeRef, boolean updatable) throws ScdException {
         return iedService.findIed(scd, tied -> tied.getName().equals(iedName))
                 .map(tied1 -> ldeviceService.findLdevice(tied1, tlDevice -> tlDevice.getInst().equals(ldInst))
                         .map(tlDevice -> Stream.concat(tlDevice.getLN().stream(), Stream.of(tlDevice.getLN0()))
                                 .filter(anyLN -> tAnyLNPredicate.test(anyLN, dataAttributeRef))
                                 .flatMap(tAnyLN -> dataTypeTemplatesService.getFilteredDataObjectsAndDataAttributes(scd.getDataTypeTemplates(), tAnyLN, LnKey.updateDataRef(tAnyLN, dataAttributeRef))
-                                        .map(dataAttributeRef1 -> {
-                                            lnService.completeFromDataAttributeInstance(tied1, tlDevice.getInst(), tAnyLN, dataAttributeRef1);
-                                            return dataAttributeRef1;
+                                        .map(dataAttribute -> {
+                                            lnService.completeFromDataAttributeInstance(tied1, tlDevice.getInst(), tAnyLN, dataAttribute);
+                                            return dataAttribute;
                                         }))
-                                .filter(dataRef -> (!updatable || dataRef.isUpdatable()))
+                                .filter(dataRef -> !updatable || dataRef.isUpdatable())
                                 .collect(Collectors.toSet()))
                         .orElseThrow(() -> new ScdException(String.format(MESSAGE_LDEVICE_INST_NOT_FOUND, ldInst, iedName))))
                 .orElseThrow(() -> new ScdException(String.format(MESSAGE_IED_NAME_NOT_FOUND, iedName)));
