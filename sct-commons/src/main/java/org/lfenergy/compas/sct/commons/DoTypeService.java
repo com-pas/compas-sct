@@ -8,6 +8,7 @@ import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
 
+import java.sql.SQLData;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -79,6 +80,132 @@ public class DoTypeService {
             }
         });
         return result;
+    }
+
+    public List<DataAttributeRef> getFilteredSDOAndDA(TDataTypeTemplates dtt, TDOType tdoType, DataAttributeRef dataObjectRef) {
+
+        List<DataAttributeRef> result = new ArrayList<>();
+
+        tdoType.getSDOOrDA()
+                .forEach(tUnNaming -> {
+                    // Filter SDO -> SDO -> SDO..
+                    if(tUnNaming.getClass().equals(TSDO.class)){
+                        TSDO tsdo0 = (TSDO)tUnNaming ;
+                        List<DataAttributeRef> filteredSDO = getFilteredSDO(dtt, tdoType, dataObjectRef,
+                                tsdo -> dataObjectRef.getDoName().getStructNames().contains(tsdo0.getName())
+                        );
+//                                .peek(dataAttributeRef -> {
+//                                    System.out.println(" Before [getFilteredSDO] doRef : "+dataAttributeRef.getDoRef());
+//                                    System.out.println(" Before [getFilteredSDO] daRef : "+dataAttributeRef.getDaRef());
+//                                    System.out.println(" ====== ");
+//                                })
+                        result.addAll(filteredSDO);
+                    }
+                    if(tUnNaming.getClass().equals(TDA.class)){
+                        TDA tda0 = (TDA)tUnNaming ;
+                        DataAttributeRef newDataAttributeRef = DataAttributeRef.copyFrom(dataObjectRef);
+//                        newDataAttributeRef.getDoName().getStructNames().add(tda0.getName());
+                        List<DataAttributeRef> filteredDABDA = getFilteredDA(dtt, tdoType, newDataAttributeRef,
+                                tda -> newDataAttributeRef.getDaName().getStructNames().isEmpty())
+                                .toList();
+                        result.addAll(filteredDABDA);
+                    }
+                });
+        return result;
+    }
+
+    public List<DataAttributeRef> getFilteredSDO(TDataTypeTemplates dtt, TDOType tdoType,
+                                                 DataAttributeRef dataObjectRef, Predicate<TSDO> tsdoPredicate) {
+        List<DataAttributeRef> result = new ArrayList<>();
+
+        // SDO -> SDO -> SDO..
+        sdoOrDAService.getFilteredSDOOrDAs(tdoType, TSDO.class, tsdoPredicate)
+                .findFirst()
+                .ifPresentOrElse(tsdo -> {
+                    findDoType(dtt, tdoType1 -> tsdo.isSetType() && tdoType1.getId().equals(tsdo.getType()))
+                            .ifPresent(nextDoType -> {
+                                DataAttributeRef newDataAttributeRef = DataAttributeRef.copyFrom(dataObjectRef);
+//                                newDataAttributeRef.getDoName().getStructNames().add(tsdo.getName());
+                                if (!newDataAttributeRef.getDoName().getStructNames().contains(tsdo.getName()))
+                                    newDataAttributeRef.getDoName().getStructNames().add(tsdo.getName());
+                                if (nextDoType.isSetCdc()) newDataAttributeRef.getDoName().setCdc(nextDoType.getCdc());
+                                result.addAll(
+                                        getFilteredSDOAndDA(dtt, nextDoType, newDataAttributeRef).stream()
+                                                .toList()
+
+                                );
+                            });
+                }, ()-> {
+                    sdoOrDAService.getSDOOrDAs(tdoType, TSDO.class)
+                            .forEach(tsdo -> findDoType(dtt, tdoType1 -> tsdo.isSetType() && tdoType1.getId().equals(tsdo.getType()))
+                                    .ifPresent(nextDoType -> {
+                                        DataAttributeRef newDataAttributeRef = DataAttributeRef.copyFrom(dataObjectRef);
+                                        if (!newDataAttributeRef.getDoName().getStructNames().contains(tsdo.getName()))
+                                            newDataAttributeRef.getDoName().getStructNames().add(tsdo.getName());
+//                                        newDataAttributeRef.getDoName().getStructNames().add(tsdo.getName());
+                                        if(nextDoType.isSetCdc()) newDataAttributeRef.getDoName().setCdc(nextDoType.getCdc());
+                                        result.addAll(
+                                                //TODO
+                                                getAllSDOAndDA(dtt, nextDoType, newDataAttributeRef)
+                                        );
+                                    }));
+                });
+        return result;
+    }
+
+    public Stream<DataAttributeRef> getFilteredDA(TDataTypeTemplates dtt, TDOType tdoType,
+                                                   DataAttributeRef dataObjectRef, Predicate<TDA> tdaPredicate) {
+        List<DataAttributeRef> result = new ArrayList<>();
+        // DA -> BDA -> BDA..
+       return sdoOrDAService.getFilteredSDOOrDAs(tdoType, TDA.class, tdaPredicate)
+               .flatMap(tda -> {
+                   System.out.println(" [da] : "+tda.getName());
+                   System.out.println(" [da] getStructNames : "+dataObjectRef.getDaName().getStructNames());
+                   DataAttributeRef newDataObjectRef = DataAttributeRef.copyFrom(dataObjectRef);
+                   newDataObjectRef.getDaName().setName(tda.getName());
+                   if(tda.isSetFc()) newDataObjectRef.getDaName().setFc(tda.getFc());
+
+                    // STRUCT type (BType=STRUCT) refer to BDA, otherwise it is DA
+                   if(tda.isSetBType() && tda.getBType().equals(TPredefinedBasicTypeEnum.STRUCT)) {
+                       return daTypeService.getFilteredDaTypes(dtt, tdaType -> tda.isSetType() && tdaType.getId().equals(tda.getType()))
+                               .flatMap(nextDaType -> {
+                                   return getFilteredDataAttributesFromBDA(dtt,
+                                           nextDaType,
+                                           newDataObjectRef,
+                                            tbda -> newDataObjectRef.getDaName()
+                                                    .getStructNames().contains(tbda.getName()));
+                                   });
+                    } else {
+                        System.out.println(" [da] SAMPLE : "+tda.getName());
+                        updateFromAbstractDataAttribute(tda, newDataObjectRef.getDaName());
+                        result.add(newDataObjectRef);
+                        return result.stream();
+                    }
+        });
+    }
+
+    private Stream<DataAttributeRef> getFilteredDataAttributesFromBDA(TDataTypeTemplates dtt, TDAType tdaType1,
+                                                                    DataAttributeRef dataAttributeRef,
+                                                                    Predicate<TBDA> tbdaPredicate) {
+        List<DataAttributeRef> result = new ArrayList<>();
+        // BDA -> BDA -> BDA..
+       return bdaService.getFilteredBDAs(tdaType1, tbdaPredicate)
+               .flatMap(tbda -> {
+                    DataAttributeRef newDataAttributeRef = DataAttributeRef.copyFrom(dataAttributeRef);
+                    newDataAttributeRef.getDaName().getStructNames().add(tbda.getName());
+                    // STRUCT type (BType=STRUCT) refer to complex BDA object, otherwise it is kind of DA object
+                    if(tbda.isSetType() && tbda.getBType().equals(TPredefinedBasicTypeEnum.STRUCT)){
+                        return daTypeService.getFilteredDaTypes(dtt, tdaType -> tdaType.getId().equals(tbda.getType()))
+                                .flatMap(nextDaType ->
+                                        getFilteredDataAttributesFromBDA(dtt, nextDaType, newDataAttributeRef, tbdaPredicate)
+                                );
+                    }
+                    else {
+                        updateFromAbstractDataAttribute(tbda, newDataAttributeRef.getDaName());
+                        result.add(newDataAttributeRef);
+                        return result.stream();
+                    }
+               });
     }
 
     private <T extends TAbstractDataAttribute> void updateFromAbstractDataAttribute(T daOrBda, DaTypeName daTypeName) {

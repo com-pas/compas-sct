@@ -56,4 +56,18 @@ public class LnodeTypeService {
                         }));
 
     }
+
+    public Stream<DataAttributeRef> getFilteredDOAndDA_V2(TDataTypeTemplates dtt, DataAttributeRef dataRef)  {
+        return getFilteredLnodeTypes(dtt, tlNodeType -> tlNodeType.getId().equals(dataRef.getLnType()))
+                .flatMap(tlNodeType -> tlNodeType.getDO().stream()
+                        .flatMap(tdo -> {
+                            dataRef.getDoName().setName(tdo.getName());
+                            return doTypeService.findDoType(dtt, tdoType -> tdoType.getId().equals(tdo.getType()))
+                                    .stream().flatMap(tdoType -> {
+                                        dataRef.getDoName().setCdc(tdoType.getCdc());
+                                        return doTypeService.getFilteredSDOAndDA(dtt, tdoType, dataRef).stream();
+                                    });
+                        }));
+
+    }
 }
