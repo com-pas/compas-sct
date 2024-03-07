@@ -281,8 +281,6 @@ class SclElementsProviderServiceTest {
                 "LLN0.DoB.structValImportFalse.bValImportFalseAndTrueInDai",
                 "LLN0.DoB.structValImportFalse.bValImportNotSetAndTrueInDai",
                 "LLN0.DoB.structValImportFalse.bValImportTrueAndTrueInDai",
-//                "LLN0.DoB.structValImportTrue.bValImportNotSet",
-//                "LLN0.DoB.structValImportTrue.bValImportNotSetAndNotSetInDai",
                 // bValImportTrue : If ValImport is True in BDA and DAI does not exist, BDA is updatable
                 "LLN0.DoB.structValImportFalse.bValImportTrue",
                 "LLN0.DoB.structValImportTrue.bValImportTrue",
