@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 public class LnodeTypeService {
 
-    private DoTypeService doTypeService = new DoTypeService();
+    private final DoTypeService doTypeService = new DoTypeService();
 
     public Stream<TLNodeType> getLnodeTypes(TDataTypeTemplates tDataTypeTemplates) {
         return tDataTypeTemplates.getLNodeType().stream();
