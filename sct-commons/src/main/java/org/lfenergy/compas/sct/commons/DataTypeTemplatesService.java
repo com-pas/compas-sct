@@ -44,9 +44,8 @@ public class DataTypeTemplatesService implements DataTypeTemplateReader {
         return lnodeTypeService.findLnodeType(dtt, lNodeType -> lNodeTypeId.equals(lNodeType.getId()))
                 .flatMap(lNodeType -> doService.findDo(lNodeType, tdo -> MOD_DO_NAME.equals(tdo.getName()))
                         .flatMap(tdo -> doTypeService.findDoType(dtt, doType -> tdo.getType().equals(doType.getId()))
-                                .map(doType -> sdoOrDAService.findSDOOrDA(doType, TDA.class, tda -> STVAL_DA_NAME.equals(tda.getName()))
-                                        .isPresent()))
-                ).orElse(false);
+                                .map(doType -> sdoOrDAService.findDA(doType, tda -> STVAL_DA_NAME.equals(tda.getName())).isPresent())))
+                .orElse(false);
     }
 
     @Override
@@ -75,7 +74,7 @@ public class DataTypeTemplatesService implements DataTypeTemplateReader {
                                     // Search last DoType from DOType (SDO) > DOType (SDO)
                                     TDOType lastDoType = findDOTypeBySdoName(dtt, tdoType, dataRefList);
                                     // Search first DA from last DoType
-                                    return sdoOrDAService.findSDOOrDA(lastDoType, TDA.class, tda1 -> tda1.getName().equals(dataAttributeRef.getDaName().getName()))
+                                    return sdoOrDAService.findDA(lastDoType, tda1 -> tda1.getName().equals(dataAttributeRef.getDaName().getName()))
                                             .flatMap(tda -> {
                                                 // Check if first DA is STRUCT or not
                                                 if(!tda.getBType().equals(TPredefinedBasicTypeEnum.STRUCT)) {
@@ -101,13 +100,13 @@ public class DataTypeTemplatesService implements DataTypeTemplateReader {
     }
 
     private Optional<TDAType> getDATypeByDaName(TDataTypeTemplates dtt, TDOType tdoType, String daName) {
-        return sdoOrDAService.findSDOOrDA(tdoType, TDA.class, tda -> tda.getName().equals(daName))
+        return sdoOrDAService.findDA(tdoType, tda -> tda.getName().equals(daName))
                 .flatMap(tda -> daTypeService.findDaType(dtt, tdaType -> tda.isSetType() && tdaType.getId().equals(tda.getType())));
     }
 
     private TDOType findDOTypeBySdoName(TDataTypeTemplates dtt, TDOType tdoType, List<String> sdoNames) {
         if(sdoNames.isEmpty()) return tdoType;
-        return sdoOrDAService.findSDOOrDA(tdoType, TSDO.class, tsdo -> tsdo.getName().equals(sdoNames.get(0)))
+        return sdoOrDAService.findSDO(tdoType, tsdo -> tsdo.getName().equals(sdoNames.get(0)))
                 .flatMap(tsdo -> doTypeService.findDoType(dtt, tdoType2 -> tdoType2.getId().equals(tsdo.getType())))
                 .map(tdoType2 -> {
                     sdoNames.remove(0);

@@ -35,7 +35,7 @@ public class DoTypeService {
     public List<DataAttributeRef> getAllSDOAndDA(TDataTypeTemplates dtt, TDOType tdoType, DataAttributeRef dataRef) {
         List<DataAttributeRef> result = new ArrayList<>();
         // DA -> BDA -> BDA..
-        sdoOrDAService.getSDOOrDAs(tdoType, TDA.class).forEach(tda -> {
+        sdoOrDAService.getDAs(tdoType).forEach(tda -> {
             DataAttributeRef newDataObjectRef = DataAttributeRef.copyFrom(dataRef);
             newDataObjectRef.getDaName().setName(tda.getName());
             if(tda.isSetFc()) newDataObjectRef.getDaName().setFc(tda.getFc());
@@ -45,12 +45,12 @@ public class DoTypeService {
                 daTypeService.findDaType(dtt, tdaType -> tda.isSetType() && tdaType.getId().equals(tda.getType()))
                         .ifPresent(nextDaType -> result.addAll(getDataAttributesFromBDA(dtt, nextDaType, newDataObjectRef)));
             } else {
-                updateFromAbstractDataAttribute(tda, newDataObjectRef.getDaName());
+                updateDaNameFromDaOrBda(tda, newDataObjectRef.getDaName());
                 result.add(newDataObjectRef);
             }
         });
         // SDO -> SDO -> SDO..
-        sdoOrDAService.getSDOOrDAs(tdoType, TSDO.class)
+        sdoOrDAService.getSDOs(tdoType)
                 .forEach(tsdo -> findDoType(dtt, tdoType1 -> tsdo.isSetType() && tdoType1.getId().equals(tsdo.getType()))
                         .ifPresent(nextDoType -> {
                             DataAttributeRef newDataAttributeRef = DataAttributeRef.copyFrom(dataRef);
@@ -74,17 +74,17 @@ public class DoTypeService {
                 daTypeService.findDaType(dtt, tdaType -> tdaType.getId().equals(tbda.getType()))
                         .ifPresent(nextDaType -> result.addAll(getDataAttributesFromBDA(dtt, nextDaType, newDataAttributeRef)));
             } else {
-                updateFromAbstractDataAttribute(tbda, newDataAttributeRef.getDaName());
+                updateDaNameFromDaOrBda(tbda, newDataAttributeRef.getDaName());
                 result.add(newDataAttributeRef);
             }
         });
         return result;
     }
 
-    private <T extends TAbstractDataAttribute> void updateFromAbstractDataAttribute(T daOrBda, DaTypeName daTypeName) {
-        if(daOrBda.isSetType()) daTypeName.setType(daOrBda.getType());
-        if(daOrBda.isSetBType()) daTypeName.setBType(daOrBda.getBType());
-        if(daOrBda.isSetValImport()) daTypeName.setValImport(daOrBda.isValImport());
-        if(daOrBda.isSetVal()) daTypeName.addDaiValues(daOrBda.getVal());
+    private void updateDaNameFromDaOrBda(TAbstractDataAttribute daOrBda, DaTypeName daTypeName) {
+        if (daOrBda.isSetType()) daTypeName.setType(daOrBda.getType());
+        if (daOrBda.isSetBType()) daTypeName.setBType(daOrBda.getBType());
+        if (daOrBda.isSetValImport()) daTypeName.setValImport(daOrBda.isValImport());
+        if (daOrBda.isSetVal()) daTypeName.addDaiValues(daOrBda.getVal());
     }
 }

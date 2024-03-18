@@ -14,7 +14,7 @@ import java.util.Optional;
 
 public interface LNEditor {
 
-    Optional<TDAI> isDOAndDAInstancesExist(TAnyLN tAnyLN, DoTypeName doTypeName, DaTypeName daTypeName);
+    Optional<TDAI> getDOAndDAInstances(TAnyLN tAnyLN, DoTypeName doTypeName, DaTypeName daTypeName);
 
     void updateOrCreateDOAndDAInstances(TAnyLN tAnyLN, DataAttributeRef dataAttributeRef);
 

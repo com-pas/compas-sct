@@ -29,16 +29,19 @@ public class LnodeTypeService {
     }
 
     public Stream<DataAttributeRef> getAllDOAndDA(TDataTypeTemplates dtt, TLNodeType tlNodeType, DataAttributeRef dataRef)  {
-        return tlNodeType.getDO().stream()
-                .flatMap(tdo -> {
-                    dataRef.setLnType(tlNodeType.getId());
-                    if(tlNodeType.isSetLnClass() && !tlNodeType.getLnClass().isEmpty()) dataRef.setLnClass(tlNodeType.getLnClass().get(0));
+        dataRef.setLnType(tlNodeType.getId());
+        if(tlNodeType.isSetLnClass() && !tlNodeType.getLnClass().isEmpty()) dataRef.setLnClass(tlNodeType.getLnClass().get(0));
+        return tlNodeType.getDO()
+                .stream()
+                .map(tdo -> {
                     dataRef.getDoName().setName(tdo.getName());
-                    return doTypeService.findDoType(dtt, tdoType -> tdoType.getId().equals(tdo.getType()))
-                            .stream().flatMap(tdoType -> {
-                                dataRef.getDoName().setCdc(tdoType.getCdc());
-                                return doTypeService.getAllSDOAndDA(dtt, tdoType, dataRef).stream();
-                            });
+                    return doTypeService.findDoType(dtt, tdoType -> tdoType.getId().equals(tdo.getType()));
+                })
+                .filter(Optional::isPresent)
+                .map(Optional::orElseThrow)
+                .flatMap(tdoType -> {
+                    dataRef.getDoName().setCdc(tdoType.getCdc());
+                    return doTypeService.getAllSDOAndDA(dtt, tdoType, dataRef).stream();
                 });
     }
 

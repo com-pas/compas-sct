@@ -12,18 +12,33 @@ import java.util.stream.Stream;
 
 public class SDOOrDAService {
 
-    public <T> Stream<T> getSDOOrDAs(TDOType tdoType, Class<T> clazz) {
+
+    public Stream<TSDO> getSDOs(TDOType tdoType) {
         return tdoType.getSDOOrDA().stream()
-                .filter(unNaming -> unNaming.getClass().equals(clazz))
-                .map(clazz::cast);
+                .filter(tUnNaming -> tUnNaming.getClass().equals(TSDO.class))
+                .map(TSDO.class::cast);
     }
 
-    public <T> Stream<T> getFilteredSDOOrDAs(TDOType tdoType, Class<T> clazz, Predicate<T> tSDOOrDAPredicate) {
-        return getSDOOrDAs(tdoType, clazz).filter(tSDOOrDAPredicate);
+    public Stream<TDA> getDAs(TDOType tdoType) {
+        return tdoType.getSDOOrDA().stream()
+                .filter(tUnNaming -> tUnNaming.getClass().equals(TDA.class))
+                .map(TDA.class::cast);
     }
 
-    public <T> Optional<T> findSDOOrDA(TDOType tdoType, Class<T> clazz, Predicate<T> tSDOOrDAPredicate) {
-        return getFilteredSDOOrDAs(tdoType, clazz, tSDOOrDAPredicate).findFirst();
+    public Stream<TSDO> getFilteredSDOs(TDOType tdoType, Predicate<TSDO> tsdoPredicate) {
+        return getSDOs(tdoType).filter(tsdoPredicate);
+    }
+
+    public Stream<TDA> getFilteredDAs(TDOType tdoType, Predicate<TDA> tdaPredicate) {
+        return getDAs(tdoType).filter(tdaPredicate);
+    }
+
+    public Optional<TSDO> findSDO(TDOType tdoType, Predicate<TSDO> tsdoPredicate) {
+        return getFilteredSDOs(tdoType, tsdoPredicate).findFirst();
+    }
+
+    public Optional<TDA> findDA(TDOType tdoType, Predicate<TDA> tdaPredicate) {
+        return getFilteredDAs(tdoType, tdaPredicate).findFirst();
     }
 
 }

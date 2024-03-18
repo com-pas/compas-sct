@@ -4,7 +4,6 @@
 
 package org.lfenergy.compas.sct.commons;
 
-import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
@@ -14,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 import static org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateTestUtils.*;
 
 class DataTypeTemplatesServiceTest {
@@ -156,23 +156,23 @@ class DataTypeTemplatesServiceTest {
                         DataAttributeRef::getDoRef, DataAttributeRef::getSdoNames,
                         DataAttributeRef::getDaRef, DataAttributeRef::getBdaNames, DataAttributeRef::getBType, DataAttributeRef::getType)
                 .containsExactlyInAnyOrder(
-                        Tuple.tuple("FirstDoName", List.of(),
+                        tuple("FirstDoName", List.of(),
                                 "sampleDaName1", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
-                        Tuple.tuple("FirstDoName.sdoName1", List.of("sdoName1"),
+                        tuple("FirstDoName.sdoName1", List.of("sdoName1"),
                                 "sampleDaName21", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
-                        Tuple.tuple("FirstDoName.sdoName1.sdoName21", List.of("sdoName1", "sdoName21"),
+                        tuple("FirstDoName.sdoName1.sdoName21", List.of("sdoName1", "sdoName21"),
                                 "sampleDaName31", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
-                        Tuple.tuple("FirstDoName.sdoName1.sdoName21.sdoName31", List.of("sdoName1", "sdoName21", "sdoName31"),
+                        tuple("FirstDoName.sdoName1.sdoName21.sdoName31", List.of("sdoName1", "sdoName21", "sdoName31"),
                                 "sampleDaName41", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
-                        Tuple.tuple("FirstDoName.sdoName2", List.of("sdoName2"),
+                        tuple("FirstDoName.sdoName2", List.of("sdoName2"),
                                 "sampleDaName11", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
-                        Tuple.tuple("FirstDoName.sdoName2", List.of("sdoName2"),
+                        tuple("FirstDoName.sdoName2", List.of("sdoName2"),
                                 "structDaName1.sampleBdaName1", List.of("sampleBdaName1"), TPredefinedBasicTypeEnum.BOOLEAN, null),
-                        Tuple.tuple("FirstDoName.sdoName2", List.of("sdoName2"),
+                        tuple("FirstDoName.sdoName2", List.of("sdoName2"),
                                 "structDaName1.structBdaName1.sampleBdaName21", List.of("structBdaName1", "sampleBdaName21"), TPredefinedBasicTypeEnum.BOOLEAN, null),
-                        Tuple.tuple("FirstDoName.sdoName2", List.of("sdoName2"),
+                        tuple("FirstDoName.sdoName2", List.of("sdoName2"),
                                 "structDaName1.structBdaName1.enumBdaName22", List.of("structBdaName1", "enumBdaName22"), TPredefinedBasicTypeEnum.ENUM, "EnumType1"),
-                        Tuple.tuple("SecondDoName", List.of(),
+                        tuple("SecondDoName", List.of(),
                                 "sampleDaName41", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null)
                 );
     }
@@ -190,9 +190,21 @@ class DataTypeTemplatesServiceTest {
         dataAttributeRef.getDaName().setStructNames(List.of("bda1", "bda2", "bda3"));
         // When
         DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
-        Optional<DataAttributeRef> dataAttributeRefs = dataTypeTemplatesService.findDOAndDA(dtt, "LNO1", dataAttributeRef);
+        Optional<DataAttributeRef> result = dataTypeTemplatesService.findDOAndDA(dtt, "LNO1", dataAttributeRef);
         // Then
-        assertThat(dataAttributeRefs).isPresent();
+        assertThat(result).isPresent();
+        assertThat(result.get()).extracting(
+                DataAttributeRef::getDoRef, DataAttributeRef::getSdoNames,
+                DataAttributeRef::getDaRef, DataAttributeRef::getBdaNames,
+                DataAttributeRef::getBType, DataAttributeRef::getType)
+                .containsExactly(
+                        "Do.sdo1.d",
+                        List.of("sdo1", "d"),
+                        "antRef.bda1.bda2.bda3",
+                        List.of("bda1", "bda2", "bda3"),
+                        dataAttributeRef.getBType(),
+                        dataAttributeRef.getType()
+                );
     }
 
     @Test
@@ -206,9 +218,21 @@ class DataTypeTemplatesServiceTest {
         dataAttributeRef.getDaName().setStructNames(List.of("bda1", "bda2"));
         // When
         DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
-        Optional<DataAttributeRef> dataAttributeRefs = dataTypeTemplatesService.findDOAndDA(dtt, "LN1", dataAttributeRef);
+        Optional<DataAttributeRef> result = dataTypeTemplatesService.findDOAndDA(dtt, "LN1", dataAttributeRef);
         // Then
-        assertThat(dataAttributeRefs).isPresent();
+        assertThat(result).isPresent();
+        assertThat(result.get()).extracting(
+                        DataAttributeRef::getDoRef, DataAttributeRef::getSdoNames,
+                        DataAttributeRef::getDaRef, DataAttributeRef::getBdaNames,
+                        DataAttributeRef::getBType, DataAttributeRef::getType)
+                .containsExactly(
+                        "Do1.sdo1.sdo2",
+                        List.of("sdo1", "sdo2"),
+                        "da2.bda1.bda2",
+                        List.of("bda1", "bda2"),
+                        dataAttributeRef.getBType(),
+                        dataAttributeRef.getType()
+                );
     }
 
     @Test
@@ -220,9 +244,14 @@ class DataTypeTemplatesServiceTest {
         dataAttributeRef.getDaName().setName("da1");
         // When
         DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
-        Optional<DataAttributeRef> dataAttributeRefs = dataTypeTemplatesService.findDOAndDA(dtt, "LN1", dataAttributeRef);
+        Optional<DataAttributeRef> result = dataTypeTemplatesService.findDOAndDA(dtt, "LN1", dataAttributeRef);
         // Then
-        assertThat(dataAttributeRefs).isPresent();
+        assertThat(result).isPresent();
+        assertThat(result.get()).extracting(
+                        DataAttributeRef::getDoRef, DataAttributeRef::getSdoNames,
+                        DataAttributeRef::getDaRef, DataAttributeRef::getBdaNames,
+                        DataAttributeRef::getBType, DataAttributeRef::getType)
+                .containsExactly("Do1", List.of(), "da1", List.of(), dataAttributeRef.getBType(), dataAttributeRef.getType());
     }
 
     @Test
@@ -335,91 +364,91 @@ class DataTypeTemplatesServiceTest {
                         DataAttributeRef::getBType, DataAttributeRef::getType)
                 .containsExactlyInAnyOrder(
                         // -> Do11
-                        Tuple.tuple("Do11", List.of(), "sampleDa11", List.of(), TPredefinedBasicTypeEnum.ENUM, "RecCycModKind"),
-                        Tuple.tuple("Do11", List.of(), "objRefDa12", List.of(), TPredefinedBasicTypeEnum.OBJ_REF, null),
+                        tuple("Do11", List.of(), "sampleDa11", List.of(), TPredefinedBasicTypeEnum.ENUM, "RecCycModKind"),
+                        tuple("Do11", List.of(), "objRefDa12", List.of(), TPredefinedBasicTypeEnum.OBJ_REF, null),
 
                         // Do11.sdo12
                         // -> Do11.sdo11.sdo21
-                        Tuple.tuple("Do11.sdo11.sdo21", List.of("sdo11", "sdo21"),
+                        tuple("Do11.sdo11.sdo21", List.of("sdo11", "sdo21"),
                                 "sampleDa2", List.of(), TPredefinedBasicTypeEnum.ENUM, "RecCycModKind"),
-                        Tuple.tuple("Do11.sdo11.sdo21", List.of("sdo11", "sdo21"),
+                        tuple("Do11.sdo11.sdo21", List.of("sdo11", "sdo21"),
                                 "structDa1.sampleBda1", List.of("sampleBda1"), TPredefinedBasicTypeEnum.VIS_STRING_255, null),
-                        Tuple.tuple("Do11.sdo11.sdo21", List.of("sdo11", "sdo21"),
+                        tuple("Do11.sdo11.sdo21", List.of("sdo11", "sdo21"),
                                 "structDa1.structBda1.sampleBda2", List.of("structBda1", "sampleBda2"), TPredefinedBasicTypeEnum.VIS_STRING_255, null),
-                        Tuple.tuple("Do11.sdo11.sdo21", List.of("sdo11", "sdo21"),
+                        tuple("Do11.sdo11.sdo21", List.of("sdo11", "sdo21"),
                                 "structDa1.structBda1.structBda2.sampleBda3", List.of("structBda1", "structBda2", "sampleBda3"), TPredefinedBasicTypeEnum.ENUM, "RecCycModKind"),
 
                         // -> Do11.sdo11.sdo22
-                        Tuple.tuple("Do11.sdo11.sdo22", List.of("sdo11", "sdo22"),
+                        tuple("Do11.sdo11.sdo22", List.of("sdo11", "sdo22"),
                                 "sampleDa2", List.of(), TPredefinedBasicTypeEnum.ENUM, "RecCycModKind"),
-                        Tuple.tuple("Do11.sdo11.sdo22", List.of("sdo11", "sdo22"),
+                        tuple("Do11.sdo11.sdo22", List.of("sdo11", "sdo22"),
                                 "structDa1.sampleBda1", List.of("sampleBda1"), TPredefinedBasicTypeEnum.VIS_STRING_255, null),
-                        Tuple.tuple("Do11.sdo11.sdo22", List.of("sdo11", "sdo22"),
+                        tuple("Do11.sdo11.sdo22", List.of("sdo11", "sdo22"),
                                 "structDa1.structBda1.sampleBda2", List.of("structBda1", "sampleBda2"), TPredefinedBasicTypeEnum.VIS_STRING_255, null),
-                        Tuple.tuple("Do11.sdo11.sdo22", List.of("sdo11", "sdo22"),
+                        tuple("Do11.sdo11.sdo22", List.of("sdo11", "sdo22"),
                                 "structDa1.structBda1.structBda2.sampleBda3", List.of("structBda1", "structBda2", "sampleBda3"), TPredefinedBasicTypeEnum.ENUM, "RecCycModKind"),
 
                         // Do11.sdo12
                         // -> Do11.sdo12.sdo21
-                        Tuple.tuple("Do11.sdo12.sdo21", List.of("sdo12", "sdo21"),
+                        tuple("Do11.sdo12.sdo21", List.of("sdo12", "sdo21"),
                                 "sampleDa2", List.of(), TPredefinedBasicTypeEnum.ENUM, "RecCycModKind"),
-                        Tuple.tuple("Do11.sdo12.sdo21", List.of("sdo12", "sdo21"),
+                        tuple("Do11.sdo12.sdo21", List.of("sdo12", "sdo21"),
                                 "structDa1.sampleBda1", List.of("sampleBda1"), TPredefinedBasicTypeEnum.VIS_STRING_255, null),
-                        Tuple.tuple("Do11.sdo12.sdo21", List.of("sdo12", "sdo21"),
+                        tuple("Do11.sdo12.sdo21", List.of("sdo12", "sdo21"),
                                 "structDa1.structBda1.sampleBda2", List.of("structBda1", "sampleBda2"), TPredefinedBasicTypeEnum.VIS_STRING_255, null),
-                        Tuple.tuple("Do11.sdo12.sdo21", List.of("sdo12", "sdo21"),
+                        tuple("Do11.sdo12.sdo21", List.of("sdo12", "sdo21"),
                                 "structDa1.structBda1.structBda2.sampleBda3", List.of("structBda1", "structBda2", "sampleBda3"), TPredefinedBasicTypeEnum.ENUM, "RecCycModKind"),
 
                         // -> Do11.sdo12.sdo22
-                        Tuple.tuple("Do11.sdo12.sdo22", List.of("sdo12", "sdo22"),
+                        tuple("Do11.sdo12.sdo22", List.of("sdo12", "sdo22"),
                                 "sampleDa2", List.of(), TPredefinedBasicTypeEnum.ENUM, "RecCycModKind"),
-                        Tuple.tuple("Do11.sdo12.sdo22", List.of("sdo12", "sdo22"),
+                        tuple("Do11.sdo12.sdo22", List.of("sdo12", "sdo22"),
                                 "structDa1.sampleBda1", List.of("sampleBda1"), TPredefinedBasicTypeEnum.VIS_STRING_255, null),
-                        Tuple.tuple("Do11.sdo12.sdo22", List.of("sdo12", "sdo22"),
+                        tuple("Do11.sdo12.sdo22", List.of("sdo12", "sdo22"),
                                 "structDa1.structBda1.sampleBda2", List.of("structBda1", "sampleBda2"), TPredefinedBasicTypeEnum.VIS_STRING_255, null),
-                        Tuple.tuple("Do11.sdo12.sdo22", List.of("sdo12", "sdo22"),
+                        tuple("Do11.sdo12.sdo22", List.of("sdo12", "sdo22"),
                                 "structDa1.structBda1.structBda2.sampleBda3", List.of("structBda1", "structBda2", "sampleBda3"), TPredefinedBasicTypeEnum.ENUM, "RecCycModKind"),
 
                         // Do21
                         // -> Do21.sdo21
-                        Tuple.tuple("Do21.sdo21", List.of("sdo21"),
+                        tuple("Do21.sdo21", List.of("sdo21"),
                                 "sampleDa2", List.of(), TPredefinedBasicTypeEnum.ENUM, "RecCycModKind"),
-                        Tuple.tuple("Do21.sdo21", List.of("sdo21"),
+                        tuple("Do21.sdo21", List.of("sdo21"),
                                 "structDa1.sampleBda1", List.of("sampleBda1"), TPredefinedBasicTypeEnum.VIS_STRING_255, null),
-                        Tuple.tuple("Do21.sdo21", List.of("sdo21"),
+                        tuple("Do21.sdo21", List.of("sdo21"),
                                 "structDa1.structBda1.sampleBda2", List.of("structBda1", "sampleBda2"), TPredefinedBasicTypeEnum.VIS_STRING_255, null),
-                        Tuple.tuple("Do21.sdo21", List.of("sdo21"),
+                        tuple("Do21.sdo21", List.of("sdo21"),
                                 "structDa1.structBda1.structBda2.sampleBda3", List.of("structBda1", "structBda2", "sampleBda3"), TPredefinedBasicTypeEnum.ENUM, "RecCycModKind"),
 
                         // -> Do21.sdo22
-                        Tuple.tuple("Do21.sdo22", List.of("sdo22"),
+                        tuple("Do21.sdo22", List.of("sdo22"),
                                 "sampleDa2", List.of(), TPredefinedBasicTypeEnum.ENUM, "RecCycModKind"),
-                        Tuple.tuple("Do21.sdo22", List.of("sdo22"),
+                        tuple("Do21.sdo22", List.of("sdo22"),
                                 "structDa1.sampleBda1", List.of("sampleBda1"), TPredefinedBasicTypeEnum.VIS_STRING_255, null),
-                        Tuple.tuple("Do21.sdo22", List.of("sdo22"),
+                        tuple("Do21.sdo22", List.of("sdo22"),
                                 "structDa1.structBda1.sampleBda2", List.of("structBda1", "sampleBda2"), TPredefinedBasicTypeEnum.VIS_STRING_255, null),
-                        Tuple.tuple("Do21.sdo22", List.of("sdo22"),
+                        tuple("Do21.sdo22", List.of("sdo22"),
                                 "structDa1.structBda1.structBda2.sampleBda3", List.of("structBda1", "structBda2", "sampleBda3"), TPredefinedBasicTypeEnum.ENUM, "RecCycModKind"),
 
                         // Do22
                         // -> Do22.sdo21
-                        Tuple.tuple("Do22.sdo21", List.of("sdo21"),
+                        tuple("Do22.sdo21", List.of("sdo21"),
                                 "sampleDa2", List.of(), TPredefinedBasicTypeEnum.ENUM, "RecCycModKind"),
-                        Tuple.tuple("Do22.sdo21", List.of("sdo21"),
+                        tuple("Do22.sdo21", List.of("sdo21"),
                                 "structDa1.sampleBda1", List.of("sampleBda1"), TPredefinedBasicTypeEnum.VIS_STRING_255, null),
-                        Tuple.tuple("Do22.sdo21", List.of("sdo21"),
+                        tuple("Do22.sdo21", List.of("sdo21"),
                                 "structDa1.structBda1.sampleBda2", List.of("structBda1", "sampleBda2"), TPredefinedBasicTypeEnum.VIS_STRING_255, null),
-                        Tuple.tuple("Do22.sdo21", List.of("sdo21"),
+                        tuple("Do22.sdo21", List.of("sdo21"),
                                 "structDa1.structBda1.structBda2.sampleBda3", List.of("structBda1", "structBda2", "sampleBda3"), TPredefinedBasicTypeEnum.ENUM, "RecCycModKind"),
 
                         // -> Do22.sdo22
-                        Tuple.tuple("Do22.sdo22", List.of("sdo22"),
+                        tuple("Do22.sdo22", List.of("sdo22"),
                                 "sampleDa2", List.of(), TPredefinedBasicTypeEnum.ENUM, "RecCycModKind"),
-                        Tuple.tuple("Do22.sdo22", List.of("sdo22"),
+                        tuple("Do22.sdo22", List.of("sdo22"),
                                 "structDa1.sampleBda1", List.of("sampleBda1"), TPredefinedBasicTypeEnum.VIS_STRING_255, null),
-                        Tuple.tuple("Do22.sdo22", List.of("sdo22"),
+                        tuple("Do22.sdo22", List.of("sdo22"),
                                 "structDa1.structBda1.sampleBda2", List.of("structBda1", "sampleBda2"), TPredefinedBasicTypeEnum.VIS_STRING_255, null),
-                        Tuple.tuple("Do22.sdo22", List.of("sdo22"),
+                        tuple("Do22.sdo22", List.of("sdo22"),
                                 "structDa1.structBda1.structBda2.sampleBda3", List.of("structBda1", "structBda2", "sampleBda3"), TPredefinedBasicTypeEnum.ENUM, "RecCycModKind")
                 );
     }

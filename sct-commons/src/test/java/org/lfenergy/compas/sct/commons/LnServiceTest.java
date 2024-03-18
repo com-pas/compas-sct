@@ -87,7 +87,7 @@ class LnServiceTest {
     }
 
     @Test
-    void isDOAndDAInstanceExists_should_return_true_when_DO_and_DA_instances_exists() {
+    void getDOAndDAInstances_should_return_true_when_DO_and_DA_instances_exists() {
         //Given
         TAnyLN tAnyLN = initDOAndDAInstances(
                 new LinkedList<>(List.of("Do","sdo1", "d")),
@@ -98,13 +98,15 @@ class LnServiceTest {
         DaTypeName daTypeName = new DaTypeName("antRef.bda1.bda2.bda3");
         //When
         LnService lnService = new LnService();
-        Optional<TDAI> optionalTDAI = lnService.isDOAndDAInstancesExist(tAnyLN, doTypeName, daTypeName);
+        Optional<TDAI> optionalTDAI = lnService.getDOAndDAInstances(tAnyLN, doTypeName, daTypeName);
         //Then
         assertThat(optionalTDAI).isPresent();
+        assertThat(optionalTDAI.get().getName()).isEqualTo("bda3");
+        assertThat(optionalTDAI.get().isSetValImport()).isFalse();
     }
 
     @Test
-    void isDOAndDAInstanceExists_should_return_false_when_DO_and_DA_instances_not_exists() {
+    void getDOAndDAInstances_should_return_false_when_DO_and_DA_instances_not_exists() {
         //Given
         TAnyLN tAnyLN = initDOAndDAInstances(
                 new LinkedList<>(List.of("Do","sdo1", "d")),
@@ -115,9 +117,10 @@ class LnServiceTest {
         DaTypeName daTypeName = new DaTypeName("antRef.unknown.bda2.bda3");
         //When
         LnService lnService = new LnService();
-        Optional<TDAI> optionalTDAI = lnService.isDOAndDAInstancesExist(tAnyLN, doTypeName, daTypeName);
+        Optional<TDAI> optionalTDAI = lnService.getDOAndDAInstances(tAnyLN, doTypeName, daTypeName);
         //Then
-        assertThat(optionalTDAI).isPresent();
+        assertThat(optionalTDAI).isEmpty();
+
     }
 
     @ParameterizedTest

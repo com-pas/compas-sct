@@ -67,7 +67,7 @@ public class LnService implements LNEditor {
         return Stream.concat(ln0Stream, tlnStream);
     }
 
-    public Optional<TDAI> isDOAndDAInstancesExist(TAnyLN anyLN, DoTypeName doTypeName, DaTypeName daTypeName) {
+    public Optional<TDAI> getDOAndDAInstances(TAnyLN anyLN, DoTypeName doTypeName, DaTypeName daTypeName) {
         LinkedList<String> structNamesList = new LinkedList<>(doTypeName.getStructNames());
         structNamesList.addLast(daTypeName.getName());
         daTypeName.getStructNames().forEach(structNamesList::addLast);
@@ -93,7 +93,7 @@ public class LnService implements LNEditor {
                                                 .filter(dai -> dai.getName().equals(structNamesList.getFirst()))
                                                 .findFirst();
                                     }
-                                    return Optional.of(new TDAI());
+                                    return Optional.empty();
                                 })
                                 .stream().findFirst();
                     } else if(structNamesList.size() == 1){
@@ -133,7 +133,7 @@ public class LnService implements LNEditor {
     }
 
     public void completeFromDAInstance(TIED tied, String ldInst, TAnyLN anyLN, DataAttributeRef dataRef) {
-        isDOAndDAInstancesExist(anyLN, dataRef.getDoName(), dataRef.getDaName())
+        getDOAndDAInstances(anyLN, dataRef.getDoName(), dataRef.getDaName())
                 .ifPresent(tdai -> {
                     if(tdai.isSetVal()) dataRef.setDaiValues(tdai.getVal());
                     if(dataRef.getFc() == TFCEnum.SG || dataRef.getFc() == TFCEnum.SE) {

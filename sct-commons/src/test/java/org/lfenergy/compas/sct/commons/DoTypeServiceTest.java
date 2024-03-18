@@ -4,6 +4,8 @@
 
 package org.lfenergy.compas.sct.commons;
 
+import org.apache.commons.lang3.StringUtils;
+import org.assertj.core.api.Condition;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.*;
@@ -15,6 +17,7 @@ import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 import static org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateTestUtils.*;
 
 class DoTypeServiceTest {
@@ -49,8 +52,8 @@ class DoTypeServiceTest {
         assertThat(tdoTypes)
                 .hasSize(2)
                 .extracting(TDOType::getCdc, TDOType::getId)
-                .containsExactly(Tuple.tuple(TPredefinedCDCEnum.DPL, "RTE_X_X_X_48BA5C40D0913654FA5291A28C0D9716_DPL_V1.0.0"),
-                        Tuple.tuple(TPredefinedCDCEnum.DPL, "RTE_X_X_X_D93000A2D6F9B026504B48576A914DA3_DPL_V1.0.0"));
+                .containsExactly(tuple(TPredefinedCDCEnum.DPL, "RTE_X_X_X_48BA5C40D0913654FA5291A28C0D9716_DPL_V1.0.0"),
+                        tuple(TPredefinedCDCEnum.DPL, "RTE_X_X_X_D93000A2D6F9B026504B48576A914DA3_DPL_V1.0.0"));
 
     }
 
@@ -64,7 +67,7 @@ class DoTypeServiceTest {
         //When
         TDOType tdoType = doTypeService.findDoType(dataTypeTemplates, tdoType1 -> TPredefinedCDCEnum.DPL.equals(tdoType1.getCdc())).orElseThrow();
 
-        //Then
+        //Thenf
         assertThat(tdoType)
                 .extracting(TDOType::getCdc, TDOType::getId)
                 .containsExactly(TPredefinedCDCEnum.DPL, "RTE_X_X_X_48BA5C40D0913654FA5291A28C0D9716_DPL_V1.0.0");
@@ -95,21 +98,21 @@ class DoTypeServiceTest {
                         DataAttributeRef::getDoRef, DataAttributeRef::getSdoNames,
                         DataAttributeRef::getDaRef, DataAttributeRef::getBdaNames, DataAttributeRef::getBType, DataAttributeRef::getType)
                 .containsExactlyInAnyOrder(
-                        Tuple.tuple("FirstDoName", List.of(),
+                        tuple("FirstDoName", List.of(),
                                 "sampleDaName1", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
-                        Tuple.tuple("FirstDoName.sdoName1", List.of("sdoName1"),
+                        tuple("FirstDoName.sdoName1", List.of("sdoName1"),
                                 "sampleDaName21", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
-                        Tuple.tuple("FirstDoName.sdoName1.sdoName21", List.of("sdoName1", "sdoName21"),
+                        tuple("FirstDoName.sdoName1.sdoName21", List.of("sdoName1", "sdoName21"),
                                 "sampleDaName31", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
-                        Tuple.tuple("FirstDoName.sdoName1.sdoName21.sdoName31", List.of("sdoName1", "sdoName21", "sdoName31"),
+                        tuple("FirstDoName.sdoName1.sdoName21.sdoName31", List.of("sdoName1", "sdoName21", "sdoName31"),
                                 "sampleDaName41", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
-                        Tuple.tuple("FirstDoName.sdoName2", List.of("sdoName2"),
+                        tuple("FirstDoName.sdoName2", List.of("sdoName2"),
                                 "sampleDaName11", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
-                        Tuple.tuple("FirstDoName.sdoName2", List.of("sdoName2"),
+                        tuple("FirstDoName.sdoName2", List.of("sdoName2"),
                                 "structDaName1.sampleBdaName1", List.of("sampleBdaName1"), TPredefinedBasicTypeEnum.BOOLEAN, null),
-                        Tuple.tuple("FirstDoName.sdoName2", List.of("sdoName2"),
+                        tuple("FirstDoName.sdoName2", List.of("sdoName2"),
                                 "structDaName1.structBdaName1.sampleBdaName21", List.of("structBdaName1", "sampleBdaName21"), TPredefinedBasicTypeEnum.BOOLEAN, null),
-                        Tuple.tuple("FirstDoName.sdoName2", List.of("sdoName2"),
+                        tuple("FirstDoName.sdoName2", List.of("sdoName2"),
                                 "structDaName1.structBdaName1.enumBdaName22", List.of("structBdaName1", "enumBdaName22"), TPredefinedBasicTypeEnum.ENUM, "EnumType1")
                 );
     }
@@ -122,7 +125,7 @@ class DoTypeServiceTest {
 
         DoTypeService doTypeService = new DoTypeService();
         TDOType tdoType = doTypeService.findDoType(dtt, tdoType1 -> tdoType1.getId()
-                .equals("DO11")).get();
+                .equals("DO11")).orElseThrow();
         DataAttributeRef dataRef = new DataAttributeRef();
         DoTypeName doTypeName = new DoTypeName();
         doTypeName.setName("firstDONAME");
@@ -132,6 +135,16 @@ class DoTypeServiceTest {
         // When
         List<DataAttributeRef> list = doTypeService.getAllSDOAndDA(dtt, tdoType, dataRef);
         // Then
-        assertThat(list).hasSize(811);
+        assertThat(list)
+                .hasSize(811)
+                .allMatch(dataAttributeRef -> dataAttributeRef.getPrefix() == null)
+                .allMatch(dataAttributeRef -> dataAttributeRef.getLnType() == null)
+                .allMatch(dataAttributeRef -> dataAttributeRef.getLnClass() == null)
+                .allMatch(dataAttributeRef -> dataAttributeRef.getLnInst() == null)
+                .allMatch(dataAttributeRef -> StringUtils.startsWith(dataAttributeRef.getDoName().getName(), "firstDONAME"))
+                .areExactly(1, new Condition<>(dataAttributeRef -> dataAttributeRef.getDaName().getName().equals("da1"), "Il n'y a que certaines réponses contenant da1"))
+                .areExactly(270, new Condition<>(dataAttributeRef -> dataAttributeRef.getDaName().getName().equals("da11"), "Il n'y a que certaines réponses contenant da11"))
+                .areExactly(270, new Condition<>(dataAttributeRef -> dataAttributeRef.getDaName().getName().equals("da22"), "Il n'y a que certaines réponses contenant da22"))
+                .areExactly(270, new Condition<>(dataAttributeRef -> dataAttributeRef.getDaName().getName().equals("da32"), "Il n'y a que certaines réponses contenant da32"));
     }
 }
