@@ -156,28 +156,46 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>jaxb2-maven-plugin</artifactId>
-                <version>3.1.0</version>
+                <groupId>org.jvnet.jaxb</groupId>
+                <artifactId>jaxb-maven-plugin</artifactId>
+                <version>4.0.3</version>
                 <executions>
                     <execution>
                         <id>scl</id>
                         <goals>
-                            <goal>xjc</goal>
+                            <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <sources>
-                                <source>${project.build.outputDirectory}/xsd/SCL2007B4/SCL.xsd</source>
-                                <source>${project.build.outputDirectory}/xsd/SCL_CoMPAS.xsd</source>
-                            </sources>
-                            <xjbSources>
-                                <xjbSource>${project.basedir}/src/main/resources/binding_configuration.xjb</xjbSource>
-                            </xjbSources>
-                            <packageName>org.lfenergy.compas.scl2007b4.model</packageName>
-                            <noPackageLevelAnnotations>true</noPackageLevelAnnotations>
-                            <clearOutputDir>false</clearOutputDir>
+                            <schemaDirectory>${project.build.outputDirectory}/xsd</schemaDirectory>
+                            <schemaIncludes>
+                                <include>SCL2007B4/SCL.xsd</include>
+                                <include>SCL_CoMPAS.xsd</include>
+                            </schemaIncludes>
+                            <bindingDirectory>${project.basedir}/src/main/resources</bindingDirectory>
+                            <bindingIncludes>binding_configuration.xjb</bindingIncludes>
+                            <generatePackage>org.lfenergy.compas.scl2007b4.model</generatePackage>
+                            <packageLevelAnnotations>false</packageLevelAnnotations>
+                            <cleanPackageDirectories>false</cleanPackageDirectories>
+                            <extension>true</extension>
+                            <args>
+                                <arg>-XsimpleEquals</arg>
+                            </args>
+                            <plugins>
+                                <plugin>
+                                    <groupId>org.jvnet.jaxb</groupId>
+                                    <artifactId>jaxb-plugins</artifactId>
+                                    <version>4.0.3</version>
+                                </plugin>
+                            </plugins>
                         </configuration>
                     </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jaxb2-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
                     <execution>
                         <id>epf</id>
                         <goals>
