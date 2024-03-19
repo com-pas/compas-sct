@@ -67,7 +67,7 @@ class DoTypeServiceTest {
         //When
         TDOType tdoType = doTypeService.findDoType(dataTypeTemplates, tdoType1 -> TPredefinedCDCEnum.DPL.equals(tdoType1.getCdc())).orElseThrow();
 
-        //Thenf
+        //Then
         assertThat(tdoType)
                 .extracting(TDOType::getCdc, TDOType::getId)
                 .containsExactly(TPredefinedCDCEnum.DPL, "RTE_X_X_X_48BA5C40D0913654FA5291A28C0D9716_DPL_V1.0.0");

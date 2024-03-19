@@ -32,17 +32,19 @@ public class DoTypeService {
         return getFilteredDoTypes(tDataTypeTemplates, tdoTypePredicate).findFirst();
     }
 
-    public List<DataAttributeRef> getAllSDOAndDA(TDataTypeTemplates dtt, TDOType tdoType, DataAttributeRef dataRef) {
+    public List<DataAttributeRef> getAllSDOAndDA(TDataTypeTemplates dtt, TDOType tdoType, DataAttributeRef filter) {
         List<DataAttributeRef> result = new ArrayList<>();
         // DA -> BDA -> BDA..
         sdoOrDAService.getDAs(tdoType).forEach(tda -> {
-            DataAttributeRef newDataObjectRef = DataAttributeRef.copyFrom(dataRef);
+            DataAttributeRef newDataObjectRef = DataAttributeRef.copyFrom(filter);
             newDataObjectRef.getDaName().setName(tda.getName());
-            if(tda.isSetFc()) newDataObjectRef.getDaName().setFc(tda.getFc());
+            if(tda.isSetFc()) {
+                newDataObjectRef.getDaName().setFc(tda.getFc());
+            }
 
             // STRUCT type (BType=STRUCT) refer to BDA, otherwise it is DA
-            if(tda.isSetBType() && tda.getBType().equals(TPredefinedBasicTypeEnum.STRUCT)) {
-                daTypeService.findDaType(dtt, tdaType -> tda.isSetType() && tdaType.getId().equals(tda.getType()))
+            if(tda.isSetType() && tda.isSetBType() && tda.getBType().equals(TPredefinedBasicTypeEnum.STRUCT)) {
+                daTypeService.findDaType(dtt, tdaType -> tdaType.getId().equals(tda.getType()))
                         .ifPresent(nextDaType -> result.addAll(getDataAttributesFromBDA(dtt, nextDaType, newDataObjectRef)));
             } else {
                 updateDaNameFromDaOrBda(tda, newDataObjectRef.getDaName());
@@ -53,10 +55,11 @@ public class DoTypeService {
         sdoOrDAService.getSDOs(tdoType)
                 .forEach(tsdo -> findDoType(dtt, tdoType1 -> tsdo.isSetType() && tdoType1.getId().equals(tsdo.getType()))
                         .ifPresent(nextDoType -> {
-                            DataAttributeRef newDataAttributeRef = DataAttributeRef.copyFrom(dataRef);
+                            DataAttributeRef newDataAttributeRef = DataAttributeRef.copyFrom(filter);
                             newDataAttributeRef.getDoName().getStructNames().add(tsdo.getName());
-                            if(nextDoType.isSetCdc()) newDataAttributeRef.getDoName().setCdc(nextDoType.getCdc());
-
+                            if(nextDoType.isSetCdc()) {
+                                newDataAttributeRef.getDoName().setCdc(nextDoType.getCdc());
+                            }
                             result.addAll(getAllSDOAndDA(dtt, nextDoType, newDataAttributeRef));
                         }));
         return result;
