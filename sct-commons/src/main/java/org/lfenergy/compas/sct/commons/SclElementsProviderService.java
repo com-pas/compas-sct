@@ -110,7 +110,7 @@ public class SclElementsProviderService implements SclElementsProvider {
                 .map(tied1 -> ldeviceService.findLdevice(tied1, tlDevice -> tlDevice.getInst().equals(ldInst))
                         .map(tlDevice -> Stream.concat(tlDevice.getLN().stream(), Stream.of(tlDevice.getLN0()))
                                 .filter(anyLN -> tAnyLNPredicate.test(anyLN, dataAttributeRef))
-                                .flatMap(tAnyLN -> dataTypeTemplatesService.getFilteredDOAndDA(scd.getDataTypeTemplates(), tAnyLN, LnKey.updateDataRef(tAnyLN, dataAttributeRef))
+                                .flatMap(tAnyLN -> dataTypeTemplatesService.getFilteredDOAndDA(scd.getDataTypeTemplates(), tAnyLN, DataAttributeRef.updateDataRef(tAnyLN, dataAttributeRef))
                                         .map(dataAttribute -> {
                                             lnService.completeFromDAInstance(tied1, tlDevice.getInst(), tAnyLN, dataAttribute);
                                             return dataAttribute;
