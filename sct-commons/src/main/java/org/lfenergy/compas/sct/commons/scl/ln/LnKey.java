@@ -37,19 +37,25 @@ public class LnKey {
 
     public static DataAttributeRef updateDataRef(TAnyLN anyLN, DataAttributeRef dataAttributeRef) {
         DataAttributeRef filter = DataAttributeRef.copyFrom(dataAttributeRef);
-        if(anyLN.isSetLnType()) filter.setLnType(anyLN.getLnType());
-        if(anyLN instanceof TLN0 ln0){
-            if(ln0.isSetInst()) filter.setLnInst(ln0.getInst());
-            if(ln0.isSetLnClass()) filter.setLnClass(ln0.getLnClass().get(0));
-            filter.setPrefix("");
-        } else {
-            if(((TLN)anyLN).isSetInst()) filter.setLnInst(((TLN)anyLN).getInst());
-            if(((TLN)anyLN).isSetLnClass()) filter.setLnClass(((TLN)anyLN).getLnClass().get(0));
-            if(((TLN)anyLN).isSetPrefix()) {
-                filter.setPrefix(((TLN)anyLN).getPrefix());
-            } else  {
+        if(anyLN.isSetLnType()) {
+            filter.setLnType(anyLN.getLnType());
+        }
+        switch (anyLN){
+            case TLN0 tln0 -> {
+                if(tln0.isSetInst()) filter.setLnInst(tln0.getInst());
+                if(tln0.isSetLnClass()) filter.setLnClass(tln0.getLnClass().get(0));
                 filter.setPrefix(StringUtils.EMPTY);
             }
+            case TLN tln -> {
+                if(tln.isSetInst()) filter.setLnInst(tln.getInst());
+                if(tln.isSetLnClass()) filter.setLnClass(tln.getLnClass().get(0));
+                if(tln.isSetPrefix()) {
+                    filter.setPrefix(tln.getPrefix());
+                } else  {
+                    filter.setPrefix(StringUtils.EMPTY);
+                }
+            }
+            default -> throw new RuntimeException("not possible");
         }
         return filter;
     }
