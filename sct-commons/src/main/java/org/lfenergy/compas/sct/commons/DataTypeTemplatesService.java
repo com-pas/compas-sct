@@ -51,7 +51,7 @@ public class DataTypeTemplatesService implements DataTypeTemplateReader {
     @Override
     public Stream<DataAttributeRef> getAllDOAndDA(TDataTypeTemplates dtt) {
         return dtt.getLNodeType().stream()
-                .flatMap(tlNodeType -> lnodeTypeService.getAllDOAndDA(dtt, tlNodeType, new DataAttributeRef()));
+                .flatMap(tlNodeType -> lnodeTypeService.getAllDOAndDA(dtt, tlNodeType.getId()));
     }
 
     @Override

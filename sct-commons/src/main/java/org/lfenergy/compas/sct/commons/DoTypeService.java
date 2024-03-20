@@ -9,6 +9,7 @@ import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -90,4 +91,5 @@ public class DoTypeService {
         if (daOrBda.isSetValImport()) daTypeName.setValImport(daOrBda.isValImport());
         if (daOrBda.isSetVal()) daTypeName.addDaiValues(daOrBda.getVal());
     }
+
 }

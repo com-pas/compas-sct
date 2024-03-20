@@ -82,7 +82,7 @@ class DoTypeServiceTest {
 
         DoTypeService doTypeService = new DoTypeService();
         TDOType tdoType = doTypeService.findDoType(dtt, tdoType1 -> tdoType1.getId()
-                .equals("DOType0")).get();
+                .equals("DOType0")).orElseThrow();
 
         DataAttributeRef dataRef = new DataAttributeRef();
         DoTypeName doTypeName = new DoTypeName();
