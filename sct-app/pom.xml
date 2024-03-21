@@ -17,10 +17,6 @@
     <version>local-SNAPSHOT</version>
     <name>SCT-APP</name>
 
-    <properties>
-        <sonar.coverage.jacoco.xmlReportPaths>${basedir}/${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.lfenergy.compas</groupId>
@@ -62,6 +58,7 @@
             <artifactId>mockito-junit-jupiter</artifactId>
         </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -88,13 +85,19 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                        <!-- la rapport est généré par défaut: target/site/jacoco/jacoco.xml -->
+                        <configuration>
+                            <formats>
+                                <!-- sonar a uniquement besoin du xml -->
+                                <format>XML</format>
+                            </formats>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.3.0</version>
                 <executions>
                     <execution>
                         <id>unpack</id>
