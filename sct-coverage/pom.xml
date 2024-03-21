@@ -21,8 +21,8 @@
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
         <maven.javadoc.skip>true</maven.javadoc.skip>
-        <sonar.jacoco.excludes>**/scl2007b4/**/*</sonar.jacoco.excludes>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.lfenergy.compas</groupId>
