@@ -92,6 +92,31 @@ public class DataAttributeRef {
         return dataAttributeRef;
     }
 
+    public static DataAttributeRef updateDataRef(TAnyLN anyLN, DataAttributeRef dataAttributeRef) {
+        DataAttributeRef filter = copyFrom(dataAttributeRef);
+        if(anyLN.isSetLnType()) {
+            filter.setLnType(anyLN.getLnType());
+        }
+        switch (anyLN){
+            case TLN0 tln0 -> {
+                if(tln0.isSetInst()) filter.setLnInst(tln0.getInst());
+                if(tln0.isSetLnClass()) filter.setLnClass(tln0.getLnClass().get(0));
+                filter.setPrefix(StringUtils.EMPTY);
+            }
+            case TLN tln -> {
+                if(tln.isSetInst()) filter.setLnInst(tln.getInst());
+                if(tln.isSetLnClass()) filter.setLnClass(tln.getLnClass().get(0));
+                if(tln.isSetPrefix()) {
+                    filter.setPrefix(tln.getPrefix());
+                } else  {
+                    filter.setPrefix(StringUtils.EMPTY);
+                }
+            }
+            default -> throw new RuntimeException("not possible");
+        }
+        return filter;
+    }
+
     /**
      * Checks if DA/DO is updatable
      *
