@@ -357,7 +357,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
         return aLNAdapters;
     }
 
-    public List<SclReportItem> createDataSetAndControlBlocks(Set<FcdaForDataSetsCreation> allowedFcdas) {
+    public List<SclReportItem> createDataSetAndControlBlocks(List<org.lfenergy.compas.sct.commons.model.da_comm.TFCDA> allowedFcdas) {
         LN0Adapter ln0Adapter = getLN0Adapter();
         if (!ln0Adapter.hasInputs()) {
             return Collections.emptyList();
