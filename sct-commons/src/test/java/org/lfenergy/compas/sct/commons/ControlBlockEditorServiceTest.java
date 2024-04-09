@@ -12,12 +12,11 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.ControlBlockTarget;
-import org.lfenergy.compas.sct.commons.dto.FcdaForDataSetsCreation;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
-import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.model.cbcom.*;
+import org.lfenergy.compas.sct.commons.model.da_comm.DACOMM;
+import org.lfenergy.compas.sct.commons.model.da_comm.FCDAs;
 import org.lfenergy.compas.sct.commons.scl.ControlService;
-import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.DataSetAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
@@ -25,18 +24,14 @@ import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
+import org.lfenergy.compas.sct.commons.testhelpers.DaComTestMarshallerHelper;
 import org.lfenergy.compas.sct.commons.testhelpers.FCDARecord;
 import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
-import org.lfenergy.compas.sct.commons.util.CsvUtils;
 import org.lfenergy.compas.sct.commons.util.PrivateEnum;
 import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -51,12 +46,9 @@ class ControlBlockEditorServiceTest {
 
     ControlBlockEditorService controlBlockEditorService;
 
-    private Set<FcdaForDataSetsCreation> allowedFcdas;
-
     @BeforeEach
     void init() {
         controlBlockEditorService = new ControlBlockEditorService(new ControlService());
-        allowedFcdas = new HashSet<>(CsvUtils.parseRows("FcdaCandidates.csv", StandardCharsets.UTF_8, FcdaForDataSetsCreation.class));
     }
 
     @Test
@@ -130,29 +122,11 @@ class ControlBlockEditorServiceTest {
         assertIsMarshallable(scl);
     }
 
-
-    private static Stream<Arguments> provideAllowedFcdaListEmptyOrNull() {
-        return Stream.of(
-                Arguments.of("Set of allowed FCDA is null", null),
-                Arguments.of("Set of allow FCDA is Empty", Collections.EMPTY_SET)
-        );
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("provideAllowedFcdaListEmptyOrNull")
-    void createDataSetAndControlBlocks_should_Throw_Exception_when_list_allowed_fcda_not_initialized(String testName, Set<FcdaForDataSetsCreation> fcdaForDataSets) {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
-        // When Then
-        assertThatCode(() -> controlBlockEditorService.createDataSetAndControlBlocks(scd, fcdaForDataSets))
-                .isInstanceOf(ScdException.class)
-                .hasMessage("Accepted FCDAs list is empty, you should initialize allowed FCDA lists with CsvHelper class before");
-    }
-
     @Test
     void createDataSetAndControlBlocks_should_create_DataSet() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
+        DACOMM allowedFcdas = DaComTestMarshallerHelper.getDACOMMFromFile("/cb_comm/Template_DA_COMM_v1.xml");
         // When
         List<SclReportItem> sclReportItems = controlBlockEditorService.createDataSetAndControlBlocks(scd, allowedFcdas);
         // Then
@@ -184,6 +158,7 @@ class ControlBlockEditorServiceTest {
     void createDataSetAndControlBlocks_should_create_ControlBlocks() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
+        DACOMM allowedFcdas = DaComTestMarshallerHelper.getDACOMMFromFile("/cb_comm/Template_DA_COMM_v1.xml");
         // When
         List<SclReportItem> sclReportItems = controlBlockEditorService.createDataSetAndControlBlocks(scd, allowedFcdas);
         // Then
@@ -217,6 +192,7 @@ class ControlBlockEditorServiceTest {
     void createDataSetAndControlBlocks_should_set_ExtRef_srcXXX_attributes() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
+        DACOMM allowedFcdas = DaComTestMarshallerHelper.getDACOMMFromFile("/cb_comm/Template_DA_COMM_v1.xml");
         // When
         List<SclReportItem> sclReportItems = controlBlockEditorService.createDataSetAndControlBlocks(scd, allowedFcdas);
         // Then
@@ -242,110 +218,11 @@ class ControlBlockEditorServiceTest {
                 .containsExactly("CB_LD_INST21_CYCI", "LD_INST21");
     }
 
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("provideAllowedFcdaListEmptyOrNull")
-    void createDataSetAndControlBlocks_with_targetIedName_should_Throw_Exception_when_list_allowed_fcda_not_initialized(String testName, Set<FcdaForDataSetsCreation> fcdaForDataSets) {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
-        // When Then
-        assertThatCode(() -> controlBlockEditorService.createDataSetAndControlBlocks(scd, "IED_NAME1", fcdaForDataSets))
-                .isInstanceOf(ScdException.class)
-                .hasMessage("Accepted FCDAs list is empty, you should initialize allowed FCDA lists with CsvHelper class before");
-    }
-
-    @Test
-    void createDataSetAndControlBlocks_when_targetIedName_is_provided_should_succeed() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
-        // When
-        List<SclReportItem> sclReportItems = controlBlockEditorService.createDataSetAndControlBlocks(scd, "IED_NAME1", allowedFcdas);
-        // Then
-        assertThat(sclReportItems).isEmpty();
-        assertThat(streamAllDataSets(scd)).hasSize(6);
-        List<LN0> ln0s = streamAllLn0Adapters(scd).map(SclElementAdapter::getCurrentElem).toList();
-        assertThat(ln0s).flatMap(TLN0::getGSEControl).hasSize(3);
-        assertThat(ln0s).flatMap(TLN0::getSampledValueControl).hasSize(1);
-        assertThat(ln0s).flatMap(TLN0::getReportControl).hasSize(2);
-        MarshallerWrapper.assertValidateXmlSchema(scd);
-    }
-
-    @Test
-    void createDataSetAndControlBlocks_when_targetIedName_is_provided_and_no_ext_ref_should_do_nothing() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
-        // When
-        List<SclReportItem> sclReportItems = controlBlockEditorService.createDataSetAndControlBlocks(scd, "IED_NAME2", allowedFcdas);
-        // Then
-        assertThat(sclReportItems).isEmpty();
-        assertThat(streamAllDataSets(scd)).isEmpty();
-    }
-
-    @Test
-    void createDataSetAndControlBlocks_when_targetIedName_is_not_found_should_throw_exception() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
-        // When & Then
-        assertThatThrownBy(() -> controlBlockEditorService.createDataSetAndControlBlocks(scd, "non_existing_IED_name", allowedFcdas))
-                .isInstanceOf(ScdException.class)
-                .hasMessage("IED.name 'non_existing_IED_name' not found in SCD");
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("provideAllowedFcdaListEmptyOrNull")
-    void createDataSetAndControlBlocks_with_targetIedName_and_targetLDeviceInst_should_Throw_Exception_when_list_allowed_fcda_not_initialized(String testName, Set<FcdaForDataSetsCreation> fcdaForDataSets) {
-        // Given
-        SCL scd = new SCL();
-        // When Then
-        assertThatCode(() -> controlBlockEditorService.createDataSetAndControlBlocks(scd, "IED_NAME1", "LD_INST11", fcdaForDataSets))
-                .isInstanceOf(ScdException.class)
-                .hasMessage("Accepted FCDAs list is empty, you should initialize allowed FCDA lists with CsvHelper class before");
-    }
-
-    @Test
-    void createDataSetAndControlBlocks_when_targetIedName_and_targetLDeviceInst_is_provided_should_succeed() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
-        // When
-        List<SclReportItem> sclReportItems = controlBlockEditorService.createDataSetAndControlBlocks(scd, "IED_NAME1", "LD_INST11", allowedFcdas);
-        // Then
-        assertThat(sclReportItems).isEmpty();
-    }
-
-    @Test
-    void createDataSetAndControlBlocks_when_targetIedName_is_not_found_and_targetLDeviceInst_is_provided_should_throw_exception() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
-        // When & Then
-        assertThatThrownBy(() -> controlBlockEditorService.createDataSetAndControlBlocks(scd, "non_existing_IED_name", "LD_INST11", allowedFcdas))
-                .isInstanceOf(ScdException.class)
-                .hasMessage("IED.name 'non_existing_IED_name' not found in SCD");
-    }
-
-    @Test
-    void createDataSetAndControlBlocks_when_targetIedName_and_targetLDeviceInst_is_not_found_should_throw_exception() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
-        // When & Then
-        assertThatThrownBy(() -> controlBlockEditorService.createDataSetAndControlBlocks(scd, "IED_NAME1", "non_existing_LDevice_inst", allowedFcdas))
-                .isInstanceOf(ScdException.class)
-                .hasMessage("LDevice.inst 'non_existing_LDevice_inst' not found in IED 'IED_NAME1'");
-    }
-
-    @Test
-    void createDataSetAndControlBlocks_when_targetLDeviceInst_is_provided_without_targetIedName_should_throw_exception() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
-        // When & Then
-        assertThatThrownBy(() -> controlBlockEditorService.createDataSetAndControlBlocks(scd, null, "LD_INST11", allowedFcdas))
-                .isInstanceOf(ScdException.class)
-                .hasMessage("IED.name parameter is missing");
-    }
-
-
     @Test
     void updateAllSourceDataSetsAndControlBlocks_should_sort_FCDA_inside_DataSet_and_avoid_duplicates() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success_test_fcda_sort.xml");
+        DACOMM allowedFcdas = DaComTestMarshallerHelper.getDACOMMFromFile("/cb_comm/Template_DA_COMM_v1.xml");
         // When
         List<SclReportItem> sclReportItems = controlBlockEditorService.createDataSetAndControlBlocks(scd, allowedFcdas);
         // Then

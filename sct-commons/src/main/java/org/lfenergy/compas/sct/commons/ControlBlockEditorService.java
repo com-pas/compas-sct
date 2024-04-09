@@ -8,10 +8,11 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.api.ControlBlockEditor;
-import org.lfenergy.compas.sct.commons.dto.FcdaForDataSetsCreation;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.model.cbcom.*;
+import org.lfenergy.compas.sct.commons.model.da_comm.DACOMM;
+import org.lfenergy.compas.sct.commons.model.da_comm.FCDAs;
 import org.lfenergy.compas.sct.commons.scl.ControlService;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
@@ -58,41 +59,11 @@ public class ControlBlockEditorService implements ControlBlockEditor {
     }
 
     @Override
-    public List<SclReportItem> createDataSetAndControlBlocks(SCL scd, Set<FcdaForDataSetsCreation> allowedFcdas) {
-        checkFcdaInitDataPresence(allowedFcdas);
+    public List<SclReportItem> createDataSetAndControlBlocks(SCL scd, DACOMM dacomm) {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        Stream<LDeviceAdapter> lDeviceAdapters = sclRootAdapter.streamIEDAdapters().flatMap(IEDAdapter::streamLDeviceAdapters);
-        return createDataSetAndControlBlocks(lDeviceAdapters, allowedFcdas);
-    }
-
-    @Override
-    public List<SclReportItem> createDataSetAndControlBlocks(SCL scd, String targetIedName, Set<FcdaForDataSetsCreation> allowedFcdas) {
-        checkFcdaInitDataPresence(allowedFcdas);
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(targetIedName);
-        return createDataSetAndControlBlocks(iedAdapter.streamLDeviceAdapters(), allowedFcdas);
-
-    }
-
-    @Override
-    public List<SclReportItem> createDataSetAndControlBlocks(SCL scd, String targetIedName, String targetLDeviceInst, Set<FcdaForDataSetsCreation> allowedFcdas) {
-        requireNotBlank(targetIedName, "IED.name parameter is missing");
-        checkFcdaInitDataPresence(allowedFcdas);
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(targetIedName);
-        LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(targetLDeviceInst);
-        return createDataSetAndControlBlocks(Stream.of(lDeviceAdapter), allowedFcdas);
-    }
-
-    private void checkFcdaInitDataPresence(Set<FcdaForDataSetsCreation> allowedFcdas) {
-        if (allowedFcdas == null || allowedFcdas.isEmpty()) {
-            throw new ScdException("Accepted FCDAs list is empty, you should initialize allowed FCDA lists with CsvHelper class before");
-        }
-    }
-
-    private List<SclReportItem> createDataSetAndControlBlocks(Stream<LDeviceAdapter> lDeviceAdapters, Set<FcdaForDataSetsCreation> allowedFcdas) {
-        return lDeviceAdapters
-                .map(lDeviceAdapter -> lDeviceAdapter.createDataSetAndControlBlocks(allowedFcdas))
+        return sclRootAdapter.streamIEDAdapters()
+                .flatMap(IEDAdapter::streamLDeviceAdapters)
+                .map(lDeviceAdapter -> lDeviceAdapter.createDataSetAndControlBlocks(dacomm.getFCDAs().getFCDA()))
                 .flatMap(List::stream)
                 .toList();
     }

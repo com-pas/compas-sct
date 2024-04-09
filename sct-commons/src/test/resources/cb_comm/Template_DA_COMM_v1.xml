@@ -1,0 +1,22 @@
+<!-- SPDX-FileCopyrightText: 2023 2024 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+<DACOMM xmlns="http://www.rte-france.com/dacomm">
+    <History>
+        <Hitem Version="01.00.00" When="20231013" Who="YHA" What="Création du référentiel"></Hitem>
+    </History>
+    <Version>
+        <SystemVersion MainSystemVersion="01.00"></SystemVersion>
+    </Version>
+	<FCDAs>
+        <FCDA lnClass="ANCR" doName="DoName" daName="daNameST" fc="ST"></FCDA>
+        <FCDA lnClass="ANCR" doName="DoName" daName="daNameMX" fc="MX"></FCDA>
+        <FCDA lnClass="ANCR" doName="OtherDoName" daName="daNameST" fc="ST"></FCDA>
+        <FCDA lnClass="ANCR" doName="DoWithInst" daName="daNameST" fc="ST"></FCDA>
+        <FCDA lnClass="ANCR" doName="DoWithInst.subDo" daName="daNameST" fc="ST"></FCDA>
+        <FCDA lnClass="ANCR" doName="FirstDo" daName="daNameST" fc="ST"></FCDA>
+        <FCDA lnClass="ANCR" doName="SecondDo" daName="daNameST" fc="ST"></FCDA>
+        <FCDA lnClass="ANCR" doName="ThirdDo" daName="daNameST" fc="ST"></FCDA>
+	</FCDAs>
+</DACOMM>
