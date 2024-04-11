@@ -29,29 +29,6 @@ public class LnodeTypeService {
         return getFilteredLnodeTypes(tDataTypeTemplates, tlNodeTypePredicate).findFirst();
     }
 
-    public Stream<DataAttributeRef> getAllDOAndDA(TDataTypeTemplates dtt, String tlNodeTypeId)  {
-        DataAttributeRef dataAttributeRef = new  DataAttributeRef();
-        dataAttributeRef.setLnType(tlNodeTypeId);
-        return findLnodeType(dtt, tlNodeType -> tlNodeType.getId().equals(tlNodeTypeId))
-                .map(tlNodeType -> {
-                   if(tlNodeType.isSetLnClass() && !tlNodeType.getLnClass().isEmpty()) {
-                       dataAttributeRef.setLnClass(tlNodeType.getLnClass().get(0));
-                   }
-                  return tlNodeType.getDO()
-                          .stream()
-                          .map(tdo -> {
-                              dataAttributeRef.getDoName().setName(tdo.getName());
-                              return doTypeService.findDoType(dtt, tdoType -> tdoType.getId().equals(tdo.getType()));
-                          })
-                          .filter(Optional::isPresent)
-                          .map(Optional::orElseThrow)
-                          .flatMap(tdoType -> {
-                              dataAttributeRef.getDoName().setCdc(tdoType.getCdc());
-                              return doTypeService.getAllSDOAndDA(dtt, tdoType, dataAttributeRef).stream();
-                          });
-                }).orElseThrow();
-    }
-
     public Stream<DataAttributeRef> getFilteredDOAndDA(TDataTypeTemplates dtt, DataAttributeRef filter)  {
        return findLnodeType(dtt, tlNodeType -> tlNodeType.getId().equals(filter.getLnType()))
                .stream()

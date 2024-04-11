@@ -86,53 +86,6 @@ class LnodeTypeServiceTest {
     }
 
     @Test
-    void getAllDOAndDA_when_given_LNodeType_should_return_expected_allDataAttributeReference() {
-        //Given
-        TDataTypeTemplates dtt = initDttFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda_test.xml");
-        String lNodeTypeId = "LNodeType0";
-        //When
-        LnodeTypeService lnodeTypeService = new LnodeTypeService();
-        List<DataAttributeRef> result = lnodeTypeService.getAllDOAndDA(dtt, lNodeTypeId).toList();
-        //Then
-        assertThat(result).hasSize(9).extracting(
-                        DataAttributeRef::getDoRef, DataAttributeRef::getSdoNames,
-                        DataAttributeRef::getDaRef, DataAttributeRef::getBdaNames, DataAttributeRef::getBType, DataAttributeRef::getType)
-                .containsExactlyInAnyOrder(
-                        tuple("FirstDoName", List.of(),
-                                "sampleDaName1", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
-                        tuple("FirstDoName.sdoName1", List.of("sdoName1"),
-                                "sampleDaName21", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
-                        tuple("FirstDoName.sdoName1.sdoName21", List.of("sdoName1", "sdoName21"),
-                                "sampleDaName31", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
-                        tuple("FirstDoName.sdoName1.sdoName21.sdoName31", List.of("sdoName1", "sdoName21", "sdoName31"),
-                                "sampleDaName41", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
-                        tuple("FirstDoName.sdoName2", List.of("sdoName2"),
-                                "sampleDaName11", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
-                        tuple("FirstDoName.sdoName2", List.of("sdoName2"),
-                                "structDaName1.sampleBdaName1", List.of("sampleBdaName1"), TPredefinedBasicTypeEnum.BOOLEAN, null),
-                        tuple("FirstDoName.sdoName2", List.of("sdoName2"),
-                                "structDaName1.structBdaName1.sampleBdaName21", List.of("structBdaName1", "sampleBdaName21"), TPredefinedBasicTypeEnum.BOOLEAN, null),
-                        tuple("FirstDoName.sdoName2", List.of("sdoName2"),
-                                "structDaName1.structBdaName1.enumBdaName22", List.of("structBdaName1", "enumBdaName22"), TPredefinedBasicTypeEnum.ENUM, "EnumType1"),
-                        tuple("SecondDoName", List.of(),
-                                "sampleDaName41", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null)
-                );
-    }
-
-    @Test
-    void getAllDOAndDA_should_return_all_dai() {
-        // given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
-        TDataTypeTemplates dtt = scd.getDataTypeTemplates();
-        String lNodeTypeId = "LN2";
-        //When
-        LnodeTypeService lnodeTypeService = new LnodeTypeService();
-        List<DataAttributeRef> result = lnodeTypeService.getAllDOAndDA(dtt, lNodeTypeId).toList();
-        //Then
-        assertThat(result).hasSize(1622);
-    }
-
-    @Test
     void getFilteredDOAndDA_when_given_DoName_should_return_expected_dataReference() {
         //Given
         TDataTypeTemplates dtt = initDttFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda_test.xml");

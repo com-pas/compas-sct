@@ -50,8 +50,26 @@ public class DataTypeTemplatesService implements DataTypeTemplateReader {
 
     @Override
     public Stream<DataAttributeRef> getAllDOAndDA(TDataTypeTemplates dtt) {
-        return dtt.getLNodeType().stream()
-                .flatMap(tlNodeType -> lnodeTypeService.getAllDOAndDA(dtt, tlNodeType.getId()));
+        return lnodeTypeService.getLnodeTypes(dtt)
+                .flatMap(tlNodeType -> {
+                    DataAttributeRef dataAttributeRef = new DataAttributeRef();
+                    dataAttributeRef.setLnType(tlNodeType.getId());
+                    if (tlNodeType.isSetLnClass() && !tlNodeType.getLnClass().isEmpty()) {
+                        dataAttributeRef.setLnClass(tlNodeType.getLnClass().getFirst());
+                    }
+                    return tlNodeType.getDO()
+                            .stream()
+                            .map(tdo -> {
+                                dataAttributeRef.getDoName().setName(tdo.getName());
+                                return doTypeService.findDoType(dtt, tdoType -> tdoType.getId().equals(tdo.getType()))
+                                        .map(doType -> {
+                                            dataAttributeRef.getDoName().setCdc(doType.getCdc());
+                                            return doTypeService.getAllSDOAndDA(dtt, doType, dataAttributeRef).stream();
+                                        });
+                            })
+                            .filter(Optional::isPresent)
+                            .flatMap(Optional::orElseThrow);
+                });
     }
 
     @Override
