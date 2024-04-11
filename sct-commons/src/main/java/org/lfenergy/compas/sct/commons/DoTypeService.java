@@ -48,7 +48,7 @@ public class DoTypeService {
                 daTypeService.findDaType(dtt, tdaType -> tdaType.getId().equals(tda.getType()))
                         .ifPresent(nextDaType -> result.addAll(getDataAttributesFromBDA(dtt, nextDaType, newDataObjectRef)));
             } else {
-                updateDaNameFromDaOrBda(tda, newDataObjectRef.getDaName());
+                newDataObjectRef.setDaName(updateDaNameFromDaOrBda(tda, newDataObjectRef.getDaName()));
                 result.add(newDataObjectRef);
             }
         });
@@ -78,18 +78,19 @@ public class DoTypeService {
                 daTypeService.findDaType(dtt, tdaType -> tdaType.getId().equals(tbda.getType()))
                         .ifPresent(nextDaType -> result.addAll(getDataAttributesFromBDA(dtt, nextDaType, newDataAttributeRef)));
             } else {
-                updateDaNameFromDaOrBda(tbda, newDataAttributeRef.getDaName());
+                newDataAttributeRef.setDaName(updateDaNameFromDaOrBda(tbda, newDataAttributeRef.getDaName()));
                 result.add(newDataAttributeRef);
             }
         });
         return result;
     }
 
-    private void updateDaNameFromDaOrBda(TAbstractDataAttribute daOrBda, DaTypeName daTypeName) {
+    private DaTypeName updateDaNameFromDaOrBda(TAbstractDataAttribute daOrBda, DaTypeName daTypeName) {
         if (daOrBda.isSetType()) daTypeName.setType(daOrBda.getType());
         if (daOrBda.isSetBType()) daTypeName.setBType(daOrBda.getBType());
         if (daOrBda.isSetValImport()) daTypeName.setValImport(daOrBda.isValImport());
         if (daOrBda.isSetVal()) daTypeName.addDaiValues(daOrBda.getVal());
+        return daTypeName;
     }
 
 }
