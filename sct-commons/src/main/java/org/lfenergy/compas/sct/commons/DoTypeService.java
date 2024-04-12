@@ -4,12 +4,14 @@
 
 package org.lfenergy.compas.sct.commons;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.domain.DaDomain;
+import org.lfenergy.compas.sct.commons.domain.DoLinkedToDa;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -66,6 +68,57 @@ public class DoTypeService {
         return result;
     }
 
+    public List<DoLinkedToDa> getAllSDOLinkedToDa(TDataTypeTemplates dtt, TDOType tdoType, DoLinkedToDa filtredDoLinkedToDa) {
+        List<DoLinkedToDa> result = new ArrayList<>();
+        // DA -> BDA -> BDA..
+        sdoOrDAService.getDAs(tdoType).forEach(tda -> {
+            DoLinkedToDa doLinkedToDa = SerializationUtils.clone(filtredDoLinkedToDa);
+            doLinkedToDa.getDaDomain().setDaName(tda.getName());
+            if(tda.isSetFc()) {
+                doLinkedToDa.getDaDomain().setFc(tda.getFc());
+            }
+
+            // STRUCT type (BType=STRUCT) refer to BDA, otherwise it is DA
+            if(tda.isSetType() && tda.isSetBType() && tda.getBType().equals(TPredefinedBasicTypeEnum.STRUCT)) {
+                daTypeService.findDaType(dtt, tdaType -> tdaType.getId().equals(tda.getType()))
+                        .ifPresent(nextDaType -> result.addAll(getDaLinkedToBDA(dtt, nextDaType, doLinkedToDa)));
+            } else {
+                doLinkedToDa.setDaDomain(updateDaNameFromDaOrBda(tda, doLinkedToDa.getDaDomain()));
+                result.add(doLinkedToDa);
+            }
+        });
+        // SDO -> SDO -> SDO..
+        sdoOrDAService.getSDOs(tdoType)
+                .forEach(tsdo -> findDoType(dtt, tdoType1 -> tsdo.isSetType() && tdoType1.getId().equals(tsdo.getType()))
+                        .ifPresent(nextDoType -> {
+                            DoLinkedToDa newDoLinkedToDa = SerializationUtils.clone(filtredDoLinkedToDa);
+                            newDoLinkedToDa.getDoDomain().getSdoNames().add(tsdo.getName());
+                            if(nextDoType.isSetCdc()) {
+                                newDoLinkedToDa.getDoDomain().setCdc(nextDoType.getCdc());
+                            }
+                            result.addAll(getAllSDOLinkedToDa(dtt, nextDoType, newDoLinkedToDa));
+                        }));
+        return result;
+    }
+    private List<DoLinkedToDa> getDaLinkedToBDA(TDataTypeTemplates dtt, TDAType tdaType1, DoLinkedToDa filtredDoLinkedToDa) {
+        List<DoLinkedToDa> result = new ArrayList<>();
+        // BDA -> BDA -> BDA..
+        bdaService.getBDAs(tdaType1).forEach(tbda -> {
+            DoLinkedToDa doLinkedToDa = SerializationUtils.clone(filtredDoLinkedToDa);
+            doLinkedToDa.getDaDomain().getBdaNames().add(tbda.getName());
+
+            // STRUCT type (BType=STRUCT) refer to complex BDA object, otherwise it is kind of DA object
+            if(tbda.isSetType() && tbda.getBType().equals(TPredefinedBasicTypeEnum.STRUCT)){
+                daTypeService.findDaType(dtt, tdaType -> tdaType.getId().equals(tbda.getType()))
+                        .ifPresent(nextDaType -> result.addAll(getDaLinkedToBDA(dtt, nextDaType, doLinkedToDa)));
+            } else {
+                doLinkedToDa.setDaDomain(updateDaNameFromDaOrBda(tbda, doLinkedToDa.getDaDomain()));
+                result.add(doLinkedToDa);
+            }
+        });
+        return result;
+    }
+
     private List<DataAttributeRef> getDataAttributesFromBDA(TDataTypeTemplates dtt, TDAType tdaType1, DataAttributeRef dataAttributeRef) {
         List<DataAttributeRef> result = new ArrayList<>();
         // BDA -> BDA -> BDA..
@@ -91,6 +144,14 @@ public class DoTypeService {
         if (daOrBda.isSetValImport()) daTypeName.setValImport(daOrBda.isValImport());
         if (daOrBda.isSetVal()) daTypeName.addDaiValues(daOrBda.getVal());
         return daTypeName;
+    }
+
+    private DaDomain updateDaNameFromDaOrBda(TAbstractDataAttribute daOrBda, DaDomain daDomain) {
+        if (daOrBda.isSetType()) daDomain.setType(daOrBda.getType());
+        if (daOrBda.isSetBType()) daDomain.setBType(daOrBda.getBType());
+        if (daOrBda.isSetValImport()) daDomain.setValImport(daOrBda.isValImport());
+        if (daOrBda.isSetVal()) daDomain.addDaiValues(daOrBda.getVal());
+        return daDomain;
     }
 
 }

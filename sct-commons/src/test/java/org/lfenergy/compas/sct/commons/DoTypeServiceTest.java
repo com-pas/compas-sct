@@ -6,9 +6,12 @@ package org.lfenergy.compas.sct.commons;
 
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.api.Condition;
-import org.assertj.core.groups.Tuple;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.domain.DaDomain;
+import org.lfenergy.compas.sct.commons.domain.DoDomain;
+import org.lfenergy.compas.sct.commons.domain.DoLinkedToDa;
 import org.lfenergy.compas.sct.commons.dto.DaTypeName;
 import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
 import org.lfenergy.compas.sct.commons.dto.DoTypeName;
@@ -17,7 +20,7 @@ import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.tuple;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateTestUtils.*;
 
 class DoTypeServiceTest {
@@ -117,6 +120,57 @@ class DoTypeServiceTest {
                 );
     }
 
+
+    @Test
+    @Disabled
+    void getAllSDOLinkedToDa_should_return_expected_dataReference() {
+        //Given
+        String SCD_DTT_DO_SDO_DA_BDA = "/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda_test.xml";
+        TDataTypeTemplates dtt = initDttFromFile(SCD_DTT_DO_SDO_DA_BDA);
+
+        DoTypeService doTypeService = new DoTypeService();
+        TDOType tdoType = doTypeService.findDoType(dtt, tdoType1 -> tdoType1.getId()
+                .equals("DOType0")).orElseThrow();
+
+        DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
+        DoDomain doDomain = new DoDomain();
+        doDomain.setDoName("firstDONAME");
+        doLinkedToDa.setDoDomain(doDomain);
+        DaDomain daDomain = new DaDomain();
+        doLinkedToDa.setDaDomain(daDomain);
+
+        //When
+        List<DoLinkedToDa> result = doTypeService.getAllSDOLinkedToDa(dtt, tdoType, doLinkedToDa);
+        //Then
+        assertThat(result).hasSize(8)
+                .extracting(
+                        doLinkedToDa1 -> doLinkedToDa1.getDoDomain().getDoName(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDoDomain().getSdoNames(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDaDomain().getDaName(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDaDomain().getBdaNames(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDaDomain().getBType(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDaDomain().getType()
+                )
+                .containsExactly(
+                        tuple("FirstDoName", List.of(),
+                                "sampleDaName1", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
+                        tuple("FirstDoName", List.of("sdoName1"),
+                                "sampleDaName21", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
+                        tuple("FirstDoName", List.of("sdoName1", "sdoName21"),
+                                "sampleDaName31", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
+                        tuple("FirstDoName", List.of("sdoName1", "sdoName21", "sdoName31"),
+                                "sampleDaName41", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
+                        tuple("FirstDoName", List.of("sdoName2"),
+                                "sampleDaName11", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
+                        tuple("FirstDoName", List.of("sdoName2"),
+                                "structDaName1", List.of("sampleBdaName1"), TPredefinedBasicTypeEnum.BOOLEAN, null),
+                        tuple("FirstDoName", List.of("sdoName2"),
+                                "structDaName1", List.of("structBdaName1", "sampleBdaName21"), TPredefinedBasicTypeEnum.BOOLEAN, null),
+                        tuple("FirstDoName", List.of("sdoName2"),
+                                "structDaName1", List.of("structBdaName1", "enumBdaName22"), TPredefinedBasicTypeEnum.ENUM, "EnumType1")
+                );
+    }
+
     @Test
     void getAllSDOAndDA_should_return_all_dai() {
         // GIVEN
@@ -147,4 +201,37 @@ class DoTypeServiceTest {
                 .areExactly(270, new Condition<>(dataAttributeRef -> dataAttributeRef.getDaName().getName().equals("da22"), "Il n'y a que certaines réponses contenant da22"))
                 .areExactly(270, new Condition<>(dataAttributeRef -> dataAttributeRef.getDaName().getName().equals("da32"), "Il n'y a que certaines réponses contenant da32"));
     }
+
+
+    @Test
+    void getAllSDOLinkedToDa_should_return_all_dai() {
+        // GIVEN
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
+        TDataTypeTemplates dtt = scd.getDataTypeTemplates();
+
+        DoTypeService doTypeService = new DoTypeService();
+        TDOType tdoType = doTypeService.findDoType(dtt, tdoType1 -> tdoType1.getId()
+                .equals("DO11")).orElseThrow();
+        DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
+        DoDomain doDomain = new DoDomain();
+        doDomain.setDoName("firstDONAME");
+        doLinkedToDa.setDoDomain(doDomain);
+        DaDomain daDomain = new DaDomain();
+        doLinkedToDa.setDaDomain(daDomain);
+        // When
+        List<DoLinkedToDa> list = doTypeService.getAllSDOLinkedToDa(dtt, tdoType, doLinkedToDa);
+        // Then
+        assertThat(list)
+                .hasSize(811)
+//                .allMatch(dataAttributeRef -> dataAttributeRef.getPrefix() == null)
+//                .allMatch(dataAttributeRef -> dataAttributeRef.getLnType() == null)
+//                .allMatch(dataAttributeRef -> dataAttributeRef.getLnClass() == null)
+//                .allMatch(dataAttributeRef -> dataAttributeRef.getLnInst() == null)
+                .allMatch(dataAttributeRef -> StringUtils.startsWith(dataAttributeRef.getDoDomain().getDoName(), "firstDONAME"))
+                .areExactly(1, new Condition<>(dataAttributeRef -> dataAttributeRef.getDaDomain().getDaName().equals("da1"), "Il n'y a que certaines réponses contenant da1"))
+                .areExactly(270, new Condition<>(dataAttributeRef -> dataAttributeRef.getDaDomain().getDaName().equals("da11"), "Il n'y a que certaines réponses contenant da11"))
+                .areExactly(270, new Condition<>(dataAttributeRef -> dataAttributeRef.getDaDomain().getDaName().equals("da22"), "Il n'y a que certaines réponses contenant da22"))
+                .areExactly(270, new Condition<>(dataAttributeRef -> dataAttributeRef.getDaDomain().getDaName().equals("da32"), "Il n'y a que certaines réponses contenant da32"));
+    }
+
 }

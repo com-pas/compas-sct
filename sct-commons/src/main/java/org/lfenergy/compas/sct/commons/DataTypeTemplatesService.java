@@ -6,6 +6,8 @@ package org.lfenergy.compas.sct.commons;
 
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.api.DataTypeTemplateReader;
+import org.lfenergy.compas.sct.commons.domain.DoDomain;
+import org.lfenergy.compas.sct.commons.domain.DoLinkedToDa;
 import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
 
 import java.util.*;
@@ -65,6 +67,32 @@ public class DataTypeTemplatesService implements DataTypeTemplateReader {
                                         .map(doType -> {
                                             dataAttributeRef.getDoName().setCdc(doType.getCdc());
                                             return doTypeService.getAllSDOAndDA(dtt, doType, dataAttributeRef).stream();
+                                        });
+                            })
+                            .filter(Optional::isPresent)
+                            .flatMap(Optional::orElseThrow);
+                });
+    }
+
+    // TODO
+    @Override
+    public Stream<DoLinkedToDa> getAllDoLinkedToDa(TDataTypeTemplates dtt) {
+            return lnodeTypeService.getLnodeTypes(dtt)
+                .flatMap(tlNodeType -> {
+                    DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
+                    //setLnType(tlNodeType.getId());
+//                    if (tlNodeType.isSetLnClass() && !tlNodeType.getLnClass().isEmpty()) {
+//                      setLnClass(tlNodeType.getLnClass().getFirst());
+//                    }
+                    return tlNodeType.getDO()
+                            .stream()
+                            .map(tdo -> {
+                                return doTypeService.findDoType(dtt, tdoType -> tdoType.getId().equals(tdo.getType()))
+                                        .map(doType -> {
+                                            DoDomain doDomain = new DoDomain();
+                                            doDomain.setDoName(tdo.getName());
+                                            doLinkedToDa.setDoDomain(doDomain);
+                                            return doTypeService.getAllSDOLinkedToDa(dtt, doType, doLinkedToDa).stream();
                                         });
                             })
                             .filter(Optional::isPresent)

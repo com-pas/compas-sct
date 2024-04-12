@@ -6,6 +6,7 @@ package org.lfenergy.compas.sct.commons.api;
 
 import org.lfenergy.compas.scl2007b4.model.TAnyLN;
 import org.lfenergy.compas.scl2007b4.model.TDataTypeTemplates;
+import org.lfenergy.compas.sct.commons.domain.DoLinkedToDa;
 import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
 
 import java.util.Optional;
@@ -16,6 +17,7 @@ public interface DataTypeTemplateReader {
     boolean isDoModAndDaStValExist(TDataTypeTemplates dtt, String lNodeTypeId);
 
     Stream<DataAttributeRef> getAllDOAndDA(TDataTypeTemplates tDataTypeTemplates);
+    Stream<DoLinkedToDa> getAllDoLinkedToDa(TDataTypeTemplates tDataTypeTemplates);
 
     Stream<DataAttributeRef> getFilteredDOAndDA(TDataTypeTemplates dtt, TAnyLN anyLn, DataAttributeRef filter);
 
