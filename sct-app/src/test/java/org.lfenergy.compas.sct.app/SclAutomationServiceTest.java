@@ -35,7 +35,7 @@ import static org.mockito.Mockito.*;
 class SclAutomationServiceTest {
 
     @InjectMocks
-    private SclAutomationService sclAutomationService ;
+    private SclAutomationService sclAutomationService;
     @Mock
     private SclEditor sclEditor;
     @Mock

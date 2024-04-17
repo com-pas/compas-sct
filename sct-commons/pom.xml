@@ -18,12 +18,16 @@
     <name>SCT-COMMONS</name>
 
     <properties>
-        <opencsv.version>5.7.1</opencsv.version>
         <jakarta.xml.bind-api.version>4.0.0</jakarta.xml.bind-api.version>
         <jaxb-runtime.version>4.0.3</jaxb-runtime.version>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.lfenergy.compas.core</groupId>
+            <artifactId>commons</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
@@ -34,7 +38,7 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.12.0</version>
         </dependency>
-        <!-- pour l'Object Mapper-->
+        <!-- for Object Mapper -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
@@ -83,11 +87,6 @@
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.opencsv</groupId>
-            <artifactId>opencsv</artifactId>
-            <version>${opencsv.version}</version>
         </dependency>
     </dependencies>
 
@@ -230,6 +229,23 @@
                                 <xjbSource>${project.basedir}/src/main/resources/binding_configuration.xjb</xjbSource>
                             </xjbSources>
                             <packageName>org.lfenergy.compas.sct.commons.model.cbcom</packageName>
+                            <noPackageLevelAnnotations>true</noPackageLevelAnnotations>
+                            <clearOutputDir>false</clearOutputDir>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>da_cb_com</id>
+                        <goals>
+                            <goal>xjc</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.basedir}/src/main/resources/xsd/CB_COMM_V1.xsd</source>
+                            </sources>
+                            <xjbSources>
+                                <xjbSource>${project.basedir}/src/main/resources/binding_configuration.xjb</xjbSource>
+                            </xjbSources>
+                            <packageName>org.lfenergy.compas.sct.commons.model.da_comm</packageName>
                             <noPackageLevelAnnotations>true</noPackageLevelAnnotations>
                             <clearOutputDir>false</clearOutputDir>
                         </configuration>

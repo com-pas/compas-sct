@@ -52,10 +52,13 @@
         <junit-version>5.9.0</junit-version>
         <logback-classic.version>1.4.5</logback-classic.version>
         <assertj.version>3.22.0</assertj.version>
-        <!-- lombok est compatible jdk21 à partir de la 18.30-->
+        <!-- with version 18.30, lombok is compatible with JDK 21 -->
         <lombok.version>1.18.30</lombok.version>
         <mockito.version>5.5.0</mockito.version>
         <jackson-databind.version>2.13.4.1</jackson-databind.version>
+
+        <!-- utils -->
+        <commons-beanutils.version>1.9.4</commons-beanutils.version>
     </properties>
 
     <dependencies>
@@ -110,6 +113,12 @@
                 <groupId>org.lfenergy.compas.xsd</groupId>
                 <artifactId>compas-scl-xsd</artifactId>
                 <version>${compas-scl-xsd.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.lfenergy.compas.core</groupId>
+                <artifactId>commons</artifactId>
+                <version>${compas-core.version}</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>ch.qos.logback</groupId>
