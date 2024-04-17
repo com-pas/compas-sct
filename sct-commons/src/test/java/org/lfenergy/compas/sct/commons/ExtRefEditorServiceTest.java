@@ -217,7 +217,7 @@ class ExtRefEditorServiceTest {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_iedSources_in_different_bay.xml");
         TChannel channel = new TChannel();
-        channel.setBayScope(TCBscopeType.BAY_INTERNAL);
+        channel.setBayScope(TCBScopeType.BAY_INTERNAL);
         channel.setChannelType(TChannelType.DIGITAL);
         channel.setChannelNum("1");
         channel.setChannelShortLabel("MR.PX1");
@@ -286,7 +286,7 @@ class ExtRefEditorServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_extref_with_IedType_BCU.xml");
         TChannel channel = new TChannel();
-        channel.setBayScope(TCBscopeType.BAY_INTERNAL);
+        channel.setBayScope(TCBScopeType.BAY_INTERNAL);
         channel.setChannelType(TChannelType.DIGITAL);
         channel.setChannelNum("1");
         channel.setChannelShortLabel("MR.PX1");
@@ -349,7 +349,7 @@ class ExtRefEditorServiceTest {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_manyIedSources_in_same_bay.xml");
         TChannel channel = new TChannel();
-        channel.setBayScope(TCBscopeType.BAY_INTERNAL);
+        channel.setBayScope(TCBScopeType.BAY_INTERNAL);
         channel.setChannelType(TChannelType.DIGITAL);
         channel.setChannelNum("1");
         channel.setChannelShortLabel("MR.PX1");
@@ -410,7 +410,7 @@ class ExtRefEditorServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_dataTypeTemplateValid.xml");
 
         TChannel analogueChannel1WithBayInternalScope = new TChannel();
-        analogueChannel1WithBayInternalScope.setBayScope(TCBscopeType.BAY_INTERNAL);
+        analogueChannel1WithBayInternalScope.setBayScope(TCBScopeType.BAY_INTERNAL);
         analogueChannel1WithBayInternalScope.setChannelType(TChannelType.ANALOG);
         analogueChannel1WithBayInternalScope.setChannelNum("1");
         analogueChannel1WithBayInternalScope.setChannelShortLabel("V0");
@@ -431,7 +431,7 @@ class ExtRefEditorServiceTest {
         analogueChannel1WithBayInternalScope.setBDAName("i");
 
         TChannel analogueChannel10WithBayExternalBayScope = new TChannel();
-        analogueChannel10WithBayExternalBayScope.setBayScope(TCBscopeType.BAY_EXTERNAL);
+        analogueChannel10WithBayExternalBayScope.setBayScope(TCBScopeType.BAY_EXTERNAL);
         analogueChannel10WithBayExternalBayScope.setChannelType(TChannelType.ANALOG);
         analogueChannel10WithBayExternalBayScope.setChannelNum("10");
         analogueChannel10WithBayExternalBayScope.setChannelShortLabel("U101");
@@ -505,7 +505,7 @@ class ExtRefEditorServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_withoutModStValInLN0.xml");
         // When
         TChannel channel = new TChannel();
-        channel.setBayScope(TCBscopeType.BAY_INTERNAL);
+        channel.setBayScope(TCBScopeType.BAY_INTERNAL);
         channel.setChannelType(TChannelType.DIGITAL);
         channel.setChannelNum("1");
         channel.setChannelShortLabel("MR.PX1");
@@ -545,7 +545,7 @@ class ExtRefEditorServiceTest {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_with_inactive_ldevice_ldepf.xml");
         TChannel channel = new TChannel();
-        channel.setBayScope(TCBscopeType.BAY_INTERNAL);
+        channel.setBayScope(TCBScopeType.BAY_INTERNAL);
         channel.setChannelType(TChannelType.DIGITAL);
         channel.setChannelNum("1");
         channel.setChannelShortLabel("MR.PX1");

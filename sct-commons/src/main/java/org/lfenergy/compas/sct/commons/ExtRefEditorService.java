@@ -11,7 +11,7 @@ import org.lfenergy.compas.sct.commons.api.ExtRefEditor;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.model.epf.EPF;
-import org.lfenergy.compas.sct.commons.model.epf.TCBscopeType;
+import org.lfenergy.compas.sct.commons.model.epf.TCBScopeType;
 import org.lfenergy.compas.sct.commons.model.epf.TChannel;
 import org.lfenergy.compas.sct.commons.model.epf.TChannelType;
 import org.lfenergy.compas.sct.commons.scl.ExtRefService;
@@ -65,9 +65,9 @@ public class ExtRefEditorService implements ExtRefEditor {
      */
     private static List<TIED> getIedSources(SclRootAdapter sclRootAdapter, TCompasBay compasBay, TChannel channel) {
         return sclRootAdapter.streamIEDAdapters()
-                .filter(iedAdapter -> (channel.getBayScope().equals(TCBscopeType.BAY_EXTERNAL)
+                .filter(iedAdapter -> (channel.getBayScope().equals(TCBScopeType.BAY_EXTERNAL)
                         && iedAdapter.getPrivateCompasBay().stream().noneMatch(bay -> bay.getUUID().equals(compasBay.getUUID())))
-                        || (channel.getBayScope().equals(TCBscopeType.BAY_INTERNAL)
+                        || (channel.getBayScope().equals(TCBScopeType.BAY_INTERNAL)
                         && iedAdapter.getPrivateCompasBay().stream().anyMatch(bay -> bay.getUUID().equals(compasBay.getUUID()))))
                 .filter(iedAdapter -> doesIcdHeaderMatchLDEPFChannel(iedAdapter, channel))
                 .filter(iedAdapter -> getActiveSourceLDeviceByLDEPFChannel(iedAdapter, channel)
