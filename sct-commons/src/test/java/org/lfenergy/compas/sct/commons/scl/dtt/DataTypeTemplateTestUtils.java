@@ -6,6 +6,7 @@ package org.lfenergy.compas.sct.commons.scl.dtt;
 
 import lombok.experimental.UtilityClass;
 import org.lfenergy.compas.scl2007b4.model.SCL;
+import org.lfenergy.compas.scl2007b4.model.TDataTypeTemplates;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
@@ -22,6 +23,10 @@ public class DataTypeTemplateTestUtils {
                 sclRootAdapter,
                 scd.getDataTypeTemplates()
         );
+    }
+
+    public static TDataTypeTemplates initDttFromFile(String fileName) {
+        return SclTestMarshaller.getSCLFromFile(fileName).getDataTypeTemplates();
     }
 
 }
