@@ -4,17 +4,14 @@
 
 package org.lfenergy.compas.sct.commons;
 
-import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.scl2007b4.model.SCL;
-import org.lfenergy.compas.scl2007b4.model.TDO;
-import org.lfenergy.compas.scl2007b4.model.TDataTypeTemplates;
-import org.lfenergy.compas.scl2007b4.model.TLNodeType;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 
 class LnodeTypeServiceTest {
 
@@ -64,7 +61,7 @@ class LnodeTypeServiceTest {
         assertThat(tlnodeTypes)
                 .hasSize(1)
                 .extracting(TLNodeType::getLnClass, TLNodeType::getId)
-                .containsExactly(Tuple.tuple(List.of("LPAI"), "RTE_8884DBCF760D916CCE3EE9D1846CE46F_LPAI_V1.0.0"));
+                .containsExactly(tuple(List.of("LPAI"), "RTE_8884DBCF760D916CCE3EE9D1846CE46F_LPAI_V1.0.0"));
     }
 
     @Test
@@ -83,4 +80,5 @@ class LnodeTypeServiceTest {
                 .extracting(TLNodeType::getLnClass, TLNodeType::getId)
                 .containsExactly(List.of("LPAI"), "RTE_8884DBCF760D916CCE3EE9D1846CE46F_LPAI_V1.0.0");
     }
+
 }
