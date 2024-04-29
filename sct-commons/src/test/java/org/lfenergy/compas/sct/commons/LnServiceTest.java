@@ -23,21 +23,101 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class LnServiceTest {
 
+    private final LnService lnService = new LnService();
+
     @Test
     void getAnylns_should_return_lns() {
         //Given
         SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
-        TLDevice tlDevice = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst();
-        LnService lnService = new LnService();
+        TLDevice ldsuied = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst();
 
         //When
-        List<TAnyLN> tAnyLNS = lnService.getAnylns(tlDevice).toList();
+        List<TAnyLN> tAnyLNS = lnService.getAnylns(ldsuied).toList();
 
         //Then
         assertThat(tAnyLNS)
                 .hasSize(2)
-                .extracting(TAnyLN::getLnType)
-                .containsExactly("RTE_080BBB4D93E4E704CF69E8616CAF1A74_LLN0_V1.0.0", "RTE_8884DBCF760D916CCE3EE9D1846CE46F_LPAI_V1.0.0");
+                .extracting(TAnyLN::getLnType, TAnyLN::getClass)
+                .containsExactly(Tuple.tuple("RTE_080BBB4D93E4E704CF69E8616CAF1A74_LLN0_V1.0.0", LN0.class),
+                        Tuple.tuple("RTE_8884DBCF760D916CCE3EE9D1846CE46F_LPAI_V1.0.0", TLN.class));
+    }
+
+    @Test
+    void findAnyLn_should_return_ln() {
+        //Given
+        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        TLDevice ldsuied = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst();
+
+        //When
+        Optional<TAnyLN> anyLn = lnService.findAnyLn(ldsuied, tAnyLN -> tAnyLN.getLnType().equals("RTE_080BBB4D93E4E704CF69E8616CAF1A74_LLN0_V1.0.0"));
+
+        //Then
+        assertThat(anyLn.orElseThrow())
+                .extracting(TAnyLN::getLnType, TAnyLN::getClass)
+                .containsExactly("RTE_080BBB4D93E4E704CF69E8616CAF1A74_LLN0_V1.0.0", LN0.class);
+    }
+
+    @Test
+    void getLns_should_return_lns() {
+        //Given
+        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        TLDevice ldsuied = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst();
+
+        //When
+        List<TLN> tlns = lnService.getLns(ldsuied).toList();
+
+        //Then
+        assertThat(tlns)
+                .hasSize(1)
+                .extracting(TLN::getLnType, TLN::getInst, TLN::getLnClass, TLN::getClass)
+                .containsExactly(Tuple.tuple("RTE_8884DBCF760D916CCE3EE9D1846CE46F_LPAI_V1.0.0", "1", List.of("LPAI"), TLN.class));
+    }
+
+    @Test
+    void getFilteredLns_should_return_lns() {
+        //Given
+        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        TLDevice ldsuied = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst();
+
+        //When
+        List<TLN> tlns = lnService.getFilteredLns(ldsuied, tln -> tln.getLnType().equals("RTE_8884DBCF760D916CCE3EE9D1846CE46F_LPAI_V1.0.0")).toList();
+
+        //Then
+        assertThat(tlns)
+                .hasSize(1)
+                .extracting(TLN::getLnType, TLN::getInst, TLN::getLnClass, TLN::getClass)
+                .containsExactly(Tuple.tuple("RTE_8884DBCF760D916CCE3EE9D1846CE46F_LPAI_V1.0.0", "1", List.of("LPAI"), TLN.class));
+    }
+
+    @Test
+    void findLn_should_return_lns() {
+        //Given
+        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        TLDevice ldsuied = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst();
+
+        //When
+        Optional<TLN> ln = lnService.findLn(ldsuied, tln -> tln.getLnType().equals("RTE_8884DBCF760D916CCE3EE9D1846CE46F_LPAI_V1.0.0"));
+
+        //Then
+        assertThat(ln.orElseThrow())
+                .extracting(TLN::getLnType, TLN::getInst, TLN::getLnClass, TLN::getClass)
+                .containsExactly("RTE_8884DBCF760D916CCE3EE9D1846CE46F_LPAI_V1.0.0", "1", List.of("LPAI"), TLN.class);
+    }
+
+    @Test
+    void getFilteredAnyLns_should_return_lns() {
+        //Given
+        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        TLDevice ldsuied = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst();
+
+        //When
+        List<TAnyLN> tAnyLNS = lnService.getFilteredAnyLns(ldsuied, tAnyLN -> tAnyLN.getLnType().equals("RTE_080BBB4D93E4E704CF69E8616CAF1A74_LLN0_V1.0.0")).toList();
+
+        //Then
+        assertThat(tAnyLNS)
+                .hasSize(1)
+                .extracting(TAnyLN::getLnType, TAnyLN::getClass)
+                .containsExactly(Tuple.tuple("RTE_080BBB4D93E4E704CF69E8616CAF1A74_LLN0_V1.0.0", LN0.class));
     }
 
     @Test
@@ -45,7 +125,6 @@ class LnServiceTest {
         //Given
         SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
         TLDevice tlDevice = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst();
-        LnService lnService = new LnService();
 
         //When
         Optional<ActiveStatus> daiModStval = lnService.getDaiModStval(tlDevice.getLN0());
@@ -59,7 +138,6 @@ class LnServiceTest {
         //Given
         SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
         TLDevice tlDevice = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst();
-        LnService lnService = new LnService();
 
         //When
         ActiveStatus lnStatus = lnService.getLnStatus(tlDevice.getLN().getFirst(), tlDevice.getLN0());
@@ -73,7 +151,6 @@ class LnServiceTest {
         //Given
         SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
         TLDevice tlDevice = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst();
-        LnService lnService = new LnService();
 
         //When
         List<TAnyLN> tAnyLNS = lnService.getActiveLns(tlDevice).toList();

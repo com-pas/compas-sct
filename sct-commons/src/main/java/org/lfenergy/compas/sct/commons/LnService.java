@@ -13,6 +13,9 @@ import org.lfenergy.compas.sct.commons.domain.DataObject;
 import org.lfenergy.compas.sct.commons.domain.DoLinkedToDa;
 import org.lfenergy.compas.sct.commons.util.ActiveStatus;
 
+import java.util.Collection;
+import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -25,6 +28,26 @@ public class LnService implements LnEditor {
 
     public Stream<TAnyLN> getAnylns(TLDevice tlDevice) {
         return Stream.concat(Stream.of(tlDevice.getLN0()), tlDevice.getLN().stream());
+    }
+
+    public Stream<TAnyLN> getFilteredAnyLns(TLDevice tlDevice, Predicate<TAnyLN> lnPredicate) {
+        return getAnylns(tlDevice).filter(lnPredicate);
+    }
+
+    public Optional<TAnyLN> findAnyLn(TLDevice tlDevice, Predicate<TAnyLN> lnPredicate) {
+        return getFilteredAnyLns(tlDevice, lnPredicate).findFirst();
+    }
+
+    public Stream<TLN> getLns(TLDevice tlDevice) {
+        return tlDevice.getLN().stream();
+    }
+
+    public Stream<TLN> getFilteredLns(TLDevice tlDevice, Predicate<TLN> lnPredicate) {
+        return getLns(tlDevice).filter(lnPredicate);
+    }
+
+    public Optional<TLN> findLn(TLDevice tlDevice, Predicate<TLN> lnPredicate) {
+        return getFilteredLns(tlDevice, lnPredicate).findFirst();
     }
 
     /**
