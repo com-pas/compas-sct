@@ -36,7 +36,7 @@
         <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
 
         <!-- compas -->
-        <compas-core.version>0.19.0</compas-core.version>
+        <compas-core.version>0.20.0</compas-core.version>
         <compas-scl-xsd.version>0.0.4</compas-scl-xsd.version>
 
         <!-- maven -->
