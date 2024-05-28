@@ -10,6 +10,7 @@ import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
 import jakarta.xml.bind.util.JAXBSource;
 import org.apache.commons.lang3.StringUtils;
+import org.lfenergy.compas.scl2007b4.model.TP;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
 import javax.xml.namespace.QName;
@@ -18,7 +19,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 
 public final class Utils {
 
@@ -242,46 +242,7 @@ public final class Utils {
         if (lnClass1.size() > 1){
             throw new IllegalArgumentException("lnClass can only have a single value but got : [%s] " + String.join(",", lnClass1));
         }
-        return equalsOrBothBlank(lnClass1.get(0), lnClass2);
-    }
-
-    /**
-     * Create a new Iterator that provides all ordered long value in the given range
-     * @param startInclusive the first long in the range (inclusive)
-     * @param endInclusive the last long in the range (inclusive). Cannot exceed Long.MAX_VALUE - 1.
-     * @return new Iterator. When endInclusive < startInclusive, return an empty iterator.
-     */
-    public static PrimitiveIterator.OfLong sequence(long startInclusive, long endInclusive) {
-        if (endInclusive >= Long.MAX_VALUE){
-            throw new IllegalArgumentException("End cannot exceed Long.MAX_VALUE - 1");
-        }
-        return LongStream.range(startInclusive, endInclusive + 1).iterator();
-    }
-
-    /**
-     * Create a new Iterator that provides all ordered MAC-Addresses value included in given range.
-     * See macAddressToLong for the format of MAC-Addresses range,
-     * and see longToMacAddress for the format of MAC-Addresses output
-     * @param startInclusive the first MAC-Address in the range (inclusive)
-     * @param endInclusive the last MAC-Address in the range (inclusive)
-     * @return new Iterator
-     *
-     * @see Utils#macAddressToLong(String)
-     * @see Utils#longToMacAddress(long)
-     */
-    public static Iterator<String> macAddressSequence(String startInclusive, String endInclusive) {
-        PrimitiveIterator.OfLong iterator = sequence(macAddressToLong(startInclusive), macAddressToLong(endInclusive));
-        return new Iterator<>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
-
-            @Override
-            public String next() {
-                return longToMacAddress(iterator.next());
-            }
-        };
+        return equalsOrBothBlank(lnClass1.getFirst(), lnClass2);
     }
 
     /**
@@ -366,4 +327,14 @@ public final class Utils {
         }
     }
 
+    /**
+     * Extract content of P element of given type
+     *
+     * @param type type attribute of P element
+     * @param listOfP list of P elements
+     * @return content of the first P element matching the given type if it exists, else empty Optional.
+     */
+    public static Optional<String> extractFromP(String type, List<TP> listOfP) {
+        return listOfP.stream().filter(tp -> type.equals(tp.getType())).map(TP::getValue).findFirst();
+    }
 }
