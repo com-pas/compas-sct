@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.LN0;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.sct.commons.ControlBlockEditorService;
+import org.lfenergy.compas.sct.commons.LdeviceService;
 import org.lfenergy.compas.sct.commons.SclService;
 import org.lfenergy.compas.sct.commons.SubstationService;
 import org.lfenergy.compas.sct.commons.api.ControlBlockEditor;
@@ -34,7 +35,7 @@ class SclAutomationServiceIntegrationTest {
     private SclAutomationService sclAutomationService ;
     private static final SclEditor sclEditor = new SclService() ;
     private static final SubstationEditor substationEditor = new SubstationService() ;
-    private static final ControlBlockEditor controlBlockEditor = new ControlBlockEditorService(new ControlService()) ;
+    private static final ControlBlockEditor controlBlockEditor = new ControlBlockEditorService(new ControlService(), new LdeviceService()) ;
 
     private HeaderDTO headerDTO;
 
@@ -106,7 +107,7 @@ class SclAutomationServiceIntegrationTest {
         // Then
         assertThat(scd.getHeader().getId()).isNotNull();
         assertThat(scd.getHeader().getHistory().getHitem()).hasSize(1);
-        assertThat(scd.getHeader().getHistory().getHitem().get(0).getWhat()).isEqualTo("what");
+        assertThat(scd.getHeader().getHistory().getHitem().getFirst().getWhat()).isEqualTo("what");
         assertIsMarshallable(scd);
     }
 
@@ -165,7 +166,7 @@ class SclAutomationServiceIntegrationTest {
 
         assertThat(ln0.getDataSet()).isEmpty();
         assertThat(ln0.getInputs().getExtRef()).hasSize(2);
-        assertThat(ln0.getInputs().getExtRef().get(0).isSetSrcLDInst()).isFalse();
+        assertThat(ln0.getInputs().getExtRef().getFirst().isSetSrcLDInst()).isFalse();
         assertIsMarshallable(scd);
     }
 

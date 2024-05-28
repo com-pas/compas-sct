@@ -13,6 +13,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.commons.support.ReflectionSupport;
 import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
 import org.lfenergy.compas.scl2007b4.model.TLN;
+import org.lfenergy.compas.scl2007b4.model.TP;
 import org.lfenergy.compas.sct.commons.dto.FCDAInfo;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
@@ -405,60 +406,6 @@ class UtilsTest {
             .isInstanceOf(IllegalArgumentException.class);
     }
 
-    @Test
-    void sequence_should_return_range_of_numbers(){
-        // Given
-        long startInclusive = 1;
-        long endInclusive = 3;
-        // When
-        PrimitiveIterator.OfLong result = Utils.sequence(startInclusive, endInclusive);
-        // Then
-        assertThat(result.next()).isEqualTo(1);
-        assertThat(result.next()).isEqualTo(2);
-        assertThat(result.next()).isEqualTo(3);
-        assertThat(result.hasNext()).isFalse();
-        assertThatThrownBy(result::nextLong).isInstanceOf(NoSuchElementException.class);
-    }
-
-    @Test
-    void sequence_should_return_empty_iterator(){
-        // Given
-        long startInclusive = 1;
-        long endInclusive = 0;
-        // When
-        PrimitiveIterator.OfLong result = Utils.sequence(startInclusive, endInclusive);
-        // Then
-        assertThat(result.hasNext()).isFalse();
-        assertThatThrownBy(result::nextLong).isInstanceOf(NoSuchElementException.class);
-    }
-
-    @Test
-    void sequence_when_MAX_VALUE_should_throw_exception(){
-        // Given
-        long startInclusive = 1;
-        long endInclusive = Long.MAX_VALUE;
-        // When & Then
-        assertThatThrownBy(() -> Utils.sequence(startInclusive, endInclusive))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("End cannot exceed Long.MAX_VALUE - 1");
-    }
-
-    @Test
-    void macAddressSequence_should_return_range_of_macAddresses(){
-        // Given
-        String startInclusive = "01-0C-CD-01-00-FE";
-        String endInclusive = "01-0C-CD-01-01-01";
-        // When
-        Iterator<String> result = Utils.macAddressSequence(startInclusive, endInclusive);
-        // Then
-        assertThat(result.next()).isEqualTo("01-0C-CD-01-00-FE");
-        assertThat(result.next()).isEqualTo("01-0C-CD-01-00-FF");
-        assertThat(result.next()).isEqualTo("01-0C-CD-01-01-00");
-        assertThat(result.next()).isEqualTo("01-0C-CD-01-01-01");
-        assertThat(result.hasNext()).isFalse();
-        assertThatThrownBy(result::next).isInstanceOf(NoSuchElementException.class);
-    }
-
     @ParameterizedTest
     @CsvSource({"0x123456789ABC,12-34-56-78-9A-BC", "0xAA,00-00-00-00-00-AA"})
     void longToMacAddress_should_convert_long_to_mac_address(long macAddress, String expected){
@@ -533,5 +480,25 @@ class UtilsTest {
         assertThatCode(() -> copySclElement(fcdaInfo, FCDAInfo.class))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("org.lfenergy.compas.sct.commons.dto.FCDAInfo is not known to this context");
+    }
+
+    @Test
+    void extractFromP_should_return_value_for_given_type(){
+        // Given
+        List<TP> listOfPs = List.of(SclConstructorHelper.newP("MY_TYPE_1", "MY_VALUE_1"), SclConstructorHelper.newP("MY_TYPE_2", "MY_VALUE_2"));
+        // When
+        Optional<String> result = Utils.extractFromP("MY_TYPE_2", listOfPs);
+        // Then
+        assertThat(result).hasValue("MY_VALUE_2");
+    }
+
+    @Test
+    void extractFromP_when_no_matching_type_should_return_empty(){
+        // Given
+        List<TP> listOfPs = List.of(SclConstructorHelper.newP("MY_TYPE_1", "MY_VALUE_1"), SclConstructorHelper.newP("MY_TYPE_2", "MY_VALUE_2"));
+        // When
+        Optional<String> result = Utils.extractFromP("MY_TYPE_3", listOfPs);
+        // Then
+        assertThat(result).isEmpty();
     }
 }

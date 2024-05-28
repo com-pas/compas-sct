@@ -50,9 +50,8 @@
         <jaxb2-maven-plugin.version>3.1.0</jaxb2-maven-plugin.version>
 
         <junit-version>5.9.0</junit-version>
-        <logback-classic.version>1.4.5</logback-classic.version>
+        <logback-classic.version>1.5.6</logback-classic.version>
         <assertj.version>3.22.0</assertj.version>
-        <!-- with version 18.30, lombok is compatible with JDK 21 -->
         <lombok.version>1.18.30</lombok.version>
         <mockito.version>5.5.0</mockito.version>
         <jackson-databind.version>2.13.4.1</jackson-databind.version>
