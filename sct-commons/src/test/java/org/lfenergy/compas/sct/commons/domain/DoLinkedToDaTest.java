@@ -67,4 +67,57 @@ class DoLinkedToDaTest {
         assertThat(doLinkedToDa.getDaRef()).isEqualTo("daName.bdaName1");
     }
 
+    @Test
+    void isUpdatable_should_return_true_whenIsDOModDAstVal() {
+        // Given
+        DataObject dataObject = new DataObject();
+        dataObject.setDoName("Mod");
+        DataAttribute dataAttribute = new DataAttribute();
+        dataAttribute.setDaName("stVal");
+
+        DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
+        doLinkedToDa.setDataObject(dataObject);
+        doLinkedToDa.setDataAttribute(dataAttribute);
+        // When Then
+        assertThat(doLinkedToDa.isUpdatable()).isTrue();
+    }
+
+    @Test
+    void isUpdatable_should_return_true_whenValImportIsTrue() {
+        // Given
+        DataObject dataObject = new DataObject();
+        dataObject.setDoName("doName");
+        dataObject.setSdoNames(List.of("sdoName1"));
+        DataAttribute dataAttribute = new DataAttribute();
+        dataAttribute.setDaName("daName");
+        dataAttribute.setBdaNames(List.of("bdaName1"));
+        dataAttribute.setValImport(true);
+        dataAttribute.setFc(TFCEnum.SE);
+
+        DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
+        doLinkedToDa.setDataObject(dataObject);
+        doLinkedToDa.setDataAttribute(dataAttribute);
+        // When Then
+        assertThat(doLinkedToDa.isUpdatable()).isTrue();
+    }
+
+    @Test
+    void isUpdatable_should_return_false_whenValImportIsFalse() {
+        // Given
+        DataObject dataObject = new DataObject();
+        dataObject.setDoName("doName");
+        dataObject.setSdoNames(List.of("sdoName1"));
+        DataAttribute dataAttribute = new DataAttribute();
+        dataAttribute.setDaName("daName");
+        dataAttribute.setBdaNames(List.of("bdaName1"));
+        dataAttribute.setValImport(false);
+        dataAttribute.setFc(TFCEnum.SE);
+
+        DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
+        doLinkedToDa.setDataObject(dataObject);
+        doLinkedToDa.setDataAttribute(dataAttribute);
+        // When Then
+        assertThat(doLinkedToDa.isUpdatable()).isFalse();
+    }
+
 }

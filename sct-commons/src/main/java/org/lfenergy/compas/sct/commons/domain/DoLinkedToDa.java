@@ -5,7 +5,11 @@
 package org.lfenergy.compas.sct.commons.domain;
 
 
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
+
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.MOD_DO_NAME;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL_DA_NAME;
 
 
 @Getter
@@ -30,5 +34,29 @@ public class DoLinkedToDa {
         return dataAttribute != null ? dataAttribute.toString() : "";
     }
 
-}
+    /**
+     * Checks if DA/DO is updatable
+     *
+     * @return true if updatable, false otherwise
+     */
+    public boolean isUpdatable() {
+        return isDOModDAstVal() || dataAttribute.isUpdatable();
+    }
 
+    /**
+     * Checks if DO is Mod and DA is stVal
+     *
+     * @return true if DO is "Mod" and DA is "stVal", false otherwise
+     */
+    private boolean isDOModDAstVal() {
+        return dataObject.getDoName().equals(MOD_DO_NAME) && dataAttribute.getDaName().equals(STVAL_DA_NAME);
+    }
+
+    /**
+     * Create DoLinkedToDaFilter from this
+     * @return new DoLinkedToDaFilter instance with same data Object and data Attribute Ref
+     */
+    public DoLinkedToDaFilter toFilter() {
+        return DoLinkedToDaFilter.from(getDoRef(), getDaRef());
+    }
+}
