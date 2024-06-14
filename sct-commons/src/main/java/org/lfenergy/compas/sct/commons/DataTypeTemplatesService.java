@@ -75,8 +75,8 @@ public class DataTypeTemplatesService implements DataTypeTemplateReader {
     public Stream<DoLinkedToDa> getFilteredDoLinkedToDa(TDataTypeTemplates dtt, String lNodeTypeId, DoLinkedToDaFilter doLinkedToDaFilter) {
         return lnodeTypeService.findLnodeType(dtt, tlNodeType -> tlNodeType.getId().equals(lNodeTypeId))
                 .stream()
-                .flatMap(tlNodeType -> doService.getFilteredDos(tlNodeType, tdo -> StringUtils.isBlank(doLinkedToDaFilter.getDoName())
-                                || (StringUtils.isNotBlank(doLinkedToDaFilter.getDoName()) && doLinkedToDaFilter.getDoName().equals(tdo.getName())))
+                .flatMap(tlNodeType -> doService.getFilteredDos(tlNodeType, tdo -> StringUtils.isBlank(doLinkedToDaFilter.doName())
+                                || doLinkedToDaFilter.doName().equals(tdo.getName()))
                         .flatMap(tdo -> {
                             DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
                             DataObject dataObject = new DataObject();
@@ -88,8 +88,9 @@ public class DataTypeTemplatesService implements DataTypeTemplateReader {
                                     .flatMap(tdoType -> {
                                         doLinkedToDa.getDataObject().setCdc(tdoType.getCdc());
                                         return doTypeService.getAllSDOLinkedToDa(dtt, tdoType, doLinkedToDa).stream()
-                                                .filter(doLinkedToDa1 -> StringUtils.isBlank(doLinkedToDaFilter.getDoName()) || doLinkedToDa1.getDoRef().startsWith(doLinkedToDaFilter.getDoRef())
-                                                        && StringUtils.isBlank(doLinkedToDaFilter.getDaName()) || doLinkedToDa1.getDaRef().startsWith(doLinkedToDaFilter.getDaRef()));
+                                                .filter(doLinkedToDa1 -> StringUtils.isBlank(doLinkedToDaFilter.doName())
+                                                        || (doLinkedToDa1.getDoRef().startsWith(doLinkedToDaFilter.getDoRef()) && StringUtils.isBlank(doLinkedToDaFilter.daName()))
+                                                        || doLinkedToDa1.getDaRef().startsWith(doLinkedToDaFilter.getDaRef()));
                                     });
                 }));
     }

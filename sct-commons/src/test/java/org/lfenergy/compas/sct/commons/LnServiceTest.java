@@ -10,10 +10,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.domain.DaVal;
-import org.lfenergy.compas.sct.commons.domain.DataAttribute;
-import org.lfenergy.compas.sct.commons.domain.DataObject;
-import org.lfenergy.compas.sct.commons.domain.DoLinkedToDa;
+import org.lfenergy.compas.sct.commons.domain.*;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.lfenergy.compas.sct.commons.util.ActiveStatus;
 
@@ -171,15 +168,10 @@ class LnServiceTest {
                 new LinkedList<>(List.of("antRef","bda1", "bda2", "bda3")),
                 "new value",null
         );
-        DataObject dataObject = new DataObject();
-        dataObject.setDoName("Do");
-        dataObject.setSdoNames(List.of("sdo1","d"));
-        DataAttribute dataAttribute = new DataAttribute();
-        dataAttribute.setDaName("antRef");
-        dataAttribute.setBdaNames(List.of("bda1","bda2","bda3"));
+        DoLinkedToDaFilter doLinkedToDaFilter = DoLinkedToDaFilter.from("Do.sdo1.d", "antRef.bda1.bda2.bda3");
         //When
         LnService lnService = new LnService();
-        Optional<TDAI> optionalTDAI = lnService.getDOAndDAInstances(tAnyLN, dataObject, dataAttribute);
+        Optional<TDAI> optionalTDAI = lnService.getDOAndDAInstances(tAnyLN, doLinkedToDaFilter);
         //Then
         assertThat(optionalTDAI).isPresent();
         assertThat(optionalTDAI.get().getName()).isEqualTo("bda3");
@@ -194,15 +186,10 @@ class LnServiceTest {
                 new LinkedList<>(List.of("antRef","bda1", "bda2", "bda3")),
                 "new value",null
         );
-        DataObject dataObject = new DataObject();
-        dataObject.setDoName("Do");
-        dataObject.setSdoNames(List.of("sdo1","d"));
-        DataAttribute dataAttribute = new DataAttribute();
-        dataAttribute.setDaName("antRef");
-        dataAttribute.setBdaNames(List.of("unknown","bda2","bda3"));
+        DoLinkedToDaFilter doLinkedToDaFilter = DoLinkedToDaFilter.from("Do.sdo1.d", "antRef.unknown.bda2.bda3");
         //When
         LnService lnService = new LnService();
-        Optional<TDAI> optionalTDAI = lnService.getDOAndDAInstances(tAnyLN, dataObject, dataAttribute);
+        Optional<TDAI> optionalTDAI = lnService.getDOAndDAInstances(tAnyLN, doLinkedToDaFilter);
         //Then
         assertThat(optionalTDAI).isEmpty();
     }

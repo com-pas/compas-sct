@@ -7,10 +7,7 @@ package org.lfenergy.compas.sct.commons;
 import lombok.extern.slf4j.Slf4j;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.api.LnEditor;
-import org.lfenergy.compas.sct.commons.domain.DaVal;
-import org.lfenergy.compas.sct.commons.domain.DataAttribute;
-import org.lfenergy.compas.sct.commons.domain.DataObject;
-import org.lfenergy.compas.sct.commons.domain.DoLinkedToDa;
+import org.lfenergy.compas.sct.commons.domain.*;
 import org.lfenergy.compas.sct.commons.util.ActiveStatus;
 
 import java.util.Collection;
@@ -92,12 +89,12 @@ public class LnService implements LnEditor {
     }
 
     @Override
-    public Optional<TDAI> getDOAndDAInstances(TAnyLN tAnyLN, DataObject dataObject, DataAttribute dataAttribute) {
-        List<String> structNamesList = new ArrayList<>(dataObject.getSdoNames());
-        structNamesList.add(dataAttribute.getDaName());
-        structNamesList.addAll(dataAttribute.getBdaNames());
+    public Optional<TDAI> getDOAndDAInstances(TAnyLN tAnyLN, DoLinkedToDaFilter doLinkedToDaFilter) {
+        List<String> structNamesList = new ArrayList<>(doLinkedToDaFilter.sdoNames());
+        structNamesList.add(doLinkedToDaFilter.daName());
+        structNamesList.addAll(doLinkedToDaFilter.bdaNames());
 
-        return tAnyLN.getDOI().stream().filter(doi -> doi.getName().equals(dataObject.getDoName()))
+        return tAnyLN.getDOI().stream().filter(doi -> doi.getName().equals(doLinkedToDaFilter.doName()))
                 .findFirst()
                 .flatMap(doi -> {
                     if(structNamesList.size() > 1) {
@@ -151,7 +148,7 @@ public class LnService implements LnEditor {
     }
 
     public void completeFromDAInstance(TIED tied, String ldInst, TAnyLN anyLN, DoLinkedToDa doLinkedToDa) {
-        getDOAndDAInstances(anyLN, doLinkedToDa.getDataObject(), doLinkedToDa.getDataAttribute())
+        getDOAndDAInstances(anyLN, doLinkedToDa.toFilter())
                 .ifPresent(tdai -> {
                     if(tdai.isSetVal()) {
                         doLinkedToDa.getDataAttribute().addDaVal(tdai.getVal());
