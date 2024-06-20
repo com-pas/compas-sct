@@ -185,8 +185,7 @@ class DataTypeTemplatesServiceTest {
         TDataTypeTemplates dtt = initDttFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda_test.xml");
         String lNodeTypeId = "LNodeType0";
 
-        DoLinkedToDaFilter doLinkedToDaFilter = new DoLinkedToDaFilter();
-        doLinkedToDaFilter.setDoName("SecondDoName");
+        DoLinkedToDaFilter doLinkedToDaFilter = DoLinkedToDaFilter.from("SecondDoName", "");
 
         //When
         DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
@@ -208,9 +207,7 @@ class DataTypeTemplatesServiceTest {
         TDataTypeTemplates dtt = initDttFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda_test.xml");
         String lNodeTypeId = "LNodeType0";
 
-        DoLinkedToDaFilter doLinkedToDaFilter = new DoLinkedToDaFilter();
-        doLinkedToDaFilter.setDoName("FirstDoName");
-        doLinkedToDaFilter.setSdoNames(List.of("sdoName1"));
+        DoLinkedToDaFilter doLinkedToDaFilter = DoLinkedToDaFilter.from("FirstDoName.sdoName1", "");
         //When
         DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
         List<DoLinkedToDa> result = dataTypeTemplatesService.getFilteredDoLinkedToDa(dtt, lNodeTypeId, doLinkedToDaFilter).toList();
@@ -232,9 +229,7 @@ class DataTypeTemplatesServiceTest {
         TDataTypeTemplates dtt = initDttFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda_test.xml");
         String lNodeTypeId = "LNodeType0";
 
-        DoLinkedToDaFilter doLinkedToDaFilter = new DoLinkedToDaFilter();
-        doLinkedToDaFilter.setDoName("FirstDoName");
-        doLinkedToDaFilter.setSdoNames(List.of("sdoName1", "sdoName21"));
+        DoLinkedToDaFilter doLinkedToDaFilter = DoLinkedToDaFilter.from("FirstDoName.sdoName1.sdoName21", "");
         //When
         DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
         List<DoLinkedToDa> result = dataTypeTemplatesService.getFilteredDoLinkedToDa(dtt, lNodeTypeId, doLinkedToDaFilter).toList();
@@ -255,11 +250,7 @@ class DataTypeTemplatesServiceTest {
         TDataTypeTemplates dtt = initDttFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda_test.xml");
         String lNodeTypeId = "LNodeType0";
 
-        DoLinkedToDaFilter doLinkedToDaFilter = new DoLinkedToDaFilter();
-        doLinkedToDaFilter.setDoName("FirstDoName");
-        doLinkedToDaFilter.setSdoNames(List.of("sdoName2"));
-        doLinkedToDaFilter.setDaName("structDaName1");
-        doLinkedToDaFilter.setBdaNames(List.of("structBdaName1", "enumBdaName22"));
+        DoLinkedToDaFilter doLinkedToDaFilter = DoLinkedToDaFilter.from("FirstDoName.sdoName2", "structDaName1.structBdaName1.enumBdaName22");
 
         //When
         DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();

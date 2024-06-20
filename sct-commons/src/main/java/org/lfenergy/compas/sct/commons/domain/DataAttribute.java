@@ -46,5 +46,19 @@ public class DataAttribute {
         return daName + (getBdaNames().isEmpty() ? StringUtils.EMPTY : "." + String.join(".", getBdaNames()));
     }
 
+    /**
+     * Check if DA Object is updatable
+     * @return boolean value of DA state
+     */
+    public boolean isUpdatable(){
+        return isValImport() &&
+                (fc == TFCEnum.CF ||
+                        fc == TFCEnum.DC ||
+                        fc == TFCEnum.SG ||
+                        fc == TFCEnum.SP ||
+                        fc == TFCEnum.ST ||
+                        fc == TFCEnum.SE
+                );
+    }
 
 }
