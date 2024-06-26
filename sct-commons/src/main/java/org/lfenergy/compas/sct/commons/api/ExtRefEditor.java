@@ -72,7 +72,9 @@ public interface ExtRefEditor {
 
     /**
      * Update compas:Flow.ExtRefiedName and ExtRef.iedName, based on Substation LNode iedName
+     * @param scd SCL
+     * @return list of encoutered errors
      */
-    void updateIedNameBasedOnLnode(SCL scd);
+    List<SclReportItem> updateIedNameBasedOnLnode(SCL scd);
 
 }

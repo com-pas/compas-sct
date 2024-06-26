@@ -595,7 +595,7 @@ class ExtRefEditorServiceTest {
                 .extracting(SclReportItem::message, SclReportItem::xpath)
                 .containsExactly(
                         Tuple.tuple("DO@name=Mod/DA@name=stVal not found in DataTypeTemplate",
-                         "SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LDEPF\"]"),
+                                "SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LDEPF\"]"),
                         Tuple.tuple("DO@name=Mod/DA@name=stVal not found in DataTypeTemplate",
                                 "SCL/IED[@name=\"IED_NAME2\"]/AccessPoint/Server/LDevice[@inst=\"LDEPF\"]"),
                         Tuple.tuple("DO@name=Mod/DA@name=stVal not found in DataTypeTemplate",
@@ -865,7 +865,7 @@ class ExtRefEditorServiceTest {
                 .containsExactly(flow2);
     }
 
-    private static Stream<Arguments> provideFlowAndExtRefForDebinding(){
+    private static Stream<Arguments> provideFlowAndExtRefForDebinding() {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-flow-debind/scd_extref_flow_debind_success.xml");
         SCL scdVoltageLevel0 = SclTestMarshaller.getSCLFromFile("/scd-extref-flow-debind/scd_extref_flow_debind_volatagelevelname_0.xml");
         SCL scdVoltageLevelUnknown = SclTestMarshaller.getSCLFromFile("/scd-extref-flow-debind/scd_extref_flow_debind_volatagelevelname_unknown.xml");
@@ -901,7 +901,7 @@ class ExtRefEditorServiceTest {
     }
 
     @Test
-    void updateIedNameBasedOnLnode_should_update_CompasFlow_and_ExtRef_iedName(){
+    void updateIedNameBasedOnLnode_should_update_CompasFlow_and_ExtRef_iedName() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_based_on_lnode_success.xml");
         // When
@@ -914,7 +914,7 @@ class ExtRefEditorServiceTest {
     }
 
     @Test
-    void updateIedNameBasedOnLnode_when_no_matching_lnode_should_clear_binding(){
+    void updateIedNameBasedOnLnode_when_no_matching_lnode_should_clear_binding() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_based_on_lnode_success.xml");
         PrivateUtils.extractCompasPrivate(scd.getSubstation().get(0).getVoltageLevel().get(0).getBay().get(0), TCompasTopo.class).orElseThrow().setNode("99");
@@ -927,5 +927,32 @@ class ExtRefEditorServiceTest {
                 .containsOnlyNulls();
         assertExtRefIsNotBound(findExtRef(scd, "IED_NAME1", "LD_INST11", "STAT_LDSUIED_LPDO 1 Sortie_13_BOOLEAN_18_stVal_1"));
 
+    }
+
+    @Test
+    void updateIedNameBasedOnLnode_when_several_ied_match_compasFlow_should_return_an_error() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_based_on_lnode_several_ied_matching_compasFlow.xml");
+        // When
+        List<SclReportItem> result = extRefEditorService.updateIedNameBasedOnLnode(scd);
+        // Then
+        assertThat(result)
+                .extracting(SclReportItem::isError, SclReportItem::message)
+                .containsExactly(Tuple.tuple(true,
+                        "Several LNode@IedName ('IED_NAME2', 'IED_NAME3') are found in the bay 'BAY_1' for the following compas-flow attributes " +
+                                ": @FlowSourceIEDType 'SCU' @FlowSourceIEDredundancy 'A' @FlowIEDSystemVersioninstance '1'"));
+    }
+
+    @Test
+    void updateIedNameBasedOnLnode_when_no_Compas_ICD_Header_should_return_an_error() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_fails_no_Compas_ICDHeader.xml");
+        // When
+        List<SclReportItem> result = extRefEditorService.updateIedNameBasedOnLnode(scd);
+        // Then
+        assertThat(result)
+                .extracting(SclReportItem::isError, SclReportItem::message)
+                .containsExactly(Tuple.tuple(true,
+                        "The substation LNode with following attributes : IedName:IED_NAME2 / LdInst:LD_INST21 / LnClass:ANCR / LnInst:1  does not contain the needed (COMPAS - ICDHeader) private"));
     }
 }

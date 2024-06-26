@@ -5,7 +5,6 @@
 package org.lfenergy.compas.sct.commons;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.api.ExtRefEditor;
 import org.lfenergy.compas.sct.commons.dto.*;
@@ -27,6 +26,7 @@ import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.math.BigInteger;
 import java.util.*;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -90,7 +90,7 @@ public class ExtRefEditorService implements ExtRefEditor {
      */
     private List<ExtRefInfo.ExtRefWithBayReference> getExtRefWithBayReferenceInLDEPF(TDataTypeTemplates dataTypeTemplates, TIED tied, final TLDevice tlDevice, final List<SclReportItem> sclReportItems) {
         List<ExtRefInfo.ExtRefWithBayReference> extRefBayReferenceList = new ArrayList<>();
-        String lDevicePath = "SCL/IED[@name=\""+ tied.getName() + "\"]/AccessPoint/Server/LDevice[@inst=\"" + tlDevice.getInst() + "\"]";
+        String lDevicePath = "SCL/IED[@name=\"" + tied.getName() + "\"]/AccessPoint/Server/LDevice[@inst=\"" + tlDevice.getInst() + "\"]";
         Optional<TCompasBay> tCompasBay = PrivateUtils.extractCompasPrivate(tied, TCompasBay.class);
         if (tCompasBay.isEmpty()) {
             sclReportItems.add(SclReportItem.error(lDevicePath, "The IED has no Private Bay"));
@@ -405,8 +405,7 @@ public class ExtRefEditorService implements ExtRefEditor {
     private Optional<SclReportItem> updateVal(AbstractLNAdapter<?> lnAdapter, String doName, String daName, TExtRef extRef, TChannel setting) {
         String value = switch (daName) {
             case DU_DA_NAME -> setting.getChannelShortLabel();
-            case SETVAL_DA_NAME ->
-                    LN_PREFIX_B.equals(lnAdapter.getPrefix()) || LN_PREFIX_A.equals(lnAdapter.getPrefix()) ? setting.getChannelLevModQ().value() : setting.getChannelLevMod().value();
+            case SETVAL_DA_NAME -> LN_PREFIX_B.equals(lnAdapter.getPrefix()) || LN_PREFIX_A.equals(lnAdapter.getPrefix()) ? setting.getChannelLevModQ().value() : setting.getChannelLevMod().value();
             case STVAL_DA_NAME -> ActiveStatus.ON.getValue();
             case SETSRCREF_DA_NAME -> computeDaiValue(lnAdapter, extRef, setting.getDAName());
             default -> null;
@@ -464,7 +463,7 @@ public class ExtRefEditorService implements ExtRefEditor {
 
 
     @Override
-    public void updateIedNameBasedOnLnode(SCL scl) {
+    public List<SclReportItem> updateIedNameBasedOnLnode(SCL scl) {
         Map<TopoKey, TBay> bayByTopoKey = scl.getSubstation().stream()
                 .flatMap(tSubstation -> tSubstation.getVoltageLevel().stream())
                 .flatMap(tVoltageLevel -> tVoltageLevel.getBay().stream())
@@ -475,6 +474,7 @@ public class ExtRefEditorService implements ExtRefEditor {
                 .flatMap(Optional::stream)
                 .collect(Collectors.toMap(BayTopoKey::topoKey, BayTopoKey::bay));
 
+        List<SclReportItem> sclReportItems = new ArrayList<>();
         scl.getIED().stream()
                 .flatMap(ldeviceService::getLdevices)
                 .forEach(tlDevice ->
@@ -488,9 +488,21 @@ public class ExtRefEditorService implements ExtRefEditor {
                                                                 && Objects.equals(tlNode.getLnInst(), tCompasFlow.getExtReflnInst())
                                                                 && Utils.lnClassEquals(tlNode.getLnClass(), tCompasFlow.getExtReflnClass())
                                                                 && Objects.equals(tlNode.getPrefix(), tCompasFlow.getExtRefprefix()))
+                                                        .filter(tlNode -> {
+                                                            Optional<TCompasICDHeader> tCompasICDHeader = PrivateUtils.extractCompasPrivate(tlNode, TCompasICDHeader.class);
+                                                            if (tCompasICDHeader.isPresent()) {
+                                                                return Objects.equals(tCompasFlow.getFlowSourceIEDType(), tCompasICDHeader.get().getIEDType())
+                                                                        && Objects.equals(tCompasFlow.getFlowIEDSystemVersioninstance(), tCompasICDHeader.get().getIEDSystemVersioninstance())
+                                                                        && Objects.equals(tCompasFlow.getFlowSourceIEDredundancy(), tCompasICDHeader.get().getIEDredundancy());
+                                                            } else {
+                                                                sclReportItems.add(SclReportItem.error("", ("The substation LNode with following attributes : IedName:%s / LdInst:%s / LnClass:%s / LnInst:%s  " +
+                                                                        "does not contain the needed (COMPAS - ICDHeader) private")
+                                                                        .formatted(tlNode.getIedName(), tlNode.getLdInst(), tlNode.getLnClass().getFirst(), tlNode.getLnInst())));
+                                                                return false;
+                                                            }
+                                                        })
                                                         .map(TLNode::getIedName)
-                                                        .filter(StringUtils::isNotBlank)
-                                                        .findFirst()
+                                                        .reduce(checkOnlyOneIed(tCompasFlow, tBay, sclReportItems))
                                                 )
                                                 .ifPresentOrElse(iedName -> {
                                                             extRefService.getMatchingExtRefs(tlDevice, tCompasFlow).forEach(tExtRef -> tExtRef.setIedName(iedName));
@@ -503,6 +515,17 @@ public class ExtRefEditorService implements ExtRefEditor {
                                                 )
                                 )
                 );
+        return sclReportItems;
+    }
+
+    private static BinaryOperator<String> checkOnlyOneIed(TCompasFlow tCompasFlow, TBay tBay, List<SclReportItem> sclReportItems) {
+        return (iedName1, iedName2) -> {
+            sclReportItems.add(SclReportItem.error("",
+                    ("Several LNode@IedName ('%s', '%s') are found in the bay '%s' for the following compas-flow attributes :" +
+                            " @FlowSourceIEDType '%s' @FlowSourceIEDredundancy '%s' @FlowIEDSystemVersioninstance '%s'").
+                            formatted(iedName1, iedName2, tBay.getName(), tCompasFlow.getFlowSourceIEDType(), tCompasFlow.getFlowSourceIEDredundancy(), tCompasFlow.getFlowIEDSystemVersioninstance())));
+            return iedName1;
+        };
     }
 
     record TopoKey(String FlowNode, BigInteger FlowNodeOrder) {
