@@ -464,7 +464,7 @@ public class ExtRefEditorService implements ExtRefEditor {
 
 
     @Override
-    public void updateIedNameBasedOnLnode(SCL scl) {
+    public List<SclReportItem> updateIedNameBasedOnLnode(SCL scl) {
         Map<TopoKey, TBay> bayByTopoKey = scl.getSubstation().stream()
                 .flatMap(tSubstation -> tSubstation.getVoltageLevel().stream())
                 .flatMap(tVoltageLevel -> tVoltageLevel.getBay().stream())
@@ -475,6 +475,7 @@ public class ExtRefEditorService implements ExtRefEditor {
                 .flatMap(Optional::stream)
                 .collect(Collectors.toMap(BayTopoKey::topoKey, BayTopoKey::bay));
 
+        List<SclReportItem> sclReportItems = new ArrayList<>();
         scl.getIED().stream()
                 .flatMap(ldeviceService::getLdevices)
                 .forEach(tlDevice ->
@@ -488,9 +489,24 @@ public class ExtRefEditorService implements ExtRefEditor {
                                                                 && Objects.equals(tlNode.getLnInst(), tCompasFlow.getExtReflnInst())
                                                                 && Utils.lnClassEquals(tlNode.getLnClass(), tCompasFlow.getExtReflnClass())
                                                                 && Objects.equals(tlNode.getPrefix(), tCompasFlow.getExtRefprefix()))
+                                                        .filter(tlNode -> {
+                                                            TCompasICDHeader tCompasICDHeader = PrivateUtils.extractCompasPrivate(tlNode, TCompasICDHeader.class)
+                                                                    .orElseThrow(() -> new ScdException(("The substation LNode with following attributes : IedName:%s / LdInst:%s / LnClass:%s / LnInst:%s  " +
+                                                                            "does not contain the needed private (COMPAS - ICDHeader)")
+                                                                            .formatted(tlNode.getIedName(), tlNode.getLdInst(), tlNode.getLnClass().getFirst(), tlNode.getLnInst())));
+                                                            return Objects.equals(tCompasFlow.getFlowSourceIEDType(), tCompasICDHeader.getIEDType())
+                                                                    && Objects.equals(tCompasFlow.getFlowIEDSystemVersioninstance(), tCompasICDHeader.getIEDSystemVersioninstance())
+                                                                    && Objects.equals(tCompasFlow.getFlowSourceIEDredundancy(), tCompasICDHeader.getIEDredundancy());
+                                                        })
                                                         .map(TLNode::getIedName)
                                                         .filter(StringUtils::isNotBlank)
-                                                        .findFirst()
+                                                        .reduce((iedName1, iedName2) -> {
+                                                            sclReportItems.add(SclReportItem.error("",
+                                                                    ("Several LNode@IedName ('%s', '%s') are found in the bay '%s' for the following compas-flow attributes :" +
+                                                                            " @FlowSourceIEDType '%s' @FlowSourceIEDredundancy '%s' @FlowIEDSystemVersioninstance '%s'").
+                                                                            formatted(iedName1, iedName2, tBay.getName(), tCompasFlow.getFlowSourceIEDType(), tCompasFlow.getFlowSourceIEDredundancy(), tCompasFlow.getFlowIEDSystemVersioninstance())));
+                                                            return iedName1;
+                                                        })
                                                 )
                                                 .ifPresentOrElse(iedName -> {
                                                             extRefService.getMatchingExtRefs(tlDevice, tCompasFlow).forEach(tExtRef -> tExtRef.setIedName(iedName));
@@ -503,6 +519,7 @@ public class ExtRefEditorService implements ExtRefEditor {
                                                 )
                                 )
                 );
+        return sclReportItems;
     }
 
     record TopoKey(String FlowNode, BigInteger FlowNodeOrder) {
