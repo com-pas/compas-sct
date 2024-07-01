@@ -66,6 +66,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
     private static final long INTG_PD_VALUE_FOR_FC_MX = 2000L;
 
     private static final String DA_SETSRCREF = "setSrcRef";
+    private static final int MAXIMUM_LENGHT_LD_NAME_BY_XSD = 64;
 
     /**
      * Constructor
@@ -169,8 +170,8 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
      */
     public void updateLDName() throws ScdException {
         String newLdName = parentAdapter.getCurrentElem().getName() + currentElem.getInst();
-        if (newLdName.length() > 33) {
-            throw new ScdException(newLdName + "(IED.name + LDevice.inst) has more than 33 characters");
+        if (newLdName.length() > MAXIMUM_LENGHT_LD_NAME_BY_XSD) {
+            throw new ScdException("LDName (IED.name + LDevice.inst) has more than 64 characters ("+newLdName+") wich is not allowed by xsd");
         }
         // renaming ldName
         currentElem.setLdName(newLdName);
