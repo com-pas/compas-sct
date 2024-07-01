@@ -154,6 +154,18 @@ public final class PrivateUtils {
     }
 
     /**
+     * Create RTE-ConductingEquipment private
+     * @param type the private content
+     * @return the complete private
+     */
+    public static TPrivate createConductingEquipment(String type) {
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType("RTE-ConductingEquipmentType");
+        tPrivate.getContent().add(type);
+        return tPrivate;
+    }
+
+    /**
      * Create a single Private of type COMPAS-Topo
      * containing all given TCompasTopo
      * @param compasTopos list of TCompasTopo
