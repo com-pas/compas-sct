@@ -212,6 +212,18 @@ class PrivateUtilsTest {
     }
 
     @Test
+    void createStringPrivate_should_return_new_private() {
+        //GIVEN
+        String privateType = "COMPAS-LNodeStatus";
+        String compasLNodeStatus = "on";
+        //WHEN
+        TPrivate result = PrivateUtils.createStringPrivate(privateType, compasLNodeStatus);
+        //THEN
+        assertThat(result.getType()).contains(privateType);
+        assertThat(result.getContent()).containsExactly(compasLNodeStatus);
+    }
+
+    @Test
     void removePrivates_should_remove_privates() {
         // Given : setUp
         TBaseElement baseElement = new SCL();
