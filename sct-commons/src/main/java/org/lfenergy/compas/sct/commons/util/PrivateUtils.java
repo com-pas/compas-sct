@@ -181,6 +181,14 @@ public final class PrivateUtils {
         return tPrivate;
     }
 
+    /**
+     * Create Private of given type as parameter
+     * @param compasLNodeStatus type of Private to create
+     * @return created Private
+     */
+    public static TPrivate createPrivate(TCompasLNodeStatus compasLNodeStatus) {
+        return createPrivate(objectFactory.createLNodeStatus(compasLNodeStatus));
+    }
 
     /**
      * Sorts in map of ICD_SYSTEM_VERSION_UUID and related Private coupled with all corresponding STD for all given STD
