@@ -208,7 +208,8 @@ class PrivateUtilsTest {
         return Stream.of(new TCompasBay(),
                 new TCompasICDHeader(),
                 TCompasSclFileType.SCD,
-                new TCompasSystemVersion());
+                new TCompasSystemVersion(),
+                TCompasLNodeStatus.ON);
     }
 
     @Test
