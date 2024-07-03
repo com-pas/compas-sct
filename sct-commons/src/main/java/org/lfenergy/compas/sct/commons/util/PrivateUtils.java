@@ -169,6 +169,19 @@ public final class PrivateUtils {
     }
 
     /**
+     * Create private of a given type containing a simple string as value
+     * @param privateType type attribute of private element to create
+     * @param privateValue value of private to create
+     * @return the complete private
+     */
+    public static TPrivate createStringPrivate(String privateType, String privateValue) {
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType(privateType);
+        tPrivate.getContent().add(privateValue);
+        return tPrivate;
+    }
+
+    /**
      * Create Private of given type as parameter
      * @param jaxbElement content of Private to create
      * @return created Private
