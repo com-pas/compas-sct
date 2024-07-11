@@ -164,15 +164,10 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
 
     /**
      * Updates LDevice name by combining IED name and LDevice ldInst value
-     *
-     * @throws ScdException throws when renaming LDevice and new name has more than 33 caracteres
      */
-    public void updateLDName() throws ScdException {
+    public void updateLDName() {
         String newLdName = parentAdapter.getCurrentElem().getName() + currentElem.getInst();
-        if (newLdName.length() > 33) {
-            throw new ScdException(newLdName + "(IED.name + LDevice.inst) has more than 33 characters");
-        }
-        // renaming ldName
+        // renaming ldName; Carefull because the maximum ldevice name length is 64 based on xsd
         currentElem.setLdName(newLdName);
     }
 
