@@ -39,55 +39,36 @@ import static org.lfenergy.compas.sct.commons.util.Utils.copySclElement;
 
 class LDeviceAdapterTest {
 
-    private IEDAdapter iAdapter;
+    private IEDAdapter iedAdapter;
 
     @BeforeEach
     public void init() {
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
+        iedAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
     }
 
     @Test
-    void updateLDName_when_ldName_pass_33_characters_should_throw_exception() {
+    void updateLDName_when_ldName_should_update() {
         // Given
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.findLDeviceAdapterByLdInst("LD_INS1").get());
-        lDeviceAdapter.updateLDName();
-        assertThat(lDeviceAdapter.getLdName()).isEqualTo("IED_NAMELD_INS1");
-        assertThat(lDeviceAdapter.getInst()).isEqualTo("LD_INS1");
-        String iedName = new Random().ints(97, 122)
-                .limit(27)
-                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-                .toString();
-        iAdapter.setIEDName(iedName);
-        // When Then
-        assertThatThrownBy(lDeviceAdapter::updateLDName)
-                .isInstanceOf(ScdException.class)
-                .hasMessageContaining("has more than 33 characters");
-    }
+        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        TIED tied = std.getIED().getFirst();
+        TLDevice tlDevice = tied.getAccessPoint().getFirst().getServer().getLDevice().getFirst();
+        LDeviceAdapter lDeviceAdapter = new LDeviceAdapter(new IEDAdapter(new SclRootAdapter(std), tied), tlDevice);
 
-    @Test
-    void updateLDName_when_ldName_less_than_33_characters_should_not_throw_exception() {
-        // Given
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.findLDeviceAdapterByLdInst("LD_INS1").get());
+        //When
         lDeviceAdapter.updateLDName();
-        assertThat(lDeviceAdapter.getLdName()).isEqualTo("IED_NAMELD_INS1");
-        assertThat(lDeviceAdapter.getInst()).isEqualTo("LD_INS1");
-        String iedName = new Random().ints(97, 122)
-                .limit(26)
-                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-                .toString();
-        iAdapter.setIEDName(iedName);
-        // When Then
-        assertThatCode(lDeviceAdapter::updateLDName).doesNotThrowAnyException();
-        assertThat(lDeviceAdapter.getLdName()).isEqualTo(iedName+"LD_INS1");
+
+        //When
+        assertThat(lDeviceAdapter.getLdName()).isEqualTo("IED4d4fe1a8cda64cf88a5ee4176a1a0eefLDSUIED");
+        assertThat(lDeviceAdapter.getInst()).isEqualTo("LDSUIED");
     }
 
     @Test
     @Tag("issue-321")
     void testGetLNAdapters()  {
         // Given
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.findLDeviceAdapterByLdInst("LD_INS2").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iedAdapter.findLDeviceAdapterByLdInst("LD_INS2").get());
         assertThat(lDeviceAdapter.getLNAdapters()).hasSize(1);
         // When Then
         assertDoesNotThrow(() -> lDeviceAdapter.getLNAdapter("ANCR","1",null));
@@ -99,7 +80,7 @@ class LDeviceAdapterTest {
     @Test
     void findLnAdapter_shouldReturnAdapter(){
         // Given
-        LDeviceAdapter lDeviceAdapter = iAdapter.findLDeviceAdapterByLdInst("LD_INS2").get();
+        LDeviceAdapter lDeviceAdapter = iedAdapter.findLDeviceAdapterByLdInst("LD_INS2").get();
         // When
         Optional<LNAdapter> lnAdapter = lDeviceAdapter.findLnAdapter("ANCR", "1", null);
         // Then
@@ -110,7 +91,7 @@ class LDeviceAdapterTest {
     @Test
     void getExtRefBinders_whenExist_shouldReturnExtRefBindingInfo() {
         //Given
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.findLDeviceAdapterByLdInst("LD_INS2").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iedAdapter.findLDeviceAdapterByLdInst("LD_INS2").get());
         ExtRefSignalInfo signalInfo = DTO.createExtRefSignalInfo();
         signalInfo.setPDO("Do.sdo1");
         signalInfo.setPDA("da.bda1.bda2.bda3");
@@ -122,7 +103,7 @@ class LDeviceAdapterTest {
     @Test
     void getExtRefBinders_when_PLN_NotMatch_shouldReturnEmptyList() {
         //Given
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2"));
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iedAdapter.getLDeviceAdapterByLdInst("LD_INS2"));
         ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
         signalInfo.setPLN("CSWI");
         //When Then
@@ -133,7 +114,7 @@ class LDeviceAdapterTest {
     @Test
     void getExtRefBinders_when_PLN_NotSet_shouldReturnEmptyList() {
         //Given
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2"));
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iedAdapter.getLDeviceAdapterByLdInst("LD_INS2"));
         ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
         //When Then
         assertDoesNotThrow(()-> lDeviceAdapter.getExtRefBinders(signalInfo));
@@ -144,7 +125,7 @@ class LDeviceAdapterTest {
     @Tag("issue-321")
     void getExtRefInfo_should_return_expected_list_of_ExtRefInfo() {
         // Given
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2"));
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iedAdapter.getLDeviceAdapterByLdInst("LD_INS2"));
         // When
         List<ExtRefInfo> extRefInfoList = assertDoesNotThrow(lDeviceAdapter::getExtRefInfo);
         // Then
@@ -155,7 +136,7 @@ class LDeviceAdapterTest {
     @Tag("issue-321")
     void TestGetDAI() {
         // Given
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS1"));
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iedAdapter.getLDeviceAdapterByLdInst("LD_INS1"));
         // When
         var dataAttributeRefs = lDeviceAdapter.getDAI(new DataAttributeRef(),true);
         // Then
@@ -170,7 +151,7 @@ class LDeviceAdapterTest {
         assertThat(dataAttributeRefs).hasSize(4);
 
         // Given
-        lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.findLDeviceAdapterByLdInst("LD_INS2").get());
+        lDeviceAdapter = assertDoesNotThrow(()-> iedAdapter.findLDeviceAdapterByLdInst("LD_INS2").get());
         filter.setLnClass("ANCR");
         filter.setLnInst("1");
         // When
@@ -183,7 +164,7 @@ class LDeviceAdapterTest {
     @Tag("issue-321")
     void addPrivate_with_type_and_source_should_create_Private() {
         // Given
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2"));
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iedAdapter.getLDeviceAdapterByLdInst("LD_INS2"));
         TPrivate tPrivate = new TPrivate();
         tPrivate.setType("Private Type");
         tPrivate.setSource("Private Source");
@@ -230,7 +211,7 @@ class LDeviceAdapterTest {
     @Test
     void getLNAdaptersIncludingLN0_should_return_expected_list_of_AbstractLNAdapter() {
         //Given
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.getLDeviceAdapterByLdInst("LD_INS2"));
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iedAdapter.getLDeviceAdapterByLdInst("LD_INS2"));
         //When
         List<AbstractLNAdapter<?>> lnAdapters = lDeviceAdapter.getLNAdaptersIncludingLN0();
         //Then
