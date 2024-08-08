@@ -27,6 +27,8 @@ import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
 @ExtendWith(MockitoExtension.class)
 class HmiServiceTest {
 
+    private static final String DQC_REPORT_TYPE = "DQC";
+    private static final String CYC_REPORT_TYPE = "CYC";
     @InjectMocks
     HmiService hmiService;
 
@@ -42,7 +44,7 @@ class HmiServiceTest {
     void createAllIhmReportControlBlocks_with_fc_ST_should_create_dataset_and_controlblock() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-hmi-create-report-cb/scd_create_dataset_and_controlblocks_for_hmi.xml");
-        TFCDAFilter tfcdaFilter = createFCDAFilter("LdInst11", "ANCR", "1", null, "DoName1", Tfc.ST);
+        TFCDAFilter tfcdaFilter = createFCDAFilter("LdInst11", "ANCR", "1", null, "DoName1", Tfc.ST, DQC_REPORT_TYPE);
         po.getFCDAs().getFCDA().add(tfcdaFilter);
         // When
         hmiService.createAllHmiReportControlBlocks(scd, po);
@@ -69,7 +71,7 @@ class HmiServiceTest {
     void createAllIhmReportControlBlocks_with_fc_MX_should_create_dataset_and_controlblock() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-hmi-create-report-cb/scd_create_dataset_and_controlblocks_for_hmi.xml");
-        TFCDAFilter tfcdaFilter = createFCDAFilter("LdInst11", "PVOC", "1", null, "DoName2", Tfc.MX);
+        TFCDAFilter tfcdaFilter = createFCDAFilter("LdInst11", "PVOC", "1", null, "DoName2", Tfc.MX, CYC_REPORT_TYPE);
         po.getFCDAs().getFCDA().add(tfcdaFilter);
         // When
         hmiService.createAllHmiReportControlBlocks(scd, po);
@@ -94,10 +96,38 @@ class HmiServiceTest {
     }
 
     @Test
+    void createAllIhmReportControlBlocks_with_fc_MX_and_DQC_REPORT_TYPE_should_create_dataset_and_controlblock_with_suffix_DQPO() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-hmi-create-report-cb/scd_create_dataset_and_controlblocks_for_hmi.xml");
+        TFCDAFilter tfcdaFilter = createFCDAFilter("LdInst11", "PVOC", "1", null, "DoName2", Tfc.MX, DQC_REPORT_TYPE);
+        po.getFCDAs().getFCDA().add(tfcdaFilter);
+        // When
+        hmiService.createAllHmiReportControlBlocks(scd, po);
+        // Then
+        // Check DataSet is created
+        DataSetAdapter dataSet = findDataSet(scd, "IedName1", "LdInst11", "DS_LDINST11_DQPO");
+        assertThat(dataSet.getCurrentElem().getFCDA()).hasSize(1).first()
+                .usingRecursiveComparison().isEqualTo(toFCDA(tfcdaFilter));
+        // Check ControlBlock is created
+        LN0Adapter ln0 = findLn0(scd, "IedName1", "LdInst11");
+        assertThat(ln0.getTControlsByType(TReportControl.class)).hasSize(1);
+
+        TReportControl reportControl = findControlBlock(scd, "IedName1", "LdInst11", "CB_LDINST11_DQPO", TReportControl.class);
+        assertThat(reportControl).extracting(TReportControl::getRptID, TControl::getDatSet, TReportControl::getConfRev, TReportControl::isBuffered, TReportControl::getBufTime, TReportControl::isIndexed,
+                        TControlWithTriggerOpt::getIntgPd)
+                .containsExactly("IedName1LdInst11/LLN0.CB_LDINST11_DQPO", "DS_LDINST11_DQPO", 1L, true, 0L, true, 60000L);
+        assertThat(reportControl.getTrgOps())
+                .extracting(TTrgOps::isDchg, TTrgOps::isQchg, TTrgOps::isDupd, TTrgOps::isPeriod, TTrgOps::isGi)
+                .containsExactly(true, true, false, true, true);
+        assertThat(reportControl.getRptEnabled().getMax()).isEqualTo(1);
+        assertThat(reportControl.getRptEnabled().isSetClientLN()).isFalse();
+    }
+
+    @Test
     void createAllIhmReportControlBlocks_with_FCDA_on_ln0_should_create_dataset_and_controlblock() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-hmi-create-report-cb/scd_create_dataset_and_controlblocks_for_hmi.xml");
-        TFCDAFilter tfcdaFilter = createFCDAFilter("LdInst11", "LLN0", null, null, "DoName0", Tfc.ST);
+        TFCDAFilter tfcdaFilter = createFCDAFilter("LdInst11", "LLN0", null, null, "DoName0", Tfc.ST, DQC_REPORT_TYPE);
         po.getFCDAs().getFCDA().add(tfcdaFilter);
         // When
         hmiService.createAllHmiReportControlBlocks(scd, po);
@@ -126,7 +156,7 @@ class HmiServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-hmi-create-report-cb/scd_create_dataset_and_controlblocks_for_hmi.xml");
         LNAdapter ln = findLn(scd, "IedName1", "LdInst11", "ANCR", "1", null);
         ln.getCurrentElem().unsetDOI();
-        TFCDAFilter tfcdaFilter = createFCDAFilter("LdInst11", "ANCR", "1", null, "DoName1", Tfc.ST);
+        TFCDAFilter tfcdaFilter = createFCDAFilter("LdInst11", "ANCR", "1", null, "DoName1", Tfc.ST, DQC_REPORT_TYPE);
         po.getFCDAs().getFCDA().add(tfcdaFilter);
         // When
         hmiService.createAllHmiReportControlBlocks(scd, po);
@@ -151,7 +181,7 @@ class HmiServiceTest {
         LNAdapter ln = findLn(scd, "IedName1", "LdInst11", "ANCR", "1", null);
         ln.getDOIAdapterByName(CommonConstants.MOD_DO_NAME).getDataAdapterByName(CommonConstants.STVAL_DA_NAME).setVal("off");
         assertThat(ln.getDaiModStValValue()).hasValue("off");
-        TFCDAFilter tfcdaFilter = createFCDAFilter("LdInst11", "ANCR", "1", null, "DoName1", Tfc.ST);
+        TFCDAFilter tfcdaFilter = createFCDAFilter("LdInst11", "ANCR", "1", null, "DoName1", Tfc.ST, DQC_REPORT_TYPE);
         po.getFCDAs().getFCDA().add(tfcdaFilter);
         // When
         hmiService.createAllHmiReportControlBlocks(scd, po);
@@ -167,7 +197,7 @@ class HmiServiceTest {
         LN0Adapter ln0 = findLn0(scd, "IedName1", "LdInst11");
         ln0.getDOIAdapterByName(CommonConstants.MOD_DO_NAME).getDataAdapterByName(CommonConstants.STVAL_DA_NAME).setVal("off");
         assertThat(findLDevice(scd, "IedName1", "LdInst11").getLDeviceStatus()).hasValue(ActiveStatus.OFF.getValue());
-        TFCDAFilter tfcdaFilter = createFCDAFilter("LdInst11", "ANCR", "1", null, "DoName1", Tfc.ST);
+        TFCDAFilter tfcdaFilter = createFCDAFilter("LdInst11", "ANCR", "1", null, "DoName1", Tfc.ST, DQC_REPORT_TYPE);
         po.getFCDAs().getFCDA().add(tfcdaFilter);
         // When
         hmiService.createAllHmiReportControlBlocks(scd, po);
@@ -183,7 +213,7 @@ class HmiServiceTest {
         LN0Adapter ln0 = findLn0(scd, "IedName1", "LdInst11");
         ln0.getDOIAdapterByName(CommonConstants.MOD_DO_NAME).getDataAdapterByName(CommonConstants.STVAL_DA_NAME).getCurrentElem().unsetVal();
         assertThat(findLDevice(scd, "IedName1", "LdInst11").getLDeviceStatus()).isEmpty();
-        TFCDAFilter tfcdaFilter = createFCDAFilter("LdInst11", "ANCR", "1", null, "DoName1", Tfc.ST);
+        TFCDAFilter tfcdaFilter = createFCDAFilter("LdInst11", "ANCR", "1", null, "DoName1", Tfc.ST, DQC_REPORT_TYPE);
         po.getFCDAs().getFCDA().add(tfcdaFilter);
         // When
         hmiService.createAllHmiReportControlBlocks(scd, po);
@@ -192,14 +222,15 @@ class HmiServiceTest {
         assertThat(streamAllControlBlocks(scd, TReportControl.class)).isEmpty();
     }
 
-    private static TFCDAFilter createFCDAFilter(String ldInst, String lnClass, String lnInst, String prefix, String doName, Tfc tfc) {
+    private static TFCDAFilter createFCDAFilter(String ldInst, String lnClass, String lnInst, String prefix, String doName, Tfc tfc, String reportType) {
         TFCDAFilter tfcdaFilter = new TFCDAFilter();
-        tfcdaFilter.setLdInst("LdInst11");
+        tfcdaFilter.setLdInst(ldInst);
         tfcdaFilter.setLnClass(lnClass);
-        tfcdaFilter.setPrefix(null);
+        tfcdaFilter.setPrefix(prefix);
         tfcdaFilter.setDoName(doName);
         tfcdaFilter.setLnInst(lnInst);
         tfcdaFilter.setFc(tfc);
+        tfcdaFilter.setReportType(reportType);
         return tfcdaFilter;
     }
 
