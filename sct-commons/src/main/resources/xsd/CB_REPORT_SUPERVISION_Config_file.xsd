@@ -60,6 +60,7 @@ SPDX-License-Identifier: Apache-2.0
         <xs:attribute name="lnInst" type="xs:string" use="required"/>
         <xs:attribute name="doName" type="xs:string" use="required"/>
         <xs:attribute name="fc" type="tfc" use="required"/>
+        <xs:attribute name="reportType" type="xs:string" use="required"/>
     </xs:complexType>
 
     <xs:simpleType name="tfc">
