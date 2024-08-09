@@ -302,7 +302,7 @@ class LN0AdapterTest {
         List<ControlBlock> controlBlocks = ln0Adapter.getControlBlocksForMatchingFCDA(extRefInfo).toList();
         // Then
         assertThat(controlBlocks).hasSize(1);
-        assertThat(controlBlocks.get(0).getServiceType()).isEqualTo(serviceType);
+        assertThat(controlBlocks.getFirst().getServiceType()).isEqualTo(serviceType);
     }
 
     private static Stream<Arguments> provideServiceType() {
@@ -335,7 +335,7 @@ class LN0AdapterTest {
         LN0Adapter ln0Adapter = new LN0Adapter(null, ln0);
         // When Then
         assertThat(ln0Adapter.getDOIAdapters()).isNotEmpty();
-        assertThat(ln0Adapter.getDOIAdapters().get(0).getCurrentElem().getName()).isEqualTo("Do");
+        assertThat(ln0Adapter.getDOIAdapters().getFirst().getCurrentElem().getName()).isEqualTo("Do");
     }
 
     @Test
@@ -434,7 +434,7 @@ class LN0AdapterTest {
         // When Then
         AbstractDAIAdapter<?> daiAdapter = (AbstractDAIAdapter<?>) assertDoesNotThrow(() -> ln0Adapter.findMatch(doTypeName, daTypeName).get());
         assertThat(daiAdapter.getCurrentElem().getName()).isEqualTo("bda3");
-        assertThat(daiAdapter.getCurrentElem().getVal().get(0).getValue()).isEqualTo("Completed-diff");
+        assertThat(daiAdapter.getCurrentElem().getVal().getFirst().getValue()).isEqualTo("Completed-diff");
         DoTypeName doTypeName2 = new DoTypeName("Do.sdo1");
         // When Then
         assertThat(ln0Adapter.findMatch(doTypeName2, daTypeName)).isEmpty();
@@ -540,7 +540,7 @@ class LN0AdapterTest {
         var dataAttributeRefs = ln0Adapter.getDAI(filter, false);
         // Then
         assertThat(dataAttributeRefs).hasSize(1);
-        assertThat(dataAttributeRefs.get(0).getDaName().getType()).isEqualTo("BehaviourModeKind");
+        assertThat(dataAttributeRefs.getFirst().getDaName().getType()).isEqualTo("BehaviourModeKind");
     }
 
     @Test
@@ -864,7 +864,7 @@ class LN0AdapterTest {
         // Then
         assertThat(sourceLn0.getCurrentElem().getSampledValueControl())
                 .hasSize(1);
-        TSampledValueControl tSampledValueControl = sourceLn0.getCurrentElem().getSampledValueControl().get(0);
+        TSampledValueControl tSampledValueControl = sourceLn0.getCurrentElem().getSampledValueControl().getFirst();
         assertThat(tSampledValueControl)
                 .extracting(TControl::getName, TSampledValueControl::getSmvID, TControl::getDatSet,
                         TSampledValueControl::isMulticast, TSampledValueControl::getSmpRate, TSampledValueControl::getNofASDU, TSampledValueControl::getSmpMod, TSampledValueControl::getSecurityEnable,
@@ -895,7 +895,7 @@ class LN0AdapterTest {
         // Then
         assertThat(sourceLn0.getCurrentElem().getReportControl())
                 .hasSize(1);
-        TReportControl tReportControl = sourceLn0.getCurrentElem().getReportControl().get(0);
+        TReportControl tReportControl = sourceLn0.getCurrentElem().getReportControl().getFirst();
         assertThat(tReportControl)
                 .extracting(TControl::getName, TReportControl::getRptID, TControl::getDatSet,
                         TReportControl::isBuffered, TReportControl::getBufTime, TReportControl::isIndexed, TControlWithTriggerOpt::getIntgPd, TReportControl::getConfRev)
@@ -1116,6 +1116,42 @@ class LN0AdapterTest {
         String originalSetTstCB = getDaiValue(sourceLn0, doiNameInRef, SETTSTCB_DA_NAME);
         String expectedTstRef = "IED_NAME1LD_WITH_3_InRef/PRANCR1.Do11.sdo11";
         String expectedTstCB = "IED_NAME1LD_WITH_3_InRef/prefixANCR3.GSE3";
+
+        // When
+        List<SclReportItem> sclReportItems = sourceLn0.updateDoInRef();
+        // Then
+
+        String finalSetSrcRef = getDaiValue(sourceLn0, doiNameInRef, SETSRCREF_DA_NAME);
+        String finalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, SETSRCCB_DA_NAME);
+        String finalSetTstRef = getDaiValue(sourceLn0, doiNameInRef, SETTSTREF_DA_NAME);
+        String finalSetTstCB = getDaiValue(sourceLn0, doiNameInRef, SETTSTCB_DA_NAME);
+        assertThat(finalSetSrcRef)
+                .isNotBlank()
+                .isEqualTo(expectedSrcRef);
+        assertThat(finalSetSrcCB)
+                .isNotEqualTo(originalSetSrcCB)
+                .isEqualTo(expectedSrcCb);
+        assertThat(finalSetTstRef)
+                .isNotBlank()
+                .isEqualTo(expectedTstRef);
+        assertThat(finalSetTstCB)
+                .isNotEqualTo(originalSetTstCB)
+                .isEqualTo(expectedTstCB);
+        assertThat(sclReportItems).isEmpty();
+    }
+
+    @Test
+    void updateDoInRef_when_DAI_purpose_of_Ldevice_LDEPF_ends_with_BOOLEAN_should_match_desc_that_ends_with_enum_and_update_setSrcRef_and_setSrcCB_and_setTstRef_and_setTstCB() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_test.xml");
+        LN0Adapter sourceLn0 = findLn0(scd, "IED_NAME1", "LDEPF");
+        String doiNameInRef = "InRef3";
+        String originalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, SETSRCCB_DA_NAME);
+        String expectedSrcRef = "IED_NAME1LDEPF/PRANCR1.Do11.sdo11";
+        String expectedSrcCb = "IED_NAME1LDEPF/prefixANCR1.GSE1";
+        String originalSetTstCB = getDaiValue(sourceLn0, doiNameInRef, SETTSTCB_DA_NAME);
+        String expectedTstRef = "IED_NAME1LDEPF/PRANCR1.Do11.sdo11";
+        String expectedTstCB = "IED_NAME1LDEPF/prefixANCR3.GSE3";
 
         // When
         List<SclReportItem> sclReportItems = sourceLn0.updateDoInRef();
