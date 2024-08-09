@@ -67,6 +67,30 @@
                     </LN0>
                 </LDevice>
 
+                <!-- Case with LDEPF and DAI purpose ends with BOOLEAN matching the InRef with Enum -->
+                <LDevice inst="LDEPF" ldName="IED_NAME1LDEPF">
+                    <LN0 lnClass="LLN0" inst="" lnType="LN11">
+                        <DOI name="InRef3">
+                            <DAI name="purpose">
+                                <Val>DYN_LDEPF_DIGITAL CHANNEL 36_1_BOOLEAN</Val>
+                            </DAI>
+                            <DAI name="setSrcRef" valKind="RO" valImport="true"/>
+                            <DAI name="setSrcCB" valKind="RO" valImport="true">
+                                <Val>OLD_VAL</Val>
+                            </DAI>
+                            <DAI name="setTstRef" valKind="RO" valImport="true"/>
+                            <DAI name="setTstCB" valKind="RO" valImport="true">
+                                <Val>OLD_VAL</Val>
+                            </DAI>
+                        </DOI>
+                        <Inputs>
+                            <ExtRef iedName="IED_NAME1" desc="DYN_LDEPF_DIGITAL CHANNEL 36_1_FaultDirectionKind_13_dirGeneral_1" ldInst="LDEPF" lnClass="ANCR" lnInst="1" prefix="PR" intAddr="INT_ADDR11" pDO="Do11.sdo11" doName="Do11.sdo11" srcLDInst="LD22" srcCBName="GSE1" srcPrefix="prefix" srcLNClass="ANCR" srcLNInst="1"/>
+                            <ExtRef iedName="IED_NAME1" desc="DYN_LDEPF_DIGITAL CHANNEL 36_1_FaultDirectionKind_13_dirGeneral_2" ldInst="LDEPF" lnClass="ANCR" lnInst="1" prefix="PR" intAddr="INT_ADDR11" pDO="Do11.sdo11" doName="Do11.sdo11" srcLDInst="LD22" srcCBName="GSE2" srcPrefix="prefix" srcLNClass="ANCR" srcLNInst="2"/>
+                            <ExtRef iedName="IED_NAME1" desc="DYN_LDEPF_DIGITAL CHANNEL 36_1_FaultDirectionKind_13_dirGeneral_3" ldInst="LDEPF" lnClass="ANCR" lnInst="1" prefix="PR" intAddr="INT_ADDR11" pDO="Do11.sdo11" doName="Do11.sdo11" srcLDInst="LD22" srcCBName="GSE3" srcPrefix="prefix" srcLNClass="ANCR" srcLNInst="3"/>
+                        </Inputs>
+                    </LN0>
+                </LDevice>
+
                 <!-- Case with ExtRef.desc suffix not ending with "_1" -->
                 <LDevice inst="LD_WITH_1_Bad_InRef" ldName="IED_NAME1LD_INST12">
                     <LN0 lnClass="LLN0" inst="" lnType="LN11">
