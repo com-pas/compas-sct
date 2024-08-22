@@ -36,8 +36,10 @@ public final class CommonConstants {
     public static final String SETSRCCB_DA_NAME = "setSrcCB";
     public static final String SETTSTREF_DA_NAME = "setTstRef";
     public static final String SETTSTCB_DA_NAME = "setTstCB";
+    public static final String PURPOSE_DA_NAME = "purpose";
     public static final String Q_DA_NAME = "q";
     public static final String IED_TEST_NAME = "IEDTEST";
+    public static final String INREF_PREFIX = "InRef";
 
     /**
      * Private Controlller, should not be instanced

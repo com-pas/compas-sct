@@ -20,8 +20,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.lfenergy.compas.sct.commons.util.CommonConstants.BEHAVIOUR_DO_NAME;
-import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL_DA_NAME;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 
 /**
  * A representation of the model object
@@ -71,8 +70,6 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
 
     public static final DoTypeName BEHAVIOUR_DO_TYPE_NAME = new DoTypeName(BEHAVIOUR_DO_NAME);
     public static final DaTypeName BEHAVIOUR_DA_TYPE_NAME = getDaTypeNameForBeh();
-    private static final String DAI_NAME_PURPOSE = "purpose";
-    private static final String INREF_PREFIX = "InRef";
     private static final Pattern LDEFP_DIGITAL_CHANNEL_PATTERN = Pattern.compile("DYN_LDEPF_DIGITAL CHANNEL \\d+_\\d+_BOOLEAN");
 
     /**
@@ -233,8 +230,8 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
         return getDOIAdapters().stream()
                 .filter(doiAdapter -> doiAdapter.getCurrentElem().isSetName()
                         && doiAdapter.getCurrentElem().getName().startsWith(INREF_PREFIX)
-                        && doiAdapter.findDataAdapterByName(DAI_NAME_PURPOSE).isPresent())
-                .map(doiAdapter -> doiAdapter.getDataAdapterByName(DAI_NAME_PURPOSE).getCurrentElem().getVal().stream()
+                        && doiAdapter.findDataAdapterByName(PURPOSE_DA_NAME).isPresent())
+                .map(doiAdapter -> doiAdapter.getDataAdapterByName(PURPOSE_DA_NAME).getCurrentElem().getVal().stream()
                         .findFirst()
                         .map(tVal -> doiAdapter.updateDaiFromExtRef(getExtRefsBoundToInRef(tVal.getValue())))
                         .orElse(List.of(SclReportItem.warning(getXPath(), "The DOI %s can't be bound with an ExtRef".formatted(getXPath()))))
