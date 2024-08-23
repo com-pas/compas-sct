@@ -19,6 +19,7 @@ import org.opentest4j.AssertionFailedError;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -116,6 +117,18 @@ public final class SclHelper {
             parentAdapter = parentAdapter.getStructuredDataAdapterByName(names[i]);
         }
         return parentAdapter;
+    }
+
+    public static Optional<TDAI> findDai(SCL scl, String iedName, String ldInst, String doiName, String daiName) {
+       return scl.getIED().stream().filter(tied -> tied.getName().equals(iedName))
+                .flatMap(tied -> tied.getAccessPoint().stream())
+                .flatMap(tAccessPoint -> tAccessPoint.getServer().getLDevice().stream())
+                .filter(tlDevice -> tlDevice.getInst().equals(ldInst))
+                .flatMap(tlDevice -> tlDevice.getLN0().getDOI().stream())
+                .filter(tdoi -> tdoi.getName().equals(doiName))
+                .flatMap(tdoi -> tdoi.getSDIOrDAI().stream().map(tUnNaming -> (TDAI)tUnNaming))
+                .filter(tdai -> tdai.getName().equals(daiName))
+               .findFirst();
     }
 
     public static AbstractDAIAdapter<?> findDai(AbstractLNAdapter<?> lnAdapter, String dataTypeRef) {

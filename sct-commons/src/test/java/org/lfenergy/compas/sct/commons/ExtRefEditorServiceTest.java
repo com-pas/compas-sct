@@ -5,6 +5,7 @@
 package org.lfenergy.compas.sct.commons;
 
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -39,7 +40,7 @@ class ExtRefEditorServiceTest {
 
     @BeforeEach
     void init() {
-        extRefEditorService = new ExtRefEditorService(new IedService(), new LdeviceService(), new ExtRefService(), new DataTypeTemplatesService());
+        extRefEditorService = new ExtRefEditorService(new IedService(), new LdeviceService(), new LnService(), new ExtRefService(), new DataTypeTemplatesService());
     }
 
     @Test
@@ -954,5 +955,45 @@ class ExtRefEditorServiceTest {
                 .extracting(SclReportItem::isError, SclReportItem::message)
                 .containsExactly(Tuple.tuple(true,
                         "The substation LNode with following attributes : IedName:IED_NAME2 / LdInst:LD_INST21 / LnClass:ANCR / LnInst:1  does not contain the needed (COMPAS - ICDHeader) private"));
+    }
+
+    @Test
+    void epfPostProcessing_when_exist_unused_channel_should_update_setSrcRef() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_postProcessing.xml");
+        // When
+        extRefEditorService.epfPostProcessing(scd);
+        // Then
+        SoftAssertions softly = new SoftAssertions();
+
+        Optional<TDAI> setSrcRefInInRef1 = findDai(scd, "IED_NAME1", "LDEPF", "InRef1", "setSrcRef");
+        Optional<TDAI> purposeInInRef1 = findDai(scd, "IED_NAME1", "LDEPF", "InRef1", "purpose");
+        assertThat(purposeInInRef1).isPresent();
+        softly.assertThat(purposeInInRef1.get().getVal().getFirst().getValue()).doesNotStartWith("DYN_LDEPF_DIGITAL CHANNEL");
+        softly.assertThat(purposeInInRef1.get().getVal().getFirst().getValue()).doesNotStartWith("DYN_LDEPF_ANALOG CHANNEL");
+        assertThat(setSrcRefInInRef1).isPresent();
+        softly.assertThat(setSrcRefInInRef1.get().isSetVal()).isFalse();
+
+        Optional<TDAI> setSrcRefInInRef2 = findDai(scd, "IED_NAME1", "LDEPF", "InRef2", "setSrcRef");
+        Optional<TDAI> purposeInInRef2 = findDai(scd, "IED_NAME1", "LDEPF", "InRef2", "purpose");
+        assertThat(purposeInInRef2).isPresent();
+        softly.assertThat(purposeInInRef2.get().getVal().getFirst().getValue()).startsWith("DYN_LDEPF_DIGITAL CHANNEL");
+        assertThat(setSrcRefInInRef2).isPresent();
+        softly.assertThat(setSrcRefInInRef2.get().getVal().getFirst().getValue()).isEqualTo("IED_NAME1LDEPF/LPHD0.Proxy");
+
+        Optional<TDAI> setSrcRefInInRef3 = findDai(scd, "IED_NAME1", "LDEPF", "InRef3", "setSrcRef");
+        Optional<TDAI> purposeInInRef3 = findDai(scd, "IED_NAME1", "LDEPF", "InRef3", "purpose");
+        assertThat(purposeInInRef3).isPresent();
+        softly.assertThat(purposeInInRef3.get().getVal().getFirst().getValue()).startsWith("DYN_LDEPF_DIGITAL CHANNEL");
+        assertThat(setSrcRefInInRef3).isPresent();
+        softly.assertThat(setSrcRefInInRef3.get().getVal().getFirst().getValue()).isEqualTo("IED_NAME1LDEPF/LPHD0.Proxy");
+
+        Optional<TDAI> setSrcRefInInRef4 = findDai(scd, "IED_NAME1", "LDEPF", "InRef4", "setSrcRef");
+        Optional<TDAI> purposeInInRef4 = findDai(scd, "IED_NAME1", "LDEPF", "InRef4", "purpose");
+        assertThat(purposeInInRef4).isPresent();
+        softly.assertThat(purposeInInRef4.get().getVal().getFirst().getValue()).startsWith("DYN_LDEPF_ANALOG CHANNEL");
+        assertThat(setSrcRefInInRef4).isPresent();
+        softly.assertThat(setSrcRefInInRef4.get().getVal().getFirst().getValue()).isEqualTo("IED_NAME1LDEPF/LPHD0.Proxy");
+        softly.assertAll();
     }
 }

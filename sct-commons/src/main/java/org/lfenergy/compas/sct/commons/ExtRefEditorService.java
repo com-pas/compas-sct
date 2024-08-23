@@ -7,6 +7,8 @@ package org.lfenergy.compas.sct.commons;
 import lombok.RequiredArgsConstructor;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.api.ExtRefEditor;
+import org.lfenergy.compas.sct.commons.api.LnEditor;
+import org.lfenergy.compas.sct.commons.domain.*;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.model.epf.EPF;
@@ -46,6 +48,7 @@ public class ExtRefEditorService implements ExtRefEditor {
 
     private final IedService iedService;
     private final LdeviceService ldeviceService;
+    private final LnEditor lnEditor;
     private final ExtRefService extRefService;
     private final DataTypeTemplatesService dataTypeTemplatesService;
 
@@ -321,6 +324,41 @@ public class ExtRefEditorService implements ExtRefEditor {
                                             }
                                         }))));
         return sclReportItems;
+    }
+
+    @Override
+    public void epfPostProcessing(SCL scd) {
+        iedService.getFilteredIeds(scd, ied -> !ied.getName().contains("TEST"))
+                .forEach(tied -> ldeviceService.findLdevice(tied, tlDevice -> LDEVICE_LDEPF.equals(tlDevice.getInst()))
+                        .ifPresent(tlDevice -> tlDevice.getLN0().getDOI()
+                                .stream().filter(tdoi -> tdoi.getName().startsWith(INREF_PREFIX))
+                                .forEach(tdoi -> {
+                                    DoLinkedToDaFilter doLinkedToSetSrcRef = new DoLinkedToDaFilter(tdoi.getName(), List.of(), SETSRCREF_DA_NAME, List.of());
+                                    Optional<TDAI> setSrcRefDAI = lnEditor.getDOAndDAInstances(tlDevice.getLN0(), doLinkedToSetSrcRef);
+                                    DoLinkedToDaFilter doLinkedPurPose = new DoLinkedToDaFilter(tdoi.getName(), List.of(), PURPOSE_DA_NAME, List.of());
+                                    Optional<TDAI> purPoseDAI = lnEditor.getDOAndDAInstances(tlDevice.getLN0(), doLinkedPurPose);
+
+                                    boolean isSetSrcRefExistAndEmpty = setSrcRefDAI.isPresent()
+                                            && (!setSrcRefDAI.get().isSetVal()
+                                            || (setSrcRefDAI.get().isSetVal()
+                                            && setSrcRefDAI.get().getVal().getFirst().getValue().isEmpty()));
+                                    boolean isPurposeExistAndMatchChannel = purPoseDAI.isPresent()
+                                            && purPoseDAI.get().isSetVal()
+                                            && (purPoseDAI.get().getVal().getFirst().getValue().startsWith("DYN_LDEPF_DIGITAL CHANNEL")
+                                            || purPoseDAI.get().getVal().getFirst().getValue().startsWith("DYN_LDEPF_ANALOG CHANNEL"));
+                                    if(isSetSrcRefExistAndEmpty && isPurposeExistAndMatchChannel) {
+
+                                        DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
+                                        DataObject dataObject = new DataObject();
+                                        dataObject.setDoName(tdoi.getName());
+                                        doLinkedToDa.setDataObject(dataObject);
+                                        DataAttribute dataAttribute = new DataAttribute();
+                                        dataAttribute.setDaName(SETSRCREF_DA_NAME);
+                                        dataAttribute.setDaiValues(List.of(new DaVal(null, tied.getName()+tlDevice.getInst()+"/LPHD0.Proxy")));
+                                        doLinkedToDa.setDataAttribute(dataAttribute);
+                                        lnEditor.updateOrCreateDOAndDAInstances(tlDevice.getLN0(), doLinkedToDa);
+                                    }
+                                })));
     }
 
     private List<SclReportItem> validateIed(SclRootAdapter sclRootAdapter) {
