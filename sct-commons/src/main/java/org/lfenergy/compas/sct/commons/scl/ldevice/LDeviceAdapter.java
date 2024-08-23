@@ -66,6 +66,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
     private static final long INTG_PD_VALUE_FOR_FC_MX = 2000L;
 
     private static final String DA_SETSRCREF = "setSrcRef";
+    private static final String CYC_REPORT_TYPE = "CYC";
 
     /**
      * Constructor
@@ -94,19 +95,19 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
                         findLnAdapter(tfcdaFilter.getLnClass(), tfcdaFilter.getLnInst(), tfcdaFilter.getPrefix()).filter(lnAdapter -> lnAdapter.getDaiModStValValue().map(ActiveStatus::fromValue).map(ActiveStatus.ON::equals).orElse(true)))
                         .map(sourceLn -> sourceLn.getDAI(new DataAttributeRef(toFCDA(tfcdaFilter)), false))
                         .filter(das -> das.stream().anyMatch(da -> TFCEnum.fromValue(tfcdaFilter.getFc().value()) == da.getFc())) // getDAI does not filter on DA.
-                        .ifPresent(dataAttributeRefs -> createHmiReportCB(ln0, toFCDA(tfcdaFilter))));
+                        .ifPresent(dataAttributeRefs -> createHmiReportCB(ln0, tfcdaFilter)));
     }
 
-    private void createHmiReportCB(LN0Adapter ln0, TFCDA fcda) {
-        boolean isFcMx = fcda.getFc() == TFCEnum.MX;
-        String dataSetSuffix = getInst().toUpperCase(Locale.ENGLISH) + ATTRIBUTE_VALUE_SEPARATOR + (isFcMx ? "CYPO" : "DQPO");
+    private void createHmiReportCB(LN0Adapter ln0, TFCDAFilter tfcdaFilter) {
+        TFCDA fcda = toFCDA(tfcdaFilter);
+        String dataSetSuffix = getInst().toUpperCase(Locale.ENGLISH) + ATTRIBUTE_VALUE_SEPARATOR + tfcdaFilter.getReportType().substring(0, 2) + "PO";
         String dataSetName = DATASET_NAME_PREFIX + dataSetSuffix;
         DataSetAdapter dataSet = ln0.createDataSetIfNotExists(dataSetName, ControlBlockEnum.REPORT);
-        dataSet.createFCDAIfNotExists(fcda.getLdInst(), fcda.getPrefix(), fcda.getLnClass().get(0), fcda.getLnInst(), fcda.getDoName(), fcda.getDaName(), fcda.getFc());
+        dataSet.createFCDAIfNotExists(fcda.getLdInst(), fcda.getPrefix(), fcda.getLnClass().getFirst(), fcda.getLnInst(), fcda.getDoName(), fcda.getDaName(), fcda.getFc());
         String cbName = CONTROLBLOCK_NAME_PREFIX + dataSetSuffix;
         String cbId = ln0.generateControlBlockId(getLdName(), cbName);
         ControlBlockAdapter controlBlockAdapter = ln0.createControlBlockIfNotExists(cbName, cbId, dataSetName, ControlBlockEnum.REPORT);
-        if (isFcMx) {
+        if (tfcdaFilter.getReportType().equals(CYC_REPORT_TYPE)) {
             TReportControl tReportControl = (TReportControl) controlBlockAdapter.getCurrentElem();
             tReportControl.setIntgPd(INTG_PD_VALUE_FOR_FC_MX);
             tReportControl.getTrgOps().setDchg(false);
@@ -478,7 +479,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
     private String createVal(TExtRef tExtRef) {
         String sourceLdName = getParentAdapter().getParentAdapter().getIEDAdapterByName(tExtRef.getIedName())
                 .getLDeviceAdapterByLdInst(tExtRef.getSrcLDInst()).getLdName();
-        String lnClass = !tExtRef.isSetSrcLNClass() ? TLLN0Enum.LLN_0.value() : tExtRef.getSrcLNClass().get(0);
+        String lnClass = !tExtRef.isSetSrcLNClass() ? TLLN0Enum.LLN_0.value() : tExtRef.getSrcLNClass().getFirst();
         return sourceLdName + "/" + lnClass + "." + tExtRef.getSrcCBName();
     }
 
