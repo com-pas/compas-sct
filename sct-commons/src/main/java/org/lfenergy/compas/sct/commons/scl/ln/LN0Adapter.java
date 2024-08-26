@@ -8,19 +8,19 @@ package org.lfenergy.compas.sct.commons.scl.ln;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
-import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceActivation;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.ied.InputsAdapter;
+import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceActivation;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.lfenergy.compas.sct.commons.util.CommonConstants.BEHAVIOUR_DO_NAME;
-import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL_DA_NAME;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 
 /**
  * A representation of the model object
@@ -47,9 +47,6 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL_DA_NAME
  *      <li>{@link LN0Adapter#getDAI <em>Returns the value of the <b>DataAttributeRef </b> containment reference By filter</em>}</li>
  *      <li>{@link LN0Adapter#getDAIValues(DataAttributeRef) <em>Returns <b>DAI (sGroup, value) </b> containment reference list By <b>DataAttributeRef </b> filter</em>}</li>
  *
- *      <li>{@link LN0Adapter#getDataSetByName(String) <em>Returns the value of the <b>TDataSet </b>object reference By the value of the <b>name </b>attribute </em>}</li>
- *
- *      <li>{@link LN0Adapter#getControlBlocks(List, TServiceType) <em>Returns the value of the <b>ControlBlock </b>containment reference list that match <b>datSet </b> value of given <b>TDataSet</b> </em>}</li>
  *      <li>{@link LN0Adapter#addPrivate <em>Add <b>TPrivate </b>under this object</em>}</li>
  *      <li>{@link LN0Adapter#removeAllControlBlocksAndDatasets() <em>Remove all <b>ControlBlock</b></em>}</li>
  *    </ul>
@@ -73,8 +70,7 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
 
     public static final DoTypeName BEHAVIOUR_DO_TYPE_NAME = new DoTypeName(BEHAVIOUR_DO_NAME);
     public static final DaTypeName BEHAVIOUR_DA_TYPE_NAME = getDaTypeNameForBeh();
-    private static final String DAI_NAME_PURPOSE = "purpose";
-    private static final String INREF_PREFIX = "InRef";
+    private static final Pattern LDEFP_DIGITAL_CHANNEL_PATTERN = Pattern.compile("DYN_LDEPF_DIGITAL CHANNEL \\d+_\\d+_BOOLEAN");
 
     /**
      * Constructor
@@ -188,7 +184,7 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
         if (daiBehList.isEmpty()) {
             return Optional.of(buildFatalReportItem("The LDevice doesn't have a DO @name='Beh' OR its associated DA@fc='ST' AND DA@name='stVal'"));
         }
-        Set<String> enumValues = getEnumValues(daiBehList.get(0).getDaName().getType());
+        Set<String> enumValues = getEnumValues(daiBehList.getFirst().getDaName().getType());
         Optional<TCompasLDevice> optionalTCompasLDevice = PrivateUtils.extractCompasPrivate(getParentAdapter().getCurrentElem(), TCompasLDevice.class);
         if (optionalTCompasLDevice.isEmpty()) {
             return Optional.of(buildFatalReportItem("The LDevice doesn't have a Private compas:LDevice."));
@@ -234,14 +230,24 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
         return getDOIAdapters().stream()
                 .filter(doiAdapter -> doiAdapter.getCurrentElem().isSetName()
                         && doiAdapter.getCurrentElem().getName().startsWith(INREF_PREFIX)
-                        && doiAdapter.findDataAdapterByName(DAI_NAME_PURPOSE).isPresent())
-                .map(doiAdapter -> doiAdapter.getDataAdapterByName(DAI_NAME_PURPOSE).getCurrentElem().getVal().stream()
+                        && doiAdapter.findDataAdapterByName(PURPOSE_DA_NAME).isPresent())
+                .map(doiAdapter -> doiAdapter.getDataAdapterByName(PURPOSE_DA_NAME).getCurrentElem().getVal().stream()
                         .findFirst()
-                        .map(tVal -> doiAdapter.updateDaiFromExtRef(getBoundExtRefsByDesc(tVal.getValue())))
+                        .map(tVal -> doiAdapter.updateDaiFromExtRef(getExtRefsBoundToInRef(tVal.getValue())))
                         .orElse(List.of(SclReportItem.warning(getXPath(), "The DOI %s can't be bound with an ExtRef".formatted(getXPath()))))
                 )
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
+    }
+
+    private List<TExtRef> getExtRefsBoundToInRef(String desc) {
+        List<TExtRef> boundExtRefs = getBoundExtRefsByDesc(desc);
+        // Special case for LDEPF DIGITAL CHANNEL of type BOOLEAN RSR-1048
+        if (boundExtRefs.isEmpty() && LDEFP_DIGITAL_CHANNEL_PATTERN.matcher(desc).matches()) {
+            String descWithoutType = desc.substring(0, desc.lastIndexOf("_"));
+            return getBoundExtRefsByDesc(descWithoutType);
+        }
+        return boundExtRefs;
     }
 
     private List<TExtRef> getBoundExtRefsByDesc(String desc) {

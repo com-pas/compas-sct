@@ -64,6 +64,14 @@ public interface ExtRefEditor {
     List<SclReportItem> manageBindingForLDEPF(SCL scd, EPF epf);
 
     /**
+     * Pointing an unused channel to an existing object LPHD0.Proxy of the concerned IED.
+     * An unused channel is characterized by the value DAI name ="setSrcRef"/Val (should be empty) in InRef**
+     *  that have a purpose beginning by DYN_LDEPF_DIGITAL CHANNEL or DYN_LDEPF_ANALOG CHANNEL
+     * @param scd SCL
+     */
+    void epfPostProcessing(SCL scd);
+
+    /**
      * Debinding of Private CompasFlows and ExtRef signals based on voltageLevel
      *
      * @param scd SCL file in which ExtRef and Private CompasFlow should be debind
