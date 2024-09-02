@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- SPDX-FileCopyrightText: 2023 RTE FRANCE -->
+<!-- SPDX-FileCopyrightText: 2024 RTE FRANCE -->
 <!-- -->
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
@@ -12,9 +12,9 @@
             <xs:sequence>
                 <xs:element ref="History"/>
                 <xs:element ref="Version"/>
-                <xs:element ref="AppIdRanges"/>
-                <xs:element ref="MacRanges"/>
                 <xs:element ref="Vlans"/>
+                <xs:element ref="MacRanges"/>
+                <xs:element ref="AppIdRanges"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -26,7 +26,6 @@
             </xs:sequence>
         </xs:complexType>
     </xs:element>
-
     <xs:complexType name="tHitem" mixed="true">
         <xs:attribute name="Version" type="xs:normalizedString" use="required"/>
         <xs:attribute name="When" type="xs:normalizedString" use="required"/>
@@ -141,9 +140,20 @@
             <xs:enumeration value="AUT"/>
             <xs:enumeration value="PDIF"/>
             <xs:enumeration value="GRP"/>
+            <xs:enumeration value="GRPR"/>
+            <xs:enumeration value="ASLD"/>
             <xs:enumeration value="GW"/>
             <xs:enumeration value="TG"/>
             <xs:enumeration value="TOPO"/>
+            <xs:enumeration value="SWC"/>
+            <xs:enumeration value="SWT"/>
+            <xs:enumeration value="SW"/>
+            <xs:enumeration value="OUT"/>
+            <xs:enumeration value="CLUS"/>
+            <xs:enumeration value="VIRT"/>
+            <xs:enumeration value="ICT"/>
+            <xs:enumeration value="SYN"/>
+            <xs:enumeration value="OND"/>
             <xs:enumeration value="ADEFINIR"/>
             <xs:enumeration value="IEDTEST"/>
         </xs:restriction>
