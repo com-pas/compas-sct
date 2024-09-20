@@ -18,6 +18,7 @@ import org.lfenergy.compas.sct.commons.dto.FCDAInfo;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
@@ -480,6 +481,29 @@ class UtilsTest {
         assertThatCode(() -> copySclElement(fcdaInfo, FCDAInfo.class))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("org.lfenergy.compas.sct.commons.dto.FCDAInfo is not known to this context");
+    }
+
+    @Test
+    void copySclElement_should_succeed_when_syncRead() throws ExecutionException, InterruptedException {
+        // Given
+        TLN tln = new TLN();
+        tln.setLnType("T1");
+        tln.getLnClass().add(TLLN0Enum.LLN_0.value());
+        ExecutorService service = Executors.newFixedThreadPool(2);
+        Callable<TLN> copySclElementTlnCallable = () -> copySclElement(tln, TLN.class);
+        // When
+        List<Future<TLN>> result = service.invokeAll(List.of(copySclElementTlnCallable, copySclElementTlnCallable));
+        service.shutdown();
+        TLN[] tlns = new TLN[]{result.getFirst().get(), result.getLast().get()};
+        // Then
+        assertThat(tlns).hasSize(2);
+        assertThat(tlns[0])
+                .isNotSameAs(tlns[1])
+                .isNotSameAs(tln);
+        assertThat(tlns[0])
+                .usingRecursiveComparison()
+                .isEqualTo(tlns[1])
+                .isEqualTo(tln);
     }
 
     @Test
