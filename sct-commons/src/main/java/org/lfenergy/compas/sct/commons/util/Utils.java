@@ -31,7 +31,6 @@ public final class Utils {
     private static final Pattern MAC_ADDRESS_PATTERN = Pattern.compile("[0-9A-F]{2}([-:][0-9A-F]{2}){5}", Pattern.CASE_INSENSITIVE);
 
     private static JAXBContext jaxbContext = null;
-    private static Unmarshaller unmarshaller = null;
 
     /**
      * Private Constructor, should not be instanced
@@ -149,7 +148,7 @@ public final class Utils {
      * @param s1 first string
      * @param s2 seconde string
      * @return true if strings are equals or both blank, false otherwise
-     * @see org.apache.commons.lang3.StringUtils#isBlank(CharSequence)
+     * @see StringUtils#isBlank(CharSequence)
      */
     public static boolean equalsOrBothBlank(String s1, String s2) {
         return Objects.equals(s1, s2)
@@ -167,9 +166,9 @@ public final class Utils {
      * @param s2 second String to compare
      * @return when s1 and s2 are not blank, same result as {@link String#compare(CharSequence, CharSequence)},
      *  zero when s1 and s2 are both blanks, negative integer when s1 is blank and s2 is not, positive integer when s1 is not blank but s2 is.
-     * @see java.util.Comparator#compare(Object, Object)
-     * @see org.apache.commons.lang3.StringUtils#isBlank(CharSequence)
-     * @see java.util.Comparator#nullsFirst(Comparator)
+     * @see Comparator#compare(Object, Object)
+     * @see StringUtils#isBlank(CharSequence)
+     * @see Comparator#nullsFirst(Comparator)
      */
     public static int blanksFirstComparator(String s1, String s2) {
         if (StringUtils.isBlank(s1)){
@@ -314,11 +313,12 @@ public final class Utils {
      * @return copy of the object
      */
     public static <T> T copySclElement(T object, Class<T> clazz) {
+        Unmarshaller unmarshaller;
         try {
             if (jaxbContext == null) {
                 jaxbContext = JAXBContext.newInstance("org.lfenergy.compas.scl2007b4.model");
-                unmarshaller = jaxbContext.createUnmarshaller();
             }
+            unmarshaller = jaxbContext.createUnmarshaller();
             JAXBElement<T> contentObject = new JAXBElement<>(new QName(clazz.getSimpleName()), clazz, object);
             JAXBSource source = new JAXBSource(jaxbContext, contentObject);
             return unmarshaller.unmarshal(source, clazz).getValue();
