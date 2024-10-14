@@ -12,17 +12,16 @@ import org.lfenergy.compas.scl2007b4.model.TVoltageLevel;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
 
-@ExtendWith(MockitoExtension.class)
 class SubstationServiceTest {
 
-    @InjectMocks
-    SubstationService substationService;
+    private final SubstationService substationService = new SubstationService(new VoltageLevelService());
 
     @Test
     void addSubstation_when_SCD_has_no_substation_should_succeed() {
@@ -43,8 +42,8 @@ class SubstationServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/scd_with_substation.xml");
         SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
-        TSubstation scdSubstation = scd.getSubstation().get(0);
-        TSubstation ssdSubstation = ssd.getSubstation().get(0);
+        TSubstation scdSubstation = scd.getSubstation().getFirst();
+        TSubstation ssdSubstation = ssd.getSubstation().getFirst();
         assertThat(scdSubstation.getVoltageLevel().stream().map(TVoltageLevel::getBay).count()).isEqualTo(1);
         // When
         substationService.addSubstation(scd, ssd);

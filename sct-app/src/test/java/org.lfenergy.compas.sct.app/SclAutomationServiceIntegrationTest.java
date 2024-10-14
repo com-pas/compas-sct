@@ -8,10 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.LN0;
 import org.lfenergy.compas.scl2007b4.model.SCL;
-import org.lfenergy.compas.sct.commons.ControlBlockEditorService;
-import org.lfenergy.compas.sct.commons.LdeviceService;
-import org.lfenergy.compas.sct.commons.SclService;
-import org.lfenergy.compas.sct.commons.SubstationService;
+import org.lfenergy.compas.sct.commons.*;
 import org.lfenergy.compas.sct.commons.api.ControlBlockEditor;
 import org.lfenergy.compas.sct.commons.api.SclEditor;
 import org.lfenergy.compas.sct.commons.api.SubstationEditor;
@@ -34,7 +31,7 @@ class SclAutomationServiceIntegrationTest {
 
     private SclAutomationService sclAutomationService ;
     private static final SclEditor sclEditor = new SclService() ;
-    private static final SubstationEditor substationEditor = new SubstationService() ;
+    private static final SubstationEditor substationEditor = new SubstationService(new VoltageLevelService()) ;
     private static final ControlBlockEditor controlBlockEditor = new ControlBlockEditorService(new ControlService(), new LdeviceService()) ;
 
     private HeaderDTO headerDTO;

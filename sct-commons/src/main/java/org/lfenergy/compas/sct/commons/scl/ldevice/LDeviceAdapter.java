@@ -10,24 +10,18 @@ import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.model.cb_po.PO;
-import org.lfenergy.compas.sct.commons.model.cb_po.TFCDAFilter;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.ControlBlockAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.DataSetAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
-import org.lfenergy.compas.sct.commons.util.ActiveStatus;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 import org.lfenergy.compas.sct.commons.util.MonitoringLnClassEnum;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
 
-import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 import static org.lfenergy.compas.sct.commons.util.Utils.copySclElement;
 
 /**
@@ -63,10 +57,7 @@ import static org.lfenergy.compas.sct.commons.util.Utils.copySclElement;
 @Slf4j
 public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
 
-    private static final long INTG_PD_VALUE_FOR_FC_MX = 2000L;
-
     private static final String DA_SETSRCREF = "setSrcRef";
-    private static final String CYC_REPORT_TYPE = "CYC";
 
     /**
      * Constructor
@@ -76,43 +67,6 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
      */
     public LDeviceAdapter(IEDAdapter parentAdapter, TLDevice currentElem) {
         super(parentAdapter, currentElem);
-    }
-
-    /**
-     * Create DataSet and ReportControl Blocks for the HMI with the given FCDAs.
-     * DataSet and ReportControl are created in LN0, even if FCDA refers to another LN.
-     *
-     * @param po object containing list  of FCDA for which we must create the DataSet and ReportControl
-     */
-    public void createHmiReportControlBlocks(PO po) {
-        LN0Adapter ln0 = getLN0Adapter();
-        if (!ln0.getDaiModStValValue().map(ActiveStatus::fromValue).map(ActiveStatus.ON::equals).orElse(false)) return;
-        po.getFCDAs().getFCDA().stream()
-                .filter(tfcdaFilter -> getInst().equals(tfcdaFilter.getLdInst()) && tfcdaFilter.isSetLnClass())
-                .forEach(tfcdaFilter -> (tfcdaFilter.getLnClass().equals(TLLN0Enum.LLN_0.value()) ?
-                        Optional.of(ln0) // ln0 Mod stVal "ON" has already been checked, no need to check it again
-                        :
-                        findLnAdapter(tfcdaFilter.getLnClass(), tfcdaFilter.getLnInst(), tfcdaFilter.getPrefix()).filter(lnAdapter -> lnAdapter.getDaiModStValValue().map(ActiveStatus::fromValue).map(ActiveStatus.ON::equals).orElse(true)))
-                        .map(sourceLn -> sourceLn.getDAI(new DataAttributeRef(toFCDA(tfcdaFilter)), false))
-                        .filter(das -> das.stream().anyMatch(da -> TFCEnum.fromValue(tfcdaFilter.getFc().value()) == da.getFc())) // getDAI does not filter on DA.
-                        .ifPresent(dataAttributeRefs -> createHmiReportCB(ln0, tfcdaFilter)));
-    }
-
-    private void createHmiReportCB(LN0Adapter ln0, TFCDAFilter tfcdaFilter) {
-        TFCDA fcda = toFCDA(tfcdaFilter);
-        String dataSetSuffix = getInst().toUpperCase(Locale.ENGLISH) + ATTRIBUTE_VALUE_SEPARATOR + tfcdaFilter.getReportType().substring(0, 2) + "PO";
-        String dataSetName = DATASET_NAME_PREFIX + dataSetSuffix;
-        DataSetAdapter dataSet = ln0.createDataSetIfNotExists(dataSetName, ControlBlockEnum.REPORT);
-        dataSet.createFCDAIfNotExists(fcda.getLdInst(), fcda.getPrefix(), fcda.getLnClass().getFirst(), fcda.getLnInst(), fcda.getDoName(), fcda.getDaName(), fcda.getFc());
-        String cbName = CONTROLBLOCK_NAME_PREFIX + dataSetSuffix;
-        String cbId = ln0.generateControlBlockId(getLdName(), cbName);
-        ControlBlockAdapter controlBlockAdapter = ln0.createControlBlockIfNotExists(cbName, cbId, dataSetName, ControlBlockEnum.REPORT);
-        if (tfcdaFilter.getReportType().equals(CYC_REPORT_TYPE)) {
-            TReportControl tReportControl = (TReportControl) controlBlockAdapter.getCurrentElem();
-            tReportControl.setIntgPd(INTG_PD_VALUE_FOR_FC_MX);
-            tReportControl.getTrgOps().setDchg(false);
-            tReportControl.getTrgOps().setQchg(false);
-        }
     }
 
     /**
@@ -481,17 +435,6 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
                 .getLDeviceAdapterByLdInst(tExtRef.getSrcLDInst()).getLdName();
         String lnClass = !tExtRef.isSetSrcLNClass() ? TLLN0Enum.LLN_0.value() : tExtRef.getSrcLNClass().getFirst();
         return sourceLdName + "/" + lnClass + "." + tExtRef.getSrcCBName();
-    }
-
-    private TFCDA toFCDA(TFCDAFilter tfcdaFilter) {
-        TFCDA tfcda = new TFCDA();
-        tfcda.setLdInst(tfcdaFilter.getLdInst());
-        tfcda.getLnClass().add(tfcdaFilter.getLnClass());
-        tfcda.setPrefix(tfcdaFilter.getPrefix());
-        tfcda.setLnInst(tfcdaFilter.getLnInst());
-        tfcda.setDoName(tfcdaFilter.getDoName());
-        tfcda.setFc(TFCEnum.fromValue(tfcdaFilter.getFc().value()));
-        return tfcda;
     }
 
 }
