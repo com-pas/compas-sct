@@ -154,6 +154,15 @@ public final class PrivateUtils {
     }
 
     /**
+     * Create Private of given type as parameter
+     * @param tCompasLDevice type of Private to create
+     * @return created Private
+     */
+    public static TPrivate createPrivate(TCompasLDevice tCompasLDevice) {
+        return createPrivate(objectFactory.createLDevice(tCompasLDevice));
+    }
+
+    /**
      * Create a single Private of type COMPAS-Topo
      * containing all given TCompasTopo
      * @param compasTopos list of TCompasTopo
