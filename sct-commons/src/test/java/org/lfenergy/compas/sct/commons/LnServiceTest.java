@@ -4,9 +4,11 @@
 
 package org.lfenergy.compas.sct.commons;
 
+import org.assertj.core.api.Assertions;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
@@ -15,6 +17,7 @@ import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.lfenergy.compas.sct.commons.util.ActiveStatus;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -580,5 +583,92 @@ class LnServiceTest {
         return dai;
     }
 
+    @ParameterizedTest
+    @MethodSource("provideLnAttributesForMatchingLns")
+    void matchesLn_should_return_True_in_these_LN_cases(String lnClass, String lnInst, String lnPrefix) {
+        //GIVEN:
+        TLN tln = new TLN();
+        tln.getLnClass().add(lnClass);
+        tln.setInst(lnInst);
+        tln.setPrefix(lnPrefix);
+        //WHEN:
+        Boolean response = lnService.matchesLn(tln, lnClass, lnInst, lnPrefix);
+        //THEN:
+        assertThat(response).isTrue();
+    }
+
+    private static Stream<Arguments> provideLnAttributesForMatchingLns() {
+        return Stream.of(
+                Arguments.of("LPHD", "1", "LnPrefix", "LPHD", "1", "LnPrefix"),
+                Arguments.of("LPHD", "1", null, "LPHD", "1", null)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideLnAttributesForUnMatchingLns")
+    void matchesLn_should_return_False_in_these_LN_cases(String lnClass, String lnInst, String lnPrefix, String lnClassString, String lnInstString, String lnPrefixString) {
+        //GIVEN:
+        TLN tln = new TLN();
+        tln.getLnClass().add(lnClass);
+        tln.setInst(lnInst);
+        tln.setPrefix(lnPrefix);
+        //WHEN:
+        Boolean response = lnService.matchesLn(tln, lnClassString, lnInstString, lnPrefixString);
+        //THEN:
+        assertThat(response).isFalse();
+    }
+
+    private static Stream<Arguments> provideLnAttributesForUnMatchingLns() {
+        return Stream.of(
+                Arguments.of("FAKE", "1", "LnPrefix", "LPHD", "1", "LnPrefix"),
+                Arguments.of("LPHD", "FAKE", "LnPrefix", "LPHD", "1", "LnPrefix"),
+                Arguments.of("LPHD", "1", "FAKE", "LPHD", "1", "LnPrefix"),
+                Arguments.of("FAKE", "1", null, "LPHD", "1", null),
+                Arguments.of("LPHD", "FAKE", null, "LPHD", "1", null)
+        );
+    }
+
+
+    @ParameterizedTest
+    @MethodSource("provideLn0AttributesForMatchingLn0s")
+    void matchesLn_should_return_True_for_matching_LLN0(String lnClass, String lnInst, String lnPrefix) {
+        //GIVEN:
+        LN0 ln0 = new LN0();
+        ln0.getLnClass().add(lnClass);
+        //WHEN:
+        Boolean response = lnService.matchesLn(ln0, lnClass, lnInst, lnPrefix);
+        //THEN:
+        assertThat(response).isTrue();
+    }
+
+    private static Stream<Arguments> provideLn0AttributesForMatchingLn0s() {
+        return Stream.of(
+                Arguments.of("LLN0", "", ""),
+                Arguments.of("LLN0", "1", ""),
+                Arguments.of("LLN0", "", "LnPrefix")
+        );
+    }
+
+    @Test
+    void matchesLn_should_return_False_for_Unmatching_LLN0() {
+        //GIVEN:
+        LN0 ln0 = new LN0();
+        ln0.getLnClass().add("LLN0");
+        //WHEN:
+        Boolean response = lnService.matchesLn(ln0, "LPHD", "", "");
+        //THEN:
+        assertThat(response).isFalse();
+    }
+
+    @Test
+    void matchesLn_should_throw_an_exception() {
+        //GIVEN:
+        TLN0 tln0 = new TLN0();
+        tln0.getLnClass().add("LLN0");
+        //WHEN && //THEN:
+        Assertions.assertThatThrownBy(() -> lnService.matchesLn(tln0, "LLN0", "", ""))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Unexpected value: ");
+    }
 
 }
