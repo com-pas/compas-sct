@@ -5,15 +5,17 @@
 package org.lfenergy.compas.sct.commons;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.api.LnEditor;
 import org.lfenergy.compas.sct.commons.domain.*;
 import org.lfenergy.compas.sct.commons.util.ActiveStatus;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.*;
 import java.util.stream.Stream;
 
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.MOD_DO_NAME;
@@ -173,6 +175,16 @@ public class LnService implements LnEditor {
                         doLinkedToDa.getDataAttribute().setValImport(tdai.isValImport());
                     }
                 });
+    }
+
+    public boolean matchesLn(TAnyLN tAnyLN, String lnClass, String lnInst, String lnPrefix) {
+        return switch (tAnyLN) {
+            case TLN ln -> lnClass.equals(ln.getLnClass().getFirst())
+                    && lnInst.equals(ln.getInst())
+                    && (StringUtils.trimToEmpty(lnPrefix).equals(StringUtils.trimToEmpty(ln.getPrefix())));
+            case LN0 ignored -> lnClass.equals(TLLN0Enum.LLN_0.value());
+            default -> throw new IllegalStateException("Unexpected value: " + tAnyLN);
+        };
     }
 
     private boolean hasSettingGroup(TDAI tdai) {
