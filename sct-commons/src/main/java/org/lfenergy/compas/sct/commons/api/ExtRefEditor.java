@@ -21,7 +21,6 @@ import java.util.List;
  *   <ol>
  *      <li>{@link ExtRefEditor#updateExtRefBinders <em>Update the <b>TExtRef </b> reference object for given <b>ExtRefBindingInfo </b> model</em>}</li>
  *      <li>{@link ExtRefEditor#updateExtRefSource <em>Update the <b>TExtRef </b> reference object for given <b>ExtRefSourceInfo </b> model</em>}</li>
- *      <li>{@link ExtRefEditor#updateAllExtRefIedNames <em>Update the iedName attribute in all <b>TExtRef</b></em>}</li>
  *      <li>{@link ExtRefEditor#manageBindingForLDEPF <em>Manage <b>TExtRef</b> Binding For LDevice (inst=LDEPF) within LDEPF configuration</em>}</li>
  *   </ol>
  * </ul>
@@ -48,13 +47,6 @@ public interface ExtRefEditor {
     TExtRef updateExtRefSource(SCL scd, ExtRefInfo extRefInfo) throws ScdException;
 
     /**
-     * Updates iedName attribute of all ExtRefs in the Scd.
-     *
-     * @return list of encountered errors
-     */
-    List<SclReportItem> updateAllExtRefIedNames(SCL scd);
-
-    /**
      * ExtRef Binding For LDevice (inst=LDEPF) that matching EPF configuration
      *
      * @param scd SCL
@@ -70,19 +62,5 @@ public interface ExtRefEditor {
      * @param scd SCL
      */
     void epfPostProcessing(SCL scd);
-
-    /**
-     * Debinding of Private CompasFlows and ExtRef signals based on voltageLevel
-     *
-     * @param scd SCL file in which ExtRef and Private CompasFlow should be debind
-     */
-    void debindCompasFlowsAndExtRefsBasedOnVoltageLevel(SCL scd);
-
-    /**
-     * Update compas:Flow.ExtRefiedName and ExtRef.iedName, based on Substation LNode iedName
-     * @param scd SCL
-     * @return list of encoutered errors
-     */
-    List<SclReportItem> updateIedNameBasedOnLnode(SCL scd);
 
 }

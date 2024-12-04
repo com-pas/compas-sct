@@ -191,11 +191,7 @@ class InputsAdapterTest {
             Arguments.of(named("should ignore instance number when checking FCDA Candidate file (DO with SDO)",
                     "test no daName and doName with instance number and SDO"),
                 "IED_NAME2/LD_INST21/DS_LD_INST21_GSI",
-                List.of(new FCDARecord("LD_INST21", "ANCR", "1", "", "DoWithInst2.subDo", "daNameST", TFCEnum.ST))),
-            Arguments.of(named("hould include UNTESTED FlowStatus",
-                    "test include compas:Flow.FlowStatus UNTESTED"),
-                "IED_NAME2/LD_INST21/DS_LD_INST21_GSI",
-                List.of(new FCDARecord("LD_INST21", "ANCR", "1", "", "DoName", "daNameST", TFCEnum.ST)))
+                List.of(new FCDARecord("LD_INST21", "ANCR", "1", "", "DoWithInst2.subDo", "daNameST", TFCEnum.ST)))
         );
     }
 
@@ -218,16 +214,41 @@ class InputsAdapterTest {
             .allMatch(ln0Adapter -> !ln0Adapter.getCurrentElem().isSetDataSet());
     }
 
+    @ParameterizedTest
+    @MethodSource("provideDoCreateFCDA")
+    void updateAllSourceDataSetsAndControlBlocks_when_valid_source_Da_found_should_create_FCDA(String extRefDesc, String extRefIedName) {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        InputsAdapter inputsAdapter = keepOnlyThisExtRef(sclRootAdapter, extRefDesc);
+        DACOMM dacomm = DaComTestMarshallerHelper.getDACOMMFromFile("/cb_comm/Template_DA_COMM_v1.xml");
+        // When
+        List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks(dacomm.getFCDAs().getFCDA());
+        // Then
+        assertThat(sclReportItems).isEmpty();
+        assertThat(sclRootAdapter.streamIEDAdapters()
+                .filter(iedAdapter -> iedAdapter.getName().equals(extRefIedName))
+                .flatMap(IEDAdapter::streamLDeviceAdapters)
+                .filter(LDeviceAdapter::hasLN0)
+                .map(LDeviceAdapter::getLN0Adapter))
+                .allMatch(ln0Adapter -> ln0Adapter.getCurrentElem().isSetDataSet());
+    }
+
     public static Stream<Arguments> provideDoNotCreateFCDA() {
         return Stream.of(
-            Arguments.of(named("should not create FCDA for source Da different from MX and ST",
-                "test daName BL")),
-            Arguments.of(named("should not create FCDA for extref with a binding internal to the IED",
-                "test ignore internal binding")),
-            Arguments.of(named("should not create FCDA for extref with missing binding attributes",
-                "test ignore missing bindings attributes")),
-            Arguments.of(named("should not create FCDA for ExtRef with compas:Flow.FlowStatus INACTIVE",
-                "test ignore when compas:Flow.FlowStatus is neither ACTIVE nor UNTESTED"))
+                Arguments.of(named("should not create FCDA for source Da different from MX and ST",
+                        "test daName BL")),
+                Arguments.of(named("should not create FCDA for extref with a binding internal to the IED",
+                        "test ignore internal binding")),
+                Arguments.of(named("should not create FCDA for extref with missing binding attributes",
+                        "test ignore missing bindings attributes"))
+        );
+    }
+
+    public static Stream<Arguments> provideDoCreateFCDA() {
+        return Stream.of(
+                Arguments.of(named("should create FCDA", "test bay internal"), "IED_NAME2"),
+                Arguments.of(named("should create FCDA", "test bay external"), "IED_NAME3")
         );
     }
 
@@ -303,17 +324,6 @@ class InputsAdapterTest {
         // Then
         assertThat(result).hasSameSizeAs(tExtRefList)
                 .hasSize(6);
-    }
-
-    @Test
-    void updateAllExtRefIedNames_when_DOI_Mod_and_DAI_stVal_notExists_should_not_produce_error() {
-        // Given
-        SCL scl = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/Test_Missing_ModstVal_In_LN0_when_binding.scd");
-        InputsAdapter inputsAdapter = findInputs(scl, "IedName1", "LDSUIED");
-        // When
-        List<SclReportItem> sclReportItems = inputsAdapter.updateAllExtRefIedNames(Map.of());
-        // Then
-        assertThat(sclReportItems).isEmpty();
     }
 
 }

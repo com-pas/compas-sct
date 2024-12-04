@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- SPDX-FileCopyrightText: 2022 RTE FRANCE -->
+<!-- SPDX-FileCopyrightText: 2022 2023 2024 RTE FRANCE -->
 <!-- -->
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
@@ -24,18 +24,6 @@
                             </DAI>
                         </DOI>
                         <Inputs>
-                            <Private type="COMPAS-Flow">
-                                <compas:Flow FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="System_Version_IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE" dataStreamKey="STAT_LDSUIED_LPDO 1 Sortie_13_BOOLEAN_18_stVal_1"/>
-                                <compas:Flow FlowID="2" FlowKind="BAY_INTERNAL" ExtRefiedName="System_Version_IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="INACTIVE" dataStreamKey="Match compas:Flow but FlowStatus is INACTIVE"/>
-                                <compas:Flow FlowID="3" FlowKind="BAY_INTERNAL" ExtRefiedName="System_Version_IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE" dataStreamKey="Matching two compas:Flow"/>
-                                <compas:Flow FlowID="4" FlowKind="BAY_INTERNAL" ExtRefiedName="System_Version_IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE" dataStreamKey="Matching two compas:Flow"/>
-                                <compas:Flow FlowID="5" FlowKind="BAY_INTERNAL" ExtRefiedName="Non_Existent_System_Version" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE" dataStreamKey="ExtRef does not match any ICDSystemVersionUUID"/>
-                                <compas:Flow FlowID="6" FlowKind="BAY_INTERNAL" ExtRefiedName="System_Version_IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="Non_existent_LD" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE" dataStreamKey="ExtRefldinst does not match any LDevice inst in source IED"/>
-                                <compas:Flow FlowID="7" FlowKind="BAY_INTERNAL" ExtRefiedName="System_Version_IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST21" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE" dataStreamKey="ExtRef does not match any LN in source LDevice"/>
-                                <compas:Flow FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="System_Version_IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST22" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE" dataStreamKey="Source LDevice is off for this ExtRef"/>
-                                <compas:Flow FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="System_Version_IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST23" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE" dataStreamKey="Source LDevice is undefined for this ExtRef"/>
-                                <compas:Flow FlowID="1" FlowKind="BAY_INTERNAL" ExtRefiedName="System_Version_IED_NAME2" ExtReflnClass="ANCR" ExtRefldinst="LD_INST24" ExtReflnInst="1" ExtRefprefix="" FlowStatus="ACTIVE" dataStreamKey="Source LDevice is neither on nor off for this ExtRef"/>
-                            </Private>
                             <!-- nominal case -->
                             <ExtRef iedName="System_Version_IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="1" doName="DoName1" daName="daName1" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113" desc="STAT_LDSUIED_LPDO 1 Sortie_13_BOOLEAN_18_stVal_1"/>
                             <!-- match compas Flow but Flow status INACTIVE -->

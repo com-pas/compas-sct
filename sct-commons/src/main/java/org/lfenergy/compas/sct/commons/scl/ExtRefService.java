@@ -1,5 +1,5 @@
 /*
- * // SPDX-FileCopyrightText: 2023 RTE FRANCE
+ * // SPDX-FileCopyrightText: 2023 2024 RTE FRANCE
  * //
  * // SPDX-License-Identifier: Apache-2.0
  */
@@ -53,18 +53,6 @@ public class ExtRefService {
     }
 
     /**
-     * Retrieves ExtRefs corresponding to given CompasFlow
-     *
-     * @param tlDevice      LDevice containing CompasFlows and ExtRefs
-     * @param tCompasFlow corresponding to Extrefs we are searching
-     * @return stream of matching ExtRefs
-     */
-    public Stream<TExtRef> getMatchingExtRefs(TLDevice tlDevice, TCompasFlow tCompasFlow) {
-        return getExtRefs(tlDevice)
-                .filter(tExtRef -> isMatchingExtRef(tCompasFlow, tExtRef));
-    }
-
-    /**
      * Debind ExtRef
      *
      * @param extRef to debind
@@ -85,18 +73,6 @@ public class ExtRefService {
         extRef.unsetSrcLNClass();
     }
 
-    /**
-     * Debind CompasFlow
-     *
-     * @param tCompasFlow to debind
-     */
-    public void clearCompasFlowBinding(TCompasFlow tCompasFlow) {
-        tCompasFlow.setExtRefiedName(null);
-        tCompasFlow.setExtRefldinst(null);
-        tCompasFlow.setExtReflnClass(null);
-        tCompasFlow.setExtReflnInst(null);
-        tCompasFlow.setExtRefprefix(null);
-    }
 
     /**
      * Check if extRef matches CompasFlow
