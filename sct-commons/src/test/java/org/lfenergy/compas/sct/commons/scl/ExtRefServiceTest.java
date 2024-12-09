@@ -103,26 +103,6 @@ class ExtRefServiceTest {
     }
 
     @Test
-    void getMatchingExtRefs_should_succeed() {
-        //Given
-        TLDevice tlDevice = new TLDevice();
-        tlDevice.setLN0(new LN0());
-        TInputs tInputs = new TInputs();
-        TExtRef tExtRef1 = createExtRef("Desc_1", "IED_Name_1", "LD_INST_1");
-        TExtRef tExtRef2 = createExtRef("Desc_2", "IED_Name_2", "LD_INST_2");
-        tInputs.getExtRef().add(tExtRef1);
-        tInputs.getExtRef().add(tExtRef2);
-        TCompasFlow tCompasFlow = createCompasFlow("Desc_1", "IED_Name_1", "LD_INST_1");
-        tlDevice.getLN0().setInputs(tInputs);
-        //When
-        Stream<TExtRef> tExtRefStream = extRefService.getMatchingExtRefs(tlDevice, tCompasFlow);
-        //Then
-        assertThat(tExtRefStream).hasSize(1)
-                .map(TExtRef::getIedName, TExtRef::getLdInst, TExtRef::getDesc)
-                .containsExactly(Tuple.tuple("IED_Name_1", "LD_INST_1", "Desc_1"));
-    }
-
-    @Test
     void clearExtRefBinding_should_remove_binding() {
         //Given
         TExtRef tExtRef = createExtRef("Desc_1", "IED_Name_1", "LD_INST_1");
@@ -133,19 +113,6 @@ class ExtRefServiceTest {
                 .extracting(TExtRef::getIedName, TExtRef::getLdInst, TExtRef::getLnInst)
                 .containsOnlyNulls();
         assertThat(tExtRef.getDesc()).isEqualTo("Desc_1");
-    }
-
-    @Test
-    void clearCompasFlowBinding_should_remove_binding() {
-        //Given
-        TCompasFlow compasFlow = createCompasFlow("Desc_1", "IED_Name_1", "LD_INST_1");
-        //When
-        extRefService.clearCompasFlowBinding(compasFlow);
-        //Then
-        assertThat(compasFlow)
-                .extracting(TCompasFlow::getExtRefiedName, TCompasFlow::getExtRefldinst, TCompasFlow::getExtReflnClass, TCompasFlow::getExtReflnInst, TCompasFlow::getExtRefprefix)
-                .containsOnlyNulls();
-        assertThat(compasFlow.getDataStreamKey()).isEqualTo("Desc_1");
     }
 
     @ParameterizedTest
