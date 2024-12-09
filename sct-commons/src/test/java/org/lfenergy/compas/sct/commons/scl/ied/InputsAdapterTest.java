@@ -153,44 +153,34 @@ class InputsAdapterTest {
     public static Stream<Arguments> provideCreateFCDA() {
         return Stream.of(
             Arguments.of(named("should include signal internal to a Bay",
-                    "test bay internal"),
-                "IED_NAME2/LD_INST21/DS_LD_INST21_GSI",
+                    "test bay internal"), "IED_NAME2/LD_INST21/DS_LD_INST21_GSI",
                 List.of(new FCDARecord("LD_INST21", "ANCR", "1", "", "DoName", "daNameST", TFCEnum.ST))),
             Arguments.of(named("should include signal external to a Bay",
-                    "test bay external"),
-                "IED_NAME3/LD_INST31/DS_LD_INST31_GSE",
+                    "test bay external"), "IED_NAME3/LD_INST31/DS_LD_INST31_GSE",
                 List.of(new FCDARecord("LD_INST31", "ANCR", "1", "", "DoName", "daNameST", TFCEnum.ST))),
             Arguments.of(named("keep source DA with fc = ST",
-                    "test daName ST"),
-                "IED_NAME2/LD_INST21/DS_LD_INST21_GSI",
+                    "test daName ST"), "IED_NAME2/LD_INST21/DS_LD_INST21_GSI",
                 List.of(new FCDARecord("LD_INST21", "ANCR", "1", "", "DoName", "daNameST", TFCEnum.ST))),
             Arguments.of(named("keep source DA with fc = MX",
-                    "test daName MX"),
-                "IED_NAME2/LD_INST21/DS_LD_INST21_GMI",
+                    "test daName MX"), "IED_NAME2/LD_INST21/DS_LD_INST21_GMI",
                 List.of(new FCDARecord("LD_INST21", "ANCR", "1", "", "DoName", "daNameMX", TFCEnum.MX))),
             Arguments.of(named("for GOOSE, should keep only valid fcda candidates",
-                    "test ServiceType is GOOSE, no daName and DO contains ST and MX, but only ST is FCDA candidate"),
-                "IED_NAME2/LD_INST21/DS_LD_INST21_GSI",
+                    "test ServiceType is GOOSE, no daName and DO contains ST and MX, but only ST is FCDA candidate"), "IED_NAME2/LD_INST21/DS_LD_INST21_GSI",
                 List.of(new FCDARecord("LD_INST21", "ANCR", "1", "", "OtherDoName", "daNameST", TFCEnum.ST))),
             Arguments.of(named("for SMV, should keep only valid fcda candidates",
-                    "test ServiceType is SMV, no daName and DO contains ST and MX, but only ST is FCDA candidate"),
-                "IED_NAME2/LD_INST21/DS_LD_INST21_SVI",
+                    "test ServiceType is SMV, no daName and DO contains ST and MX, but only ST is FCDA candidate"), "IED_NAME2/LD_INST21/DS_LD_INST21_SVI",
                 List.of(new FCDARecord("LD_INST21", "ANCR", "1", "", "OtherDoName", "daNameST", TFCEnum.ST))),
             Arguments.of(named("for Report, should get source daName from ExtRef.desc to deduce FC ST",
-                    "test ServiceType is Report_daReportST_1"),
-                "IED_NAME2/LD_INST21/DS_LD_INST21_DQCI",
+                    "test ServiceType is Report_daReportST_1"), "IED_NAME2/LD_INST21/DS_LD_INST21_DQCI",
                 List.of(new FCDARecord("LD_INST21", "ANCR", "1", "", "DoName", null, TFCEnum.ST))),
             Arguments.of(named("for Report, should get source daName from ExtRef.desc to deduce FC MX",
-                    "test ServiceType is Report_daReportMX_1"),
-                "IED_NAME2/LD_INST21/DS_LD_INST21_CYCI",
+                    "test ServiceType is Report_daReportMX_1"), "IED_NAME2/LD_INST21/DS_LD_INST21_CYCI",
                 List.of(new FCDARecord("LD_INST21", "ANCR", "1", "", "DoName", null, TFCEnum.MX))),
             Arguments.of(named("should ignore instance number when checking FCDA Candidate file",
-                    "test no daName and doName with instance number"),
-                "IED_NAME2/LD_INST21/DS_LD_INST21_GSI",
+                    "test no daName and doName with instance number"), "IED_NAME2/LD_INST21/DS_LD_INST21_GSI",
                 List.of(new FCDARecord("LD_INST21", "ANCR", "1", "", "DoWithInst1", "daNameST", TFCEnum.ST))),
             Arguments.of(named("should ignore instance number when checking FCDA Candidate file (DO with SDO)",
-                    "test no daName and doName with instance number and SDO"),
-                "IED_NAME2/LD_INST21/DS_LD_INST21_GSI",
+                    "test no daName and doName with instance number and SDO"), "IED_NAME2/LD_INST21/DS_LD_INST21_GSI",
                 List.of(new FCDARecord("LD_INST21", "ANCR", "1", "", "DoWithInst2.subDo", "daNameST", TFCEnum.ST)))
         );
     }
@@ -214,26 +204,6 @@ class InputsAdapterTest {
             .allMatch(ln0Adapter -> !ln0Adapter.getCurrentElem().isSetDataSet());
     }
 
-    @ParameterizedTest
-    @MethodSource("provideDoCreateFCDA")
-    void updateAllSourceDataSetsAndControlBlocks_when_valid_source_Da_found_should_create_FCDA(String extRefDesc, String extRefIedName) {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        InputsAdapter inputsAdapter = keepOnlyThisExtRef(sclRootAdapter, extRefDesc);
-        DACOMM dacomm = DaComTestMarshallerHelper.getDACOMMFromFile("/cb_comm/Template_DA_COMM_v1.xml");
-        // When
-        List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks(dacomm.getFCDAs().getFCDA());
-        // Then
-        assertThat(sclReportItems).isEmpty();
-        assertThat(sclRootAdapter.streamIEDAdapters()
-                .filter(iedAdapter -> iedAdapter.getName().equals(extRefIedName))
-                .flatMap(IEDAdapter::streamLDeviceAdapters)
-                .filter(LDeviceAdapter::hasLN0)
-                .map(LDeviceAdapter::getLN0Adapter))
-                .allMatch(ln0Adapter -> ln0Adapter.getCurrentElem().isSetDataSet());
-    }
-
     public static Stream<Arguments> provideDoNotCreateFCDA() {
         return Stream.of(
                 Arguments.of(named("should not create FCDA for source Da different from MX and ST",
@@ -242,13 +212,6 @@ class InputsAdapterTest {
                         "test ignore internal binding")),
                 Arguments.of(named("should not create FCDA for extref with missing binding attributes",
                         "test ignore missing bindings attributes"))
-        );
-    }
-
-    public static Stream<Arguments> provideDoCreateFCDA() {
-        return Stream.of(
-                Arguments.of(named("should create FCDA", "test bay internal"), "IED_NAME2"),
-                Arguments.of(named("should create FCDA", "test bay external"), "IED_NAME3")
         );
     }
 

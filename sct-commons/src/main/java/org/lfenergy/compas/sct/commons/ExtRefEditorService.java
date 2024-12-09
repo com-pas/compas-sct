@@ -15,19 +15,15 @@ import org.lfenergy.compas.sct.commons.model.epf.EPF;
 import org.lfenergy.compas.sct.commons.model.epf.TCBScopeType;
 import org.lfenergy.compas.sct.commons.model.epf.TChannel;
 import org.lfenergy.compas.sct.commons.model.epf.TChannelType;
-import org.lfenergy.compas.sct.commons.scl.ExtRefService;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.util.ActiveStatus;
-import org.lfenergy.compas.sct.commons.util.PrivateEnum;
 import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
-import java.math.BigInteger;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.*;
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
@@ -325,48 +321,6 @@ public class ExtRefEditorService implements ExtRefEditor {
                                 })));
     }
 
-    private List<SclReportItem> validateIed(SclRootAdapter sclRootAdapter) {
-        List<SclReportItem> iedErrors = new ArrayList<>(checkIedCompasIcdHeaderAttributes(sclRootAdapter));
-        iedErrors.addAll(checkIedUnityOfIcdSystemVersionUuid(sclRootAdapter));
-        return iedErrors;
-    }
-
-    private List<SclReportItem> checkIedCompasIcdHeaderAttributes(SclRootAdapter sclRootAdapter) {
-        return sclRootAdapter.streamIEDAdapters()
-                .map(iedAdapter -> {
-                            Optional<TCompasICDHeader> compasPrivate = iedAdapter.getCompasICDHeader();
-                            if (compasPrivate.isEmpty()) {
-                                return iedAdapter.buildFatalReportItem(String.format("IED has no Private %s element", PrivateEnum.COMPAS_ICDHEADER.getPrivateType()));
-                            }
-                            if (isBlank(compasPrivate.get().getICDSystemVersionUUID())
-                                    || isBlank(compasPrivate.get().getIEDName())) {
-                                return iedAdapter.buildFatalReportItem(String.format("IED private %s as no icdSystemVersionUUID or iedName attribute",
-                                        PrivateEnum.COMPAS_ICDHEADER.getPrivateType()));
-                            }
-                            return null;
-                        }
-                ).filter(Objects::nonNull)
-                .toList();
-    }
-
-    private List<SclReportItem> checkIedUnityOfIcdSystemVersionUuid(SclRootAdapter sclRootAdapter) {
-        Map<String, List<TIED>> systemVersionToIedList = sclRootAdapter.getCurrentElem().getIED().stream()
-                .collect(Collectors.groupingBy(ied -> PrivateUtils.extractCompasPrivate(ied, TCompasICDHeader.class)
-                        .map(TCompasICDHeader::getICDSystemVersionUUID)
-                        .orElse("")));
-
-        return systemVersionToIedList.entrySet().stream()
-                .filter(entry -> isNotBlank(entry.getKey()))
-                .filter(entry -> entry.getValue().size() > 1)
-                .map(entry -> SclReportItem.error(entry.getValue().stream()
-                                .map(tied -> new IEDAdapter(sclRootAdapter, tied))
-                                .map(IEDAdapter::getXPath)
-                                .collect(Collectors.joining(", ")),
-                        "/IED/Private/compas:ICDHeader[@ICDSystemVersionUUID] must be unique" +
-                                " but the same ICDSystemVersionUUID was found on several IED."))
-                .toList();
-    }
-
     private void updateLDEPFExtRefBinding(TExtRef extRef, TIED iedSource, TChannel setting) {
         extRef.setIedName(iedSource.getName());
         extRef.setLdInst(setting.getLDInst());
@@ -432,12 +386,6 @@ public class ExtRefEditorService implements ExtRefEditor {
                     extRef.getDoName() + "." +
                     daName;
         }
-    }
-
-    record TopoKey(String FlowNode, BigInteger FlowNodeOrder) {
-    }
-
-    record BayTopoKey(TBay bay, TopoKey topoKey) {
     }
 
     private record DoNameAndDaName(String doName, String daName) {
