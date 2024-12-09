@@ -4,7 +4,6 @@
 
 package org.lfenergy.compas.sct.commons;
 
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,12 +16,9 @@ import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.model.epf.*;
-import org.lfenergy.compas.sct.commons.scl.ExtRefService;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
-import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -40,177 +36,7 @@ class ExtRefEditorServiceTest {
 
     @BeforeEach
     void init() {
-        extRefEditorService = new ExtRefEditorService(new IedService(), new LdeviceService(), new LnService(), new ExtRefService(), new DataTypeTemplatesService());
-    }
-
-    @Test
-    void updateAllExtRefIedNames_should_update_iedName_and_ExtRefIedName() {
-        // Given : An ExtRef with a matching compas:Flow
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_success.xml");
-        // When
-        extRefEditorService.updateAllExtRefIedNames(scd);
-        // Then
-        TExtRef extRef = findExtRef(scd, "IED_NAME1", "LD_INST11", "STAT_LDSUIED_LPDO 1 Sortie_13_BOOLEAN_18_stVal_1");
-        assertThat(extRef.getIedName()).isEqualTo("IED_NAME2");
-
-        TInputs inputs = findLDevice(scd, "IED_NAME1", "LD_INST11")
-                .getLN0Adapter()
-                .getCurrentElem()
-                .getInputs();
-        Assertions.assertThat(PrivateUtils.extractCompasPrivate(inputs, TCompasFlow.class))
-                .map(TCompasFlow::getExtRefiedName)
-                .hasValue("IED_NAME2");
-    }
-
-    @Test
-    void updateAllExtRefIedNames_should_return_success_status() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_success.xml");
-        // When
-        List<SclReportItem> sclReportItems = extRefEditorService.updateAllExtRefIedNames(scd);
-        // Then
-        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError))
-                .overridingErrorMessage(String.valueOf(sclReportItems))
-                .isTrue();
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("updateAllExtRefIedNamesErrors")
-    void updateAllExtRefIedNames_should_report_errors(String testCase, SCL scl, SclReportItem... errors) {
-        // Given : scl parameter
-        // When
-        List<SclReportItem> sclReportItems = extRefEditorService.updateAllExtRefIedNames(scl);
-        // Then : the sclReport should report all errors described in the comments in the SCD file
-        assertThat(sclReportItems).isNotNull();
-        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isFalse();
-        assertThat(sclReportItems).containsExactlyInAnyOrder(errors);
-    }
-
-    public static Stream<Arguments> updateAllExtRefIedNamesErrors() {
-        return
-                Stream.of(Arguments.of(
-                                "Errors on ExtRefs",
-                                SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_with_extref_errors.xml"),
-                                new SclReportItem[]{
-                                        SclReportItem.error(
-                                                "/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]" +
-                                                        "/LN0/Inputs/ExtRef[@desc=\"No matching compas:Flow\"]",
-                                                "The signal ExtRef has no matching compas:Flow Private"),
-                                        SclReportItem.error(
-                                                "/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]" +
-                                                        "/LN0/Inputs/ExtRef[@desc=\"Matching two compas:Flow\"]",
-                                                "The signal ExtRef has more than one matching compas:Flow Private"),
-                                        SclReportItem.error(
-                                                "/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST13\"]",
-                                                "The status test does not exist. It should be among [on, off]"),
-                                        SclReportItem.warning(
-                                                "/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/" +
-                                                        "LDevice[@inst=\"LD_INST14\"]/LN0/Inputs/ExtRef[@desc=\"STAT_LDSUIED_LPDO 1 Sortie_13_BOOLEAN_18_stVal_1\"]",
-                                                "The signal ExtRef lninst, doName or daName does not match any source " +
-                                                        "in LDevice /SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST14\"]"),
-                                        SclReportItem.warning(
-                                                "/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]" +
-                                                        "/LN0/Inputs/ExtRef[@desc=\"ExtRef does not match any ICDSystemVersionUUID\"]",
-                                                "The signal ExtRef iedName does not match any IED/Private/compas:ICDHeader@ICDSystemVersionUUID"),
-                                        SclReportItem.warning(
-                                                "/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]" +
-                                                        "/LN0/Inputs/ExtRef[@desc=\"ExtRefldinst does not match any LDevice inst in source IED\"]",
-                                                "The signal ExtRef ExtRefldinst does not match any LDevice with same inst attribute in source IED /SCL/IED[@name=\"IED_NAME2\"]"),
-                                        SclReportItem.warning(
-                                                "/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]" +
-                                                        "/LN0/Inputs/ExtRef[@desc=\"ExtRef does not match any LN in source LDevice\"]",
-                                                "The signal ExtRef lninst, doName or daName does not match any source in LDevice " +
-                                                        "/SCL/IED[@name=\"IED_NAME2\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST21\"]"),
-                                        SclReportItem.warning(
-                                                "/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]" +
-                                                        "/LN0/Inputs/ExtRef[@desc=\"Source LDevice is off for this ExtRef\"]",
-                                                "The signal ExtRef source LDevice /SCL/IED[@name=\"IED_NAME2\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST22\"] status is off"),
-                                        SclReportItem.error(
-                                                "/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]" +
-                                                        "/LN0/Inputs/ExtRef[@desc=\"Source LDevice is undefined for this ExtRef\"]",
-                                                "The signal ExtRef source LDevice /SCL/IED[@name=\"IED_NAME2\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST23\"] status is " +
-                                                        "undefined"),
-                                        SclReportItem.error(
-                                                "/SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST11\"]" +
-                                                        "/LN0/Inputs/ExtRef[@desc=\"Source LDevice is neither on nor off for this ExtRef\"]",
-                                                "The signal ExtRef source LDevice /SCL/IED[@name=\"IED_NAME2\"]/AccessPoint/Server/LDevice[@inst=\"LD_INST24\"] " +
-                                                        "status is neither \"on\" nor \"off\"")
-                                }),
-                        Arguments.of(
-                                "Errors on IEDs",
-                                SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_with_ied_errors.xml"),
-                                new SclReportItem[]{
-                                        SclReportItem.error(
-                                                "/SCL/IED[@name=\"IED_NAME1\"], /SCL/IED[@name=\"IED_NAME2\"]",
-                                                "/IED/Private/compas:ICDHeader[@ICDSystemVersionUUID] must be unique but the same ICDSystemVersionUUID was found on several IED."),
-                                        SclReportItem.error("/SCL/IED[@name=\"IED_NAME3\"]", "IED has no Private COMPAS-ICDHeader element"),
-                                        SclReportItem.error("/SCL/IED[@name=\"IED_NAME4\"]", "IED private COMPAS-ICDHeader as no icdSystemVersionUUID or iedName attribute"),
-                                        SclReportItem.error("/SCL/IED[@name=\"IED_NAME5\"]", "IED private COMPAS-ICDHeader as no icdSystemVersionUUID or iedName attribute")
-                                })
-                );
-    }
-
-    @Test
-    void updateAllExtRefIedNames_when_not_bindable_should_clear_binding() {
-        // Given : see comments in SCD file
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_with_extref_errors.xml");
-        // When
-        extRefEditorService.updateAllExtRefIedNames(scd);
-        // Then
-        assertExtRefIsNotBound(findExtRef(scd, "IED_NAME1", "LD_INST12", "ExtRef target LDevice status is off"));
-        assertExtRefIsNotBound(findExtRef(scd, "IED_NAME1", "LD_INST11", "Match compas:Flow but FlowStatus is INACTIVE"));
-        assertExtRefIsNotBound(findExtRef(scd, "IED_NAME1", "LD_INST11", "ExtRef does not match any ICDSystemVersionUUID"));
-        assertExtRefIsNotBound(findExtRef(scd, "IED_NAME1", "LD_INST11", "ExtRefldinst does not match any LDevice inst in source IED"));
-        assertExtRefIsNotBound(findExtRef(scd, "IED_NAME1", "LD_INST11", "ExtRef does not match any LN in source LDevice"));
-        assertExtRefIsNotBound(findExtRef(scd, "IED_NAME1", "LD_INST11", "Source LDevice is off for this ExtRef"));
-    }
-
-    @Test
-    void updateAllExtRefIedNames_when_lDevice_off_should_remove_binding() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_with_extref_errors.xml");
-        // When
-        List<SclReportItem> sclReportItems = extRefEditorService.updateAllExtRefIedNames(scd);
-        // Then
-        assertThat(sclReportItems).isNotNull();
-        LDeviceAdapter lDeviceAdapter = findLDeviceByLdName(scd, "IED_NAME1LD_INST12");
-        assertThat(lDeviceAdapter.getLDeviceStatus()).hasValue("off");
-        assertThat(lDeviceAdapter.getLN0Adapter().getInputsAdapter().getCurrentElem().getExtRef())
-                .allSatisfy(this::assertExtRefIsNotBound);
-    }
-
-    @Test
-    void updateAllExtRefIedNames_when_FlowStatus_INACTIVE_should_remove_binding() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_with_extref_errors.xml");
-        // When
-        List<SclReportItem> sclReportItems = extRefEditorService.updateAllExtRefIedNames(scd);
-        // Then
-        assertThat(sclReportItems).isNotNull();
-        LDeviceAdapter lDeviceAdapter = findLDeviceByLdName(scd, "IED_NAME1LD_INST11");
-        assertThat(lDeviceAdapter.getLDeviceStatus()).hasValue("on");
-        Optional<TExtRef> optionalTExtRef = lDeviceAdapter.getCurrentElem().getLN0().getInputs().getExtRef().stream()
-                .filter(tExtRef -> "Match compas:Flow but FlowStatus is INACTIVE".equals(tExtRef.getDesc()))
-                .findFirst();
-        assertThat(optionalTExtRef).isPresent();
-        TExtRef extRef = optionalTExtRef.get();
-        assertExtRefIsNotBound(extRef);
-    }
-
-    private void assertExtRefIsNotBound(TExtRef extRef) {
-        assertThat(extRef.isSetIedName()).isFalse();
-        assertThat(extRef.isSetLdInst()).isFalse();
-        assertThat(extRef.isSetPrefix()).isFalse();
-        assertThat(extRef.isSetLnClass()).isFalse();
-        assertThat(extRef.isSetLnInst()).isFalse();
-        assertThat(extRef.isSetDoName()).isFalse();
-        assertThat(extRef.isSetDaName()).isFalse();
-        assertThat(extRef.isSetServiceType()).isFalse();
-        assertThat(extRef.isSetSrcLDInst()).isFalse();
-        assertThat(extRef.isSetSrcPrefix()).isFalse();
-        assertThat(extRef.isSetSrcLNClass()).isFalse();
-        assertThat(extRef.isSetSrcLNInst()).isFalse();
-        assertThat(extRef.isSetSrcCBName()).isFalse();
+        extRefEditorService = new ExtRefEditorService(new IedService(), new LdeviceService(), new LnService(), new DataTypeTemplatesService());
     }
 
     @Test
@@ -842,119 +668,6 @@ class ExtRefEditorServiceTest {
         assertThat(extRef.getSrcCBName()).isEqualTo(extRefInfo.getSourceInfo().getSrcCBName());
         assertThat(extRef.getSrcLDInst()).isEqualTo(extRefInfo.getBindingInfo().getLdInst());
         assertThat(extRef.getSrcLNClass()).contains(extRefInfo.getBindingInfo().getLnClass());
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("provideFlowAndExtRefForDebinding")
-    void debindCompasFlowsAndExtRefsBasedOnVoltageLevel(String testCase, SCL scd, Tuple extRef1, Tuple flow1, Tuple extRef2, Tuple flow2) {
-        //Given
-        //Then
-        extRefEditorService.debindCompasFlowsAndExtRefsBasedOnVoltageLevel(scd);
-        //When
-        TInputs tInputs = findInputs(scd);
-        assertThat(tInputs.getExtRef().stream().filter(tExtRef -> tExtRef.getDesc().equals("Desc_1")))
-                .extracting(TExtRef::getIedName, TExtRef::getLdInst)
-                .containsExactly(extRef1);
-        assertThat(PrivateUtils.getPrivateStream(tInputs.getPrivate(), TCompasFlow.class).filter(tCompasFlow -> tCompasFlow.getDataStreamKey().equals("Desc_1")))
-                .extracting(TCompasFlow::getExtRefiedName, TCompasFlow::getExtRefldinst, TCompasFlow::getExtReflnClass, TCompasFlow::getExtReflnInst)
-                .containsExactly(flow1);
-        assertThat(tInputs.getExtRef().stream().filter(tExtRef -> tExtRef.getDesc().equals("Desc_2")))
-                .extracting(TExtRef::getIedName, TExtRef::getLdInst)
-                .containsExactly(extRef2);
-        assertThat(PrivateUtils.getPrivateStream(tInputs.getPrivate(), TCompasFlow.class).filter(tCompasFlow -> tCompasFlow.getDataStreamKey().equals("Desc_2")))
-                .extracting(TCompasFlow::getExtRefiedName, TCompasFlow::getExtRefldinst, TCompasFlow::getExtReflnClass, TCompasFlow::getExtReflnInst)
-                .containsExactly(flow2);
-    }
-
-    private static Stream<Arguments> provideFlowAndExtRefForDebinding() {
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-flow-debind/scd_extref_flow_debind_success.xml");
-        SCL scdVoltageLevel0 = SclTestMarshaller.getSCLFromFile("/scd-extref-flow-debind/scd_extref_flow_debind_volatagelevelname_0.xml");
-        SCL scdVoltageLevelUnknown = SclTestMarshaller.getSCLFromFile("/scd-extref-flow-debind/scd_extref_flow_debind_volatagelevelname_unknown.xml");
-        SCL scdUnsetExtRefIedName = SclTestMarshaller.getSCLFromFile("/scd-extref-flow-debind/scd_extref_flow_not_debind.xml");
-        SCL scdVLevelUnknownUnsetFlowSourceVoltageLevel = SclTestMarshaller.getSCLFromFile("/scd-extref-flow-debind/scd_extref_flow_not_debind_volatagelevelname_unknown.xml");
-        Tuple tupleExtRef1 = Tuple.tuple("System_Version_IED_NAME1", "LD_INST11");
-        Tuple tupleExtRef2 = Tuple.tuple("System_Version_IED_NAME2", "LD_INST21");
-        Tuple tupleExtRefDebind = Tuple.tuple(null, null);
-        Tuple tupleFlow1 = Tuple.tuple("System_Version_IED_NAME1", "LD_INST11", "LLN0", null);
-        Tuple tupleFlow2 = Tuple.tuple("System_Version_IED_NAME2", "LD_INST21", "ANCR", "1");
-        Tuple tupleFlowNoExtRefIedName = Tuple.tuple(null, "LD_INST21", "ANCR", "1");
-        Tuple tupleFlowDebind = Tuple.tuple(null, null, null, null);
-
-        return Stream.of(
-                Arguments.of("case known voltageLevel should debind THT flow and corresponding ExtRef", scd, tupleExtRef1, tupleFlow1, tupleExtRefDebind, tupleFlowDebind),
-                Arguments.of("case voltageLevel 0 should do nothing", scdVoltageLevel0, tupleExtRef1, tupleFlow1, tupleExtRef2, tupleFlow2),
-                Arguments.of("case unknown voltageLevel should debind all CompasFlow and corresponding ExtRef", scdVoltageLevelUnknown, tupleExtRefDebind, tupleFlowDebind, tupleExtRefDebind, tupleFlowDebind),
-                Arguments.of("case known voltageLevel should not debind because no ExtRefIedName", scdUnsetExtRefIedName, tupleExtRef1, tupleFlow1, tupleExtRef2, tupleFlowNoExtRefIedName),
-                Arguments.of("case unknown voltageLevel should not debind because unset FlowSourceVoltageLevel", scdVLevelUnknownUnsetFlowSourceVoltageLevel, tupleExtRef1, tupleFlow1, tupleExtRef2, tupleFlow2)
-        );
-
-    }
-
-
-    private TInputs findInputs(SCL scd) {
-        IedService iedService = new IedService();
-        LdeviceService ldeviceService = new LdeviceService();
-        return iedService.findIed(scd, tied -> tied.getName().equals("IED_NAME1"))
-                .flatMap(tied -> ldeviceService.findLdevice(tied, tlDevice -> tlDevice.getInst().equals("LD_INST11")))
-                .map(tlDevice -> tlDevice.getLN0().getInputs())
-                .orElseThrow();
-
-    }
-
-    @Test
-    void updateIedNameBasedOnLnode_should_update_CompasFlow_and_ExtRef_iedName() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_based_on_lnode_success.xml");
-        // When
-        extRefEditorService.updateIedNameBasedOnLnode(scd);
-        // Then
-        assertThat(findCompasFlow(scd, "IED_NAME1", "LD_INST11", "STAT_LDSUIED_LPDO 1 Sortie_13_BOOLEAN_18_stVal_1").getExtRefiedName())
-                .isEqualTo("IED_NAME2");
-        assertThat(findExtRef(scd, "IED_NAME1", "LD_INST11", "STAT_LDSUIED_LPDO 1 Sortie_13_BOOLEAN_18_stVal_1").getIedName())
-                .isEqualTo("IED_NAME2");
-    }
-
-    @Test
-    void updateIedNameBasedOnLnode_when_no_matching_lnode_should_clear_binding() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_based_on_lnode_success.xml");
-        PrivateUtils.extractCompasPrivate(scd.getSubstation().get(0).getVoltageLevel().get(0).getBay().get(0), TCompasTopo.class).orElseThrow().setNode("99");
-        // When
-        extRefEditorService.updateIedNameBasedOnLnode(scd);
-        // Then
-        TCompasFlow compasFlow = findCompasFlow(scd, "IED_NAME1", "LD_INST11", "STAT_LDSUIED_LPDO 1 Sortie_13_BOOLEAN_18_stVal_1");
-        assertThat(compasFlow)
-                .extracting(TCompasFlow::getExtRefiedName, TCompasFlow::getExtRefldinst, TCompasFlow::getExtRefprefix, TCompasFlow::getExtReflnClass, TCompasFlow::getExtReflnInst)
-                .containsOnlyNulls();
-        assertExtRefIsNotBound(findExtRef(scd, "IED_NAME1", "LD_INST11", "STAT_LDSUIED_LPDO 1 Sortie_13_BOOLEAN_18_stVal_1"));
-
-    }
-
-    @Test
-    void updateIedNameBasedOnLnode_when_several_ied_match_compasFlow_should_return_an_error() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_based_on_lnode_several_ied_matching_compasFlow.xml");
-        // When
-        List<SclReportItem> result = extRefEditorService.updateIedNameBasedOnLnode(scd);
-        // Then
-        assertThat(result)
-                .extracting(SclReportItem::isError, SclReportItem::message)
-                .containsExactly(Tuple.tuple(true,
-                        "Several LNode@IedName ('IED_NAME2', 'IED_NAME3') are found in the bay 'BAY_1' for the following compas-flow attributes " +
-                                ": @FlowSourceIEDType 'SCU' @FlowSourceIEDredundancy 'A' @FlowIEDSystemVersioninstance '1'"));
-    }
-
-    @Test
-    void updateIedNameBasedOnLnode_when_no_Compas_ICD_Header_should_return_an_error() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_fails_no_Compas_ICDHeader.xml");
-        // When
-        List<SclReportItem> result = extRefEditorService.updateIedNameBasedOnLnode(scd);
-        // Then
-        assertThat(result)
-                .extracting(SclReportItem::isError, SclReportItem::message)
-                .containsExactly(Tuple.tuple(true,
-                        "The substation LNode with following attributes : IedName:IED_NAME2 / LdInst:LD_INST21 / LnClass:ANCR / LnInst:1  does not contain the needed (COMPAS - ICDHeader) private"));
     }
 
     @Test
