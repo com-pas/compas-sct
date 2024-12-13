@@ -36,9 +36,9 @@ class SclAutomationServiceIntegrationTest {
     private static final ExtRefReaderService extRefReaderService = new ExtRefReaderService();
     private static final DataTypeTemplateReader dataTypeTemplatesService = new DataTypeTemplatesService() ;
     private static final LdeviceService ldeviceService = new LdeviceService(lnService);
-    private static final SclEditor sclEditor = new SclService(iedService, ldeviceService, lnService, extRefReaderService, dataTypeTemplatesService) ;
+    private static final SclEditor sclEditor = new SclService(iedService, ldeviceService, lnService, extRefReaderService, dataTypeTemplatesService, new SubNetworkService(), new ConnectedAPService()) ;
     private static final SubstationEditor substationEditor = new SubstationService(new VoltageLevelService());
-    private static final ControlBlockEditor controlBlockEditor = new ControlBlockEditorService(new ControlService(), new LdeviceService(new LnService()), new ConnectedAPService(), new SubNetworkService());
+    private static final ControlBlockEditor controlBlockEditor = new ControlBlockEditorService(new ControlService(), new LdeviceService(new LnService()), new SubNetworkService(), new ConnectedAPService());
 
     private HeaderDTO headerDTO;
 

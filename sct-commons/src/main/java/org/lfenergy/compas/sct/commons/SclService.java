@@ -22,7 +22,7 @@ import org.lfenergy.compas.sct.commons.scl.com.SubNetworkAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.header.HeaderAdapter;
-import org.lfenergy.compas.sct.commons.scl.icd.IcdHeader;
+import org.lfenergy.compas.sct.commons.scl.icd.CompasIcdHeader;
 import org.lfenergy.compas.sct.commons.scl.ied.DAITracker;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
@@ -52,6 +52,8 @@ public class SclService implements SclEditor {
     private final LnService lnService;
     private final ExtRefReaderService extRefReaderService;
     private final DataTypeTemplateReader dataTypeTemplateService;
+    private final SubNetworkService subNetworkService;
+    private final ConnectedAPService connectedAPService;
 
     @Getter
     private final ThreadLocal<List<SclReportItem>> errorHandler = ThreadLocal.withInitial(ArrayList::new);
@@ -123,9 +125,9 @@ public class SclService implements SclEditor {
 
     @Override
     public void addSubnetworks(SCL scd, SCL icd, String iedName) throws ScdException {
-        Optional.ofNullable(icd.getCommunication()).ifPresent(tCommunication ->
-                tCommunication.getSubNetwork().forEach(icdSubNetwork ->
-                        icdSubNetwork.getConnectedAP().forEach(icdConnectedAP -> {
+        subNetworkService.getSubNetworks(icd)
+                .forEach(icdSubNetwork -> connectedAPService.getConnectedAP(icdSubNetwork)
+                        .forEach(icdConnectedAP -> {
                             // init Communication if not exist
                             CommunicationAdapter communicationAdapter = new SclRootAdapter(scd).getCommunicationAdapter(true);
                             // add SubNetwork if not exist, add ConnectedAP to SubNetwork if not exist
@@ -134,8 +136,7 @@ public class SclService implements SclEditor {
                             // copy Address And PhysConn From Icd to Scd
                             subNetworkAdapter.getConnectedAPAdapter(iedName, icdConnectedAP.getApName())
                                     .copyAddressAndPhysConnFromIcd(icd);
-                        })
-                ));
+                        }));
     }
 
     @Override
@@ -184,20 +185,20 @@ public class SclService implements SclEditor {
         List<String> iedNamesUsed = new ArrayList<>();
         SclRootAdapter scdRootAdapter = new SclRootAdapter(scd);
         PrivateUtils.streamIcdHeaders(scd)
-                .forEach(icdHeader -> {
-                    if (!iedNamesUsed.contains(icdHeader.getIedName())) {
-                        String iedName = icdHeader.getIedName();
+                .forEach(compasIcdHeader -> {
+                    if (!iedNamesUsed.contains(compasIcdHeader.getIedName())) {
+                        String iedName = compasIcdHeader.getIedName();
                         iedNamesUsed.add(iedName);
-                        String icdSysVerUuid = icdHeader.getIcdSystemVersionUUID();
+                        String icdSysVerUuid = compasIcdHeader.getIcdSystemVersionUUID();
                         if (!mapICDSystemVersionUuidAndSTDFile.containsKey(icdSysVerUuid))
-                            throw new ScdException("There is no STD file found corresponding to " + icdHeader);
+                            throw new ScdException("There is no STD file found corresponding to " + compasIcdHeader);
                         // import /ied /dtt in Scd
                         SCL std = mapICDSystemVersionUuidAndSTDFile.get(icdSysVerUuid).stdList().get(0);
                         SclRootAdapter stdRootAdapter = new SclRootAdapter(std);
                         IEDAdapter stdIedAdapter = new IEDAdapter(stdRootAdapter, std.getIED().get(0));
                         Optional<TPrivate> optionalTPrivate = stdIedAdapter.getPrivateHeader(COMPAS_ICDHEADER.getPrivateType());
-                        if (optionalTPrivate.isPresent() && optionalTPrivate.flatMap(PrivateUtils::extractCompasICDHeader).map(IcdHeader::new).get().equals(icdHeader)) {
-                            PrivateUtils.copyCompasICDHeaderFromLNodePrivateIntoSTDPrivate(optionalTPrivate.get(), icdHeader.toTCompasICDHeader());
+                        if (optionalTPrivate.isPresent() && optionalTPrivate.flatMap(PrivateUtils::extractCompasICDHeader).map(CompasIcdHeader::new).get().equals(compasIcdHeader)) {
+                            PrivateUtils.copyCompasICDHeaderFromLNodePrivateIntoSTDPrivate(optionalTPrivate.get(), compasIcdHeader.toTCompasICDHeader());
                         } else throw new ScdException("COMPAS-ICDHeader is not the same in Substation and in IED");
                         scdRootAdapter.addIED(std, iedName);
 

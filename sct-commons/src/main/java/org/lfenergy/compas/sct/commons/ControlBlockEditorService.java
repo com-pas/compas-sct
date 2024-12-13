@@ -49,8 +49,8 @@ public class ControlBlockEditorService implements ControlBlockEditor {
     private static final int HEXADECIMAL_BASE = 16;
     private final ControlService controlService;
     private final LdeviceService ldeviceService;
-    private final ConnectedAPService connectedAPService;
     private final SubNetworkService subNetworkService;
+    private final ConnectedAPService connectedAPService;
 
     @Override
     public List<SclReportItem> analyzeDataGroups(SCL scd) {
