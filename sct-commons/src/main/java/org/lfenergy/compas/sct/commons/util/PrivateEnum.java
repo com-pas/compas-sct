@@ -21,7 +21,6 @@ public enum PrivateEnum {
 
     COMPAS_BAY("COMPAS-Bay", TCompasBay.class),
     COMPAS_CRITERIA("COMPAS-Criteria", TCompasCriteria.class),
-    COMPAS_FLOW("COMPAS-Flow", TCompasFlow.class),
     COMPAS_FUNCTION("COMPAS-Function", TCompasFunction.class),
     COMPAS_ICDHEADER("COMPAS-ICDHeader", TCompasICDHeader.class),
     COMPAS_LDEVICE("COMPAS-LDevice", TCompasLDevice.class),
