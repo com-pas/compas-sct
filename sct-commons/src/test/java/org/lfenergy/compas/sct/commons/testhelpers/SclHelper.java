@@ -13,7 +13,6 @@ import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
-import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.util.Utils;
 import org.opentest4j.AssertionFailedError;
 
@@ -72,13 +71,6 @@ public final class SclHelper {
                 .filter(extRef -> extRefDesc.equals(extRef.getDesc()))
                 .findFirst()
                 .orElseThrow(() -> new AssertionFailedError(String.format("ExtRef.desc=%s not found in IED.name=%s,LDevice.inst=%s", extRefDesc, iedName, ldInst)));
-    }
-
-    public static TCompasFlow findCompasFlow(SCL scl, String iedName, String ldInst, String compasFlowDataStreamKey) {
-        return PrivateUtils.extractCompasPrivates(findInputs(scl, iedName, ldInst).getCurrentElem(), TCompasFlow.class)
-                .filter(compasFlow -> compasFlowDataStreamKey.equals(compasFlow.getDataStreamKey()))
-                .findFirst()
-                .orElseThrow(() -> new AssertionFailedError(String.format("CompasFlow.dataStreamKey=%s not found in IED.name=%s,LDevice.inst=%s", compasFlowDataStreamKey, iedName, ldInst)));
     }
 
     public static LN0Adapter findLn0(SCL scl, String iedName, String ldInst) {
@@ -170,14 +162,6 @@ public final class SclHelper {
                         dataSetName, iedName, ldInst)));
     }
 
-    public static ControlBlockAdapter findControlBlock(SCL scl, String iedName, String ldInst, String cbName,
-                                                       ControlBlockEnum controlBlockEnum) {
-        LN0Adapter ln0 = findLn0(scl, iedName, ldInst);
-        return ln0.findControlBlock(cbName, controlBlockEnum)
-                .orElseThrow(() -> new AssertionFailedError(String.format("%s name=%s not found in IED.name=%s,LDevice.inst=%s,LN0",
-                        controlBlockEnum.getControlBlockClass().getSimpleName(), cbName, iedName, ldInst)));
-    }
-
     public static <T extends TControl> T findControlBlock(SCL scl, String iedName, String ldInst, String cbName, Class<T> controlBlockClass) {
         LN0Adapter ln0 = findLn0(scl, iedName, ldInst);
         return ln0.getTControlsByType(controlBlockClass).stream()
@@ -213,12 +197,6 @@ public final class SclHelper {
                 .flatMap(List::stream);
     }
 
-    public static <T extends TControl> Stream<T> streamAllControlBlocks(SCL scl, Class<T> controlBlockClass) {
-        return streamAllLn0Adapters(scl)
-                .map(ln0Adapter -> ln0Adapter.getTControlsByType(controlBlockClass))
-                .flatMap(List::stream);
-    }
-
     public static Stream<LN0Adapter> streamAllLn0Adapters(SCL scl) {
         return new SclRootAdapter(scl)
                 .streamIEDAdapters()
@@ -251,16 +229,6 @@ public final class SclHelper {
                 .flatMap(List::stream)
                 .filter(tp -> pType.equals(tp.getType()))
                 .map(TP::getValue);
-    }
-
-    public static TConnectedAP addConnectedAp(SCL scd, String subNetworkName, String apName, String iedName) {
-        scd.setCommunication(new TCommunication());
-        TSubNetwork subNetwork = new TSubNetwork();
-        subNetwork.setName(subNetworkName);
-        scd.getCommunication().getSubNetwork().add(subNetwork);
-        TConnectedAP connectedAP = newConnectedAp(iedName, apName);
-        subNetwork.getConnectedAP().add(connectedAP);
-        return connectedAP;
     }
 
     public static SclRootAdapter createSclRootAdapterWithIed(String iedName) {
