@@ -14,7 +14,7 @@ import org.lfenergy.compas.scl2007b4.model.TSystemLNGroupEnum;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class LnKeyTest {
+class LnIdTest {
 
     @Test
     void test_LnKey_withLN() {
@@ -24,12 +24,11 @@ class LnKeyTest {
         ln.setInst("1");
         ln.getLnClass().add(TSystemLNGroupEnum.LGOS.value());
         // When
-        LnKey lnKey = new LnKey(ln);
+        LnId lnId = LnId.from(ln);
         // Then
-        assertThat(lnKey.getLnType()).isEqualTo("LnTypeAny");
-        assertThat(lnKey.getLnClass()).isEqualTo("LGOS");
-        assertThat(lnKey.getInst()).isEqualTo("1");
-        assertThat(lnKey.getPrefix()).isEqualTo(StringUtils.EMPTY);
+        assertThat(lnId.lnClass()).isEqualTo("LGOS");
+        assertThat(lnId.lnInst()).isEqualTo("1");
+        assertThat(lnId.prefix()).isEqualTo(StringUtils.EMPTY);
     }
 
     @Test
@@ -39,12 +38,11 @@ class LnKeyTest {
         ln0.setLnType("LnType0");
         ln0.getLnClass().add(TLLN0Enum.LLN_0.value());
         // When
-        LnKey lnKey = new LnKey(ln0);
+        LnId lnId = LnId.from(ln0);
         // Then
-        assertThat(lnKey.getLnType()).isEqualTo("LnType0");
-        assertThat(lnKey.getLnClass()).isEqualTo("LLN0");
-        assertThat(lnKey.getInst()).isEqualTo("");
-        assertThat(lnKey.getPrefix()).isEqualTo(StringUtils.EMPTY);
+        assertThat(lnId.lnClass()).isEqualTo("LLN0");
+        assertThat(lnId.lnInst()).isEqualTo("");
+        assertThat(lnId.prefix()).isEqualTo(StringUtils.EMPTY);
     }
 
 }
