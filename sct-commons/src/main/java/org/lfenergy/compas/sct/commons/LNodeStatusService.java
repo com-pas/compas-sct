@@ -23,6 +23,8 @@ import java.util.stream.Stream;
 public class LNodeStatusService {
 
     private static final String LNODE_STATUS_PRIVATE_TYPE = "COMPAS-LNodeStatus";
+    private static final List<String> LN_LNS_POSSIBLE_VALUES = List.of("off;on", "on;off", "on", "off");
+    private static final List<String> LNODE_LNS_POSSIBLE_VALUES = List.of("on", "off");
     private final LdeviceService ldeviceService;
     private final LnService lnService;
     private final DataTypeTemplatesService dataTypeTemplatesService;
@@ -40,7 +42,7 @@ public class LNodeStatusService {
 
     private SclReportItem updateSingleLnModStValBasedOnLNodeStatus(SCL scl, TLNode tlNode) {
         String lNodeLNS = PrivateUtils.extractStringPrivate(tlNode, LNODE_STATUS_PRIVATE_TYPE).orElse(null);
-        if (!"on".equals(lNodeLNS) && !"off".equals(lNodeLNS)) {
+        if (lNodeLNS == null || !LNODE_LNS_POSSIBLE_VALUES.contains(lNodeLNS)) {
             return SclReportItem.error(lNodePath(tlNode), "The private %s of the LNode has invalid value. Expecting one of [on, off] but got : %s".formatted(LNODE_STATUS_PRIVATE_TYPE, lNodeLNS));
         }
         TAnyLN anyLn = findLn(scl, tlNode.getIedName(), tlNode.getLdInst(), tlNode.getLnClass().getFirst(), tlNode.getLnInst(), tlNode.getPrefix()).orElse(null);
@@ -48,8 +50,9 @@ public class LNodeStatusService {
             return SclReportItem.error(lNodePath(tlNode), "LNode in Substation section does not have a matching LN in IED section");
         }
         String anyLnLNS = PrivateUtils.extractStringPrivate(anyLn, LNODE_STATUS_PRIVATE_TYPE).orElse(null);
-        if (anyLnLNS == null) {
-            return SclReportItem.error(lnPath(tlNode), "LN does not have a private %s".formatted(LNODE_STATUS_PRIVATE_TYPE));
+        if (anyLnLNS == null || !LN_LNS_POSSIBLE_VALUES.contains(anyLnLNS)) {
+            return SclReportItem.error(lnPath(tlNode), "The private %s of the LN has invalid value. Expecting one of %s but got : %s".formatted(LNODE_STATUS_PRIVATE_TYPE, LN_LNS_POSSIBLE_VALUES, anyLnLNS));
+
         }
         if (!anyLnLNS.contains(lNodeLNS)) {
             return SclReportItem.error(lnPath(tlNode), "Cannot set DAI Mod.stVal to %s, because LN private %s is set to %s".formatted(lNodeLNS, LNODE_STATUS_PRIVATE_TYPE, anyLnLNS));

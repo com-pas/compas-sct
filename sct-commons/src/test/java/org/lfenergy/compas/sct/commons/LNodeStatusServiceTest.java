@@ -107,7 +107,7 @@ class LNodeStatusServiceTest {
     void updateLnStatusBasedOnPrivateLNodeStatus_when_LNode_does_not_match_any_LN_should_return_error() {
         // Given
         SCL scl = SclTestMarshaller.getSCLFromFile("/scl-lnodestatus/lnodestatus.scd");
-        ((TLN)  findAnyLn(scl, "IED_NAME_1", "LDEVICE_1", "PDIS", "1", ""))
+        ((TLN) findAnyLn(scl, "IED_NAME_1", "LDEVICE_1", "PDIS", "1", ""))
                 .setPrefix("helloworld");
         // When
         List<SclReportItem> sclReportItems = lNodeStatusService.updateLnModStValBasedOnLNodeStatus(scl);
@@ -129,7 +129,7 @@ class LNodeStatusServiceTest {
         // Then
         assertThat(sclReportItems).containsExactly(
                 SclReportItem.error("IED(IED_NAME_1)/LD(LDEVICE_1)/LN[PDIS,1,]",
-                        "LN does not have a private COMPAS-LNodeStatus")
+                        "The private COMPAS-LNodeStatus of the LN has invalid value. Expecting one of [off;on, on;off, on, off] but got : null")
         );
     }
 
@@ -137,9 +137,9 @@ class LNodeStatusServiceTest {
     void updateLnStatusBasedOnPrivateLNodeStatus_when_compasLNodeStatus_is_on_in_LNode_but_off_in_LN_should_return_error() {
         // Given
         SCL scl = SclTestMarshaller.getSCLFromFile("/scl-lnodestatus/lnodestatus.scd");
-       findAnyLn(scl, "IED_NAME_1", "LDEVICE_1", "LLN0", "", "")
+        findAnyLn(scl, "IED_NAME_1", "LDEVICE_1", "LLN0", "", "")
                 .getPrivate().getFirst().getContent().set(0, "off");
-       findAnyLn(scl, "IED_NAME_1", "LDEVICE_1", "PDIS", "1", "")
+        findAnyLn(scl, "IED_NAME_1", "LDEVICE_1", "PDIS", "1", "")
                 .getPrivate().getFirst().getContent().set(0, "off");
         // When
         List<SclReportItem> sclReportItems = lNodeStatusService.updateLnModStValBasedOnLNodeStatus(scl);
@@ -156,9 +156,9 @@ class LNodeStatusServiceTest {
     void updateLnStatusBasedOnPrivateLNodeStatus_when_compasLNodeStatus_is_off_in_LNode_but_on_in_LN_should_return_error() {
         // Given
         SCL scl = SclTestMarshaller.getSCLFromFile("/scl-lnodestatus/lnodestatus.scd");
-       findAnyLn(scl, "IED_NAME_1", "LDEVICE_4", "LLN0", "", "")
+        findAnyLn(scl, "IED_NAME_1", "LDEVICE_4", "LLN0", "", "")
                 .getPrivate().getFirst().getContent().set(0, "on");
-       findAnyLn(scl, "IED_NAME_1", "LDEVICE_1", "PDIS", "4", "")
+        findAnyLn(scl, "IED_NAME_1", "LDEVICE_1", "PDIS", "4", "")
                 .getPrivate().getFirst().getContent().set(0, "on");
         // When
         List<SclReportItem> sclReportItems = lNodeStatusService.updateLnModStValBasedOnLNodeStatus(scl);
