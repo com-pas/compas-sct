@@ -307,15 +307,12 @@ public class ExtRefEditorService implements ExtRefEditor {
                                             && (purPoseDAI.get().getVal().getFirst().getValue().startsWith("DYN_LDEPF_DIGITAL CHANNEL")
                                             || purPoseDAI.get().getVal().getFirst().getValue().startsWith("DYN_LDEPF_ANALOG CHANNEL"));
                                     if(isSetSrcRefExistAndEmpty && isPurposeExistAndMatchChannel) {
-
-                                        DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
                                         DataObject dataObject = new DataObject();
                                         dataObject.setDoName(tdoi.getName());
-                                        doLinkedToDa.setDataObject(dataObject);
                                         DataAttribute dataAttribute = new DataAttribute();
                                         dataAttribute.setDaName(SETSRCREF_DA_NAME);
                                         dataAttribute.setDaiValues(List.of(new DaVal(null, tied.getName()+tlDevice.getInst()+"/LPHD0.Proxy")));
-                                        doLinkedToDa.setDataAttribute(dataAttribute);
+                                        DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
                                         lnEditor.updateOrCreateDOAndDAInstances(tlDevice.getLN0(), doLinkedToDa);
                                     }
                                 })));
