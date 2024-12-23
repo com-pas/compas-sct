@@ -7,6 +7,7 @@ package org.lfenergy.compas.sct.commons.util;
 import jakarta.xml.bind.JAXBElement;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
+import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.PrivateLinkedToStds;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
@@ -320,4 +321,13 @@ public final class PrivateUtils {
     }
 
 
+    public static Optional<String> extractStringPrivate(TBaseElement tBaseElement, String privateType) {
+        return tBaseElement.getPrivate().stream()
+                .filter(tPrivate -> privateType.equals(tPrivate.getType()))
+                .flatMap(tPrivate -> tPrivate.getContent().stream())
+                .filter(String.class::isInstance)
+                .map(String.class::cast)
+                .filter(StringUtils::isNotBlank)
+                .findFirst();
     }
+}
