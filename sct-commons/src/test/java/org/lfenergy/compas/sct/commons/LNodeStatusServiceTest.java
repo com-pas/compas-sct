@@ -48,14 +48,20 @@ class LNodeStatusServiceTest {
 
     public static Stream<Arguments> provideUpdateModStVal() {
         return Stream.of(
-                Arguments.of(named("LN 'on' à mettre à 'on'", "LDEVICE_1"), "PDIS", "1", "on"),
-                Arguments.of(named("LN 'off;on' à mettre à 'on'", "LDEVICE_1"), "PDIS", "2", "on"),
-                Arguments.of(named("LN 'off' à mettre à 'off'", "LDEVICE_1"), "PDIS", "3", "off"),
-                Arguments.of(named("LN 'off;on' à mettre à 'off'", "LDEVICE_1"), "PDIS", "3", "off"),
-                Arguments.of(named("LN0 'on' à mettre à 'on'", "LDEVICE_1"), "LLN0", "", "on"),
-                Arguments.of(named("LN0 'off;on' à mettre à 'on'", "LDEVICE_2"), "LLN0", "", "on"),
-                Arguments.of(named("LN0 'off' à mettre à 'off'", "LDEVICE_3"), "LLN0", "", "off"),
-                Arguments.of(named("LN0 'off;on' à mettre à 'off'", "LDEVICE_4"), "LLN0", "", "off")
+                // Tests on LN
+                Arguments.of(named("LN 'on;off' to set to 'on'", "LDEVICE_1"), "PDIS", "1", "on"),
+                Arguments.of(named("LN 'off;on' to set to 'on'", "LDEVICE_1"), "PDIS", "2", "on"),
+                Arguments.of(named("LN 'on' to set to 'on'", "LDEVICE_1"), "PDIS", "3", "on"),
+                Arguments.of(named("LN 'on;off' to set to 'off'", "LDEVICE_1"), "PDIS", "4", "off"),
+                Arguments.of(named("LN 'off;on' to set to 'off'", "LDEVICE_1"), "PDIS", "5", "off"),
+                Arguments.of(named("LN 'off' to set to 'off'", "LDEVICE_1"), "PDIS", "6", "off"),
+                // Tests on LN0
+                Arguments.of(named("LN0 'on;off' to set to 'on'", "LDEVICE_1"), "LLN0", "", "on"),
+                Arguments.of(named("LN0 'off;on' to set to 'on'", "LDEVICE_2"), "LLN0", "", "on"),
+                Arguments.of(named("LN0 'on' to set to 'on'", "LDEVICE_3"), "LLN0", "", "on"),
+                Arguments.of(named("LN0 'on;off' to set to 'off'", "LDEVICE_4"), "LLN0", "", "off"),
+                Arguments.of(named("LN0 'off;on' to set to 'off'", "LDEVICE_5"), "LLN0", "", "off"),
+                Arguments.of(named("LN0 'off' to set to 'off'", "LDEVICE_6"), "LLN0", "", "off")
         );
     }
 
