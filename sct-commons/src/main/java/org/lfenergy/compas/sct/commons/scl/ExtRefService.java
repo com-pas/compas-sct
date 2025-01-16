@@ -6,8 +6,10 @@
 
 package org.lfenergy.compas.sct.commons.scl;
 
-import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.util.PrivateUtils;
+import org.lfenergy.compas.scl2007b4.model.TExtRef;
+import org.lfenergy.compas.scl2007b4.model.TInputs;
+import org.lfenergy.compas.scl2007b4.model.TLDevice;
+import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.ArrayList;
@@ -31,28 +33,6 @@ public class ExtRefService {
     }
 
     /**
-     * List all CompasFlows in this LDevice
-     *
-     * @return list of ExtRefs. List is modifiable.
-     */
-    public Stream<TCompasFlow> getCompasFlows(TLDevice tlDevice) {
-        return getInputs(tlDevice).stream()
-                .flatMap(tInputs -> PrivateUtils.extractCompasPrivates(tlDevice.getLN0().getInputs(), TCompasFlow.class));
-    }
-
-    /**
-     * Find CompasFlows that match given ExtRef
-     *
-     * @param inputs  inputs containing Privates CompasFlow and TExtRefs
-     * @param tExtRef corresponding to CompasFlow we are searching
-     * @return list of matching CompasFlows
-     */
-    public Stream<TCompasFlow> getMatchingCompasFlows(TInputs inputs, TExtRef tExtRef) {
-        return PrivateUtils.extractCompasPrivates(inputs, TCompasFlow.class)
-                .filter(compasFlow -> isMatchingExtRef(compasFlow, tExtRef));
-    }
-
-    /**
      * Debind ExtRef
      *
      * @param extRef to debind
@@ -71,25 +51,6 @@ public class ExtRefService {
         extRef.setSrcCBName(null);
         extRef.unsetLnClass();
         extRef.unsetSrcLNClass();
-    }
-
-
-    /**
-     * Check if extRef matches CompasFlow
-     *
-     * @param compasFlow compasFlow
-     * @param extRef     extRef
-     * @return true if all required attributes matches. Note that empty string, whitespaces only string and null values are considered as matching
-     * (missing attributes matches attribute with empty string value or whitespaces only). Return false otherwise.
-     */
-    private boolean isMatchingExtRef(TCompasFlow compasFlow, TExtRef extRef) {
-        String extRefLnClass = extRef.isSetLnClass() ? extRef.getLnClass().get(0) : null;
-        return Utils.equalsOrBothBlank(compasFlow.getDataStreamKey(), extRef.getDesc())
-                && Utils.equalsOrBothBlank(compasFlow.getExtRefiedName(), extRef.getIedName())
-                && Utils.equalsOrBothBlank(compasFlow.getExtRefldinst(), extRef.getLdInst())
-                && Utils.equalsOrBothBlank(compasFlow.getExtRefprefix(), extRef.getPrefix())
-                && Utils.equalsOrBothBlank(compasFlow.getExtReflnClass(), extRefLnClass)
-                && Utils.equalsOrBothBlank(compasFlow.getExtReflnInst(), extRef.getLnInst());
     }
 
     /**
