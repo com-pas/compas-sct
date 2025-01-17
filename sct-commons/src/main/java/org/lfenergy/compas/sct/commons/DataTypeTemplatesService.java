@@ -149,6 +149,20 @@ public class DataTypeTemplatesService implements DataTypeTemplateReader {
                         ));
     }
 
+    public Stream<String> getEnumValues(TDataTypeTemplates dataTypeTemplates, String lnType, DoLinkedToDaFilter doLinkedToDaFilter) {
+        return findDoLinkedToDa(dataTypeTemplates, lnType, doLinkedToDaFilter)
+                .map(DoLinkedToDa::dataAttribute)
+                .filter(dataAttribute -> TPredefinedBasicTypeEnum.ENUM.equals(dataAttribute.getBType()))
+                .map(DataAttribute::getType)
+                .flatMap(enumId ->
+                        dataTypeTemplates.getEnumType().stream()
+                                .filter(tEnumType -> tEnumType.getId().equals(enumId))
+                                .findFirst())
+                .stream()
+                .flatMap(tEnumType -> tEnumType.getEnumVal().stream())
+                .map(TEnumVal::getValue);
+    }
+
     private Optional<TDAType> getDATypeByDaName(TDataTypeTemplates dtt, TDOType tdoType, String daName) {
         return sdoOrDAService.findDA(tdoType, tda -> tda.getName().equals(daName))
                 .flatMap(tda -> daTypeService.findDaType(dtt, tda.getType()));

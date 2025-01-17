@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.domain.DataAttribute;
@@ -23,12 +24,18 @@ import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newVal;
 class DataTypeTemplatesServiceTest {
 
 
+    private DataTypeTemplatesService dataTypeTemplatesService;
+
+    @BeforeEach
+    void setUp() {
+        dataTypeTemplatesService = new DataTypeTemplatesService();
+    }
+
     @Test
     void isDoModAndDaStValExist_when_LNodeType_not_exist_should_return_false() {
         //Given
         TDataTypeTemplates dtt = new TDataTypeTemplates();
         //When
-        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
         boolean result = dataTypeTemplatesService.isDoModAndDaStValExist(dtt, "lnodeTypeId");
         //Then
         assertThat(result).isFalse();
@@ -43,7 +50,6 @@ class DataTypeTemplatesServiceTest {
         tlNodeType.setId("lnodeTypeId");
         dtt.getLNodeType().add(tlNodeType);
         //When
-        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
         boolean result = dataTypeTemplatesService.isDoModAndDaStValExist(dtt, "lnodeTypeId");
         //Then
         assertThat(result).isFalse();
@@ -61,7 +67,6 @@ class DataTypeTemplatesServiceTest {
         tlNodeType.getDO().add(tdo);
         dtt.getLNodeType().add(tlNodeType);
         //When
-        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
         boolean result = dataTypeTemplatesService.isDoModAndDaStValExist(dtt, "lnodeTypeId");
         //Then
         assertThat(result).isFalse();
@@ -83,7 +88,6 @@ class DataTypeTemplatesServiceTest {
         tdoType.setId("doTypeId");
         dtt.getDOType().add(tdoType);
         //When
-        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
         boolean result = dataTypeTemplatesService.isDoModAndDaStValExist(dtt, "lnodeTypeId");
         //Then
         assertThat(result).isFalse();
@@ -108,7 +112,6 @@ class DataTypeTemplatesServiceTest {
         tdoType.getSDOOrDA().add(tda);
         dtt.getDOType().add(tdoType);
         //When
-        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
         boolean result = dataTypeTemplatesService.isDoModAndDaStValExist(dtt, "lnodeTypeId");
         //Then
         assertThat(result).isFalse();
@@ -133,7 +136,6 @@ class DataTypeTemplatesServiceTest {
         tdoType.getSDOOrDA().add(tda);
         dtt.getDOType().add(tdoType);
         //When
-        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
         boolean result = dataTypeTemplatesService.isDoModAndDaStValExist(dtt, "lnodeTypeId");
         //Then
         assertThat(result).isTrue();
@@ -145,10 +147,9 @@ class DataTypeTemplatesServiceTest {
         TDataTypeTemplates dtt = initDttFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda_test.xml");
         String lNodeTypeId = "LNodeType0";
 
-        DoLinkedToDaFilter doLinkedToDaFilter = new DoLinkedToDaFilter();
+        DoLinkedToDaFilter doLinkedToDaFilter = new DoLinkedToDaFilter(null, null, null, null);
 
         //When
-        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
         List<DoLinkedToDa> result = dataTypeTemplatesService.getFilteredDoLinkedToDa(dtt, lNodeTypeId, doLinkedToDaFilter).toList();
         //Then
         assertThat(result).hasSize(9)
@@ -189,7 +190,6 @@ class DataTypeTemplatesServiceTest {
         DoLinkedToDaFilter doLinkedToDaFilter = DoLinkedToDaFilter.from("SecondDoName", "");
 
         //When
-        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
         List<DoLinkedToDa> result = dataTypeTemplatesService.getFilteredDoLinkedToDa(dtt, lNodeTypeId, doLinkedToDaFilter).toList();
         //Then
         assertThat(result).hasSize(1).extracting(doLinkedToDa1 -> doLinkedToDa1.dataObject().getDoName(),
@@ -210,7 +210,6 @@ class DataTypeTemplatesServiceTest {
 
         DoLinkedToDaFilter doLinkedToDaFilter = DoLinkedToDaFilter.from("FirstDoName.sdoName1", "");
         //When
-        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
         List<DoLinkedToDa> result = dataTypeTemplatesService.getFilteredDoLinkedToDa(dtt, lNodeTypeId, doLinkedToDaFilter).toList();
         //Then
         assertThat(result).hasSize(3).extracting(doLinkedToDa1 -> doLinkedToDa1.dataObject().getDoName(),
@@ -232,7 +231,6 @@ class DataTypeTemplatesServiceTest {
 
         DoLinkedToDaFilter doLinkedToDaFilter = DoLinkedToDaFilter.from("FirstDoName.sdoName1.sdoName21", "");
         //When
-        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
         List<DoLinkedToDa> result = dataTypeTemplatesService.getFilteredDoLinkedToDa(dtt, lNodeTypeId, doLinkedToDaFilter).toList();
         //Then
         assertThat(result).hasSize(2).extracting(doLinkedToDa1 -> doLinkedToDa1.dataObject().getDoName(),
@@ -254,7 +252,6 @@ class DataTypeTemplatesServiceTest {
         DoLinkedToDaFilter doLinkedToDaFilter = DoLinkedToDaFilter.from("FirstDoName.sdoName2", "structDaName1.structBdaName1.enumBdaName22");
 
         //When
-        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
         List<DoLinkedToDa> result = dataTypeTemplatesService.getFilteredDoLinkedToDa(dtt, lNodeTypeId, doLinkedToDaFilter).toList();
         //Then
         assertThat(result).hasSize(1).extracting(doLinkedToDa1 -> doLinkedToDa1.dataObject().getDoName(),
@@ -286,7 +283,6 @@ class DataTypeTemplatesServiceTest {
         DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
         DoLinkedToDaFilter doLinkedToDaFilter = new DoLinkedToDaFilter("Do", List.of("sdo1", "d"), "antRef", List.of("bda1", "bda2", "bda3"));
         // When
-        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
         Optional<DoLinkedToDa> result = dataTypeTemplatesService.findDoLinkedToDa(dtt, "LNO1", doLinkedToDaFilter);
         // Then
         assertThat(result).get().usingRecursiveComparison().isEqualTo(doLinkedToDa);
@@ -308,7 +304,6 @@ class DataTypeTemplatesServiceTest {
         dataAttribute.setType("EnumType1");
         DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
         // When
-        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
         Optional<DoLinkedToDa> result = dataTypeTemplatesService.findDoLinkedToDa(dtt, "LN1", new DoLinkedToDaFilter("Do1", List.of("sdo1", "sdo2"), "da2", List.of("bda1", "bda2")));
         // Then
         assertThat(result).get().usingRecursiveComparison().isEqualTo(doLinkedToDa);
@@ -327,7 +322,6 @@ class DataTypeTemplatesServiceTest {
         dataAttribute.setFc(TFCEnum.ST);
         DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
         // When
-        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
         Optional<DoLinkedToDa> result = dataTypeTemplatesService.findDoLinkedToDa(dtt, "LN1", new DoLinkedToDaFilter("Do1", List.of(), "da1", List.of()));
         // Then
         assertThat(result).get().usingRecursiveComparison().isEqualTo(doLinkedToDa);
@@ -338,7 +332,6 @@ class DataTypeTemplatesServiceTest {
         //Given
         TDataTypeTemplates dtt = new TDataTypeTemplates();
         //When
-        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
         List<DoLinkedToDa> result = dataTypeTemplatesService.getAllDoLinkedToDa(dtt).toList();
         //Then
         assertThat(result).isEmpty();
@@ -352,8 +345,7 @@ class DataTypeTemplatesServiceTest {
         tlNodeType.setId("lnodeTypeId");
         dtt.getLNodeType().add(tlNodeType);
         //When
-        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
-        List<DoLinkedToDa> result =  dataTypeTemplatesService.getAllDoLinkedToDa(dtt).toList();
+        List<DoLinkedToDa> result = dataTypeTemplatesService.getAllDoLinkedToDa(dtt).toList();
         //Then
         assertThat(result).isEmpty();
     }
@@ -370,8 +362,7 @@ class DataTypeTemplatesServiceTest {
         tlNodeType.getDO().add(tdo);
         dtt.getLNodeType().add(tlNodeType);
         //When
-        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
-        List<DoLinkedToDa> result =  dataTypeTemplatesService.getAllDoLinkedToDa(dtt).toList();
+        List<DoLinkedToDa> result = dataTypeTemplatesService.getAllDoLinkedToDa(dtt).toList();
         //Then
         assertThat(result).isEmpty();
     }
@@ -393,8 +384,7 @@ class DataTypeTemplatesServiceTest {
         dtt.getDOType().add(tdoType);
         scl.setDataTypeTemplates(dtt);
         //When
-        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
-        List<DoLinkedToDa> result =  dataTypeTemplatesService.getAllDoLinkedToDa(dtt).toList();
+        List<DoLinkedToDa> result = dataTypeTemplatesService.getAllDoLinkedToDa(dtt).toList();
         //Then
         assertThat(result).isEmpty();
     }
@@ -419,8 +409,7 @@ class DataTypeTemplatesServiceTest {
         dtt.getDOType().add(tdoType);
         scl.setDataTypeTemplates(dtt);
         //When
-        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
-        List<DoLinkedToDa> result =  dataTypeTemplatesService.getAllDoLinkedToDa(dtt).toList();
+        List<DoLinkedToDa> result = dataTypeTemplatesService.getAllDoLinkedToDa(dtt).toList();
         //Then
         assertThat(result).hasSize(1);
         assertThat(result.getFirst())
@@ -437,8 +426,7 @@ class DataTypeTemplatesServiceTest {
         // File contain all combinations that can be made
         TDataTypeTemplates dtt = initDttFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda_tests.xml");
         // When
-        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
-        List<DoLinkedToDa> result =  dataTypeTemplatesService.getAllDoLinkedToDa(dtt).toList();
+        List<DoLinkedToDa> result = dataTypeTemplatesService.getAllDoLinkedToDa(dtt).toList();
         // Then
         assertThat(result).hasSize(34)
                 .extracting(doLinkedToDa1 -> doLinkedToDa1.dataObject().getDoName(),
@@ -536,6 +524,16 @@ class DataTypeTemplatesServiceTest {
                         tuple("Do22", List.of("sdo22"),
                                 "structDa1", List.of("structBda1", "structBda2", "sampleBda3"), TPredefinedBasicTypeEnum.ENUM, "RecCycModKind")
                 );
+    }
+
+    @Test
+    void getEnumValues_should_succeed() {
+        // Given
+        TDataTypeTemplates dtt = initDttFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda_tests.xml");
+        // When
+        List<String> enumValues = dataTypeTemplatesService.getEnumValues(dtt, "LN1", DoLinkedToDaFilter.from("Do11", "sampleDa11")).toList();
+        // Then
+        assertThat(enumValues).containsExactly("REB", "RVB", "RVL", "RVB+L");
     }
 
 }
