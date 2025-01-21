@@ -18,23 +18,25 @@ class DoLinkedToDaTest {
     @Test
     void test_copyFrom() {
         // Given
+        DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
         DataObject dataObject = new DataObject();
         dataObject.setDoName("doName");
         dataObject.setSdoNames(List.of("sdoName1"));
         dataObject.setCdc(TPredefinedCDCEnum.CST);
+        doLinkedToDa.setDataObject(dataObject);
         DataAttribute dataAttribute = new DataAttribute();
         dataAttribute.setDaName("daName");
         dataAttribute.setBdaNames(List.of("bdaName1"));
         dataAttribute.setFc(TFCEnum.BL);
-        DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
+        doLinkedToDa.setDataAttribute(dataAttribute);
         // When
         DoLinkedToDa newDoLinkedToDa = DoLinkedToDa.copyFrom(doLinkedToDa);
         // Then
         assertAll("Copy From",
-                () -> assertThat(newDoLinkedToDa.dataObject().getCdc()).isEqualTo(doLinkedToDa.dataObject().getCdc()),
-                () -> assertThat(newDoLinkedToDa.dataAttribute().getBType()).isEqualTo(doLinkedToDa.dataAttribute().getBType()),
-                () -> assertThat(newDoLinkedToDa.dataAttribute().getType()).isEqualTo(doLinkedToDa.dataAttribute().getType()),
-                () -> assertThat(newDoLinkedToDa.dataAttribute().getFc()).isEqualTo(doLinkedToDa.dataAttribute().getFc()),
+                () -> assertThat(newDoLinkedToDa.getDataObject().getCdc()).isEqualTo(doLinkedToDa.getDataObject().getCdc()),
+                () -> assertThat(newDoLinkedToDa.getDataAttribute().getBType()).isEqualTo(doLinkedToDa.getDataAttribute().getBType()),
+                () -> assertThat(newDoLinkedToDa.getDataAttribute().getType()).isEqualTo(doLinkedToDa.getDataAttribute().getType()),
+                () -> assertThat(newDoLinkedToDa.getDataAttribute().getFc()).isEqualTo(doLinkedToDa.getDataAttribute().getFc()),
                 () -> assertThat(newDoLinkedToDa.getDoRef()).isEqualTo(doLinkedToDa.getDoRef()),
                 () -> assertThat(newDoLinkedToDa.getDaRef()).isEqualTo(doLinkedToDa.getDaRef()));
     }
@@ -47,7 +49,8 @@ class DoLinkedToDaTest {
         dataObject.setSdoNames(List.of("sdoName1"));
         dataObject.setCdc(TPredefinedCDCEnum.CST);
         // When Then
-        DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, new DataAttribute());
+        DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
+        doLinkedToDa.setDataObject(dataObject);
         assertThat(doLinkedToDa.getDoRef()).isEqualTo("doName.sdoName1");
     }
 
@@ -58,10 +61,9 @@ class DoLinkedToDaTest {
         dataAttribute.setDaName("daName");
         dataAttribute.setBdaNames(List.of("bdaName1"));
         dataAttribute.setFc(TFCEnum.BL);
-        // When
-        DoLinkedToDa doLinkedToDa = new DoLinkedToDa(new DataObject(), dataAttribute);
-
-        // Then
+        // When Then
+        DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
+        doLinkedToDa.setDataAttribute(dataAttribute);
         assertThat(doLinkedToDa.getDaRef()).isEqualTo("daName.bdaName1");
     }
 
@@ -73,7 +75,9 @@ class DoLinkedToDaTest {
         DataAttribute dataAttribute = new DataAttribute();
         dataAttribute.setDaName("stVal");
 
-        DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
+        DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
+        doLinkedToDa.setDataObject(dataObject);
+        doLinkedToDa.setDataAttribute(dataAttribute);
         // When Then
         assertThat(doLinkedToDa.isUpdatable()).isTrue();
     }
@@ -90,7 +94,9 @@ class DoLinkedToDaTest {
         dataAttribute.setValImport(true);
         dataAttribute.setFc(TFCEnum.SE);
 
-        DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
+        DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
+        doLinkedToDa.setDataObject(dataObject);
+        doLinkedToDa.setDataAttribute(dataAttribute);
         // When Then
         assertThat(doLinkedToDa.isUpdatable()).isTrue();
     }
@@ -107,7 +113,9 @@ class DoLinkedToDaTest {
         dataAttribute.setValImport(false);
         dataAttribute.setFc(TFCEnum.SE);
 
-        DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
+        DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
+        doLinkedToDa.setDataObject(dataObject);
+        doLinkedToDa.setDataAttribute(dataAttribute);
         // When Then
         assertThat(doLinkedToDa.isUpdatable()).isFalse();
     }

@@ -11,13 +11,16 @@ import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.domain.DataAttribute;
 import org.lfenergy.compas.sct.commons.domain.DataObject;
 import org.lfenergy.compas.sct.commons.domain.DoLinkedToDa;
+import org.lfenergy.compas.sct.commons.dto.DaTypeName;
+import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
+import org.lfenergy.compas.sct.commons.dto.DoTypeName;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.tuple;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateTestUtils.initDttFromFile;
+import static org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateTestUtils.*;
 
 class DoTypeServiceTest {
 
@@ -82,20 +85,23 @@ class DoTypeServiceTest {
         TDOType tdoType = doTypeService.findDoType(dtt, tdoType1 -> tdoType1.getId()
                 .equals("DOType0")).orElseThrow();
 
+        DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
         DataObject dataObject = new DataObject();
         dataObject.setDoName("FirstDoName");
+        doLinkedToDa.setDataObject(dataObject);
         DataAttribute dataAttribute = new DataAttribute();
-        DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
+        doLinkedToDa.setDataAttribute(dataAttribute);
+
         //When
         List<DoLinkedToDa> result = doTypeService.getAllSDOLinkedToDa(dtt, tdoType, doLinkedToDa);
         //Then
         assertThat(result).hasSize(8)
-                .extracting(doLinkedToDa1 -> doLinkedToDa1.dataObject().getDoName(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataObject().getSdoNames(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getDaName(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getBdaNames(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getBType(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getType())
+                .extracting(doLinkedToDa1 -> doLinkedToDa1.getDataObject().getDoName(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataObject().getSdoNames(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getDaName(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getBdaNames(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getBType(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getType())
                 .containsExactlyInAnyOrder(
                         tuple("FirstDoName", List.of(),
                                 "sampleDaName1", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
@@ -125,19 +131,22 @@ class DoTypeServiceTest {
         DoTypeService doTypeService = new DoTypeService();
         TDOType tdoType = doTypeService.findDoType(dtt, tdoType1 -> tdoType1.getId()
                 .equals("DO11")).orElseThrow();
+        DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
         DataObject dataObject = new DataObject();
         dataObject.setDoName("firstDONAME");
+        doLinkedToDa.setDataObject(dataObject);
         DataAttribute dataAttribute = new DataAttribute();
-        DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);        // When
+        doLinkedToDa.setDataAttribute(dataAttribute);
+        // When
         List<DoLinkedToDa> list = doTypeService.getAllSDOLinkedToDa(dtt, tdoType, doLinkedToDa);
         // Then
         assertThat(list)
                 .hasSize(811)
-                .allMatch(dataAttributeRef -> StringUtils.startsWith(dataAttributeRef.dataObject().getDoName(), "firstDONAME"))
-                .areExactly(1, new Condition<>(dataAttributeRef -> dataAttributeRef.dataAttribute().getDaName().equals("da1"), "Il n'y a que certaines réponses contenant da1"))
-                .areExactly(270, new Condition<>(dataAttributeRef -> dataAttributeRef.dataAttribute().getDaName().equals("da11"), "Il n'y a que certaines réponses contenant da11"))
-                .areExactly(270, new Condition<>(dataAttributeRef -> dataAttributeRef.dataAttribute().getDaName().equals("da22"), "Il n'y a que certaines réponses contenant da22"))
-                .areExactly(270, new Condition<>(dataAttributeRef -> dataAttributeRef.dataAttribute().getDaName().equals("da32"), "Il n'y a que certaines réponses contenant da32"));
+                .allMatch(dataAttributeRef -> StringUtils.startsWith(dataAttributeRef.getDataObject().getDoName(), "firstDONAME"))
+                .areExactly(1, new Condition<>(dataAttributeRef -> dataAttributeRef.getDataAttribute().getDaName().equals("da1"), "Il n'y a que certaines réponses contenant da1"))
+                .areExactly(270, new Condition<>(dataAttributeRef -> dataAttributeRef.getDataAttribute().getDaName().equals("da11"), "Il n'y a que certaines réponses contenant da11"))
+                .areExactly(270, new Condition<>(dataAttributeRef -> dataAttributeRef.getDataAttribute().getDaName().equals("da22"), "Il n'y a que certaines réponses contenant da22"))
+                .areExactly(270, new Condition<>(dataAttributeRef -> dataAttributeRef.getDataAttribute().getDaName().equals("da32"), "Il n'y a que certaines réponses contenant da32"));
     }
 
 }

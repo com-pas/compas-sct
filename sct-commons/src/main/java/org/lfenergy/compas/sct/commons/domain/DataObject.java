@@ -13,21 +13,18 @@ import java.util.List;
 
 @Getter
 @Setter
-@NoArgsConstructor
 public class DataObject {
 
     private String doName;
     private TPredefinedCDCEnum cdc;
     private List<String> sdoNames = new ArrayList<>();
 
-    public DataObject(String doName, TPredefinedCDCEnum cdc, List<String> sdoNames) {
-        this.doName = doName;
-        this.cdc = cdc;
-        this.sdoNames.addAll(sdoNames);
-    }
-
     public static DataObject copyFrom(DataObject dataObject) {
-        return new DataObject(dataObject.getDoName(), dataObject.getCdc(), dataObject.getSdoNames());
+        DataObject dataObject1 = new DataObject();
+        dataObject1.setDoName(dataObject.getDoName());
+        dataObject1.setCdc(dataObject.getCdc());
+        dataObject1.getSdoNames().addAll(dataObject.getSdoNames());
+        return dataObject1;
     }
 
     @Override
