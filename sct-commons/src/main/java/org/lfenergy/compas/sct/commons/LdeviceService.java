@@ -41,6 +41,6 @@ public class LdeviceService {
 
     public Optional<ActiveStatus> getLdeviceStatus(TLDevice tlDevice) {
         LnService lnService = new LnService();
-        return lnService.getDaiModStValValue(tlDevice.getLN0());
+        return lnService.getDaiModStval(tlDevice.getLN0());
     }
 }
