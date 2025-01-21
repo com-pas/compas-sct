@@ -4,7 +4,11 @@
 
 package org.lfenergy.compas.sct.commons;
 
-import org.lfenergy.compas.scl2007b4.model.*;
+import lombok.RequiredArgsConstructor;
+import org.lfenergy.compas.scl2007b4.model.TAccessPoint;
+import org.lfenergy.compas.scl2007b4.model.TIED;
+import org.lfenergy.compas.scl2007b4.model.TLDevice;
+import org.lfenergy.compas.scl2007b4.model.TServer;
 import org.lfenergy.compas.sct.commons.util.ActiveStatus;
 
 import java.util.Objects;
@@ -12,7 +16,10 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+@RequiredArgsConstructor
 public class LdeviceService {
+
+    private final LnService lnService;
 
     public Stream<TLDevice> getLdevices(TIED tied) {
         if (!tied.isSetAccessPoint()) {
@@ -40,7 +47,6 @@ public class LdeviceService {
     }
 
     public Optional<ActiveStatus> getLdeviceStatus(TLDevice tlDevice) {
-        LnService lnService = new LnService();
-        return lnService.getDaiModStval(tlDevice.getLN0());
+        return lnService.getDaiModStValValue(tlDevice.getLN0());
     }
 }

@@ -32,7 +32,7 @@ class SclAutomationServiceIntegrationTest {
     private SclAutomationService sclAutomationService ;
     private static final SclEditor sclEditor = new SclService() ;
     private static final SubstationEditor substationEditor = new SubstationService(new VoltageLevelService()) ;
-    private static final ControlBlockEditor controlBlockEditor = new ControlBlockEditorService(new ControlService(), new LdeviceService()) ;
+    private static final ControlBlockEditor controlBlockEditor = new ControlBlockEditorService(new ControlService(), new LdeviceService(new LnService()));
 
     private HeaderDTO headerDTO;
 

@@ -54,7 +54,7 @@ public class ExtRefEditorService implements ExtRefEditor {
      * @param channel        TChannel represent parameters
      * @return the IED sources matching the LDEPF parameters
      */
-    private static List<TIED> getIedSources(SclRootAdapter sclRootAdapter, TCompasBay compasBay, TChannel channel) {
+    private List<TIED> getIedSources(SclRootAdapter sclRootAdapter, TCompasBay compasBay, TChannel channel) {
         return sclRootAdapter.streamIEDAdapters()
                 .filter(iedAdapter -> (channel.getBayScope().equals(TCBScopeType.BAY_EXTERNAL)
                         && iedAdapter.getPrivateCompasBay().stream().noneMatch(bay -> bay.getUUID().equals(compasBay.getUUID())))
@@ -143,8 +143,7 @@ public class ExtRefEditorService implements ExtRefEditor {
      * @param channel    TChannel
      * @return LDeviceAdapter object that matches the EPF channel
      */
-    private static Optional<LDeviceAdapter> getActiveSourceLDeviceByLDEPFChannel(IEDAdapter iedAdapter, TChannel channel) {
-        LdeviceService ldeviceService = new LdeviceService();
+    private Optional<LDeviceAdapter> getActiveSourceLDeviceByLDEPFChannel(IEDAdapter iedAdapter, TChannel channel) {
         return ldeviceService.findLdevice(iedAdapter.getCurrentElem(), tlDevice -> tlDevice.getInst().equals(channel.getLDInst()))
                 .filter(tlDevice -> ldeviceService.getLdeviceStatus(tlDevice).map(ActiveStatus.ON::equals).orElse(false))
                 .map(tlDevice -> new LDeviceAdapter(iedAdapter, tlDevice));
