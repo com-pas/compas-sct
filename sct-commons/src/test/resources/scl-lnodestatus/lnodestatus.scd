@@ -20,15 +20,9 @@
                         <Private type="COMPAS-LNodeStatus">on</Private>
                     </LNode>
                     <LNode iedName="IED_NAME_1" ldInst="LDEVICE_1" lnClass="PDIS" lnInst="3">
-                        <Private type="COMPAS-LNodeStatus">on</Private>
+                        <Private type="COMPAS-LNodeStatus">off</Private>
                     </LNode>
                     <LNode iedName="IED_NAME_1" ldInst="LDEVICE_1" lnClass="PDIS" lnInst="4">
-                        <Private type="COMPAS-LNodeStatus">off</Private>
-                    </LNode>
-                    <LNode iedName="IED_NAME_1" ldInst="LDEVICE_1" lnClass="PDIS" lnInst="5">
-                        <Private type="COMPAS-LNodeStatus">off</Private>
-                    </LNode>
-                    <LNode iedName="IED_NAME_1" ldInst="LDEVICE_1" lnClass="PDIS" lnInst="6">
                         <Private type="COMPAS-LNodeStatus">off</Private>
                     </LNode>
                 </Function>
@@ -40,15 +34,9 @@
                         <Private type="COMPAS-LNodeStatus">on</Private>
                     </LNode>
                     <LNode iedName="IED_NAME_1" ldInst="LDEVICE_3" lnClass="LLN0">
-                        <Private type="COMPAS-LNodeStatus">on</Private>
+                        <Private type="COMPAS-LNodeStatus">off</Private>
                     </LNode>
                     <LNode iedName="IED_NAME_1" ldInst="LDEVICE_4" lnClass="LLN0">
-                        <Private type="COMPAS-LNodeStatus">off</Private>
-                    </LNode>
-                    <LNode iedName="IED_NAME_1" ldInst="LDEVICE_5" lnClass="LLN0">
-                        <Private type="COMPAS-LNodeStatus">off</Private>
-                    </LNode>
-                    <LNode iedName="IED_NAME_1" ldInst="LDEVICE_6" lnClass="LLN0">
                         <Private type="COMPAS-LNodeStatus">off</Private>
                     </LNode>
                 </Function>
@@ -61,7 +49,7 @@
                 <Authentication/>
                 <LDevice inst="LDEVICE_1">
                     <LN0 lnType="lnType1" lnClass="LLN0" inst="">
-                        <Private type="COMPAS-LNodeStatus">on;off</Private>
+                        <Private type="COMPAS-LNodeStatus">on</Private>
                         <DOI name="Mod">
                             <DAI name="stVal"/>
                         </DOI>
@@ -73,30 +61,18 @@
                         </DOI>
                     </LN>
                     <LN lnType="lnType2" lnClass="PDIS" inst="2">
-                        <Private type="COMPAS-LNodeStatus">off;on</Private>
-                        <DOI name="Mod">
-                            <DAI name="stVal"/>
-                        </DOI>
-                    </LN>
-                    <LN lnType="lnType2" lnClass="PDIS" inst="3">
                         <Private type="COMPAS-LNodeStatus">on</Private>
                         <DOI name="Mod">
                             <DAI name="stVal"/>
                         </DOI>
                     </LN>
-                    <LN lnType="lnType2" lnClass="PDIS" inst="4">
+                    <LN lnType="lnType2" lnClass="PDIS" inst="3">
                         <Private type="COMPAS-LNodeStatus">on;off</Private>
                         <DOI name="Mod">
                             <DAI name="stVal"/>
                         </DOI>
                     </LN>
-                    <LN lnType="lnType2" lnClass="PDIS" inst="5">
-                        <Private type="COMPAS-LNodeStatus">off;on</Private>
-                        <DOI name="Mod">
-                            <DAI name="stVal"/>
-                        </DOI>
-                    </LN>
-                    <LN lnType="lnType2" lnClass="PDIS" inst="6">
+                    <LN lnType="lnType2" lnClass="PDIS" inst="4">
                         <Private type="COMPAS-LNodeStatus">off</Private>
                         <DOI name="Mod">
                             <DAI name="stVal"/>
@@ -105,7 +81,7 @@
                 </LDevice>
                 <LDevice inst="LDEVICE_2">
                     <LN0 lnType="lnType1" lnClass="LLN0" inst="">
-                        <Private type="COMPAS-LNodeStatus">off;on</Private>
+                        <Private type="COMPAS-LNodeStatus">on</Private>
                         <DOI name="Mod">
                             <DAI name="stVal"/>
                         </DOI>
@@ -113,29 +89,13 @@
                 </LDevice>
                 <LDevice inst="LDEVICE_3">
                     <LN0 lnType="lnType1" lnClass="LLN0" inst="">
-                        <Private type="COMPAS-LNodeStatus">on</Private>
-                        <DOI name="Mod">
-                            <DAI name="stVal"/>
-                        </DOI>
-                    </LN0>
-                </LDevice>
-                <LDevice inst="LDEVICE_4">
-                    <LN0 lnType="lnType1" lnClass="LLN0" inst="">
                         <Private type="COMPAS-LNodeStatus">on;off</Private>
                         <DOI name="Mod">
                             <DAI name="stVal"/>
                         </DOI>
                     </LN0>
                 </LDevice>
-                <LDevice inst="LDEVICE_5">
-                    <LN0 lnType="lnType1" lnClass="LLN0" inst="">
-                        <Private type="COMPAS-LNodeStatus">off;on</Private>
-                        <DOI name="Mod">
-                            <DAI name="stVal"/>
-                        </DOI>
-                    </LN0>
-                </LDevice>
-                <LDevice inst="LDEVICE_6">
+                <LDevice inst="LDEVICE_4">
                     <LN0 lnType="lnType1" lnClass="LLN0" inst="">
                         <Private type="COMPAS-LNodeStatus">off</Private>
                         <DOI name="Mod">
