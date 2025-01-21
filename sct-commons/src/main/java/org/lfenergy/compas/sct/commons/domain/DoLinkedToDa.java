@@ -5,16 +5,25 @@
 package org.lfenergy.compas.sct.commons.domain;
 
 
+import lombok.Getter;
+import lombok.Setter;
+
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.MOD_DO_NAME;
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL_DA_NAME;
 
 
-public record DoLinkedToDa(DataObject dataObject, DataAttribute dataAttribute) {
+@Getter
+@Setter
+public class DoLinkedToDa {
+
+    private DataObject dataObject;
+    private DataAttribute dataAttribute;
 
     public static DoLinkedToDa copyFrom(DoLinkedToDa doLinkedToDa) {
-        return new DoLinkedToDa(
-                DataObject.copyFrom(doLinkedToDa.dataObject()),
-                DataAttribute.copyFrom(doLinkedToDa.dataAttribute()));
+        DoLinkedToDa newDoLinkedToDa = new DoLinkedToDa();
+        newDoLinkedToDa.setDataObject(DataObject.copyFrom(doLinkedToDa.getDataObject()));
+        newDoLinkedToDa.setDataAttribute(DataAttribute.copyFrom(doLinkedToDa.getDataAttribute()));
+        return newDoLinkedToDa;
     }
 
     public String getDoRef() {

@@ -17,8 +17,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.tuple;
-import static org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateTestUtils.initDttFromFile;
-import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newVal;
+import static org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateTestUtils.*;
 
 class DataTypeTemplatesServiceTest {
 
@@ -152,12 +151,12 @@ class DataTypeTemplatesServiceTest {
         List<DoLinkedToDa> result = dataTypeTemplatesService.getFilteredDoLinkedToDa(dtt, lNodeTypeId, doLinkedToDaFilter).toList();
         //Then
         assertThat(result).hasSize(9)
-                .extracting(doLinkedToDa1 -> doLinkedToDa1.dataObject().getDoName(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataObject().getSdoNames(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getDaName(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getBdaNames(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getBType(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getType())
+                .extracting(doLinkedToDa1 -> doLinkedToDa1.getDataObject().getDoName(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataObject().getSdoNames(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getDaName(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getBdaNames(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getBType(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getType())
                 .containsExactlyInAnyOrder(
                         tuple("FirstDoName", List.of(),
                                 "sampleDaName1", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
@@ -192,12 +191,12 @@ class DataTypeTemplatesServiceTest {
         DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
         List<DoLinkedToDa> result = dataTypeTemplatesService.getFilteredDoLinkedToDa(dtt, lNodeTypeId, doLinkedToDaFilter).toList();
         //Then
-        assertThat(result).hasSize(1).extracting(doLinkedToDa1 -> doLinkedToDa1.dataObject().getDoName(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataObject().getSdoNames(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getDaName(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getBdaNames(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getBType(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getType())
+        assertThat(result).hasSize(1).extracting(doLinkedToDa1 -> doLinkedToDa1.getDataObject().getDoName(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataObject().getSdoNames(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getDaName(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getBdaNames(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getBType(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getType())
                 .containsExactly(tuple("SecondDoName", List.of(), "sampleDaName41", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null));
     }
 
@@ -213,12 +212,12 @@ class DataTypeTemplatesServiceTest {
         DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
         List<DoLinkedToDa> result = dataTypeTemplatesService.getFilteredDoLinkedToDa(dtt, lNodeTypeId, doLinkedToDaFilter).toList();
         //Then
-        assertThat(result).hasSize(3).extracting(doLinkedToDa1 -> doLinkedToDa1.dataObject().getDoName(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataObject().getSdoNames(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getDaName(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getBdaNames(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getBType(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getType())
+        assertThat(result).hasSize(3).extracting(doLinkedToDa1 -> doLinkedToDa1.getDataObject().getDoName(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataObject().getSdoNames(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getDaName(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getBdaNames(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getBType(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getType())
                 .containsExactlyInAnyOrder(tuple("FirstDoName", List.of("sdoName1"), "sampleDaName21", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
                         tuple("FirstDoName", List.of("sdoName1", "sdoName21"), "sampleDaName31", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
                         tuple("FirstDoName", List.of("sdoName1", "sdoName21", "sdoName31"), "sampleDaName41", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null));
@@ -235,12 +234,12 @@ class DataTypeTemplatesServiceTest {
         DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
         List<DoLinkedToDa> result = dataTypeTemplatesService.getFilteredDoLinkedToDa(dtt, lNodeTypeId, doLinkedToDaFilter).toList();
         //Then
-        assertThat(result).hasSize(2).extracting(doLinkedToDa1 -> doLinkedToDa1.dataObject().getDoName(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataObject().getSdoNames(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getDaName(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getBdaNames(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getBType(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getType())
+        assertThat(result).hasSize(2).extracting(doLinkedToDa1 -> doLinkedToDa1.getDataObject().getDoName(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataObject().getSdoNames(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getDaName(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getBdaNames(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getBType(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getType())
                 .containsExactlyInAnyOrder(tuple("FirstDoName", List.of("sdoName1", "sdoName21"), "sampleDaName31", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null),
                         tuple("FirstDoName", List.of("sdoName1", "sdoName21", "sdoName31"), "sampleDaName41", List.of(), TPredefinedBasicTypeEnum.BOOLEAN, null));
     }
@@ -257,12 +256,12 @@ class DataTypeTemplatesServiceTest {
         DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
         List<DoLinkedToDa> result = dataTypeTemplatesService.getFilteredDoLinkedToDa(dtt, lNodeTypeId, doLinkedToDaFilter).toList();
         //Then
-        assertThat(result).hasSize(1).extracting(doLinkedToDa1 -> doLinkedToDa1.dataObject().getDoName(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataObject().getSdoNames(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getDaName(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getBdaNames(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getBType(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getType())
+        assertThat(result).hasSize(1).extracting(doLinkedToDa1 -> doLinkedToDa1.getDataObject().getDoName(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataObject().getSdoNames(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getDaName(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getBdaNames(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getBType(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getType())
                 .containsExactlyInAnyOrder(tuple("FirstDoName", List.of("sdoName2"), "structDaName1", List.of("structBdaName1", "enumBdaName22"), TPredefinedBasicTypeEnum.ENUM, "EnumType1"));
     }
 
@@ -271,66 +270,58 @@ class DataTypeTemplatesServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
         TDataTypeTemplates dtt = scd.getDataTypeTemplates();
+        DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
         DataObject dataObject = new DataObject();
         dataObject.setDoName("Do");
         dataObject.setSdoNames(List.of("sdo1", "d"));
-        dataObject.setCdc(TPredefinedCDCEnum.WYE);
+        doLinkedToDa.setDataObject(dataObject);
         DataAttribute dataAttribute = new DataAttribute();
         dataAttribute.setDaName("antRef");
         dataAttribute.setBdaNames(List.of("bda1", "bda2", "bda3"));
-        dataAttribute.setFc(TFCEnum.ST);
-        dataAttribute.setBType(TPredefinedBasicTypeEnum.ENUM);
-        dataAttribute.setType("RecCycModKind");
-        dataAttribute.setValImport(true);
-        dataAttribute.addDaVal(List.of(newVal("myValue")));
-        DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
-        DoLinkedToDaFilter doLinkedToDaFilter = new DoLinkedToDaFilter("Do", List.of("sdo1", "d"), "antRef", List.of("bda1", "bda2", "bda3"));
+        doLinkedToDa.setDataAttribute(dataAttribute);
         // When
         DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
-        Optional<DoLinkedToDa> result = dataTypeTemplatesService.findDoLinkedToDa(dtt, "LNO1", doLinkedToDaFilter);
+        Optional<DoLinkedToDa> result = dataTypeTemplatesService.findDoLinkedToDa(dtt, "LNO1", doLinkedToDa);
         // Then
-        assertThat(result).get().usingRecursiveComparison().isEqualTo(doLinkedToDa);
+        assertThat(result).contains(doLinkedToDa);
     }
 
     @Test
     void findDoLinkedToDa_should_find_DO_SDO_DA_and_partial_BDA_list() {
         // Given
         TDataTypeTemplates dtt = initDttFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda.xml");
+        DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
         DataObject dataObject = new DataObject();
         dataObject.setDoName("Do1");
-        dataObject.setCdc(TPredefinedCDCEnum.WYE);
         dataObject.setSdoNames(List.of("sdo1", "sdo2"));
+        doLinkedToDa.setDataObject(dataObject);
         DataAttribute dataAttribute = new DataAttribute();
         dataAttribute.setDaName("da2");
-        dataAttribute.setFc(TFCEnum.ST);
         dataAttribute.setBdaNames(List.of("bda1", "bda2"));
-        dataAttribute.setBType(TPredefinedBasicTypeEnum.ENUM);
-        dataAttribute.setType("EnumType1");
-        DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
+        doLinkedToDa.setDataAttribute(dataAttribute);
         // When
         DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
-        Optional<DoLinkedToDa> result = dataTypeTemplatesService.findDoLinkedToDa(dtt, "LN1", new DoLinkedToDaFilter("Do1", List.of("sdo1", "sdo2"), "da2", List.of("bda1", "bda2")));
+        Optional<DoLinkedToDa> result = dataTypeTemplatesService.findDoLinkedToDa(dtt, "LN1", doLinkedToDa);
         // Then
-        assertThat(result).get().usingRecursiveComparison().isEqualTo(doLinkedToDa);
+        assertThat(result).contains(doLinkedToDa);
     }
 
     @Test
     void findDoLinkedToDa_should_find_DO_DA() {
         // Given
         TDataTypeTemplates dtt = initDttFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda.xml");
+        DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
         DataObject dataObject = new DataObject();
         dataObject.setDoName("Do1");
-        dataObject.setCdc(TPredefinedCDCEnum.WYE);
+        doLinkedToDa.setDataObject(dataObject);
         DataAttribute dataAttribute = new DataAttribute();
         dataAttribute.setDaName("da1");
-        dataAttribute.setBType(TPredefinedBasicTypeEnum.BOOLEAN);
-        dataAttribute.setFc(TFCEnum.ST);
-        DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
+        doLinkedToDa.setDataAttribute(dataAttribute);
         // When
         DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
-        Optional<DoLinkedToDa> result = dataTypeTemplatesService.findDoLinkedToDa(dtt, "LN1", new DoLinkedToDaFilter("Do1", List.of(), "da1", List.of()));
+        Optional<DoLinkedToDa> result = dataTypeTemplatesService.findDoLinkedToDa(dtt, "LN1", doLinkedToDa);
         // Then
-        assertThat(result).get().usingRecursiveComparison().isEqualTo(doLinkedToDa);
+        assertThat(result).contains(doLinkedToDa);
     }
 
     @Test
@@ -424,10 +415,10 @@ class DataTypeTemplatesServiceTest {
         //Then
         assertThat(result).hasSize(1);
         assertThat(result.getFirst())
-                .extracting(doLinkedToDa1 -> doLinkedToDa1.dataObject().getDoName(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataObject().getSdoNames(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getDaName(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getBdaNames())
+                .extracting(doLinkedToDa1 -> doLinkedToDa1.getDataObject().getDoName(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataObject().getSdoNames(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getDaName(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getBdaNames())
                 .containsExactly("doName", List.of(), "daName", List.of());
     }
 
@@ -441,12 +432,12 @@ class DataTypeTemplatesServiceTest {
         List<DoLinkedToDa> result =  dataTypeTemplatesService.getAllDoLinkedToDa(dtt).toList();
         // Then
         assertThat(result).hasSize(34)
-                .extracting(doLinkedToDa1 -> doLinkedToDa1.dataObject().getDoName(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataObject().getSdoNames(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getDaName(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getBdaNames(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getBType(),
-                        doLinkedToDa1 -> doLinkedToDa1.dataAttribute().getType())
+                .extracting(doLinkedToDa1 -> doLinkedToDa1.getDataObject().getDoName(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataObject().getSdoNames(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getDaName(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getBdaNames(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getBType(),
+                        doLinkedToDa1 -> doLinkedToDa1.getDataAttribute().getType())
                 .containsExactlyInAnyOrder(
                         // -> Do11
                         tuple("Do11", List.of(), "sampleDa11", List.of(), TPredefinedBasicTypeEnum.ENUM, "RecCycModKind"),
