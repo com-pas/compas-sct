@@ -12,7 +12,6 @@ import org.lfenergy.compas.sct.commons.domain.*;
 import org.lfenergy.compas.sct.commons.util.ActiveStatus;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -24,6 +23,8 @@ import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newVal;
 
 @Slf4j
 public class LnService implements LnEditor {
+
+    private static final DoLinkedToDaFilter DAI_FILTER_MOD_STVAL = DoLinkedToDaFilter.from(MOD_DO_NAME, STVAL_DA_NAME);
 
     public Stream<TAnyLN> getAnylns(TLDevice tlDevice) {
         return Stream.concat(Stream.of(tlDevice.getLN0()), tlDevice.getLN().stream());
@@ -60,33 +61,29 @@ public class LnService implements LnEditor {
      * @return the Lnode Status
      */
     public ActiveStatus getLnStatus(TAnyLN tAnyLN, LN0 ln0) {
-        Optional<ActiveStatus> ln0Status = getDaiModStval(ln0);
-        return getDaiModStval(tAnyLN).filter(ActiveStatus.OFF::equals).orElseGet(() -> ln0Status.orElse(ActiveStatus.OFF));
+        Optional<ActiveStatus> ln0Status = getDaiModStValValue(ln0);
+        return getDaiModStValValue(tAnyLN).filter(ActiveStatus.OFF::equals).orElseGet(() -> ln0Status.orElse(ActiveStatus.OFF));
     }
 
-    public Optional<ActiveStatus> getDaiModStval(TAnyLN tAnyLN) {
-        return tAnyLN
-                .getDOI()
+    public Optional<ActiveStatus> getDaiModStValValue(TAnyLN tAnyLN) {
+        return getDaiModStVal(tAnyLN)
                 .stream()
-                .filter(tdoi -> MOD_DO_NAME.equals(tdoi.getName()))
+                .flatMap(tdai -> tdai.getVal().stream())
+                .map(TVal::getValue)
                 .findFirst()
-                .flatMap(tdoi -> tdoi.getSDIOrDAI()
-                        .stream()
-                        .filter(dai -> dai.getClass().equals(TDAI.class))
-                        .map(TDAI.class::cast)
-                        .filter(tdai -> STVAL_DA_NAME.equals(tdai.getName()))
-                        .map(TDAI::getVal)
-                        .flatMap(Collection::stream)
-                        .findFirst()
-                        .map(TVal::getValue))
                 .map(ActiveStatus::fromValue);
     }
+
+    public Optional<TDAI> getDaiModStVal(TAnyLN tAnyLN) {
+        return getDOAndDAInstances(tAnyLN, DAI_FILTER_MOD_STVAL);
+    }
+
     public Stream<TAnyLN> getActiveLns(TLDevice tlDevice) {
         LN0 ln0 = tlDevice.getLN0();
         Stream<TLN> tlnStream = tlDevice.getLN()
                 .stream()
                 .filter(tln -> ActiveStatus.ON.equals(getLnStatus(tln, ln0)));
-        Stream<LN0> ln0Stream = Stream.of(ln0).filter(ln02 -> getDaiModStval(ln02).map(ActiveStatus.ON::equals).orElse(false));
+        Stream<LN0> ln0Stream = Stream.of(ln0).filter(ln02 -> getDaiModStValValue(ln02).map(ActiveStatus.ON::equals).orElse(false));
         return Stream.concat(ln0Stream, tlnStream);
     }
 
@@ -99,7 +96,7 @@ public class LnService implements LnEditor {
         return tAnyLN.getDOI().stream().filter(doi -> doi.getName().equals(doLinkedToDaFilter.doName()))
                 .findFirst()
                 .flatMap(doi -> {
-                    if(structNamesList.size() > 1) {
+                    if (structNamesList.size() > 1) {
                         String firstSDIName = structNamesList.removeFirst();
                         return this.getSdiByName(doi, firstSDIName)
                                 .map(intermediateSdi -> findSDIByStructName(intermediateSdi, structNamesList))
@@ -116,7 +113,7 @@ public class LnService implements LnEditor {
                                     return Optional.empty();
                                 })
                                 .stream().findFirst();
-                    } else if(structNamesList.size() == 1){
+                    } else if (structNamesList.size() == 1) {
                         return doi.getSDIOrDAI().stream()
                                 .filter(unNaming -> unNaming.getClass().equals(TDAI.class))
                                 .map(TDAI.class::cast)
@@ -138,7 +135,7 @@ public class LnService implements LnEditor {
                                 .ifPresentOrElse(tVal -> tVal.setValue(value),
                                         () -> tdai.getVal().add(newVal(value)));
                     } else {
-                        for (DaVal daVal: daiVals) {
+                        for (DaVal daVal : daiVals) {
                             tdai.getVal().stream()
                                     .filter(tValElem -> tValElem.isSetSGroup() && tValElem.getSGroup() == daVal.settingGroup())
                                     .findFirst()
@@ -198,22 +195,22 @@ public class LnService implements LnEditor {
 
         TDOI doi = tAnyLN.getDOI().stream().filter(doi1 -> doi1.getName().equals(dataObject.getDoName()))
                 .findFirst()
-                .orElseGet(()-> {
+                .orElseGet(() -> {
                     TDOI newDOI = new TDOI();
                     newDOI.setName(dataObject.getDoName());
                     tAnyLN.getDOI().add(newDOI);
                     return newDOI;
                 });
-        if(structInstances.size() > 1){
+        if (structInstances.size() > 1) {
             TSDI firstSDI = findOrCreateSDIFromDOI(doi, structInstances.getFirst());
             TSDI lastSDI = findOrCreateSDIByStructName(firstSDI, structInstances);
-            if(structInstances.size() == 1){
+            if (structInstances.size() == 1) {
                 return lastSDI.getSDIOrDAI().stream()
                         .filter(tUnNaming -> tUnNaming.getClass().equals(TDAI.class))
                         .map(TDAI.class::cast)
                         .filter(tdai -> tdai.getName().equals(structInstances.getFirst()))
                         .map(tdai -> {
-                            if(tdai.isSetValImport()) {
+                            if (tdai.isSetValImport()) {
                                 tdai.setValImport(dataAttribute.isValImport());
                             }
                             return tdai;
@@ -226,13 +223,13 @@ public class LnService implements LnEditor {
                             return Optional.of(newDAI);
                         });
             }
-        } else if(structInstances.size() == 1){
+        } else if (structInstances.size() == 1) {
             return doi.getSDIOrDAI().stream()
                     .filter(tUnNaming -> tUnNaming.getClass().equals(TDAI.class))
                     .map(TDAI.class::cast)
                     .filter(tdai -> tdai.getName().equals(structInstances.getFirst()))
                     .map(tdai -> {
-                        if(tdai.isSetValImport()) tdai.setValImport(dataAttribute.isValImport());
+                        if (tdai.isSetValImport()) tdai.setValImport(dataAttribute.isValImport());
                         return tdai;
                     })
                     .findFirst()
@@ -247,7 +244,7 @@ public class LnService implements LnEditor {
     }
 
     private TSDI findSDIByStructName(TSDI tsdi, List<String> sdiNames) {
-        if(sdiNames.isEmpty()) return tsdi;
+        if (sdiNames.isEmpty()) return tsdi;
         return this.getSdiByName(tsdi, sdiNames.getFirst())
                 .map(sdi1 -> {
                     sdiNames.removeFirst();
@@ -294,14 +291,13 @@ public class LnService implements LnEditor {
     }
 
     /**
-     *
-     * @param sdi TSDI
+     * @param sdi        TSDI
      * @param structName list start with sdi name
      * @return already existing TSDI or newly created TSDI from given TSDI
      */
     private TSDI findOrCreateSDIByStructName(TSDI sdi, List<String> structName) {
         structName.removeFirst();
-        if(structName.isEmpty() || structName.size() == 1) return sdi;
+        if (structName.isEmpty() || structName.size() == 1) return sdi;
         return findOrCreateSDIByStructName(findOrCreateSDIFromSDI(sdi, structName.getFirst()), structName);
     }
 
