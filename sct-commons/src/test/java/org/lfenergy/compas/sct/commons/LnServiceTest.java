@@ -121,13 +121,13 @@ class LnServiceTest {
     }
 
     @Test
-    void getDaiModStval_should_return_status() {
+    void getDaiModStValValue_should_return_status() {
         //Given
         SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
         TLDevice tlDevice = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst();
 
         //When
-        Optional<ActiveStatus> daiModStval = lnService.getDaiModStval(tlDevice.getLN0());
+        Optional<ActiveStatus> daiModStval = lnService.getDaiModStValValue(tlDevice.getLN0());
 
         //Then
         assertThat(daiModStval).contains(ActiveStatus.ON);
