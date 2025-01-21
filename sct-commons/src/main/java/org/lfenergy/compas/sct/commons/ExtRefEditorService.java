@@ -23,7 +23,10 @@ import org.lfenergy.compas.sct.commons.util.ActiveStatus;
 import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.*;
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
@@ -271,7 +274,7 @@ public class ExtRefEditorService implements ExtRefEditor {
                                         .findFirst().ifPresent(channel -> {
                                             List<TIED> iedSources = getIedSources(sclRootAdapter, extRefBayRef.compasBay(), channel);
                                             if (iedSources.size() == 1) {
-                                                updateLDEPFExtRefBinding(extRefBayRef.extRef(), iedSources.get(0), channel);
+                                                updateLDEPFExtRefBinding(extRefBayRef.extRef(), iedSources.getFirst(), channel);
                                                 LDeviceAdapter lDeviceAdapter = new LDeviceAdapter(new IEDAdapter(sclRootAdapter, tied.getName()), tlDevice);
                                                 sclReportItems.addAll(updateLDEPFDos(lDeviceAdapter, extRefBayRef.extRef(), channel));
                                             } else {
@@ -307,15 +310,12 @@ public class ExtRefEditorService implements ExtRefEditor {
                                             && (purPoseDAI.get().getVal().getFirst().getValue().startsWith("DYN_LDEPF_DIGITAL CHANNEL")
                                             || purPoseDAI.get().getVal().getFirst().getValue().startsWith("DYN_LDEPF_ANALOG CHANNEL"));
                                     if(isSetSrcRefExistAndEmpty && isPurposeExistAndMatchChannel) {
-
-                                        DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
                                         DataObject dataObject = new DataObject();
                                         dataObject.setDoName(tdoi.getName());
-                                        doLinkedToDa.setDataObject(dataObject);
                                         DataAttribute dataAttribute = new DataAttribute();
                                         dataAttribute.setDaName(SETSRCREF_DA_NAME);
                                         dataAttribute.setDaiValues(List.of(new DaVal(null, tied.getName()+tlDevice.getInst()+"/LPHD0.Proxy")));
-                                        doLinkedToDa.setDataAttribute(dataAttribute);
+                                        DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
                                         lnEditor.updateOrCreateDOAndDAInstances(tlDevice.getLN0(), doLinkedToDa);
                                     }
                                 })));

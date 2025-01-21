@@ -129,10 +129,10 @@ public class LnService implements LnEditor {
 
     @Override
     public void updateOrCreateDOAndDAInstances(TAnyLN tAnyLN, DoLinkedToDa doLinkedToDa) {
-        createDoiSdiDaiChainIfNotExists(tAnyLN, doLinkedToDa.getDataObject(), doLinkedToDa.getDataAttribute())
+        createDoiSdiDaiChainIfNotExists(tAnyLN, doLinkedToDa.dataObject(), doLinkedToDa.dataAttribute())
                 .ifPresent(tdai -> {
-                    List<DaVal> daiVals = doLinkedToDa.getDataAttribute().getDaiValues();
-                    if(!hasSettingGroup(tdai) && daiVals.size() == 1 && daiVals.getFirst().settingGroup() == null) {
+                    List<DaVal> daiVals = doLinkedToDa.dataAttribute().getDaiValues();
+                    if (!hasSettingGroup(tdai) && daiVals.size() == 1 && daiVals.getFirst().settingGroup() == null) {
                         String value = daiVals.getFirst().val();
                         tdai.getVal().stream().findFirst()
                                 .ifPresentOrElse(tVal -> tVal.setValue(value),
@@ -152,11 +152,11 @@ public class LnService implements LnEditor {
     public void completeFromDAInstance(TIED tied, String ldInst, TAnyLN anyLN, DoLinkedToDa doLinkedToDa) {
         getDOAndDAInstances(anyLN, doLinkedToDa.toFilter())
                 .ifPresent(tdai -> {
-                    if(tdai.isSetVal()) {
-                        doLinkedToDa.getDataAttribute().addDaVal(tdai.getVal());
+                    if (tdai.isSetVal()) {
+                        doLinkedToDa.dataAttribute().addDaVal(tdai.getVal());
                     }
-                    if(doLinkedToDa.getDataAttribute().getFc() == TFCEnum.SG || doLinkedToDa.getDataAttribute().getFc() == TFCEnum.SE) {
-                        if(hasSettingGroup(tdai)) {
+                    if (doLinkedToDa.dataAttribute().getFc() == TFCEnum.SG || doLinkedToDa.dataAttribute().getFc() == TFCEnum.SE) {
+                        if (hasSettingGroup(tdai)) {
                             boolean isIedHasConfSG = tied.isSetAccessPoint() &&
                                     tied.getAccessPoint().stream()
                                             .filter(tAccessPoint -> tAccessPoint.getServer() != null
@@ -166,13 +166,13 @@ public class LnService implements LnEditor {
                                                     && tAccessPoint.getServices() != null
                                                     && tAccessPoint.getServices().getSettingGroups() != null
                                                     && tAccessPoint.getServices().getSettingGroups().getConfSG() != null);
-                            doLinkedToDa.getDataAttribute().setValImport((!tdai.isSetValImport() || tdai.isValImport()) && isIedHasConfSG);
+                            doLinkedToDa.dataAttribute().setValImport((!tdai.isSetValImport() || tdai.isValImport()) && isIedHasConfSG);
                         } else {
-                            log.warn(String.format("Inconsistency in the SCD file - DAI= %s with fc= %s must have a sGroup attribute", tdai.getName(), doLinkedToDa.getDataAttribute().getFc()));
-                            doLinkedToDa.getDataAttribute().setValImport(false);
-                         }
-                    } else if(tdai.isSetValImport()) {
-                        doLinkedToDa.getDataAttribute().setValImport(tdai.isValImport());
+                            log.warn(String.format("Inconsistency in the SCD file - DAI= %s with fc= %s must have a sGroup attribute", tdai.getName(), doLinkedToDa.dataAttribute().getFc()));
+                            doLinkedToDa.dataAttribute().setValImport(false);
+                        }
+                    } else if (tdai.isSetValImport()) {
+                        doLinkedToDa.dataAttribute().setValImport(tdai.isValImport());
                     }
                 });
     }
