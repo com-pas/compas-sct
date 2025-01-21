@@ -212,9 +212,7 @@ class LnServiceTest {
         dataObject.setDoName("Do");
         DataAttribute dataAttribute = new DataAttribute();
         dataAttribute.setDaName("Da");
-        DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
-        doLinkedToDa.setDataObject(dataObject);
-        doLinkedToDa.setDataAttribute(dataAttribute);
+        DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
         //When
         LnService lnService = new LnService();
         lnService.completeFromDAInstance(tied, "ldInst", tAnyLN, doLinkedToDa);
@@ -272,15 +270,13 @@ class LnServiceTest {
         dataAttribute.setDaName("Da");
         dataAttribute.setFc(givenFc);
 
-        DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
-        doLinkedToDa.setDataObject(dataObject);
-        doLinkedToDa.setDataAttribute(dataAttribute);
+        DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
 
         //When
         LnService lnService = new LnService();
         lnService.completeFromDAInstance(tied, "ldInst", tAnyLN, doLinkedToDa);
         //Then
-        assertThat(doLinkedToDa.getDataAttribute().isValImport()).isEqualTo(expectedValImport);
+        assertThat(doLinkedToDa.dataAttribute().isValImport()).isEqualTo(expectedValImport);
     }
 
 
@@ -294,14 +290,12 @@ class LnServiceTest {
         DataAttribute dataAttribute = new DataAttribute();
         dataAttribute.setDaName("Da");
 
-        DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
-        doLinkedToDa.setDataObject(dataObject);
-        doLinkedToDa.setDataAttribute(dataAttribute);
+        DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
         //When
         LnService lnService = new LnService();
         lnService.completeFromDAInstance(tied, "ldInst",  tAnyLN, doLinkedToDa);
         //Then
-        assertThat(doLinkedToDa.getDataAttribute().isValImport()).isFalse();//initialValue
+        assertThat(doLinkedToDa.dataAttribute().isValImport()).isFalse();//initialValue
     }
 
     @ParameterizedTest
@@ -321,15 +315,13 @@ class LnServiceTest {
         dataAttribute.setDaName("antRef");
         dataAttribute.setBdaNames(List.of("bda1","bda2","bda3"));
 
-        DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
-        doLinkedToDa.setDataObject(dataObject);
-        doLinkedToDa.setDataAttribute(dataAttribute);
+        DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
 
         //When
         LnService lnService = new LnService();
         lnService.completeFromDAInstance(tied, "ldInst", tAnyLN, doLinkedToDa);
         //Then
-        assertThat(doLinkedToDa.getDataAttribute().isValImport()).isEqualTo(expected);
+        assertThat(doLinkedToDa.dataAttribute().isValImport()).isEqualTo(expected);
     }
 
     @Test
@@ -343,9 +335,7 @@ class LnServiceTest {
         dataAttribute.setDaName("stVal");
         dataAttribute.getDaiValues().add(new DaVal(1L, "new value"));
         dataAttribute.getDaiValues().add(new DaVal(2L, "new value 2"));
-        DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
-        doLinkedToDa.setDataObject(dataObject);
-        doLinkedToDa.setDataAttribute(dataAttribute);
+        DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
         //When
         LnService lnService = new LnService();
         lnService.updateOrCreateDOAndDAInstances(tAnyLN, doLinkedToDa);
@@ -375,9 +365,7 @@ class LnServiceTest {
         dataAttribute.setDaName("antRef");
         dataAttribute.setBdaNames(List.of("bda1"));
         dataAttribute.getDaiValues().add(new DaVal(null, "new value"));
-        DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
-        doLinkedToDa.setDataObject(dataObject);
-        doLinkedToDa.setDataAttribute(dataAttribute);
+        DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
 
         //When
         LnService lnService = new LnService();
@@ -440,9 +428,7 @@ class LnServiceTest {
         dataAttribute.setBdaNames(List.of("BdaName1"));
         dataAttribute.getDaiValues().add(new DaVal(null, "new dai value"));
 
-        DoLinkedToDa doLinkedToDa = new DoLinkedToDa();
-        doLinkedToDa.setDataObject(dataObject);
-        doLinkedToDa.setDataAttribute(dataAttribute);
+        DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
 
         //When
         LnService lnService = new LnService();
@@ -529,7 +515,7 @@ class LnServiceTest {
             TSDI lastSDI = createSDIByStructName(firstSDI, structInstances);
             if(structInstances.size() == 1){
                 TDAI dai = new TDAI();
-                dai.setName(daInstances.get(daInstances.size() - 1));
+                dai.setName(daInstances.getLast());
                 TVal tVal = new TVal();
                 tVal.setValue(daiVal);
                 dai.getVal().add(tVal);
@@ -539,7 +525,7 @@ class LnServiceTest {
         } else
         if(structInstances.size() == 1){
             TDAI dai = new TDAI();
-            dai.setName(daInstances.get(daInstances.size() - 1));
+            dai.setName(daInstances.getLast());
             TVal tVal = new TVal();
             tVal.setValue(daiVal);
             dai.getVal().add(tVal);
@@ -566,7 +552,7 @@ class LnServiceTest {
             TSDI firstSDI = createSDIFromDOI(tdoi, structInstances.getFirst());
             TSDI lastSDI = createSDIByStructName(firstSDI, structInstances);
             if(structInstances.size() == 1){
-                dai.setName(daInstances.get(daInstances.size() - 1));
+                dai.setName(daInstances.getLast());
                 TVal tVal = new TVal();
                 dai.getVal().add(tVal);
                 lastSDI.getSDIOrDAI().add(dai);
@@ -574,7 +560,7 @@ class LnServiceTest {
             }
         } else
         if(structInstances.size() == 1){
-            dai.setName(daInstances.get(daInstances.size() - 1));
+            dai.setName(daInstances.getLast());
             TVal tVal = new TVal();
             dai.getVal().add(tVal);
             tdoi.getSDIOrDAI().add(dai);
