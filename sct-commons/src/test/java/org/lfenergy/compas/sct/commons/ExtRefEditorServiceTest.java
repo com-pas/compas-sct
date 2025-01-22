@@ -36,7 +36,7 @@ class ExtRefEditorServiceTest {
 
     @BeforeEach
     void init() {
-        extRefEditorService = new ExtRefEditorService(new IedService(), new LdeviceService(), new LnService(), new DataTypeTemplatesService());
+        extRefEditorService = new ExtRefEditorService(new IedService(), new LdeviceService(new LnService()), new LnService(), new DataTypeTemplatesService());
     }
 
     @Test

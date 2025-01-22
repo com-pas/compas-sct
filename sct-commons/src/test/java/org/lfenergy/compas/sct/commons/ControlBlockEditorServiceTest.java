@@ -50,7 +50,7 @@ class ControlBlockEditorServiceTest {
 
     @BeforeEach
     void init() {
-        controlBlockEditorService = new ControlBlockEditorService(new ControlService(), new LdeviceService());
+        controlBlockEditorService = new ControlBlockEditorService(new ControlService(), new LdeviceService(new LnService()));
     }
 
     @Test
