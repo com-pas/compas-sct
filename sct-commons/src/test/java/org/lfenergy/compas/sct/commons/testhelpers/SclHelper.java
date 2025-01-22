@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newConnectedAp;
 import static org.lfenergy.compas.sct.commons.util.Utils.lnClassEquals;
@@ -99,8 +100,29 @@ public final class SclHelper {
                 );
     }
 
+    public static TAnyLN findAnyLn(SCL scl, String iedName, String ldInst, String lnClass, String lnInst, String prefix) {
+        TIED ied = scl.getIED().stream().filter(tied -> tied.getName().equals(iedName))
+                .findFirst().orElseThrow(() -> new AssertionFailedError("IED with name=%s not found".formatted(iedName)));
+        TLDevice tlDevice = getLDevices(ied)
+                .filter(tlDevice1 -> tlDevice1.getInst().equals(ldInst))
+                .findFirst().orElseThrow(() -> new AssertionFailedError("LDevice with inst=%s not found".formatted(ldInst)));
+        if (lnClass.equals(TLLN0Enum.LLN_0.value()) && tlDevice.isSetLN0()) {
+            return tlDevice.getLN0();
+        }
+        return tlDevice.getLN().stream()
+                .filter(tln -> Utils.lnClassEquals(tln.getLnClass(), lnClass) && trimToEmpty(tln.getInst()).equals(trimToEmpty(lnInst)) && trimToEmpty(tln.getPrefix()).equals(trimToEmpty(prefix)))
+                .findFirst()
+                .orElseThrow(() -> new AssertionFailedError("LN (lnClass=%s, lnInst=%s, lnPrefix=%s) not found".formatted(lnClass, lnInst, prefix)));
+    }
+
+    public static Stream<TLDevice> getLDevices(TIED tied) {
+        return tied.getAccessPoint().stream()
+                .filter(TAccessPoint::isSetServer)
+                .flatMap(tAccessPoint -> tAccessPoint.getServer().getLDevice().stream());
+    }
+
     public static IDataParentAdapter findDoiOrSdi(AbstractLNAdapter<?> lnAdapter, String dataTypeRef) {
-        if (dataTypeRef.length() < 1) {
+        if (dataTypeRef.isEmpty()) {
             Assertions.fail("dataTypeRef must at least contain a DO, but got: " + dataTypeRef);
         }
         String[] names = dataTypeRef.split("\\.");
@@ -112,15 +134,16 @@ public final class SclHelper {
     }
 
     public static Optional<TDAI> findDai(SCL scl, String iedName, String ldInst, String doiName, String daiName) {
-       return scl.getIED().stream().filter(tied -> tied.getName().equals(iedName))
-                .flatMap(tied -> tied.getAccessPoint().stream())
-                .flatMap(tAccessPoint -> tAccessPoint.getServer().getLDevice().stream())
-                .filter(tlDevice -> tlDevice.getInst().equals(ldInst))
-                .flatMap(tlDevice -> tlDevice.getLN0().getDOI().stream())
+        return findDai(scl, iedName, ldInst, "LLN0", "", "", doiName, daiName);
+    }
+
+    public static Optional<TDAI> findDai(SCL scl, String iedName, String ldInst, String lnClass, String lnInst, String lnPrefix, String doiName, String daiName) {
+        return findAnyLn(scl, iedName, ldInst, lnClass, lnInst, lnPrefix)
+                .getDOI().stream()
                 .filter(tdoi -> tdoi.getName().equals(doiName))
-                .flatMap(tdoi -> tdoi.getSDIOrDAI().stream().map(tUnNaming -> (TDAI)tUnNaming))
+                .flatMap(tdoi -> tdoi.getSDIOrDAI().stream().map(tUnNaming -> (TDAI) tUnNaming))
                 .filter(tdai -> tdai.getName().equals(daiName))
-               .findFirst();
+                .findFirst();
     }
 
     public static AbstractDAIAdapter<?> findDai(AbstractLNAdapter<?> lnAdapter, String dataTypeRef) {
@@ -143,16 +166,7 @@ public final class SclHelper {
         } else if (tdai.getVal().size() > 1) {
             Assertions.fail("Expecting a single value for for DAI " + tdai.getName());
         }
-        return tdai.getVal().get(0).getValue();
-    }
-
-
-    public static LDeviceAdapter findLDeviceByLdName(SCL scl, String ldName) {
-        return new SclRootAdapter(scl).streamIEDAdapters()
-                .flatMap(IEDAdapter::streamLDeviceAdapters)
-                .filter(lDeviceAdapter -> ldName.equals(lDeviceAdapter.getLdName()))
-                .findFirst()
-                .orElseThrow(() -> new AssertionFailedError("LDevice with ldName=%s not found in SCD".formatted(ldName)));
+        return tdai.getVal().getFirst().getValue();
     }
 
     public static DataSetAdapter findDataSet(SCL scl, String iedName, String ldInst, String dataSetName) {
@@ -215,7 +229,7 @@ public final class SclHelper {
     }
 
     public static String getDaiValue(AbstractLNAdapter<?> ln, String doiName, String daiName) {
-        return ln.getDOIAdapterByName(doiName).getDataAdapterByName(daiName).getCurrentElem().getVal().get(0).getValue();
+        return ln.getDOIAdapterByName(doiName).getDataAdapterByName(daiName).getCurrentElem().getVal().getFirst().getValue();
     }
 
     public static Stream<String> streamAllConnectedApGseP(SCL scd, String pType) {
