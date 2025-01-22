@@ -113,9 +113,7 @@
             <BDA name="bda2" bType="Struct" type="DA3"/>
         </DAType>
         <DAType id="DA3">
-            <BDA name="bda3" bType="Enum" type="RecCycModKind" valImport="true">
-                <Val>myValue</Val>
-            </BDA>
+            <BDA name="bda3" bType="Enum" type="RecCycModKind" valImport="true"/>
         </DAType>
         <DAType id="DA4">
             <BDA name="SIUnit" bType="VisString255">

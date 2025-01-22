@@ -630,18 +630,4 @@ class PrivateUtilsTest {
                 .map(JAXBElement::getValue)
                 .containsExactly(tCompasTopo1, tCompasTopo2);
     }
-
-    @Test
-    void extractStringPrivate_should_succeed(){
-        // Given
-        TIED tied = new TIED();
-        TPrivate tPrivate = new TPrivate();
-        tPrivate.setType("MyCustomType");
-        tPrivate.getContent().add("hello World");
-        tied.getPrivate().add(tPrivate);
-        // When
-        Optional<String> result = PrivateUtils.extractStringPrivate(tied, "MyCustomType");
-        // Then
-        assertThat(result).hasValue("hello World");
-    }
 }

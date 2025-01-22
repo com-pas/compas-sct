@@ -18,7 +18,7 @@ import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
-import org.lfenergy.compas.sct.commons.scl.ln.LnId;
+import org.lfenergy.compas.sct.commons.scl.ln.LnKey;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.HashSet;
@@ -152,10 +152,14 @@ public class LNodeDTO {
 
     public static LNodeDTO from(TAnyLN tAnyLN, LogicalNodeOptions options, String iedName, String ldInst, SCL scl) {
         log.info(Utils.entering());
-        LnId lnId = LnId.from(tAnyLN);
-        String inst = lnId.lnInst();
-        String lnClass = lnId.lnClass();
-        String prefix = lnId.prefix();
+        LnKey lnKey = switch (tAnyLN) {
+            case LN0 ln0 -> new LnKey(ln0);
+            case TLN tln -> new LnKey(tln);
+            default -> throw new IllegalStateException("Unexpected value: " + tAnyLN);
+        };
+        String inst = lnKey.getInst();
+        String lnClass = lnKey.getLnClass();
+        String prefix = lnKey.getPrefix();
         String lnType = tAnyLN.getLnType();
         LNodeDTO lNodeDTO = new LNodeDTO(inst, lnClass, prefix, lnType);
         if (options.isWithExtRef()) {
