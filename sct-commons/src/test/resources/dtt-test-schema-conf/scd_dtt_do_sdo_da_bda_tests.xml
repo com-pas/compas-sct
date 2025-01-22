@@ -37,7 +37,10 @@
             <BDA name="sampleBda3" bType="Enum" type="RecCycModKind" valImport="true"/>
         </DAType>
         <EnumType id="RecCycModKind">
-            <EnumVal ord="1">Completed-diff</EnumVal>
+            <EnumVal ord="1">REB</EnumVal>
+            <EnumVal ord="2">RVB</EnumVal>
+            <EnumVal ord="3">RVL</EnumVal>
+            <EnumVal ord="4">RVB+L</EnumVal>
         </EnumType>
     </DataTypeTemplates>
 </SCL>

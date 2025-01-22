@@ -6,7 +6,7 @@ package org.lfenergy.compas.sct.commons.dto;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.scl2007b4.model.TExtRef;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
@@ -24,7 +24,7 @@ class LNodeDTOTest {
 
     @Test
     @Tag("issue-321")
-    void testConstructor(){
+    void testConstructor() {
         // When
         LNodeDTO lNodeDTO = new LNodeDTO();
         lNodeDTO.setNodeClass(DTO.HOLDER_LN_CLASS);
@@ -33,14 +33,14 @@ class LNodeDTOTest {
         lNodeDTO.setNodeType(DTO.LN_TYPE);
         // Then
         assertAll("LNODE",
-                ()-> assertThat(lNodeDTO.getGooseControlBlocks()).isEmpty(),
-                ()-> assertThat(lNodeDTO.getDataAttributeRefs()).isEmpty(),
-                ()-> assertThat(lNodeDTO.getDatSets()).isEmpty(),
-                ()-> assertThat(lNodeDTO.getExtRefs()).isEmpty(),
-                ()-> assertThat(lNodeDTO.getInst()).isEqualTo(DTO.HOLDER_LN_INST),
-                ()-> assertThat(lNodeDTO.getNodeClass()).isEqualTo(DTO.HOLDER_LN_CLASS),
-                ()-> assertThat(lNodeDTO.getNodeType()).isEqualTo(DTO.LN_TYPE),
-                ()-> assertThat(lNodeDTO.getPrefix()).isEqualTo(DTO.HOLDER_LN_PREFIX)
+                () -> assertThat(lNodeDTO.getGooseControlBlocks()).isEmpty(),
+                () -> assertThat(lNodeDTO.getDataAttributeRefs()).isEmpty(),
+                () -> assertThat(lNodeDTO.getDatSets()).isEmpty(),
+                () -> assertThat(lNodeDTO.getExtRefs()).isEmpty(),
+                () -> assertThat(lNodeDTO.getInst()).isEqualTo(DTO.HOLDER_LN_INST),
+                () -> assertThat(lNodeDTO.getNodeClass()).isEqualTo(DTO.HOLDER_LN_CLASS),
+                () -> assertThat(lNodeDTO.getNodeType()).isEqualTo(DTO.LN_TYPE),
+                () -> assertThat(lNodeDTO.getPrefix()).isEqualTo(DTO.HOLDER_LN_PREFIX)
         );
         // When
         lNodeDTO.addDataAttributeRef(DataAttributeRef.builder().daName(new DaTypeName("da1")).build());
@@ -67,7 +67,7 @@ class LNodeDTOTest {
     }
 
     @Test
-    void from_whenCalledWithLNAdapter_shouldFillValues(){
+    void from_whenCalledWithLNAdapter_shouldFillValues() {
         // When
         IEDAdapter iedAdapter = mock(IEDAdapter.class);
         LDeviceAdapter lDeviceAdapter = mock(LDeviceAdapter.class);
@@ -93,14 +93,14 @@ class LNodeDTOTest {
 
         // When
         LNodeDTO lNodeDTO = LNodeDTO.from(lnAdapter,
-                new LogicalNodeOptions(true,true,false,false));
+                new LogicalNodeOptions(true, true, false, false));
         // Then
         assertThat(lNodeDTO).isNotNull();
         assertAll("LNODE",
-                ()-> assertThat(lNodeDTO.getInst()).isEqualTo(DTO.HOLDER_LN_INST),
-                ()-> assertThat(lNodeDTO.getNodeClass()).isEqualTo(DTO.HOLDER_LN_CLASS),
-                ()-> assertThat(lNodeDTO.getNodeType()).isEqualTo(DTO.LN_TYPE),
-                ()-> assertThat(lNodeDTO.getPrefix()).isEqualTo(DTO.HOLDER_LN_PREFIX),
+                () -> assertThat(lNodeDTO.getInst()).isEqualTo(DTO.HOLDER_LN_INST),
+                () -> assertThat(lNodeDTO.getNodeClass()).isEqualTo(DTO.HOLDER_LN_CLASS),
+                () -> assertThat(lNodeDTO.getNodeType()).isEqualTo(DTO.LN_TYPE),
+                () -> assertThat(lNodeDTO.getPrefix()).isEqualTo(DTO.HOLDER_LN_PREFIX),
                 () -> assertThat(lNodeDTO.getExtRefs()).hasSize(1)
         );
         ExtRefInfo extRefInfo = lNodeDTO.getExtRefs().iterator().next();
@@ -112,7 +112,64 @@ class LNodeDTOTest {
     }
 
     @Test
-    void extractExtRefInfo_whenCalledWithLNAdapter_shouldFillValues(){
+    void from_whenCalledWithTAnyLn_shouldFillValues() {
+        // When
+        TExtRef extRef = DTO.createExtRef();
+        TLN tAnyLN = new TLN();
+        tAnyLN.getLnClass().add(DTO.HOLDER_LN_CLASS);
+        tAnyLN.setInst(DTO.HOLDER_LN_INST);
+        tAnyLN.setPrefix(DTO.HOLDER_LN_PREFIX);
+        tAnyLN.setLnType(DTO.LN_TYPE);
+        tAnyLN.setInputs(new TInputs());
+        tAnyLN.getInputs().getExtRef().add(extRef);
+
+        SCL scl = new SCL();
+        scl.setHeader(new THeader());
+        TDataTypeTemplates dataTypeTemplates = new TDataTypeTemplates();
+        TLNodeType tlNodeType = new TLNodeType();
+        tlNodeType.setId(DTO.LN_TYPE);
+        TDO tdo = new TDO();
+        tdo.setName("Do1");
+        tdo.setType("DO1");
+        tlNodeType.getDO().add(tdo);
+        TDOType tdoType = new TDOType();
+        tdoType.setId("DO1");
+        TDA tda = new TDA();
+        tda.setName("Da1");
+        tda.setBType(TPredefinedBasicTypeEnum.BOOLEAN);
+        tdoType.getSDOOrDA().add(tda);
+        dataTypeTemplates.getDOType().add(tdoType);
+        dataTypeTemplates.getLNodeType().add(tlNodeType);
+        scl.setDataTypeTemplates(dataTypeTemplates);
+
+        // When
+        LNodeDTO lNodeDTO = LNodeDTO.from(tAnyLN, new LogicalNodeOptions(true, true, false, true), DTO.HOLDER_IED_NAME, DTO.HOLDER_LD_INST, scl);
+        // Then
+        assertThat(lNodeDTO).isNotNull();
+        assertAll("LNODE",
+                () -> assertThat(lNodeDTO.getInst()).isEqualTo(DTO.HOLDER_LN_INST),
+                () -> assertThat(lNodeDTO.getNodeClass()).isEqualTo(DTO.HOLDER_LN_CLASS),
+                () -> assertThat(lNodeDTO.getNodeType()).isEqualTo(DTO.LN_TYPE),
+                () -> assertThat(lNodeDTO.getPrefix()).isEqualTo(DTO.HOLDER_LN_PREFIX),
+                () -> assertThat(lNodeDTO.getExtRefs()).hasSize(1),
+                () -> assertThat(lNodeDTO.getDataAttributeRefs()).hasSize(1)
+        );
+        ExtRefInfo extRefInfo = lNodeDTO.getExtRefs().iterator().next();
+        assertThat(extRefInfo.getHolderIEDName()).isEqualTo(DTO.HOLDER_IED_NAME);
+        assertThat(extRefInfo.getHolderLDInst()).isEqualTo(DTO.HOLDER_LD_INST);
+        assertThat(extRefInfo.getHolderLnClass()).isEqualTo(DTO.HOLDER_LN_CLASS);
+        assertThat(extRefInfo.getHolderLnInst()).isEqualTo(DTO.HOLDER_LN_INST);
+        assertThat(extRefInfo.getHolderLnPrefix()).isEqualTo(DTO.HOLDER_LN_PREFIX);
+
+        DaTypeName daTypeName = new DaTypeName("Da1");
+        daTypeName.setBType(TPredefinedBasicTypeEnum.BOOLEAN);
+        DoTypeName doTypeName = new DoTypeName("Do1");
+        assertThat(lNodeDTO.getDataAttributeRefs().iterator().next())
+                .isEqualTo(DataAttributeRef.builder().lnType(DTO.LN_TYPE).lnClass(DTO.HOLDER_LN_CLASS).lnInst(DTO.HOLDER_LN_INST).prefix(DTO.HOLDER_LN_PREFIX).daName(daTypeName).doName(doTypeName).build());
+    }
+
+    @Test
+    void extractExtRefInfo_whenCalledWithLNAdapter_shouldFillValues() {
         // Given
         LNAdapter lnAdapter = mock(LNAdapter.class);
         when(lnAdapter.getLNClass()).thenReturn(DTO.HOLDER_LN_CLASS);
@@ -128,10 +185,10 @@ class LNodeDTOTest {
         // Then
         assertThat(lNodeDTO).isNotNull();
         assertAll("LNODE",
-                ()-> assertThat(lNodeDTO.getInst()).isEqualTo(DTO.HOLDER_LN_INST),
-                ()-> assertThat(lNodeDTO.getNodeClass()).isEqualTo(DTO.HOLDER_LN_CLASS),
-                ()-> assertThat(lNodeDTO.getNodeType()).isEqualTo(DTO.LN_TYPE),
-                ()-> assertThat(lNodeDTO.getPrefix()).isEqualTo(DTO.HOLDER_LN_PREFIX),
+                () -> assertThat(lNodeDTO.getInst()).isEqualTo(DTO.HOLDER_LN_INST),
+                () -> assertThat(lNodeDTO.getNodeClass()).isEqualTo(DTO.HOLDER_LN_CLASS),
+                () -> assertThat(lNodeDTO.getNodeType()).isEqualTo(DTO.LN_TYPE),
+                () -> assertThat(lNodeDTO.getPrefix()).isEqualTo(DTO.HOLDER_LN_PREFIX),
                 () -> assertThat(lNodeDTO.getExtRefs()).hasSize(1)
         );
     }
