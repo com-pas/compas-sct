@@ -4,7 +4,9 @@
 
 package org.lfenergy.compas.sct.commons.domain;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedCDCEnum;
 
@@ -13,18 +15,21 @@ import java.util.List;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class DataObject {
 
     private String doName;
     private TPredefinedCDCEnum cdc;
     private List<String> sdoNames = new ArrayList<>();
 
+    public DataObject(String doName, TPredefinedCDCEnum cdc, List<String> sdoNames) {
+        this.doName = doName;
+        this.cdc = cdc;
+        this.sdoNames.addAll(sdoNames);
+    }
+
     public static DataObject copyFrom(DataObject dataObject) {
-        DataObject dataObject1 = new DataObject();
-        dataObject1.setDoName(dataObject.getDoName());
-        dataObject1.setCdc(dataObject.getCdc());
-        dataObject1.getSdoNames().addAll(dataObject.getSdoNames());
-        return dataObject1;
+        return new DataObject(dataObject.getDoName(), dataObject.getCdc(), dataObject.getSdoNames());
     }
 
     @Override
