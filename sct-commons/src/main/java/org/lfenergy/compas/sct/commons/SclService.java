@@ -6,7 +6,6 @@ package org.lfenergy.compas.sct.commons;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.api.SclEditor;
 import org.lfenergy.compas.sct.commons.dto.*;
@@ -185,19 +184,6 @@ public class SclService implements SclEditor {
                         addSubnetworks(scdRootAdapter.getCurrentElem(), std, iedName);
                     }
                 });
-    }
-
-    @Override
-    public List<SclReportItem> updateLDeviceStatus(SCL scd) {
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        SubstationAdapter substationAdapter = sclRootAdapter.getSubstationAdapter();
-        final List<Pair<String, String>> iedNameLdInstList = substationAdapter.getIedAndLDeviceNamesForLN0FromLNode();
-        return sclRootAdapter.streamIEDAdapters()
-                .flatMap(IEDAdapter::streamLDeviceAdapters)
-                .map(LDeviceAdapter::getLN0Adapter)
-                .map(ln0Adapter -> ln0Adapter.updateLDeviceStatus(iedNameLdInstList))
-                .flatMap(Optional::stream)
-                .toList();
     }
 
     @Override

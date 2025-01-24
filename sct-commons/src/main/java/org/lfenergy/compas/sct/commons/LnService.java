@@ -9,16 +9,20 @@ import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.api.LnEditor;
 import org.lfenergy.compas.sct.commons.domain.*;
+import org.lfenergy.compas.sct.commons.dto.SclReportItem;
+import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceActivation;
+import org.lfenergy.compas.sct.commons.scl.ln.LnId;
 import org.lfenergy.compas.sct.commons.util.ActiveStatus;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.lfenergy.compas.sct.commons.util.CommonConstants.MOD_DO_NAME;
-import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL_DA_NAME;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newVal;
 
 @Slf4j
@@ -144,6 +148,77 @@ public class LnService implements LnEditor {
                         }
                     }
                 });
+    }
+
+    /**
+     * Activate used LDevice and Deactivate unused LDevice in {@link TLNode <em><b>TLNode </b></em>}
+     *
+     * @param scd SCL file for which LDevice should be activated or deactivated
+     * @return list of encountered errors
+     */
+    public List<SclReportItem> updateLDeviceStatus(SCL scd, SubstationService substationService, LdeviceService ldeviceService, DataTypeTemplatesService dataTypeTemplatesService) {
+        List<SclReportItem> sclReportItems = new ArrayList<>();
+        scd.getIED().forEach(tied -> ldeviceService.getLdevices(tied)
+                .forEach(tlDevice -> getAnylns(tlDevice)
+                        .forEach(tln -> {
+                            String xpath = "/SCL/IED[@name=%s]/AccessPoint/Server/LDevice[@inst=%s]/LN[class=%s]".formatted(tied.getName(), tlDevice.getInst(), LnId.from(tln).lnClass());
+                            DoLinkedToDaFilter doLinkedToDaFilter = DoLinkedToDaFilter.from(BEHAVIOUR_DO_NAME, STVAL_DA_NAME);
+                            Optional<DoLinkedToDa> optionalBehStVal = dataTypeTemplatesService.getFilteredDoLinkedToDa(scd.getDataTypeTemplates(), tln.getLnType(), doLinkedToDaFilter).findFirst();
+                            if (optionalBehStVal.isEmpty()) {
+                                sclReportItems.add(SclReportItem.error(xpath, "The LDevice doesn't have a DO @name='Beh'"));
+                                return;
+                            }
+
+                            Optional<ActiveStatus> modStValOptional = getDaiModStValValue(tln);
+                            if (modStValOptional.isEmpty()) {
+                                sclReportItems.add(SclReportItem.error(xpath, "The LDevice doesn't have a DO @name='Mod'"));
+                                return;
+                            }
+
+                            Set<String> enumValues = dataTypeTemplatesService.getEnumValues(scd.getDataTypeTemplates(), tln.getLnType(), doLinkedToDaFilter).collect(Collectors.toSet());
+                            if (!enumValues.contains(ActiveStatus.ON.getValue()) && !enumValues.contains(ActiveStatus.OFF.getValue())) {
+                                sclReportItems.add(SclReportItem.error(xpath, "The LDevice cannot be activated or desactivated because its BehaviourKind Enum contains NOT 'on' AND NOT 'off'."));
+                                return;
+                            }
+
+                            Optional<TLNode> tlNodeOptional = substationService.getLNodes(scd).stream().filter(tlNode1 -> tlNode1.isSetIedName() && tlNode1.isSetLdInst())
+                                    .filter(tlNode -> tlNode.getIedName().equals(tied.getName()) && tlNode.getLdInst().equals(tlDevice.getInst()))
+                                    .findFirst();
+
+                            LDeviceActivation lDeviceStatusActivation = new LDeviceActivation(modStValOptional.get().getValue(), tlNodeOptional.isPresent(), enumValues, tln);
+                            activateOrDeactivateLDeviceStatus(lDeviceStatusActivation, xpath, sclReportItems);
+                        })));
+        return sclReportItems;
+    }
+
+    private void activateOrDeactivateLDeviceStatus(LDeviceActivation lDeviceStatusActivation, String xpath, List<SclReportItem> sclReportItems) {
+        if(lDeviceStatusActivation.isPresentInSubstation()){
+            // Activate LDevice
+            if(lDeviceStatusActivation.enumValues().contains(ActiveStatus.ON.getValue())) {
+                update(lDeviceStatusActivation.tln(), lDeviceStatusActivation.modStValCurrentValue(), ActiveStatus.ON.getValue());
+            }else {
+                sclReportItems.add(SclReportItem.error(xpath, "The LDevice cannot be set to 'on' but has been selected into SSD."));
+            }
+        } else {
+            // Deactivate LDevice
+            if(lDeviceStatusActivation.enumValues().contains(ActiveStatus.OFF.getValue())) {
+                update(lDeviceStatusActivation.tln(), lDeviceStatusActivation.modStValCurrentValue(), ActiveStatus.OFF.getValue());
+            }else {
+                sclReportItems.add(SclReportItem.error(xpath, "The LDevice cannot be set to 'off' but it has not been selected into SSD."));
+            }
+        }
+    }
+
+    private void update(TAnyLN tAnyLN, String modStValValue, String modStValNewVal) {
+        if (!modStValValue.equals(modStValNewVal)) {
+            DataObject dataObject = new DataObject();
+            dataObject.setDoName(MOD_DO_NAME);
+            DataAttribute dataAttribute = new DataAttribute();
+            dataAttribute.setDaName(STVAL_DA_NAME);
+            dataAttribute.setDaiValues(List.of(new DaVal(null, modStValNewVal)));
+            DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
+            updateOrCreateDOAndDAInstances(tAnyLN, doLinkedToDa);
+         }
     }
 
     public void completeFromDAInstance(TIED tied, String ldInst, TAnyLN anyLN, DoLinkedToDa doLinkedToDa) {

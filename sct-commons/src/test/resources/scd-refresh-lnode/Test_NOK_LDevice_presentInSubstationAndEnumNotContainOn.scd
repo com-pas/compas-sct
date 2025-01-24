@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- SPDX-FileCopyrightText: 2022 RTE FRANCE -->
+<!-- SPDX-FileCopyrightText: 2022 2023 2024 2025 TE FRANCE -->
 <!-- -->
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 <SCL xmlns:compas="https://www.lfenergy.org/compas/extension/v1" xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4">
@@ -12,15 +12,12 @@
 		</History>
 	</Header>
 	<Substation name="SITE">
-		<Private type="RTE-ExportSite">
-			<rte:ExportSite xmlns:rte="http://www.rte-france.com" Indice="2" Label="PALLU" UUID="d66637d5-2387-409e-99c3-f3d67079013a" />
-		</Private>
 		<VoltageLevel nomFreq="50" numPhases="3" name="0">
 			<Voltage unit="V" multiplier="k">0</Voltage>
 			<Bay name="BAY_1">
 				<Private type="COMPAS-Bay">
 					<compas:Bay BayCodif="TG00000001" UUID="9cd6f05b-1bbd-4ba3-86c5-41c99103e06d" Version="1"
-								MainShortLabel="SITE1" SecondLabel="SITE-TGENE" NumBay="7" BayCount="1"/>
+                                MainShortLabel="SITE1" SecondLabel="SITE-TGENE" NumBay="7" BayCount="1"/>
 				</Private>
 				<Private type="COMPAS-Criteria">
 					<compas:Criteria ObjectID="9cd6f05b-1bbd-4ba3-86c5-41c99103e06d" CriteriaAssociationID="CriteriaAssociationID" />
@@ -66,19 +63,16 @@
 			<compas:SystemVersion MainSystemVersion="01.00" MinorSystemVersion="009.001.001" />
 		</Private>
 		<Private type="COMPAS-ICDHeader">
-			<compas:ICDHeader ICDSystemVersionUUID="IED4d4fe1a8cda64cf88a5ee4176a1a0eed" IEDSystemVersioninstance="1"
-							  IEDType="SAMU" IEDSubstationinstance="3" IEDName="IedName1" VendorName="RTE"
-							  IEDmodel="ICDfromModeling" IEDredundancy="B" BayLabel="SITE1" hwRev="01.00.00"
-							  swRev="01.00.00" headerId="cacfa2df-bdb2-47a7-b7ea-07916586ebdd" headerVersion="01.00.00"
-							  headerRevision="01.00.00"/>
+            <compas:ICDHeader ICDSystemVersionUUID="IED4d4fe1a8cda64cf88a5ee4176a1a0eed" IEDSystemVersioninstance="1"
+                              IEDType="SAMU" IEDSubstationinstance="3" IEDName="IedName1" VendorName="RTE"
+                              IEDmodel="ICDfromModeling" IEDredundancy="B" BayLabel="SITE1" hwRev="01.00.00"
+                              swRev="01.00.00" headerId="cacfa2df-bdb2-47a7-b7ea-07916586ebdd" headerVersion="01.00.00"
+                              headerRevision="01.00.00"/>
 		</Private>
 		<AccessPoint name="PROCESS_AP">
 			<Server>
 				<Authentication />
 				<LDevice inst="LDSUIED" ldName="IedName1LDSUIED" desc="IED Monitoring Function">
-					<Private type="COMPAS-LDevice">
-						<compas:LDevice xmlns:compas="https://www.lfenergy.org/compas/extension/v1" LDeviceID="IedName1LDSUIED" LDeviceStatus="ACTIVE"/>
-					</Private>
 					<LN0 lnClass="LLN0" inst="" lnType="LNType1" desc="Logical node zero">
 						<DOI name="NamPlt">
 							<DAI name="swRev">
@@ -99,11 +93,11 @@
 		</AccessPoint>
 		<AccessPoint name="ADMIN_AP" />
 	</IED>
-
 	<DataTypeTemplates>
 		<LNodeType lnClass="LLN0" id="LNType1">
 			<DO name="NamPlt" type="DO1" transient="false" />
-			<DO name="Beh" type="DO2" transient="false" />
+			<DO name="Mod" type="DO2" transient="false" />
+			<DO name="Beh" type="DO2" transient="false"/>
 		</LNodeType>
 		<DOType cdc="LPL" id="DO1">
 			<DA fc="DC" dchg="false" qchg="false" dupd="false" name="configRev" bType="VisString255" valKind="RO" valImport="false" />
@@ -113,12 +107,10 @@
 			<DA fc="ST" dchg="true" qchg="false" dupd="false" name="stVal" bType="Enum" type="BehaviourModeKind" valImport="true" />
 		</DOType>
 		<EnumType id="BehaviourModeKind">
-			<EnumVal ord="2">blocked</EnumVal>
-			<EnumVal ord="3">test</EnumVal>
-			<EnumVal ord="4">test/blocked</EnumVal>
-			<EnumVal ord="5">off</EnumVal>
-			<EnumVal ord="1">on</EnumVal>
+			<EnumVal ord="2">off</EnumVal>
+			<EnumVal ord="3">blocked</EnumVal>
+			<EnumVal ord="4">test</EnumVal>
+			<EnumVal ord="5">test/blocked</EnumVal>
 		</EnumType>
-
 	</DataTypeTemplates>
 </SCL>

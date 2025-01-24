@@ -6,12 +6,15 @@ package org.lfenergy.compas.sct.commons;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.lfenergy.compas.scl2007b4.model.SCL;
-import org.lfenergy.compas.scl2007b4.model.TBay;
-import org.lfenergy.compas.scl2007b4.model.TSubstation;
-import org.lfenergy.compas.scl2007b4.model.TVoltageLevel;
+import org.apache.commons.lang3.tuple.Pair;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.api.SubstationEditor;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.scl.sstation.BayAdapter;
+import org.lfenergy.compas.sct.commons.scl.sstation.VoltageLevelAdapter;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class SubstationService implements SubstationEditor {
@@ -41,6 +44,21 @@ public class SubstationService implements SubstationEditor {
             }
         }
     }
+
+    /**
+     * Gets a pair of IedName and LDevice inst from Substation LNodes for LN0 type object
+     * @return a pair of Ied name and LDevice inst attributes
+     */
+    public List<TLNode> getLNodes(SCL scd) {
+        return scd.getSubstation().getFirst()
+                .getVoltageLevel().stream()
+                .flatMap(tVoltageLevel -> tVoltageLevel.getBay().stream())
+                .flatMap(tBay -> tBay.getFunction().stream())
+                .flatMap(tFunction -> tFunction.getLNode().stream())
+                .filter(tlNode -> tlNode.getLnClass().contains(TLLN0Enum.LLN_0.value()))
+                .toList();
+    }
+
 
     /**
      * Creates new VoltageLevel section or updates VoltageLevel contents

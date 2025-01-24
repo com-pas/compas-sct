@@ -6,7 +6,6 @@ package org.lfenergy.compas.sct.commons.api;
 
 import lombok.NonNull;
 import org.lfenergy.compas.scl2007b4.model.SCL;
-import org.lfenergy.compas.scl2007b4.model.TLNode;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
@@ -137,13 +136,6 @@ public interface SclEditor {
      */
     void importSTDElementsInSCD(SCL scd, List<SCL> stds) throws ScdException;
 
-    /**
-     * Activate used LDevice and Deactivate unused LDevice in {@link TLNode <em><b>TLNode </b></em>}
-     *
-     * @param scd SCL file for which LDevice should be activated or deactivated
-     * @return list of encountered errors
-     */
-    List<SclReportItem> updateLDeviceStatus(SCL scd);
 
     /**
      * Update DAIs of DO InRef in all LN0 of the SCD using matching ExtRef information.

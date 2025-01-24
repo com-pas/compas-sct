@@ -13,6 +13,12 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.domain.*;
+import org.lfenergy.compas.sct.commons.dto.SclReportItem;
+import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.scl.ied.DOIAdapter;
+import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
+import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
+import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.lfenergy.compas.sct.commons.util.ActiveStatus;
 
@@ -24,6 +30,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 class LnServiceTest {
 
     private final LnService lnService = new LnService();
+
+    SubstationService substationService = new SubstationService(new VoltageLevelService());
+    LdeviceService ldeviceService = new LdeviceService(lnService);
+    DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
 
     @Test
     void getAnylns_should_return_lns() {
@@ -656,5 +666,129 @@ class LnServiceTest {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Unexpected value: ");
     }
+
+    @Test
+    void updateLDeviceStatus_shouldReturnError_whenMissingDOBeh() {
+        // Given
+        SCL scl = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/Test_NOK_MissingBeh.scd");
+        // When
+        List<SclReportItem> sclReportItems = lnService.updateLDeviceStatus(scl, substationService, ldeviceService, dataTypeTemplatesService);
+        // Then
+        assertThat(sclReportItems)
+                .hasSize(1)
+                .extracting(SclReportItem::message, SclReportItem::xpath)
+                .containsExactly(Tuple.tuple("The LDevice doesn't have a DO @name='Beh'",
+                        "/SCL/IED[@name=IedName1]/AccessPoint/Server/LDevice[@inst=LDSUIED]/LN[class=LLN0]"));
+    }
+
+
+    @Test
+    void updateLDeviceStatus_shouldReturnError_whenMissingDOMod() {
+        // Given
+        SCL scl = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/Test_NOK_MissingMod.scd");
+        // When
+        List<SclReportItem> sclReportItems = lnService.updateLDeviceStatus(scl, substationService, ldeviceService, dataTypeTemplatesService);
+        // Then
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isFalse();
+        assertThat(sclReportItems)
+                .hasSize(1)
+                .extracting(SclReportItem::message, SclReportItem::xpath)
+                .containsExactly(Tuple.tuple("The LDevice doesn't have a DO @name='Mod'", "/SCL/IED[@name=IedName1]/AccessPoint/Server/LDevice[@inst=LDSUIED]/LN[class=LLN0]"));
+    }
+
+
+    @Test
+    void updateLDeviceStatus_shouldReturnError_whenEnumNotContainValues() {
+        // Given
+        SCL scl = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/Test_NOK_MissingEnums.scd");
+        assertThat(getLDeviceStatusValue(scl).get().getValue()).isEqualTo("off");
+        // When
+        List<SclReportItem> sclReportItems = lnService.updateLDeviceStatus(scl, substationService, ldeviceService, dataTypeTemplatesService);
+        // Then
+        assertThat(sclReportItems)
+                .hasSize(1)
+                .extracting(SclReportItem::message, SclReportItem::xpath)
+                .containsExactly(Tuple.tuple("The LDevice cannot be activated or desactivated because its BehaviourKind Enum contains NOT 'on' AND NOT 'off'.",
+                        "/SCL/IED[@name=IedName1]/AccessPoint/Server/LDevice[@inst=LDSUIED]/LN[class=LLN0]"));
+        assertThat(getLDeviceStatusValue(scl).get().getValue()).isEqualTo("off");
+    }
+
+    @Test
+    void updateLDeviceStatus_shouldReturnError_whenLDeviceIsNotPresentInSubstationAndEnumNotContainOff() {
+        // Given
+        SCL scl = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/Test_NOK_LDevice_notPresentInSubstationAndEnumNotContainOff.scd");
+        assertThat(getLDeviceStatusValue(scl).get().getValue()).isEqualTo("on");
+        // When
+        List<SclReportItem> sclReportItems = lnService.updateLDeviceStatus(scl, substationService, ldeviceService, dataTypeTemplatesService);
+        // Then
+        assertThat(sclReportItems)
+                .hasSize(1)
+                .extracting(SclReportItem::message, SclReportItem::xpath)
+                .containsExactly(Tuple.tuple("The LDevice cannot be set to 'off' but it has not been selected into SSD.",
+                        "/SCL/IED[@name=IedName1]/AccessPoint/Server/LDevice[@inst=LDSUIED]/LN[class=LLN0]"));
+        assertThat(getLDeviceStatusValue(scl).get().getValue()).isEqualTo("on");
+    }
+
+
+    @Test
+    void updateLDeviceStatus_shouldReturnError_whenLDeviceIsPresentInSubstationAndEnumNotContainOn() {
+        // Given
+        SCL scl = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/Test_NOK_LDevice_presentInSubstationAndEnumNotContainOn.scd");
+        assertThat(getLDeviceStatusValue(scl).get().getValue()).isEqualTo("off");
+        // When
+        List<SclReportItem> sclReportItems = lnService.updateLDeviceStatus(scl, substationService, ldeviceService, dataTypeTemplatesService);
+        // Then
+        assertThat(sclReportItems)
+                .hasSize(1)
+                .extracting(SclReportItem::message, SclReportItem::xpath)
+                .containsExactly(Tuple.tuple("The LDevice cannot be set to 'on' but has been selected into SSD.",
+                        "/SCL/IED[@name=IedName1]/AccessPoint/Server/LDevice[@inst=LDSUIED]/LN[class=LLN0]"));
+        assertThat(getLDeviceStatusValue(scl).get().getValue()).isEqualTo("off");
+    }
+
+    @Test
+    void updateLDeviceStatus_shouldDeactivate_whenLDeviceIsNotPresentInSubstation_AndEnumContainOff() {
+        // Given
+        SCL scl = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/Test_OK_LDevice_notPresentInSubstation.scd");
+        assertThat(getLDeviceStatusValue(scl).get().getValue()).isEqualTo("on");
+        // When
+        List<SclReportItem> sclReportItems = lnService.updateLDeviceStatus(scl, substationService, ldeviceService, dataTypeTemplatesService);
+        // Then
+        assertThat(sclReportItems).isEmpty();
+        assertThat(getLDeviceStatusValue(scl).get().getValue()).isEqualTo("off");
+    }
+
+    @Test
+    void updateLDeviceStatus_shouldActivate_whenLDeviceIsPresentInSubstation_AndEnumContainOn() {
+        // Given
+        SCL scl = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/Test_OK_LDevice_presentInSubstation.scd");
+        assertThat(getLDeviceStatusValue(scl).get().getValue()).isEqualTo("off");
+        // When
+        List<SclReportItem> sclReportItems = lnService.updateLDeviceStatus(scl, substationService, ldeviceService, dataTypeTemplatesService);
+        // Then
+        assertThat(sclReportItems).isEmpty();
+        assertThat(getLDeviceStatusValue(scl).get().getValue()).isEqualTo("on");
+    }
+
+    private Optional<TVal> getLDeviceStatusValue(SCL scl) {
+        return getValFromDaiName(scl);
+    }
+
+    private Optional<TVal> getValFromDaiName(SCL scl) {
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scl);
+        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IedName1");
+        Optional<LDeviceAdapter> lDeviceAdapter = iedAdapter.findLDeviceAdapterByLdInst("LDSUIED");
+        LN0Adapter ln0Adapter = lDeviceAdapter.get().getLN0Adapter();
+        Optional<DOIAdapter> doiAdapter = ln0Adapter.getDOIAdapters().stream()
+                .filter(doiAdapter1 -> doiAdapter1.getCurrentElem().getName().equals("Mod"))
+                .findFirst();
+        return doiAdapter.flatMap(adapter -> adapter.getCurrentElem().getSDIOrDAI().stream()
+                .filter(tUnNaming -> tUnNaming.getClass().equals(TDAI.class))
+                .map(TDAI.class::cast)
+                .filter(tdai -> tdai.getName().equals("stVal") && !tdai.getVal().isEmpty())
+                .map(tdai -> tdai.getVal().get(0))
+                .findFirst());
+    }
+
 
 }
