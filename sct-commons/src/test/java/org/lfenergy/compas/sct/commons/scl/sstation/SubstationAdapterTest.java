@@ -4,7 +4,6 @@
 
 package org.lfenergy.compas.sct.commons.scl.sstation;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.SCL;
@@ -12,9 +11,6 @@ import org.lfenergy.compas.scl2007b4.model.TPrivate;
 import org.lfenergy.compas.scl2007b4.model.TSubstation;
 import org.lfenergy.compas.scl2007b4.model.TVoltageLevel;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -91,21 +87,6 @@ class SubstationAdapterTest {
         substationAdapter.addPrivate(tPrivate);
         // Then
         assertThat(substationAdapter.getCurrentElem().getPrivate()).isNotEmpty();
-    }
-
-
-    @Test
-    void getIedAndLDeviceNamesForLN0FromLNode_whenLNodeContainsLN0_shouldReturnListOf1Pair() {
-        // Given
-        SCL scl = SclTestMarshaller.getSCLFromFile("/scd-refresh-lnode/issue68_Test_Template.scd");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scl);
-        substationAdapter = sclRootAdapter.getSubstationAdapter();
-        // When
-        List<Pair<String, String>> iedNameLdInstList = substationAdapter.getIedAndLDeviceNamesForLN0FromLNode();
-        // Then
-        assertThat(iedNameLdInstList)
-                .hasSize(1)
-                .containsExactly(Pair.of("IedName1", "LDSUIED"));
     }
 
 }
