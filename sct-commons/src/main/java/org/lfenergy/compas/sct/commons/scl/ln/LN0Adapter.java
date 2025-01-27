@@ -5,18 +5,12 @@
 package org.lfenergy.compas.sct.commons.scl.ln;
 
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.ied.InputsAdapter;
-import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceActivation;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
-import org.lfenergy.compas.sct.commons.util.PrivateUtils;
-
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -68,8 +62,6 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
  */
 public class LN0Adapter extends AbstractLNAdapter<LN0> {
 
-    public static final DoTypeName BEHAVIOUR_DO_TYPE_NAME = new DoTypeName(BEHAVIOUR_DO_NAME);
-    public static final DaTypeName BEHAVIOUR_DA_TYPE_NAME = getDaTypeNameForBeh();
     private static final Pattern LDEFP_DIGITAL_CHANNEL_PATTERN = Pattern.compile("DYN_LDEPF_DIGITAL CHANNEL \\d+_\\d+_BOOLEAN");
 
     /**
@@ -167,58 +159,6 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
         super.removeAllControlBlocksAndDatasets();
         currentElem.unsetGSEControl();
         currentElem.unsetSampledValueControl();
-    }
-
-    /**
-     * Verify and update LDevice status in parent Node
-     *
-     * @param iedNameLDeviceInstList pair of Ied name and LDevice inst attributes
-     * @return Set of Errors
-     */
-    public Optional<SclReportItem> updateLDeviceStatus(List<Pair<String, String>> iedNameLDeviceInstList) {
-        LDeviceActivation lDeviceActivation = new LDeviceActivation(iedNameLDeviceInstList);
-        final String iedName = getParentAdapter().getParentAdapter().getName();
-        final String ldInst = getParentAdapter().getInst();
-        DataAttributeRef daiBehFilter = new DataAttributeRef(this, BEHAVIOUR_DO_TYPE_NAME, BEHAVIOUR_DA_TYPE_NAME);
-        List<DataAttributeRef> daiBehList = getDAI(daiBehFilter, false);
-        if (daiBehList.isEmpty()) {
-            return Optional.of(buildFatalReportItem("The LDevice doesn't have a DO @name='Beh' OR its associated DA@fc='ST' AND DA@name='stVal'"));
-        }
-        Set<String> enumValues = getEnumValues(daiBehList.getFirst().getDaName().getType());
-        Optional<TCompasLDevice> optionalTCompasLDevice = PrivateUtils.extractCompasPrivate(getParentAdapter().getCurrentElem(), TCompasLDevice.class);
-        if (optionalTCompasLDevice.isEmpty()) {
-            return Optional.of(buildFatalReportItem("The LDevice doesn't have a Private compas:LDevice."));
-        }
-        if (!optionalTCompasLDevice.get().isSetLDeviceStatus()) {
-            return Optional.of(buildFatalReportItem("The Private compas:LDevice doesn't have the attribute 'LDeviceStatus'"));
-        }
-        TCompasLDeviceStatus compasLDeviceStatus = optionalTCompasLDevice.get().getLDeviceStatus();
-        Optional<DataAttributeRef> optionalModStVal = getDaiModStVal();
-        if (optionalModStVal.isEmpty()) {
-            return Optional.of(buildFatalReportItem("The LDevice doesn't have a DO @name='Mod'"));
-        }
-        DataAttributeRef newDaModToSetInLN0 = optionalModStVal.get();
-        String initialValue = newDaModToSetInLN0.findFirstValue().orElse("");
-        lDeviceActivation.checkLDeviceActivationStatus(iedName, ldInst, compasLDeviceStatus, enumValues);
-        if (lDeviceActivation.isUpdatable()) {
-            if (!initialValue.equals(lDeviceActivation.getNewVal())) {
-                newDaModToSetInLN0.setVal(lDeviceActivation.getNewVal());
-                updateDAI(newDaModToSetInLN0);
-            }
-        } else {
-            if (lDeviceActivation.getErrorMessage() != null) {
-                return Optional.of(buildFatalReportItem(lDeviceActivation.getErrorMessage()));
-            }
-        }
-        return Optional.empty();
-    }
-
-    private static DaTypeName getDaTypeNameForBeh() {
-        DaTypeName daTypeNameBeh = new DaTypeName();
-        daTypeNameBeh.setName(STVAL_DA_NAME);
-        daTypeNameBeh.setBType(TPredefinedBasicTypeEnum.ENUM);
-        daTypeNameBeh.setFc(TFCEnum.ST);
-        return daTypeNameBeh;
     }
 
     /**
