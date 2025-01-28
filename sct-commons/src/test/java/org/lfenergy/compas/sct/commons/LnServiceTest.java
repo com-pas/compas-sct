@@ -515,7 +515,7 @@ class LnServiceTest {
             TSDI lastSDI = createSDIByStructName(firstSDI, structInstances);
             if(structInstances.size() == 1){
                 TDAI dai = new TDAI();
-                dai.setName(daInstances.get(daInstances.size() - 1));
+                dai.setName(daInstances.getLast());
                 TVal tVal = new TVal();
                 tVal.setValue(daiVal);
                 dai.getVal().add(tVal);
@@ -525,7 +525,7 @@ class LnServiceTest {
         } else
         if(structInstances.size() == 1){
             TDAI dai = new TDAI();
-            dai.setName(daInstances.get(daInstances.size() - 1));
+            dai.setName(daInstances.getLast());
             TVal tVal = new TVal();
             tVal.setValue(daiVal);
             dai.getVal().add(tVal);
@@ -552,7 +552,7 @@ class LnServiceTest {
             TSDI firstSDI = createSDIFromDOI(tdoi, structInstances.getFirst());
             TSDI lastSDI = createSDIByStructName(firstSDI, structInstances);
             if(structInstances.size() == 1){
-                dai.setName(daInstances.get(daInstances.size() - 1));
+                dai.setName(daInstances.getLast());
                 TVal tVal = new TVal();
                 dai.getVal().add(tVal);
                 lastSDI.getSDIOrDAI().add(dai);
@@ -560,7 +560,7 @@ class LnServiceTest {
             }
         } else
         if(structInstances.size() == 1){
-            dai.setName(daInstances.get(daInstances.size() - 1));
+            dai.setName(daInstances.getLast());
             TVal tVal = new TVal();
             dai.getVal().add(tVal);
             tdoi.getSDIOrDAI().add(dai);

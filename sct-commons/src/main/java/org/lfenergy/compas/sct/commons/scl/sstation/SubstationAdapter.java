@@ -4,17 +4,13 @@
 
 package org.lfenergy.compas.sct.commons.scl.sstation;
 
-import org.apache.commons.lang3.tuple.Pair;
-import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
 import org.lfenergy.compas.scl2007b4.model.TSubstation;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -117,20 +113,6 @@ public class SubstationAdapter extends SclElementAdapter<SclRootAdapter, TSubsta
             return Stream.empty();
         }
         return currentElem.getVoltageLevel().stream().map(tVoltageLevel -> new VoltageLevelAdapter(this, tVoltageLevel));
-    }
-
-    /**
-     * Gets a pair of IedName and LDevice inst from Substation LNodes for LN0 type object
-     * @return a pair of Ied name and LDevice inst attributes
-     */
-    public List<Pair<String, String>> getIedAndLDeviceNamesForLN0FromLNode() {
-        return streamVoltageLevelAdapters()
-                .flatMap(VoltageLevelAdapter::streamBayAdapters)
-                .flatMap(BayAdapter::streamFunctionAdapters)
-                .flatMap(functionAdapter -> functionAdapter.getCurrentElem().getLNode().stream())
-                .filter(tlNode -> tlNode.getLnClass().contains(TLLN0Enum.LLN_0.value()))
-                .map(tlNode -> Pair.of(tlNode.getIedName(), tlNode.getLdInst()))
-                .collect(Collectors.toList());
     }
 
 }

@@ -4,7 +4,9 @@
 
 package org.lfenergy.compas.sct.commons.domain;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedCDCEnum;
 

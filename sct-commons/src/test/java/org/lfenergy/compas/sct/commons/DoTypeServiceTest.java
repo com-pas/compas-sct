@@ -128,7 +128,8 @@ class DoTypeServiceTest {
         DataObject dataObject = new DataObject();
         dataObject.setDoName("firstDONAME");
         DataAttribute dataAttribute = new DataAttribute();
-        DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);        // When
+        DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
+        // When
         List<DoLinkedToDa> list = doTypeService.getAllSDOLinkedToDa(dtt, tdoType, doLinkedToDa);
         // Then
         assertThat(list)

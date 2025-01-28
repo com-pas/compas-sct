@@ -198,7 +198,7 @@ class PrivateUtilsTest {
         assertThat(resultPrivate).isNotNull()
                 .hasFieldOrPropertyWithValue("type", privateEnum.getPrivateType());
         assertThat(resultPrivate.getContent()).hasSize(1).first().satisfies(content -> assertThat(content).isInstanceOf(JAXBElement.class));
-        JAXBElement<?> content = (JAXBElement<?>) resultPrivate.getContent().get(0);
+        JAXBElement<?> content = (JAXBElement<?>) resultPrivate.getContent().getFirst();
         assertThat(content.isNil()).isFalse();
         assertThat(content.getValue()).isNotNull().isInstanceOf(compasElement.getClass())
                 .isEqualTo(compasElement);
@@ -258,10 +258,10 @@ class PrivateUtilsTest {
         PrivateUtils.removePrivates(baseElement, PrivateEnum.COMPAS_ICDHEADER);
         // Then
         assertThat(baseElement.getPrivate()).hasSize(1);
-        TPrivate tPrivate = baseElement.getPrivate().get(0);
+        TPrivate tPrivate = baseElement.getPrivate().getFirst();
         assertThat(tPrivate.getType()).isEqualTo(privateSCD.getType());
         assertThat(tPrivate.getContent()).hasSize(1).first().isInstanceOf(JAXBElement.class);
-        JAXBElement<?> jaxbElement = (JAXBElement<?>) tPrivate.getContent().get(0);
+        JAXBElement<?> jaxbElement = (JAXBElement<?>) tPrivate.getContent().getFirst();
         assertThat(jaxbElement.isNil()).isFalse();
         assertThat(jaxbElement.getValue()).isEqualTo(TCompasSclFileType.SCD);
     }
@@ -561,7 +561,7 @@ class PrivateUtilsTest {
         PrivateUtils.copyCompasICDHeaderFromLNodePrivateIntoSTDPrivate(stdTPrivate, lNodeCompasICDHeader);
 
         // Then
-        TCompasICDHeader result = PrivateUtils.extractCompasICDHeader(stdTPrivate).get();
+        TCompasICDHeader result = PrivateUtils.extractCompasICDHeader(stdTPrivate).orElseThrow();
         assertThat(result).extracting(TCompasICDHeader::getICDSystemVersionUUID, TCompasICDHeader::getIEDName,
                         TCompasICDHeader::getIEDSubstationinstance, TCompasICDHeader::getBayLabel)
                 .containsExactlyInAnyOrder("UUID-2", "IED-1", BigInteger.ONE, "BAY-1");
@@ -613,7 +613,7 @@ class PrivateUtilsTest {
 
     private static TIED createTIED() {
         SCL sclFromFile = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
-        return sclFromFile.getIED().get(0);
+        return sclFromFile.getIED().getFirst();
     }
 
     @Test
@@ -632,7 +632,7 @@ class PrivateUtilsTest {
     }
 
     @Test
-    void extractStringPrivate_should_succeed(){
+    void extractStringPrivate_should_succeed() {
         // Given
         TIED tied = new TIED();
         TPrivate tPrivate = new TPrivate();

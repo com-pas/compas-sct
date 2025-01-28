@@ -270,7 +270,7 @@ public final class PrivateUtils {
     public static Stream<IcdHeader> streamIcdHeaders(SCL scd) {
         return scd
                 .getSubstation()
-                .get(0)
+                .getFirst()
                 .getVoltageLevel()
                 .stream()
                 .map(TVoltageLevel::getBay).flatMap(Collection::stream)

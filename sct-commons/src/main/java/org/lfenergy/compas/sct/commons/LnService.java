@@ -24,6 +24,8 @@ import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newVal;
 @Slf4j
 public class LnService implements LnEditor {
 
+    private static final DoLinkedToDaFilter DAI_FILTER_MOD_STVAL = DoLinkedToDaFilter.from(MOD_DO_NAME, STVAL_DA_NAME);
+
     public Stream<TAnyLN> getAnylns(TLDevice tlDevice) {
         return Stream.concat(Stream.of(tlDevice.getLN0()), tlDevice.getLN().stream());
     }
@@ -73,15 +75,7 @@ public class LnService implements LnEditor {
     }
 
     public Optional<TDAI> getDaiModStVal(TAnyLN tAnyLN) {
-        return tAnyLN
-                .getDOI()
-                .stream()
-                .filter(tdoi -> MOD_DO_NAME.equals(tdoi.getName()))
-                .flatMap(tdoi -> tdoi.getSDIOrDAI().stream())
-                .filter(TDAI.class::isInstance)
-                .map(TDAI.class::cast)
-                .filter(tdai -> STVAL_DA_NAME.equals(tdai.getName()))
-                .findFirst();
+        return getDOAndDAInstances(tAnyLN, DAI_FILTER_MOD_STVAL);
     }
 
     public Stream<TAnyLN> getActiveLns(TLDevice tlDevice) {
