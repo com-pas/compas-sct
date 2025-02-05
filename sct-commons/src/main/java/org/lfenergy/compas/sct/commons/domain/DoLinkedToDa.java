@@ -11,10 +11,10 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL_DA_NAME
 
 public record DoLinkedToDa(DataObject dataObject, DataAttribute dataAttribute) {
 
-    public static DoLinkedToDa copyFrom(DoLinkedToDa doLinkedToDa) {
+    public DoLinkedToDa deepCopy() {
         return new DoLinkedToDa(
-                DataObject.copyFrom(doLinkedToDa.dataObject()),
-                DataAttribute.copyFrom(doLinkedToDa.dataAttribute()));
+                dataObject().deepCopy(),
+                dataAttribute().deepCopy());
     }
 
     public String getDoRef() {
