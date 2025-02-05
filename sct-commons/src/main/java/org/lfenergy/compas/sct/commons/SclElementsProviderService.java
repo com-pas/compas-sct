@@ -4,8 +4,11 @@
 
 package org.lfenergy.compas.sct.commons;
 
+import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.api.SclElementsProvider;
+import org.lfenergy.compas.sct.commons.domain.DoLinkedToDa;
+import org.lfenergy.compas.sct.commons.domain.DoLinkedToDaFilter;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
@@ -15,9 +18,12 @@ import org.lfenergy.compas.sct.commons.scl.dtt.EnumTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.*;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
+import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
+import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SclElementsProviderService implements SclElementsProvider {
 
@@ -91,6 +97,7 @@ public class SclElementsProviderService implements SclElementsProvider {
                 .toList();
     }
 
+
     @Override
     public Set<DataAttributeRef> getDAI(SCL scd, String iedName, String ldInst, DataAttributeRef dataAttributeRef, boolean updatable) throws ScdException {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
@@ -98,6 +105,36 @@ public class SclElementsProviderService implements SclElementsProvider {
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst(ldInst);
         return lDeviceAdapter.getDAI(dataAttributeRef, updatable);
     }
+
+    @Override
+    public Set<DoLinkedToDa> getDAIV2(SCL scd, String iedName, String ldInst, DataAttributeRef dataAttributeRef, boolean updatable) throws ScdException {
+        IedService iedService = new IedService();
+        LnService lnService = new LnService();
+        LdeviceService ldeviceService = new LdeviceService(lnService);
+        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
+        return iedService.findIed(scd, tied -> tied.getName().equals(iedName))
+                .map(tied1 -> ldeviceService.findLdevice(tied1, tlDevice -> tlDevice.getInst().equals(ldInst))
+                        .map(tlDevice -> Stream.concat(tlDevice.getLN().stream(), Stream.of(tlDevice.getLN0()))
+                                .filter(anyLN -> tAnyLNPredicate.test(anyLN, dataAttributeRef))
+                                .flatMap(tAnyLN -> dataTypeTemplatesService.getFilteredDoLinkedToDa(scd.getDataTypeTemplates(), tAnyLN.getLnType(), DoLinkedToDaFilter.from(dataAttributeRef))
+                                        .map(dataAttribute -> {
+                                            lnService.completeFromDAInstance(tied1, tlDevice.getInst(), tAnyLN, dataAttribute);
+                                            return dataAttribute;
+                                        }))
+                                .filter(dataRef -> !updatable || dataRef.isUpdatable())
+                                .collect(Collectors.toSet()))
+                        .orElseThrow(() -> new ScdException(String.format("LDevice.inst '%s' not found in IED '%s'", ldInst, iedName))))
+                .orElseThrow(() -> new ScdException(String.format("IED.name '%s' not found in SCD", iedName)));
+    }
+
+    private final BiPredicate<TAnyLN, DataAttributeRef> tAnyLNPredicate = (anyLN, dataRef) ->
+            StringUtils.isBlank(dataRef.getLnClass())
+                    || (anyLN instanceof TLN0
+                    && (dataRef.getLnClass() != null && dataRef.getLnClass().equals(TLLN0Enum.LLN_0.value())))
+                    || (anyLN instanceof TLN ln
+                    && Utils.lnClassEquals(ln.getLnClass(), dataRef.getLnClass())
+                    && ln.getInst().equals(dataRef.getLnInst())
+                    && Utils.equalsOrBothBlank(dataRef.getPrefix(), ln.getPrefix()));
 
     @Override
     public Set<EnumValDTO> getEnumTypeValues(SCL scd, String idEnum) throws ScdException {

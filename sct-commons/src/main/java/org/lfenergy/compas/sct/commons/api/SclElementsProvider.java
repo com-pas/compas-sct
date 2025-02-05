@@ -5,6 +5,8 @@
 package org.lfenergy.compas.sct.commons.api;
 
 import org.lfenergy.compas.scl2007b4.model.SCL;
+import org.lfenergy.compas.sct.commons.domain.DoLinkedToDa;
+import org.lfenergy.compas.sct.commons.domain.DoLinkedToDaFilter;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
@@ -95,6 +97,7 @@ public interface SclElementsProvider {
      * @throws ScdException SCD illegal arguments exception, missing mandatory data
      */
     Set<DataAttributeRef> getDAI(SCL scd, String iedName, String ldInst, DataAttributeRef dataAttributeRef, boolean updatable) throws ScdException;
+    Set<DoLinkedToDa> getDAIV2(SCL scd, String iedName, String ldInst, DataAttributeRef dataAttributeRef, boolean updatable) throws ScdException;
 
     /**
      * Gets EnumTypes values of ID <em>idEnum</em> from DataTypeTemplate of SCL file

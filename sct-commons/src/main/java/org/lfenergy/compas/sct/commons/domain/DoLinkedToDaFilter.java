@@ -6,6 +6,8 @@ package org.lfenergy.compas.sct.commons.domain;
 
 
 import org.apache.commons.lang3.StringUtils;
+import org.lfenergy.compas.scl2007b4.model.TAnyLN;
+import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,6 +34,23 @@ public record DoLinkedToDaFilter(String doName, List<String> sdoNames, String da
         if (StringUtils.isNotBlank(daNames)) {
             daName = daNames.split("\\.")[0];
             bdaNames = Arrays.stream(daNames.split("\\.")).skip(1).toList();
+        }
+        return new DoLinkedToDaFilter(doName, sdoNames, daName, bdaNames);
+    }
+
+
+    public static DoLinkedToDaFilter from(DataAttributeRef dataAttributeRef) {
+        String doName = null;
+        List<String> sdoNames = null;
+        String daName = null;
+        List<String> bdaNames = null;
+        if (StringUtils.isNotBlank(dataAttributeRef.getDoRef())) {
+            doName = dataAttributeRef.getDoRef().split("\\.")[0];
+            sdoNames = Arrays.stream(dataAttributeRef.getDoRef().split("\\.")).skip(1).toList();
+        }
+        if (StringUtils.isNotBlank(dataAttributeRef.getDaRef())) {
+            daName = dataAttributeRef.getDaRef().split("\\.")[0];
+            bdaNames = Arrays.stream(dataAttributeRef.getDaRef().split("\\.")).skip(1).toList();
         }
         return new DoLinkedToDaFilter(doName, sdoNames, daName, bdaNames);
     }

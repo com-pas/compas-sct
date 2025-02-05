@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.domain.DoLinkedToDa;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
@@ -143,6 +144,34 @@ class SclElementsProviderServiceTest {
         Set<DataAttributeRef> result = sclElementsProviderService.getDAI(scd, "IED_NAME1", "LD_INST12", new DataAttributeRef(), false);
         // THEN
         assertThat(result).hasSize(2433);
+    }
+
+    @Test
+    void test_dai_multiple_value_sourceDataTypeTemplateAndLN() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/dai_multiple_value_test.xml");
+        // When
+        Set<DataAttributeRef> resultV1 = sclElementsProviderService.getDAI(scd, "IED_NAME1", "LD_INST11", new DataAttributeRef(), false);
+        Set<DoLinkedToDa> resultV2 = sclElementsProviderService.getDAIV2(scd, "IED_NAME1", "LD_INST11", new DataAttributeRef(), false);
+        // THEN
+        assertThat(resultV1).hasSize(1622);
+        assertThat(resultV2).hasSize(1622);
+
+        Set<DataAttributeRef> resultV1_OnlyOneValue = resultV1.stream().filter(dataAttributeRef -> dataAttributeRef.getDaName().getDaiValues().size() == 1)
+                .collect(Collectors.toSet());
+        assertThat(resultV1_OnlyOneValue).hasSize(2);
+
+        Set<DataAttributeRef> resultV1_OnlyTWOValue = resultV1.stream().filter(dataAttributeRef -> dataAttributeRef.getDaName().getDaiValues().size() == 2)
+                .collect(Collectors.toSet());
+        assertThat(resultV1_OnlyTWOValue).hasSize(0);
+
+        Set<DoLinkedToDa> resultV2_OnlyOneValue = resultV2.stream().filter(doLinkedToDa -> doLinkedToDa.dataAttribute().getDaiValues().size() == 1)
+                .collect(Collectors.toSet());
+        assertThat(resultV2_OnlyOneValue).hasSize(1);//  expected 2: not same as resultV1_OnlyOneValue
+
+        Set<DoLinkedToDa> resultV2_OnlyTWOValue = resultV2.stream().filter(doLinkedToDa -> doLinkedToDa.dataAttribute().getDaiValues().size() == 2)
+                .collect(Collectors.toSet());
+        assertThat(resultV2_OnlyTWOValue).hasSize(1);// expected 0: not same as resultV1_OnlyOneValue
     }
 
     @Test
