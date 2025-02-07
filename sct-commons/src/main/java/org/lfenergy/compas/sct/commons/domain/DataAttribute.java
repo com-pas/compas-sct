@@ -13,6 +13,7 @@ import org.lfenergy.compas.scl2007b4.model.TVal;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -26,19 +27,24 @@ public class DataAttribute {
     private List<String> bdaNames = new ArrayList<>();
     private List<DaVal> daiValues = new ArrayList<>();
 
-    public static DataAttribute copyFrom(DataAttribute dataAttribute) {
-        DataAttribute dataAttribute1 = new DataAttribute();
-        dataAttribute1.setDaName(dataAttribute.getDaName());
-        dataAttribute1.setFc(dataAttribute.getFc());
-        dataAttribute1.setBType(dataAttribute.getBType());
-        dataAttribute1.setType(dataAttribute.getType());
-        dataAttribute1.getBdaNames().addAll(dataAttribute.getBdaNames());
-        dataAttribute1.setValImport(dataAttribute.isValImport());
-        return dataAttribute1;
+    public DataAttribute deepCopy() {
+        DataAttribute dataAttribute = new DataAttribute();
+        dataAttribute.setDaName(getDaName());
+        dataAttribute.setType(getType());
+        dataAttribute.setBType(getBType());
+        dataAttribute.setFc(getFc());
+        dataAttribute.setValImport(isValImport());
+        dataAttribute.getBdaNames().addAll(getBdaNames());
+        dataAttribute.getDaiValues().addAll(getDaiValues());
+        return dataAttribute;
     }
 
     public void addDaVal(List<TVal> vals) {
-       vals.forEach(tVal -> daiValues.add(new DaVal(tVal.isSetSGroup() ? tVal.getSGroup() : null, tVal.getValue())));
+        vals.forEach(tVal -> {
+            Long settingGroup = tVal.isSetSGroup() ? tVal.getSGroup() : null;
+            daiValues.removeIf(daVal -> Objects.equals(daVal.settingGroup(), settingGroup));
+            daiValues.add(new DaVal(settingGroup, tVal.getValue()));
+        });
     }
 
     @Override

@@ -146,13 +146,15 @@ public class LnService implements LnEditor {
                 });
     }
 
-    public void completeFromDAInstance(TIED tied, String ldInst, TAnyLN anyLN, DoLinkedToDa doLinkedToDa) {
+    @Override
+    public DoLinkedToDa getDoLinkedToDaCompletedFromDAI(TIED tied, String ldInst, TAnyLN anyLN, DoLinkedToDa doLinkedToDa) {
+        DoLinkedToDa result = doLinkedToDa.deepCopy();
         getDOAndDAInstances(anyLN, doLinkedToDa.toFilter())
                 .ifPresent(tdai -> {
                     if (tdai.isSetVal()) {
-                        doLinkedToDa.dataAttribute().addDaVal(tdai.getVal());
+                        result.dataAttribute().addDaVal(tdai.getVal());
                     }
-                    if (doLinkedToDa.dataAttribute().getFc() == TFCEnum.SG || doLinkedToDa.dataAttribute().getFc() == TFCEnum.SE) {
+                    if (result.dataAttribute().getFc() == TFCEnum.SG || result.dataAttribute().getFc() == TFCEnum.SE) {
                         if (hasSettingGroup(tdai)) {
                             boolean isIedHasConfSG = tied.isSetAccessPoint() &&
                                     tied.getAccessPoint().stream()
@@ -163,15 +165,16 @@ public class LnService implements LnEditor {
                                                     && tAccessPoint.getServices() != null
                                                     && tAccessPoint.getServices().getSettingGroups() != null
                                                     && tAccessPoint.getServices().getSettingGroups().getConfSG() != null);
-                            doLinkedToDa.dataAttribute().setValImport((!tdai.isSetValImport() || tdai.isValImport()) && isIedHasConfSG);
+                            result.dataAttribute().setValImport((!tdai.isSetValImport() || tdai.isValImport()) && isIedHasConfSG);
                         } else {
-                            log.warn(String.format("Inconsistency in the SCD file - DAI= %s with fc= %s must have a sGroup attribute", tdai.getName(), doLinkedToDa.dataAttribute().getFc()));
-                            doLinkedToDa.dataAttribute().setValImport(false);
+                            log.warn("Inconsistency in the SCD file - DAI= {} with fc= {} must have a sGroup attribute", tdai.getName(), result.dataAttribute().getFc());
+                            result.dataAttribute().setValImport(false);
                         }
                     } else if (tdai.isSetValImport()) {
-                        doLinkedToDa.dataAttribute().setValImport(tdai.isValImport());
+                        result.dataAttribute().setValImport(tdai.isValImport());
                     }
                 });
+        return result;
     }
 
     public boolean matchesLn(TAnyLN tAnyLN, String lnClass, String lnInst, String lnPrefix) {
