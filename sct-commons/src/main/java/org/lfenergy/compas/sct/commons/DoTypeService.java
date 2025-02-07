@@ -36,7 +36,7 @@ public class DoTypeService {
         List<DoLinkedToDa> result = new ArrayList<>();
         // DA -> BDA -> BDA..
         sdoOrDAService.getDAs(tdoType).forEach(tda -> {
-            DoLinkedToDa doLinkedToDa = DoLinkedToDa.copyFrom(doLinkedToDaTemplate);
+            DoLinkedToDa doLinkedToDa = doLinkedToDaTemplate.deepCopy();
             doLinkedToDa.dataAttribute().setDaName(tda.getName());
             if (tda.isSetFc()) {
                 doLinkedToDa.dataAttribute().setFc(tda.getFc());
@@ -57,7 +57,7 @@ public class DoTypeService {
                     if (tsdo.isSetType()) {
                         findDoType(dtt, tdoType1 -> tdoType1.getId().equals(tsdo.getType()))
                                 .ifPresent(nextDoType -> {
-                                    DoLinkedToDa newDoLinkedToDa = DoLinkedToDa.copyFrom(doLinkedToDaTemplate);
+                                    DoLinkedToDa newDoLinkedToDa = doLinkedToDaTemplate.deepCopy();
                                     newDoLinkedToDa.dataObject().getSdoNames().add(tsdo.getName());
                                     if (nextDoType.isSetCdc()) {
                                         newDoLinkedToDa.dataObject().setCdc(nextDoType.getCdc());
@@ -73,7 +73,7 @@ public class DoTypeService {
         // BDA -> BDA -> BDA..
         return bdaService.getBDAs(tdaType1)
                 .flatMap(tbda -> {
-                    DoLinkedToDa newDoLinkedToDa = DoLinkedToDa.copyFrom(doLinkedToDaTemplate);
+                    DoLinkedToDa newDoLinkedToDa = doLinkedToDaTemplate.deepCopy();
                     newDoLinkedToDa.dataAttribute().getBdaNames().add(tbda.getName());
 
                     // STRUCT type (BType=STRUCT) refer to complex BDA object, otherwise it is kind of DA object

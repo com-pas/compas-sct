@@ -28,8 +28,8 @@ public class DataObject {
         this.sdoNames.addAll(sdoNames);
     }
 
-    public static DataObject copyFrom(DataObject dataObject) {
-        return new DataObject(dataObject.getDoName(), dataObject.getCdc(), dataObject.getSdoNames());
+    public DataObject deepCopy() {
+        return new DataObject(getDoName(), getCdc(), getSdoNames());
     }
 
     @Override

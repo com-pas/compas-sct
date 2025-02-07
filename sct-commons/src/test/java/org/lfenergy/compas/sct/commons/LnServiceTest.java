@@ -6,6 +6,7 @@ package org.lfenergy.compas.sct.commons;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.groups.Tuple;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -15,6 +16,7 @@ import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.domain.*;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.lfenergy.compas.sct.commons.util.ActiveStatus;
+import org.lfenergy.compas.sct.commons.util.SclConstructorHelper;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -23,7 +25,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class LnServiceTest {
 
-    private final LnService lnService = new LnService();
+    private LnService lnService;
+
+    @BeforeEach
+    void setUp() {
+        lnService = new LnService();
+    }
 
     @Test
     void getAnylns_should_return_lns() {
@@ -173,7 +180,6 @@ class LnServiceTest {
         );
         DoLinkedToDaFilter doLinkedToDaFilter = DoLinkedToDaFilter.from("Do.sdo1.d", "antRef.bda1.bda2.bda3");
         //When
-        LnService lnService = new LnService();
         Optional<TDAI> optionalTDAI = lnService.getDOAndDAInstances(tAnyLN, doLinkedToDaFilter);
         //Then
         assertThat(optionalTDAI).isPresent();
@@ -191,7 +197,6 @@ class LnServiceTest {
         );
         DoLinkedToDaFilter doLinkedToDaFilter = DoLinkedToDaFilter.from("Do.sdo1.d", "antRef.unknown.bda2.bda3");
         //When
-        LnService lnService = new LnService();
         Optional<TDAI> optionalTDAI = lnService.getDOAndDAInstances(tAnyLN, doLinkedToDaFilter);
         //Then
         assertThat(optionalTDAI).isEmpty();
@@ -199,14 +204,13 @@ class LnServiceTest {
 
     @ParameterizedTest
     @CsvSource(value = {"null:false", "false:false", "true:true"}, delimiter = ':')
-    void completeFromDataAttributeInstance_should_complete_when_valImport_set_or_not(Boolean existingValImportSet,
-                                                                                     Boolean expectedValImport) {
+    void getCompletedDoLinkedToDaFromDAI_should_getDoLinkedToDaCompleted_when_valImport_set_or_not(boolean existingValImportSet, boolean expectedValImport) {
         //Given
         TIED tied = new TIED();
         TAnyLN tAnyLN = initDOAndDAInstances(
                 new LinkedList<>(List.of("Do")),
                 new LinkedList<>(List.of("Da")),
-                "new value", existingValImportSet
+                "dai value", existingValImportSet
         );
         DataObject dataObject = new DataObject();
         dataObject.setDoName("Do");
@@ -214,10 +218,13 @@ class LnServiceTest {
         dataAttribute.setDaName("Da");
         DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
         //When
-        LnService lnService = new LnService();
-        lnService.completeFromDAInstance(tied, "ldInst", tAnyLN, doLinkedToDa);
+        DoLinkedToDa result = lnService.getDoLinkedToDaCompletedFromDAI(tied, "ldInst", tAnyLN, doLinkedToDa);
         //Then
-        assertThat(dataAttribute.isValImport()).isEqualTo(expectedValImport);
+        assertThat(result.dataAttribute().isValImport()).isEqualTo(expectedValImport);
+        assertThat(result.dataAttribute().getDaiValues()).isEqualTo(List.of(new DaVal(null, "dai value")));
+        assertThat(result).usingRecursiveComparison()
+                .ignoringFields("dataAttribute.valImport", "dataAttribute.daiValues")
+                .isEqualTo(doLinkedToDa);
     }
 
     public static Collection<Object> testSettingGroupValuesWithIedHasConfSG() {
@@ -233,17 +240,17 @@ class LnServiceTest {
     }
     @ParameterizedTest
     @MethodSource("testSettingGroupValuesWithIedHasConfSG")
-    void completeFromDataAttributeInstance_should_complete_when_settingGroup_set_or_not(Boolean existingValImportSet,
-                                                                                        Boolean isWithSettingGroup,
-                                                                                        Boolean isIedHasConfSG,
-                                                                                        TFCEnum givenFc,
-                                                                                        Boolean expectedValImport) {
+    void getCompletedDoLinkedToDaFromDAI_should_getDoLinkedToDaCompleted_when_settingGroup_set_or_not(Boolean existingValImportSet,
+                                                                                                      Boolean isWithSettingGroup,
+                                                                                                      Boolean isIedHasConfSG,
+                                                                                                      TFCEnum givenFc,
+                                                                                                      Boolean expectedValImport) {
         //Given
         TIED tied = new TIED();
         TAnyLN tAnyLN = new LN0();
         TDAI dai = initDOAndDAInstances(tAnyLN, new LinkedList<>(List.of("Do")), new LinkedList<>(List.of("Da")));
         TVal tVal = new TVal();
-        tVal.setValue("dailue");
+        tVal.setValue("dai value");
         dai.getVal().clear();
         dai.getVal().add(tVal);
         //
@@ -273,15 +280,18 @@ class LnServiceTest {
         DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
 
         //When
-        LnService lnService = new LnService();
-        lnService.completeFromDAInstance(tied, "ldInst", tAnyLN, doLinkedToDa);
+        DoLinkedToDa result = lnService.getDoLinkedToDaCompletedFromDAI(tied, "ldInst", tAnyLN, doLinkedToDa);
         //Then
-        assertThat(doLinkedToDa.dataAttribute().isValImport()).isEqualTo(expectedValImport);
+        assertThat(result.dataAttribute().isValImport()).isEqualTo(expectedValImport);
+        assertThat(result.dataAttribute().getDaiValues()).isEqualTo(List.of(new DaVal(isWithSettingGroup ? 1L : null, "dai value")));
+        assertThat(result).usingRecursiveComparison()
+                .ignoringFields("dataAttribute.valImport", "dataAttribute.daiValues")
+                .isEqualTo(doLinkedToDa);
     }
 
 
     @Test
-    void completeFromDataAttributeInstance__should_not_complete_when_not_found() {
+    void getCompletedDoLinkedToDaFromDAI_should_not_getDoLinkedToDaCompleted_when_not_found() {
         //Given
         TIED tied = new TIED();
         TAnyLN tAnyLN = new LN0();
@@ -292,21 +302,20 @@ class LnServiceTest {
 
         DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
         //When
-        LnService lnService = new LnService();
-        lnService.completeFromDAInstance(tied, "ldInst",  tAnyLN, doLinkedToDa);
+        DoLinkedToDa result = lnService.getDoLinkedToDaCompletedFromDAI(tied, "ldInst", tAnyLN, doLinkedToDa);
         //Then
-        assertThat(doLinkedToDa.dataAttribute().isValImport()).isFalse();//initialValue
+        assertThat(result).usingRecursiveComparison().isEqualTo(doLinkedToDa);//initialValue
     }
 
     @ParameterizedTest
     @CsvSource(value = {"null:false", "false:false", "true:true"}, delimiter = ':')
-    void completeFromDataAttributeInstance_should_complete_when_struct(Boolean input, Boolean expected) {
+    void getCompletedDoLinkedToDaFromDAI_should_getDoLinkedToDaCompleted_when_struct(Boolean input, Boolean expected) {
         //Given
         TIED tied = new TIED();
         TAnyLN tAnyLN = initDOAndDAInstances(
                 new LinkedList<>(List.of("Do","sdo1", "d")),
                 new LinkedList<>(List.of("antRef","bda1", "bda2", "bda3")),
-                "new value", input
+                "dai value", input
         );
         DataObject dataObject = new DataObject();
         dataObject.setDoName("Do");
@@ -318,10 +327,67 @@ class LnServiceTest {
         DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
 
         //When
-        LnService lnService = new LnService();
-        lnService.completeFromDAInstance(tied, "ldInst", tAnyLN, doLinkedToDa);
+        DoLinkedToDa result = lnService.getDoLinkedToDaCompletedFromDAI(tied, "ldInst", tAnyLN, doLinkedToDa);
         //Then
-        assertThat(doLinkedToDa.dataAttribute().isValImport()).isEqualTo(expected);
+        assertThat(result.dataAttribute().isValImport()).isEqualTo(expected);
+        assertThat(result.dataAttribute().getDaiValues()).isEqualTo(List.of(new DaVal(null, "dai value")));
+        assertThat(result).usingRecursiveComparison()
+                .ignoringFields("dataAttribute.valImport", "dataAttribute.daiValues")
+                .isEqualTo(doLinkedToDa);
+    }
+
+    @Test
+    void getDoLinkedToDaCompletedFromDAI_should_replace_val() {
+        //Given
+        TIED tied = new TIED();
+        TAnyLN tAnyLN = initDOAndDAInstances(
+                new LinkedList<>(List.of("Do")),
+                new LinkedList<>(List.of("Da")),
+                "dai value", null
+        );
+        DataObject dataObject = new DataObject();
+        dataObject.setDoName("Do");
+        DataAttribute dataAttribute = new DataAttribute();
+        dataAttribute.setDaName("Da");
+        dataAttribute.getDaiValues().add(new DaVal(null, "value from dataTypeTemplate"));
+        DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
+        //When
+        DoLinkedToDa result = lnService.getDoLinkedToDaCompletedFromDAI(tied, "ldInst", tAnyLN, doLinkedToDa);
+        //Then
+        assertThat(result.dataAttribute().getDaiValues()).isEqualTo(List.of(new DaVal(null, "dai value")));
+        assertThat(result).usingRecursiveComparison()
+                .ignoringFields("dataAttribute.daiValues")
+                .isEqualTo(doLinkedToDa);
+    }
+
+    @Test
+    void getDoLinkedToDaCompletedFromDAI_should_replace_val_with_sGroup() {
+        //Given
+        TIED tied = new TIED();
+        TAnyLN tAnyLN = initDOAndDAInstances(
+                new LinkedList<>(List.of("Do")),
+                new LinkedList<>(List.of("Da")),
+                "ignored", null
+        );
+        TDAI tdai = (TDAI) tAnyLN.getDOI().getFirst().getSDIOrDAI().getFirst();
+        tdai.getVal().clear();
+        tdai.getVal().add(SclConstructorHelper.newVal("value 2 from DAI", 2L));
+        DataObject dataObject = new DataObject();
+        dataObject.setDoName("Do");
+        DataAttribute dataAttribute = new DataAttribute();
+        dataAttribute.setDaName("Da");
+        dataAttribute.getDaiValues().add(new DaVal(1L, "value 1 from dataTypeTemplate"));
+        dataAttribute.getDaiValues().add(new DaVal(2L, "value 2 from dataTypeTemplate"));
+        DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
+        //When
+        DoLinkedToDa result = lnService.getDoLinkedToDaCompletedFromDAI(tied, "ldInst", tAnyLN, doLinkedToDa);
+        //Then
+        assertThat(result.dataAttribute().getDaiValues()).containsExactly(
+                new DaVal(1L, "value 1 from dataTypeTemplate"),
+                new DaVal(2L, "value 2 from DAI"));
+        assertThat(result).usingRecursiveComparison()
+                .ignoringFields("dataAttribute.daiValues")
+                .isEqualTo(doLinkedToDa);
     }
 
     @Test
@@ -337,7 +403,6 @@ class LnServiceTest {
         dataAttribute.getDaiValues().add(new DaVal(2L, "new value 2"));
         DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
         //When
-        LnService lnService = new LnService();
         lnService.updateOrCreateDOAndDAInstances(tAnyLN, doLinkedToDa);
         //Then
         assertThat(tAnyLN.getDOI()).hasSize(1);
@@ -368,7 +433,6 @@ class LnServiceTest {
         DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
 
         //When
-        LnService lnService = new LnService();
         lnService.updateOrCreateDOAndDAInstances(tAnyLN, doLinkedToDa);
 
         //Then
@@ -431,7 +495,6 @@ class LnServiceTest {
         DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
 
         //When
-        LnService lnService = new LnService();
         lnService.updateOrCreateDOAndDAInstances(tAnyLN, doLinkedToDa);
 
         //Then
@@ -516,9 +579,7 @@ class LnServiceTest {
             if(structInstances.size() == 1){
                 TDAI dai = new TDAI();
                 dai.setName(daInstances.getLast());
-                TVal tVal = new TVal();
-                tVal.setValue(daiVal);
-                dai.getVal().add(tVal);
+                dai.getVal().add(SclConstructorHelper.newVal(daiVal));
                 if (valImport != null) dai.setValImport(valImport);
                 lastSDI.getSDIOrDAI().add(dai);
             }
@@ -526,9 +587,7 @@ class LnServiceTest {
         if(structInstances.size() == 1){
             TDAI dai = new TDAI();
             dai.setName(daInstances.getLast());
-            TVal tVal = new TVal();
-            tVal.setValue(daiVal);
-            dai.getVal().add(tVal);
+            dai.getVal().add(SclConstructorHelper.newVal(daiVal));
             if (valImport != null) dai.setValImport(valImport);
             tdoi.getSDIOrDAI().add(dai);
         }

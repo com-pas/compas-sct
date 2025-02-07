@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Named.named;
 import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDa;
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.MOD_DO_NAME;
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL_DA_NAME;
@@ -139,7 +140,7 @@ class DataAttributeRefTest {
 
     @Test
     @Tag("issue-321")
-    void testCopyFrom() {
+    void testDeepCopy() {
         // Given
         DataAttributeRef dataAttributeRef = DTO.createDataAttributeRef("pre","lnclass","1");
         // When
@@ -186,7 +187,7 @@ class DataAttributeRefTest {
      */
     @ParameterizedTest
     @MethodSource("daParametersProviderUpdatable")
-    void isUpdatable_case0(String testName, String daName, TFCEnum fc, boolean valImport) {
+    void isUpdatable_case0(String daName, TFCEnum fc, boolean valImport) {
         //Given
         DataAttributeRef dataAttributeRef = new DataAttributeRef();
         dataAttributeRef.setDoName(new DoTypeName(MOD_DO_NAME));
@@ -201,19 +202,19 @@ class DataAttributeRefTest {
 
     private static Stream<Arguments> daParametersProviderUpdatable() {
         return Stream.of(
-                Arguments.of("should return true when Mod", STVAL_DA_NAME, TFCEnum.CF, true),
-                Arguments.of("should return true when Mod", STVAL_DA_NAME, TFCEnum.CF, false),
-                Arguments.of("should return true when Mod", STVAL_DA_NAME, TFCEnum.MX, true),
-                Arguments.of("should return true when Mod", STVAL_DA_NAME, TFCEnum.MX, false),
-                Arguments.of("should return true when Mod", STVAL_DA_NAME, null, true),
-                Arguments.of("should return true when Mod", STVAL_DA_NAME, null, false),
-                Arguments.of("should return true when Mod", "ctlModel", TFCEnum.CF, true)
+                Arguments.of(named("should return true when Mod", STVAL_DA_NAME), TFCEnum.CF, true),
+                Arguments.of(named("should return true when Mod", STVAL_DA_NAME), TFCEnum.CF, false),
+                Arguments.of(named("should return true when Mod", STVAL_DA_NAME), TFCEnum.MX, true),
+                Arguments.of(named("should return true when Mod", STVAL_DA_NAME), TFCEnum.MX, false),
+                Arguments.of(named("should return true when Mod", STVAL_DA_NAME), null, true),
+                Arguments.of(named("should return true when Mod", STVAL_DA_NAME), null, false),
+                Arguments.of(named("should return true when Mod", "ctlModel"), TFCEnum.CF, true)
         );
     }
 
     @ParameterizedTest
     @MethodSource("daParametersProviderNotUpdatable")
-    void isUpdatable_case1(String testName, String daName, TFCEnum fc, boolean valImport) {
+    void isUpdatable_case1(String daName, TFCEnum fc, boolean valImport) {
         //Given
         DataAttributeRef dataAttributeRef = new DataAttributeRef();
         dataAttributeRef.setDoName(new DoTypeName(MOD_DO_NAME));
@@ -228,11 +229,11 @@ class DataAttributeRefTest {
 
     private static Stream<Arguments> daParametersProviderNotUpdatable() {
         return Stream.of(
-                Arguments.of("should return false when Mod", "ctlModel", TFCEnum.CF, false),
-                Arguments.of("should return false when Mod", "ctlModel", TFCEnum.MX, true),
-                Arguments.of("should return false when Mod", "ctlModel", TFCEnum.MX, false),
-                Arguments.of("should return false when Mod", "ctlModel", null, true),
-                Arguments.of("should return false when Mod", "ctlModel", null, false)
+                Arguments.of(named("should return false when Mod", "ctlModel"), TFCEnum.CF, false),
+                Arguments.of(named("should return false when Mod", "ctlModel"), TFCEnum.MX, true),
+                Arguments.of(named("should return false when Mod", "ctlModel"), TFCEnum.MX, false),
+                Arguments.of(named("should return false when Mod", "ctlModel"), null, true),
+                Arguments.of(named("should return false when Mod", "ctlModel"), null, false)
         );
     }
 

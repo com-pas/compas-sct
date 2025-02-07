@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 class DoLinkedToDaTest {
 
     @Test
-    void test_copyFrom() {
+    void test_deepCopy() {
         // Given
         DataObject dataObject = new DataObject();
         dataObject.setDoName("doName");
@@ -28,7 +28,7 @@ class DoLinkedToDaTest {
         dataAttribute.setFc(TFCEnum.BL);
         DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
         // When
-        DoLinkedToDa newDoLinkedToDa = DoLinkedToDa.copyFrom(doLinkedToDa);
+        DoLinkedToDa newDoLinkedToDa = doLinkedToDa.deepCopy();
         // Then
         assertAll("Copy From",
                 () -> assertThat(newDoLinkedToDa.dataObject().getCdc()).isEqualTo(doLinkedToDa.dataObject().getCdc()),
