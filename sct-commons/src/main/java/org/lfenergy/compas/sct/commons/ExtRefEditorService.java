@@ -144,7 +144,7 @@ public class ExtRefEditorService implements ExtRefEditor {
      * @return LDeviceAdapter object that matches the EPF channel
      */
     private Optional<LDeviceAdapter> getActiveSourceLDeviceByLDEPFChannel(IEDAdapter iedAdapter, TChannel channel) {
-        return ldeviceService.findLdevice(iedAdapter.getCurrentElem(), tlDevice -> tlDevice.getInst().equals(channel.getLDInst()))
+        return ldeviceService.findLdevice(iedAdapter.getCurrentElem(), channel.getLDInst())
                 .filter(tlDevice -> ldeviceService.getLdeviceStatus(tlDevice).map(ActiveStatus.ON::equals).orElse(false))
                 .map(tlDevice -> new LDeviceAdapter(iedAdapter, tlDevice));
     }
@@ -267,7 +267,7 @@ public class ExtRefEditorService implements ExtRefEditor {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         if (!epf.isSetChannels()) return sclReportItems;
         iedService.getFilteredIeds(scd, ied -> !ied.getName().contains("TEST"))
-                .forEach(tied -> ldeviceService.findLdevice(tied, tlDevice -> LDEVICE_LDEPF.equals(tlDevice.getInst()))
+                .forEach(tied -> ldeviceService.findLdevice(tied, LDEVICE_LDEPF)
                         .ifPresent(tlDevice -> getExtRefWithBayReferenceInLDEPF(scd.getDataTypeTemplates(), tied, tlDevice, sclReportItems)
                                 .forEach(extRefBayRef -> epf.getChannels().getChannel().stream().filter(tChannel -> doesExtRefMatchLDEPFChannel(extRefBayRef.extRef(), tChannel))
                                         .findFirst().ifPresent(channel -> {
@@ -291,7 +291,7 @@ public class ExtRefEditorService implements ExtRefEditor {
     @Override
     public void epfPostProcessing(SCL scd) {
         iedService.getFilteredIeds(scd, ied -> !ied.getName().contains("TEST"))
-                .forEach(tied -> ldeviceService.findLdevice(tied, tlDevice -> LDEVICE_LDEPF.equals(tlDevice.getInst()))
+                .forEach(tied -> ldeviceService.findLdevice(tied, LDEVICE_LDEPF)
                         .ifPresent(tlDevice -> tlDevice.getLN0().getDOI()
                                 .stream().filter(tdoi -> tdoi.getName().startsWith(INREF_PREFIX))
                                 .forEach(tdoi -> {
