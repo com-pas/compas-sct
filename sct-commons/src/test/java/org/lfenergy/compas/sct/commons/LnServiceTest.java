@@ -50,13 +50,43 @@ class LnServiceTest {
     }
 
     @Test
-    void findAnyLn_should_return_ln() {
+    void findAnyLn_with_predicate_should_return_ln() {
         //Given
         SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
         TLDevice ldsuied = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst();
 
         //When
         Optional<TAnyLN> anyLn = lnService.findAnyLn(ldsuied, tAnyLN -> tAnyLN.getLnType().equals("RTE_080BBB4D93E4E704CF69E8616CAF1A74_LLN0_V1.0.0"));
+
+        //Then
+        assertThat(anyLn.orElseThrow())
+                .extracting(TAnyLN::getLnType, TAnyLN::getClass)
+                .containsExactly("RTE_080BBB4D93E4E704CF69E8616CAF1A74_LLN0_V1.0.0", LN0.class);
+    }
+
+    @Test
+    void findAnyLn_with_lnClass_lnInst_lnPrefix_should_return_ln() {
+        //Given
+        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        TLDevice ldtm = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().stream().filter(tlDevice -> "LDTM".equals(tlDevice.getInst())).findFirst().orElseThrow();
+
+        //When
+        Optional<TAnyLN> anyLn = lnService.findAnyLn(ldtm, "TCTR", "43", "I04C");
+
+        //Then
+        assertThat(anyLn.orElseThrow())
+                .extracting(TAnyLN::getLnType, TAnyLN::getClass)
+                .containsExactly("RTE_336B5093F3DDA93A19E979FB89196E26_TCTR_V1.0.0", TLN.class);
+    }
+
+    @Test
+    void findAnyLn_with_lnClass_lnInst_lnPrefix_should_return_ln0() {
+        //Given
+        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        TLDevice ldsuied = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst();
+
+        //When
+        Optional<TAnyLN> anyLn = lnService.findAnyLn(ldsuied, "LLN0", "", null);
 
         //Then
         assertThat(anyLn.orElseThrow())

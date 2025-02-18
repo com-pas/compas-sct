@@ -46,6 +46,10 @@ public class LdeviceService {
         return getFilteredLdevices(tied, ldevicePredicate).findFirst();
     }
 
+    public Optional<TLDevice> findLdevice(TIED tied, String ldInst) {
+        return findLdevice(tied, tlDevice -> tlDevice.getInst().equals(ldInst));
+    }
+
     public Optional<ActiveStatus> getLdeviceStatus(TLDevice tlDevice) {
         return lnService.getDaiModStValValue(tlDevice.getLN0());
     }

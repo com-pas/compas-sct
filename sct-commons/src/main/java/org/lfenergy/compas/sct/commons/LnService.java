@@ -38,6 +38,10 @@ public class LnService implements LnEditor {
         return getFilteredAnyLns(tlDevice, lnPredicate).findFirst();
     }
 
+    public Optional<TAnyLN> findAnyLn(TLDevice tlDevice, String lnClass, String lnInst, String lnPrefix) {
+        return findAnyLn(tlDevice, tAnyLN -> matchesLn(tAnyLN, lnClass, lnInst, lnPrefix));
+    }
+
     public Stream<TLN> getLns(TLDevice tlDevice) {
         return tlDevice.getLN().stream();
     }
@@ -48,6 +52,16 @@ public class LnService implements LnEditor {
 
     public Optional<TLN> findLn(TLDevice tlDevice, Predicate<TLN> lnPredicate) {
         return getFilteredLns(tlDevice, lnPredicate).findFirst();
+    }
+
+    public boolean matchesLn(TAnyLN tAnyLN, String lnClass, String lnInst, String lnPrefix) {
+        return switch (tAnyLN) {
+            case TLN ln -> lnClass.equals(ln.getLnClass().getFirst())
+                           && StringUtils.trimToEmpty(lnInst).equals(StringUtils.trimToEmpty(ln.getInst()))
+                           && (StringUtils.trimToEmpty(lnPrefix).equals(StringUtils.trimToEmpty(ln.getPrefix())));
+            case LN0 ignored -> lnClass.equals(TLLN0Enum.LLN_0.value());
+            default -> throw new IllegalStateException("Unexpected value: " + tAnyLN);
+        };
     }
 
     /**
@@ -175,16 +189,6 @@ public class LnService implements LnEditor {
                     }
                 });
         return result;
-    }
-
-    public boolean matchesLn(TAnyLN tAnyLN, String lnClass, String lnInst, String lnPrefix) {
-        return switch (tAnyLN) {
-            case TLN ln -> lnClass.equals(ln.getLnClass().getFirst())
-                    && lnInst.equals(ln.getInst())
-                    && (StringUtils.trimToEmpty(lnPrefix).equals(StringUtils.trimToEmpty(ln.getPrefix())));
-            case LN0 ignored -> lnClass.equals(TLLN0Enum.LLN_0.value());
-            default -> throw new IllegalStateException("Unexpected value: " + tAnyLN);
-        };
     }
 
     private boolean hasSettingGroup(TDAI tdai) {

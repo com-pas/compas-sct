@@ -68,12 +68,25 @@ class LdeviceServiceTest {
     }
 
     @Test
-    void findLdevice_should_return_ldevice() {
+    void findLdevice_with_predicate_should_return_ldevice() {
         //Given
         SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
         TIED tied = std.getIED().getFirst();
         //When
         TLDevice ldevice = ldeviceService.findLdevice(tied, tlDevice -> "LDTM".equals(tlDevice.getInst())).orElseThrow();
+        //Then
+        assertThat(ldevice)
+                .extracting(TLDevice::getInst, TLDevice::getLdName)
+                .containsExactly("LDTM", "VirtualSAMULDTM");
+    }
+
+    @Test
+    void findLdevice_with_ldInst_should_return_ldevice() {
+        //Given
+        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        TIED tied = std.getIED().getFirst();
+        //When
+        TLDevice ldevice = ldeviceService.findLdevice(tied, "LDTM").orElseThrow();
         //Then
         assertThat(ldevice)
                 .extracting(TLDevice::getInst, TLDevice::getLdName)
