@@ -24,6 +24,7 @@ import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -48,6 +49,8 @@ public class ControlBlockEditorService implements ControlBlockEditor {
     private static final int HEXADECIMAL_BASE = 16;
     private final ControlService controlService;
     private final LdeviceService ldeviceService;
+    private final ConnectedAPService connectedAPService;
+    private final SubNetworkService subNetworkService;
 
     @Override
     public List<SclReportItem> analyzeDataGroups(SCL scd) {
@@ -114,8 +117,9 @@ public class ControlBlockEditorService implements ControlBlockEditor {
         }
         List<Long> appIdToReuse = appIdsAndMacsToReuse.values().stream().map(AppIdAndMac::appId).toList();
         List<Long> macToReuse = appIdsAndMacsToReuse.values().stream().map(AppIdAndMac::mac).toList();
-        PrimitiveIterator.OfLong appIdIterator = cbComSettings.appIds.filter(appId -> !appIdToReuse.contains(appId)).iterator();
-        PrimitiveIterator.OfLong macIterator = cbComSettings.macAddresses.filter(mac -> !macToReuse.contains(mac)).iterator();
+        PrimitiveIterator.OfLong appIdIterator = cbComSettings.appIds().filter(appId -> !appIdToReuse.contains(appId)).iterator();
+        List<Long> macAddresseList = cbComSettings.macAddresses().filter(mac -> !macToReuse.contains(mac)).boxed().toList();
+        AtomicInteger macAddresseIndex = new AtomicInteger(0);
         return scl.getIED().stream()
                 .flatMap(tied ->
                         tied.getAccessPoint()
@@ -137,7 +141,7 @@ public class ControlBlockEditorService implements ControlBlockEditor {
                                 return newError(iedApLd, tControl, "Cannot configure communication for this ControlBlock because: No controlBlock communication settings found with these " + criteriaOrError.criteria);
                             }
                             AppIdAndMac reuseAppIdAndMac = appIdsAndMacsToReuse.get(new CbKey(iedApLd.ied.getName(), iedApLd.lDevice.getInst(), tControl.getName()));
-                            return configureControlBlockNetwork(scl.getCommunication(), settings, appIdIterator, macIterator, tControl, iedApLd, reuseAppIdAndMac);
+                            return configureControlBlockNetwork(scl.getCommunication(), settings, appIdIterator, macAddresseList, macAddresseIndex, tControl, iedApLd, reuseAppIdAndMac);
                         })
                         .flatMap(Optional::stream)
                 );
@@ -166,12 +170,13 @@ public class ControlBlockEditorService implements ControlBlockEditor {
         return new CbComSettings(appIds, macAddresses, settingsByCriteria);
     }
 
-    private Optional<SclReportItem> configureControlBlockNetwork(TCommunication tCommunication, Settings settings, PrimitiveIterator.OfLong appIdIterator, PrimitiveIterator.OfLong macAddressIterator, TControl tControl, IedApLd iedApLd, AppIdAndMac reuseAppIdAndMac) {
-        Optional<TConnectedAP> optConApAdapter = findConnectedAp(tCommunication, iedApLd.ied.getName(), iedApLd.apName);
-        if (optConApAdapter.isEmpty()) {
+    private Optional<SclReportItem> configureControlBlockNetwork(TCommunication tCommunication, Settings settings, PrimitiveIterator.OfLong appIdIterator, List<Long> macAddressList, AtomicInteger macAddresseIndex, TControl tControl, IedApLd iedApLd, AppIdAndMac reuseAppIdAndMac) {
+        Optional<TConnectedAP> optionalTConnectedAP = subNetworkService.getSubNetworks(tCommunication)
+                .flatMap(tSubNetwork -> connectedAPService.getFilteredConnectedAP(tSubNetwork, connectedAP -> iedApLd.ied.getName().equals(connectedAP.getIedName()) && iedApLd.apName.equals(connectedAP.getApName())))
+                .findFirst();
+        if (optionalTConnectedAP.isEmpty()) {
             return newError(iedApLd, tControl, "Cannot configure communication for ControlBlock because no ConnectedAP found for AccessPoint");
         }
-        TConnectedAP tConnectedAP = optConApAdapter.get();
         if (settings.vlanId() == null) {
             return newError(iedApLd, tControl, "Cannot configure communication for this ControlBlock because no Vlan Id was provided in the settings");
         }
@@ -182,10 +187,8 @@ public class ControlBlockEditorService implements ControlBlockEditor {
             if (!appIdIterator.hasNext()) {
                 return newError(iedApLd, tControl, "Cannot configure communication for this ControlBlock because range of appId is exhausted");
             }
-            if (!macAddressIterator.hasNext()) {
-                return newError(iedApLd, tControl, "Cannot configure communication for this ControlBlock because range of MAC Address is exhausted");
-            }
-            appIdAndMac = new AppIdAndMac(appIdIterator.nextLong(), macAddressIterator.nextLong());
+            // For the MAC adress assignation, we restart from the begining if we reach the end of the range
+            appIdAndMac = new AppIdAndMac(appIdIterator.nextLong(), macAddressList.get(macAddresseIndex.getAndIncrement() % macAddressList.size()));
         }
 
         List<TP> listOfPs = new ArrayList<>();
@@ -196,6 +199,7 @@ public class ControlBlockEditorService implements ControlBlockEditor {
             listOfPs.add(newP(VLAN_PRIORITY_P_TYPE, String.valueOf(settings.vlanPriority())));
         }
 
+        TConnectedAP tConnectedAP = optionalTConnectedAP.orElseThrow();
         switch (tControl) {
             case TGSEControl ignored -> updateGseOrCreateIfNotExists(tConnectedAP, iedApLd.lDevice().getInst(), tControl.getName(), listOfPs, SclConstructorHelper.newDurationInMilliSec(settings.minTime), SclConstructorHelper.newDurationInMilliSec(settings.maxTime));
             case TSampledValueControl ignored -> updateSmvOrCreateIfNotExists(tConnectedAP, iedApLd.lDevice().getInst(), tControl.getName(), listOfPs);
@@ -222,17 +226,6 @@ public class ControlBlockEditorService implements ControlBlockEditor {
                 )
                 .filter(entry -> allControlBlocksInScd.contains(entry.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    private Optional<TConnectedAP> findConnectedAp(TCommunication tCommunication, String iedName, String apName) {
-        if (tCommunication == null || !tCommunication.isSetSubNetwork()) {
-            return Optional.empty();
-        }
-        return tCommunication.getSubNetwork().stream()
-                .filter(TSubNetwork::isSetConnectedAP)
-                .flatMap(tSubNetwork -> tSubNetwork.getConnectedAP().stream())
-                .filter(tConnectedAP -> iedName.equals(tConnectedAP.getIedName()) && apName.equals(tConnectedAP.getApName()))
-                .findFirst();
     }
 
     private void updateGseOrCreateIfNotExists(TConnectedAP tConnectedAP, String ldInst, String cbName, List<TP> listOfP, TDurationInMilliSec minTime, TDurationInMilliSec maxTime) {

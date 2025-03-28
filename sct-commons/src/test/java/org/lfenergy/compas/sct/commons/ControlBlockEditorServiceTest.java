@@ -50,7 +50,7 @@ class ControlBlockEditorServiceTest {
 
     @BeforeEach
     void init() {
-        controlBlockEditorService = new ControlBlockEditorService(new ControlService(), new LdeviceService(new LnService()));
+        controlBlockEditorService = new ControlBlockEditorService(new ControlService(), new LdeviceService(new LnService()), new ConnectedAPService(), new SubNetworkService());
     }
 
     @Test
@@ -347,14 +347,67 @@ class ControlBlockEditorServiceTest {
         cbCom.getAppIdRanges().getAppIdRange().getFirst().setEnd("000B");
         cbCom.getMacRanges().getMacRange().getFirst().setStart("01-02-03-04-00-FF");
         cbCom.getMacRanges().getMacRange().getFirst().setEnd("01-02-03-04-01-01");
+
         // When
         List<SclReportItem> sclReportItems = controlBlockEditorService.configureNetworkForAllControlBlocks(scd, cbCom);
+
         // Then
         assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
-        assertThat(streamAllConnectedApGseP(scd, "APPID"))
-                .containsExactlyInAnyOrder("0009", "000A", "000B");
-        assertThat(streamAllConnectedApGseP(scd, "MAC-Address"))
-                .containsExactlyInAnyOrder("01-02-03-04-00-FF", "01-02-03-04-01-00", "01-02-03-04-01-01");
+        assertThat(scd.getCommunication().getSubNetwork())
+                .flatExtracting(TSubNetwork::getConnectedAP)
+                .flatExtracting(TConnectedAP::getGSE)
+                .extracting(TControlBlock::getAddress)
+                .flatExtracting(TAddress::getP)
+                .extracting(TP::getType, TP::getValue)
+                .containsExactly(
+                        Tuple.tuple("APPID", "0009"),
+                        Tuple.tuple("MAC-Address", "01-02-03-04-00-FF"),
+                        Tuple.tuple("VLAN-ID", "12D"),
+                        Tuple.tuple("VLAN-PRIORITY", "1"),
+                        Tuple.tuple("APPID", "000A"),
+                        Tuple.tuple("MAC-Address", "01-02-03-04-01-00"),
+                        Tuple.tuple("VLAN-ID", "12D"),
+                        Tuple.tuple("VLAN-PRIORITY", "1"),
+                        Tuple.tuple("APPID", "000B"),
+                        Tuple.tuple("MAC-Address", "01-02-03-04-01-01"),
+                        Tuple.tuple("VLAN-ID", "12E"),
+                        Tuple.tuple("VLAN-PRIORITY", "2")
+                );
+    }
+
+    @Test
+    void configureNetworkForAllControlBlocks_should_restart_Mac_adress() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
+        CBCom cbCom = createCbCom();
+        cbCom.getMacRanges().getMacRange().getFirst().setStart("01-0C-CD-01-00-00");
+        cbCom.getMacRanges().getMacRange().getFirst().setEnd("01-0C-CD-01-00-01");
+
+        // When
+        List<SclReportItem> sclReportItems = controlBlockEditorService.configureNetworkForAllControlBlocks(scd, cbCom);
+
+        // Then
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
+        assertThat(scd.getCommunication().getSubNetwork())
+                .flatExtracting(TSubNetwork::getConnectedAP)
+                .flatExtracting(TConnectedAP::getGSE)
+                .extracting(TControlBlock::getAddress)
+                .flatExtracting(TAddress::getP)
+                .extracting(TP::getType, TP::getValue)
+                .containsExactly(
+                        Tuple.tuple("APPID", "0000"),
+                        Tuple.tuple("MAC-Address", "01-0C-CD-01-00-00"),
+                        Tuple.tuple("VLAN-ID", "12D"),
+                        Tuple.tuple("VLAN-PRIORITY", "1"),
+                        Tuple.tuple("APPID", "0001"),
+                        Tuple.tuple("MAC-Address", "01-0C-CD-01-00-01"),
+                        Tuple.tuple("VLAN-ID", "12D"),
+                        Tuple.tuple("VLAN-PRIORITY", "1"),
+                        Tuple.tuple("APPID", "0002"),
+                        Tuple.tuple("MAC-Address", "01-0C-CD-01-00-00"),
+                        Tuple.tuple("VLAN-ID", "12E"),
+                        Tuple.tuple("VLAN-PRIORITY", "2")
+                );
     }
 
     @ParameterizedTest
@@ -378,9 +431,6 @@ class ControlBlockEditorServiceTest {
         CBCom cbComWithNotEnoughAppId = createCbCom();
         cbComWithNotEnoughAppId.getAppIdRanges().getAppIdRange().getFirst().setStart("0000");
         cbComWithNotEnoughAppId.getAppIdRanges().getAppIdRange().getFirst().setEnd("00001");
-        CBCom cbComWithNotEnoughMacAddress = createCbCom();
-        cbComWithNotEnoughMacAddress.getMacRanges().getMacRange().getFirst().setStart("01-0C-CD-01-00-00");
-        cbComWithNotEnoughMacAddress.getMacRanges().getMacRange().getFirst().setEnd("01-0C-CD-01-00-01");
 
         return Stream.of(
                 Arguments.of(cbComWithNoVlan, "Cannot configure communication for this ControlBlock because: No controlBlock communication settings found with these Criteria[cbType=GOOSE, systemVersionWithoutV=01.00.009.001, iedType=BCU, iedRedundancy=A, iedSystemVersionInstance=1, bayIntOrExt=BAY_INTERNAL]",
@@ -388,8 +438,6 @@ class ControlBlockEditorServiceTest {
                 Arguments.of(cbComWithMissingVlanId, "Cannot configure communication for this ControlBlock because no Vlan Id was provided in the settings",
                         "/SCL/IED[@name=\"IED_NAME2\"]/AccessPoint[@name=\"AP_NAME\"]/Server/LDevice[@inst=\"LD_INST21\"]/LN0/GSEControl[@name=\"CB_LD_INST21_GMI\"]"),
                 Arguments.of(cbComWithNotEnoughAppId, "Cannot configure communication for this ControlBlock because range of appId is exhausted",
-                        "/SCL/IED[@name=\"IED_NAME3\"]/AccessPoint[@name=\"AP_NAME\"]/Server/LDevice[@inst=\"LD_INST31\"]/LN0/GSEControl[@name=\"CB_LD_INST31_GSE\"]"),
-                Arguments.of(cbComWithNotEnoughMacAddress, "Cannot configure communication for this ControlBlock because range of MAC Address is exhausted",
                         "/SCL/IED[@name=\"IED_NAME3\"]/AccessPoint[@name=\"AP_NAME\"]/Server/LDevice[@inst=\"LD_INST31\"]/LN0/GSEControl[@name=\"CB_LD_INST31_GSE\"]")
         );
     }
