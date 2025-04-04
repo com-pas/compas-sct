@@ -51,9 +51,14 @@ public class DataAttributeRef {
     @NonNull
     private DaTypeName daName = new DaTypeName("");
 
-    /**
-     * Constructor
-     */
+    public DataAttributeRef(TLN tln, DoTypeName doName, DaTypeName daName) {
+        this.prefix = tln.getPrefix();
+        this.lnClass = tln.getLnClass().getFirst();
+        this.lnInst = tln.getInst();
+        this.lnType = tln.getLnType();
+        this.doName = doName;
+        this.daName = daName;
+    }
 
     public DataAttributeRef(AbstractLNAdapter<?> lnAdapter, DoTypeName doName, DaTypeName daName) {
         this.lnClass = lnAdapter.getLNClass();
