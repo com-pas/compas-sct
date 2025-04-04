@@ -10,9 +10,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.api.SclEditor;
+import org.lfenergy.compas.sct.commons.domain.DaVal;
+import org.lfenergy.compas.sct.commons.domain.DoLinkedToDaFilter;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.ExtRefService;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.com.CommunicationAdapter;
 import org.lfenergy.compas.sct.commons.scl.com.ConnectedAPAdapter;
@@ -26,14 +27,13 @@ import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
-import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
 import org.lfenergy.compas.sct.commons.util.MonitoringLnClassEnum;
 import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
 
-import static org.lfenergy.compas.sct.commons.util.CommonConstants.IED_TEST_NAME;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 import static org.lfenergy.compas.sct.commons.util.PrivateEnum.COMPAS_ICDHEADER;
 import static org.lfenergy.compas.sct.commons.util.Utils.copySclElement;
 
@@ -217,14 +217,10 @@ public class SclService implements SclEditor {
     public List<SclReportItem> manageMonitoringLns(SCL scd) {
         errorHanlder.clear();
         iedService.getFilteredIeds(scd, ied -> !ied.getName().contains(IED_TEST_NAME))
-                        .forEach(tied -> ldeviceService.findLdevice(tied, tlDevice -> "LDSUIED".equals(tlDevice.getInst()))
-                                .filter(tlDevice -> tlDevice.getLN0().isSetInputs())
+                        .forEach(tied ->
+                                ldeviceService.findLdevice(tied, tlDevice -> LDEVICE_LDSUIED.equals(tlDevice.getInst()))
                                 .ifPresent(tlDevice -> {
-                                    List<TExtRef> tExtRefs = new ExtRefService().filterDuplicatedExtRefs(tlDevice.getLN0().getInputs().getExtRef())
-                                            .stream()
-                                            .filter(TExtRef::isSetServiceType)
-                                            .filter(TExtRef::isSetSrcCBName)
-                                            .toList();
+                                    List<TExtRef> tExtRefs = new ExtRefReaderService().getExtRefs(scd).toList();
                                     manageMonitoringLns(tExtRefs.stream().filter(tExtRef -> TServiceType.GOOSE.equals(tExtRef.getServiceType())).toList(), scd, tied, tlDevice, DO_GOCBREF, MonitoringLnClassEnum.LGOS);
                                     manageMonitoringLns(tExtRefs.stream().filter(tExtRef -> TServiceType.SMV.equals(tExtRef.getServiceType())).toList(), scd, tied, tlDevice, DO_SVCBREF, MonitoringLnClassEnum.LSVS);
                                 }));
@@ -235,32 +231,40 @@ public class SclService implements SclEditor {
         List<TLN> tlns = lnService.getFilteredLns(tlDevice, tln -> monitoringLnClassEnum.value().equals(tln.getLnClass().getFirst())).toList();
         if (tlns.isEmpty())
             errorHanlder.add(SclReportItem.warning(tied.getName()+"/"+tlDevice.getInst()+"/"+monitoringLnClassEnum.value(), "There is no LN %s present in LDevice".formatted(monitoringLnClassEnum.value())));
+        if (tExtRefs.isEmpty()) {
+            return;
+        }
+        DoLinkedToDaFilter doLinkedToDaFilter = new DoLinkedToDaFilter(doName, List.of(), DA_SETSRCREF, List.of());
+        DataTypeTemplatesService dataTypeTemplatesService = new DataTypeTemplatesService();
 
-        tlns.forEach(tln -> {
-                    LNAdapter lnAdapter = new LNAdapter(new LDeviceAdapter(new IEDAdapter(new SclRootAdapter(scd), tied), tlDevice), tln);
-                    lnAdapter
-                            .getDAI(new DataAttributeRef(tln, new DoTypeName(doName), new DaTypeName(DA_SETSRCREF)), true)
-                            .stream()
-                            .findFirst()
-                            .ifPresentOrElse(daToUpdateFilter -> {
-                                removeLnsByLnClass(monitoringLnClassEnum, tlDevice);
-                                for (int i = 0; i < tExtRefs.size(); i++) {
-                                    TLN copiedLn = copySclElement(tln, TLN.class);
-                                    TExtRef tExtRef = tExtRefs.get(i);
-                                    TIED sourceIed = iedService.findByName(scd, tExtRef.getIedName())
-                                            .orElseThrow(() -> new ScdException("IED.name '" + tExtRef.getIedName() + "' not found in SCD"));
-                                    String sourceLdName = ldeviceService.findLdevice(sourceIed, tExtRef.getSrcLDInst())
-                                            .orElseThrow(() -> new ScdException(String.format("LDevice.inst '%s' not found in IED '%s'", tExtRef.getSrcLDInst(), tExtRef.getIedName())))
-                                            .getLdName();
-                                    String lnClass = !tExtRef.isSetSrcLNClass() ? TLLN0Enum.LLN_0.value() : tExtRef.getSrcLNClass().getFirst();
-                                    lnAdapter.getCurrentElem().setInst(String.valueOf(i + 1));
-                                    daToUpdateFilter.setVal(sourceLdName + "/" + lnClass + "." + tExtRef.getSrcCBName());
-                                    lnAdapter.updateDAI(daToUpdateFilter);
-                                    tlDevice.getLN().add(copiedLn);//value copy
-                                }
-                            }, () -> errorHanlder.add(SclReportItem.warning(lnAdapter.getXPath() + "/DOI@name=\"" + doName + "\"/DAI@name=\"setSrcRef\"/Val",
-                                    "The DAI cannot be updated")));
-                });
+        tlns.forEach(tln -> dataTypeTemplatesService.getFilteredDoLinkedToDa(scd.getDataTypeTemplates(), tln.getLnType(), doLinkedToDaFilter)
+                .map(doLinkedToDa -> lnService.getDoLinkedToDaCompletedFromDAI(tied, tlDevice.getInst(), tln, doLinkedToDa))
+                .findFirst()
+                .ifPresent(doLinkedToDa -> {
+                    if (!doLinkedToDa.isUpdatable()) {
+                        errorHanlder.add(SclReportItem.warning(tied.getName()+"/"+tlDevice.getInst()+"/"+monitoringLnClassEnum.value() + "/DOI@name=\"" + doName + "\"/DAI@name=\"setSrcRef\"/Val", "The DAI cannot be updated"));
+                    } else {
+                        TLN lnToUpdate = tln;
+                        // Remove LN
+                        removeLnsByLnClass(monitoringLnClassEnum, tlDevice);
+                        for (int i = 0; i < tExtRefs.size(); i++) {
+                            tlDevice.getLN().add(lnToUpdate);
+
+                            TExtRef tExtRef = tExtRefs.get(i);
+                            TIED sourceIed = iedService.findByName(scd, tExtRef.getIedName())
+                                    .orElseThrow(() -> new ScdException("IED.name '" + tExtRef.getIedName() + "' not found in SCD"));
+                            String sourceLdName = ldeviceService.findLdevice(sourceIed, tExtRef.getSrcLDInst())
+                                    .orElseThrow(() -> new ScdException(String.format("LDevice.inst '%s' not found in IED '%s'", tExtRef.getSrcLDInst(), tExtRef.getIedName())))
+                                    .getLdName();
+                            String lnClass = !tExtRef.isSetSrcLNClass() ? TLLN0Enum.LLN_0.value() : tExtRef.getSrcLNClass().getFirst();
+                            tln.setInst(String.valueOf(i + 1));
+                            doLinkedToDa.dataAttribute().getDaiValues().add(new DaVal(null, sourceLdName + "/" + lnClass + "." + tExtRef.getSrcCBName()));
+                            lnService.updateOrCreateDOAndDAInstances(lnToUpdate, doLinkedToDa);
+
+                            lnToUpdate = copySclElement(tln, TLN.class); //value copy
+                        }
+                    }
+                }));
     }
 
     private void removeLnsByLnClass(MonitoringLnClassEnum monitoringLnClassEnum, TLDevice tlDevice) {

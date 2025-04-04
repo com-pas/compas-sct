@@ -4,12 +4,10 @@
 
 package org.lfenergy.compas.sct.commons;
 
-import org.lfenergy.compas.scl2007b4.model.LN0;
-import org.lfenergy.compas.scl2007b4.model.TAnyLN;
-import org.lfenergy.compas.scl2007b4.model.TExtRef;
-import org.lfenergy.compas.scl2007b4.model.TLN;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.api.ExtRefReader;
 
+import java.util.Collection;
 import java.util.stream.Stream;
 
 public class ExtRefReaderService implements ExtRefReader {
@@ -21,4 +19,12 @@ public class ExtRefReaderService implements ExtRefReader {
             default -> throw new IllegalStateException("Unexpected value: " + tAnyLN);
         };
     }
+    public Stream<TExtRef> getExtRefs(SCL scd) {
+      return scd.getIED()
+              .stream()
+              .flatMap(tied -> new LdeviceService(new LnService()).getLdevices(tied).flatMap(tlDevice -> Stream.of(tlDevice.getLN0())))
+              .filter(TAnyLN::isSetInputs)
+              .flatMap(ln0 -> ln0.getInputs().getExtRef().stream());
+    }
+
 }

@@ -30,7 +30,10 @@ import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.asse
 class SclAutomationServiceIntegrationTest {
 
     private SclAutomationService sclAutomationService ;
-    private static final SclEditor sclEditor = new SclService() ;
+    private static final IedService iedService = new IedService() ;
+    private static final LnService lnService = new LnService() ;
+    private static final LdeviceService ldeviceService = new LdeviceService(lnService) ;
+    private static final SclEditor sclEditor = new SclService(iedService, ldeviceService, lnService) ;
     private static final SubstationEditor substationEditor = new SubstationService(new VoltageLevelService()) ;
     private static final ControlBlockEditor controlBlockEditor = new ControlBlockEditorService(new ControlService(), new LdeviceService(new LnService()), new ConnectedAPService(), new SubNetworkService());
 

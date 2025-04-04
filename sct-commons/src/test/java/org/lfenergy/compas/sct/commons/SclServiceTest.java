@@ -5,9 +5,9 @@
 package org.lfenergy.compas.sct.commons;
 
 import org.assertj.core.groups.Tuple;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.lfenergy.compas.scl2007b4.model.*;
@@ -20,8 +20,6 @@ import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,11 +34,17 @@ import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.getDAIAdapte
 import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
 import static org.lfenergy.compas.sct.commons.util.PrivateEnum.COMPAS_SCL_FILE_TYPE;
 
-@ExtendWith(MockitoExtension.class)
 class SclServiceTest {
 
-    @InjectMocks
-    SclService sclService;
+    private final IedService iedService = new IedService();
+    private final LnService lnService = new LnService();
+    private final LdeviceService ldeviceService = new LdeviceService(lnService);
+    private SclService sclService;
+
+    @BeforeEach
+    void setUp() {
+        sclService = new SclService(iedService, ldeviceService, lnService);
+    }
 
     @Test
     void addHistoryItem_should_add_history_elements() throws ScdException {
