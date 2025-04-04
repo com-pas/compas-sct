@@ -27,6 +27,7 @@ public final class CommonConstants {
     public static final String LN_PREFIX_A = "a";
     public static final String LN_PREFIX_B = "b";
     public static final String LDEVICE_LDEPF = "LDEPF";
+    public static final String LDEVICE_LDSUIED = "LDSUIED";
     public static final String CHNUM1_DO_NAME = "ChNum1";
     public static final String LEVMOD_DO_NAME = "LevMod";
     public static final String SRCREF_DO_NAME = "SrcRef";

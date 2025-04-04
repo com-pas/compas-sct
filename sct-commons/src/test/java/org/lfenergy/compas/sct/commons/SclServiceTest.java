@@ -5,12 +5,13 @@
 package org.lfenergy.compas.sct.commons;
 
 import org.assertj.core.groups.Tuple;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.api.DataTypeTemplateReader;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
@@ -20,8 +21,6 @@ import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,17 +29,25 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.LD_SUIED;
-import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.getDAIAdapters;
+import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
 import static org.lfenergy.compas.sct.commons.util.PrivateEnum.COMPAS_SCL_FILE_TYPE;
 
-@ExtendWith(MockitoExtension.class)
 class SclServiceTest {
 
-    @InjectMocks
-    SclService sclService;
+    private final IedService iedService = new IedService();
+    private final LnService lnService = new LnService();
+    private final ExtRefReaderService extRefReaderService = new ExtRefReaderService();
+    private final DataTypeTemplateReader dataTypeTemplatesService = new DataTypeTemplatesService();
+    private final LdeviceService ldeviceService = new LdeviceService(lnService);
+    private SclService sclService;
+
+    @BeforeEach
+    void setUp() {
+        sclService = new SclService(iedService, ldeviceService, lnService, extRefReaderService, dataTypeTemplatesService);
+    }
 
     @Test
     void addHistoryItem_should_add_history_elements() throws ScdException {
@@ -414,13 +421,25 @@ class SclServiceTest {
         List<SclReportItem> sclReportItems = sclService.manageMonitoringLns(scd);
         //Then
         assertThat(sclReportItems).isEmpty();
-        LDeviceAdapter lDeviceAdapter = new SclRootAdapter(scd).getIEDAdapterByName("IED_NAME1").getLDeviceAdapterByLdInst(LD_SUIED);
+        assertIsMarshallable(scd);
+        LDeviceAdapter lDeviceAdapter = new SclRootAdapter(scd).getIEDAdapterByName("IED_NAME1").getLDeviceAdapterByLdInst(LD_LDSUIED);
         assertThat(lDeviceAdapter.getLNAdapters())
                 .hasSize(4)
                 .extracting(LNAdapter::getLNClass, LNAdapter::getLNInst).containsExactlyInAnyOrder(
                         Tuple.tuple("LGOS", "1"), Tuple.tuple("LGOS", "2"),
                         Tuple.tuple("LSVS", "1"), Tuple.tuple("LSVS", "2"));
-        assertIsMarshallable(scd);
+        assertThat(getDaiValues(lDeviceAdapter, "LGOS", "1", "GoCBRef", "setSrcRef"))
+                .hasSize(1).extracting(TVal::getValue)
+                .containsExactly("IED_NAME2LD_INST21/LLN0.goose1");
+        assertThat(getDaiValues(lDeviceAdapter, "LGOS", "2", "GoCBRef", "setSrcRef"))
+                .hasSize(1).extracting(TVal::getValue)
+                .containsExactly("IED_NAME2LD_INST21/LLN0.goose1");
+        assertThat(getDaiValues(lDeviceAdapter, "LSVS", "1", "SvCBRef", "setSrcRef"))
+                .hasSize(1).extracting(TVal::getValue)
+                .containsExactly("IED_NAME2LD_INST21/LLN0.smv2");
+        assertThat(getDaiValues(lDeviceAdapter, "LSVS", "2", "SvCBRef", "setSrcRef"))
+                .hasSize(1).extracting(TVal::getValue)
+                .containsExactly("IED_NAME2LD_INST21/LLN0.smv2");
     }
 
     @Test
@@ -436,7 +455,7 @@ class SclServiceTest {
         List<SclReportItem> sclReportItems = sclService.manageMonitoringLns(scd);
         //Then
         assertThat(sclReportItems).isEmpty();
-        LDeviceAdapter lDeviceAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1").getLDeviceAdapterByLdInst(LD_SUIED);
+        LDeviceAdapter lDeviceAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1").getLDeviceAdapterByLdInst(LD_LDSUIED);
         assertThat(lDeviceAdapter.getLNAdapters())
                 .hasSize(2)
                 .extracting(LNAdapter::getLNClass, LNAdapter::getLNInst).containsExactlyInAnyOrder(
@@ -449,10 +468,10 @@ class SclServiceTest {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/monitoring_lns/scd_monitoring_lsvs_lgos.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        LDeviceAdapter lDeviceAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1").getLDeviceAdapterByLdInst(LD_SUIED);
-        getDAIAdapters(lDeviceAdapter, "LGOS", "GoCBRef", "setSrcRef")
+        LDeviceAdapter lDeviceAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1").getLDeviceAdapterByLdInst(LD_LDSUIED);
+        getDAIAdapters(lDeviceAdapter, "LGOS", "3", "GoCBRef", "setSrcRef")
                 .forEach(daiAdapter -> daiAdapter.getCurrentElem().setValImport(false));
-        getDAIAdapters(lDeviceAdapter, "LSVS", "SvCBRef", "setSrcRef")
+        getDAIAdapters(lDeviceAdapter, "LSVS", "9", "SvCBRef", "setSrcRef")
                 .forEach(daiAdapter -> daiAdapter.getCurrentElem().setValImport(false));
         // When
         List<SclReportItem> sclReportItems = sclService.manageMonitoringLns(scd);
@@ -467,6 +486,51 @@ class SclServiceTest {
                 .extracting(LNAdapter::getLNClass, LNAdapter::getLNInst).containsExactlyInAnyOrder(
                         Tuple.tuple("LGOS", "3"), Tuple.tuple("LSVS", "9"));
         assertIsMarshallable(scd);
+    }
+
+    @Test
+    void manageMonitoringLns_should_return_error_when_target_lns_not_found() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/monitoring_lns/scd_monitoring_lsvs_lgos.xml");
+        LDeviceAdapter lDeviceAdapter = new SclRootAdapter(scd).getIEDAdapterByName("IED_NAME1").getLDeviceAdapterByLdInst(LD_LDSUIED);
+        lDeviceAdapter.getCurrentElem().getLN().clear();
+        // When
+        List<SclReportItem> sclReportItems = sclService.manageMonitoringLns(scd);
+        //Then
+        assertThat(sclReportItems)
+                .isNotEmpty()
+                .hasSize(2)
+                .extracting(SclReportItem::xpath, SclReportItem::message)
+                .containsExactly(tuple("IED_NAME1/LDSUIED/LGOS", "There is no LN LGOS present in LDevice"), tuple("IED_NAME1/LDSUIED/LSVS", "There is no LN LSVS present in LDevice"));
+    }
+
+    @Test
+    void manageMonitoringLns_should_update_and_create_lsvs_and_goose_when_contains_privates() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/monitoring_lns/scd_monitoring_lsvs_lgos_with_privates.xml");
+        // When
+        List<SclReportItem> sclReportItems = sclService.manageMonitoringLns(scd);
+        //Then
+        assertThat(sclReportItems).isEmpty();
+        assertIsMarshallable(scd);
+        LDeviceAdapter lDeviceAdapter = new SclRootAdapter(scd).getIEDAdapterByName("IED_NAME1").getLDeviceAdapterByLdInst(LD_LDSUIED);
+        assertThat(lDeviceAdapter.getLNAdapters())
+                .hasSize(4)
+                .extracting(LNAdapter::getLNClass, LNAdapter::getLNInst).containsExactlyInAnyOrder(
+                        Tuple.tuple("LGOS", "1"), Tuple.tuple("LGOS", "2"),
+                        Tuple.tuple("LSVS", "1"), Tuple.tuple("LSVS", "2"));
+        assertThat(getDaiValues(lDeviceAdapter, "LGOS", "1", "GoCBRef", "setSrcRef"))
+                .hasSize(1).extracting(TVal::getValue)
+                .containsExactly("IED_NAME2LD_INST21/LLN0.goose1");
+        assertThat(getDaiValues(lDeviceAdapter, "LGOS", "2", "GoCBRef", "setSrcRef"))
+                .hasSize(1).extracting(TVal::getValue)
+                .containsExactly("IED_NAME2LD_INST21/LLN0.goose1");
+        assertThat(getDaiValues(lDeviceAdapter, "LSVS", "1", "SvCBRef", "setSrcRef"))
+                .hasSize(1).extracting(TVal::getValue)
+                .containsExactly("IED_NAME2LD_INST21/LLN0.smv2");
+        assertThat(getDaiValues(lDeviceAdapter, "LSVS", "2", "SvCBRef", "setSrcRef"))
+                .hasSize(1).extracting(TVal::getValue)
+                .containsExactly("IED_NAME2LD_INST21/LLN0.smv2");
     }
 
 }

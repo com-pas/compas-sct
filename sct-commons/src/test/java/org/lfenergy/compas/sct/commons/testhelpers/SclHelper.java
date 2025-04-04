@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.in;
 import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newConnectedAp;
 import static org.lfenergy.compas.sct.commons.util.Utils.lnClassEquals;
 
@@ -39,7 +40,7 @@ public final class SclHelper {
 
     public static final String DO_GOCBREF = "GoCBRef";
     public static final String DO_SVCBREF = "SvCBRef";
-    public static final String LD_SUIED = "LDSUIED";
+    public static final String LD_LDSUIED = "LDSUIED";
     public static final String IED_NAME_1 = "IED_NAME_1";
     public static final String IED_NAME_2 = "IED_NAME_2";
 
@@ -312,7 +313,7 @@ public final class SclHelper {
 
         TLDevice tlDevice1 = new TLDevice();
         tlDevice1.setLN0(new LN0());
-        tlDevice1.setInst(LD_SUIED);
+        tlDevice1.setInst(LD_LDSUIED);
         TLN tln1 = new TLN();
         tln1.getLnClass().add(lnClass);
         tln1.setLnType("T1");
@@ -353,16 +354,17 @@ public final class SclHelper {
         return new SclRootAdapter(scd);
     }
 
-    public static List<TVal> getDaiValues(LDeviceAdapter lDeviceAdapter, String lnClass, String doName, String daName) {
-        return getDAIAdapters(lDeviceAdapter, lnClass, doName, daName)
+    public static List<TVal> getDaiValues(LDeviceAdapter lDeviceAdapter, String lnClass, String inst, String doName, String daName) {
+        return getDAIAdapters(lDeviceAdapter, lnClass, inst, doName, daName)
                 .map(daiAdapter -> daiAdapter.getCurrentElem().getVal())
                 .flatMap(List::stream)
                 .toList();
     }
 
-    public static Stream<DOIAdapter.DAIAdapter> getDAIAdapters(LDeviceAdapter lDeviceAdapter, String lnClass, String doName, String daName) {
+    public static Stream<DOIAdapter.DAIAdapter> getDAIAdapters(LDeviceAdapter lDeviceAdapter, String lnClass, String inst, String doName, String daName) {
         return lDeviceAdapter.getLNAdapters().stream()
-                .filter(lnAdapter -> lnClassEquals(lnAdapter.getCurrentElem().getLnClass(), lnClass))
+                .filter(lnAdapter -> lnClassEquals(lnAdapter.getCurrentElem().getLnClass(), lnClass)
+                && lnAdapter.getCurrentElem().getInst().equals(inst))
                 .map(lnAdapter -> lnAdapter.getDOIAdapterByName(doName))
                 .map(doiAdapter -> (DOIAdapter.DAIAdapter) doiAdapter.getDataAdapterByName(daName));
     }

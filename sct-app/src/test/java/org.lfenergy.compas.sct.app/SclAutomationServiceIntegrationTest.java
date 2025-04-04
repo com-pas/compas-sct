@@ -10,6 +10,7 @@ import org.lfenergy.compas.scl2007b4.model.LN0;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.sct.commons.*;
 import org.lfenergy.compas.sct.commons.api.ControlBlockEditor;
+import org.lfenergy.compas.sct.commons.api.DataTypeTemplateReader;
 import org.lfenergy.compas.sct.commons.api.SclEditor;
 import org.lfenergy.compas.sct.commons.api.SubstationEditor;
 import org.lfenergy.compas.sct.commons.dto.HeaderDTO;
@@ -29,9 +30,14 @@ import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.asse
 
 class SclAutomationServiceIntegrationTest {
 
-    private SclAutomationService sclAutomationService ;
-    private static final SclEditor sclEditor = new SclService() ;
-    private static final SubstationEditor substationEditor = new SubstationService(new VoltageLevelService()) ;
+    private SclAutomationService sclAutomationService;
+    private static final IedService iedService = new IedService();
+    private static final LnService lnService = new LnService();
+    private static final ExtRefReaderService extRefReaderService = new ExtRefReaderService();
+    private static final DataTypeTemplateReader dataTypeTemplatesService = new DataTypeTemplatesService() ;
+    private static final LdeviceService ldeviceService = new LdeviceService(lnService);
+    private static final SclEditor sclEditor = new SclService(iedService, ldeviceService, lnService, extRefReaderService, dataTypeTemplatesService) ;
+    private static final SubstationEditor substationEditor = new SubstationService(new VoltageLevelService());
     private static final ControlBlockEditor controlBlockEditor = new ControlBlockEditorService(new ControlService(), new LdeviceService(new LnService()), new ConnectedAPService(), new SubNetworkService());
 
     private HeaderDTO headerDTO;

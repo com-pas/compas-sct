@@ -33,9 +33,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
 import static org.lfenergy.compas.sct.commons.util.ControlBlockEnum.*;
-import static org.lfenergy.compas.sct.commons.util.Utils.copySclElement;
 
 class LDeviceAdapterTest {
 
@@ -487,111 +485,5 @@ class LDeviceAdapterTest {
                 .isInstanceOf(NullPointerException.class);
     }
 
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("provideLnClassAndDoType")
-    void manageMonitoringLns_when_no_extRef_should_not_update_ln(String testCase, MonitoringLnClassEnum lnClassEnum, String doName) {
-        // Given
-        LDeviceAdapter lDeviceAdapter = createIedsInScl(lnClassEnum.value(), doName).getIEDAdapterByName(IED_NAME_1).getLDeviceAdapterByLdInst(LD_SUIED);
-        // When
-        Optional<SclReportItem> sclReportItem = lDeviceAdapter.manageMonitoringLns(new ArrayList<>(), doName, lnClassEnum);
-        // Then
-        assertThat(sclReportItem).isNotPresent();
-        assertThat(lDeviceAdapter.getLNAdapters())
-                .hasSize(1);
-        assertThat(lDeviceAdapter.getLNAdapters().get(0).getLNInst()).isNull();
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("provideLnClassAndDoType")
-    void manageMonitoringLns_when_no_init_ln_should_not_create_ln(String testCase, MonitoringLnClassEnum lnClassEnum, String doName) {
-        // Given
-        LDeviceAdapter lDeviceAdapter = createIedsInScl(lnClassEnum.value(), doName).getIEDAdapterByName(IED_NAME_1).getLDeviceAdapterByLdInst(LD_SUIED);
-        lDeviceAdapter.getCurrentElem().unsetLN();
-        // When
-        Optional<SclReportItem> sclReportItem = lDeviceAdapter.manageMonitoringLns(List.of(new TExtRef()), doName, lnClassEnum);
-        // Then
-        assertThat(sclReportItem).isPresent();
-        assertThat(sclReportItem.get())
-                .extracting(SclReportItem::message)
-                .isEqualTo("There is no LN " + lnClassEnum.value() + " present in LDevice");
-        assertThat(lDeviceAdapter.getLNAdapters()).isEmpty();
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("provideLnClassAndDoType")
-    void manageMonitoringLns_when_one_extRef_and_dai_updatable_should_update_ln(String testCase, MonitoringLnClassEnum lnClassEnum, String doName, TServiceType tServiceType) {
-        // Given
-        LDeviceAdapter lDeviceAdapter = createIedsInScl(lnClassEnum.value(), doName).getIEDAdapterByName(IED_NAME_1).getLDeviceAdapterByLdInst(LD_SUIED);
-        TExtRef tExtRef = createExtRefExample("CB_Name", tServiceType);
-
-        // When
-        Optional<SclReportItem> sclReportItem = lDeviceAdapter.manageMonitoringLns(List.of(tExtRef), doName, lnClassEnum);
-        // Then
-        assertThat(sclReportItem).isNotPresent();
-        assertThat(lDeviceAdapter.getLNAdapters())
-                .hasSize(1)
-                .map(LNAdapter::getLNInst)
-                .isEqualTo(List.of("1"));
-        assertThat(getDaiValues(lDeviceAdapter, lnClassEnum.value(), doName, "setSrcRef"))
-                .hasSize(1)
-                .extracting(TVal::getValue)
-                .containsExactly("LD_Name/LLN0.CB_Name");
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("provideLnClassAndDoType")
-    void manageMonitoringLns_when_one_extRef_and_dai_not_updatable_should_not_update_ln(String testCase, MonitoringLnClassEnum lnClassEnum, String doName, TServiceType tServiceType) {
-        // Given
-        SclRootAdapter sclRootAdapter = createIedsInScl(lnClassEnum.value(), doName);
-        sclRootAdapter.getDataTypeTemplateAdapter().getDOTypeAdapterById("REF").get().getDAAdapterByName("setSrcRef")
-                .get().getCurrentElem().setValImport(false);
-        LDeviceAdapter lDeviceAdapter = sclRootAdapter.getIEDAdapterByName(IED_NAME_1).getLDeviceAdapterByLdInst(LD_SUIED);
-        TExtRef tExtRef = createExtRefExample("CB_Name", tServiceType);
-
-        // When
-        Optional<SclReportItem> sclReportItem = lDeviceAdapter.manageMonitoringLns(List.of(tExtRef), doName, lnClassEnum);
-        // Then
-        assertThat(sclReportItem).isPresent();
-        assertThat(sclReportItem.get())
-                .extracting(SclReportItem::message)
-                .isEqualTo("The DAI cannot be updated");
-        assertThat(lDeviceAdapter.getLNAdapters())
-                .hasSize(1);
-        assertThat(lDeviceAdapter.getLNAdapters().get(0).getLNInst()).isNull();
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("provideLnClassAndDoType")
-    void manageMonitoringLns_when_2_extRef_and_dai_updatable_should_update_ln(String testCase, MonitoringLnClassEnum lnClassEnum, String doName, TServiceType tServiceType) {
-        // Given
-        LDeviceAdapter lDeviceAdapter = createIedsInScl(lnClassEnum.value(), doName).getIEDAdapterByName(IED_NAME_1).getLDeviceAdapterByLdInst(LD_SUIED);
-        TLN copiedLN1 = copySclElement(lDeviceAdapter.getLNAdapters().get(0).getCurrentElem(), TLN.class);
-        copiedLN1.setInst("23");
-        TLN copiedLN2 = copySclElement(lDeviceAdapter.getLNAdapters().get(0).getCurrentElem(), TLN.class);
-        copiedLN2.setInst("24");
-        lDeviceAdapter.getCurrentElem().getLN().addAll(List.of(copiedLN1, copiedLN2));
-        TExtRef tExtRef1 = createExtRefExample("CB_Name_1", tServiceType);
-        TExtRef tExtRef2 = createExtRefExample("CB_Name_2", tServiceType);
-
-        // When
-        Optional<SclReportItem> sclReportItem = lDeviceAdapter.manageMonitoringLns(List.of(tExtRef1, tExtRef2), doName, lnClassEnum);
-        // Then
-        assertThat(sclReportItem).isNotPresent();
-        assertThat(lDeviceAdapter.getLNAdapters())
-                .hasSize(2)
-                .map(LNAdapter::getLNInst)
-                .isEqualTo(List.of("1", "2"));
-        assertThat(getDaiValues(lDeviceAdapter, lnClassEnum.value(), doName, "setSrcRef"))
-                .hasSize(2)
-                .extracting(TVal::getValue)
-                .containsExactly("LD_Name/LLN0.CB_Name_1", "LD_Name/LLN0.CB_Name_2");
-    }
-
-    private static Stream<Arguments> provideLnClassAndDoType() {
-        return Stream.of(
-                Arguments.of("Case GOOSE : ln LGOS", MonitoringLnClassEnum.LGOS, DO_GOCBREF, TServiceType.GOOSE),
-                Arguments.of("Case SMV : ln LSVS", MonitoringLnClassEnum.LSVS, DO_SVCBREF, TServiceType.SMV)
-        );
-    }
 }
 
