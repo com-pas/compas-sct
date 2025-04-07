@@ -25,4 +25,8 @@ public class LnodeTypeService {
         return getFilteredLnodeTypes(tDataTypeTemplates, tlNodeTypePredicate).findFirst();
     }
 
+    public Optional<TLNodeType> findLnodeType(TDataTypeTemplates tDataTypeTemplates, String lNodeTypeId) {
+        return getFilteredLnodeTypes(tDataTypeTemplates, tlNodeType -> tlNodeType.getId().equals(lNodeTypeId)).findFirst();
+    }
+
 }

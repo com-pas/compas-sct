@@ -183,7 +183,7 @@ public class LNodeDTO {
                     .lnType(lnType)
                     .build();
 
-            TLNodeType lnodeType = new LnodeTypeService().findLnodeType(scl.getDataTypeTemplates(), lnodeType1 -> lnodeType1.getId().equals(lnType))
+            TLNodeType lnodeType = new LnodeTypeService().findLnodeType(scl.getDataTypeTemplates(), lnType)
                     .orElseThrow(() -> new IllegalArgumentException("Corrupted SCD file: reference to unknown lnType(" + lnType + ")"));
             List<DataAttributeRef> dataAttributeRefList = new LNodeTypeAdapter(new DataTypeTemplateAdapter(new SclRootAdapter(scl), scl.getDataTypeTemplates()), lnodeType)
                     .getDataAttributeRefs(filter);

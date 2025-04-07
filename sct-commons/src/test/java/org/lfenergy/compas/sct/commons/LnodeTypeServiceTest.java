@@ -15,12 +15,13 @@ import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 
 class LnodeTypeServiceTest {
 
+    private final LnodeTypeService lnodeTypeService = new LnodeTypeService();
+
     @Test
     void getLnodeTypes() {
         //Given
         SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
         TDataTypeTemplates dataTypeTemplates = std.getDataTypeTemplates();
-        LnodeTypeService lnodeTypeService = new LnodeTypeService();
 
         //When
         List<TLNodeType> tlnodeTypes = lnodeTypeService.getLnodeTypes(dataTypeTemplates).toList();
@@ -51,7 +52,6 @@ class LnodeTypeServiceTest {
         //Given
         SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
         TDataTypeTemplates dataTypeTemplates = std.getDataTypeTemplates();
-        LnodeTypeService lnodeTypeService = new LnodeTypeService();
 
         //When
         List<TLNodeType> tlnodeTypes =
@@ -69,11 +69,25 @@ class LnodeTypeServiceTest {
         //Given
         SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
         TDataTypeTemplates dataTypeTemplates = std.getDataTypeTemplates();
-        LnodeTypeService lnodeTypeService = new LnodeTypeService();
 
         //When
         TLNodeType tlnodeType =
                 lnodeTypeService.findLnodeType(dataTypeTemplates, tlNodeType -> tlNodeType.getLnClass().contains("LPAI")).orElseThrow();
+
+        //Then
+        assertThat(tlnodeType)
+                .extracting(TLNodeType::getLnClass, TLNodeType::getId)
+                .containsExactly(List.of("LPAI"), "RTE_8884DBCF760D916CCE3EE9D1846CE46F_LPAI_V1.0.0");
+    }
+
+    @Test
+    void findLnodeType_should_find_by_id() {
+        //Given
+        TDataTypeTemplates dataTypeTemplates = SclTestMarshaller.getSCLFromFile("/std/std_sample.std").getDataTypeTemplates();
+        String lNodeTypeId = "RTE_8884DBCF760D916CCE3EE9D1846CE46F_LPAI_V1.0.0";
+
+        //When
+        TLNodeType tlnodeType = lnodeTypeService.findLnodeType(dataTypeTemplates, lNodeTypeId).orElseThrow();
 
         //Then
         assertThat(tlnodeType)
