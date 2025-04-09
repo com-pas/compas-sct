@@ -21,12 +21,13 @@ import static org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateTestUtils.
 
 class DoTypeServiceTest {
 
+    private final DoTypeService doTypeService = new DoTypeService();
+
     @Test
     void getDoTypes() {
         //Given
         SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
         TDataTypeTemplates dataTypeTemplates = std.getDataTypeTemplates();
-        DoTypeService doTypeService = new DoTypeService();
 
         //When
         List<TDOType> tdoTypes = doTypeService.getDoTypes(dataTypeTemplates).toList();
@@ -41,7 +42,6 @@ class DoTypeServiceTest {
         //Given
         SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
         TDataTypeTemplates dataTypeTemplates = std.getDataTypeTemplates();
-        DoTypeService doTypeService = new DoTypeService();
 
         //When
         List<TDOType> tdoTypes =
@@ -61,10 +61,24 @@ class DoTypeServiceTest {
         //Given
         SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
         TDataTypeTemplates dataTypeTemplates = std.getDataTypeTemplates();
-        DoTypeService doTypeService = new DoTypeService();
 
         //When
         TDOType tdoType = doTypeService.findDoType(dataTypeTemplates, tdoType1 -> TPredefinedCDCEnum.DPL.equals(tdoType1.getCdc())).orElseThrow();
+
+        //Then
+        assertThat(tdoType)
+                .extracting(TDOType::getCdc, TDOType::getId)
+                .containsExactly(TPredefinedCDCEnum.DPL, "RTE_X_X_X_48BA5C40D0913654FA5291A28C0D9716_DPL_V1.0.0");
+    }
+
+    @Test
+    void findDoType_should_find_by_id() {
+        //Given
+        TDataTypeTemplates dataTypeTemplates = SclTestMarshaller.getSCLFromFile("/std/std_sample.std").getDataTypeTemplates();
+        String doTypeId = "RTE_X_X_X_48BA5C40D0913654FA5291A28C0D9716_DPL_V1.0.0";
+
+        //When
+        TDOType tdoType = doTypeService.findDoType(dataTypeTemplates, doTypeId).orElseThrow();
 
         //Then
         assertThat(tdoType)
@@ -78,7 +92,6 @@ class DoTypeServiceTest {
         String SCD_DTT_DO_SDO_DA_BDA = "/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda_test.xml";
         TDataTypeTemplates dtt = initDttFromFile(SCD_DTT_DO_SDO_DA_BDA);
 
-        DoTypeService doTypeService = new DoTypeService();
         TDOType tdoType = doTypeService.findDoType(dtt, tdoType1 -> tdoType1.getId()
                 .equals("DOType0")).orElseThrow();
 
@@ -122,7 +135,6 @@ class DoTypeServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
         TDataTypeTemplates dtt = scd.getDataTypeTemplates();
 
-        DoTypeService doTypeService = new DoTypeService();
         TDOType tdoType = doTypeService.findDoType(dtt, tdoType1 -> tdoType1.getId()
                 .equals("DO11")).orElseThrow();
         DataObject dataObject = new DataObject();

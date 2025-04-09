@@ -25,4 +25,8 @@ public class DoService {
         return getFilteredDos(tlNodeType, tdoPredicate).findFirst();
     }
 
+    public Optional<TDO> findDo(TLNodeType tlNodeType, String doName) {
+        return getFilteredDos(tlNodeType, tdo -> tdo.getName().equals(doName)).findFirst();
+    }
+
 }
