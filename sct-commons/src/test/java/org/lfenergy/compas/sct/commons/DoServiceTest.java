@@ -17,12 +17,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class DoServiceTest {
 
+    private final DoService doService = new DoService();
+
     @Test
     void getDos() {
         //Given
         SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
-        TLNodeType lnodeType = std.getDataTypeTemplates().getLNodeType().get(0);
-        DoService doService = new DoService();
+        TLNodeType lnodeType = std.getDataTypeTemplates().getLNodeType().getFirst();
 
         //When
         List<TDO> dos = doService.getDos(lnodeType).toList();
@@ -51,8 +52,7 @@ class DoServiceTest {
     void getFilteredDos() {
         //Given
         SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
-        TLNodeType lnodeType = std.getDataTypeTemplates().getLNodeType().get(0);
-        DoService doService = new DoService();
+        TLNodeType lnodeType = std.getDataTypeTemplates().getLNodeType().getFirst();
 
         //When
         List<TDO> dos = doService.getFilteredDos(lnodeType, tdo -> "NumInput1".equals(tdo.getName())).toList();
@@ -68,11 +68,25 @@ class DoServiceTest {
     void findDo() {
         //Given
         SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
-        TLNodeType lnodeType = std.getDataTypeTemplates().getLNodeType().get(0);
-        DoService doService = new DoService();
+        TLNodeType lnodeType = std.getDataTypeTemplates().getLNodeType().getFirst();
 
         //When
         TDO tdo1 = doService.findDo(lnodeType, tdo -> "NumInput1".equals(tdo.getName())).orElseThrow();
+
+        //Then
+        assertThat(tdo1)
+                .extracting(TDO::getName, TDO::getType)
+                .containsExactly("NumInput1", "RTE_X_X_X_553F8AE90EC0448B1518B00F5EAABB58_ING_V1.0.0");
+    }
+
+    @Test
+    void findDo_should_find_by_name() {
+        //Given
+        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        TLNodeType lnodeType = std.getDataTypeTemplates().getLNodeType().getFirst();
+
+        //When
+        TDO tdo1 = doService.findDo(lnodeType, "NumInput1").orElseThrow();
 
         //Then
         assertThat(tdo1)

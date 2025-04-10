@@ -13,11 +13,9 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
-import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
 import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import org.lfenergy.compas.sct.commons.util.MonitoringLnClassEnum;
 import org.lfenergy.compas.sct.commons.util.ServicesConfigEnum;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
@@ -64,9 +62,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
 
     private static final String MESSAGE_LDEVICE_INST_NOT_FOUND = "LDevice.inst '%s' not found in IED '%s'";
-    private static final String DO_GOCBREF = "GoCBRef";
-    private static final String DO_SVCBREF = "SvCBRef";
-    private static final String LDSUIED_LDINST = "LDSUIED";
 
     /**
      * Constructor
@@ -388,34 +383,6 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
      */
     public Optional<TCompasSystemVersion> getCompasSystemVersion() {
         return PrivateUtils.extractCompasPrivate(currentElem, TCompasSystemVersion.class);
-    }
-
-    /**
-     * Update and/or create Monitoring LNs (LSVS and LGOS) into LDSUIED for each bound ExtRef of each LDevice
-     *
-     * @return a list of SclReport Objects that contains errors
-     */
-    public List<SclReportItem> manageMonitoringLns() {
-        List<SclReportItem> sclReportItems = new ArrayList<>();
-        findLDeviceAdapterByLdInst(LDSUIED_LDINST).ifPresent(lDeviceAdapter -> {
-            lDeviceAdapter.manageMonitoringLns(retrieveAllExtRefForServiceType(TServiceType.GOOSE), DO_GOCBREF, MonitoringLnClassEnum.LGOS)
-                    .ifPresent(sclReportItems::add);
-            lDeviceAdapter.manageMonitoringLns(retrieveAllExtRefForServiceType(TServiceType.SMV), DO_SVCBREF, MonitoringLnClassEnum.LSVS)
-                    .ifPresent(sclReportItems::add);
-        });
-        return sclReportItems;
-    }
-
-    private List<TExtRef> retrieveAllExtRefForServiceType(TServiceType tServiceType) {
-        return streamLDeviceAdapters()
-                .map(LDeviceAdapter::getLN0Adapter)
-                .filter(AbstractLNAdapter::hasInputs)
-                .map(LN0Adapter::getInputsAdapter)
-                .map(InputsAdapter::filterDuplicatedExtRefs)
-                .flatMap(List::stream)
-                .filter(tExtRef -> tExtRef.isSetServiceType() && tExtRef.isSetSrcCBName() &&
-                        tServiceType.equals(tExtRef.getServiceType()))
-                .toList();
     }
 
 }

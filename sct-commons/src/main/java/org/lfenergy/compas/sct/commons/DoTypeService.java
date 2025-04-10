@@ -17,7 +17,8 @@ import java.util.stream.Stream;
 public class DoTypeService {
 
     final DaTypeService daTypeService = new DaTypeService();
-    final SDOOrDAService sdoOrDAService = new SDOOrDAService();
+    final DaService daService = new DaService();
+    final SdoService sdoService = new SdoService();
     final BDAService bdaService = new BDAService();
 
     public Stream<TDOType> getDoTypes(TDataTypeTemplates tDataTypeTemplates) {
@@ -32,10 +33,14 @@ public class DoTypeService {
         return getFilteredDoTypes(tDataTypeTemplates, tdoTypePredicate).findFirst();
     }
 
+    public Optional<TDOType> findDoType(TDataTypeTemplates tDataTypeTemplates, String doTypeId) {
+        return getFilteredDoTypes(tDataTypeTemplates, tdoType -> tdoType.getId().equals(doTypeId)).findFirst();
+    }
+
     public List<DoLinkedToDa> getAllSDOLinkedToDa(TDataTypeTemplates dtt, TDOType tdoType, DoLinkedToDa doLinkedToDaTemplate) {
         List<DoLinkedToDa> result = new ArrayList<>();
         // DA -> BDA -> BDA..
-        sdoOrDAService.getDAs(tdoType).forEach(tda -> {
+        daService.getDAs(tdoType).forEach(tda -> {
             DoLinkedToDa doLinkedToDa = doLinkedToDaTemplate.deepCopy();
             doLinkedToDa.dataAttribute().setDaName(tda.getName());
             if (tda.isSetFc()) {
@@ -52,10 +57,10 @@ public class DoTypeService {
             }
         });
         // SDO -> SDO -> SDO..
-        sdoOrDAService.getSDOs(tdoType)
+        sdoService.getSDOs(tdoType)
                 .forEach(tsdo -> {
                     if (tsdo.isSetType()) {
-                        findDoType(dtt, tdoType1 -> tdoType1.getId().equals(tsdo.getType()))
+                        findDoType(dtt, tsdo.getType())
                                 .ifPresent(nextDoType -> {
                                     DoLinkedToDa newDoLinkedToDa = doLinkedToDaTemplate.deepCopy();
                                     newDoLinkedToDa.dataObject().getSdoNames().add(tsdo.getName());

@@ -27,7 +27,8 @@ public class DataTypeTemplatesService implements DataTypeTemplateReader {
     final DoTypeService doTypeService = new DoTypeService();
     final DaTypeService daTypeService = new DaTypeService();
     final DoService doService = new DoService();
-    final SDOOrDAService sdoOrDAService = new SDOOrDAService();
+    final DaService daService = new DaService();
+    final SdoService sdoService = new SdoService();
     final BDAService bdaService = new BDAService();
 
     /**
@@ -48,10 +49,10 @@ public class DataTypeTemplatesService implements DataTypeTemplateReader {
      * @return true if the Data Object (Mod) and Data attribute (stVal) present, false otherwise
      */
     public boolean isDoModAndDaStValExist(TDataTypeTemplates dtt, String lNodeTypeId) {
-        return lnodeTypeService.findLnodeType(dtt, lNodeType -> lNodeTypeId.equals(lNodeType.getId()))
-                .flatMap(lNodeType -> doService.findDo(lNodeType, tdo -> MOD_DO_NAME.equals(tdo.getName()))
-                        .flatMap(tdo -> doTypeService.findDoType(dtt, doType -> tdo.getType().equals(doType.getId()))
-                                .map(doType -> sdoOrDAService.findDA(doType, tda -> STVAL_DA_NAME.equals(tda.getName())).isPresent())))
+        return lnodeTypeService.findLnodeType(dtt, lNodeTypeId)
+                .flatMap(lNodeType -> doService.findDo(lNodeType, MOD_DO_NAME)
+                        .flatMap(tdo -> doTypeService.findDoType(dtt, tdo.getType())
+                                .map(doType -> daService.findDA(doType, STVAL_DA_NAME).isPresent())))
                 .orElse(false);
     }
 
@@ -62,7 +63,7 @@ public class DataTypeTemplatesService implements DataTypeTemplateReader {
                     DoLinkedToDa doLinkedToDa = new DoLinkedToDa(new DataObject(), new DataAttribute());
                     return tlNodeType.getDO()
                             .stream()
-                            .map(tdo -> doTypeService.findDoType(dtt, tdoType -> tdoType.getId().equals(tdo.getType()))
+                            .map(tdo -> doTypeService.findDoType(dtt, tdo.getType())
                                     .map(doType -> {
                                         doLinkedToDa.dataObject().setDoName(tdo.getName());
                                         return doTypeService.getAllSDOLinkedToDa(dtt, doType, doLinkedToDa).stream();
@@ -74,7 +75,7 @@ public class DataTypeTemplatesService implements DataTypeTemplateReader {
 
     @Override
     public Stream<DoLinkedToDa> getFilteredDoLinkedToDa(TDataTypeTemplates dtt, String lNodeTypeId, DoLinkedToDaFilter doLinkedToDaFilter) {
-        return lnodeTypeService.findLnodeType(dtt, tlNodeType -> tlNodeType.getId().equals(lNodeTypeId))
+        return lnodeTypeService.findLnodeType(dtt, lNodeTypeId)
                 .stream()
                 .flatMap(tlNodeType -> doService.getFilteredDos(tlNodeType, tdo -> StringUtils.isBlank(doLinkedToDaFilter.doName())
                                 || doLinkedToDaFilter.doName().equals(tdo.getName()))
@@ -82,7 +83,7 @@ public class DataTypeTemplatesService implements DataTypeTemplateReader {
                             DataObject dataObject = new DataObject();
                             dataObject.setDoName(tdo.getName());
                             DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, new DataAttribute());
-                            return doTypeService.findDoType(dtt, tdoType -> tdoType.getId().equals(tdo.getType()))
+                            return doTypeService.findDoType(dtt, tdo.getType())
                                     .stream()
                                     .flatMap(tdoType -> {
                                         doLinkedToDa.dataObject().setCdc(tdoType.getCdc());
@@ -99,17 +100,17 @@ public class DataTypeTemplatesService implements DataTypeTemplateReader {
         List<String> dataRefList = new ArrayList<>(doLinkedToDaFilter.sdoNames());
         dataRefList.addAll(doLinkedToDaFilter.bdaNames());
 
-        return lnodeTypeService.findLnodeType(dtt, lNodeType -> lNodeTypeId.equals(lNodeType.getId()))
-                .flatMap(lNodeType -> doService.findDo(lNodeType, tdo -> tdo.getName().equals(doLinkedToDaFilter.doName()))
+        return lnodeTypeService.findLnodeType(dtt, lNodeTypeId)
+                .flatMap(lNodeType -> doService.findDo(lNodeType, doLinkedToDaFilter.doName())
                         // Search DoType for each DO
-                        .flatMap(tdo -> doTypeService.findDoType(dtt, doType -> doType.getId().equals(tdo.getType()))
+                        .flatMap(tdo -> doTypeService.findDoType(dtt, tdo.getType())
                                 .flatMap(tdoType -> {
                                     // Search last DoType from DOType (SDO) > DOType (SDO)
                                     TDOType lastDoType = findDOTypeBySdoName(dtt, tdoType, dataRefList);
                                     // Prepare DataObject
                                     DataObject dataObject = new DataObject(tdo.getName(), tdoType.getCdc(), doLinkedToDaFilter.sdoNames());
                                     // Search first DA from last DoType
-                                    return sdoOrDAService.findDA(lastDoType, tda -> tda.getName().equals(doLinkedToDaFilter.daName()))
+                                    return daService.findDA(lastDoType, doLinkedToDaFilter.daName())
                                             .flatMap(tda -> {
                                                 // Prepare DataAttribute
                                                 DataAttribute dataAttribute = new DataAttribute();
@@ -165,14 +166,14 @@ public class DataTypeTemplatesService implements DataTypeTemplateReader {
     }
 
     private Optional<TDAType> getDATypeByDaName(TDataTypeTemplates dtt, TDOType tdoType, String daName) {
-        return sdoOrDAService.findDA(tdoType, tda -> tda.getName().equals(daName))
+        return daService.findDA(tdoType, daName)
                 .flatMap(tda -> daTypeService.findDaType(dtt, tda.getType()));
     }
 
     private TDOType findDOTypeBySdoName(TDataTypeTemplates dtt, TDOType tdoType, List<String> sdoNames) {
         if (sdoNames.isEmpty()) return tdoType;
-        return sdoOrDAService.findSDO(tdoType, tsdo -> tsdo.getName().equals(sdoNames.getFirst()))
-                .flatMap(tsdo -> doTypeService.findDoType(dtt, tdoType2 -> tdoType2.getId().equals(tsdo.getType())))
+        return sdoService.findSDO(tdoType, sdoNames.getFirst())
+                .flatMap(tsdo -> doTypeService.findDoType(dtt, tsdo.getType()))
                 .map(tdoType2 -> {
                     sdoNames.removeFirst();
                     return findDOTypeBySdoName(dtt, tdoType2, sdoNames);

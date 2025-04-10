@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.util;
 
+import jakarta.xml.bind.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -11,19 +12,17 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.commons.support.ReflectionSupport;
-import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
-import org.lfenergy.compas.scl2007b4.model.TLN;
-import org.lfenergy.compas.scl2007b4.model.TP;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.FCDAInfo;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
+import javax.xml.namespace.QName;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.lfenergy.compas.sct.commons.util.Utils.copySclElement;
-
 
 class UtilsTest {
 
@@ -525,4 +524,5 @@ class UtilsTest {
         // Then
         assertThat(result).isEmpty();
     }
+
 }

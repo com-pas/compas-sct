@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.api;
 
+import jakarta.xml.bind.JAXBContext;
 import lombok.NonNull;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.sct.commons.dto.*;

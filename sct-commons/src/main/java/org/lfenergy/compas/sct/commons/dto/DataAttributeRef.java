@@ -51,10 +51,6 @@ public class DataAttributeRef {
     @NonNull
     private DaTypeName daName = new DaTypeName("");
 
-    /**
-     * Constructor
-     */
-
     public DataAttributeRef(AbstractLNAdapter<?> lnAdapter, DoTypeName doName, DaTypeName daName) {
         this.lnClass = lnAdapter.getLNClass();
         this.lnInst = lnAdapter.getLNInst();

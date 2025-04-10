@@ -4,10 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.util;
 
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.JAXBElement;
-import jakarta.xml.bind.JAXBException;
-import jakarta.xml.bind.Unmarshaller;
+import jakarta.xml.bind.*;
 import jakarta.xml.bind.util.JAXBSource;
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.TP;
