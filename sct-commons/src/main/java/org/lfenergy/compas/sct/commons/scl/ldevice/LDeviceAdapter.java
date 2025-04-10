@@ -17,12 +17,9 @@ import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
-import org.lfenergy.compas.sct.commons.util.MonitoringLnClassEnum;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
-
-import static org.lfenergy.compas.sct.commons.util.Utils.copySclElement;
 
 /**
  * A representation of the model object
@@ -378,63 +375,6 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
     private boolean hasCBNameConf(TServiceSettings tServiceSettings) {
         return tServiceSettings.isSetCbName()
                 && (TServiceSettingsNoDynEnum.CONF.equals(tServiceSettings.getCbName()));
-    }
-
-    /**
-     * Update and/or create Monitoring LNs (LSVS and LGOS) into LDSUIED from ExtRefs binding
-     *
-     * @param tExtRefs              ExtRefs for which source Control Blocks (Goose or SMV) should be monitored
-     * @param monitoringLnClassEnum LNClass value for LN to monitor
-     * @return a list of SclReport Objects that contains errors
-     */
-    public Optional<SclReportItem> manageMonitoringLns(List<TExtRef> tExtRefs, String doName, MonitoringLnClassEnum monitoringLnClassEnum) {
-        if (tExtRefs.isEmpty()) {
-            return Optional.empty();
-        }
-        return getLNAdapters().stream().filter(lnAdapter -> monitoringLnClassEnum.value().equals(lnAdapter.getLNClass()))
-                .map(lnAdapter -> {
-                    Optional<SclReportItem> optionalSclReportItem = Optional.empty();
-                    DataAttributeRef filter = new DataAttributeRef(lnAdapter, new DoTypeName(doName), new DaTypeName(DA_SETSRCREF));
-                    Optional<DataAttributeRef> foundDai = lnAdapter.getDAI(filter, true).stream().findFirst();
-                    if (foundDai.isEmpty()) {
-                        optionalSclReportItem = Optional.of(SclReportItem.warning(lnAdapter.getXPath() + "/DOI@name=\"" + doName + "\"/DAI@name=\"setSrcRef\"/Val",
-                                "The DAI cannot be updated"));
-                    } else {
-                        DataAttributeRef daToUpdateFilter = foundDai.get();
-                        TLN lnToUpdate = lnAdapter.getCurrentElem();
-                        removeLnsByLnClass(monitoringLnClassEnum);
-                        for (int i = 0; i < tExtRefs.size(); i++) {
-                            getCurrentElem().getLN().add(lnToUpdate);
-                            updateNewCreatedLnDaiValue(lnToUpdate, tExtRefs.get(i), String.valueOf(i + 1), daToUpdateFilter);
-                            lnToUpdate = copySclElement(lnAdapter.getCurrentElem(), TLN.class); //value copy
-                        }
-                    }
-                    return optionalSclReportItem;
-                }).findFirst()
-                .orElse(Optional.of(SclReportItem.warning(getXPath(), "There is no LN %s present in LDevice".formatted(monitoringLnClassEnum.value()))));
-    }
-
-    private void removeLnsByLnClass(MonitoringLnClassEnum monitoringLnClassEnum) {
-        List<TLN> lnToKeep = getCurrentElem().getLN().stream()
-                .filter(tln -> !Utils.lnClassEquals(tln.getLnClass(), monitoringLnClassEnum.value()))
-                .toList();
-        getCurrentElem().unsetLN();
-        getCurrentElem().getLN().addAll(lnToKeep);
-    }
-
-    private void updateNewCreatedLnDaiValue(TLN tln, TExtRef tExtRef, String lnInst, DataAttributeRef daToUpdate) {
-        LNAdapter lnAdapter = new LNAdapter(this, tln);
-        String value = createVal(tExtRef);
-        lnAdapter.getCurrentElem().setInst(lnInst);
-        daToUpdate.setVal(value);
-        lnAdapter.updateDAI(daToUpdate);
-    }
-
-    private String createVal(TExtRef tExtRef) {
-        String sourceLdName = getParentAdapter().getParentAdapter().getIEDAdapterByName(tExtRef.getIedName())
-                .getLDeviceAdapterByLdInst(tExtRef.getSrcLDInst()).getLdName();
-        String lnClass = !tExtRef.isSetSrcLNClass() ? TLLN0Enum.LLN_0.value() : tExtRef.getSrcLNClass().getFirst();
-        return sourceLdName + "/" + lnClass + "." + tExtRef.getSrcCBName();
     }
 
 }

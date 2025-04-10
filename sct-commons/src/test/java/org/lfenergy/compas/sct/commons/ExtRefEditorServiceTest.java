@@ -476,7 +476,7 @@ class ExtRefEditorServiceTest {
         SCL scd = createIedsInScl("ANCR", "do1").getCurrentElem();
         ExtRefInfo extRefInfo = new ExtRefInfo();
         extRefInfo.setHolderIEDName(IED_NAME_1);
-        extRefInfo.setHolderLDInst(LD_SUIED);
+        extRefInfo.setHolderLDInst(LD_LDSUIED);
         extRefInfo.setHolderLnClass("LLN0");
         ExtRefBindingInfo extRefBindingInfo = new ExtRefBindingInfo();
         ExtRefSignalInfo extRefSignalInfo = new ExtRefSignalInfo();
