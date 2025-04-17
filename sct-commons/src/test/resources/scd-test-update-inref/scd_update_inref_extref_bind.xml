@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- SPDX-FileCopyrightText: 2021 2025 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+<SCL version="2007" revision="B" release="4" xmlns="http://www.iec.ch/61850/2003/SCL">
+    <Header id="hId" version="2007" revision="B" toolID="COMPAS"/>
+    <IED name="IED_NAME1">
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LD1" ldName="IED_NAME1LD_INST12">
+                    <LN0 lnClass="LLN0" inst="" lnType="LN11">
+                        <DOI name="InRef1">
+                            <DAI name="purpose">
+                                <Val>purpose value</Val>
+                            </DAI>
+                            <DAI name="setSrcRef" valKind="RO" valImport="true"/>
+                            <DAI name="setSrcCB" valKind="RO" valImport="true"/>
+                            <DAI name="setTstRef" valKind="RO" valImport="true"/>
+                            <DAI name="setTstCB" valKind="RO" valImport="true"/>
+                        </DOI>
+                        <Inputs>
+                            <ExtRef iedName="IED_NAME1" ldInst="LD2" desc="purpose value AA_1"
+                                    lnClass="ANCR" lnInst="1" prefix="PR" intAddr="INT_ADDR11" pDO="Do11.sdo11"
+                                    doName="Do11.sdo11"/>
+                        </Inputs>
+                    </LN0>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
+    <DataTypeTemplates>
+        <LNodeType lnClass="LLN0" id="LN11">
+            <DO name="Do11" type="DO11" transient="true"/>
+            <DO name="InRef1" type="DOType_13"/>
+        </LNodeType>
+        <LNodeType lnClass="ANCR" id="LN12">
+            <DO name="Do21" type="DO11"/>
+        </LNodeType>
+        <DOType cdc="WYE" id="DO11">
+            <SDO name="sdo11" type="DO12"/>
+        </DOType>
+        <DOType cdc="WYE" id="DO12">
+            <SDO name="sdo11" type="DO12"/>
+        </DOType>
+        <DOType cdc="ORG" id="DOType_13">
+            <DA fc="SP" dchg="true" name="setSrcRef" bType="ObjRef"/>
+            <DA fc="SP" dchg="true" name="setSrcCB" bType="ObjRef"/>
+            <DA fc="SP" dchg="true" name="intAddr" bType="VisString255"/>
+            <DA fc="DC" name="purpose" bType="VisString255"/>
+            <DA fc="DC" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+        </DOType>
+    </DataTypeTemplates>
+</SCL>

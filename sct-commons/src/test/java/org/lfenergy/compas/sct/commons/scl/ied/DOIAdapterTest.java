@@ -451,7 +451,7 @@ class DOIAdapterTest {
     }
 
     @Test
-    void updateDaiFromExtRef_when_none_ExtRef_endin_with_1_should_return_warning_report() {
+    void updateDaiFromExtRef_when_none_ExtRef_endin_with_1_should_not_return_error() {
         // Given
         DOIAdapter.DAIAdapter daiAdapter = initInnerDAIAdapter("Do", "da");
         DOIAdapter doiAdapter = daiAdapter.getParentAdapter();
@@ -465,10 +465,7 @@ class DOIAdapterTest {
         List<SclReportItem> sclReportItems = doiAdapter.updateDaiFromExtRef(List.of(extRef3));
 
         // Then
-        assertThat(sclReportItems)
-                .isNotEmpty()
-                .extracting(SclReportItem::message)
-                .contains("The DOI /DOI[@name=\"Do\"] can't be bound with an ExtRef");
+        assertThat(sclReportItems).isEmpty();
         assertThat(doiAdapter.getDataAdapterByName(SETSRCREF_DA_NAME)).isNotNull();
         assertThat(getDaiValOfDoi(doiAdapter, SETSRCREF_DA_NAME)).isNotPresent();
     }
@@ -493,7 +490,7 @@ class DOIAdapterTest {
     }
 
     @Test
-    void updateDaiFromExtRef_when_no_ExtRef_in_LNode_should_return_filled_ReportItem() {
+    void updateDaiFromExtRef_when_no_ExtRef_in_LNode_should_not_return_error() {
         // Given
         DOIAdapter.DAIAdapter daiAdapter = initInnerDAIAdapter("Do", "da");
         DOIAdapter doiAdapter = daiAdapter.getParentAdapter();
@@ -502,11 +499,7 @@ class DOIAdapterTest {
         List<SclReportItem> sclReportItems = doiAdapter.updateDaiFromExtRef(List.of());
 
         // Then
-        assertThat(sclReportItems)
-                .isNotEmpty();
-        assertThat(sclReportItems)
-                .extracting(SclReportItem::message)
-                .contains("The DOI /DOI[@name=\"Do\"] can't be bound with an ExtRef");
+        assertThat(sclReportItems).isEmpty();
     }
 
     @Test
