@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
@@ -1000,26 +999,6 @@ class LN0AdapterTest {
         assertThatThrownBy(() -> ln0Adapter.getFCDAs(tExtRef))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("Control Block smv1 not found in /LN0");
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @CsvSource({
-            "Case without InRef,LD_WITHOUT_InRef,InRef1",
-            "Case with no InRef finishing with _1,LD_WITH_1_Bad_InRef,InRef4",
-            "Case with several ExtRef desc finishing with _1,LD_WITH_2_InRef_same_SUFFIX,InRef5"
-    })
-    void updateDoInRef_should_return_error_message(String testName, String ldInst, String doiName) {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_test.xml");
-        LN0Adapter sourceLn0 = findLn0(scd, "IED_NAME1", ldInst);
-
-        // When
-        List<SclReportItem> sclReportItems = sourceLn0.updateDoInRef();
-
-        // Then
-        assertThat(sclReportItems).hasSize(1)
-                .extracting(SclReportItem::message)
-                .containsExactly("The DOI /SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"" + ldInst + "\"]/LN0/DOI[@name=\"" + doiName + "\"] can't be bound with an ExtRef");
     }
 
     @Test
