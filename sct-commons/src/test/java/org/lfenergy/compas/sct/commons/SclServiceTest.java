@@ -475,24 +475,55 @@ class SclServiceTest {
         //Then
         assertThat(sclReportItems).isEmpty();
         assertIsMarshallable(scd);
-        LDeviceAdapter lDeviceAdapter = new SclRootAdapter(scd).getIEDAdapterByName("IED_NAME1").getLDeviceAdapterByLdInst(LD_LDSUIED);
-        assertThat(lDeviceAdapter.getLNAdapters())
-                .hasSize(4)
-                .extracting(LNAdapter::getLNClass, LNAdapter::getLNInst).containsExactlyInAnyOrder(
-                        Tuple.tuple("LGOS", "1"), Tuple.tuple("LGOS", "2"),
-                        Tuple.tuple("LSVS", "1"), Tuple.tuple("LSVS", "2"));
-        assertThat(getDaiValues(lDeviceAdapter, "LGOS", "1", "GoCBRef", "setSrcRef"))
-                .hasSize(1).extracting(TVal::getValue)
-                .containsExactly("IED_NAME2LD_INST21/LLN0.goose1");
-        assertThat(getDaiValues(lDeviceAdapter, "LGOS", "2", "GoCBRef", "setSrcRef"))
-                .hasSize(1).extracting(TVal::getValue)
-                .containsExactly("IED_NAME2LD_INST21/LLN0.goose1");
-        assertThat(getDaiValues(lDeviceAdapter, "LSVS", "1", "SvCBRef", "setSrcRef"))
-                .hasSize(1).extracting(TVal::getValue)
-                .containsExactly("IED_NAME2LD_INST21/LLN0.smv2");
-        assertThat(getDaiValues(lDeviceAdapter, "LSVS", "2", "SvCBRef", "setSrcRef"))
-                .hasSize(1).extracting(TVal::getValue)
-                .containsExactly("IED_NAME2LD_INST21/LLN0.smv2");
+        assertThat(scd.getIED())
+                .filteredOn(tied -> tied.getName().equals("IED_NAME1"))
+                .flatExtracting(TIED::getAccessPoint)
+                .extracting(TAccessPoint::getServer)
+                .flatExtracting(TServer::getLDevice)
+                .filteredOn(tlDevice -> tlDevice.getInst().equals(LD_LDSUIED))
+                .extracting(TLDevice::getLN)
+                .allSatisfy(tlns -> {
+                    // Expected number of LGOS and LSVS
+                    assertThat(tlns).hasSize(4).extracting(tln -> tln.getLnClass().getFirst(), TLN::getInst).containsExactlyInAnyOrder(
+                            Tuple.tuple("LGOS", "1"), Tuple.tuple("LGOS", "2"),
+                            Tuple.tuple("LSVS", "1"), Tuple.tuple("LSVS", "2"));
+
+                    // LGOS setSrcRef value
+                    assertThat(tlns)
+                            .filteredOn(tln -> tln.getLnClass().contains("LGOS") && tln.getInst().equals("1"))
+                            .flatExtracting(TAnyLN::getDOI)
+                            .filteredOn(tdoi -> tdoi.getName().equals("GoCBRef"))
+                            .flatExtracting(TDOI::getSDIOrDAI)
+                            .filteredOn(tUnNaming -> tUnNaming.getClass().equals(TDAI.class) && ((TDAI)tUnNaming).getName().equals("setSrcRef"))
+                            .map(tUnNaming -> ((TDAI)tUnNaming).getVal().getFirst().getValue())
+                            .containsExactly("IED_NAME1LD_INST22/LLN0.goose1");
+                    assertThat(tlns)
+                            .filteredOn(tln -> tln.getLnClass().contains("LGOS") && tln.getInst().equals("2"))
+                            .flatExtracting(TAnyLN::getDOI)
+                            .filteredOn(tdoi -> tdoi.getName().equals("GoCBRef"))
+                            .flatExtracting(TDOI::getSDIOrDAI)
+                            .filteredOn(tUnNaming -> tUnNaming.getClass().equals(TDAI.class) && ((TDAI)tUnNaming).getName().equals("setSrcRef"))
+                            .map(tUnNaming -> ((TDAI)tUnNaming).getVal().getFirst().getValue())
+                            .containsExactly("IED_NAME2LD_INST21/LLN0.goose1");
+
+                    // LSVS setSrcRef value
+                    assertThat(tlns)
+                            .filteredOn(tln -> tln.getLnClass().contains("LSVS") && tln.getInst().equals("1"))
+                            .flatExtracting(TAnyLN::getDOI)
+                            .filteredOn(tdoi -> tdoi.getName().equals("SvCBRef"))
+                            .flatExtracting(TDOI::getSDIOrDAI)
+                            .filteredOn(tUnNaming -> tUnNaming.getClass().equals(TDAI.class) && ((TDAI)tUnNaming).getName().equals("setSrcRef"))
+                            .map(tUnNaming -> ((TDAI)tUnNaming).getVal().getFirst().getValue())
+                            .containsExactly("IED_NAME1LD_INST22/LLN0.smv2");
+                    assertThat(tlns)
+                            .filteredOn(tln -> tln.getLnClass().contains("LSVS") && tln.getInst().equals("2"))
+                            .flatExtracting(TAnyLN::getDOI)
+                            .filteredOn(tdoi -> tdoi.getName().equals("SvCBRef"))
+                            .flatExtracting(TDOI::getSDIOrDAI)
+                            .filteredOn(tUnNaming -> tUnNaming.getClass().equals(TDAI.class) && ((TDAI)tUnNaming).getName().equals("setSrcRef"))
+                            .map(tUnNaming -> ((TDAI)tUnNaming).getVal().getFirst().getValue())
+                            .containsExactly("IED_NAME2LD_INST21/LLN0.smv2");
+                });
     }
 
     @Test
@@ -566,24 +597,56 @@ class SclServiceTest {
         //Then
         assertThat(sclReportItems).isEmpty();
         assertIsMarshallable(scd);
-        LDeviceAdapter lDeviceAdapter = new SclRootAdapter(scd).getIEDAdapterByName("IED_NAME1").getLDeviceAdapterByLdInst(LD_LDSUIED);
-        assertThat(lDeviceAdapter.getLNAdapters())
-                .hasSize(4)
-                .extracting(LNAdapter::getLNClass, LNAdapter::getLNInst).containsExactlyInAnyOrder(
-                        Tuple.tuple("LGOS", "1"), Tuple.tuple("LGOS", "2"),
-                        Tuple.tuple("LSVS", "1"), Tuple.tuple("LSVS", "2"));
-        assertThat(getDaiValues(lDeviceAdapter, "LGOS", "1", "GoCBRef", "setSrcRef"))
-                .hasSize(1).extracting(TVal::getValue)
-                .containsExactly("IED_NAME2LD_INST21/LLN0.goose1");
-        assertThat(getDaiValues(lDeviceAdapter, "LGOS", "2", "GoCBRef", "setSrcRef"))
-                .hasSize(1).extracting(TVal::getValue)
-                .containsExactly("IED_NAME2LD_INST21/LLN0.goose1");
-        assertThat(getDaiValues(lDeviceAdapter, "LSVS", "1", "SvCBRef", "setSrcRef"))
-                .hasSize(1).extracting(TVal::getValue)
-                .containsExactly("IED_NAME2LD_INST21/LLN0.smv2");
-        assertThat(getDaiValues(lDeviceAdapter, "LSVS", "2", "SvCBRef", "setSrcRef"))
-                .hasSize(1).extracting(TVal::getValue)
-                .containsExactly("IED_NAME2LD_INST21/LLN0.smv2");
+
+        assertThat(scd.getIED())
+                .filteredOn(tied -> tied.getName().equals("IED_NAME1"))
+                .flatExtracting(TIED::getAccessPoint)
+                .extracting(TAccessPoint::getServer)
+                .flatExtracting(TServer::getLDevice)
+                .filteredOn(tlDevice -> tlDevice.getInst().equals(LD_LDSUIED))
+                .extracting(TLDevice::getLN)
+                .allSatisfy(tlns -> {
+                            // Expected number of LGOS and LSVS
+                            assertThat(tlns).hasSize(4).extracting(tln -> tln.getLnClass().getFirst(), TLN::getInst).containsExactlyInAnyOrder(
+                                            Tuple.tuple("LGOS", "1"), Tuple.tuple("LGOS", "2"),
+                                            Tuple.tuple("LSVS", "1"), Tuple.tuple("LSVS", "2"));
+
+                            // LGOS setSrcRef value
+                            assertThat(tlns)
+                                    .filteredOn(tln -> tln.getLnClass().contains("LGOS") && tln.getInst().equals("1"))
+                                    .flatExtracting(TAnyLN::getDOI)
+                                    .filteredOn(tdoi -> tdoi.getName().equals("GoCBRef"))
+                                    .flatExtracting(TDOI::getSDIOrDAI)
+                                    .filteredOn(tUnNaming -> tUnNaming.getClass().equals(TDAI.class) && ((TDAI)tUnNaming).getName().equals("setSrcRef"))
+                                    .map(tUnNaming -> ((TDAI)tUnNaming).getVal().getFirst().getValue())
+                                    .containsExactly("IED_NAME1LD_INST22/LLN0.goose1");
+                            assertThat(tlns)
+                                    .filteredOn(tln -> tln.getLnClass().contains("LGOS") && tln.getInst().equals("2"))
+                                    .flatExtracting(TAnyLN::getDOI)
+                                    .filteredOn(tdoi -> tdoi.getName().equals("GoCBRef"))
+                                    .flatExtracting(TDOI::getSDIOrDAI)
+                                    .filteredOn(tUnNaming -> tUnNaming.getClass().equals(TDAI.class) && ((TDAI)tUnNaming).getName().equals("setSrcRef"))
+                                    .map(tUnNaming -> ((TDAI)tUnNaming).getVal().getFirst().getValue())
+                                    .containsExactly("IED_NAME2LD_INST21/LLN0.goose1");
+
+                            // LSVS setSrcRef value
+                            assertThat(tlns)
+                                    .filteredOn(tln -> tln.getLnClass().contains("LSVS") && tln.getInst().equals("1"))
+                                    .flatExtracting(TAnyLN::getDOI)
+                                    .filteredOn(tdoi -> tdoi.getName().equals("SvCBRef"))
+                                    .flatExtracting(TDOI::getSDIOrDAI)
+                                    .filteredOn(tUnNaming -> tUnNaming.getClass().equals(TDAI.class) && ((TDAI)tUnNaming).getName().equals("setSrcRef"))
+                                    .map(tUnNaming -> ((TDAI)tUnNaming).getVal().getFirst().getValue())
+                                    .containsExactly("IED_NAME1LD_INST22/LLN0.smv2");
+                            assertThat(tlns)
+                                    .filteredOn(tln -> tln.getLnClass().contains("LSVS") && tln.getInst().equals("2"))
+                                    .flatExtracting(TAnyLN::getDOI)
+                                    .filteredOn(tdoi -> tdoi.getName().equals("SvCBRef"))
+                                    .flatExtracting(TDOI::getSDIOrDAI)
+                                    .filteredOn(tUnNaming -> tUnNaming.getClass().equals(TDAI.class) && ((TDAI)tUnNaming).getName().equals("setSrcRef"))
+                                    .map(tUnNaming -> ((TDAI)tUnNaming).getVal().getFirst().getValue())
+                                    .containsExactly("IED_NAME2LD_INST21/LLN0.smv2");
+                        });
     }
 
 }

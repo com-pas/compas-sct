@@ -4,7 +4,6 @@
 
 package org.lfenergy.compas.sct.commons;
 
-import jakarta.xml.bind.JAXBContext;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +37,7 @@ import java.util.stream.Collectors;
 
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 import static org.lfenergy.compas.sct.commons.util.PrivateEnum.COMPAS_ICDHEADER;
+import static org.lfenergy.compas.sct.commons.util.Utils.copyLn;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -269,26 +269,6 @@ public class SclService implements SclEditor {
                     }
                     ldsuiedLdevice.getLN().remove(lgosOrLsvs); //We can remove this LGOS or LSVS as we already added new ones
                 }));
-    }
-
-    private TLN copyLn(TLN tln) {
-        TLN newLn = new TLN();
-        newLn.getLnClass().addAll(tln.getLnClass());
-        newLn.setInst(tln.getInst());
-        newLn.setLnType(tln.getLnType());
-        newLn.setPrefix(tln.getPrefix());
-        newLn.setDesc(tln.getDesc());
-        newLn.setInputs(tln.getInputs());
-        newLn.setText(tln.getText());
-        newLn.getPrivate().addAll(tln.getPrivate());
-        newLn.getDataSet().addAll(tln.getDataSet());
-        newLn.getAny().addAll(tln.getAny());
-        newLn.getDOI().addAll(tln.getDOI());
-        newLn.getLog().addAll(tln.getLog());
-        newLn.getLogControl().addAll(tln.getLogControl());
-        newLn.getOtherAttributes().putAll(tln.getOtherAttributes());
-        newLn.getReportControl().addAll(tln.getReportControl());
-        return newLn;
     }
 
 }
