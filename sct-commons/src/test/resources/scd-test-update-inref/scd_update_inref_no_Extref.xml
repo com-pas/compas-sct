@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- SPDX-FileCopyrightText: 2021 2025 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+<SCL version="2007" revision="B" release="4" xmlns="http://www.iec.ch/61850/2003/SCL">
+    <Header id="hId" version="2007" revision="B" toolID="COMPAS"/>
+    <IED name="IED_NAME1">
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <!-- Case when No InRef in LDevice-->
+                <LDevice inst="LD_WITHOUT_InRef" ldName="IED_NAME1LD_INST11">
+                    <LN0 lnClass="LLN0" inst="" lnType="LN11">
+                        <DOI name="InRef1">
+                            <DAI name="purpose">
+                                <Val>LD_WITHOUT_InRef_DOI_InRef1</Val>
+                            </DAI>
+                        </DOI>
+                    </LN0>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
+    <DataTypeTemplates>
+        <LNodeType lnClass="LLN0" id="LN11">
+            <DO name="Do11" type="DO11" transient="true"/>
+            <DO name="InRef1" type="DOType_13"/>
+        </LNodeType>
+        <LNodeType lnClass="ANCR" id="LN12">
+            <DO name="Do21" type="DO11"/>
+        </LNodeType>
+        <DOType cdc="WYE" id="DO11">
+            <SDO name="sdo11" type="DO12"/>
+        </DOType>
+        <DOType cdc="WYE" id="DO12">
+            <SDO name="sdo11" type="DO12"/>
+        </DOType>
+        <DOType cdc="ORG" id="DOType_13">
+            <DA fc="SP" dchg="true" name="setSrcRef" bType="ObjRef"/>
+            <DA fc="SP" dchg="true" name="setSrcCB" bType="ObjRef"/>
+            <DA fc="SP" dchg="true" name="intAddr" bType="VisString255"/>
+            <DA fc="DC" name="purpose" bType="VisString255"/>
+            <DA fc="DC" name="d" bType="VisString255" valKind="RO" valImport="false"/>
+        </DOType>
+    </DataTypeTemplates>
+</SCL>

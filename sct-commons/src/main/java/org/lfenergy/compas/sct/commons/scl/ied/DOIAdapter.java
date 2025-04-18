@@ -126,10 +126,7 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
                     updateDAI(SETTSTCB_DA_NAME, valueTstCb).ifPresent(sclReportItems::add);
                 }
             }
-        } else {
-            sclReportItems.add(SclReportItem.warning(getXPath(), "The DOI %s can't be bound with an ExtRef".formatted(getXPath())));
         }
-
         return sclReportItems;
     }
 

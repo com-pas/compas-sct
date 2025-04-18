@@ -386,15 +386,68 @@ class SclServiceTest {
     }
 
     @Test
-    @Tag("issue-321")
-    void updateDoInRef_when_ExtRefNotCoherent_shouldReturnReportWithError() {
+    void updateDoInRef_when_No_ExtRef_for_InRef_should_not_return_error() {
         // Given
-        SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_issue_231_test_ko.xml");
+        SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_no_Extref.xml");
         // When
         List<SclReportItem> sclReportItems = sclService.updateDoInRef(givenScl);
         // Then
-        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
-        assertThat(sclReportItems).hasSize(4);
+        assertThat(sclReportItems).isEmpty();
+    }
+
+    @Test
+    void updateDoInRef_when_ExtRef_bind_and_desc_suffix_not_match_should_not_return_error() {
+        // Given
+        SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_extref_bind_desc_suffix_not_match.xml");
+        // When
+        List<SclReportItem> sclReportItems = sclService.updateDoInRef(givenScl);
+        // Then
+        assertThat(sclReportItems).isEmpty();
+    }
+
+    @Test
+    void updateDoInRef_when_ExtRef_bind_should_succeed() {
+        // Given
+        SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_extref_bind.xml");
+        // When
+        List<SclReportItem> sclReportItems = sclService.updateDoInRef(givenScl);
+        // Then
+        assertThat(sclReportItems).isEmpty();
+        assertThat(givenScl.getIED())
+                .filteredOn(tied -> tied.getName().equals("IED_NAME1"))
+                .flatExtracting(TIED::getAccessPoint)
+                .extracting(TAccessPoint::getServer)
+                .flatExtracting(TServer::getLDevice)
+                .filteredOn(tlDevice -> tlDevice.getInst().equals("LD1"))
+                .map(TLDevice::getLN0)
+                .flatExtracting(TAnyLN::getDOI)
+                .filteredOn(tdoi -> tdoi.getName().equals("InRef1"))
+                .flatExtracting(TDOI::getSDIOrDAI)
+                .filteredOn(tUnNaming -> tUnNaming.getClass().equals(TDAI.class) && ((TDAI)tUnNaming).getName().equals("setSrcRef"))
+                .map(tUnNaming -> ((TDAI)tUnNaming).getVal().getFirst().getValue())
+                .containsExactly("IED_NAME1LD2/PRANCR1.Do11.sdo11");
+    }
+
+    @Test
+    void updateDoInRef_when_ExtRef_bind_should_not_return_error() {
+        // Given
+        SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_extref_not_bind.xml");
+        // When
+        List<SclReportItem> sclReportItems = sclService.updateDoInRef(givenScl);
+        // Then
+        assertThat(sclReportItems).isEmpty();
+    }
+
+    @Test
+    void updateDoInRef_when_Inref_purpose_not_set_should_return_report_with_warning() {
+        // Given
+        SCL givenScl = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_when_inref_purpose_not_set.xml");
+        // When
+        List<SclReportItem> sclReportItems = sclService.updateDoInRef(givenScl);
+        // Then
+        assertThat(sclReportItems.stream().filter(sclReportItem -> !sclReportItem.isError()).map(SclReportItem::message))
+                .hasSize(1)
+                .containsExactly("The DOI /SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_Without_Val_in_DAI_purpose\"]/LN0 can't be bound with an ExtRef");
     }
 
     private Optional<TVal> getValFromDaiName(SCL scl, String iedName, String ldInst, String doiName, String daiName) {
