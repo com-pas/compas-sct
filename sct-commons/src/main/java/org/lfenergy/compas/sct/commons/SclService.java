@@ -4,7 +4,6 @@
 
 package org.lfenergy.compas.sct.commons;
 
-import jakarta.xml.bind.JAXBContext;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +37,7 @@ import java.util.stream.Collectors;
 
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 import static org.lfenergy.compas.sct.commons.util.PrivateEnum.COMPAS_ICDHEADER;
+import static org.lfenergy.compas.sct.commons.util.Utils.copyLn;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -224,21 +224,24 @@ public class SclService implements SclEditor {
         errorHanlder.clear();
         iedService.getFilteredIeds(scd, ied -> !ied.getName().contains(IED_TEST_NAME))
                 .forEach(tied -> {
-                    Map<TServiceType, List<TExtRef>> serviceTypeToExtRefs = ldeviceService.getLdevices(tied)
+                    Map<TServiceType, List<IedSource>> serviceTypeToIedSource = ldeviceService.getLdevices(tied)
                             .flatMap(tlDevice -> extRefReaderService.getExtRefs(tlDevice.getLN0()))
                             .filter(tExtRef -> tExtRef.isSetServiceType() && tExtRef.isSetSrcCBName() && (tExtRef.getServiceType().equals(TServiceType.GOOSE) || tExtRef.getServiceType().equals(TServiceType.SMV)))
-                            .collect(Collectors.groupingBy(TExtRef::getServiceType));
+                            .collect(Collectors.groupingBy(tExtRef -> new IedSource(tExtRef.getIedName(), tExtRef.getSrcCBName(), tExtRef.getSrcLDInst(), tExtRef.getServiceType())))
+                            .keySet()
+                            .stream()
+                            .collect(Collectors.groupingBy(IedSource::serviceType));
                     ldeviceService.findLdevice(tied, LDEVICE_LDSUIED).ifPresent(ldSUIEDLDevice -> {
-                        Optional.ofNullable(serviceTypeToExtRefs.get(TServiceType.GOOSE))
-                                .ifPresent(extRefs -> manageMonitoringLns(extRefs, scd, tied, ldSUIEDLDevice, DO_GOCBREF, MonitoringLnClassEnum.LGOS));
-                        Optional.ofNullable(serviceTypeToExtRefs.get(TServiceType.SMV))
-                                .ifPresent(extRefs -> manageMonitoringLns(extRefs, scd, tied, ldSUIEDLDevice, DO_SVCBREF, MonitoringLnClassEnum.LSVS));
+                        Optional.ofNullable(serviceTypeToIedSource.get(TServiceType.GOOSE))
+                                .ifPresent(iedSourceKeys -> manageMonitoringLns(iedSourceKeys, scd, tied, ldSUIEDLDevice, DO_GOCBREF, MonitoringLnClassEnum.LGOS));
+                        Optional.ofNullable(serviceTypeToIedSource.get(TServiceType.SMV))
+                                .ifPresent(iedSourceKeys -> manageMonitoringLns(iedSourceKeys, scd, tied, ldSUIEDLDevice, DO_SVCBREF, MonitoringLnClassEnum.LSVS));
                     });
                 });
         return errorHanlder;
     }
 
-    private void manageMonitoringLns(List<TExtRef> tExtRefs, SCL scd, TIED tied, TLDevice ldsuiedLdevice, String doName, MonitoringLnClassEnum monitoringLnClassEnum) {
+    private void manageMonitoringLns(List<IedSource> iedSources, SCL scd, TIED tied, TLDevice ldsuiedLdevice, String doName, MonitoringLnClassEnum monitoringLnClassEnum) {
         List<TLN> lgosOrLsvsLns = lnService.getFilteredLns(ldsuiedLdevice, tln -> monitoringLnClassEnum.value().equals(tln.getLnClass().getFirst())).toList();
         if (lgosOrLsvsLns.isEmpty())
             errorHanlder.add(SclReportItem.warning(tied.getName() + "/" + LDEVICE_LDSUIED + "/" + monitoringLnClassEnum.value(), "There is no LN %s present in LDevice".formatted(monitoringLnClassEnum.value())));
@@ -252,43 +255,24 @@ public class SclService implements SclEditor {
                     return doLinkedToDa.isUpdatable();
                 })
                 .ifPresent(doLinkedToDa -> {
-                    log.info("Processing %d ExtRefs in LDName=%s of service type %s for LN (lnClass=%s, inst=%s, prefix=%s)".formatted(tExtRefs.size(), ldsuiedLdevice.getLdName(), monitoringLnClassEnum.value(), lgosOrLsvs.getLnClass().getFirst(), lgosOrLsvs.getInst(), lgosOrLsvs.getPrefix()));
-                    for (int i = 0; i < tExtRefs.size(); i++) {
+                    log.info("Processing %d IED Source in LDName=%s for LN (lnClass=%s, inst=%s, prefix=%s)".formatted(iedSources.size(), ldsuiedLdevice.getLdName(), lgosOrLsvs.getLnClass().getFirst(), lgosOrLsvs.getInst(), lgosOrLsvs.getPrefix()));
+                    for (int i = 0; i < iedSources.size(); i++) {
                         TLN lnToAdd = copyLn(lgosOrLsvs); //duplicate actual LGOS or LSVS in order to add LDSUIED with extRefs properties
-                        TExtRef tExtRef = tExtRefs.get(i);
-                        TIED sourceIed = iedService.findByName(scd, tExtRef.getIedName()).orElseThrow(() -> new ScdException("IED.name '" + tExtRef.getIedName() + "' not found in SCD"));
-                        String sourceLdName = ldeviceService.findLdevice(sourceIed, tExtRef.getSrcLDInst()).orElseThrow(() -> new ScdException(String.format("LDevice.inst '%s' not found in IED '%s'", tExtRef.getSrcLDInst(), tExtRef.getIedName()))).getLdName();
-                        String lnClass = !tExtRef.isSetSrcLNClass() ? TLLN0Enum.LLN_0.value() : tExtRef.getSrcLNClass().getFirst();
+                        IedSource iedSource = iedSources.get(i);
+                        TIED sourceIed = iedService.findByName(scd, iedSource.iedName()).orElseThrow(() -> new ScdException("IED.name '" + iedSource.iedName() + "' not found in SCD"));
+                        String sourceLdName = ldeviceService.findLdevice(sourceIed, iedSource.srcLdInst()).orElseThrow(() -> new ScdException(String.format("LDevice.inst '%s' not found in IED '%s'", iedSource.srcLdInst(), iedSource.iedName()))).getLdName();
                         lnToAdd.setInst(String.valueOf(i + 1));
-                        DaVal newVal = new DaVal(null, sourceLdName + "/" + lnClass + "." + tExtRef.getSrcCBName());
+                        DaVal newVal = new DaVal(null, sourceLdName + "/" + TLLN0Enum.LLN_0.value() + "." + iedSource.srcCBName());
                         doLinkedToDa.dataAttribute().getDaiValues().clear();
                         doLinkedToDa.dataAttribute().getDaiValues().add(newVal);
                         lnService.updateOrCreateDOAndDAInstances(lnToAdd, doLinkedToDa);
-                        log.info("Processing %d ExtRefs in LDName=%s  - added LN (lnClass=%s, inst=%s, prefix=%s) - update DOI(name=%s)/DAI(name=%s) with value=%s".formatted(tExtRefs.size(), ldsuiedLdevice.getLdName(), lgosOrLsvs.getLnClass().getFirst(), String.valueOf(i + 1), lgosOrLsvs.getPrefix(), doName, DA_SETSRCREF, newVal.val()));
+                        log.info("Processing %d IED Source in LDName=%s  - added LN (lnClass=%s, inst=%s, prefix=%s) - update DOI(name=%s)/DAI(name=%s) with value=%s".formatted(iedSources.size(), ldsuiedLdevice.getLdName(), lgosOrLsvs.getLnClass().getFirst(), String.valueOf(i + 1), lgosOrLsvs.getPrefix(), doName, DA_SETSRCREF, newVal.val()));
                         ldsuiedLdevice.getLN().add(lnToAdd);
                     }
                     ldsuiedLdevice.getLN().remove(lgosOrLsvs); //We can remove this LGOS or LSVS as we already added new ones
                 }));
     }
 
-    private TLN copyLn(TLN tln) {
-        TLN newLn = new TLN();
-        newLn.getLnClass().addAll(tln.getLnClass());
-        newLn.setInst(tln.getInst());
-        newLn.setLnType(tln.getLnType());
-        newLn.setPrefix(tln.getPrefix());
-        newLn.setDesc(tln.getDesc());
-        newLn.setInputs(tln.getInputs());
-        newLn.setText(tln.getText());
-        newLn.getPrivate().addAll(tln.getPrivate());
-        newLn.getDataSet().addAll(tln.getDataSet());
-        newLn.getAny().addAll(tln.getAny());
-        newLn.getDOI().addAll(tln.getDOI());
-        newLn.getLog().addAll(tln.getLog());
-        newLn.getLogControl().addAll(tln.getLogControl());
-        newLn.getOtherAttributes().putAll(tln.getOtherAttributes());
-        newLn.getReportControl().addAll(tln.getReportControl());
-        return newLn;
-    }
+    record IedSource(String iedName, String srcCBName, String srcLdInst, TServiceType serviceType){}
 
 }
