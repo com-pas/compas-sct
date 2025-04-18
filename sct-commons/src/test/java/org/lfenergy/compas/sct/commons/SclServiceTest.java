@@ -475,24 +475,40 @@ class SclServiceTest {
         //Then
         assertThat(sclReportItems).isEmpty();
         assertIsMarshallable(scd);
-        LDeviceAdapter lDeviceAdapter = new SclRootAdapter(scd).getIEDAdapterByName("IED_NAME1").getLDeviceAdapterByLdInst(LD_LDSUIED);
-        assertThat(lDeviceAdapter.getLNAdapters())
-                .hasSize(4)
-                .extracting(LNAdapter::getLNClass, LNAdapter::getLNInst).containsExactlyInAnyOrder(
-                        Tuple.tuple("LGOS", "1"), Tuple.tuple("LGOS", "2"),
-                        Tuple.tuple("LSVS", "1"), Tuple.tuple("LSVS", "2"));
-        assertThat(getDaiValues(lDeviceAdapter, "LGOS", "1", "GoCBRef", "setSrcRef"))
-                .hasSize(1).extracting(TVal::getValue)
-                .containsExactly("IED_NAME2LD_INST21/LLN0.goose1");
-        assertThat(getDaiValues(lDeviceAdapter, "LGOS", "2", "GoCBRef", "setSrcRef"))
-                .hasSize(1).extracting(TVal::getValue)
-                .containsExactly("IED_NAME2LD_INST21/LLN0.goose1");
-        assertThat(getDaiValues(lDeviceAdapter, "LSVS", "1", "SvCBRef", "setSrcRef"))
-                .hasSize(1).extracting(TVal::getValue)
-                .containsExactly("IED_NAME2LD_INST21/LLN0.smv2");
-        assertThat(getDaiValues(lDeviceAdapter, "LSVS", "2", "SvCBRef", "setSrcRef"))
-                .hasSize(1).extracting(TVal::getValue)
-                .containsExactly("IED_NAME2LD_INST21/LLN0.smv2");
+        assertThat(scd.getIED())
+                .filteredOn(tied -> tied.getName().equals("IED_NAME1"))
+                .flatExtracting(TIED::getAccessPoint)
+                .extracting(TAccessPoint::getServer)
+                .flatExtracting(TServer::getLDevice)
+                .filteredOn(tlDevice -> tlDevice.getInst().equals(LD_LDSUIED))
+                .extracting(TLDevice::getLN)
+                .allSatisfy(tlns -> {
+                    // Expected number of LGOS and LSVS
+                    assertThat(tlns).hasSize(4).extracting(tln -> tln.getLnClass().getFirst(), TLN::getInst).containsExactlyInAnyOrder(
+                            Tuple.tuple("LGOS", "1"), Tuple.tuple("LGOS", "2"),
+                            Tuple.tuple("LSVS", "1"), Tuple.tuple("LSVS", "2"));
+
+                    // LGOS setSrcRef values
+                    assertThat(tlns)
+                            .filteredOn(tln -> tln.getLnClass().contains("LGOS") && tln.getInst().equals("1")
+                                    || tln.getLnClass().contains("LGOS") && tln.getInst().equals("2"))
+                            .flatExtracting(TAnyLN::getDOI)
+                            .filteredOn(tdoi -> tdoi.getName().equals("GoCBRef"))
+                            .flatExtracting(TDOI::getSDIOrDAI)
+                            .filteredOn(tUnNaming -> tUnNaming.getClass().equals(TDAI.class) && ((TDAI)tUnNaming).getName().equals("setSrcRef"))
+                            .map(tUnNaming -> ((TDAI)tUnNaming).getVal().getFirst().getValue())
+                            .containsExactlyInAnyOrder("IED_NAME2LD_INST21/LLN0.goose1", "IED_NAME2LD_INST22/LLN0.goose1");
+                    // LSVS setSrcRef values
+                    assertThat(tlns)
+                            .filteredOn(tln -> (tln.getLnClass().contains("LSVS") && tln.getInst().equals("1")
+                                    || tln.getLnClass().contains("LSVS") && tln.getInst().equals("2")))
+                            .flatExtracting(TAnyLN::getDOI)
+                            .filteredOn(tdoi -> tdoi.getName().equals("SvCBRef"))
+                            .flatExtracting(TDOI::getSDIOrDAI)
+                            .filteredOn(tUnNaming -> tUnNaming.getClass().equals(TDAI.class) && ((TDAI)tUnNaming).getName().equals("setSrcRef"))
+                            .map(tUnNaming -> ((TDAI)tUnNaming).getVal().getFirst().getValue())
+                            .containsExactlyInAnyOrder("IED_NAME2LD_INST21/LLN0.smv2", "IED_NAME2LD_INST22/LLN0.smv2");
+                });
     }
 
     @Test
@@ -545,16 +561,19 @@ class SclServiceTest {
     void manageMonitoringLns_should_return_error_when_target_lns_not_found() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/monitoring_lns/scd_monitoring_lsvs_lgos.xml");
-        LDeviceAdapter lDeviceAdapter = new SclRootAdapter(scd).getIEDAdapterByName("IED_NAME1").getLDeviceAdapterByLdInst(LD_LDSUIED);
-        lDeviceAdapter.getCurrentElem().getLN().clear();
+        scd.getIED().stream()
+                .filter(tied -> tied.getName().equals("IED_NAME1"))
+                .flatMap(tied -> tied.getAccessPoint().stream())
+                .flatMap(tAccessPoint -> tAccessPoint.getServer().getLDevice().stream())
+                .filter(tlDevice -> tlDevice.getInst().equals(LD_LDSUIED))
+                .findFirst()
+                .ifPresent(tlDevice -> tlDevice.getLN().clear());
         // When
         List<SclReportItem> sclReportItems = sclService.manageMonitoringLns(scd);
         //Then
-        assertThat(sclReportItems)
-                .isNotEmpty()
-                .hasSize(2)
-                .extracting(SclReportItem::xpath, SclReportItem::message)
-                .containsExactly(tuple("IED_NAME1/LDSUIED/LGOS", "There is no LN LGOS present in LDevice"), tuple("IED_NAME1/LDSUIED/LSVS", "There is no LN LSVS present in LDevice"));
+        assertThat(sclReportItems).isNotEmpty().hasSize(2)
+                .extracting(SclReportItem::isError, SclReportItem::xpath, SclReportItem::message)
+                .containsExactly(tuple(false, "IED_NAME1/LDSUIED/LGOS", "There is no LN LGOS present in LDevice"), tuple(false, "IED_NAME1/LDSUIED/LSVS", "There is no LN LSVS present in LDevice"));
     }
 
     @Test
@@ -566,24 +585,40 @@ class SclServiceTest {
         //Then
         assertThat(sclReportItems).isEmpty();
         assertIsMarshallable(scd);
-        LDeviceAdapter lDeviceAdapter = new SclRootAdapter(scd).getIEDAdapterByName("IED_NAME1").getLDeviceAdapterByLdInst(LD_LDSUIED);
-        assertThat(lDeviceAdapter.getLNAdapters())
-                .hasSize(4)
-                .extracting(LNAdapter::getLNClass, LNAdapter::getLNInst).containsExactlyInAnyOrder(
-                        Tuple.tuple("LGOS", "1"), Tuple.tuple("LGOS", "2"),
-                        Tuple.tuple("LSVS", "1"), Tuple.tuple("LSVS", "2"));
-        assertThat(getDaiValues(lDeviceAdapter, "LGOS", "1", "GoCBRef", "setSrcRef"))
-                .hasSize(1).extracting(TVal::getValue)
-                .containsExactly("IED_NAME2LD_INST21/LLN0.goose1");
-        assertThat(getDaiValues(lDeviceAdapter, "LGOS", "2", "GoCBRef", "setSrcRef"))
-                .hasSize(1).extracting(TVal::getValue)
-                .containsExactly("IED_NAME2LD_INST21/LLN0.goose1");
-        assertThat(getDaiValues(lDeviceAdapter, "LSVS", "1", "SvCBRef", "setSrcRef"))
-                .hasSize(1).extracting(TVal::getValue)
-                .containsExactly("IED_NAME2LD_INST21/LLN0.smv2");
-        assertThat(getDaiValues(lDeviceAdapter, "LSVS", "2", "SvCBRef", "setSrcRef"))
-                .hasSize(1).extracting(TVal::getValue)
-                .containsExactly("IED_NAME2LD_INST21/LLN0.smv2");
+
+        assertThat(scd.getIED())
+                .filteredOn(tied -> tied.getName().equals("IED_NAME1"))
+                .flatExtracting(TIED::getAccessPoint)
+                .extracting(TAccessPoint::getServer)
+                .flatExtracting(TServer::getLDevice)
+                .filteredOn(tlDevice -> tlDevice.getInst().equals(LD_LDSUIED))
+                .extracting(TLDevice::getLN)
+                .allSatisfy(tlns -> {
+                            // Expected number of LGOS and LSVS
+                            assertThat(tlns).hasSize(4).extracting(tln -> tln.getLnClass().getFirst(), TLN::getInst).containsExactlyInAnyOrder(
+                                            Tuple.tuple("LGOS", "1"), Tuple.tuple("LGOS", "2"),
+                                            Tuple.tuple("LSVS", "1"), Tuple.tuple("LSVS", "2"));
+                            // LGOS setSrcRef values
+                            assertThat(tlns)
+                                    .filteredOn(tln -> tln.getLnClass().contains("LGOS") && tln.getInst().equals("1")
+                                            || tln.getLnClass().contains("LGOS") && tln.getInst().equals("2"))
+                                    .flatExtracting(TAnyLN::getDOI)
+                                    .filteredOn(tdoi -> tdoi.getName().equals("GoCBRef"))
+                                    .flatExtracting(TDOI::getSDIOrDAI)
+                                    .filteredOn(tUnNaming -> tUnNaming.getClass().equals(TDAI.class) && ((TDAI)tUnNaming).getName().equals("setSrcRef"))
+                                    .map(tUnNaming -> ((TDAI)tUnNaming).getVal().getFirst().getValue())
+                                    .containsExactlyInAnyOrder("IED_NAME2LD_INST21/LLN0.goose1", "IED_NAME2LD_INST22/LLN0.goose1");
+                            // LSVS setSrcRef values
+                            assertThat(tlns)
+                                    .filteredOn(tln -> tln.getLnClass().contains("LSVS") && tln.getInst().equals("1")
+                                            || tln.getLnClass().contains("LSVS") && tln.getInst().equals("2"))
+                                    .flatExtracting(TAnyLN::getDOI)
+                                    .filteredOn(tdoi -> tdoi.getName().equals("SvCBRef"))
+                                    .flatExtracting(TDOI::getSDIOrDAI)
+                                    .filteredOn(tUnNaming -> tUnNaming.getClass().equals(TDAI.class) && ((TDAI)tUnNaming).getName().equals("setSrcRef"))
+                                    .map(tUnNaming -> ((TDAI)tUnNaming).getVal().getFirst().getValue())
+                                    .containsExactlyInAnyOrder("IED_NAME2LD_INST21/LLN0.smv2", "IED_NAME2LD_INST22/LLN0.smv2");
+                        });
     }
 
 }

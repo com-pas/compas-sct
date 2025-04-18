@@ -70,7 +70,7 @@
                         </SampledValueControl>
                     </LN0>
                 </LDevice>
-                <LDevice inst="LD_INST22" ldName="IED_NAME1LD_INST22">
+                <LDevice inst="LD_INST22" ldName="IED_NAME2LD_INST22">
                     <LN0 lnClass="LLN0" inst="" lnType="LN11">
                         <DataSet name="dataset1">
                             <FCDA fc="ST" doName="Do20"/>
