@@ -11,9 +11,6 @@ import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
 import javax.xml.namespace.QName;
-import javax.xml.transform.stream.StreamSource;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -361,8 +358,8 @@ public final class Utils {
     public static TDOI createDOI(TDOI tdoi){
         TDOI newDOI = new TDOI();
         newDOI.setName(tdoi.getName());
-        if(tdoi.isSetText()){
-            newDOI.setText(tdoi.getText());
+        if(tdoi.isSetIx()){
+            newDOI.setIx(tdoi.getIx());
         }
         if(tdoi.isSetSDIOrDAI()){
             newDOI.getSDIOrDAI().addAll((tdoi.getSDIOrDAI().stream().map(Utils::createSDIOrDAI).toList()));
@@ -373,6 +370,7 @@ public final class Utils {
         if(tdoi.isSetAny()){
             newDOI.getAny().addAll(tdoi.getAny());
         }
+        updateUnNaming(newDOI, tdoi);
         return newDOI;
     }
 
@@ -387,9 +385,6 @@ public final class Utils {
     private static TDAI createDAI(TDAI tdai){
         TDAI newDAI = new TDAI();
         newDAI.setName(tdai.getName());
-        if(tdai.isSetText()){
-            newDAI.setText(tdai.getText());
-        }
         if(tdai.isSetVal()){
             newDAI.getVal().addAll((tdai.getVal().stream().map(tVal -> {
                 TVal newVal = new TVal();
@@ -400,12 +395,25 @@ public final class Utils {
                 return newVal;
             }).toList()));
         }
+        if(tdai.isSetIx()){
+            newDAI.setIx(tdai.getIx());
+        }
+        if(tdai.isSetSAddr()){
+            newDAI.setSAddr(tdai.getSAddr());
+        }
+        if(tdai.isSetValImport()){
+            newDAI.setValImport(tdai.isValImport());
+        }
+        if(tdai.isSetValKind()){
+            newDAI.setValKind(tdai.getValKind());
+        }
         if(tdai.isSetPrivate()){
             newDAI.getPrivate().addAll(tdai.getPrivate());
         }
         if(tdai.isSetAny()){
             newDAI.getAny().addAll(tdai.getAny());
         }
+        updateUnNaming(newDAI, tdai);
         return newDAI;
     }
 
@@ -415,8 +423,11 @@ public final class Utils {
         if(tsdi.isSetSDIOrDAI()){
             newSDI.getSDIOrDAI().addAll((tsdi.getSDIOrDAI().stream().map(Utils::createSDIOrDAI).toList()));
         }
-        if(tsdi.isSetText()){
-            newSDI.setText(tsdi.getText());
+        if(tsdi.isSetIx()){
+            newSDI.setIx(tsdi.getIx());
+        }
+        if(tsdi.isSetSAddr()){
+            newSDI.setSAddr(tsdi.getSAddr());
         }
         if(tsdi.isSetPrivate()){
             newSDI.getPrivate().addAll(tsdi.getPrivate());
@@ -424,7 +435,20 @@ public final class Utils {
         if(tsdi.isSetAny()){
             newSDI.getAny().addAll(tsdi.getAny());
         }
+        updateUnNaming(newSDI, tsdi);
         return newSDI;
     }
+
+
+    static void updateUnNaming(TUnNaming unNaming, TUnNaming unNamingSource){
+        if(unNamingSource.isSetText()){
+            unNaming.setText(unNamingSource.getText());
+        }
+        if(unNamingSource.isSetDesc()){
+            unNaming.setDesc(unNamingSource.getDesc());
+        }
+
+    }
+
 
 }
