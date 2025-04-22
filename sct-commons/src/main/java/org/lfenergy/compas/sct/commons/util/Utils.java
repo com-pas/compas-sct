@@ -347,7 +347,7 @@ public final class Utils {
         newLn.getPrivate().addAll(tln.getPrivate());
         newLn.getDataSet().addAll(tln.getDataSet());
         newLn.getAny().addAll(tln.getAny());
-        newLn.getDOI().addAll((tln.getDOI().stream().map(Utils::createDOI).toList()));
+        newLn.getDOI().addAll(tln.getDOI().stream().map(Utils::createDOI).toList());
         newLn.getLog().addAll(tln.getLog());
         newLn.getLogControl().addAll(tln.getLogControl());
         newLn.getOtherAttributes().putAll(tln.getOtherAttributes());
@@ -355,7 +355,7 @@ public final class Utils {
         return newLn;
     }
 
-    public static TDOI createDOI(TDOI tdoi){
+    private static TDOI createDOI(TDOI tdoi){
         TDOI newDOI = new TDOI();
         newDOI.setName(tdoi.getName());
         if(tdoi.isSetIx()){
@@ -439,16 +439,13 @@ public final class Utils {
         return newSDI;
     }
 
-
-    static void updateUnNaming(TUnNaming unNaming, TUnNaming unNamingSource){
+    private static void updateUnNaming(TUnNaming unNaming, TUnNaming unNamingSource){
         if(unNamingSource.isSetText()){
             unNaming.setText(unNamingSource.getText());
         }
         if(unNamingSource.isSetDesc()){
             unNaming.setDesc(unNamingSource.getDesc());
         }
-
     }
-
 
 }

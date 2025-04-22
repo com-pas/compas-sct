@@ -4,7 +4,6 @@
 
 package org.lfenergy.compas.sct.commons.util;
 
-import jakarta.xml.bind.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -15,13 +14,14 @@ import org.junit.platform.commons.support.ReflectionSupport;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.FCDAInfo;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
-import javax.xml.namespace.QName;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.LD_LDSUIED;
 import static org.lfenergy.compas.sct.commons.util.Utils.copySclElement;
 
 class UtilsTest {
@@ -523,6 +523,78 @@ class UtilsTest {
         Optional<String> result = Utils.extractFromP("MY_TYPE_3", listOfPs);
         // Then
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    void copyLn_should_succeed(){
+        // Given
+        TLN tln = new TLN();
+        tln.setLnType("T1");
+        tln.getLnClass().add("LGOS");
+        tln.setInst("3");
+        TDOI tdoi = new TDOI();
+        tdoi.setName("doiName1");
+        tdoi.setDesc("DOI Name desc");
+        tdoi.setText(new TText());
+        TDAI tdai = new TDAI();
+        tdai.setName("daiName");
+        tdai.setDesc("DAI Name desc");
+        tdai.setText(new TText());
+        tdai.setValImport(true);
+        tdai.getVal().add(new TVal());
+        TSDI tsdi = new TSDI();
+        tsdi.setName("sdiName1");
+        tsdi.setDesc("SDI Name desc");
+        tsdi.setText(new TText());
+        tsdi.getSDIOrDAI().add(tdai);
+        tdoi.getSDIOrDAI().add(tsdi);
+        tln.getDOI().add(tdoi);
+        // When
+        TLN result = Utils.copyLn(tln);
+        // Then
+        assertThat(result).usingRecursiveComparison().isEqualTo(tln);
+    }
+
+
+    @Test
+    void copyLn_should_copy_LN(){
+        // Given
+        TLN tln = new TLN();
+        tln.setLnType("T1");
+        tln.getLnClass().add("LGOS");
+        tln.setInst("3");
+        TDOI tdoi = new TDOI();
+        tdoi.setName("GoCBRef");
+        TDAI tdai = new TDAI();
+        tdai.setName("setSrcRef");
+        tdai.setValImport(true);
+        tdoi.getSDIOrDAI().add(tdai);
+        tln.getDOI().add(tdoi);
+        // When
+        TLN result = Utils.copyLn(tln);
+        // Then
+        assertThat(result).usingRecursiveComparison().isEqualTo(tln);
+    }
+
+    @Test
+    void copyLn_should_copy_DOIs_by_value(){
+        // Given
+        TLN tln = new TLN();
+        tln.setLnType("T1");
+        tln.getLnClass().add("LGOS");
+        tln.setInst("3");
+        TDOI tdoi = new TDOI();
+        tdoi.setName("GoCBRef");
+        TDAI tdai = new TDAI();
+        tdai.setName("setSrcRef");
+        tdai.setValImport(true);
+        tdoi.getSDIOrDAI().add(tdai);
+        tln.getDOI().add(tdoi);
+        // When
+        TLN result = Utils.copyLn(tln);
+        result.getDOI().getFirst().getSDIOrDAI().getFirst().setDesc("TODO");
+        // Then
+        assertThat(result).usingRecursiveComparison().isNotEqualTo(tln);
     }
 
 }
