@@ -54,7 +54,7 @@ public class SclService implements SclEditor {
     private final DataTypeTemplateReader dataTypeTemplateService;
 
     @Getter
-    private final List<SclReportItem> errorHanlder = new ArrayList<>();
+    private final List<SclReportItem> errorHandler = new ArrayList<>();
 
     @Override
     public SCL initScl(final UUID hId, final String hVersion, final String hRevision) throws ScdException {
@@ -221,7 +221,7 @@ public class SclService implements SclEditor {
 
     @Override
     public List<SclReportItem> manageMonitoringLns(SCL scd) {
-        errorHanlder.clear();
+        errorHandler.clear();
         iedService.getFilteredIeds(scd, ied -> !ied.getName().contains(IED_TEST_NAME))
                 .forEach(tied -> {
                     Map<TServiceType, List<TExtRef>> serviceTypeToExtRefs = ldeviceService.getLdevices(tied)
@@ -235,20 +235,20 @@ public class SclService implements SclEditor {
                                 .ifPresent(extRefs -> manageMonitoringLns(extRefs, scd, tied, ldSUIEDLDevice, DO_SVCBREF, MonitoringLnClassEnum.LSVS));
                     });
                 });
-        return errorHanlder;
+        return errorHandler;
     }
 
     private void manageMonitoringLns(List<TExtRef> tExtRefs, SCL scd, TIED tied, TLDevice ldsuiedLdevice, String doName, MonitoringLnClassEnum monitoringLnClassEnum) {
         List<TLN> lgosOrLsvsLns = lnService.getFilteredLns(ldsuiedLdevice, tln -> monitoringLnClassEnum.value().equals(tln.getLnClass().getFirst())).toList();
         if (lgosOrLsvsLns.isEmpty())
-            errorHanlder.add(SclReportItem.warning(tied.getName() + "/" + LDEVICE_LDSUIED + "/" + monitoringLnClassEnum.value(), "There is no LN %s present in LDevice".formatted(monitoringLnClassEnum.value())));
+            errorHandler.add(SclReportItem.warning(tied.getName() + "/" + LDEVICE_LDSUIED + "/" + monitoringLnClassEnum.value(), "There is no LN %s present in LDevice".formatted(monitoringLnClassEnum.value())));
         DoLinkedToDaFilter doLinkedToDaFilter = new DoLinkedToDaFilter(doName, List.of(), DA_SETSRCREF, List.of());
         lgosOrLsvsLns.forEach(lgosOrLsvs -> dataTypeTemplateService.getFilteredDoLinkedToDa(scd.getDataTypeTemplates(), lgosOrLsvs.getLnType(), doLinkedToDaFilter)
                 .map(doLinkedToDa -> lnService.getDoLinkedToDaCompletedFromDAI(tied, LDEVICE_LDSUIED, lgosOrLsvs, doLinkedToDa))
                 .findFirst()
                 .filter(doLinkedToDa -> {
                     if (!doLinkedToDa.isUpdatable())
-                        errorHanlder.add(SclReportItem.warning(tied.getName() + "/" + LDEVICE_LDSUIED + "/" + monitoringLnClassEnum.value() + "/DOI@name=\"" + doName + "\"/DAI@name=\"setSrcRef\"/Val", "The DAI cannot be updated"));
+                        errorHandler.add(SclReportItem.warning(tied.getName() + "/" + LDEVICE_LDSUIED + "/" + monitoringLnClassEnum.value() + "/DOI@name=\"" + doName + "\"/DAI@name=\"setSrcRef\"/Val", "The DAI cannot be updated"));
                     return doLinkedToDa.isUpdatable();
                 })
                 .ifPresent(doLinkedToDa -> {

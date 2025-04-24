@@ -46,6 +46,11 @@ public class DataAttribute {
             daiValues.add(new DaVal(settingGroup, tVal.getValue()));
         });
     }
+    public void addDaVal(TVal tVal) {
+        Long settingGroup = tVal.isSetSGroup() ? tVal.getSGroup() : null;
+        daiValues.removeIf(daVal -> Objects.equals(daVal.settingGroup(), settingGroup));
+        daiValues.add(new DaVal(settingGroup, tVal.getValue()));
+    }
 
     @Override
     public String toString(){
