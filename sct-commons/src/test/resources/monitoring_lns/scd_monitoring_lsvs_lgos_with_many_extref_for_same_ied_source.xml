@@ -13,9 +13,13 @@
                     <LN0 lnClass="LLN0" inst="" lnType="LNEX1">
                         <Inputs>
                             <ExtRef srcCBName="goose1" srcLDInst="LD_INST22" iedName="IED_NAME2" ldInst="LD_INST22"
-                                    serviceType="GOOSE" desc="a" pDO="GoCBRef"/>
+                                    serviceType="GOOSE" desc="desc_LD_INST11_11" pDO="GoCBRef"/>
+                            <ExtRef srcCBName="goose1" srcLDInst="LD_INST22" iedName="IED_NAME2" ldInst="LD_INST22"
+                                    serviceType="GOOSE" desc="desc_LD_INST11_12" pDO="GoCBRef"/>
                             <ExtRef srcCBName="smv2" srcLDInst="LD_INST22" iedName="IED_NAME2" ldInst="LD_INST22"
-                                    serviceType="SMV" desc="b" pDO="GoCBRef"/>
+                                    serviceType="SMV" desc="desc_LD_INST11_21" pDO="GoCBRef"/>
+                            <ExtRef srcCBName="smv2" srcLDInst="LD_INST22" iedName="IED_NAME2" ldInst="LD_INST22"
+                                    serviceType="SMV" desc="desc_LD_INST11_22" pDO="GoCBRef"/>
                         </Inputs>
                     </LN0>
                 </LDevice>
@@ -23,9 +27,13 @@
                     <LN0 lnClass="LLN0" inst="" lnType="LNEX1">
                         <Inputs>
                             <ExtRef srcCBName="goose1" srcLDInst="LD_INST21" iedName="IED_NAME2" ldInst="LD_INST22"
-                                    serviceType="GOOSE" desc="a" pDO="GoCBRef"/>
+                                    serviceType="GOOSE" desc="desc_INST21_11" pDO="GoCBRef"/>
+                            <ExtRef srcCBName="goose1" srcLDInst="LD_INST21" iedName="IED_NAME2" ldInst="LD_INST22"
+                                    serviceType="GOOSE" desc="desc_INST21_12" pDO="GoCBRef"/>
                             <ExtRef srcCBName="smv2" srcLDInst="LD_INST21" iedName="IED_NAME2" ldInst="LD_INST22"
-                                    serviceType="SMV" desc="b" pDO="GoCBRef"/>
+                                    serviceType="SMV" desc="desc_INST21_21" pDO="GoCBRef"/>
+                            <ExtRef srcCBName="smv2" srcLDInst="LD_INST21" iedName="IED_NAME2" ldInst="LD_INST22"
+                                    serviceType="SMV" desc="desc_INST21_22" pDO="GoCBRef"/>
                         </Inputs>
                     </LN0>
                 </LDevice>

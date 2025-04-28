@@ -7,7 +7,7 @@ package org.lfenergy.compas.sct.commons.util;
 import jakarta.xml.bind.*;
 import jakarta.xml.bind.util.JAXBSource;
 import org.apache.commons.lang3.StringUtils;
-import org.lfenergy.compas.scl2007b4.model.TP;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
 import javax.xml.namespace.QName;
@@ -334,4 +334,118 @@ public final class Utils {
     public static Optional<String> extractFromP(String type, List<TP> listOfP) {
         return listOfP.stream().filter(tp -> type.equals(tp.getType())).map(TP::getValue).findFirst();
     }
+
+    public static TLN copyLn(TLN tln) {
+        TLN newLn = new TLN();
+        newLn.getLnClass().addAll(tln.getLnClass());
+        newLn.setInst(tln.getInst());
+        newLn.setLnType(tln.getLnType());
+        newLn.setPrefix(tln.getPrefix());
+        newLn.setDesc(tln.getDesc());
+        newLn.setInputs(tln.getInputs());
+        newLn.setText(tln.getText());
+        newLn.getPrivate().addAll(tln.getPrivate());
+        newLn.getDataSet().addAll(tln.getDataSet());
+        newLn.getAny().addAll(tln.getAny());
+        newLn.getDOI().addAll(tln.getDOI().stream().map(Utils::createDOI).toList());
+        newLn.getLog().addAll(tln.getLog());
+        newLn.getLogControl().addAll(tln.getLogControl());
+        newLn.getOtherAttributes().putAll(tln.getOtherAttributes());
+        newLn.getReportControl().addAll(tln.getReportControl());
+        return newLn;
+    }
+
+    private static TDOI createDOI(TDOI tdoi){
+        TDOI newDOI = new TDOI();
+        newDOI.setName(tdoi.getName());
+        if(tdoi.isSetIx()){
+            newDOI.setIx(tdoi.getIx());
+        }
+        if(tdoi.isSetSDIOrDAI()){
+            newDOI.getSDIOrDAI().addAll((tdoi.getSDIOrDAI().stream().map(Utils::createSDIOrDAI).toList()));
+        }
+        if(tdoi.isSetPrivate()){
+            newDOI.getPrivate().addAll(tdoi.getPrivate());
+        }
+        if(tdoi.isSetAny()){
+            newDOI.getAny().addAll(tdoi.getAny());
+        }
+        updateUnNaming(newDOI, tdoi);
+        return newDOI;
+    }
+
+    private static TUnNaming createSDIOrDAI(TUnNaming tUnNaming){
+        return switch (tUnNaming) {
+            case TDAI tdai -> createDAI(tdai);
+            case TSDI tsdi -> createSDI(tsdi);
+            default -> throw new IllegalStateException("Unexpected value: " + tUnNaming);
+        };
+    }
+
+    private static TDAI createDAI(TDAI tdai){
+        TDAI newDAI = new TDAI();
+        newDAI.setName(tdai.getName());
+        if(tdai.isSetVal()){
+            newDAI.getVal().addAll((tdai.getVal().stream().map(tVal -> {
+                TVal newVal = new TVal();
+                newVal.setValue(tVal.getValue());
+                if(tVal.isSetSGroup()){
+                    newVal.setSGroup(tVal.getSGroup());
+                }
+                return newVal;
+            }).toList()));
+        }
+        if(tdai.isSetIx()){
+            newDAI.setIx(tdai.getIx());
+        }
+        if(tdai.isSetSAddr()){
+            newDAI.setSAddr(tdai.getSAddr());
+        }
+        if(tdai.isSetValImport()){
+            newDAI.setValImport(tdai.isValImport());
+        }
+        if(tdai.isSetValKind()){
+            newDAI.setValKind(tdai.getValKind());
+        }
+        if(tdai.isSetPrivate()){
+            newDAI.getPrivate().addAll(tdai.getPrivate());
+        }
+        if(tdai.isSetAny()){
+            newDAI.getAny().addAll(tdai.getAny());
+        }
+        updateUnNaming(newDAI, tdai);
+        return newDAI;
+    }
+
+    private static TSDI createSDI(TSDI tsdi){
+        TSDI newSDI = new TSDI();
+        newSDI.setName(tsdi.getName());
+        if(tsdi.isSetSDIOrDAI()){
+            newSDI.getSDIOrDAI().addAll((tsdi.getSDIOrDAI().stream().map(Utils::createSDIOrDAI).toList()));
+        }
+        if(tsdi.isSetIx()){
+            newSDI.setIx(tsdi.getIx());
+        }
+        if(tsdi.isSetSAddr()){
+            newSDI.setSAddr(tsdi.getSAddr());
+        }
+        if(tsdi.isSetPrivate()){
+            newSDI.getPrivate().addAll(tsdi.getPrivate());
+        }
+        if(tsdi.isSetAny()){
+            newSDI.getAny().addAll(tsdi.getAny());
+        }
+        updateUnNaming(newSDI, tsdi);
+        return newSDI;
+    }
+
+    private static void updateUnNaming(TUnNaming unNaming, TUnNaming unNamingSource){
+        if(unNamingSource.isSetText()){
+            unNaming.setText(unNamingSource.getText());
+        }
+        if(unNamingSource.isSetDesc()){
+            unNaming.setDesc(unNamingSource.getDesc());
+        }
+    }
+
 }
