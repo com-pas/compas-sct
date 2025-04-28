@@ -14,14 +14,12 @@ import org.junit.platform.commons.support.ReflectionSupport;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.FCDAInfo;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.LD_LDSUIED;
 import static org.lfenergy.compas.sct.commons.util.Utils.copySclElement;
 
 class UtilsTest {
@@ -526,7 +524,7 @@ class UtilsTest {
     }
 
     @Test
-    void copyLn_should_succeed(){
+    void copyLn_should_succeed_when_optional_fields_are_set(){
         // Given
         TLN tln = new TLN();
         tln.setLnType("T1");
@@ -557,7 +555,7 @@ class UtilsTest {
 
 
     @Test
-    void copyLn_should_copy_LN(){
+    void copyLn_should_succeed_when_optional_fields_are_not_set(){
         // Given
         TLN tln = new TLN();
         tln.setLnType("T1");
@@ -567,7 +565,6 @@ class UtilsTest {
         tdoi.setName("GoCBRef");
         TDAI tdai = new TDAI();
         tdai.setName("setSrcRef");
-        tdai.setValImport(true);
         tdoi.getSDIOrDAI().add(tdai);
         tln.getDOI().add(tdoi);
         // When
