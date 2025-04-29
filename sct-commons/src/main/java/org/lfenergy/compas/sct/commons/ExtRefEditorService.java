@@ -276,7 +276,7 @@ public class ExtRefEditorService implements ExtRefEditor {
                                         .findFirst().ifPresent(channel -> {
                                             List<TIED> iedSources = getIedSources(sclRootAdapter, extRefBayRef.compasBay(), channel);
                                             if (iedSources.size() == 1) {
-                                                updateLDEPFExtRefBinding(extRefBayRef.extRef(), iedSources.getFirst(), channel);
+                                                updateLDEPFExtRefBinding(extRefBayRef, iedSources.getFirst(), channel);
                                                 LDeviceAdapter lDeviceAdapter = new LDeviceAdapter(new IEDAdapter(sclRootAdapter, tied.getName()), ldepfLdevice);
                                                 updateLDEPFDos(lDeviceAdapter, extRefBayRef.extRef(), channel);
                                             } else {
@@ -323,16 +323,25 @@ public class ExtRefEditorService implements ExtRefEditor {
                                 })));
     }
 
-    private void updateLDEPFExtRefBinding(TExtRef extRef, TIED iedSource, TChannel setting) {
-        extRef.setIedName(iedSource.getName());
-        extRef.setLdInst(setting.getLDInst());
-        extRef.getLnClass().add(setting.getLNClass());
-        extRef.setLnInst(setting.getLNInst());
+    private void updateLDEPFExtRefBinding(ExtRefInfo.ExtRefWithBayReference extRefWithBay, TIED iedSource, TChannel setting) {
+        TExtRef tExtRef = extRefWithBay.extRef();
+        tExtRef.setIedName(iedSource.getName());
+        tExtRef.setLdInst(setting.getLDInst());
+        tExtRef.getLnClass().add(setting.getLNClass());
+        tExtRef.setLnInst(setting.getLNInst());
         if (!isBlank(setting.getLNPrefix())) {
-            extRef.setPrefix(setting.getLNPrefix());
+            tExtRef.setPrefix(setting.getLNPrefix());
         }
         String doName = isBlank(setting.getDOInst()) || setting.getDOInst().equals("0") ? setting.getDOName() : setting.getDOName() + setting.getDOInst();
-        extRef.setDoName(doName);
+        tExtRef.setDoName(doName);
+        // This is true for External Binding
+        if (!extRefWithBay.iedName().equals(iedSource.getName())) {
+            tExtRef.setServiceType(
+                    switch (setting.getChannelType()) {
+                        case DIGITAL -> TServiceType.GOOSE;
+                        case ANALOG -> TServiceType.SMV;
+                    });
+        }
     }
 
     private void updateLDEPFDos(LDeviceAdapter lDeviceAdapter, TExtRef extRef, TChannel setting) {
