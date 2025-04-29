@@ -15,6 +15,7 @@ import org.lfenergy.compas.sct.commons.model.epf.EPF;
 import org.lfenergy.compas.sct.commons.model.epf.TCBScopeType;
 import org.lfenergy.compas.sct.commons.model.epf.TChannel;
 import org.lfenergy.compas.sct.commons.model.epf.TChannelType;
+import org.lfenergy.compas.sct.commons.model.epf.TChannelLevMod;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
@@ -34,6 +35,12 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 @RequiredArgsConstructor
 public class ExtRefEditorService implements ExtRefEditor {
     private static final String INVALID_OR_MISSING_ATTRIBUTES_IN_EXT_REF_BINDING_INFO = "Invalid or missing attributes in ExtRef binding info";
+    private static final List<DoNameAndDaName> DO_DA_MAPPINGS = List.of(
+            new DoNameAndDaName(CHNUM1_DO_NAME, DU_DA_NAME),
+            new DoNameAndDaName(LEVMOD_DO_NAME, SETVAL_DA_NAME),
+            new DoNameAndDaName(MOD_DO_NAME, STVAL_DA_NAME),
+            new DoNameAndDaName(SRCREF_DO_NAME, SETSRCREF_DA_NAME)
+    );
 
     private final IedService iedService;
     private final LdeviceService ldeviceService;
@@ -114,7 +121,7 @@ public class ExtRefEditorService implements ExtRefEditor {
                 && extRef.getDesc().startsWith("DYN_LDEPF_ANALOG CHANNEL " + tChannel.getChannelNum() + "_1_AnalogueValue")
                 && extRef.getDesc().endsWith("_" + tChannel.getDAName() + "_1");
         Boolean doesExtRefDescMatchDigitalChannel = tChannel.getChannelType().equals(TChannelType.DIGITAL)
-                && extRef.getDesc().startsWith("DYN_LDEPF_DIGITAL CHANNEL " + tChannel.getChannelNum() + "_1_BOOLEEN")
+                && extRef.getDesc().startsWith("DYN_LDEPF_DIGITAL CHANNEL " + tChannel.getChannelNum() + "_1_BOOLEAN")
                 && extRef.getDesc().endsWith("_" + tChannel.getDAName() + "_1");
         return extRef.isSetDesc() && (doesExtRefDescMatchAnalogChannel || doesExtRefDescMatchDigitalChannel)
                 && extRef.isSetPLN() && Utils.lnClassEquals(extRef.getPLN(), tChannel.getLNClass())
@@ -334,38 +341,38 @@ public class ExtRefEditorService implements ExtRefEditor {
 
     private List<SclReportItem> updateLDEPFDos(LDeviceAdapter lDeviceAdapter, TExtRef extRef, TChannel setting) {
         List<SclReportItem> sclReportItems = new ArrayList<>();
-        List<DoNameAndDaName> doNameAndDaNameList = List.of(
-                new DoNameAndDaName(CHNUM1_DO_NAME, DU_DA_NAME),
-                new DoNameAndDaName(LEVMOD_DO_NAME, SETVAL_DA_NAME),
-                new DoNameAndDaName(MOD_DO_NAME, STVAL_DA_NAME),
-                new DoNameAndDaName(SRCREF_DO_NAME, SETSRCREF_DA_NAME)
-        );
         if (setting.getChannelType().equals(TChannelType.DIGITAL)) {
             //digital
             lDeviceAdapter.findLnAdapter(LN_RBDR, setting.getChannelNum(), null)
-                    .ifPresent(lnAdapter -> doNameAndDaNameList.forEach(doNameAndDaName -> updateVal(lnAdapter, doNameAndDaName.doName, doNameAndDaName.daName, extRef, setting).ifPresent(sclReportItems::add)));
+                    .ifPresent(lnAdapter -> DO_DA_MAPPINGS.forEach(doNameAndDaName -> updateVal(lnAdapter, doNameAndDaName.doName, doNameAndDaName.daName, extRef, setting).ifPresent(sclReportItems::add)));
             lDeviceAdapter.findLnAdapter(LN_RBDR, setting.getChannelNum(), LN_PREFIX_B)
-                    .ifPresent(lnAdapter -> doNameAndDaNameList.forEach(doNameAndDaName -> updateVal(lnAdapter, doNameAndDaName.doName, doNameAndDaName.daName, extRef, setting).ifPresent(sclReportItems::add)));
+                    .ifPresent(lnAdapter -> DO_DA_MAPPINGS.forEach(doNameAndDaName -> updateVal(lnAdapter, doNameAndDaName.doName, doNameAndDaName.daName, extRef, setting).ifPresent(sclReportItems::add)));
         }
         if (setting.getChannelType().equals(TChannelType.ANALOG)) {
             //analog
             lDeviceAdapter.findLnAdapter(LN_RADR, setting.getChannelNum(), null)
-                    .ifPresent(lnAdapter -> doNameAndDaNameList.forEach(doNameAndDaName -> updateVal(lnAdapter, doNameAndDaName.doName, doNameAndDaName.daName, extRef, setting).ifPresent(sclReportItems::add)));
+                    .ifPresent(lnAdapter -> DO_DA_MAPPINGS.forEach(doNameAndDaName -> updateVal(lnAdapter, doNameAndDaName.doName, doNameAndDaName.daName, extRef, setting).ifPresent(sclReportItems::add)));
             lDeviceAdapter.findLnAdapter(LN_RADR, setting.getChannelNum(), LN_PREFIX_A)
-                    .ifPresent(lnAdapter -> doNameAndDaNameList.forEach(doNameAndDaName -> updateVal(lnAdapter, doNameAndDaName.doName, doNameAndDaName.daName, extRef, setting).ifPresent(sclReportItems::add)));
+                    .ifPresent(lnAdapter -> DO_DA_MAPPINGS.forEach(doNameAndDaName -> updateVal(lnAdapter, doNameAndDaName.doName, doNameAndDaName.daName, extRef, setting).ifPresent(sclReportItems::add)));
         }
         return sclReportItems;
     }
 
     private Optional<SclReportItem> updateVal(AbstractLNAdapter<?> lnAdapter, String doName, String daName, TExtRef extRef, TChannel setting) {
         String value = switch (daName) {
-            case DU_DA_NAME -> setting.getChannelShortLabel();
-            case SETVAL_DA_NAME -> LN_PREFIX_B.equals(lnAdapter.getPrefix()) || LN_PREFIX_A.equals(lnAdapter.getPrefix()) ? setting.getChannelLevModQ().value() : setting.getChannelLevMod().value();
+            case DU_DA_NAME -> setting.isSetChannelShortLabel() ? setting.getChannelShortLabel(): null;
+            case SETVAL_DA_NAME -> {
+                if(LN_PREFIX_B.equals(lnAdapter.getPrefix()) || LN_PREFIX_A.equals(lnAdapter.getPrefix())){
+                    yield setting.isSetChannelLevModQ() && !setting.getChannelLevModQ().equals(TChannelLevMod.NA) ? setting.getChannelLevModQ().value(): null;
+                } else {
+                    yield setting.isSetChannelLevMod() && !setting.getChannelLevMod().equals(TChannelLevMod.NA) ? setting.getChannelLevMod().value(): null;
+                }
+            }
             case STVAL_DA_NAME -> ActiveStatus.ON.getValue();
             case SETSRCREF_DA_NAME -> computeDaiValue(lnAdapter, extRef, setting.getDAName());
             default -> null;
         };
-        return lnAdapter.getDOIAdapterByName(doName).updateDAI(daName, value);
+        return Optional.ofNullable(value).flatMap(newDaiValue -> lnAdapter.getDOIAdapterByName(doName).updateDAI(daName, newDaiValue));
     }
 
     private String computeDaiValue(AbstractLNAdapter<?> lnAdapter, TExtRef extRef, String daName) {

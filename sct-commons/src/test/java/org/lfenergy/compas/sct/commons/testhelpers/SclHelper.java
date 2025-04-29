@@ -233,17 +233,17 @@ public final class SclHelper {
         return ln.getDOIAdapterByName(doiName).getDataAdapterByName(daiName).getCurrentElem().getVal().getFirst().getValue();
     }
 
-    public static Stream<String> streamAllConnectedApGseP(SCL scd, String pType) {
-        return scd.getCommunication().getSubNetwork().stream()
-                .map(TSubNetwork::getConnectedAP)
-                .flatMap(List::stream)
-                .map(TConnectedAP::getGSE)
-                .flatMap(List::stream)
-                .map(TControlBlock::getAddress)
-                .map(TAddress::getP)
-                .flatMap(List::stream)
-                .filter(tp -> pType.equals(tp.getType()))
-                .map(TP::getValue);
+    public static Stream<TDAI> getDai(TAnyLN tAnyLN, String doiName, String daiName) {
+        return tAnyLN.getDOI().stream().filter(tdoi -> tdoi.getName().equals(doiName))
+                .flatMap(tdoi -> tdoi.getSDIOrDAI().stream())
+                .filter(tUnNaming -> tUnNaming.getClass().equals(TDAI.class) && ((TDAI)tUnNaming).getName().equals(daiName))
+                .map(tUnNaming -> (TDAI) tUnNaming);
+    }
+
+    public static Stream<TVal> getDaiValue(TAnyLN tAnyLN, String doiName, String daiName) {
+        return getDai(tAnyLN,doiName, daiName)
+                .filter(TDAI::isSetVal)
+                .map(tUnNaming -> tUnNaming.getVal().getFirst());
     }
 
     public static SclRootAdapter createSclRootAdapterWithIed(String iedName) {
