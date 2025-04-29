@@ -31,7 +31,7 @@
                         </DOI>
                         <Inputs>
                             <ExtRef intAddr="INT_ADDR11" pDO="Str" pLN="PTRC"
-                                    desc="DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1"/>
+                                    desc="DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEAN_1_general_1"/>
                         </Inputs>
                     </LN0>
                     <LN lnClass="RBDR" inst="1" lnType="RTE_RBDR">
@@ -146,7 +146,7 @@
                             </DAI>
                         </DOI>
                         <Inputs>
-                            <ExtRef intAddr="INT_ADDR11" pDO="Str" pLN="PTRC" desc="DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1"/>
+                            <ExtRef intAddr="INT_ADDR11" pDO="Str" pLN="PTRC" desc="DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEAN_1_general_1"/>
                         </Inputs>
                     </LN0>
                 </LDevice>
@@ -190,7 +190,7 @@
                             </DAI>
                         </DOI>
                         <Inputs>
-                            <ExtRef intAddr="INT_ADDR11" pDO="Str" pLN="PTRC" desc="DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1"/>
+                            <ExtRef intAddr="INT_ADDR11" pDO="Str" pLN="PTRC" desc="DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEAN_1_general_1"/>
                         </Inputs>
                     </LN0>
                 </LDevice>

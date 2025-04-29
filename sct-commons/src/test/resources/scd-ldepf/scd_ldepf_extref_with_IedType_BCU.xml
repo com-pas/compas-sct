@@ -31,19 +31,19 @@
                         </DOI>
                         <Inputs> <!-- ExtRef check (pLN, pDO, desc) -->
                             <!-- Binding ExtRef : ExtRef match Channel.Digital.num 1 at IED_NAME1 -->
-                            <ExtRef pLN="PTRC" pDO="Str" desc="DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1"/>
-                            <ExtRef pLN="PTRC" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 2_1_BOOLEEN_1_general_1"/>
-                            <ExtRef pLN="PDIS" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 3_1_BOOLEEN_1_general_1"/>
-                            <ExtRef pLN="PDIS" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 4_1_BOOLEEN_1_general_1"/>
-                            <ExtRef pLN="PDIS" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 5_1_BOOLEEN_1_general_1"/>
-                            <ExtRef pLN="PDIS" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 6_1_BOOLEEN_1_general_1"/>
-                            <ExtRef pLN="PDIS" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 7_1_BOOLEEN_1_general_1"/>
-                            <ExtRef pLN="PDIS" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 8_1_BOOLEEN_1_general_1"/>
-                            <ExtRef pLN="PDIS" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 9_1_BOOLEEN_1_neut_1"/>
-                            <ExtRef pLN="PTRC" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 10_1_BOOLEEN_1_phsA_1"/>
-                            <ExtRef pLN="PTRC" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 11_1_BOOLEEN_1_phsB_1"/>
-                            <ExtRef pLN="PTRC" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 12_1_BOOLEEN_1_phsC_1"/>
-                            <ExtRef pLN="PTRC" pDO="Str" desc="DYN_LDEPF_DIGITAL CHANNEL 13_1_BOOLEEN_1_dirGeneral_1"/>
+                            <ExtRef pLN="PTRC" pDO="Str" desc="DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEAN_1_general_1"/>
+                            <ExtRef pLN="PTRC" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 2_1_BOOLEAN_1_general_1"/>
+                            <ExtRef pLN="PDIS" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 3_1_BOOLEAN_1_general_1"/>
+                            <ExtRef pLN="PDIS" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 4_1_BOOLEAN_1_general_1"/>
+                            <ExtRef pLN="PDIS" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 5_1_BOOLEAN_1_general_1"/>
+                            <ExtRef pLN="PDIS" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 6_1_BOOLEAN_1_general_1"/>
+                            <ExtRef pLN="PDIS" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 7_1_BOOLEAN_1_general_1"/>
+                            <ExtRef pLN="PDIS" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 8_1_BOOLEAN_1_general_1"/>
+                            <ExtRef pLN="PDIS" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 9_1_BOOLEAN_1_neut_1"/>
+                            <ExtRef pLN="PTRC" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 10_1_BOOLEAN_1_phsA_1"/>
+                            <ExtRef pLN="PTRC" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 11_1_BOOLEAN_1_phsB_1"/>
+                            <ExtRef pLN="PTRC" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 12_1_BOOLEAN_1_phsC_1"/>
+                            <ExtRef pLN="PTRC" pDO="Str" desc="DYN_LDEPF_DIGITAL CHANNEL 13_1_BOOLEAN_1_dirGeneral_1"/>
                         </Inputs>
                     </LN0>
                     <LN lnClass="RBDR" inst="1" lnType="RTE_RBDR">
