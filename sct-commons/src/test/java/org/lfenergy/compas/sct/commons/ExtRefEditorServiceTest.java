@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 RTE FRANCE
+// SPDX-FileCopyrightText: 2021 2025 RTE FRANCE
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -36,7 +36,7 @@ class ExtRefEditorServiceTest {
 
     @BeforeEach
     void init() {
-        extRefEditorService = new ExtRefEditorService(new IedService(), new LdeviceService(new LnService()), new LnService());
+        extRefEditorService = new ExtRefEditorService(new IedService(), new LdeviceService(new LnService()), new LnService(), new DataTypeTemplatesService());
     }
 
     @Test
@@ -630,8 +630,8 @@ class ExtRefEditorServiceTest {
     }
 
     @ParameterizedTest()
-    @CsvSource({"'',''", "NA,NA"})
-    void manageBindingForLDEPF_should_not_update_dai_setVal_when_channelLevMod_or_channelLevModq_are_empty_or_NA(String channelLevMod, String channelLevModq) {
+    @CsvSource({"'', '', 'ADF','ADF'", "NA, NA,'ADF','ADF'", "POSITIVE_OR_RISING, OTHER, 'Positive or Rising','Other'"})
+    void manageBindingForLDEPF_should_bind_extRef_and_update_dai_within_radr_and_rbdr_ln_for_both_DIGITAL_and_ANALOG_channel(String channelLevMod, String channelLevModq, String expectedChannelLevMod, String expectedChannelLevModq) {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_processing_internal_bind.xml");
         TChannel digitalChannel = new TChannel();
@@ -690,6 +690,11 @@ class ExtRefEditorServiceTest {
                 .extracting(TAccessPoint::getServer)
                 .flatExtracting(TServer::getLDevice)
                 .filteredOn(tlDevice -> tlDevice.getInst().equals(LDEVICE_LDEPF))
+                // Binding properties should be set
+                .allSatisfy(tlDevice -> assertThat(tlDevice.getLN0().getInputs().getExtRef())
+                        .filteredOn(tExtRef -> tExtRef.getDesc().contains("ANALOG") || tExtRef.getDesc().contains("DIGITAL"))
+                        .extracting(TExtRef::getIedName, TExtRef::getLdInst, TExtRef::getLnClass, TExtRef::getLnInst, TExtRef::getDoName)
+                        .containsExactlyInAnyOrder(tuple("IED_NAME1", "LDPX", List.of("PTRC"), "0", "Str"), tuple("IED_NAME1", "LDPX", List.of("PTRC"), "0", "Str")))
                 //LN class RBDR: with and without prefix 'b'
                 .allSatisfy(tlDevice -> {
                     assertThat(tlDevice.getLN())
@@ -697,7 +702,7 @@ class ExtRefEditorServiceTest {
                             .allSatisfy(tln -> {
                                 assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("MR.PX1");
                                 assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
-                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo("ADF");
+                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo(expectedChannelLevMod);
                                 assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME1LDPX/PTRC0.Str.general");
                             });
                     assertThat(tlDevice.getLN())
@@ -705,7 +710,7 @@ class ExtRefEditorServiceTest {
                             .allSatisfy(tln -> {
                                 assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("MR.PX1");
                                 assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
-                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo("ADF");
+                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo(expectedChannelLevModq);
                                 assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME1LDPX/PTRC0.Str.q");
                             });
                 })
@@ -716,7 +721,7 @@ class ExtRefEditorServiceTest {
                             .allSatisfy(tln -> {
                                 assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("MR.PX1");
                                 assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
-                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo("ADF");
+                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo(expectedChannelLevMod);
                                 assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME1LDPX/PTRC0.Str.general");
                             });
                     assertThat(tlDevice.getLN())
@@ -724,7 +729,7 @@ class ExtRefEditorServiceTest {
                             .allSatisfy(tln -> {
                                 assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("MR.PX1");
                                 assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
-                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo("ADF");
+                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo(expectedChannelLevModq);
                                 assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME1LDPX/PTRC0.Str.q");
                             });
                 });
@@ -736,7 +741,6 @@ class ExtRefEditorServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_processing_internal_bind.xml");
         scd.getIED().forEach(tied -> tied.getPrivate().removeIf(tPrivate -> tPrivate.getType().equals(PrivateEnum.COMPAS_BAY.getPrivateType())
                 || tPrivate.getType().equals(PrivateEnum.COMPAS_ICDHEADER.getPrivateType())));
-
         TChannel digitalChannel = new TChannel();
         digitalChannel.setBayScope(TCBScopeType.BAY_INTERNAL);
         digitalChannel.setChannelType(TChannelType.DIGITAL);
@@ -762,6 +766,48 @@ class ExtRefEditorServiceTest {
         // Then
         assertThat(sclReportItems).containsExactly(SclReportItem.error("SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LDEPF\"]", "The IED has no Private Bay"),
                 SclReportItem.error("SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LDEPF\"]", "The IED has no Private compas:ICDHeader"));
+    }
+
+    @Test
+    void manageBindingForLDEPF_should_return_warning_when_dai_is_not_updatable() {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_processing_internal_bind.xml");
+        scd.getIED().stream()
+                .filter(tied -> tied.getName().equals("IED_NAME1"))
+                .flatMap(tied -> tied.getAccessPoint().stream())
+                .filter(TAccessPoint::isSetServer)
+                .flatMap(tAccessPoint -> tAccessPoint.getServer().getLDevice().stream())
+                .filter(tlDevice -> tlDevice.getInst().equals(LDEVICE_LDEPF))
+                .flatMap(tlDevice -> tlDevice.getLN().stream())
+                .filter(tln -> tln.getLnClass().contains("RBDR") && tln.getInst().equals("1") && !tln.isSetPrefix())
+                .flatMap(tln -> getDai(tln, CHNUM1_DO_NAME, DU_DA_NAME))
+                .findFirst().ifPresent(tdai -> tdai.setValImport(false));
+        TChannel digitalChannel = new TChannel();
+        digitalChannel.setBayScope(TCBScopeType.BAY_INTERNAL);
+        digitalChannel.setChannelType(TChannelType.DIGITAL);
+        digitalChannel.setChannelNum("1");
+        digitalChannel.setChannelShortLabel("MR.PX1");
+        digitalChannel.setChannelLevMod(TChannelLevMod.POSITIVE_OR_RISING);
+        digitalChannel.setChannelLevModQ(TChannelLevMod.OTHER);
+        digitalChannel.setIEDType("BCU");
+        digitalChannel.setIEDRedundancy(TIEDredundancy.NONE);
+        digitalChannel.setIEDSystemVersionInstance("1");
+        digitalChannel.setLDInst("LDPX");
+        digitalChannel.setLNClass("PTRC");
+        digitalChannel.setLNInst("0");
+        digitalChannel.setDOName("Str");
+        digitalChannel.setDOInst("0");
+        digitalChannel.setDAName("general");
+        EPF epf = new EPF();
+        Channels channels = new Channels();
+        channels.getChannel().add(digitalChannel);
+        epf.setChannels(channels);
+        // When
+        List<SclReportItem> sclReportItems = extRefEditorService.manageBindingForLDEPF(scd, epf);
+        // Then
+        assertThat(sclReportItems)
+                .extracting(SclReportItem::isError, SclReportItem::xpath, SclReportItem::message)
+                .containsExactly(tuple(false, "IED_NAME1/LDSUIED/RBDR/DOI@name=\"ChNum1\"/DAI@name=\"dU\"/Val", "The DAI cannot be updated"));
     }
 
     @Test
