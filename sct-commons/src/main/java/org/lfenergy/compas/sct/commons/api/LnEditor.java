@@ -4,14 +4,13 @@
 
 package org.lfenergy.compas.sct.commons.api;
 
-import org.lfenergy.compas.scl2007b4.model.TAnyLN;
-import org.lfenergy.compas.scl2007b4.model.TDAI;
-import org.lfenergy.compas.scl2007b4.model.TIED;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.domain.DoLinkedToDa;
 import org.lfenergy.compas.sct.commons.domain.DoLinkedToDaFilter;
 import org.lfenergy.compas.sct.commons.util.ActiveStatus;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public interface LnEditor {
 
@@ -24,4 +23,6 @@ public interface LnEditor {
     void updateOrCreateDOAndDAInstances(TAnyLN tAnyLN, DoLinkedToDa doLinkedToDa);
 
     DoLinkedToDa getDoLinkedToDaCompletedFromDAI(TIED tied, String ldInst, TAnyLN anyLN, DoLinkedToDa doLinkedToDa);
+
+    Optional<TLN> findLn(TLDevice tlDevice, Predicate<TLN> lnPredicate);
 }

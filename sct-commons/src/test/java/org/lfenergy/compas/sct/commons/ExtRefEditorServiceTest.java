@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 RTE FRANCE
+// SPDX-FileCopyrightText: 2021 2025 RTE FRANCE
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -25,8 +25,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
@@ -712,8 +711,8 @@ class ExtRefEditorServiceTest {
     }
 
     @ParameterizedTest()
-    @CsvSource({"'',''", "NA,NA"})
-    void manageBindingForLDEPF_should_not_update_dai_setVal_when_channelLevMod_or_channelLevModq_are_empty_or_NA(String channelLevMod, String channelLevModq) {
+    @CsvSource({"'', '', 'ADF','ADF'", "NA, NA,'ADF','ADF'", "POSITIVE_OR_RISING, OTHER, 'Positive or Rising','Other'"})
+    void manageBindingForLDEPF_should_bind_extRef_and_update_dai_within_radr_and_rbdr_ln_for_both_DIGITAL_and_ANALOG_channel(String channelLevMod, String channelLevModq, String expectedChannelLevMod, String expectedChannelLevModq) {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_processing_bind_dai_update.xml");
         TChannel digitalChannel = new TChannel();
@@ -772,6 +771,11 @@ class ExtRefEditorServiceTest {
                 .extracting(TAccessPoint::getServer)
                 .flatExtracting(TServer::getLDevice)
                 .filteredOn(tlDevice -> tlDevice.getInst().equals(LDEVICE_LDEPF))
+                // Binding properties should be set
+                .allSatisfy(tlDevice -> assertThat(tlDevice.getLN0().getInputs().getExtRef())
+                        .filteredOn(tExtRef -> tExtRef.getDesc().contains("ANALOG") || tExtRef.getDesc().contains("DIGITAL"))
+                        .extracting(TExtRef::getIedName, TExtRef::getLdInst, TExtRef::getLnClass, TExtRef::getLnInst, TExtRef::getDoName)
+                        .containsExactlyInAnyOrder(tuple("IED_NAME1", "LDPX", List.of("PTRC"), "0", "Str"), tuple("IED_NAME1", "LDPX", List.of("PTRC"), "0", "Str")))
                 //LN class RBDR: with and without prefix 'b'
                 .allSatisfy(tlDevice -> {
                     assertThat(tlDevice.getLN())
@@ -785,7 +789,7 @@ class ExtRefEditorServiceTest {
                                         .containsExactlyInAnyOrder("on");
                                 assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME))
                                         .extracting(TVal::getValue)
-                                        .containsExactlyInAnyOrder("ADF");
+                                        .containsExactlyInAnyOrder(expectedChannelLevMod);
                                 assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME))
                                         .extracting(TVal::getValue)
                                         .containsExactlyInAnyOrder("IED_NAME1LDPX/PTRC0.Str.general");
@@ -801,7 +805,7 @@ class ExtRefEditorServiceTest {
                                         .containsExactlyInAnyOrder("on");
                                 assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME))
                                         .extracting(TVal::getValue)
-                                        .containsExactlyInAnyOrder("ADF");
+                                        .containsExactlyInAnyOrder(expectedChannelLevModq);
                                 assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME))
                                         .extracting(TVal::getValue)
                                         .containsExactlyInAnyOrder("IED_NAME1LDPX/PTRC0.Str.q");
@@ -820,7 +824,7 @@ class ExtRefEditorServiceTest {
                                         .containsExactlyInAnyOrder("on");
                                 assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME))
                                         .extracting(TVal::getValue)
-                                        .containsExactlyInAnyOrder("ADF");
+                                        .containsExactlyInAnyOrder(expectedChannelLevMod);
                                 assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME))
                                         .extracting(TVal::getValue)
                                         .containsExactlyInAnyOrder("IED_NAME1LDPX/PTRC0.Str.general");
@@ -836,7 +840,7 @@ class ExtRefEditorServiceTest {
                                         .containsExactlyInAnyOrder("on");
                                 assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME))
                                         .extracting(TVal::getValue)
-                                        .containsExactlyInAnyOrder("ADF");
+                                        .containsExactlyInAnyOrder(expectedChannelLevModq);
                                 assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME))
                                         .extracting(TVal::getValue)
                                         .containsExactlyInAnyOrder("IED_NAME1LDPX/PTRC0.Str.q");
@@ -844,4 +848,47 @@ class ExtRefEditorServiceTest {
                 });
     }
 
+    @Test
+    void manageBindingForLDEPF_should_return_warning_when_dai_is_not_updatable() {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_processing_bind_dai_update.xml");
+        scd.getIED().stream()
+                .filter(tied -> tied.getName().equals("IED_NAME1"))
+                .flatMap(tied -> tied.getAccessPoint().stream())
+                .filter(TAccessPoint::isSetServer)
+                .flatMap(tAccessPoint -> tAccessPoint.getServer().getLDevice().stream())
+                .filter(tlDevice -> tlDevice.getInst().equals(LDEVICE_LDEPF))
+                .flatMap(tlDevice -> tlDevice.getLN().stream())
+                .filter(tln -> tln.getLnClass().contains("RBDR") && tln.getInst().equals("1") && !tln.isSetPrefix())
+                .flatMap(tln -> getDai(tln, CHNUM1_DO_NAME, DU_DA_NAME))
+                .findFirst().ifPresent(tdai -> tdai.setValImport(false));
+
+        TChannel digitalChannel = new TChannel();
+        digitalChannel.setBayScope(TCBScopeType.BAY_INTERNAL);
+        digitalChannel.setChannelType(TChannelType.DIGITAL);
+        digitalChannel.setChannelNum("1");
+        digitalChannel.setChannelShortLabel("MR.PX1");
+        digitalChannel.setChannelLevMod(TChannelLevMod.POSITIVE_OR_RISING);
+        digitalChannel.setChannelLevModQ(TChannelLevMod.OTHER);
+        digitalChannel.setIEDType("BCU");
+        digitalChannel.setIEDRedundancy(TIEDredundancy.NONE);
+        digitalChannel.setIEDSystemVersionInstance("1");
+        digitalChannel.setLDInst("LDPX");
+        digitalChannel.setLNClass("PTRC");
+        digitalChannel.setLNInst("0");
+        digitalChannel.setDOName("Str");
+        digitalChannel.setDOInst("0");
+        digitalChannel.setDAName("general");
+        EPF epf = new EPF();
+        Channels channels = new Channels();
+        channels.getChannel().add(digitalChannel);
+        epf.setChannels(channels);
+        // When
+        List<SclReportItem> sclReportItems = extRefEditorService.manageBindingForLDEPF(scd, epf);
+        // Then
+        assertThat(sclReportItems)
+                .hasSize(1)
+                .extracting(SclReportItem::isError, SclReportItem::xpath, SclReportItem::message)
+                .containsExactlyInAnyOrder(tuple(false, "IED_NAME1/LDSUIED/RBDR/DOI@name=\"ChNum1\"/DAI@name=\"dU\"/Val", "The DAI cannot be updated"));
+    }
 }
