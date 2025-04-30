@@ -24,6 +24,7 @@
                 <Authentication/>
                 <LDevice inst="LDEPF" ldName="IED_NAME1LDEPF">
                     <LN0 lnClass="LLN0" inst="" lnType="LLN0_ID1">
+                        <Private type="COMPAS-LNodeStatus">on</Private>
                         <DOI name="Mod">
                             <DAI name="stVal" valImport="true">
                                 <Val>on</Val>
