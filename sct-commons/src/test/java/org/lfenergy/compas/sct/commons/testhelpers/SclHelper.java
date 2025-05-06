@@ -233,17 +233,18 @@ public final class SclHelper {
         return ln.getDOIAdapterByName(doiName).getDataAdapterByName(daiName).getCurrentElem().getVal().getFirst().getValue();
     }
 
-    public static Stream<String> streamAllConnectedApGseP(SCL scd, String pType) {
-        return scd.getCommunication().getSubNetwork().stream()
-                .map(TSubNetwork::getConnectedAP)
-                .flatMap(List::stream)
-                .map(TConnectedAP::getGSE)
-                .flatMap(List::stream)
-                .map(TControlBlock::getAddress)
-                .map(TAddress::getP)
-                .flatMap(List::stream)
-                .filter(tp -> pType.equals(tp.getType()))
-                .map(TP::getValue);
+    public static Stream<TDAI> getDai(TAnyLN tAnyLN, String doiName, String daiName) {
+        return tAnyLN.getDOI().stream().filter(tdoi -> tdoi.getName().equals(doiName))
+                .flatMap(tdoi -> tdoi.getSDIOrDAI().stream())
+                .filter(TDAI.class::isInstance)
+                .map(TDAI.class::cast)
+                .filter(tdai -> daiName.equals(tdai.getName()));
+    }
+
+    public static String getDaiValue(TAnyLN tAnyLN, String doiName, String daiName) {
+        TDAI tdai = getDai(tAnyLN, doiName, daiName).findFirst()
+                .orElseThrow(() -> new AssertionFailedError(String.format("DAI %s.%s not found in LN", doiName, daiName)));
+        return getValue(tdai);
     }
 
     public static SclRootAdapter createSclRootAdapterWithIed(String iedName) {
