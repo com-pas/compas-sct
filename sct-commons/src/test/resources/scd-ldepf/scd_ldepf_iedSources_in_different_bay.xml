@@ -24,6 +24,7 @@
                 <Authentication/>
                 <LDevice inst="LDEPF" ldName="IED_NAME1LDEPF">
                     <LN0 lnClass="LLN0" inst="" lnType="LLN0_ID1">
+                        <Private type="COMPAS-LNodeStatus">on</Private>
                         <DOI name="Mod">
                             <DAI name="stVal" valImport="true">
                                 <Val>on</Val>
@@ -31,7 +32,7 @@
                         </DOI>
                         <Inputs>
                             <ExtRef intAddr="INT_ADDR11" pDO="Str" pLN="PTRC"
-                                    desc="DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1"/>
+                                    desc="DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEAN_1_general_1"/>
                         </Inputs>
                     </LN0>
                     <LN lnClass="RBDR" inst="1" lnType="RTE_RBDR">
@@ -140,13 +141,14 @@
                 <Authentication/>
                 <LDevice inst="LDEPF" ldName="IED_NAME2LDEPF">
                     <LN0 lnClass="LLN0" inst="" lnType="LLN0_ID1">
+                        <Private type="COMPAS-LNodeStatus">on</Private>
                         <DOI name="Mod">
                             <DAI name="stVal" valImport="true">
                                 <Val>on</Val>
                             </DAI>
                         </DOI>
                         <Inputs>
-                            <ExtRef intAddr="INT_ADDR11" pDO="Str" pLN="PTRC" desc="DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1"/>
+                            <ExtRef intAddr="INT_ADDR11" pDO="Str" pLN="PTRC" desc="DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEAN_1_general_1"/>
                         </Inputs>
                     </LN0>
                 </LDevice>
@@ -184,13 +186,14 @@
                 <Authentication/>
                 <LDevice inst="LDEPF" ldName="IED_NAME3LDEPF">
                     <LN0 lnClass="LLN0" inst="" lnType="LLN0_ID1">
+                        <Private type="COMPAS-LNodeStatus">on</Private>
                         <DOI name="Mod">
                             <DAI name="stVal" valImport="true">
                                 <Val>on</Val>
                             </DAI>
                         </DOI>
                         <Inputs>
-                            <ExtRef intAddr="INT_ADDR11" pDO="Str" pLN="PTRC" desc="DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1"/>
+                            <ExtRef intAddr="INT_ADDR11" pDO="Str" pLN="PTRC" desc="DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEAN_1_general_1"/>
                         </Inputs>
                     </LN0>
                 </LDevice>

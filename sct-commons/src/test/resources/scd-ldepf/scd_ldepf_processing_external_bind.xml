@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- SPDX-FileCopyrightText: 2023 RTE FRANCE -->
+<!-- SPDX-FileCopyrightText: 2025 RTE FRANCE -->
 <!-- -->
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 <SCL version="2007" revision="B" release="4" xmlns="http://www.iec.ch/61850/2003/SCL" xmlns:compas="https://www.lfenergy.org/compas/extension/v1">
@@ -30,78 +30,122 @@
                                 <Val>on</Val>
                             </DAI>
                         </DOI>
-                        <Inputs> <!-- ExtRef check (pLN, pDO, desc) -->
-                            <!-- Binding ExtRef : ExtRef match Channel.Digital.num 1 at IED_NAME1 -->
+                        <Inputs>
                             <ExtRef pLN="PTRC" pDO="Str" desc="DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEAN_1_general_1"/>
-                            <ExtRef pLN="PTRC" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 2_1_BOOLEAN_1_general_1"/>
-                            <ExtRef pLN="PDIS" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 3_1_BOOLEAN_1_general_1"/>
-                            <ExtRef pLN="PDIS" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 4_1_BOOLEAN_1_general_1"/>
-                            <ExtRef pLN="PDIS" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 5_1_BOOLEAN_1_general_1"/>
-                            <ExtRef pLN="PDIS" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 6_1_BOOLEAN_1_general_1"/>
-                            <ExtRef pLN="PDIS" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 7_1_BOOLEAN_1_general_1"/>
-                            <ExtRef pLN="PDIS" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 8_1_BOOLEAN_1_general_1"/>
-                            <ExtRef pLN="PDIS" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 9_1_BOOLEAN_1_neut_1"/>
-                            <ExtRef pLN="PTRC" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 10_1_BOOLEAN_1_phsA_1"/>
-                            <ExtRef pLN="PTRC" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 11_1_BOOLEAN_1_phsB_1"/>
-                            <ExtRef pLN="PTRC" pDO="Op" desc="DYN_LDEPF_DIGITAL CHANNEL 12_1_BOOLEAN_1_phsC_1"/>
-                            <ExtRef pLN="PTRC" pDO="Str" desc="DYN_LDEPF_DIGITAL CHANNEL 13_1_BOOLEAN_1_dirGeneral_1"/>
+                            <ExtRef pLN="PTRC" pDO="Str" desc="DYN_LDEPF_ANALOG CHANNEL 1_1_AnalogueValue_1_general_1"/>
                         </Inputs>
                     </LN0>
-                    <LN lnClass="RBDR" inst="1" lnType="RTE_RBDR">
+                    <LN lnClass="RADR" inst="1" lnType="RTE_RADR_Type">
                         <DOI name="ChNum1">
                             <DAI name="dU" valKind="RO" valImport="true">
-                                <Val>dU_old_val
-                                </Val> <!-- "MR.PX1"     It is the Channel.ShortLabel column value of the current setting file line -->
+                                <Val>ADF</Val>
                             </DAI>
                         </DOI>
                         <DOI name="LevMod">
                             <DAI name="setVal" valKind="RO" valImport="true">
-                                <Val>setVal_old_val
-                                </Val>   <!-- "Positive or Rising"      It is the Channel.LevMod column value of the current setting file line -->
+                                <Val>ADF</Val>
                             </DAI>
                         </DOI>
                         <DOI name="Mod">
                             <DAI name="stVal" sAddr="50606.0" valKind="Set" valImport="false">
-                                <Val>off
-                                </Val> <!-- "on"  With the help of RSR-121, Mod/stVal always updatable even if valImport="false" -->
+                                <Val>off</Val>
                             </DAI>
                         </DOI>
                         <DOI name="SrcRef">
                             <DAI name="setSrcRef" valKind="Set" valImport="true">
-                                <Val>setSrcRef_old_val
-                                </Val>  <!-- "IED_NAME1LDPX/PTRC0.Str.general"  must contain ExtRef@iedNameExtRef@ldInst/ExtRef@prefixExtRef@lnClassExtRef@lnInst[.]ExtRef@doName[.]ExtRef@daName="general" from the DA.name column value of the setting file -->
+                                <Val>ADF</Val>
                             </DAI>
                         </DOI>
                     </LN>
-
-                    <LN prefix="b" lnClass="RBDR" inst="1" lnType="RTE_RBDR">
+                    <LN prefix="a" lnClass="RADR" inst="1" lnType="RTE_RADR_Type">
                         <DOI name="ChNum1">
                             <DAI name="dU" valKind="RO" valImport="true">
-                                <Val>dU_old_val
-                                </Val>  <!-- "MR.PX1"     It is the Channel.ShortLabel column value of the current setting file line -->
+                                <Val>ADF</Val>
                             </DAI>
                         </DOI>
                         <DOI name="LevMod">
                             <DAI name="setVal" valKind="RO" valImport="true">
-                                <Val>setVal_old_val
-                                </Val>   <!-- "Other"   It is the Channel.LevMod.q column value of the current setting file line -->
+                                <Val>ADF</Val>
                             </DAI>
                         </DOI>
                         <DOI name="Mod">
                             <DAI name="stVal" sAddr="50606.0" valKind="Set" valImport="false">
-                                <Val>off
-                                </Val>  <!-- "on" With the help of RSR-121, Mod/stVal always updatable even if valImport="false" -->
+                                <Val>off</Val>
                             </DAI>
                         </DOI>
                         <DOI name="SrcRef">
                             <DAI name="setSrcRef" valKind="Set" valImport="true">
-                                <Val>setSrcRef_old_val
-                                </Val>   <!-- "IED_NAME1LDPX/PTRC0.Str.q"  must contain ExtRef@iedNameExtRef@ldInst/ExtRef@prefixExtRef@lnClassExtRef@lnInst[.]ExtRef@doName.q , DA name will be always q for bRBDR -->
+                                <Val>ADF</Val>
+                            </DAI>
+                        </DOI>
+                    </LN>
+                    <LN lnClass="RBDR" inst="1" lnType="RTE_RBDR_Type">
+                        <DOI name="ChNum1">
+                            <DAI name="dU" valKind="RO" valImport="true">
+                                <Val>ADF</Val>
+                            </DAI>
+                        </DOI>
+                        <DOI name="SrcRef">
+                            <DAI name="setSrcRef" valKind="Set" valImport="true">
+                                <Val>ADF</Val>
+                            </DAI>
+                            <DAI name="d" valKind="RO" valImport="false">
+                                <Val>Source reference of the channel among LDEPF input signals</Val>
+                            </DAI>
+                        </DOI>
+                        <DOI name="LevMod">
+                            <DAI name="setVal" valKind="RO" valImport="true">
+                                <Val>ADF</Val>
+                            </DAI>
+                        </DOI>
+                        <DOI name="Mod">
+                            <DAI name="stVal">
+                                <Val>ADF</Val>
+                            </DAI>
+                        </DOI>
+                    </LN>
+                    <LN prefix="b" lnClass="RBDR" inst="1" lnType="RTE_RBDR_Type">
+                        <DOI name="ChNum1">
+                            <DAI name="dU" valKind="RO" valImport="true">
+                                <Val>ADF</Val>
+                            </DAI>
+                        </DOI>
+                        <DOI name="SrcRef">
+                            <DAI name="setSrcRef" valKind="Set" valImport="true">
+                                <Val>ADF</Val>
+                            </DAI>
+                            <DAI name="d" valKind="RO" valImport="false">
+                                <Val>Source reference of the channel among LDEPF input signals</Val>
+                            </DAI>
+                        </DOI>
+                        <DOI name="LevMod">
+                            <DAI name="setVal" valKind="RO" valImport="true">
+                                <Val>ADF</Val>
+                            </DAI>
+                        </DOI>
+                        <DOI name="Mod">
+                            <DAI name="stVal">
+                                <Val>ADF</Val>
                             </DAI>
                         </DOI>
                     </LN>
                 </LDevice>
-                <LDevice inst="LDPX" ldName="IED_NAME1LDPX">
+            </Server>
+        </AccessPoint>
+    </IED>
+    <IED name="IED_NAME2">
+        <Private type="COMPAS-Bay"> <!-- BAY check (UUID) -->
+            <compas:Bay UUID="bayUUID2" BayCodif="CB00001101" NumBay="1" BayCount="1" MainShortLabel="aa"/>
+        </Private>
+        <Private type="COMPAS-ICDHeader"> <!-- ICDHeader check (IEDType, IEDredundancy, IEDSystemVersioninstance) -->
+            <compas:ICDHeader IEDType="BCU" IEDredundancy="None" IEDSystemVersioninstance="1"
+                              ICDSystemVersionUUID="System_Version_UUID" VendorName="SCLE SFE" IEDmodel="ARKENS-SV1120-HGAAA-EB5" hwRev="1.0" swRev="1.0"
+                              headerId="ARKENS-SV1120-HGAAA-EB5_SCU"/>
+        </Private>
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LDPX" ldName="IED_NAME2LDPX">
                     <LN0 lnClass="LLN0" inst="" lnType="LLN0_ID1">
                         <DOI name="Mod">
                             <DAI name="stVal">
@@ -109,26 +153,7 @@
                             </DAI>
                         </DOI>
                     </LN0>
-                    <LN lnClass="PTRC" inst="0" lnType="PTRC_ID1">
-                    </LN>
-                    <LN lnClass="PTRC" inst="2" lnType="PTRC_ID1">
-                        <DOI name="Mod">
-                            <DAI name="stVal">
-                                <Val>off</Val>
-                            </DAI>
-                        </DOI>
-                    </LN>
-                </LDevice>
-                <LDevice inst="LDPXINVALID" ldName="IED_NAME1LDPX">
-                    <LN0 lnClass="LLN0" inst="" lnType="LLN0_ID1">
-                        <DOI name="Mod">
-                            <DAI name="stVal">
-                                <Val>off</Val>
-                            </DAI>
-                        </DOI>
-                    </LN0>
-                    <LN lnClass="PTRC" inst="0" lnType="PTRC_ID1">
-                    </LN>
+                    <LN lnClass="PTRC" inst="0" lnType="PTRC_ID1"/>
                 </LDevice>
             </Server>
         </AccessPoint>
@@ -142,7 +167,13 @@
             <DO name="Str" type="ACD1"/>
             <DO name="Op" type="ACD1"/> <!-- doName Op -->
         </LNodeType>
-        <LNodeType lnClass="RBDR" id="RTE_RBDR"> <!-- lnClass RBDR -->
+        <LNodeType lnClass="RADR" id="RTE_RADR_Type"> <!-- lnClass RADR -->
+            <DO name="ChNum1" type="DOCh"/>
+            <DO name="LevMod" type="DOLe"/>
+            <DO name="Mod" type="DOMo"/>
+            <DO name="SrcRef" type="DOSr"/>
+        </LNodeType>
+        <LNodeType lnClass="RBDR" id="RTE_RBDR_Type"> <!-- lnClass RBDR -->
             <DO name="ChNum1" type="DOCh"/>
             <DO name="LevMod" type="DOLe"/>
             <DO name="Mod" type="DOMo"/>

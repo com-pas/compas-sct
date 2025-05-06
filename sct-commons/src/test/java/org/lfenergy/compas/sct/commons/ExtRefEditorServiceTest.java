@@ -5,12 +5,12 @@
 package org.lfenergy.compas.sct.commons;
 
 import org.assertj.core.api.SoftAssertions;
-import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
@@ -19,6 +19,7 @@ import org.lfenergy.compas.sct.commons.model.epf.*;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
+import org.lfenergy.compas.sct.commons.util.PrivateEnum;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +27,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
@@ -36,7 +38,7 @@ class ExtRefEditorServiceTest {
 
     @BeforeEach
     void init() {
-        extRefEditorService = new ExtRefEditorService(new IedService(), new LdeviceService(new LnService()), new LnService(), new DataTypeTemplatesService());
+        extRefEditorService = new ExtRefEditorService(new IedService(), new LdeviceService(new LnService()), new LnService());
     }
 
     @Test
@@ -68,11 +70,11 @@ class ExtRefEditorServiceTest {
         List<SclReportItem> sclReportItems = extRefEditorService.manageBindingForLDEPF(scd, epf);
         // Then
         assertThat(sclReportItems).isEmpty();
-        TExtRef extRef1 = findExtRef(scd, "IED_NAME1", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
+        TExtRef extRef1 = findExtRef(scd, "IED_NAME1", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEAN_1_general_1");
         assertThat(extRef1.getIedName()).isEqualTo("IED_NAME1");
-        TExtRef extRef2 = findExtRef(scd, "IED_NAME2", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
+        TExtRef extRef2 = findExtRef(scd, "IED_NAME2", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEAN_1_general_1");
         assertThat(extRef2.getIedName()).isEqualTo("IED_NAME2");
-        TExtRef extRef3 = findExtRef(scd, "IED_NAME3", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
+        TExtRef extRef3 = findExtRef(scd, "IED_NAME3", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEAN_1_general_1");
         assertThat(extRef3.getIedName()).isEqualTo("IED_NAME1");
 
         assertExtRefIsBoundAccordingTOLDEPF(extRef1, channel);
@@ -138,7 +140,7 @@ class ExtRefEditorServiceTest {
         // Then
         assertThat(sclReportItems).isEmpty();
         SclTestMarshaller.assertIsMarshallable(new SclRootAdapter(scd).getCurrentElem());
-        TExtRef extRef1 = findExtRef(scd, "IED_NAME1", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
+        TExtRef extRef1 = findExtRef(scd, "IED_NAME1", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEAN_1_general_1");
         assertThat(extRef1.getIedName()).isEqualTo("IED_NAME1");
         assertExtRefIsBoundAccordingTOLDEPF(extRef1, channel);
 
@@ -201,13 +203,13 @@ class ExtRefEditorServiceTest {
         // Then
         assertThat(sclReportItems).hasSize(2)
                 .extracting(SclReportItem::message)
-                .isEqualTo(List.of("There is more than one IED source to bind the signal /IED@name=IED_NAME2/LDevice@inst=LDEPF/LN0/ExtRef@desc=DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1",
-                        "There is more than one IED source to bind the signal /IED@name=IED_NAME3/LDevice@inst=LDEPF/LN0/ExtRef@desc=DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1"));
-        TExtRef extRef1 = findExtRef(scd, "IED_NAME1", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
+                .isEqualTo(List.of("There is more than one IED source to bind the signal /IED@name=IED_NAME2/LDevice@inst=LDEPF/LN0/ExtRef@desc=DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEAN_1_general_1",
+                        "There is more than one IED source to bind the signal /IED@name=IED_NAME3/LDevice@inst=LDEPF/LN0/ExtRef@desc=DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEAN_1_general_1"));
+        TExtRef extRef1 = findExtRef(scd, "IED_NAME1", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEAN_1_general_1");
         assertThat(extRef1.isSetIedName()).isTrue();
-        TExtRef extRef2 = findExtRef(scd, "IED_NAME2", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
+        TExtRef extRef2 = findExtRef(scd, "IED_NAME2", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEAN_1_general_1");
         assertThat(extRef2.isSetIedName()).isFalse();
-        TExtRef extRef3 = findExtRef(scd, "IED_NAME3", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
+        TExtRef extRef3 = findExtRef(scd, "IED_NAME3", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEAN_1_general_1");
         assertThat(extRef3.isSetIedName()).isFalse();
 
         AbstractLNAdapter<?> lnRbdr = findLn(scd, "IED_NAME2", "LDEPF", "RBDR", "1", "");
@@ -241,8 +243,8 @@ class ExtRefEditorServiceTest {
         analogueChannel1WithBayInternalScope.setChannelType(TChannelType.ANALOG);
         analogueChannel1WithBayInternalScope.setChannelNum("1");
         analogueChannel1WithBayInternalScope.setChannelShortLabel("V0");
-        analogueChannel1WithBayInternalScope.setChannelLevMod(TChannelLevMod.NA);
-        analogueChannel1WithBayInternalScope.setChannelLevModQ(TChannelLevMod.NA);
+        analogueChannel1WithBayInternalScope.setChannelLevMod(TChannelLevMod.POSITIVE_OR_RISING);
+        analogueChannel1WithBayInternalScope.setChannelLevModQ(TChannelLevMod.OTHER);
         analogueChannel1WithBayInternalScope.setBAPVariant("8");
         analogueChannel1WithBayInternalScope.setBAPIgnoredValue("N/A");
         analogueChannel1WithBayInternalScope.setIEDType("SAMU");
@@ -262,8 +264,8 @@ class ExtRefEditorServiceTest {
         analogueChannel10WithBayExternalBayScope.setChannelType(TChannelType.ANALOG);
         analogueChannel10WithBayExternalBayScope.setChannelNum("10");
         analogueChannel10WithBayExternalBayScope.setChannelShortLabel("U101");
-        analogueChannel10WithBayExternalBayScope.setChannelLevMod(TChannelLevMod.NA);
-        analogueChannel10WithBayExternalBayScope.setChannelLevModQ(TChannelLevMod.NA);
+        analogueChannel10WithBayExternalBayScope.setChannelLevMod(TChannelLevMod.POSITIVE_OR_RISING);
+        analogueChannel10WithBayExternalBayScope.setChannelLevModQ(TChannelLevMod.OTHER);
         analogueChannel10WithBayExternalBayScope.setBAPVariant("8");
         analogueChannel10WithBayExternalBayScope.setBAPIgnoredValue("N/A");
         analogueChannel10WithBayExternalBayScope.setIEDType("SAMU");
@@ -299,7 +301,7 @@ class ExtRefEditorServiceTest {
                 .isEqualTo("V0");
         assertThat(getDaiValue(lnRadr, LEVMOD_DO_NAME, SETVAL_DA_NAME))
                 .isNotEqualTo("setVal_old_val")
-                .isEqualTo("NA");
+                .isEqualTo("Positive or Rising");
         assertThat(getDaiValue(lnRadr, MOD_DO_NAME, STVAL_DA_NAME))
                 .isNotEqualTo("off")
                 .isEqualTo("on");
@@ -313,7 +315,7 @@ class ExtRefEditorServiceTest {
                 .isEqualTo("V0");
         assertThat(getDaiValue(lnAradr, LEVMOD_DO_NAME, SETVAL_DA_NAME))
                 .isNotEqualTo("setVal_old_val")
-                .isEqualTo("NA");
+                .isEqualTo("Other");
         assertThat(getDaiValue(lnAradr, MOD_DO_NAME, STVAL_DA_NAME))
                 .isNotEqualTo("off")
                 .isEqualTo("on");
@@ -325,111 +327,6 @@ class ExtRefEditorServiceTest {
         assertThat(extRefBindExternally.getIedName()).isEqualTo("IED_NAME2");
         assertExtRefIsBoundAccordingTOLDEPF(extRefBindExternally, analogueChannel10WithBayExternalBayScope);
     }
-
-    @Test
-    void manageBindingForLDEPF_when_DOI_Mod_and_DAI_stVal_notExists_should_precede() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_withoutModStValInLN0.xml");
-        // When
-        TChannel channel = new TChannel();
-        channel.setBayScope(TCBScopeType.BAY_INTERNAL);
-        channel.setChannelType(TChannelType.DIGITAL);
-        channel.setChannelNum("1");
-        channel.setChannelShortLabel("MR.PX1");
-        channel.setChannelLevMod(TChannelLevMod.POSITIVE_OR_RISING);
-        channel.setChannelLevModQ(TChannelLevMod.OTHER);
-        channel.setIEDType("BCU");
-        channel.setIEDRedundancy(TIEDredundancy.NONE);
-        channel.setIEDSystemVersionInstance("1");
-        channel.setLDInst("LDPX");
-        channel.setLNClass("PTRC");
-        channel.setLNInst("0");
-        channel.setDOName("Str");
-        channel.setDOInst("0");
-        channel.setDAName("general");
-
-        EPF epf = new EPF();
-        Channels channels = new Channels();
-        channels.getChannel().add(channel);
-        epf.setChannels(channels);
-        List<SclReportItem> sclReportItems = extRefEditorService.manageBindingForLDEPF(scd, epf);
-        // Then
-        assertThat(sclReportItems).isEmpty();
-        TExtRef extRef1 = findExtRef(scd, "IED_NAME1", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
-        assertThat(extRef1.getIedName()).isEqualTo("IED_NAME1");
-        TExtRef extRef2 = findExtRef(scd, "IED_NAME2", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
-        assertThat(extRef2.getIedName()).isEqualTo("IED_NAME2");
-        TExtRef extRef3 = findExtRef(scd, "IED_NAME3", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
-        assertThat(extRef3.getIedName()).isEqualTo("IED_NAME1");
-
-        assertExtRefIsBoundAccordingTOLDEPF(extRef1, channel);
-        assertExtRefIsBoundAccordingTOLDEPF(extRef2, channel);
-        assertExtRefIsBoundAccordingTOLDEPF(extRef3, channel);
-    }
-
-    @Test
-    void manageBindingForLDEPF_when_LDEPF_NotActive_should_precede() {
-        //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_with_inactive_ldevice_ldepf.xml");
-        TChannel channel = new TChannel();
-        channel.setBayScope(TCBScopeType.BAY_INTERNAL);
-        channel.setChannelType(TChannelType.DIGITAL);
-        channel.setChannelNum("1");
-        channel.setChannelShortLabel("MR.PX1");
-        channel.setChannelLevMod(TChannelLevMod.POSITIVE_OR_RISING);
-        channel.setChannelLevModQ(TChannelLevMod.OTHER);
-        channel.setIEDType("BCU");
-        channel.setIEDRedundancy(TIEDredundancy.NONE);
-        channel.setIEDSystemVersionInstance("1");
-        channel.setLDInst("LDPX");
-        channel.setLNClass("PTRC");
-        channel.setLNInst("0");
-        channel.setDOName("Str");
-        channel.setDOInst("0");
-        channel.setDAName("general");
-
-        EPF epf = new EPF();
-        Channels channels = new Channels();
-        channels.getChannel().add(channel);
-        epf.setChannels(channels);
-        // When
-        List<SclReportItem> sclReportItems = extRefEditorService.manageBindingForLDEPF(scd, epf);
-        // Then
-        assertThat(sclReportItems).isEmpty();
-        TExtRef extRef1 = findExtRef(scd, "IED_NAME1", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
-        assertThat(extRef1.getIedName()).isEqualTo("IED_NAME1");
-        TExtRef extRef2 = findExtRef(scd, "IED_NAME2", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
-        assertThat(extRef2.getIedName()).isEqualTo("IED_NAME2");
-        TExtRef extRef3 = findExtRef(scd, "IED_NAME3", "LDEPF", "DYN_LDEPF_DIGITAL CHANNEL 1_1_BOOLEEN_1_general_1");
-        assertThat(extRef3.getIedName()).isEqualTo("IED_NAME1");
-
-        assertExtRefIsBoundAccordingTOLDEPF(extRef1, channel);
-        assertExtRefIsBoundAccordingTOLDEPF(extRef2, channel);
-        assertExtRefIsBoundAccordingTOLDEPF(extRef3, channel);
-    }
-
-    @Test
-    void manageBindingForLDEPF_when_DO_Mod_and_DA_stVal_NotFoundInDataTypeTemplate_should_return_error() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_withoutModStValInDataTypeTemplate.xml");
-        // When
-        EPF epf = new EPF();
-        epf.setChannels(new Channels());
-        List<SclReportItem> sclReportItems = extRefEditorService.manageBindingForLDEPF(scd, epf);
-        // Then
-        assertThat(sclReportItems).hasSize(3);
-        assertThat(sclReportItems)
-                .extracting(SclReportItem::message, SclReportItem::xpath)
-                .containsExactly(
-                        Tuple.tuple("DO@name=Mod/DA@name=stVal not found in DataTypeTemplate",
-                                "SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LDEPF\"]"),
-                        Tuple.tuple("DO@name=Mod/DA@name=stVal not found in DataTypeTemplate",
-                                "SCL/IED[@name=\"IED_NAME2\"]/AccessPoint/Server/LDevice[@inst=\"LDEPF\"]"),
-                        Tuple.tuple("DO@name=Mod/DA@name=stVal not found in DataTypeTemplate",
-                                "SCL/IED[@name=\"IED_NAME3\"]/AccessPoint/Server/LDevice[@inst=\"LDEPF\"]")
-                );
-    }
-
 
     private void assertExtRefIsBoundAccordingTOLDEPF(TExtRef extRef, TChannel setting) {
         assertThat(extRef.getLdInst()).isEqualTo(setting.getLDInst());
@@ -709,4 +606,303 @@ class ExtRefEditorServiceTest {
         softly.assertThat(setSrcRefInInRef4.get().getVal().getFirst().getValue()).isEqualTo("IED_NAME1LDEPF/LPHD0.Proxy");
         softly.assertAll();
     }
+
+    @ParameterizedTest()
+    @CsvSource({"'',''", "NA,NA"})
+    void manageBindingForLDEPF_should_not_update_dai_setVal_when_channelLevMod_or_channelLevModq_are_empty_or_NA(String channelLevMod, String channelLevModq) {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_processing_internal_bind.xml");
+        TChannel digitalChannel = new TChannel();
+        digitalChannel.setBayScope(TCBScopeType.BAY_INTERNAL);
+        digitalChannel.setChannelType(TChannelType.DIGITAL);
+        digitalChannel.setChannelNum("1");
+        digitalChannel.setChannelShortLabel("MR.PX1");
+        if(!channelLevMod.isEmpty()){
+            digitalChannel.setChannelLevMod(TChannelLevMod.valueOf(channelLevMod));
+        }
+        if(!channelLevModq.isEmpty()){
+            digitalChannel.setChannelLevModQ(TChannelLevMod.valueOf(channelLevModq));
+        }
+        digitalChannel.setIEDType("BCU");
+        digitalChannel.setIEDRedundancy(TIEDredundancy.NONE);
+        digitalChannel.setIEDSystemVersionInstance("1");
+        digitalChannel.setLDInst("LDPX");
+        digitalChannel.setLNClass("PTRC");
+        digitalChannel.setLNInst("0");
+        digitalChannel.setDOName("Str");
+        digitalChannel.setDOInst("0");
+        digitalChannel.setDAName("general");
+
+        TChannel analogChannel = new TChannel();
+        analogChannel.setBayScope(TCBScopeType.BAY_INTERNAL);
+        analogChannel.setChannelType(TChannelType.ANALOG);
+        analogChannel.setChannelNum("1");
+        analogChannel.setChannelShortLabel("MR.PX1");
+        if(!channelLevMod.isEmpty()){
+            analogChannel.setChannelLevMod(TChannelLevMod.valueOf(channelLevMod));
+        }
+        if(!channelLevModq.isEmpty()){
+            analogChannel.setChannelLevModQ(TChannelLevMod.valueOf(channelLevModq));
+        }
+        analogChannel.setIEDType("BCU");
+        analogChannel.setIEDRedundancy(TIEDredundancy.NONE);
+        analogChannel.setIEDSystemVersionInstance("1");
+        analogChannel.setLDInst("LDPX");
+        analogChannel.setLNClass("PTRC");
+        analogChannel.setLNInst("0");
+        analogChannel.setDOName("Str");
+        analogChannel.setDOInst("0");
+        analogChannel.setDAName("general");
+
+        EPF epf = new EPF();
+        Channels channels = new Channels();
+        channels.getChannel().addAll(List.of(digitalChannel, analogChannel));
+        epf.setChannels(channels);
+        // When
+        List<SclReportItem> sclReportItems = extRefEditorService.manageBindingForLDEPF(scd, epf);
+        // Then
+        assertThat(sclReportItems).isEmpty();
+        assertThat(scd.getIED())
+                .filteredOn(tied -> tied.getName().equals("IED_NAME1"))
+                .flatExtracting(TIED::getAccessPoint)
+                .extracting(TAccessPoint::getServer)
+                .flatExtracting(TServer::getLDevice)
+                .filteredOn(tlDevice -> tlDevice.getInst().equals(LDEVICE_LDEPF))
+                //LN class RBDR: with and without prefix 'b'
+                .allSatisfy(tlDevice -> {
+                    assertThat(tlDevice.getLN())
+                            .filteredOn(tln -> tln.getLnClass().contains("RBDR") && tln.getInst().equals("1") && !tln.isSetPrefix())
+                            .allSatisfy(tln -> {
+                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("MR.PX1");
+                                assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
+                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo("ADF");
+                                assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME1LDPX/PTRC0.Str.general");
+                            });
+                    assertThat(tlDevice.getLN())
+                            .filteredOn(tln -> tln.getLnClass().contains("RBDR") && tln.getInst().equals("1") &&  tln.getPrefix().equals("b"))
+                            .allSatisfy(tln -> {
+                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("MR.PX1");
+                                assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
+                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo("ADF");
+                                assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME1LDPX/PTRC0.Str.q");
+                            });
+                })
+                //LN class RADR: with and without prefix 'a'
+                .allSatisfy(tlDevice -> {
+                    assertThat(tlDevice.getLN())
+                            .filteredOn(tln -> tln.getLnClass().contains("RADR") && tln.getInst().equals("1") && !tln.isSetPrefix())
+                            .allSatisfy(tln -> {
+                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("MR.PX1");
+                                assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
+                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo("ADF");
+                                assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME1LDPX/PTRC0.Str.general");
+                            });
+                    assertThat(tlDevice.getLN())
+                            .filteredOn(tln -> tln.getLnClass().contains("RBDR") && tln.getInst().equals("1") &&  tln.getPrefix().equals("a"))
+                            .allSatisfy(tln -> {
+                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("MR.PX1");
+                                assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
+                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo("ADF");
+                                assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME1LDPX/PTRC0.Str.q");
+                            });
+                });
+    }
+
+    @Test
+    void manageBindingForLDEPF_should_return_error_report_when_missing_mandatory_privates() {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_processing_internal_bind.xml");
+        scd.getIED().forEach(tied -> tied.getPrivate().removeIf(tPrivate -> tPrivate.getType().equals(PrivateEnum.COMPAS_BAY.getPrivateType())
+                || tPrivate.getType().equals(PrivateEnum.COMPAS_ICDHEADER.getPrivateType())));
+
+        TChannel digitalChannel = new TChannel();
+        digitalChannel.setBayScope(TCBScopeType.BAY_INTERNAL);
+        digitalChannel.setChannelType(TChannelType.DIGITAL);
+        digitalChannel.setChannelNum("1");
+        digitalChannel.setChannelShortLabel("MR.PX1");
+        digitalChannel.setChannelLevMod(TChannelLevMod.POSITIVE_OR_RISING);
+        digitalChannel.setChannelLevModQ(TChannelLevMod.OTHER);
+        digitalChannel.setIEDType("BCU");
+        digitalChannel.setIEDRedundancy(TIEDredundancy.NONE);
+        digitalChannel.setIEDSystemVersionInstance("1");
+        digitalChannel.setLDInst("LDPX");
+        digitalChannel.setLNClass("PTRC");
+        digitalChannel.setLNInst("0");
+        digitalChannel.setDOName("Str");
+        digitalChannel.setDOInst("0");
+        digitalChannel.setDAName("general");
+        EPF epf = new EPF();
+        Channels channels = new Channels();
+        channels.getChannel().add(digitalChannel);
+        epf.setChannels(channels);
+        // When
+        List<SclReportItem> sclReportItems = extRefEditorService.manageBindingForLDEPF(scd, epf);
+        // Then
+        assertThat(sclReportItems).containsExactly(SclReportItem.error("SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LDEPF\"]", "The IED has no Private Bay"),
+                SclReportItem.error("SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LDEPF\"]", "The IED has no Private compas:ICDHeader"));
+    }
+
+    @Test
+    void manageBindingForLDEPF_should_not_been_configured_when_ldepf_ln0_is_off() {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_processing_when_status_ln0_off.xml");
+        TChannel digitalChannel = new TChannel();
+        digitalChannel.setBayScope(TCBScopeType.BAY_INTERNAL);
+        digitalChannel.setChannelType(TChannelType.DIGITAL);
+        digitalChannel.setChannelNum("1");
+        digitalChannel.setChannelShortLabel("MR.PX1");
+        digitalChannel.setChannelLevMod(TChannelLevMod.POSITIVE_OR_RISING);
+        digitalChannel.setChannelLevModQ(TChannelLevMod.OTHER);
+        digitalChannel.setIEDType("BCU");
+        digitalChannel.setIEDRedundancy(TIEDredundancy.NONE);
+        digitalChannel.setIEDSystemVersionInstance("1");
+        digitalChannel.setLDInst("LDPX");
+        digitalChannel.setLNClass("PTRC");
+        digitalChannel.setLNInst("0");
+        digitalChannel.setDOName("Str");
+        digitalChannel.setDOInst("0");
+        digitalChannel.setDAName("general");
+        EPF epf = new EPF();
+        Channels channels = new Channels();
+        channels.getChannel().add(digitalChannel);
+        epf.setChannels(channels);
+        // When
+        List<SclReportItem> sclReportItems = extRefEditorService.manageBindingForLDEPF(scd, epf);
+        // Then
+        assertThat(sclReportItems).isEmpty();
+        assertThat(scd)
+                .usingRecursiveComparison()
+                .isEqualTo(SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_processing_when_status_ln0_off.xml"));
+    }
+
+    @Test
+    void manageBindingForLDEPF_should_update_binding_properties_when_internal_binding() {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_processing_internal_bind.xml");
+        TChannel digitalChannel = new TChannel();
+        digitalChannel.setBayScope(TCBScopeType.BAY_INTERNAL);
+        digitalChannel.setChannelType(TChannelType.DIGITAL);
+        digitalChannel.setChannelNum("1");
+        digitalChannel.setChannelShortLabel("MR.PX1");
+        digitalChannel.setChannelLevMod(TChannelLevMod.POSITIVE_OR_RISING);
+        digitalChannel.setChannelLevModQ(TChannelLevMod.OTHER);
+        digitalChannel.setIEDType("BCU");
+        digitalChannel.setIEDRedundancy(TIEDredundancy.NONE);
+        digitalChannel.setIEDSystemVersionInstance("1");
+        digitalChannel.setLDInst("LDPX");
+        digitalChannel.setLNClass("PTRC");
+        digitalChannel.setLNInst("0");
+        digitalChannel.setDOName("Str");
+        digitalChannel.setDOInst("0");
+        digitalChannel.setDAName("general");
+
+        TChannel analogChannel = new TChannel();
+        analogChannel.setBayScope(TCBScopeType.BAY_INTERNAL);
+        analogChannel.setChannelType(TChannelType.ANALOG);
+        analogChannel.setChannelNum("1");
+        analogChannel.setChannelShortLabel("MR.PX1");
+        analogChannel.setChannelLevMod(TChannelLevMod.POSITIVE_OR_RISING);
+        analogChannel.setChannelLevModQ(TChannelLevMod.OTHER);
+        analogChannel.setIEDType("BCU");
+        analogChannel.setIEDRedundancy(TIEDredundancy.NONE);
+        analogChannel.setIEDSystemVersionInstance("1");
+        analogChannel.setLDInst("LDPX");
+        analogChannel.setLNClass("PTRC");
+        analogChannel.setLNInst("0");
+        analogChannel.setDOName("Str");
+        analogChannel.setDOInst("0");
+        analogChannel.setDAName("general");
+
+        EPF epf = new EPF();
+        Channels channels = new Channels();
+        channels.getChannel().addAll(List.of(digitalChannel, analogChannel));
+        epf.setChannels(channels);
+        // When
+        List<SclReportItem> sclReportItems = extRefEditorService.manageBindingForLDEPF(scd, epf);
+        // Then
+        assertThat(sclReportItems).isEmpty();
+        assertThat(scd.getIED())
+                .filteredOn(tied -> tied.getName().equals("IED_NAME1"))
+                .flatExtracting(TIED::getAccessPoint)
+                .extracting(TAccessPoint::getServer)
+                .flatExtracting(TServer::getLDevice)
+                .filteredOn(tlDevice -> tlDevice.getInst().equals(LDEVICE_LDEPF))
+                // Binding properties should be set
+                .allSatisfy(tlDevice -> {
+                    assertThat(tlDevice.getLN0().getInputs().getExtRef())
+                            .filteredOn(tExtRef -> tExtRef.getDesc().contains("DIGITAL"))
+                            .extracting(TExtRef::getIedName, TExtRef::getLdInst, TExtRef::getLnClass, TExtRef::getLnInst, TExtRef::getDoName, TExtRef::isSetServiceType)
+                            .containsExactlyInAnyOrder(tuple("IED_NAME1", "LDPX", List.of("PTRC"), "0", "Str", false));
+                    assertThat(tlDevice.getLN0().getInputs().getExtRef())
+                            .filteredOn(tExtRef -> tExtRef.getDesc().contains("ANALOG"))
+                            .extracting(TExtRef::getIedName, TExtRef::getLdInst, TExtRef::getLnClass, TExtRef::getLnInst, TExtRef::getDoName, TExtRef::isSetServiceType)
+                            .containsExactlyInAnyOrder(tuple("IED_NAME1", "LDPX", List.of("PTRC"), "0", "Str", false));
+                });
+    }
+
+    @Test
+    void manageBindingForLDEPF_should_update_binding_properties_when_external_binding() {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_processing_external_bind.xml");
+        TChannel digitalChannel = new TChannel();
+        digitalChannel.setBayScope(TCBScopeType.BAY_EXTERNAL);
+        digitalChannel.setChannelType(TChannelType.DIGITAL);
+        digitalChannel.setChannelNum("1");
+        digitalChannel.setChannelShortLabel("MR.PX1");
+        digitalChannel.setChannelLevMod(TChannelLevMod.POSITIVE_OR_RISING);
+        digitalChannel.setChannelLevModQ(TChannelLevMod.OTHER);
+        digitalChannel.setIEDType("BCU");
+        digitalChannel.setIEDRedundancy(TIEDredundancy.NONE);
+        digitalChannel.setIEDSystemVersionInstance("1");
+        digitalChannel.setLDInst("LDPX");
+        digitalChannel.setLNClass("PTRC");
+        digitalChannel.setLNInst("0");
+        digitalChannel.setDOName("Str");
+        digitalChannel.setDOInst("0");
+        digitalChannel.setDAName("general");
+
+        TChannel analogChannel = new TChannel();
+        analogChannel.setBayScope(TCBScopeType.BAY_EXTERNAL);
+        analogChannel.setChannelType(TChannelType.ANALOG);
+        analogChannel.setChannelNum("1");
+        analogChannel.setChannelShortLabel("MR.PX1");
+        analogChannel.setChannelLevMod(TChannelLevMod.POSITIVE_OR_RISING);
+        analogChannel.setChannelLevModQ(TChannelLevMod.OTHER);
+        analogChannel.setIEDType("BCU");
+        analogChannel.setIEDRedundancy(TIEDredundancy.NONE);
+        analogChannel.setIEDSystemVersionInstance("1");
+        analogChannel.setLDInst("LDPX");
+        analogChannel.setLNClass("PTRC");
+        analogChannel.setLNInst("0");
+        analogChannel.setDOName("Str");
+        analogChannel.setDOInst("0");
+        analogChannel.setDAName("general");
+
+        EPF epf = new EPF();
+        Channels channels = new Channels();
+        channels.getChannel().addAll(List.of(digitalChannel, analogChannel));
+        epf.setChannels(channels);
+        // When
+        List<SclReportItem> sclReportItems = extRefEditorService.manageBindingForLDEPF(scd, epf);
+        // Then
+        assertThat(sclReportItems).isEmpty();
+        assertThat(scd.getIED())
+                .filteredOn(tied -> tied.getName().equals("IED_NAME1"))
+                .flatExtracting(TIED::getAccessPoint)
+                .extracting(TAccessPoint::getServer)
+                .flatExtracting(TServer::getLDevice)
+                .filteredOn(tlDevice -> tlDevice.getInst().equals(LDEVICE_LDEPF))
+                // Binding properties should be set including Service Type
+                .allSatisfy(tlDevice -> {
+                    assertThat(tlDevice.getLN0().getInputs().getExtRef())
+                            .filteredOn(tExtRef -> tExtRef.getDesc().contains("DIGITAL"))
+                            .extracting(TExtRef::getIedName, TExtRef::getLdInst, TExtRef::getLnClass, TExtRef::getLnInst, TExtRef::getDoName, TExtRef::getServiceType)
+                            .containsExactlyInAnyOrder(tuple("IED_NAME2", "LDPX", List.of("PTRC"), "0", "Str", TServiceType.GOOSE));
+                   assertThat(tlDevice.getLN0().getInputs().getExtRef())
+                            .filteredOn(tExtRef -> tExtRef.getDesc().contains("ANALOG"))
+                            .extracting(TExtRef::getIedName, TExtRef::getLdInst, TExtRef::getLnClass, TExtRef::getLnInst, TExtRef::getDoName, TExtRef::getServiceType)
+                            .containsExactlyInAnyOrder(tuple("IED_NAME2", "LDPX", List.of("PTRC"), "0", "Str", TServiceType.SMV));
+                });
+    }
+
 }
