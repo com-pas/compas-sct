@@ -36,6 +36,7 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 @RequiredArgsConstructor
 public class ExtRefEditorService implements ExtRefEditor {
     private static final String INVALID_OR_MISSING_ATTRIBUTES_IN_EXT_REF_BINDING_INFO = "Invalid or missing attributes in ExtRef binding info";
+    private static final String COMPAS_LNODE_STATUS = "COMPAS-LNodeStatus";
     private static final List<DoNameAndDaName> DO_DA_MAPPINGS = List.of(
             new DoNameAndDaName(CHNUM1_DO_NAME, DU_DA_NAME),
             new DoNameAndDaName(LEVMOD_DO_NAME, SETVAL_DA_NAME),
@@ -46,7 +47,6 @@ public class ExtRefEditorService implements ExtRefEditor {
     private final IedService iedService;
     private final LdeviceService ldeviceService;
     private final LnEditor lnEditor;
-    private final DataTypeTemplatesService dataTypeTemplatesService;
 
     @Getter
     private final List<SclReportItem> errorHandler = new ArrayList<>();
@@ -89,8 +89,7 @@ public class ExtRefEditorService implements ExtRefEditor {
      *
      * @return list of ExtRef and associated Bay
      */
-    private List<ExtRefInfo.ExtRefWithBayReference> getExtRefWithBayReferenceInLDEPF(TDataTypeTemplates dataTypeTemplates, TIED tied, final TLDevice tlDevice) {
-        List<ExtRefInfo.ExtRefWithBayReference> extRefBayReferenceList = new ArrayList<>();
+    private List<ExtRefInfo.ExtRefWithBayReference> getExtRefWithBayReferenceInLDEPF(TIED tied, final TLDevice tlDevice) {
         String lDevicePath = "SCL/IED[@name=\"" + tied.getName() + "\"]/AccessPoint/Server/LDevice[@inst=\"" + tlDevice.getInst() + "\"]";
         Optional<TCompasBay> tCompasBay = PrivateUtils.extractCompasPrivate(tied, TCompasBay.class);
         if (tCompasBay.isEmpty()) {
@@ -100,16 +99,9 @@ public class ExtRefEditorService implements ExtRefEditor {
             }
             return Collections.emptyList();
         }
-
-        if (dataTypeTemplatesService.isDoModAndDaStValExist(dataTypeTemplates, tlDevice.getLN0().getLnType())) {
-            extRefBayReferenceList.addAll(tlDevice.getLN0()
-                    .getInputs()
-                    .getExtRef().stream()
-                    .map(extRef -> new ExtRefInfo.ExtRefWithBayReference(tied.getName(), tCompasBay.get(), extRef)).toList());
-        } else {
-            errorHandler.add(SclReportItem.error(lDevicePath, "DO@name=Mod/DA@name=stVal not found in DataTypeTemplate"));
-        }
-        return extRefBayReferenceList;
+        return tlDevice.getLN0().getInputs().getExtRef().stream()
+                .map(extRef -> new ExtRefInfo.ExtRefWithBayReference(tied.getName(), tCompasBay.get(), extRef))
+                .toList();
     }
 
     /**
@@ -277,14 +269,15 @@ public class ExtRefEditorService implements ExtRefEditor {
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         if (!epf.isSetChannels()) return errorHandler;
         iedService.getFilteredIeds(scd, ied -> !ied.getName().contains("TEST"))
-                .forEach(tied -> ldeviceService.findLdevice(tied, LDEVICE_LDEPF)
-                        .ifPresent(tlDevice -> getExtRefWithBayReferenceInLDEPF(scd.getDataTypeTemplates(), tied, tlDevice)
+                .forEach(tied -> ldeviceService.findLdevice(tied, tlDevice -> tlDevice.getInst().equals(LDEVICE_LDEPF))
+                        .filter(ldepfLdevice -> PrivateUtils.extractStringPrivate(ldepfLdevice.getLN0(), COMPAS_LNODE_STATUS).map(status -> !status.equals("off")).orElse(false))
+                        .ifPresent(ldepfLdevice -> getExtRefWithBayReferenceInLDEPF(tied, ldepfLdevice)
                                 .forEach(extRefBayRef -> epf.getChannels().getChannel().stream().filter(tChannel -> doesExtRefMatchLDEPFChannel(extRefBayRef.extRef(), tChannel))
                                         .findFirst().ifPresent(channel -> {
                                             List<TIED> iedSources = getIedSources(sclRootAdapter, extRefBayRef.compasBay(), channel);
                                             if (iedSources.size() == 1) {
                                                 updateLDEPFExtRefBinding(extRefBayRef.extRef(), iedSources.getFirst(), channel);
-                                                LDeviceAdapter lDeviceAdapter = new LDeviceAdapter(new IEDAdapter(sclRootAdapter, tied.getName()), tlDevice);
+                                                LDeviceAdapter lDeviceAdapter = new LDeviceAdapter(new IEDAdapter(sclRootAdapter, tied.getName()), ldepfLdevice);
                                                 updateLDEPFDos(lDeviceAdapter, extRefBayRef.extRef(), channel);
                                             } else {
                                                 if (iedSources.size() > 1) {
