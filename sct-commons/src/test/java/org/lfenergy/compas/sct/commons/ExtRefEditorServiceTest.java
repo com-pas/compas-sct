@@ -4,7 +4,6 @@
 
 package org.lfenergy.compas.sct.commons;
 
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -22,7 +21,6 @@ import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.lfenergy.compas.sct.commons.util.PrivateEnum;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -595,37 +593,40 @@ class ExtRefEditorServiceTest {
         // When
         extRefEditorService.epfPostProcessing(scd);
         // Then
-        SoftAssertions softly = new SoftAssertions();
-
-        Optional<TDAI> setSrcRefInInRef1 = findDai(scd, "IED_NAME1", "LDEPF", "InRef1", "setSrcRef");
-        Optional<TDAI> purposeInInRef1 = findDai(scd, "IED_NAME1", "LDEPF", "InRef1", "purpose");
-        assertThat(purposeInInRef1).isPresent();
-        softly.assertThat(purposeInInRef1.get().getVal().getFirst().getValue()).doesNotStartWith("DYN_LDEPF_DIGITAL CHANNEL");
-        softly.assertThat(purposeInInRef1.get().getVal().getFirst().getValue()).doesNotStartWith("DYN_LDEPF_ANALOG CHANNEL");
-        assertThat(setSrcRefInInRef1).isPresent();
-        softly.assertThat(setSrcRefInInRef1.get().isSetVal()).isFalse();
-
-        Optional<TDAI> setSrcRefInInRef2 = findDai(scd, "IED_NAME1", "LDEPF", "InRef2", "setSrcRef");
-        Optional<TDAI> purposeInInRef2 = findDai(scd, "IED_NAME1", "LDEPF", "InRef2", "purpose");
-        assertThat(purposeInInRef2).isPresent();
-        softly.assertThat(purposeInInRef2.get().getVal().getFirst().getValue()).startsWith("DYN_LDEPF_DIGITAL CHANNEL");
-        assertThat(setSrcRefInInRef2).isPresent();
-        softly.assertThat(setSrcRefInInRef2.get().getVal().getFirst().getValue()).isEqualTo("IED_NAME1LDEPF/LPHD0.Proxy");
-
-        Optional<TDAI> setSrcRefInInRef3 = findDai(scd, "IED_NAME1", "LDEPF", "InRef3", "setSrcRef");
-        Optional<TDAI> purposeInInRef3 = findDai(scd, "IED_NAME1", "LDEPF", "InRef3", "purpose");
-        assertThat(purposeInInRef3).isPresent();
-        softly.assertThat(purposeInInRef3.get().getVal().getFirst().getValue()).startsWith("DYN_LDEPF_DIGITAL CHANNEL");
-        assertThat(setSrcRefInInRef3).isPresent();
-        softly.assertThat(setSrcRefInInRef3.get().getVal().getFirst().getValue()).isEqualTo("IED_NAME1LDEPF/LPHD0.Proxy");
-
-        Optional<TDAI> setSrcRefInInRef4 = findDai(scd, "IED_NAME1", "LDEPF", "InRef4", "setSrcRef");
-        Optional<TDAI> purposeInInRef4 = findDai(scd, "IED_NAME1", "LDEPF", "InRef4", "purpose");
-        assertThat(purposeInInRef4).isPresent();
-        softly.assertThat(purposeInInRef4.get().getVal().getFirst().getValue()).startsWith("DYN_LDEPF_ANALOG CHANNEL");
-        assertThat(setSrcRefInInRef4).isPresent();
-        softly.assertThat(setSrcRefInInRef4.get().getVal().getFirst().getValue()).isEqualTo("IED_NAME1LDEPF/LPHD0.Proxy");
-        softly.assertAll();
+        assertThat(scd.getIED())
+                .filteredOn(tied -> tied.getName().equals("IED_NAME1"))
+                .flatExtracting(TIED::getAccessPoint)
+                .extracting(TAccessPoint::getServer)
+                .flatExtracting(TServer::getLDevice)
+                .filteredOn(tlDevice -> tlDevice.getInst().equals(LDEVICE_LDEPF))
+                .extracting(tlDevice -> tlDevice.getLN0().getDOI())
+                .allSatisfy(tdois -> {
+                    assertThat(tdois)
+                            .filteredOn(tdoi -> tdoi.getName().equals("InRef1"))
+                            .allSatisfy(tdoi -> {
+                                assertThat(getDai(tdoi,"purpose").getVal().getFirst().getValue()).doesNotStartWith("DYN_LDEPF_DIGITAL CHANNEL");
+                                assertThat(getDai(tdoi,"purpose").getVal().getFirst().getValue()).doesNotStartWith("DYN_LDEPF_ANALOG CHANNEL");
+                                assertThat(getDai(tdoi, "setSrcRef").isSetVal()).isFalse();
+                            });
+                    assertThat(tdois)
+                            .filteredOn(tdoi -> tdoi.getName().equals("InRef2"))
+                            .allSatisfy(tdoi -> {
+                                assertThat(getDaiValue(tdoi,"purpose")).startsWith("DYN_LDEPF_DIGITAL CHANNEL");
+                                assertThat(getDaiValue(tdoi, "setSrcRef")).isEqualTo("IED_NAME1LDEPF/LPHD0.Proxy");
+                            });
+                    assertThat(tdois)
+                            .filteredOn(tdoi -> tdoi.getName().equals("InRef3"))
+                            .allSatisfy(tdoi -> {
+                                assertThat(getDaiValue(tdoi,"purpose")).startsWith("DYN_LDEPF_DIGITAL CHANNEL");
+                                assertThat(getDaiValue(tdoi, "setSrcRef")).isEqualTo("IED_NAME1LDEPF/LPHD0.Proxy");
+                            });
+                    assertThat(tdois)
+                            .filteredOn(tdoi -> tdoi.getName().equals("InRef4"))
+                            .allSatisfy(tdoi -> {
+                                assertThat(getDaiValue(tdoi,"purpose")).startsWith("DYN_LDEPF_ANALOG CHANNEL");
+                                assertThat(getDaiValue(tdoi, "setSrcRef")).isEqualTo("IED_NAME1LDEPF/LPHD0.Proxy");
+                            });
+                });
     }
 
     @ParameterizedTest()
@@ -996,4 +997,23 @@ class ExtRefEditorServiceTest {
                 });
     }
 
+    @Test
+    void epfPostProcessing_when_exist_unused_channel_and_ldepf_off_should_not_update_Inref_setSrcRef() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_postProcessing_when_ln0_off.xml");
+        // When
+        extRefEditorService.epfPostProcessing(scd);
+        // Then
+        assertThat(scd.getIED())
+                .filteredOn(tied -> tied.getName().equals("IED_NAME1"))
+                .flatExtracting(TIED::getAccessPoint)
+                .extracting(TAccessPoint::getServer)
+                .flatExtracting(TServer::getLDevice)
+                .filteredOn(tlDevice -> tlDevice.getInst().equals(LDEVICE_LDEPF))
+                .flatExtracting(tlDevice -> tlDevice.getLN0().getDOI())
+                .filteredOn(tdoi -> tdoi.getName().startsWith("InRef"))
+                .extracting(tdoi -> getDai(tdoi, "setSrcRef"))
+                .filteredOn(TDAI::isSetVal)
+                .allSatisfy(tdai -> assertThat(tdai.getVal().getFirst().getValue()).isNotEqualTo("IED_NAME1LDEPF/LPHD0.Proxy"));
+    }
 }
