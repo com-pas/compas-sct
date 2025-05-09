@@ -54,7 +54,7 @@ public class SclService implements SclEditor {
     private final DataTypeTemplateReader dataTypeTemplateService;
 
     @Getter
-    private final List<SclReportItem> errorHanlder = new ArrayList<>();
+    private final ThreadLocal<List<SclReportItem>> errorHandler = ThreadLocal.withInitial(ArrayList::new);
 
     @Override
     public SCL initScl(final UUID hId, final String hVersion, final String hRevision) throws ScdException {
@@ -221,37 +221,41 @@ public class SclService implements SclEditor {
 
     @Override
     public List<SclReportItem> manageMonitoringLns(SCL scd) {
-        errorHanlder.clear();
-        iedService.getFilteredIeds(scd, ied -> !ied.getName().contains(IED_TEST_NAME))
-                .forEach(tied -> {
-                    Map<TServiceType, List<IedSource>> serviceTypeToIedSource = ldeviceService.getLdevices(tied)
-                            .flatMap(tlDevice -> extRefReaderService.getExtRefs(tlDevice.getLN0()))
-                            .filter(tExtRef -> tExtRef.isSetServiceType() && tExtRef.isSetSrcCBName() && (tExtRef.getServiceType().equals(TServiceType.GOOSE) || tExtRef.getServiceType().equals(TServiceType.SMV)))
-                            .collect(Collectors.groupingBy(tExtRef -> new IedSource(tExtRef.getIedName(), tExtRef.getSrcCBName(), tExtRef.getSrcLDInst(), tExtRef.getServiceType())))
-                            .keySet()
-                            .stream()
-                            .collect(Collectors.groupingBy(IedSource::serviceType));
-                    ldeviceService.findLdevice(tied, LDEVICE_LDSUIED).ifPresent(ldSUIEDLDevice -> {
-                        Optional.ofNullable(serviceTypeToIedSource.get(TServiceType.GOOSE))
-                                .ifPresent(iedSourceKeys -> manageMonitoringLns(iedSourceKeys, scd, tied, ldSUIEDLDevice, DO_GOCBREF, MonitoringLnClassEnum.LGOS));
-                        Optional.ofNullable(serviceTypeToIedSource.get(TServiceType.SMV))
-                                .ifPresent(iedSourceKeys -> manageMonitoringLns(iedSourceKeys, scd, tied, ldSUIEDLDevice, DO_SVCBREF, MonitoringLnClassEnum.LSVS));
+        errorHandler.get().clear();
+        try {
+            iedService.getFilteredIeds(scd, ied -> !ied.getName().contains(IED_TEST_NAME))
+                    .forEach(tied -> {
+                        Map<TServiceType, List<IedSource>> serviceTypeToIedSource = ldeviceService.getLdevices(tied)
+                                .flatMap(tlDevice -> extRefReaderService.getExtRefs(tlDevice.getLN0()))
+                                .filter(tExtRef -> tExtRef.isSetServiceType() && tExtRef.isSetSrcCBName() && (tExtRef.getServiceType().equals(TServiceType.GOOSE) || tExtRef.getServiceType().equals(TServiceType.SMV)))
+                                .collect(Collectors.groupingBy(tExtRef -> new IedSource(tExtRef.getIedName(), tExtRef.getSrcCBName(), tExtRef.getSrcLDInst(), tExtRef.getServiceType())))
+                                .keySet()
+                                .stream()
+                                .collect(Collectors.groupingBy(IedSource::serviceType));
+                        ldeviceService.findLdevice(tied, LDEVICE_LDSUIED).ifPresent(ldSUIEDLDevice -> {
+                            Optional.ofNullable(serviceTypeToIedSource.get(TServiceType.GOOSE))
+                                    .ifPresent(iedSourceKeys -> manageMonitoringLns(iedSourceKeys, scd, tied, ldSUIEDLDevice, DO_GOCBREF, MonitoringLnClassEnum.LGOS));
+                            Optional.ofNullable(serviceTypeToIedSource.get(TServiceType.SMV))
+                                    .ifPresent(iedSourceKeys -> manageMonitoringLns(iedSourceKeys, scd, tied, ldSUIEDLDevice, DO_SVCBREF, MonitoringLnClassEnum.LSVS));
+                        });
                     });
-                });
-        return errorHanlder;
+            return errorHandler.get();
+        } finally {
+            errorHandler.remove();
+        }
     }
 
     private void manageMonitoringLns(List<IedSource> iedSources, SCL scd, TIED tied, TLDevice ldsuiedLdevice, String doName, MonitoringLnClassEnum monitoringLnClassEnum) {
         List<TLN> lgosOrLsvsLns = lnService.getFilteredLns(ldsuiedLdevice, tln -> monitoringLnClassEnum.value().equals(tln.getLnClass().getFirst())).toList();
         if (lgosOrLsvsLns.isEmpty())
-            errorHanlder.add(SclReportItem.warning(tied.getName() + "/" + LDEVICE_LDSUIED + "/" + monitoringLnClassEnum.value(), "There is no LN %s present in LDevice".formatted(monitoringLnClassEnum.value())));
+            errorHandler.get().add(SclReportItem.warning(tied.getName() + "/" + LDEVICE_LDSUIED + "/" + monitoringLnClassEnum.value(), "There is no LN %s present in LDevice".formatted(monitoringLnClassEnum.value())));
         DoLinkedToDaFilter doLinkedToDaFilter = new DoLinkedToDaFilter(doName, List.of(), DA_SETSRCREF, List.of());
         lgosOrLsvsLns.forEach(lgosOrLsvs -> dataTypeTemplateService.getFilteredDoLinkedToDa(scd.getDataTypeTemplates(), lgosOrLsvs.getLnType(), doLinkedToDaFilter)
                 .map(doLinkedToDa -> lnService.getDoLinkedToDaCompletedFromDAI(tied, LDEVICE_LDSUIED, lgosOrLsvs, doLinkedToDa))
                 .findFirst()
                 .filter(doLinkedToDa -> {
                     if (!doLinkedToDa.isUpdatable())
-                        errorHanlder.add(SclReportItem.warning(tied.getName() + "/" + LDEVICE_LDSUIED + "/" + monitoringLnClassEnum.value() + "/DOI@name=\"" + doName + "\"/DAI@name=\"setSrcRef\"/Val", "The DAI cannot be updated"));
+                        errorHandler.get().add(SclReportItem.warning(tied.getName() + "/" + LDEVICE_LDSUIED + "/" + monitoringLnClassEnum.value() + "/DOI@name=\"" + doName + "\"/DAI@name=\"setSrcRef\"/Val", "The DAI cannot be updated"));
                     return doLinkedToDa.isUpdatable();
                 })
                 .ifPresent(doLinkedToDa -> {
