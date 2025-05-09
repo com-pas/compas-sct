@@ -53,7 +53,7 @@ public class ExtRefEditorService implements ExtRefEditor {
     private final DataTypeTemplatesService dataTypeTemplatesService;
 
     @Getter
-    private final List<SclReportItem> errorHandler = new ArrayList<>();
+    private final ThreadLocal<List<SclReportItem>> errorHandler = ThreadLocal.withInitial(ArrayList::new);
 
     /**
      * Provides valid IED sources according to EPF configuration.<br/>
@@ -100,9 +100,9 @@ public class ExtRefEditorService implements ExtRefEditor {
         String lDevicePath = "SCL/IED[@name=\"" + tied.getName() + "\"]/AccessPoint/Server/LDevice[@inst=\"" + tlDevice.getInst() + "\"]";
         Optional<TCompasBay> tCompasBay = PrivateUtils.extractCompasPrivate(tied, TCompasBay.class);
         if (tCompasBay.isEmpty()) {
-            errorHandler.add(SclReportItem.error(lDevicePath, "The IED has no Private Bay"));
+            errorHandler.get().add(SclReportItem.error(lDevicePath, "The IED has no Private Bay"));
             if (PrivateUtils.extractCompasPrivate(tied, TCompasICDHeader.class).isEmpty()) {
-                errorHandler.add(SclReportItem.error(lDevicePath, "The IED has no Private compas:ICDHeader"));
+                errorHandler.get().add(SclReportItem.error(lDevicePath, "The IED has no Private compas:ICDHeader"));
             }
             return Collections.emptyList();
         }
@@ -247,29 +247,33 @@ public class ExtRefEditorService implements ExtRefEditor {
 
     @Override
     public List<SclReportItem> manageBindingForLDEPF(SCL scd, EPF epf) {
-        errorHandler.clear();
-        if (!epf.isSetChannels()) return errorHandler;
-        log.info("Processing %d EPF setting channels".formatted(epf.getChannels().getChannel().size()));
-        iedService.getFilteredIeds(scd, ied -> !ied.getName().contains("TEST"))
-                .forEach(tied -> ldeviceService.findLdevice(tied, tlDevice -> tlDevice.getInst().equals(LDEVICE_LDEPF))
-                        .filter(ldepfLdevice -> PrivateUtils.extractStringPrivate(ldepfLdevice.getLN0(), COMPAS_LNODE_STATUS).map(status -> !status.equals("off")).orElse(false))
-                        .ifPresent(ldepfLdevice -> getExtRefWithBayReferenceInLDEPF(tied, ldepfLdevice)
-                                .forEach(extRefBayRef -> epf.getChannels().getChannel().stream().filter(tChannel -> doesExtRefMatchLDEPFChannel(extRefBayRef.extRef(), tChannel))
-                                        .findFirst().ifPresent(channel -> {
-                                            List<TIED> iedSources = getIedSources(scd, extRefBayRef.compasBay(), channel);
-                                            if (iedSources.size() == 1) {
-                                                updateLDEPFExtRefBinding(extRefBayRef, iedSources.getFirst(), channel);
-                                                updateLDEPFDos(scd.getDataTypeTemplates(), tied, ldepfLdevice, extRefBayRef.extRef(), channel);
-                                            } else {
-                                                if (iedSources.size() > 1) {
-                                                    errorHandler.add(SclReportItem.warning(null, "There is more than one IED source to bind the signal " +
-                                                            "/IED@name=" + extRefBayRef.iedName() + "/LDevice@inst=LDEPF/LN0" +
-                                                            "/ExtRef@desc=" + extRefBayRef.extRef().getDesc()));
+        errorHandler.get().clear();
+        if (!epf.isSetChannels()) return List.of();
+        try {
+            log.info("Processing %d EPF setting channels".formatted(epf.getChannels().getChannel().size()));
+            iedService.getFilteredIeds(scd, ied -> !ied.getName().contains("TEST"))
+                    .forEach(tied -> ldeviceService.findLdevice(tied, tlDevice -> tlDevice.getInst().equals(LDEVICE_LDEPF))
+                            .filter(ldepfLdevice -> PrivateUtils.extractStringPrivate(ldepfLdevice.getLN0(), COMPAS_LNODE_STATUS).map(status -> !status.equals("off")).orElse(false))
+                            .ifPresent(ldepfLdevice -> getExtRefWithBayReferenceInLDEPF(tied, ldepfLdevice)
+                                    .forEach(extRefBayRef -> epf.getChannels().getChannel().stream().filter(tChannel -> doesExtRefMatchLDEPFChannel(extRefBayRef.extRef(), tChannel))
+                                            .findFirst().ifPresent(channel -> {
+                                                List<TIED> iedSources = getIedSources(scd, extRefBayRef.compasBay(), channel);
+                                                if (iedSources.size() == 1) {
+                                                    updateLDEPFExtRefBinding(extRefBayRef, iedSources.getFirst(), channel);
+                                                    updateLDEPFDos(scd.getDataTypeTemplates(), tied, ldepfLdevice, extRefBayRef.extRef(), channel);
+                                                } else {
+                                                    if (iedSources.size() > 1) {
+                                                        errorHandler.get().add(SclReportItem.warning(null, "There is more than one IED source to bind the signal " +
+                                                                "/IED@name=" + extRefBayRef.iedName() + "/LDevice@inst=LDEPF/LN0" +
+                                                                "/ExtRef@desc=" + extRefBayRef.extRef().getDesc()));
+                                                    }
+                                                    // If the source IED is not found, there will be no update or report message.
                                                 }
-                                                // If the source IED is not found, there will be no update or report message.
-                                            }
-                                        }))));
-        return errorHandler;
+                                            }))));
+            return errorHandler.get();
+        } finally {
+            errorHandler.remove();
+        }
     }
 
     @Override
@@ -388,7 +392,7 @@ public class ExtRefEditorService implements ExtRefEditor {
                 .findFirst()
                 .filter(doLinkedToDa1 -> {
                     if (!doLinkedToDa1.isUpdatable()){
-                        errorHandler.add(SclReportItem.warning(tied.getName() + "/" + LDEVICE_LDSUIED + "/" + LnId.from(tln).lnClass() + "/DOI@name=\"" + doLinkedToDaFilter.doName() + "\"/DAI@name=\"" + doLinkedToDaFilter.daName() + "\"/Val", "The DAI cannot be updated"));
+                        errorHandler.get().add(SclReportItem.warning(tied.getName() + "/" + LDEVICE_LDSUIED + "/" + LnId.from(tln).lnClass() + "/DOI@name=\"" + doLinkedToDaFilter.doName() + "\"/DAI@name=\"" + doLinkedToDaFilter.daName() + "\"/Val", "The DAI cannot be updated"));
                     }
                     return doLinkedToDa1.isUpdatable();
                 })
