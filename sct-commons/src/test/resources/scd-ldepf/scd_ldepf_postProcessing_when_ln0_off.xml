@@ -22,10 +22,10 @@
                 <Authentication/>
                 <LDevice inst="LDEPF" ldName="IED_NAME1LDEPF">
                     <LN0 lnClass="LLN0" inst="" lnType="LLN0_ID1">
-                        <Private type="COMPAS-LNodeStatus">on</Private>
+                        <Private type="COMPAS-LNodeStatus">off</Private>
                         <DOI name="Mod">
                             <DAI name="stVal" valImport="true">
-                                <Val>on</Val>
+                                <Val>off</Val>
                             </DAI>
                         </DOI>
                         <DOI name="InRef1">
