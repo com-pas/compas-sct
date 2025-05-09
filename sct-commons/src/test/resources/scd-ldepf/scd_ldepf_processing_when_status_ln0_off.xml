@@ -57,10 +57,18 @@
                             </DAI>
                         </DOI>
                     </LN>
-                    <LN prefix="a" lnClass="RADR" inst="1" lnType="RTE_RADR_Type">
+                    <LN lnClass="RBDR" inst="1" lnType="RTE_RBDR_Type">
                         <DOI name="ChNum1">
                             <DAI name="dU" valKind="RO" valImport="true">
                                 <Val>ADF</Val>
+                            </DAI>
+                        </DOI>
+                        <DOI name="SrcRef">
+                            <DAI name="setSrcRef" valKind="Set" valImport="true">
+                                <Val>ADF</Val>
+                            </DAI>
+                            <DAI name="d" valKind="RO" valImport="false">
+                                <Val>Source reference of the channel among LDEPF input signals</Val>
                             </DAI>
                         </DOI>
                         <DOI name="LevMod">
@@ -69,18 +77,12 @@
                             </DAI>
                         </DOI>
                         <DOI name="Mod">
-                            <DAI name="stVal" sAddr="50606.0" valKind="Set" valImport="false">
-                                <Val>off</Val>
-                            </DAI>
-                        </DOI>
-                        <DOI name="SrcRef">
-                            <DAI name="setSrcRef" valKind="Set" valImport="true">
+                            <DAI name="stVal">
                                 <Val>ADF</Val>
                             </DAI>
                         </DOI>
                     </LN>
-
-                    <LN lnClass="RBDR" inst="1" lnType="RTE_RBDR_Type">
+                    <LN prefix="a" lnClass="RBDR" inst="1" lnType="RTE_RBDR_Type">
                         <DOI name="ChNum1">
                             <DAI name="dU" valKind="RO" valImport="true">
                                 <Val>ADF</Val>
