@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- SPDX-FileCopyrightText: 2023 RTE FRANCE -->
+<!-- SPDX-FileCopyrightText: 2023 2024 2025 RTE FRANCE -->
 <!-- -->
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 <SCL version="2007" revision="B" release="4" xmlns="http://www.iec.ch/61850/2003/SCL" xmlns:compas="https://www.lfenergy.org/compas/extension/v1">
@@ -31,61 +31,117 @@
                             </DAI>
                         </DOI>
                         <Inputs><!-- ExtRef check (pLN, pDO, desc) -->
-                            <ExtRef pLN="TVTR" pDO="VolSv"
-                                    desc="DYN_LDEPF_ANALOG CHANNEL 1_1_AnalogueValue_1_instMag_1"/>
+                            <ExtRef pLN="TVTR" pDO="VolSv" desc="DYN_LDEPF_ANALOG CHANNEL 1_1_AnalogueValue_1_instMag_1"/>
                             <ExtRef pLN="MMXU" pDO="PhV" desc="DYN_LDEPF_ANALOG CHANNEL 10_1_AnalogueValue_1_cVal_1"/>
                         </Inputs>
                     </LN0>
                     <LN lnClass="RADR" inst="1" lnType="RTE_RADR">
                         <DOI name="ChNum1">
                             <DAI name="dU" valKind="RO" valImport="true">
-                                <Val>dU_old_val
-                                </Val> <!-- "MR.PX1"     It is the Channel.ShortLabel column value of the current setting file line -->
+                                <Val>dU_old_val</Val>
                             </DAI>
                         </DOI>
                         <DOI name="LevMod">
                             <DAI name="setVal" valKind="RO" valImport="true">
-                                <Val>setVal_old_val
-                                </Val>   <!-- "Positive or Rising"      It is the Channel.LevMod column value of the current setting file line -->
+                                <Val>setVal_old_val</Val>
                             </DAI>
                         </DOI>
                         <DOI name="Mod">
                             <DAI name="stVal" sAddr="50606.0" valKind="Set" valImport="false">
-                                <Val>off
-                                </Val> <!-- "on"  With the help of RSR-121, Mod/stVal always updatable even if valImport="false" -->
+                                <Val>off</Val>
                             </DAI>
                         </DOI>
                         <DOI name="SrcRef">
                             <DAI name="setSrcRef" valKind="Set" valImport="true">
-                                <Val>setSrcRef_old_val
-                                </Val>  <!-- "IED_NAME1LDPX/PTRC0.Str.general"  must contain ExtRef@iedNameExtRef@ldInst/ExtRef@prefixExtRef@lnClassExtRef@lnInst[.]ExtRef@doName[.]ExtRef@daName="general" from the DA.name column value of the setting file -->
+                                <Val>setSrcRef_old_val</Val>
                             </DAI>
                         </DOI>
                     </LN>
-
                     <LN prefix="a" lnClass="RADR" inst="1" lnType="RTE_RADR">
                         <DOI name="ChNum1">
                             <DAI name="dU" valKind="RO" valImport="true">
-                                <Val>dU_old_val
-                                </Val>  <!-- "MR.PX1"     It is the Channel.ShortLabel column value of the current setting file line -->
+                                <Val>dU_old_val</Val>
                             </DAI>
                         </DOI>
                         <DOI name="LevMod">
                             <DAI name="setVal" valKind="RO" valImport="true">
-                                <Val>setVal_old_val
-                                </Val>   <!-- "Other"   It is the Channel.LevMod.q column value of the current setting file line -->
+                                <Val>setVal_old_val</Val>
                             </DAI>
                         </DOI>
                         <DOI name="Mod">
                             <DAI name="stVal" sAddr="50606.0" valKind="Set" valImport="false">
-                                <Val>off
-                                </Val>  <!-- "on" With the help of RSR-121, Mod/stVal always updatable even if valImport="false" -->
+                                <Val>off</Val>
                             </DAI>
                         </DOI>
                         <DOI name="SrcRef">
                             <DAI name="setSrcRef" valKind="Set" valImport="true">
-                                <Val>setSrcRef_old_val
-                                </Val>   <!-- "IED_NAME1LDPX/PTRC0.Str.q"  must contain ExtRef@iedNameExtRef@ldInst/ExtRef@prefixExtRef@lnClassExtRef@lnInst[.]ExtRef@doName.q , DA name will be always q for bRBDR -->
+                                <Val>setSrcRef_old_val</Val>
+                            </DAI>
+                        </DOI>
+                    </LN>
+                    <LN lnClass="RBDR" inst="1" lnType="RTE_RBDR">
+                        <DOI name="ChNum1">
+                            <DAI name="dU" valKind="RO" valImport="true">
+                                <Val>dU_old_val</Val>
+                            </DAI>
+                        </DOI>
+                        <DOI name="LevMod">
+                            <DAI name="setVal" valKind="RO" valImport="true">
+                                <Val>setVal_old_val</Val>
+                            </DAI>
+                        </DOI>
+                        <DOI name="Mod">
+                            <DAI name="stVal" sAddr="50606.0" valKind="Set" valImport="false">
+                                <Val>off</Val>
+                            </DAI>
+                        </DOI>
+                        <DOI name="SrcRef">
+                            <DAI name="setSrcRef" valKind="Set" valImport="true">
+                                <Val>setSrcRef_old_val</Val>
+                            </DAI>
+                        </DOI>
+                    </LN>
+                    <LN prefix="a" lnClass="RBDR" inst="1" lnType="RTE_RBDR">
+                        <DOI name="ChNum1">
+                            <DAI name="dU" valKind="RO" valImport="true">
+                                <Val>dU_old_val</Val>
+                            </DAI>
+                        </DOI>
+                        <DOI name="LevMod">
+                            <DAI name="setVal" valKind="RO" valImport="true">
+                                <Val>setVal_old_val</Val>
+                            </DAI>
+                        </DOI>
+                        <DOI name="Mod">
+                            <DAI name="stVal" sAddr="50606.0" valKind="Set" valImport="false">
+                                <Val>off</Val>
+                            </DAI>
+                        </DOI>
+                        <DOI name="SrcRef">
+                            <DAI name="setSrcRef" valKind="Set" valImport="true">
+                                <Val>setSrcRef_old_val</Val>
+                            </DAI>
+                        </DOI>
+                    </LN>
+                    <LN prefix="b" lnClass="RBDR" inst="1" lnType="RTE_RBDR">
+                        <DOI name="ChNum1">
+                            <DAI name="dU" valKind="RO" valImport="true">
+                                <Val>dU_old_val</Val>
+                            </DAI>
+                        </DOI>
+                        <DOI name="LevMod">
+                            <DAI name="setVal" valKind="RO" valImport="true">
+                                <Val>setVal_old_val</Val>
+                            </DAI>
+                        </DOI>
+                        <DOI name="Mod">
+                            <DAI name="stVal" sAddr="50606.0" valKind="Set" valImport="false">
+                                <Val>off</Val>
+                            </DAI>
+                        </DOI>
+                        <DOI name="SrcRef">
+                            <DAI name="setSrcRef" valKind="Set" valImport="true">
+                                <Val>setSrcRef_old_val</Val>
                             </DAI>
                         </DOI>
                     </LN>
@@ -144,6 +200,12 @@
             <DO name="PhV" type="PhV_DOType"/>
         </LNodeType>
         <LNodeType lnClass="RADR" id="RTE_RADR"> <!-- lnClass RBDR -->
+            <DO name="ChNum1" type="DOCh"/>
+            <DO name="LevMod" type="DOLe"/>
+            <DO name="Mod" type="DOMo"/>
+            <DO name="SrcRef" type="DOSr"/>
+        </LNodeType>
+        <LNodeType lnClass="RBDR" id="RTE_RBDR"> <!-- lnClass RBDR -->
             <DO name="ChNum1" type="DOCh"/>
             <DO name="LevMod" type="DOLe"/>
             <DO name="Mod" type="DOMo"/>
