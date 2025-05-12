@@ -147,7 +147,7 @@ public class ExtRefEditorService implements ExtRefEditor {
      */
     private Optional<LDeviceAdapter> getActiveSourceLDeviceByLDEPFChannel(IEDAdapter iedAdapter, TChannel channel) {
         return ldeviceService.findLdevice(iedAdapter.getCurrentElem(), channel.getLDInst())
-                .filter(tlDevice -> ldeviceService.getLdeviceStatus(tlDevice).map(ActiveStatus.ON::equals).orElse(false))
+                .filter(tlDevice -> PrivateUtils.extractStringPrivate(tlDevice.getLN0(), COMPAS_LNODE_STATUS).map(status -> status.equals(ActiveStatus.ON.getValue())).orElse(false))
                 .map(tlDevice -> new LDeviceAdapter(iedAdapter, tlDevice));
     }
 
@@ -165,9 +165,7 @@ public class ExtRefEditorService implements ExtRefEditor {
                         && lnAdapter.getLNInst().equals(channel.getLNInst())
                         && trimToEmpty(channel.getLNPrefix()).equals(trimToEmpty(lnAdapter.getPrefix())))
                 .findFirst()
-                .filter(lnAdapter -> lnAdapter.getDaiModStValValue()
-                        .map(status -> status.equals(ActiveStatus.ON.getValue()))
-                        .orElse(true));
+                .filter(abstractLNAdapter -> PrivateUtils.extractStringPrivate(abstractLNAdapter.getCurrentElem(), COMPAS_LNODE_STATUS).map(status -> status.equals(ActiveStatus.ON.getValue())).orElse(true));
     }
 
     /**
