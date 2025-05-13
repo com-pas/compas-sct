@@ -356,7 +356,7 @@ public class ExtRefEditorService implements ExtRefEditor {
             //analog
             lDeviceAdapter.findLnAdapter(LN_RADR, setting.getChannelNum(), null)
                     .ifPresent(lnAdapter -> DO_DA_MAPPINGS.forEach(doNameAndDaName -> updateVal(lnAdapter, doNameAndDaName, extRef, setting)));
-            lDeviceAdapter.findLnAdapter(LN_RADR, setting.getChannelNum(), LN_PREFIX_A)
+            lDeviceAdapter.findLnAdapter(LN_RBDR, setting.getChannelNum(), LN_PREFIX_A)
                     .ifPresent(lnAdapter -> DO_DA_MAPPINGS.forEach(doNameAndDaName -> updateVal(lnAdapter, doNameAndDaName, extRef, setting)));
         }
     }
