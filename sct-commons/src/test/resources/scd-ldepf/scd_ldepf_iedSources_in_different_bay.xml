@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- SPDX-FileCopyrightText: 2023 RTE FRANCE -->
+<!-- SPDX-FileCopyrightText: 2023 2024 2025 RTE FRANCE -->
 <!-- -->
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 <SCL version="2007" revision="B" release="4" xmlns="http://www.iec.ch/61850/2003/SCL" xmlns:compas="https://www.lfenergy.org/compas/extension/v1">
@@ -91,6 +91,7 @@
                 </LDevice>
                 <LDevice inst="LDPX" ldName="IED_NAME1LDPX">
                     <LN0 lnClass="LLN0" inst="" lnType="LLN0_ID1">
+                        <Private type="COMPAS-LNodeStatus">on</Private>
                         <DOI name="Mod">
                             <DAI name="stVal">
                                 <Val>on</Val>
@@ -99,13 +100,10 @@
                     </LN0>
                     <LN lnClass="PTRC" inst="0" lnType="PTRC_ID1">
                         <!-- If not exist it considered active by default -->
-<!--                        <DOI name="Mod">-->
-<!--                            <DAI name="stVal">-->
-<!--                                <Val>on</Val>-->
-<!--                            </DAI>-->
-<!--                        </DOI>-->
+                        <!-- <Private type="COMPAS-LNodeStatus">on</Private>-->
                     </LN>
                     <LN lnClass="PTRC" inst="2" lnType="PTRC_ID1">
+                        <Private type="COMPAS-LNodeStatus">off</Private>
                         <DOI name="Mod">
                             <DAI name="stVal">
                                 <Val>off</Val>
@@ -115,6 +113,7 @@
                 </LDevice>
                 <LDevice inst="LDEVICE_INVALID" ldName="IED_NAME1LDPX">
                     <LN0 lnClass="LLN0" inst="" lnType="LLN0_ID1">
+                        <Private type="COMPAS-LNodeStatus">off</Private>
                         <DOI name="Mod">
                             <DAI name="stVal">
                                 <Val>off</Val>
@@ -154,6 +153,7 @@
                 </LDevice>
                 <LDevice inst="LDPX" ldName="IED_NAME2LDPX">
                     <LN0 lnClass="LLN0" inst="" lnType="LLN0_ID1">
+                        <Private type="COMPAS-LNodeStatus">on</Private>
                         <DOI name="Mod">
                             <DAI name="stVal">
                                 <Val>on</Val>
@@ -162,11 +162,7 @@
                     </LN0>
                     <LN lnClass="PTRC" inst="0" lnType="PTRC_ID1">
                         <!-- If not exist it considered active by default -->
-<!--                        <DOI name="Mod">-->
-<!--                            <DAI name="stVal">-->
-<!--                                <Val>on</Val>-->
-<!--                            </DAI>-->
-<!--                        </DOI>-->
+                        <!-- <Private type="COMPAS-LNodeStatus">on</Private> -->
                     </LN>
                 </LDevice>
             </Server>
@@ -199,20 +195,16 @@
                 </LDevice>
                 <LDevice inst="LDPX" ldName="IED_NAME3LDPX">
                     <LN0 lnClass="LLN0" inst="" lnType="LLN0_ID1">
+                        <Private type="COMPAS-LNodeStatus">on</Private>
                         <DOI name="Mod">
                             <DAI name="stVal">
                                 <Val>on</Val>
                             </DAI>
                         </DOI>
-
                     </LN0>
                     <LN lnClass="PTRC" inst="0" lnType="PTRC_ID1">
                         <!-- If not exist it considered active by default -->
-<!--                        <DOI name="Mod">-->
-<!--                            <DAI name="stVal">-->
-<!--                                <Val>on</Val>-->
-<!--                            </DAI>-->
-<!--                        </DOI>-->
+                        <!-- <Private type="COMPAS-LNodeStatus">on</Private> -->
                     </LN>
                 </LDevice>
             </Server>

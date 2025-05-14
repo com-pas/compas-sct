@@ -148,6 +148,7 @@
                 </LDevice>
                 <LDevice inst="LDTM1" ldName="IED_NAME1LDTM1">
                     <LN0 lnClass="LLN0" inst="" lnType="LLN0_ID1">
+                        <Private type="COMPAS-LNodeStatus">on</Private>
                         <DOI name="Mod">
                             <DAI name="stVal">
                                 <Val>on</Val>
@@ -155,6 +156,7 @@
                         </DOI>
                     </LN0>
                     <LN lnClass="TVTR" inst="11" prefix="U01A" lnType="TVTR_ID1">
+                        <Private type="COMPAS-LNodeStatus">on</Private>
                     </LN>
                 </LDevice>
             </Server>
