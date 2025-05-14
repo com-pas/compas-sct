@@ -23,7 +23,7 @@ class DoiServiceTest {
     void getDois() {
         //Given
         SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
-        LN0 ln0 = std.getIED().get(0).getAccessPoint().get(0).getServer().getLDevice().get(0).getLN0();
+        LN0 ln0 = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst().getLN0();
 
         //When
         List<TDOI> tdois = doiService.getDois(ln0).toList();
@@ -39,7 +39,7 @@ class DoiServiceTest {
     void getFilteredDois() {
         //Given
         SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
-        LN0 ln0 = std.getIED().get(0).getAccessPoint().get(0).getServer().getLDevice().get(0).getLN0();
+        LN0 ln0 = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst().getLN0();
 
         //When
         List<TDOI> tdois = doiService.getFilteredDois(ln0, tdoi -> tdoi.getName().equals("Beh")).toList();
@@ -55,7 +55,7 @@ class DoiServiceTest {
     void findDoi() {
         //Given
         SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
-        LN0 ln0 = std.getIED().get(0).getAccessPoint().get(0).getServer().getLDevice().get(0).getLN0();
+        LN0 ln0 = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst().getLN0();
 
         //When
         Optional<TDOI> doi = doiService.findDoi(ln0, tdoi -> tdoi.getName().equals("Beh"));
@@ -64,5 +64,18 @@ class DoiServiceTest {
         assertThat(doi.orElseThrow())
                 .extracting(TDOI::getName, tdoi -> tdoi.getSDIOrDAI().size())
                 .containsExactly("Beh", 1);
+    }
+
+    @Test
+    void findDoiByName() {
+        //Given
+        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        LN0 ln0 = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst().getLN0();
+
+        //When
+        Optional<TDOI> doi = doiService.findDoiByName(ln0, "Beh");
+
+        //Then
+        assertThat(doi).hasValueSatisfying(tdoi -> assertThat(tdoi.getName()).isEqualTo("Beh"));
     }
 }
