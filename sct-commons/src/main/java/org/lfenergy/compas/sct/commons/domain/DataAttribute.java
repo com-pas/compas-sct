@@ -40,11 +40,18 @@ public class DataAttribute {
     }
 
     public void addDaVal(List<TVal> vals) {
+        vals.forEach(this::addDaVal);
         vals.forEach(tVal -> {
             Long settingGroup = tVal.isSetSGroup() ? tVal.getSGroup() : null;
             daiValues.removeIf(daVal -> Objects.equals(daVal.settingGroup(), settingGroup));
             daiValues.add(new DaVal(settingGroup, tVal.getValue()));
         });
+    }
+
+    public void addDaVal(TVal tVal) {
+        Long settingGroup = tVal.isSetSGroup() ? tVal.getSGroup() : null;
+        daiValues.removeIf(daVal -> Objects.equals(daVal.settingGroup(), settingGroup));
+        daiValues.add(new DaVal(settingGroup, tVal.getValue()));
     }
 
     @Override

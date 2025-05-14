@@ -1,10 +1,9 @@
-// SPDX-FileCopyrightText: 2021 RTE FRANCE
+// SPDX-FileCopyrightText: 2021 2025 RTE FRANCE
 //
 // SPDX-License-Identifier: Apache-2.0
 
 package org.lfenergy.compas.sct.commons;
 
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -22,7 +21,6 @@ import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.lfenergy.compas.sct.commons.util.PrivateEnum;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,7 +36,7 @@ class ExtRefEditorServiceTest {
 
     @BeforeEach
     void init() {
-        extRefEditorService = new ExtRefEditorService(new IedService(), new LdeviceService(new LnService()), new LnService());
+        extRefEditorService = new ExtRefEditorService(new IedService(), new LdeviceService(new LnService()), new LnService(), new DataTypeTemplatesService());
     }
 
     @Test
@@ -234,7 +232,7 @@ class ExtRefEditorServiceTest {
     }
 
     @Test
-    void manageBindingForLDEPF_when_extRefMatchFlowKindInternalOrExternal_should_update_successfully_the_ExtRef_And_DAI_In_RBDR_bRBDR_LNodes_with_no_report() {
+    void manageBindingForLDEPF_when_extRefMatchFlowKindInternalOrExternal_forAnalaogChannel_should_update_successfully_the_ExtRef_And_DAI_In_RADR_aRBDR_LNodes_with_no_report() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_dataTypeTemplateValid.xml");
 
@@ -290,42 +288,63 @@ class ExtRefEditorServiceTest {
         List<SclReportItem> sclReportItems = extRefEditorService.manageBindingForLDEPF(scd, epf);
         // Then
         assertThat(sclReportItems).isEmpty();
-        SclTestMarshaller.assertIsMarshallable(scd);
-        TExtRef extRefBindInternally = findExtRef(scd, "IED_NAME1", "LDEPF", "DYN_LDEPF_ANALOG CHANNEL 1_1_AnalogueValue_1_instMag_1");
-        assertThat(extRefBindInternally.getIedName()).isEqualTo("IED_NAME1");
-        assertExtRefIsBoundAccordingTOLDEPF(extRefBindInternally, analogueChannel1WithBayInternalScope);
-
-        AbstractLNAdapter<?> lnRadr = findLn(scd, "IED_NAME1", "LDEPF", "RADR", "1", "");
-        assertThat(getDaiValue(lnRadr, CHNUM1_DO_NAME, DU_DA_NAME))
-                .isNotEqualTo("dU_old_val")
-                .isEqualTo("V0");
-        assertThat(getDaiValue(lnRadr, LEVMOD_DO_NAME, SETVAL_DA_NAME))
-                .isNotEqualTo("setVal_old_val")
-                .isEqualTo("Positive or Rising");
-        assertThat(getDaiValue(lnRadr, MOD_DO_NAME, STVAL_DA_NAME))
-                .isNotEqualTo("off")
-                .isEqualTo("on");
-        assertThat(getDaiValue(lnRadr, SRCREF_DO_NAME, SETSRCREF_DA_NAME))
-                .isNotEqualTo("setSrcRef_old_val")
-                .isEqualTo("IED_NAME1LDTM1/U01ATVTR11.VolSv.instMag");
-
-        AbstractLNAdapter<?> lnAradr = findLn(scd, "IED_NAME1", "LDEPF", "RADR", "1", "a");
-        assertThat(getDaiValue(lnAradr, CHNUM1_DO_NAME, DU_DA_NAME))
-                .isNotEqualTo("dU_old_val")
-                .isEqualTo("V0");
-        assertThat(getDaiValue(lnAradr, LEVMOD_DO_NAME, SETVAL_DA_NAME))
-                .isNotEqualTo("setVal_old_val")
-                .isEqualTo("Other");
-        assertThat(getDaiValue(lnAradr, MOD_DO_NAME, STVAL_DA_NAME))
-                .isNotEqualTo("off")
-                .isEqualTo("on");
-        assertThat(getDaiValue(lnAradr, SRCREF_DO_NAME, SETSRCREF_DA_NAME))
-                .isNotEqualTo("setSrcRef_old_val")
-                .isEqualTo("IED_NAME1LDTM1/U01ATVTR11.VolSv.q");
-
-        TExtRef extRefBindExternally = findExtRef(scd, "IED_NAME1", "LDEPF", "DYN_LDEPF_ANALOG CHANNEL 10_1_AnalogueValue_1_cVal_1");
-        assertThat(extRefBindExternally.getIedName()).isEqualTo("IED_NAME2");
-        assertExtRefIsBoundAccordingTOLDEPF(extRefBindExternally, analogueChannel10WithBayExternalBayScope);
+        assertThat(scd.getIED())
+                .filteredOn(tied -> tied.getName().equals("IED_NAME1"))
+                .flatExtracting(TIED::getAccessPoint)
+                .extracting(TAccessPoint::getServer)
+                .flatExtracting(TServer::getLDevice)
+                .filteredOn(tlDevice -> tlDevice.getInst().equals(LDEVICE_LDEPF))
+                .allSatisfy(tlDevice -> {
+                    // Binding properties should be set including Service Type
+                    assertThat(tlDevice.getLN0().getInputs().getExtRef())
+                            .filteredOn(tExtRef -> tExtRef.getDesc().contains("ANALOG"))
+                            .extracting(TExtRef::getIedName, TExtRef::getLdInst, TExtRef::getLnClass, TExtRef::getLnInst, TExtRef::getDoName, TExtRef::getServiceType)
+                            .containsExactlyInAnyOrder(tuple("IED_NAME1", "LDTM1", List.of("TVTR"), "11", "VolSv", null),
+                                    tuple("IED_NAME2", "LDPHAS1", List.of("MMXU"), "101", "PhV", TServiceType.SMV));
+                    //LN class RADR
+                    assertThat(tlDevice.getLN())
+                            .filteredOn(tln -> tln.getLnClass().contains("RADR") && tln.getInst().equals("1") && !tln.isSetPrefix())
+                            .allSatisfy(tln -> {
+                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("V0");
+                                assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
+                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo("Positive or Rising");
+                                assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME1LDTM1/U01ATVTR11.VolSv.instMag");
+                            });
+                    // for Analog channel aRADR should not be configured, instead configuring aRBDR
+                    assertThat(tlDevice.getLN())
+                            .filteredOn(tln -> tln.getLnClass().contains("RADR") && tln.getInst().equals("1") &&  tln.getPrefix().equals("a"))
+                            .allSatisfy(tln -> {
+                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("dU_old_val");
+                                assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("off");
+                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo("setVal_old_val");
+                                assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("setSrcRef_old_val");
+                            });
+                    //LN class RBDR
+                    assertThat(tlDevice.getLN())
+                            .filteredOn(tln -> tln.getLnClass().contains("RBDR") && tln.getInst().equals("1") && !tln.isSetPrefix())
+                            .allSatisfy(tln -> {
+                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("dU_old_val");
+                                assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("off");
+                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo("setVal_old_val");
+                                assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("setSrcRef_old_val");
+                            });
+                    assertThat(tlDevice.getLN())
+                            .filteredOn(tln -> tln.getLnClass().contains("RBDR") && tln.getInst().equals("1") &&  tln.getPrefix().equals("a"))
+                            .allSatisfy(tln -> {
+                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("V0");
+                                assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
+                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo("Other");
+                                assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME1LDTM1/U01ATVTR11.VolSv.q");
+                            });
+                    assertThat(tlDevice.getLN())
+                            .filteredOn(tln -> tln.getLnClass().contains("RBDR") && tln.getInst().equals("1") &&  tln.getPrefix().equals("b"))
+                            .allSatisfy(tln -> {
+                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("dU_old_val");
+                                assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("off");
+                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo("setVal_old_val");
+                                assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("setSrcRef_old_val");
+                            });
+                });
     }
 
     private void assertExtRefIsBoundAccordingTOLDEPF(TExtRef extRef, TChannel setting) {
@@ -574,42 +593,45 @@ class ExtRefEditorServiceTest {
         // When
         extRefEditorService.epfPostProcessing(scd);
         // Then
-        SoftAssertions softly = new SoftAssertions();
-
-        Optional<TDAI> setSrcRefInInRef1 = findDai(scd, "IED_NAME1", "LDEPF", "InRef1", "setSrcRef");
-        Optional<TDAI> purposeInInRef1 = findDai(scd, "IED_NAME1", "LDEPF", "InRef1", "purpose");
-        assertThat(purposeInInRef1).isPresent();
-        softly.assertThat(purposeInInRef1.get().getVal().getFirst().getValue()).doesNotStartWith("DYN_LDEPF_DIGITAL CHANNEL");
-        softly.assertThat(purposeInInRef1.get().getVal().getFirst().getValue()).doesNotStartWith("DYN_LDEPF_ANALOG CHANNEL");
-        assertThat(setSrcRefInInRef1).isPresent();
-        softly.assertThat(setSrcRefInInRef1.get().isSetVal()).isFalse();
-
-        Optional<TDAI> setSrcRefInInRef2 = findDai(scd, "IED_NAME1", "LDEPF", "InRef2", "setSrcRef");
-        Optional<TDAI> purposeInInRef2 = findDai(scd, "IED_NAME1", "LDEPF", "InRef2", "purpose");
-        assertThat(purposeInInRef2).isPresent();
-        softly.assertThat(purposeInInRef2.get().getVal().getFirst().getValue()).startsWith("DYN_LDEPF_DIGITAL CHANNEL");
-        assertThat(setSrcRefInInRef2).isPresent();
-        softly.assertThat(setSrcRefInInRef2.get().getVal().getFirst().getValue()).isEqualTo("IED_NAME1LDEPF/LPHD0.Proxy");
-
-        Optional<TDAI> setSrcRefInInRef3 = findDai(scd, "IED_NAME1", "LDEPF", "InRef3", "setSrcRef");
-        Optional<TDAI> purposeInInRef3 = findDai(scd, "IED_NAME1", "LDEPF", "InRef3", "purpose");
-        assertThat(purposeInInRef3).isPresent();
-        softly.assertThat(purposeInInRef3.get().getVal().getFirst().getValue()).startsWith("DYN_LDEPF_DIGITAL CHANNEL");
-        assertThat(setSrcRefInInRef3).isPresent();
-        softly.assertThat(setSrcRefInInRef3.get().getVal().getFirst().getValue()).isEqualTo("IED_NAME1LDEPF/LPHD0.Proxy");
-
-        Optional<TDAI> setSrcRefInInRef4 = findDai(scd, "IED_NAME1", "LDEPF", "InRef4", "setSrcRef");
-        Optional<TDAI> purposeInInRef4 = findDai(scd, "IED_NAME1", "LDEPF", "InRef4", "purpose");
-        assertThat(purposeInInRef4).isPresent();
-        softly.assertThat(purposeInInRef4.get().getVal().getFirst().getValue()).startsWith("DYN_LDEPF_ANALOG CHANNEL");
-        assertThat(setSrcRefInInRef4).isPresent();
-        softly.assertThat(setSrcRefInInRef4.get().getVal().getFirst().getValue()).isEqualTo("IED_NAME1LDEPF/LPHD0.Proxy");
-        softly.assertAll();
+        assertThat(scd.getIED())
+                .filteredOn(tied -> tied.getName().equals("IED_NAME1"))
+                .flatExtracting(TIED::getAccessPoint)
+                .extracting(TAccessPoint::getServer)
+                .flatExtracting(TServer::getLDevice)
+                .filteredOn(tlDevice -> tlDevice.getInst().equals(LDEVICE_LDEPF))
+                .extracting(tlDevice -> tlDevice.getLN0().getDOI())
+                .allSatisfy(tdois -> {
+                    assertThat(tdois)
+                            .filteredOn(tdoi -> tdoi.getName().equals("InRef1"))
+                            .allSatisfy(tdoi -> {
+                                assertThat(getDai(tdoi,"purpose").getVal().getFirst().getValue()).doesNotStartWith("DYN_LDEPF_DIGITAL CHANNEL");
+                                assertThat(getDai(tdoi,"purpose").getVal().getFirst().getValue()).doesNotStartWith("DYN_LDEPF_ANALOG CHANNEL");
+                                assertThat(getDai(tdoi, "setSrcRef").isSetVal()).isFalse();
+                            });
+                    assertThat(tdois)
+                            .filteredOn(tdoi -> tdoi.getName().equals("InRef2"))
+                            .allSatisfy(tdoi -> {
+                                assertThat(getDaiValue(tdoi,"purpose")).startsWith("DYN_LDEPF_DIGITAL CHANNEL");
+                                assertThat(getDaiValue(tdoi, "setSrcRef")).isEqualTo("IED_NAME1LDEPF/LPHD0.Proxy");
+                            });
+                    assertThat(tdois)
+                            .filteredOn(tdoi -> tdoi.getName().equals("InRef3"))
+                            .allSatisfy(tdoi -> {
+                                assertThat(getDaiValue(tdoi,"purpose")).startsWith("DYN_LDEPF_DIGITAL CHANNEL");
+                                assertThat(getDaiValue(tdoi, "setSrcRef")).isEqualTo("IED_NAME1LDEPF/LPHD0.Proxy");
+                            });
+                    assertThat(tdois)
+                            .filteredOn(tdoi -> tdoi.getName().equals("InRef4"))
+                            .allSatisfy(tdoi -> {
+                                assertThat(getDaiValue(tdoi,"purpose")).startsWith("DYN_LDEPF_ANALOG CHANNEL");
+                                assertThat(getDaiValue(tdoi, "setSrcRef")).isEqualTo("IED_NAME1LDEPF/LPHD0.Proxy");
+                            });
+                });
     }
 
     @ParameterizedTest()
-    @CsvSource({"'',''", "NA,NA"})
-    void manageBindingForLDEPF_should_not_update_dai_setVal_when_channelLevMod_or_channelLevModq_are_empty_or_NA(String channelLevMod, String channelLevModq) {
+    @CsvSource({"'', '', 'ADF','ADF'", "NA, NA,'ADF','ADF'", "POSITIVE_OR_RISING, OTHER, 'Positive or Rising','Other'"})
+    void manageBindingForLDEPF_should_bind_extRef_and_update_dai_within_radr_and_rbdr_ln_for_both_DIGITAL_and_ANALOG_channel(String channelLevMod, String channelLevModq, String expectedChannelLevMod, String expectedChannelLevModq) {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_processing_internal_bind.xml");
         TChannel digitalChannel = new TChannel();
@@ -668,6 +690,11 @@ class ExtRefEditorServiceTest {
                 .extracting(TAccessPoint::getServer)
                 .flatExtracting(TServer::getLDevice)
                 .filteredOn(tlDevice -> tlDevice.getInst().equals(LDEVICE_LDEPF))
+                // Binding properties should be set
+                .allSatisfy(tlDevice -> assertThat(tlDevice.getLN0().getInputs().getExtRef())
+                        .filteredOn(tExtRef -> tExtRef.getDesc().contains("ANALOG") || tExtRef.getDesc().contains("DIGITAL"))
+                        .extracting(TExtRef::getIedName, TExtRef::getLdInst, TExtRef::getLnClass, TExtRef::getLnInst, TExtRef::getDoName)
+                        .containsExactlyInAnyOrder(tuple("IED_NAME1", "LDPX", List.of("PTRC"), "0", "Str"), tuple("IED_NAME1", "LDPX", List.of("PTRC"), "0", "Str")))
                 //LN class RBDR: with and without prefix 'b'
                 .allSatisfy(tlDevice -> {
                     assertThat(tlDevice.getLN())
@@ -675,7 +702,7 @@ class ExtRefEditorServiceTest {
                             .allSatisfy(tln -> {
                                 assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("MR.PX1");
                                 assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
-                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo("ADF");
+                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo(expectedChannelLevMod);
                                 assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME1LDPX/PTRC0.Str.general");
                             });
                     assertThat(tlDevice.getLN())
@@ -683,7 +710,7 @@ class ExtRefEditorServiceTest {
                             .allSatisfy(tln -> {
                                 assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("MR.PX1");
                                 assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
-                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo("ADF");
+                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo(expectedChannelLevModq);
                                 assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME1LDPX/PTRC0.Str.q");
                             });
                 })
@@ -694,7 +721,7 @@ class ExtRefEditorServiceTest {
                             .allSatisfy(tln -> {
                                 assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("MR.PX1");
                                 assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
-                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo("ADF");
+                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo(expectedChannelLevMod);
                                 assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME1LDPX/PTRC0.Str.general");
                             });
                     assertThat(tlDevice.getLN())
@@ -702,7 +729,7 @@ class ExtRefEditorServiceTest {
                             .allSatisfy(tln -> {
                                 assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("MR.PX1");
                                 assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
-                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo("ADF");
+                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo(expectedChannelLevModq);
                                 assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME1LDPX/PTRC0.Str.q");
                             });
                 });
@@ -714,7 +741,6 @@ class ExtRefEditorServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_processing_internal_bind.xml");
         scd.getIED().forEach(tied -> tied.getPrivate().removeIf(tPrivate -> tPrivate.getType().equals(PrivateEnum.COMPAS_BAY.getPrivateType())
                 || tPrivate.getType().equals(PrivateEnum.COMPAS_ICDHEADER.getPrivateType())));
-
         TChannel digitalChannel = new TChannel();
         digitalChannel.setBayScope(TCBScopeType.BAY_INTERNAL);
         digitalChannel.setChannelType(TChannelType.DIGITAL);
@@ -740,6 +766,48 @@ class ExtRefEditorServiceTest {
         // Then
         assertThat(sclReportItems).containsExactly(SclReportItem.error("SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LDEPF\"]", "The IED has no Private Bay"),
                 SclReportItem.error("SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LDEPF\"]", "The IED has no Private compas:ICDHeader"));
+    }
+
+    @Test
+    void manageBindingForLDEPF_should_return_warning_when_dai_is_not_updatable() {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_processing_internal_bind.xml");
+        scd.getIED().stream()
+                .filter(tied -> tied.getName().equals("IED_NAME1"))
+                .flatMap(tied -> tied.getAccessPoint().stream())
+                .filter(TAccessPoint::isSetServer)
+                .flatMap(tAccessPoint -> tAccessPoint.getServer().getLDevice().stream())
+                .filter(tlDevice -> tlDevice.getInst().equals(LDEVICE_LDEPF))
+                .flatMap(tlDevice -> tlDevice.getLN().stream())
+                .filter(tln -> tln.getLnClass().contains("RBDR") && tln.getInst().equals("1") && !tln.isSetPrefix())
+                .flatMap(tln -> getDai(tln, CHNUM1_DO_NAME, DU_DA_NAME))
+                .findFirst().ifPresent(tdai -> tdai.setValImport(false));
+        TChannel digitalChannel = new TChannel();
+        digitalChannel.setBayScope(TCBScopeType.BAY_INTERNAL);
+        digitalChannel.setChannelType(TChannelType.DIGITAL);
+        digitalChannel.setChannelNum("1");
+        digitalChannel.setChannelShortLabel("MR.PX1");
+        digitalChannel.setChannelLevMod(TChannelLevMod.POSITIVE_OR_RISING);
+        digitalChannel.setChannelLevModQ(TChannelLevMod.OTHER);
+        digitalChannel.setIEDType("BCU");
+        digitalChannel.setIEDRedundancy(TIEDredundancy.NONE);
+        digitalChannel.setIEDSystemVersionInstance("1");
+        digitalChannel.setLDInst("LDPX");
+        digitalChannel.setLNClass("PTRC");
+        digitalChannel.setLNInst("0");
+        digitalChannel.setDOName("Str");
+        digitalChannel.setDOInst("0");
+        digitalChannel.setDAName("general");
+        EPF epf = new EPF();
+        Channels channels = new Channels();
+        channels.getChannel().add(digitalChannel);
+        epf.setChannels(channels);
+        // When
+        List<SclReportItem> sclReportItems = extRefEditorService.manageBindingForLDEPF(scd, epf);
+        // Then
+        assertThat(sclReportItems)
+                .extracting(SclReportItem::isError, SclReportItem::xpath, SclReportItem::message)
+                .containsExactly(tuple(false, "IED_NAME1/LDSUIED/RBDR/DOI@name=\"ChNum1\"/DAI@name=\"dU\"/Val", "The DAI cannot be updated"));
     }
 
     @Test
@@ -837,6 +905,41 @@ class ExtRefEditorServiceTest {
                             .filteredOn(tExtRef -> tExtRef.getDesc().contains("ANALOG"))
                             .extracting(TExtRef::getIedName, TExtRef::getLdInst, TExtRef::getLnClass, TExtRef::getLnInst, TExtRef::getDoName, TExtRef::isSetServiceType)
                             .containsExactlyInAnyOrder(tuple("IED_NAME1", "LDPX", List.of("PTRC"), "0", "Str", false));
+
+                    //ANALOG: configure LN RADR and aRBDR
+                    assertThat(tlDevice.getLN())
+                            .filteredOn(tln -> tln.getLnClass().contains("RADR") && tln.getInst().equals("1") && !tln.isSetPrefix())
+                            .allSatisfy(tln -> {
+                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("MR.PX1");
+                                assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
+                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo(TChannelLevMod.POSITIVE_OR_RISING.value());
+                                assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME1LDPX/PTRC0.Str.general");
+                            });
+                    assertThat(tlDevice.getLN())
+                            .filteredOn(tln -> tln.getLnClass().contains("RBDR") && tln.getInst().equals("1") &&  tln.getPrefix().equals("a"))
+                            .allSatisfy(tln -> {
+                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("MR.PX1");
+                                assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
+                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo(TChannelLevMod.OTHER.value());
+                                assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME1LDPX/PTRC0.Str.q");
+                            });
+                    //DIGITAL: configure LN RBDR and bRBDR
+                    assertThat(tlDevice.getLN())
+                            .filteredOn(tln -> tln.getLnClass().contains("RBDR") && tln.getInst().equals("1") && !tln.isSetPrefix())
+                            .allSatisfy(tln -> {
+                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("MR.PX1");
+                                assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
+                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo(TChannelLevMod.POSITIVE_OR_RISING.value());
+                                assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME1LDPX/PTRC0.Str.general");
+                            });
+                    assertThat(tlDevice.getLN())
+                            .filteredOn(tln -> tln.getLnClass().contains("RBDR") && tln.getInst().equals("1") &&  tln.getPrefix().equals("b"))
+                            .allSatisfy(tln -> {
+                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("MR.PX1");
+                                assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
+                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo(TChannelLevMod.OTHER.value());
+                                assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME1LDPX/PTRC0.Str.q");
+                            });
                 });
     }
 
@@ -902,7 +1005,61 @@ class ExtRefEditorServiceTest {
                             .filteredOn(tExtRef -> tExtRef.getDesc().contains("ANALOG"))
                             .extracting(TExtRef::getIedName, TExtRef::getLdInst, TExtRef::getLnClass, TExtRef::getLnInst, TExtRef::getDoName, TExtRef::getServiceType)
                             .containsExactlyInAnyOrder(tuple("IED_NAME2", "LDPX", List.of("PTRC"), "0", "Str", TServiceType.SMV));
+
+                    //ANALOG: configure LN RADR and aRBDR
+                    assertThat(tlDevice.getLN())
+                            .filteredOn(tln -> tln.getLnClass().contains("RADR") && tln.getInst().equals("1") && !tln.isSetPrefix())
+                            .allSatisfy(tln -> {
+                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("MR.PX1");
+                                assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
+                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo(TChannelLevMod.POSITIVE_OR_RISING.value());
+                                assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME2LDPX/PTRC0.Str.general");
+                            });
+                    assertThat(tlDevice.getLN())
+                            .filteredOn(tln -> tln.getLnClass().contains("RBDR") && tln.getInst().equals("1") &&  tln.getPrefix().equals("a"))
+                            .allSatisfy(tln -> {
+                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("MR.PX1");
+                                assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
+                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo(TChannelLevMod.OTHER.value());
+                                assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME2LDPX/PTRC0.Str.q");
+                            });
+                    //DIGITAL: configure LN RBDR and bRBDR
+                    assertThat(tlDevice.getLN())
+                            .filteredOn(tln -> tln.getLnClass().contains("RBDR") && tln.getInst().equals("1") && !tln.isSetPrefix())
+                            .allSatisfy(tln -> {
+                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("MR.PX1");
+                                assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
+                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo(TChannelLevMod.POSITIVE_OR_RISING.value());
+                                assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME2LDPX/PTRC0.Str.general");
+                            });
+                    assertThat(tlDevice.getLN())
+                            .filteredOn(tln -> tln.getLnClass().contains("RBDR") && tln.getInst().equals("1") &&  tln.getPrefix().equals("b"))
+                            .allSatisfy(tln -> {
+                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("MR.PX1");
+                                assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
+                                assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo(TChannelLevMod.OTHER.value());
+                                assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME2LDPX/PTRC0.Str.q");
+                            });
                 });
     }
 
+    @Test
+    void epfPostProcessing_when_exist_unused_channel_and_ldepf_off_should_not_update_Inref_setSrcRef() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ldepf/scd_ldepf_postProcessing_when_ln0_off.xml");
+        // When
+        extRefEditorService.epfPostProcessing(scd);
+        // Then
+        assertThat(scd.getIED())
+                .filteredOn(tied -> tied.getName().equals("IED_NAME1"))
+                .flatExtracting(TIED::getAccessPoint)
+                .extracting(TAccessPoint::getServer)
+                .flatExtracting(TServer::getLDevice)
+                .filteredOn(tlDevice -> tlDevice.getInst().equals(LDEVICE_LDEPF))
+                .flatExtracting(tlDevice -> tlDevice.getLN0().getDOI())
+                .filteredOn(tdoi -> tdoi.getName().startsWith("InRef"))
+                .extracting(tdoi -> getDai(tdoi, "setSrcRef"))
+                .filteredOn(TDAI::isSetVal)
+                .allSatisfy(tdai -> assertThat(tdai.getVal().getFirst().getValue()).isNotEqualTo("IED_NAME1LDEPF/LPHD0.Proxy"));
+    }
 }

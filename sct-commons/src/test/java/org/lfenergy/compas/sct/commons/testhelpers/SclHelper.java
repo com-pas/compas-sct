@@ -241,10 +241,23 @@ public final class SclHelper {
                 .filter(tdai -> daiName.equals(tdai.getName()));
     }
 
+    public static TDAI getDai(TDOI tdoi, String daiName) {
+        return  tdoi.getSDIOrDAI().stream()
+                .filter(TDAI.class::isInstance)
+                .map(TDAI.class::cast)
+                .filter(tdai -> daiName.equals(tdai.getName()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionFailedError(String.format("DAI %s not found in DOI %s", daiName, tdoi.getName())));
+    }
+
     public static String getDaiValue(TAnyLN tAnyLN, String doiName, String daiName) {
         TDAI tdai = getDai(tAnyLN, doiName, daiName).findFirst()
                 .orElseThrow(() -> new AssertionFailedError(String.format("DAI %s.%s not found in LN", doiName, daiName)));
         return getValue(tdai);
+    }
+
+    public static String getDaiValue(TDOI tdoi, String daiName) {
+        return getValue(getDai(tdoi, daiName));
     }
 
     public static SclRootAdapter createSclRootAdapterWithIed(String iedName) {
