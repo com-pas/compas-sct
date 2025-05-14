@@ -37,6 +37,7 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 public class ExtRefEditorService implements ExtRefEditor {
     private static final String INVALID_OR_MISSING_ATTRIBUTES_IN_EXT_REF_BINDING_INFO = "Invalid or missing attributes in ExtRef binding info";
     private static final String COMPAS_LNODE_STATUS = "COMPAS-LNodeStatus";
+    private static final String LPHD0_PROXY = "LPHD0.Proxy";
     private static final List<DoNameAndDaName> DO_DA_MAPPINGS = List.of(
             new DoNameAndDaName(CHNUM1_DO_NAME, DU_DA_NAME),
             new DoNameAndDaName(LEVMOD_DO_NAME, SETVAL_DA_NAME),
@@ -268,7 +269,7 @@ public class ExtRefEditorService implements ExtRefEditor {
         if (!epf.isSetChannels()) return errorHandler;
         iedService.getFilteredIeds(scd, ied -> !ied.getName().contains("TEST"))
                 .forEach(tied -> ldeviceService.findLdevice(tied, tlDevice -> tlDevice.getInst().equals(LDEVICE_LDEPF))
-                        .filter(ldepfLdevice -> PrivateUtils.extractStringPrivate(ldepfLdevice.getLN0(), COMPAS_LNODE_STATUS).map(status -> !status.equals("off")).orElse(false))
+                        .filter(ldepfLdevice -> PrivateUtils.extractStringPrivate(ldepfLdevice.getLN0(), COMPAS_LNODE_STATUS).map(status -> !status.equals(ActiveStatus.OFF.getValue())).orElse(false))
                         .ifPresent(ldepfLdevice -> getExtRefWithBayReferenceInLDEPF(tied, ldepfLdevice)
                                 .forEach(extRefBayRef -> epf.getChannels().getChannel().stream().filter(tChannel -> doesExtRefMatchLDEPFChannel(extRefBayRef.extRef(), tChannel))
                                         .findFirst().ifPresent(channel -> {
@@ -293,13 +294,15 @@ public class ExtRefEditorService implements ExtRefEditor {
     public void epfPostProcessing(SCL scd) {
         iedService.getFilteredIeds(scd, ied -> !ied.getName().contains("TEST"))
                 .forEach(tied -> ldeviceService.findLdevice(tied, LDEVICE_LDEPF)
-                        .ifPresent(tlDevice -> tlDevice.getLN0().getDOI()
+                        .filter(ldepfLdevice -> PrivateUtils.extractStringPrivate(ldepfLdevice.getLN0(), COMPAS_LNODE_STATUS).map(status -> !status.equals(ActiveStatus.OFF.getValue())).orElse(false))
+                        .ifPresent(ldepfLdevice -> ldepfLdevice.getLN0().getDOI()
                                 .stream().filter(tdoi -> tdoi.getName().startsWith(INREF_PREFIX))
                                 .forEach(tdoi -> {
+                                    LN0 ln0 = ldepfLdevice.getLN0();
                                     DoLinkedToDaFilter doLinkedToSetSrcRef = new DoLinkedToDaFilter(tdoi.getName(), List.of(), SETSRCREF_DA_NAME, List.of());
-                                    Optional<TDAI> setSrcRefDAI = lnEditor.getDOAndDAInstances(tlDevice.getLN0(), doLinkedToSetSrcRef);
+                                    Optional<TDAI> setSrcRefDAI = lnEditor.getDOAndDAInstances(ln0, doLinkedToSetSrcRef);
                                     DoLinkedToDaFilter doLinkedPurPose = new DoLinkedToDaFilter(tdoi.getName(), List.of(), PURPOSE_DA_NAME, List.of());
-                                    Optional<TDAI> purPoseDAI = lnEditor.getDOAndDAInstances(tlDevice.getLN0(), doLinkedPurPose);
+                                    Optional<TDAI> purPoseDAI = lnEditor.getDOAndDAInstances(ln0, doLinkedPurPose);
 
                                     boolean isSetSrcRefExistAndEmpty = setSrcRefDAI.isPresent()
                                             && (!setSrcRefDAI.get().isSetVal()
@@ -314,9 +317,9 @@ public class ExtRefEditorService implements ExtRefEditor {
                                         dataObject.setDoName(tdoi.getName());
                                         DataAttribute dataAttribute = new DataAttribute();
                                         dataAttribute.setDaName(SETSRCREF_DA_NAME);
-                                        dataAttribute.setDaiValues(List.of(new DaVal(null, tied.getName()+tlDevice.getInst()+"/LPHD0.Proxy")));
+                                        dataAttribute.setDaiValues(List.of(new DaVal(null, ldepfLdevice.getLdName()+"/"+LPHD0_PROXY)));
                                         DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
-                                        lnEditor.updateOrCreateDOAndDAInstances(tlDevice.getLN0(), doLinkedToDa);
+                                        lnEditor.updateOrCreateDOAndDAInstances(ln0, doLinkedToDa);
                                     }
                                 })));
     }
