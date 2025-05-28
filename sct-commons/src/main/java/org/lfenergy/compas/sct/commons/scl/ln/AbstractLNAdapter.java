@@ -20,6 +20,7 @@ import org.lfenergy.compas.sct.commons.scl.dtt.LNodeTypeAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.*;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
+import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -53,9 +54,6 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL_DA_NAME
  *      <li>{@link AbstractLNAdapter#getDAI <em>Returns the value of the <b>DataAttributeRef </b> containment reference By filter</em>}</li>
  *      <li>{@link AbstractLNAdapter#getDAIValues(DataAttributeRef) <em>Returns <b>DAI (sGroup, value) </b> containment reference list By <b>DataAttributeRef </b> filter</em>}</li>
  *
- *      <li>{@link AbstractLNAdapter#getDataSetByName(String) <em>Returns the value of the <b>TDataSet </b>object reference By the value of the <b>name </b>attribute </em>}</li>
- *
- *      <li>{@link AbstractLNAdapter#getControlBlocks(List, TServiceType) <em>Returns the value of the <b>ControlBlock </b>containment reference list that match <b>datSet </b> value of given <b>TDataSet</b> </em>}</li>
  *      <li>{@link AbstractLNAdapter#addPrivate <em>Add <b>TPrivate </b>under this object</em>}</li>
  *      <li>{@link AbstractLNAdapter#removeAllControlBlocksAndDatasets() <em>Remove all <b>ControlBlock</b></em>}</li>
  *    </ul>
@@ -81,7 +79,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
 
     public static final DoTypeName MOD_DO_TYPE_NAME = new DoTypeName(MOD_DO_NAME);
     public static final DaTypeName STVAL_DA_TYPE_NAME = new DaTypeName(STVAL_DA_NAME);
-    private static final String DAI_MOD_STVAL_VALUE_ON = "on";
+    private static final int CONTROLBLOCK_ID_MAX_LENGTH = 14;
 
     /**
      * Constructor
@@ -264,7 +262,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
             log.warn("More the one desc for ExtRef [pDO({}),intAddr({})] in {}{}/{}",
                     signalInfo.getPDO(), signalInfo.getIntAddr(), iedName, ldInst, getLNClass());
         }
-        TExtRef extRef = tExtRefs.get(0);
+        TExtRef extRef = tExtRefs.getFirst();
         // update ExtRef with binding info
         updateExtRefBindingInfo(extRef, extRefInfo);
     }
@@ -555,7 +553,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
             log.error(msg);
             throw new ScdException(msg);
         }
-        TExtRef extRef = extRefs.get(0);// to be refined : what's the criteria for ExtRef's uniqueness
+        TExtRef extRef = extRefs.getFirst();// to be refined : what's the criteria for ExtRef's uniqueness
         ExtRefBindingInfo bindingInfo = extRefInfo.getBindingInfo();
         if (!bindingInfo.isWrappedIn(extRef)) {
             String msg = "No relation between binding info and the matched TExtRef";
@@ -952,46 +950,29 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
 
     /**
      * Create ControlBlock if there is no ControlBlock of the same type (controlBlockEnum) and with the same cbName in this LN/LN0.
-     * When the controlBlock already exists, the id and datSet attributes are NOT updated with the given values.
+     * When the controlBlock already exists, the idSeed and datSet attributes are NOT updated with the given values.
      *
      * @param cbName           cbName of the controlBlock to look for. When not found, the cbName of the controlBlock to create.
-     * @param id               When controlBlock not found, the id of the controlBlock to create
+     * @param idSeed           When controlBlock not found, the text that will be used to compute the controlBlock Id (appId, smvId, rptId)
      * @param datSet           the datSet of the controlBlock to create
      * @param controlBlockEnum the type of ControlBlock to create
      * @return existing controlBlock if a controlBlock of the same type and with same cbName was found in this LN/LN0, otherwise the created ControlBlock.
      * The returned ControlBlock is always a child of this LN/LN0.
      */
-    public ControlBlockAdapter createControlBlockIfNotExists(String cbName, String id, String datSet, ControlBlockEnum controlBlockEnum) {
+    public ControlBlockAdapter createControlBlockIfNotExists(String cbName, String idSeed, String datSet, ControlBlockEnum controlBlockEnum) {
+        String computedId = Utils.sha256(idSeed).substring(0, CONTROLBLOCK_ID_MAX_LENGTH);
         return findControlBlock(cbName, controlBlockEnum)
                 .orElseGet(() -> addControlBlock(
                                 switch (controlBlockEnum) {
-                                    case GSE -> new GooseControlBlock(cbName, id, datSet);
-                                    case SAMPLED_VALUE -> new SMVControlBlock(cbName, id, datSet);
-                                    case REPORT -> new ReportControlBlock(cbName, id, datSet);
+                                    case GSE -> new GooseControlBlock(cbName, computedId, datSet);
+                                    case SAMPLED_VALUE -> new SMVControlBlock(cbName, computedId, datSet);
+                                    case REPORT -> new ReportControlBlock(cbName, computedId, datSet);
                                     default -> throw new IllegalArgumentException("Unsupported ControlBlock Type " + controlBlockEnum);
                                 }
                         )
                 );
     }
 
-    /**
-     * Generate a ControlBlock Id based on the current LN and the given ldName (ldName can be different from the parent LD.name)
-     *
-     * @param ldName LD name to use for generating the id
-     * @param cbName name of the ControlBlock
-     * @return "ldName/LnPrefixLnClassLnInst.cbName". Blank values are omitted (e.g "IEDNAME1LD1/LLN0.CBNAME1")
-     */
-    public String generateControlBlockId(String ldName, String cbName) {
-        String s = getLNInst();
-        String s1 = getPrefix();
-        return StringUtils.trimToEmpty(ldName)
-                + "/"
-                + StringUtils.trimToEmpty(s1)
-                + StringUtils.defaultString(getLNClass(), "")
-                + StringUtils.trimToEmpty(s)
-                + "."
-                + StringUtils.trimToEmpty(cbName);
-    }
 
     /**
      * Finds all FCDAs in DataSet of Control Block feeding ExtRef
