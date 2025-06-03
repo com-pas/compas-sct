@@ -594,4 +594,14 @@ class UtilsTest {
         assertThat(result).usingRecursiveComparison().isNotEqualTo(tln);
     }
 
+    @Test
+    void sha256_should_succeed() {
+        // Given
+        String text = "Hello World !";
+        // When
+        String digest = Utils.sha256(text);
+        // Then
+        assertThat(digest).isEqualTo("07F2BDEF34ED16E3A1BA0DBB7E47B8FD981CE0CCB3E1BFE564D82C423CBA7E47");
+    }
+
 }

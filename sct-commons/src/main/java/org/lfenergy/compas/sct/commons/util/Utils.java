@@ -4,13 +4,19 @@
 
 package org.lfenergy.compas.sct.commons.util;
 
-import jakarta.xml.bind.*;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
 import jakarta.xml.bind.util.JAXBSource;
 import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
 import javax.xml.namespace.QName;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -26,6 +32,7 @@ public final class Utils {
     private static final int S1_GREATER_THAN_S2 = 1;
     private static final long MAC_ADDRESS_MAX_VALUE = 0xFFFFFFFFFFFFL;
     private static final Pattern MAC_ADDRESS_PATTERN = Pattern.compile("[0-9A-F]{2}([-:][0-9A-F]{2}){5}", Pattern.CASE_INSENSITIVE);
+    private static final HexFormat HEX_FORMAT = HexFormat.of().withUpperCase();
 
     private static JAXBContext jaxbContext = null;
 
@@ -448,4 +455,14 @@ public final class Utils {
         }
     }
 
+    public static String sha256(String text) {
+        MessageDigest messageDigest;
+        try {
+            messageDigest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new UnsupportedOperationException(e);
+        }
+        byte[] digest = messageDigest.digest(text.getBytes(StandardCharsets.UTF_8));
+        return HEX_FORMAT.formatHex(digest);
+    }
 }

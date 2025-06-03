@@ -21,7 +21,10 @@ import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
-import java.util.*;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
@@ -39,9 +42,9 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
 
     private static final String MESSAGE_SOURCE_LDEVICE_NOT_FOUND = "The signal ExtRef ExtRefldinst does not match any " +
-            "LDevice with same inst attribute in source IED %s";
+                                                                   "LDevice with same inst attribute in source IED %s";
     private static final String MESSAGE_SOURCE_LN_NOT_FOUND = "The signal ExtRef lninst, doName or daName does not match any " +
-            "source in LDevice %s";
+                                                              "source in LDevice %s";
     private static final String MESSAGE_SERVICE_TYPE_MISSING = "The signal ExtRef is missing ServiceType attribute";
     private static final String MESSAGE_INVALID_SERVICE_TYPE = "The signal ExtRef ServiceType attribute is unexpected : %s";
     private static final String MESSAGE_IED_MISSING_COMPAS_BAY_UUID = "IED is missing Private/compas:Bay@UUID attribute";
@@ -118,10 +121,10 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
 
     private boolean areBindingAttributesPresent(TExtRef tExtRef) {
         return StringUtils.isNotBlank(tExtRef.getIedName())
-                && StringUtils.isNotBlank(tExtRef.getDesc())
-                && StringUtils.isNotBlank(tExtRef.getLdInst())
-                && tExtRef.getLnClass().stream().findFirst().filter(StringUtils::isNotBlank).isPresent()
-                && StringUtils.isNotBlank(tExtRef.getDoName());
+               && StringUtils.isNotBlank(tExtRef.getDesc())
+               && StringUtils.isNotBlank(tExtRef.getLdInst())
+               && tExtRef.getLnClass().stream().findFirst().filter(StringUtils::isNotBlank).isPresent()
+               && StringUtils.isNotBlank(tExtRef.getDoName());
     }
 
     private Optional<SclReportItem> updateSourceDataSetsAndControlBlocks(TExtRef extRef, String targetBayUuid, List<TFCDA> allowedFcdas) {
@@ -186,8 +189,8 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
 
     private void createControlBlockWithTarget(TExtRef extRef, LDeviceAdapter sourceLDevice, DataAttributeRef sourceDa, String cbName, String datSet) {
         String sourceLDName = sourceLDevice.getLdName();
-        String cbId = getParentAdapter().generateControlBlockId(sourceLDName, cbName);
-        ControlBlockAdapter controlBlockAdapter = sourceLDevice.getLN0Adapter().createControlBlockIfNotExists(cbName, cbId, datSet, ControlBlockEnum.from(extRef.getServiceType()));
+        String idSeed = "%s/%s.%s".formatted(StringUtils.trimToEmpty(sourceLDName), TLLN0Enum.LLN_0.value(), cbName);
+        ControlBlockAdapter controlBlockAdapter = sourceLDevice.getLN0Adapter().createControlBlockIfNotExists(cbName, idSeed, datSet, ControlBlockEnum.from(extRef.getServiceType()));
         if (sourceDa.getFc() != TFCEnum.ST && controlBlockAdapter.getCurrentElem() instanceof TReportControl tReportControl) {
             tReportControl.getTrgOps().setDchg(false);
             tReportControl.getTrgOps().setQchg(false);
@@ -206,13 +209,13 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
 
     private static String generateDataSetSuffix(TExtRef extRef, DataAttributeRef sourceDa, boolean isBayInternal) {
         return extRef.getLdInst().toUpperCase(Locale.ENGLISH) + ATTRIBUTE_VALUE_SEPARATOR
-                + switch (extRef.getServiceType()) {
+               + switch (extRef.getServiceType()) {
             case GOOSE -> "G" + ((sourceDa.getFc() == TFCEnum.ST) ? "S" : "M");
             case SMV -> "SV";
             case REPORT -> (sourceDa.getFc() == TFCEnum.ST) ? "DQC" : "CYC";
             case POLL -> throw new IllegalArgumentException(MESSAGE_POLL_SERVICE_TYPE_NOT_SUPPORTED);
         }
-                + (isBayInternal ? "I" : "E");
+               + (isBayInternal ? "I" : "E");
     }
 
     private Optional<SclReportItem> removeFilteredSourceDas(TExtRef extRef, final Set<DataAttributeRef> sourceDas, List<TFCDA> allowedFcdas) {
@@ -236,9 +239,9 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
             throw new IllegalArgumentException("parameters must not be blank");
         }
         return allowedFcdas.stream().anyMatch(tfcda -> tfcda.getDoName().equals(doName)
-                && tfcda.getDaName().equals(daName)
-                && tfcda.getLnClass().equals(lnClass)
-                && tfcda.getFc().value().equals(fc));
+                                                       && tfcda.getDaName().equals(daName)
+                                                       && tfcda.getLnClass().equals(lnClass)
+                                                       && tfcda.getFc().value().equals(fc));
     }
 
     private Optional<SclReportItem> removeFilterSourceDaForReport(TExtRef extRef, Set<DataAttributeRef> sourceDas) {
@@ -264,7 +267,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
      * @return list ExtRefs without duplication
      */
     public List<TExtRef> filterDuplicatedExtRefs() {
-      return new ExtRefService().filterDuplicatedExtRefs(currentElem.getExtRef());
+        return new ExtRefService().filterDuplicatedExtRefs(currentElem.getExtRef());
     }
 
 }
