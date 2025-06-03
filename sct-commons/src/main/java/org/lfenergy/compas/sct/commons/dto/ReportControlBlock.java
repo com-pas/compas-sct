@@ -40,17 +40,20 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class ReportControlBlock extends ControlBlock {
+    public static final long RPT_ENABLED_MAX_DEFAULT = 4L;
+
     //TODO this is a DTO object; it's meant to be used for carry information; he must be created be the one responsible for carying the info
     private TReportControl.OptFields optFields = newDefaultOptFields();
     protected TTrgOps trgOps = newDefaultTrgOps();
     protected long intgPd = 60000L;
-    private Long rptEnabledMax = 1L;
+    private Long rptEnabledMax = RPT_ENABLED_MAX_DEFAULT;
     private String rptEnabledDesc;
     private boolean buffered = true;
     private long bufTime = 0;
     private boolean indexed = true;
 
     /**
+     * Constructor.
      * Create ReportControlBlock with default values
      *
      * @param name       name of the ReportControlBlock
@@ -62,6 +65,34 @@ public class ReportControlBlock extends ControlBlock {
         this.name = name;
         this.dataSetRef = dataSetRef;
         this.id = id;
+    }
+
+    /**
+     * Constructor.
+     * Create ReportControlBlock from TReportControl
+     *
+     * @param reportControl input
+     */
+    public ReportControlBlock(TReportControl reportControl) {
+        super();
+        id = reportControl.getRptID();
+        desc = reportControl.getDesc();
+        name = reportControl.getName();
+        if (reportControl.isSetConfRev()) {
+            confRev = reportControl.getConfRev();
+        }
+        dataSetRef = reportControl.getDatSet();
+        indexed = reportControl.isIndexed();
+        intgPd = reportControl.getIntgPd();
+        buffered = reportControl.isBuffered();
+        bufTime = reportControl.getBufTime();
+        optFields = copyOptFields(reportControl.getOptFields());
+        trgOps = copyTTrgOps(reportControl.getTrgOps());
+        if (reportControl.isSetRptEnabled()) {
+            rptEnabledMax = reportControl.getRptEnabled().getMax();
+            rptEnabledDesc = reportControl.getRptEnabled().getDesc();
+            targets = reportControl.getRptEnabled().getClientLN().stream().map(ControlBlockTarget::from).collect(Collectors.toCollection(ArrayList::new));
+        }
     }
 
     /**
@@ -93,32 +124,6 @@ public class ReportControlBlock extends ControlBlock {
         newDefaultOptFields.setConfigRef(false);
         newDefaultOptFields.setBufOvfl(true);
         return newDefaultOptFields;
-    }
-
-    /**
-     * Constructor
-     * @param reportControl input
-     */
-    public ReportControlBlock(TReportControl reportControl) {
-        super();
-        id = reportControl.getRptID();
-        desc = reportControl.getDesc();
-        name = reportControl.getName();
-        if(reportControl.isSetConfRev()) {
-            confRev = reportControl.getConfRev();
-        }
-        dataSetRef = reportControl.getDatSet();
-        indexed = reportControl.isIndexed();
-        intgPd = reportControl.getIntgPd();
-        buffered = reportControl.isBuffered();
-        bufTime = reportControl.getBufTime();
-        optFields = copyOptFields(reportControl.getOptFields());
-        trgOps = copyTTrgOps(reportControl.getTrgOps());
-        if (reportControl.isSetRptEnabled()){
-            rptEnabledMax = reportControl.getRptEnabled().getMax();
-            rptEnabledDesc = reportControl.getRptEnabled().getDesc();
-            targets = reportControl.getRptEnabled().getClientLN().stream().map(ControlBlockTarget::from).collect(Collectors.toCollection(ArrayList::new));
-        }
     }
 
     @Override
