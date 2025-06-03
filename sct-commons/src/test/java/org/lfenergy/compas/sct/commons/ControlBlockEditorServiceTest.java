@@ -184,7 +184,7 @@ class ControlBlockEditorServiceTest {
                 .extracting(TTrgOps::isDchg, TTrgOps::isQchg, TTrgOps::isDupd, TTrgOps::isPeriod, TTrgOps::isGi)
                 .containsExactly(false, false, false, true, true);
 
-        assertThat(tReportControl.getRptEnabled().getMax()).isEqualTo(1L);
+        assertThat(tReportControl.getRptEnabled().getMax()).isEqualTo(4L);
         assertThat(tReportControl.getRptEnabled().getClientLN().stream().map(ControlBlockTarget::from))
                 .containsExactly(
                         new ControlBlockTarget("AP_NAME", "IED_NAME1", "LD_INST11", "", "LLN0", "", ""));

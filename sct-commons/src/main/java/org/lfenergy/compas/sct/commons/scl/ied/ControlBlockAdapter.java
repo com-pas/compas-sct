@@ -7,6 +7,7 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.ControlBlockTarget;
+import org.lfenergy.compas.sct.commons.dto.ReportControlBlock;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
@@ -39,8 +40,6 @@ import static org.lfenergy.compas.sct.commons.util.Utils.xpathAttributeFilter;
  * @see AbstractLNAdapter
  */
 public class ControlBlockAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TAnyLN>, TControl> {
-
-    private static final long RPT_ENABLED_MAX_DEFAULT = 1L;
 
     public ControlBlockAdapter(AbstractLNAdapter<? extends TAnyLN> parentAdapter, TControl tControl) {
         super(parentAdapter, tControl);
@@ -103,7 +102,7 @@ public class ControlBlockAdapter extends SclElementAdapter<AbstractLNAdapter<? e
         } else if (currentElem instanceof TReportControl tReportControl) {
             if (!tReportControl.isSetRptEnabled()) {
                 tReportControl.setRptEnabled(new TRptEnabled());
-                tReportControl.getRptEnabled().setMax(RPT_ENABLED_MAX_DEFAULT);
+                tReportControl.getRptEnabled().setMax(ReportControlBlock.RPT_ENABLED_MAX_DEFAULT);
             }
             if (tReportControl.getRptEnabled().getClientLN().stream().noneMatch(controlBlockTarget::equalsTClientLn)) {
                 tReportControl.getRptEnabled().getClientLN().add(controlBlockTarget.toTClientLn());

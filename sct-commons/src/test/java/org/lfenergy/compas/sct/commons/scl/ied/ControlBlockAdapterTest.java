@@ -6,10 +6,7 @@ package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.scl2007b4.model.SCL;
-import org.lfenergy.compas.scl2007b4.model.TControl;
-import org.lfenergy.compas.scl2007b4.model.TControlWithIEDName;
-import org.lfenergy.compas.scl2007b4.model.TGSEControl;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
@@ -59,6 +56,35 @@ class ControlBlockAdapterTest {
                 TControlWithIEDName.IEDName::getLdInst, TControlWithIEDName.IEDName::getLnInst, TControlWithIEDName.IEDName::getLnClass,
                 TControlWithIEDName.IEDName::getPrefix)
             .containsExactly("AP_NAME", "IED_NAME2", "LD_INST21", "1", List.of("ANCR"), "prefix");
+    }
+
+    @Test
+    void addTargetIfNotExists_should_create_rptEnabled_of_reportControl() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
+        LN0Adapter ln0 = findLn0(scd, "IED_NAME1", "LD_INST11");
+        TDataSet newDataSet = new TDataSet();
+        newDataSet.setName("datSet");
+        ln0.getCurrentElem().getDataSet().add(newDataSet);
+        TReportControl tReportControl = new TReportControl();
+        tReportControl.setRptID("rptId");
+        tReportControl.setName("cbName");
+        tReportControl.setDatSet("datSet");
+        ln0.getCurrentElem().getReportControl().add(tReportControl);
+        ControlBlockAdapter controlBlockAdapter = new ControlBlockAdapter(ln0, tReportControl);
+        LNAdapter targetLn = findLn(scd, "IED_NAME2", "LD_INST21", "ANCR", "1", "prefix");
+        // When
+        controlBlockAdapter.addTargetIfNotExists(targetLn);
+        // Then
+        TControl tControl = controlBlockAdapter.getCurrentElem();
+        assertThat(tControl).isInstanceOf(TReportControl.class);
+        assertThat(((TReportControl) tControl).getRptEnabled())
+                .extracting(TRptEnabled::getMax)
+                .isEqualTo(4L);
+        assertThat(((TReportControl) tControl).getRptEnabled().getClientLN())
+                .singleElement()
+                .extracting(TClientLN::getApRef, TClientLN::getIedName, TClientLN::getLdInst, TClientLN::getLnClass, TClientLN::getLnInst, TClientLN::getPrefix, TClientLN::getDesc)
+                .containsExactly("AP_NAME", "IED_NAME2", "LD_INST21", List.of("ANCR"), "1", "prefix", "");
     }
 
 }
