@@ -644,4 +644,34 @@ class PrivateUtilsTest {
         // Then
         assertThat(result).hasValue("hello World");
     }
+
+    @Test
+    void setStringPrivate_when_private_missing_should_create_new_private() {
+        // Given
+        TIED tied = new TIED();
+        // When
+        PrivateUtils.setStringPrivate(tied, "privateType", "privateValue");
+        // Then
+        assertThat(tied.getPrivate())
+                .singleElement()
+                .extracting(TPrivate::getType, TPrivate::getContent)
+                .containsExactly("privateType", List.of("privateValue"));
+    }
+
+    @Test
+    void setStringPrivate_when_private_is_present_should_update_private() {
+        // Given
+        TIED tied = new TIED();
+        TPrivate tPrivate = new TPrivate();
+        tPrivate.setType("privateType");
+        tPrivate.getContent().add("oldValue");
+        tied.getPrivate().add(tPrivate);
+        // When
+        PrivateUtils.setStringPrivate(tied, "privateType", "newValue");
+        // Then
+        assertThat(tied.getPrivate())
+                .singleElement()
+                .extracting(TPrivate::getType, TPrivate::getContent)
+                .containsExactly("privateType", List.of("newValue"));
+    }
 }
