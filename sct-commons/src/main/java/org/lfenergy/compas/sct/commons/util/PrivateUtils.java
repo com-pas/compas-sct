@@ -320,7 +320,6 @@ public final class PrivateUtils {
         stdPrivate.getContent().add(objectFactory.createICDHeader(compasICDHeader));
     }
 
-
     public static Optional<String> extractStringPrivate(TBaseElement tBaseElement, String privateType) {
         return tBaseElement.getPrivate().stream()
                 .filter(tPrivate -> privateType.equals(tPrivate.getType()))
@@ -329,5 +328,10 @@ public final class PrivateUtils {
                 .map(String.class::cast)
                 .filter(StringUtils::isNotBlank)
                 .findFirst();
+    }
+
+    public static void setStringPrivate(TBaseElement tBaseElement, String privateType, String privateValue) {
+        tBaseElement.getPrivate().removeIf(tPrivate -> privateType.equals(tPrivate.getType()));
+        tBaseElement.getPrivate().add(createStringPrivate(privateType, privateValue));
     }
 }
