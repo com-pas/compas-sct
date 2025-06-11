@@ -40,17 +40,20 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class ReportControlBlock extends ControlBlock {
+    public static final long RPT_ENABLED_MAX_DEFAULT = 4L;
+
     //TODO this is a DTO object; it's meant to be used for carry information; he must be created be the one responsible for carying the info
-    private TReportControl.OptFields optFields = newDefaultOptFields();
-    protected TTrgOps trgOps = newDefaultTrgOps();
-    protected long intgPd = 60000L;
-    private Long rptEnabledMax = 1L;
+    private TReportControl.OptFields optFields;
+    protected TTrgOps trgOps;
+    protected long intgPd;
+    private Long rptEnabledMax;
     private String rptEnabledDesc;
-    private boolean buffered = true;
-    private long bufTime = 0;
-    private boolean indexed = true;
+    private boolean buffered;
+    private long bufTime;
+    private boolean indexed;
 
     /**
+     * Constructor.
      * Create ReportControlBlock with default values
      *
      * @param name       name of the ReportControlBlock
@@ -58,14 +61,52 @@ public class ReportControlBlock extends ControlBlock {
      * @param dataSetRef datSet of the ReportControlBlock
      */
     public ReportControlBlock(String name, String id, String dataSetRef) {
-        confRev = 1L;
         this.name = name;
         this.dataSetRef = dataSetRef;
         this.id = id;
+
+        // Default value
+        this.confRev = 1L;
+        this.optFields = newDefaultOptFields();
+        this.trgOps = newDefaultTrgOps();
+        this.intgPd = 60000L;
+        this.rptEnabledMax = RPT_ENABLED_MAX_DEFAULT;
+        this.buffered = true;
+        this.bufTime = 0;
+        this.indexed = true;
+    }
+
+    /**
+     * Constructor.
+     * Create ReportControlBlock from TReportControl
+     *
+     * @param reportControl input
+     */
+    public ReportControlBlock(TReportControl reportControl) {
+        super();
+        id = reportControl.getRptID();
+        desc = reportControl.getDesc();
+        name = reportControl.getName();
+        if (reportControl.isSetConfRev()) {
+            confRev = reportControl.getConfRev();
+        }
+        dataSetRef = reportControl.getDatSet();
+        indexed = reportControl.isIndexed();
+        intgPd = reportControl.getIntgPd();
+        buffered = reportControl.isBuffered();
+        bufTime = reportControl.getBufTime();
+        optFields = copyOptFields(reportControl.getOptFields());
+        trgOps = copyTTrgOps(reportControl.getTrgOps());
+        if (reportControl.isSetRptEnabled()) {
+            rptEnabledMax = reportControl.getRptEnabled().getMax();
+            rptEnabledDesc = reportControl.getRptEnabled().getDesc();
+            targets = reportControl.getRptEnabled().getClientLN().stream().map(ControlBlockTarget::from).collect(Collectors.toCollection(ArrayList::new));
+        }
     }
 
     /**
      * Create a new TTrgOps with default values
+     *
      * @return new instance of TTrgOps
      */
     private static TTrgOps newDefaultTrgOps() {
@@ -80,6 +121,7 @@ public class ReportControlBlock extends ControlBlock {
 
     /**
      * Create a new TReportControl.OptFields with default values
+     *
      * @return new instance of TReportControl.OptFields
      */
     private static TReportControl.OptFields newDefaultOptFields() {
@@ -95,32 +137,6 @@ public class ReportControlBlock extends ControlBlock {
         return newDefaultOptFields;
     }
 
-    /**
-     * Constructor
-     * @param reportControl input
-     */
-    public ReportControlBlock(TReportControl reportControl) {
-        super();
-        id = reportControl.getRptID();
-        desc = reportControl.getDesc();
-        name = reportControl.getName();
-        if(reportControl.isSetConfRev()) {
-            confRev = reportControl.getConfRev();
-        }
-        dataSetRef = reportControl.getDatSet();
-        indexed = reportControl.isIndexed();
-        intgPd = reportControl.getIntgPd();
-        buffered = reportControl.isBuffered();
-        bufTime = reportControl.getBufTime();
-        optFields = copyOptFields(reportControl.getOptFields());
-        trgOps = copyTTrgOps(reportControl.getTrgOps());
-        if (reportControl.isSetRptEnabled()){
-            rptEnabledMax = reportControl.getRptEnabled().getMax();
-            rptEnabledDesc = reportControl.getRptEnabled().getDesc();
-            targets = reportControl.getRptEnabled().getClientLN().stream().map(ControlBlockTarget::from).collect(Collectors.toCollection(ArrayList::new));
-        }
-    }
-
     @Override
     public ControlBlockEnum getControlBlockEnum() {
         return ControlBlockEnum.REPORT;
@@ -129,6 +145,7 @@ public class ReportControlBlock extends ControlBlock {
     /**
      * Implementation is required by superclass but ReportControl blocks has no SecurityEnabled attributes.
      * This implementation does nothing.
+     *
      * @param tServices Service object
      * @throws ScdException never (this is just to comply with superclass)
      */
@@ -139,6 +156,7 @@ public class ReportControlBlock extends ControlBlock {
 
     /**
      * Creates Report Control Block
+     *
      * @return TReportControl object
      */
     @Override
@@ -168,13 +186,14 @@ public class ReportControlBlock extends ControlBlock {
 
     /**
      * Validates Report Control Block
+     *
      * @throws ScdException when required fields are missing
      */
     @Override
     public void validateCB() throws ScdException {
         super.validateCB();
 
-        if(dataSetRef != null && dataSetRef.isBlank()){
+        if (dataSetRef != null && dataSetRef.isBlank()) {
             throw new ScdException("A required field is missing: datSet");
         }
     }
@@ -187,7 +206,7 @@ public class ReportControlBlock extends ControlBlock {
     }
 
     private static TReportControl.OptFields copyOptFields(TReportControl.OptFields optFields) {
-        if (optFields == null){
+        if (optFields == null) {
             return null;
         }
         TReportControl.OptFields newOptFields = new TReportControl.OptFields();
@@ -203,7 +222,7 @@ public class ReportControlBlock extends ControlBlock {
     }
 
     private static TTrgOps copyTTrgOps(TTrgOps tTrgOps) {
-        if (tTrgOps == null){
+        if (tTrgOps == null) {
             return null;
         }
         TTrgOps newTTrgOps = new TTrgOps();
