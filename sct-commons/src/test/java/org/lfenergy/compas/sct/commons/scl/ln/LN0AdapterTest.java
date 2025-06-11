@@ -39,6 +39,8 @@ class LN0AdapterTest {
 
     private static final String SCD_IED_U_TEST = "/ied-test-schema-conf/ied_unit_test.xml";
     private static final String CB_NAME = "cbName";
+    private static final String NEW_CB_ID_SEED = "newControlBlockId";
+    private static final String NEW_CB_ID = "31CA70FACE2F62";
 
     @Test
     void constructor_whenCalledWithNoRelationBetweenLDeviceAndLN0_shouldThrowException() {
@@ -426,12 +428,12 @@ class LN0AdapterTest {
         // When Then
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
         // When Then
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LD_INS1").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LD_INS1").orElseThrow());
         LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
         DoTypeName doTypeName = new DoTypeName("Do.sdo1.d");
         DaTypeName daTypeName = new DaTypeName("antRef.bda1.bda2.bda3");
         // When Then
-        AbstractDAIAdapter<?> daiAdapter = (AbstractDAIAdapter<?>) assertDoesNotThrow(() -> ln0Adapter.findMatch(doTypeName, daTypeName).get());
+        AbstractDAIAdapter<?> daiAdapter = (AbstractDAIAdapter<?>) assertDoesNotThrow(() -> ln0Adapter.findMatch(doTypeName, daTypeName).orElseThrow());
         assertThat(daiAdapter.getCurrentElem().getName()).isEqualTo("bda3");
         assertThat(daiAdapter.getCurrentElem().getVal().getFirst().getValue()).isEqualTo("Completed-diff");
         DoTypeName doTypeName2 = new DoTypeName("Do.sdo1");
@@ -522,7 +524,7 @@ class LN0AdapterTest {
         // When Then
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
         // When Then
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LDSUIED").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LDSUIED").orElseThrow());
         LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
         DataAttributeRef filter = new DataAttributeRef();
         filter.setLnClass(ln0Adapter.getLNClass());
@@ -568,7 +570,7 @@ class LN0AdapterTest {
         // When Then
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
         // When Then
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LDSUIED").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LDSUIED").orElseThrow());
         LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
         // When
         Set<String> enumValues = ln0Adapter.getEnumValues("BehaviourModeKind");
@@ -832,11 +834,10 @@ class LN0AdapterTest {
         assertThat(sourceLn0.getCurrentElem().getDataSet()).isEmpty();
         final String NEW_DATASET_NAME = "newDataSet";
         final String NEW_CB_NAME = "newControlBlock";
-        final String NEW_CB_ID = "newControlBlockId";
         // When
         sourceLn0.createDataSetIfNotExists(NEW_DATASET_NAME, ControlBlockEnum.GSE);
         // When
-        sourceLn0.createControlBlockIfNotExists(NEW_CB_NAME, NEW_CB_ID, NEW_DATASET_NAME, ControlBlockEnum.GSE);
+        sourceLn0.createControlBlockIfNotExists(NEW_CB_NAME, NEW_CB_ID_SEED, NEW_DATASET_NAME, ControlBlockEnum.GSE);
         // Then
         assertThat(sourceLn0.getCurrentElem().getGSEControl())
                 .hasSize(1)
@@ -855,11 +856,10 @@ class LN0AdapterTest {
         assertThat(sourceLn0.getCurrentElem().getDataSet()).isEmpty();
         final String NEW_DATASET_NAME = "newDataSet";
         final String NEW_CB_NAME = "newControlBlock";
-        final String NEW_CB_ID = "newControlBlockId";
         // When
         sourceLn0.createDataSetIfNotExists(NEW_DATASET_NAME, ControlBlockEnum.SAMPLED_VALUE);
         // When
-        sourceLn0.createControlBlockIfNotExists(NEW_CB_NAME, NEW_CB_ID, NEW_DATASET_NAME, ControlBlockEnum.SAMPLED_VALUE);
+        sourceLn0.createControlBlockIfNotExists(NEW_CB_NAME, NEW_CB_ID_SEED, NEW_DATASET_NAME, ControlBlockEnum.SAMPLED_VALUE);
         // Then
         assertThat(sourceLn0.getCurrentElem().getSampledValueControl())
                 .hasSize(1);
@@ -886,11 +886,10 @@ class LN0AdapterTest {
         assertThat(sourceLn0.getCurrentElem().getDataSet()).isEmpty();
         final String NEW_DATASET_NAME = "newDataSet";
         final String NEW_CB_NAME = "newControlBlock";
-        final String NEW_CB_ID = "newControlBlockId";
         // When
         sourceLn0.createDataSetIfNotExists(NEW_DATASET_NAME, ControlBlockEnum.REPORT);
         // When
-        sourceLn0.createControlBlockIfNotExists(NEW_CB_NAME, NEW_CB_ID, NEW_DATASET_NAME, ControlBlockEnum.REPORT);
+        sourceLn0.createControlBlockIfNotExists(NEW_CB_NAME, NEW_CB_ID_SEED, NEW_DATASET_NAME, ControlBlockEnum.REPORT);
         // Then
         assertThat(sourceLn0.getCurrentElem().getReportControl())
                 .hasSize(1);
