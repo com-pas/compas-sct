@@ -46,7 +46,7 @@ class SclServiceTest {
 
     @BeforeEach
     void setUp() {
-        sclService = new SclService(iedService, ldeviceService, lnService, extRefReaderService, dataTypeTemplatesService);
+        sclService = new SclService(iedService, ldeviceService, lnService, extRefReaderService, dataTypeTemplatesService, new SubNetworkService(), new ConnectedAPService());
     }
 
     @Test

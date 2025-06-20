@@ -16,14 +16,14 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class IcdHeaderTest {
+class CompasIcdHeaderTest {
 
     @Test
     void toTCompasICDHeader_shouldReturnCompasICDHeaderObject() {
         //Given
-        IcdHeader icdHeader = new IcdHeader(createHeader());
+        CompasIcdHeader compasIcdHeader = new CompasIcdHeader(createHeader());
         //When
-        TCompasICDHeader tCompasICDHeader = icdHeader.toTCompasICDHeader();
+        TCompasICDHeader tCompasICDHeader = compasIcdHeader.toTCompasICDHeader();
         //Then
         assertThat(tCompasICDHeader)
                 .usingRecursiveComparison()
@@ -33,9 +33,9 @@ class IcdHeaderTest {
     @Test
     void getIcdSystemVersionUUID_shouldReturnExpectedValue() {
         //Given
-        IcdHeader icdHeader = new IcdHeader(createHeader());
+        CompasIcdHeader compasIcdHeader = new CompasIcdHeader(createHeader());
         //When
-        String icdSystemVersionUUID = icdHeader.getIcdSystemVersionUUID();
+        String icdSystemVersionUUID = compasIcdHeader.getIcdSystemVersionUUID();
         //Then
         assertThat(icdSystemVersionUUID).isEqualTo("icdSystemVersionUUID");
     }
@@ -43,22 +43,22 @@ class IcdHeaderTest {
     @Test
     void toString_shouldReturnExpectedValue() {
         //Given
-        IcdHeader icdHeader = new IcdHeader(createHeader());
+        CompasIcdHeader compasIcdHeader = new CompasIcdHeader(createHeader());
         //When
-        String icdHeaderString = icdHeader.toString();
+        String icdHeaderString = compasIcdHeader.toString();
         //Then
         assertThat(icdHeaderString).isEqualTo("headerId = headerId, headerVersion = headerVersion, headerRevision = headerRevision and ICDSystemVersionUUID = icdSystemVersionUUID");
     }
 
     @ParameterizedTest
     @MethodSource("provideIcdHeaderForEquals")
-    void testEquals(IcdHeader icdHeader2) {
+    void testEquals(CompasIcdHeader compasIcdHeader2) {
         //Given
-        IcdHeader icdHeader = new IcdHeader(createHeader());
+        CompasIcdHeader compasIcdHeader = new CompasIcdHeader(createHeader());
 
         //When
         //Then
-        assertThat(icdHeader).isEqualTo(icdHeader2);
+        assertThat(compasIcdHeader).isEqualTo(compasIcdHeader2);
     }
 
     private static Stream<Arguments> provideIcdHeaderForEquals() {
@@ -71,21 +71,21 @@ class IcdHeaderTest {
         TCompasICDHeader tCompasICDHeaderModifiedbayLabel = createHeader();
         tCompasICDHeaderModifiedbayLabel.setBayLabel("patate");
         return Stream.of(
-                Arguments.of(new IcdHeader(tCompasICDHeaderModifiedIedSubstationinstance)),
-                Arguments.of(new IcdHeader(tCompasICDHeaderModifiediedSystemVersioninstance)),
-                Arguments.of(new IcdHeader(tCompasICDHeaderModifiediedName)),
-                Arguments.of(new IcdHeader(tCompasICDHeaderModifiedbayLabel))
+                Arguments.of(new CompasIcdHeader(tCompasICDHeaderModifiedIedSubstationinstance)),
+                Arguments.of(new CompasIcdHeader(tCompasICDHeaderModifiediedSystemVersioninstance)),
+                Arguments.of(new CompasIcdHeader(tCompasICDHeaderModifiediedName)),
+                Arguments.of(new CompasIcdHeader(tCompasICDHeaderModifiedbayLabel))
         );
     }
 
     @ParameterizedTest
     @MethodSource("provideIcdHeaderForNotEquals")
-    void testEquals_should_not_equals(IcdHeader icdHeader2) {
+    void testEquals_should_not_equals(CompasIcdHeader compasIcdHeader2) {
         //Given
-        IcdHeader icdHeader = new IcdHeader(createHeader());
+        CompasIcdHeader compasIcdHeader = new CompasIcdHeader(createHeader());
         //When
         //Then
-        assertThat(icdHeader).isNotEqualTo(icdHeader2);
+        assertThat(compasIcdHeader).isNotEqualTo(compasIcdHeader2);
     }
 
     private static Stream<Arguments> provideIcdHeaderForNotEquals() {
@@ -110,39 +110,39 @@ class IcdHeaderTest {
         TCompasICDHeader tCompasICDHeaderModifiedheaderRevision = createHeader();
         tCompasICDHeaderModifiedheaderRevision.setHeaderRevision("patate");
         return Stream.of(
-                Arguments.of(new IcdHeader(tCompasICDHeaderModifiedicdSystemVersionUUID)),
-                Arguments.of(new IcdHeader(tCompasICDHeaderModifiediedType)),
-                Arguments.of(new IcdHeader(tCompasICDHeaderModifiedvendorName)),
-                Arguments.of(new IcdHeader(tCompasICDHeaderModifiediedModel)),
-                Arguments.of(new IcdHeader(tCompasICDHeaderModifiediedRedundancy)),
-                Arguments.of(new IcdHeader(tCompasICDHeaderModifiedhwRev)),
-                Arguments.of(new IcdHeader(tCompasICDHeaderModifiedswRev)),
-                Arguments.of(new IcdHeader(tCompasICDHeaderModifiedheaderId)),
-                Arguments.of(new IcdHeader(tCompasICDHeaderModifiedheaderVersion)),
-                Arguments.of(new IcdHeader(tCompasICDHeaderModifiedheaderRevision))
+                Arguments.of(new CompasIcdHeader(tCompasICDHeaderModifiedicdSystemVersionUUID)),
+                Arguments.of(new CompasIcdHeader(tCompasICDHeaderModifiediedType)),
+                Arguments.of(new CompasIcdHeader(tCompasICDHeaderModifiedvendorName)),
+                Arguments.of(new CompasIcdHeader(tCompasICDHeaderModifiediedModel)),
+                Arguments.of(new CompasIcdHeader(tCompasICDHeaderModifiediedRedundancy)),
+                Arguments.of(new CompasIcdHeader(tCompasICDHeaderModifiedhwRev)),
+                Arguments.of(new CompasIcdHeader(tCompasICDHeaderModifiedswRev)),
+                Arguments.of(new CompasIcdHeader(tCompasICDHeaderModifiedheaderId)),
+                Arguments.of(new CompasIcdHeader(tCompasICDHeaderModifiedheaderVersion)),
+                Arguments.of(new CompasIcdHeader(tCompasICDHeaderModifiedheaderRevision))
         );
     }
 
     @Test
     void testHashCode() {
         //Given
-        IcdHeader icdHeader = new IcdHeader(createHeader());
-        IcdHeader icdHeader2 = new IcdHeader(createHeader());
+        CompasIcdHeader compasIcdHeader = new CompasIcdHeader(createHeader());
+        CompasIcdHeader compasIcdHeader2 = new CompasIcdHeader(createHeader());
         //When
         //Then
-        assertThat(icdHeader).hasSameHashCodeAs(icdHeader2);
+        assertThat(compasIcdHeader).hasSameHashCodeAs(compasIcdHeader2);
     }
 
     @Test
     void testHashCode_should_not_equals() {
         //Given
-        IcdHeader icdHeader = new IcdHeader(createHeader());
+        CompasIcdHeader compasIcdHeader = new CompasIcdHeader(createHeader());
         TCompasICDHeader header2 = createHeader();
         header2.setVendorName("patate");
-        IcdHeader icdHeader2 = new IcdHeader(header2);
+        CompasIcdHeader compasIcdHeader2 = new CompasIcdHeader(header2);
         //When
         //Then
-        assertThat(icdHeader).doesNotHaveSameHashCodeAs(icdHeader2);
+        assertThat(compasIcdHeader).doesNotHaveSameHashCodeAs(compasIcdHeader2);
     }
 
     private static TCompasICDHeader createHeader() {

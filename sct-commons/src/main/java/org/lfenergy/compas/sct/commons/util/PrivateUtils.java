@@ -11,7 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.PrivateLinkedToStds;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.icd.IcdHeader;
+import org.lfenergy.compas.sct.commons.scl.icd.CompasIcdHeader;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -267,7 +267,7 @@ public final class PrivateUtils {
      * @param scd SCL file in which Private should be found
      * @return stream of COMPAS-ICDHeader Private
      */
-    public static Stream<IcdHeader> streamIcdHeaders(SCL scd) {
+    public static Stream<CompasIcdHeader> streamIcdHeaders(SCL scd) {
         return scd
                 .getSubstation()
                 .getFirst()
@@ -280,7 +280,7 @@ public final class PrivateUtils {
                 .map(PrivateUtils::extractCompasICDHeader)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .map(IcdHeader::new);
+                .map(CompasIcdHeader::new);
     }
 
     /**

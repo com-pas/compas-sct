@@ -14,7 +14,7 @@ import org.junit.platform.commons.support.ReflectionSupport;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.PrivateLinkedToStds;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.scl.icd.IcdHeader;
+import org.lfenergy.compas.sct.commons.scl.icd.CompasIcdHeader;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.lang.reflect.Constructor;
@@ -442,12 +442,12 @@ class PrivateUtilsTest {
         scl.getSubstation().add(tSubstation);
 
         //When
-        Stream<IcdHeader> tPrivateStream = PrivateUtils.streamIcdHeaders(scl);
+        Stream<CompasIcdHeader> tPrivateStream = PrivateUtils.streamIcdHeaders(scl);
 
         //Then
         assertThat(tPrivateStream.toList())
                 .hasSize(3)
-                .extracting(IcdHeader::getIedName)
+                .extracting(CompasIcdHeader::getIedName)
                 .containsExactlyInAnyOrder("IED-1", "IED-2", "IED-3");
     }
 
@@ -473,7 +473,7 @@ class PrivateUtilsTest {
         scl.getSubstation().add(tSubstation);
 
         //When
-        Stream<IcdHeader> tPrivateStream = PrivateUtils.streamIcdHeaders(scl);
+        Stream<CompasIcdHeader> tPrivateStream = PrivateUtils.streamIcdHeaders(scl);
 
         //Then
         assertThat(tPrivateStream.toList()).isEmpty();
