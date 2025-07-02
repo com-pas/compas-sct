@@ -1,0 +1,21 @@
+<!-- SPDX-FileCopyrightText: 2023 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<SCL xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4">
+    <Header id="HeaderID" version="version" revision="Revision" toolID="toolID"/>
+    <DataTypeTemplates>
+        <LNodeType id="LN1" lnClass="ANCR">
+            <DO name="Do1" type="DO1"/>
+        </LNodeType>
+        <DOType cdc="WYE" id="DO1">
+            <SDO name="sdo1" type="SDO1"/>
+            <SDO name="sdo2" type="SDO1"/>
+            <DA name="da1" bType="BOOLEAN" fc="ST"/>
+            <DA name="unused" bType="BOOLEAN" fc="ST"/>
+        </DOType>
+        <DOType cdc="WYE" id="SDO1">
+            <DA name="da1" bType="BOOLEAN" fc="ST"/>
+            <DA name="unused" bType="BOOLEAN" fc="ST"/>
+        </DOType>
+    </DataTypeTemplates>
+</SCL>
