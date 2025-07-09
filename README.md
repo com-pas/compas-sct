@@ -29,3 +29,5 @@ Perspectives are given to users to implement other use cases in coherence with t
 For more informations about the project documentation (architecture, code documentation, etc), please refer to [Documentation](https://com-pas.github.io/compas-sct/) 
 
 Interested in contributing? Please read carefully the [CONTRIBUTING guidelines](https://github.com/com-pas/contributing/blob/master/CONTRIBUTING.md).
+
+Test change
