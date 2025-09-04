@@ -15,7 +15,13 @@ public class DaiService {
     public Stream<TDAI> getDais(TDOI tdoi) {
         return tdoi.getSDIOrDAI()
                 .stream()
-                .filter(dai -> dai.getClass().equals(TDAI.class))
+                .filter(TDAI.class::isInstance)
+                .map(TDAI.class::cast);
+    }
+    public Stream<TDAI> getDais(TSDI tsdi) {
+        return tsdi.getSDIOrDAI()
+                .stream()
+                .filter(TDAI.class::isInstance)
                 .map(TDAI.class::cast);
     }
 
@@ -23,8 +29,16 @@ public class DaiService {
         return getDais(tdoi).filter(tdaiPredicate);
     }
 
+    public Stream<TDAI> getFilteredDais(TSDI tsdi, Predicate<TDAI> tdaiPredicate) {
+        return getDais(tsdi).filter(tdaiPredicate);
+    }
+
     public Optional<TDAI> findDai(TDOI tdoi, Predicate<TDAI> tdaiPredicate) {
         return getFilteredDais(tdoi, tdaiPredicate).findFirst();
+    }
+
+    public Optional<TDAI> findDai(TSDI tsdi, Predicate<TDAI> tdaiPredicate) {
+        return getFilteredDais(tsdi, tdaiPredicate).findFirst();
     }
 
 }
