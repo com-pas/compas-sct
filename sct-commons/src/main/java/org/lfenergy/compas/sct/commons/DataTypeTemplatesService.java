@@ -18,9 +18,6 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static org.lfenergy.compas.sct.commons.util.CommonConstants.MOD_DO_NAME;
-import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL_DA_NAME;
-
 public class DataTypeTemplatesService implements DataTypeTemplateReader {
 
     final LnodeTypeService lnodeTypeService = new LnodeTypeService();
@@ -30,31 +27,6 @@ public class DataTypeTemplatesService implements DataTypeTemplateReader {
     final DaService daService = new DaService();
     final SdoService sdoService = new SdoService();
     final BDAService bdaService = new BDAService();
-
-    /**
-     * verify if DO(name=Mod)/DA(name=stVal) exists in DataTypeTemplate
-     *
-     * @param dtt         TDataTypeTemplates where Data object and Data attribute exists
-     * @param lNodeTypeId LNode Type ID where Data object exists
-     *                    DataTypeTemplates model :
-     *                    <DataTypeTemplates>
-     *                    <LNodeType lnClass="LNodeTypeClass" id="LNodeTypeID">
-     *                    <DO name="Mod" type="DOModTypeID" ../>
-     *                    </LNodeType>
-     *                    ...
-     *                    <DOType cdc="DOTypeCDC" id="DOModTypeID">
-     *                    <DA name="stVal" ../>
-     *                    </DOType>
-     *                    </DataTypeTemplates>
-     * @return true if the Data Object (Mod) and Data attribute (stVal) present, false otherwise
-     */
-    public boolean isDoModAndDaStValExist(TDataTypeTemplates dtt, String lNodeTypeId) {
-        return lnodeTypeService.findLnodeType(dtt, lNodeTypeId)
-                .flatMap(lNodeType -> doService.findDo(lNodeType, MOD_DO_NAME)
-                        .flatMap(tdo -> doTypeService.findDoType(dtt, tdo.getType())
-                                .map(doType -> daService.findDA(doType, STVAL_DA_NAME).isPresent())))
-                .orElse(false);
-    }
 
     @Override
     public Stream<DoLinkedToDa> getAllDoLinkedToDa(TDataTypeTemplates dtt) {

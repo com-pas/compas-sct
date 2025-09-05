@@ -26,9 +26,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.lfenergy.compas.sct.commons.util.CommonConstants.MOD_DO_NAME;
-import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL_DA_NAME;
-
 
 /**
  * A representation of the model object
@@ -77,8 +74,6 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL_DA_NAME
 public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdapter<LDeviceAdapter, T> {
 
 
-    public static final DoTypeName MOD_DO_TYPE_NAME = new DoTypeName(MOD_DO_NAME);
-    public static final DaTypeName STVAL_DA_TYPE_NAME = new DaTypeName(STVAL_DA_NAME);
     private static final int CONTROLBLOCK_ID_MAX_LENGTH = 14;
 
     /**
@@ -992,19 +987,4 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 .toList();
     }
 
-    /**
-     * Get the value of "Mod.stVal" of the current LN
-     *
-     * @return Mod.stVal value if present, else empty Optional
-     */
-    public Optional<String> getDaiModStValValue() {
-        return getDaiModStVal()
-                .flatMap(DataAttributeRef::findFirstValue);
-    }
-
-    protected Optional<DataAttributeRef> getDaiModStVal() {
-        DataAttributeRef daiModFilter = new DataAttributeRef(this, MOD_DO_TYPE_NAME, STVAL_DA_TYPE_NAME);
-        return getDAI(daiModFilter, false).stream()
-                .findFirst();
-    }
 }

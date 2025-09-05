@@ -14,7 +14,10 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.dto.*;
+import org.lfenergy.compas.sct.commons.dto.DTO;
+import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
+import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
+import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
@@ -23,15 +26,13 @@ import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
-import org.lfenergy.compas.sct.commons.util.MonitoringLnClassEnum;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.lfenergy.compas.sct.commons.util.ControlBlockEnum.*;
 
@@ -185,25 +186,6 @@ class LDeviceAdapterTest {
         String elementXPathResult = lDeviceAdapter.elementXPath();
         // Then
         assertThat(elementXPathResult).isEqualTo(message);
-    }
-
-    @Test
-    void getLDeviceStatus_should_succeed() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_with_extref_errors.xml");
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        Optional<LDeviceAdapter> optionalLDeviceAdapter = sclRootAdapter.streamIEDAdapters()
-            .flatMap(IEDAdapter::streamLDeviceAdapters)
-            .filter(lDeviceAdapter -> "IED_NAME1LD_INST13".equals(lDeviceAdapter.getLdName()))
-            .findFirst();
-        assertThat(optionalLDeviceAdapter).isPresent();
-        LDeviceAdapter lDeviceAdapter = optionalLDeviceAdapter.get();
-        // When
-        Optional<String> result = lDeviceAdapter.getLDeviceStatus();
-        // Then
-        assertThat(result)
-            .isPresent()
-            .hasValue("test");
     }
 
     @Test
@@ -486,4 +468,3 @@ class LDeviceAdapterTest {
     }
 
 }
-

@@ -71,7 +71,8 @@
 					<Private type="RTE-LDMaxInst">1</Private>
 					<Private type="RTE-FunctionIndice">1.0</Private>
 					<LN0 lnClass="LLN0" inst="" lnType="RTE_080BBB4D93E4E704CF69E8616CAF1A74_LLN0_V1.0.0" desc="">
-						<DOI name="Beh">
+                        <Private type="COMPAS-LNodeStatus">on</Private>
+                        <DOI name="Beh">
 							<DAI name="d" valKind="RO" valImport="false">
 								<Val>Ldevice current status</Val>
 							</DAI>
@@ -113,7 +114,8 @@
 						</DOI>
 					</LN0>
 					<LN lnClass="LPAI" inst="1" lnType="RTE_8884DBCF760D916CCE3EE9D1846CE46F_LPAI_V1.0.0" desc="">
-						<DOI name="ARtgHigh1">
+                        <Private type="COMPAS-LNodeStatus">on</Private>
+                        <DOI name="ARtgHigh1">
 							<SDI name="units">
 								<DAI name="multiplier" valKind="RO" valImport="false">
 									<Val>m</Val>
@@ -255,7 +257,8 @@
 					<Private type="RTE-LDMaxInst">1</Private>
 					<Private type="RTE-FunctionIndice">1.0</Private>
 					<LN0 lnClass="LLN0" inst="" lnType="RTE_70F5677DD1C219EE66917F2A6635F393_LLN0_V1.0.0" desc="">
-						<DOI name="Beh">
+                        <Private type="COMPAS-LNodeStatus">on</Private>
+                        <DOI name="Beh">
 							<DAI name="d" valKind="RO" valImport="false">
 								<Val>Ldevice current status</Val>
 							</DAI>
@@ -272,7 +275,8 @@
 						</Inputs>
 					</LN0>
 					<LN prefix="I04C" lnClass="TCTR" inst="43" lnType="RTE_336B5093F3DDA93A19E979FB89196E26_TCTR_V1.0.0" desc="">
-						<DOI name="ARtg">
+                        <Private type="COMPAS-LNodeStatus">on</Private>
+                        <DOI name="ARtg">
 							<Private type="RTE-PARAM">
 								<rte:RTEPARAM shortLabel="I-NOM-TC-PROT-TRI-4" longLabel="COURANT NOMINAL DU TC PROTECTION TRIPHASE 4" conf="true"/>
 							</Private>

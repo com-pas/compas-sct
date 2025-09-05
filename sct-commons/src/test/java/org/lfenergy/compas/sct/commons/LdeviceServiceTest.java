@@ -7,11 +7,13 @@ package org.lfenergy.compas.sct.commons;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.lfenergy.compas.scl2007b4.model.LN0;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TIED;
 import org.lfenergy.compas.scl2007b4.model.TLDevice;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.lfenergy.compas.sct.commons.util.ActiveStatus;
+import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,14 +30,29 @@ class LdeviceServiceTest {
     }
 
     @Test
-    void getLdeviceStatus_should_return_status() {
+    void getLdeviceStatus_should_return_status_ON() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
-        TLDevice tlDevice = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst();
+        TLDevice tlDevice = new TLDevice();
+        LN0 ln0 = new LN0();
+        PrivateUtils.setStringPrivate(ln0, "COMPAS-LNodeStatus", "on");
+        tlDevice.setLN0(ln0);
         //When
         Optional<ActiveStatus> ldeviceStatus = ldeviceService.getLdeviceStatus(tlDevice);
         //Then
         assertThat(ldeviceStatus).contains(ActiveStatus.ON);
+    }
+
+    @Test
+    void getLdeviceStatus_when_ln0_off_should_return_status_OFF() {
+        //Given
+        TLDevice tlDevice = new TLDevice();
+        LN0 ln0 = new LN0();
+        PrivateUtils.setStringPrivate(ln0, "COMPAS-LNodeStatus", "off");
+        tlDevice.setLN0(ln0);
+        //When
+        Optional<ActiveStatus> ldeviceStatus = ldeviceService.getLdeviceStatus(tlDevice);
+        //Then
+        assertThat(ldeviceStatus).contains(ActiveStatus.OFF);
     }
 
     @Test
@@ -91,20 +108,6 @@ class LdeviceServiceTest {
         assertThat(ldevice)
                 .extracting(TLDevice::getInst, TLDevice::getLdName)
                 .containsExactly("LDTM", "VirtualSAMULDTM");
-    }
-
-    @Test
-    void getActiveLdevices_should_return_ldevices() {
-        //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
-        TIED tied = std.getIED().getFirst();
-        //When
-        List<TLDevice> tlDevices = ldeviceService.getActiveLdevices(tied).toList();
-        //Then
-        assertThat(tlDevices)
-                .hasSize(1)
-                .extracting(TLDevice::getInst, TLDevice::getLdName)
-                .containsExactly(Tuple.tuple("LDSUIED", "VirtualSAMULDSUIED"));
     }
 
 }

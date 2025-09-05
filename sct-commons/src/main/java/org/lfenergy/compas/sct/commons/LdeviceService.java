@@ -33,11 +33,6 @@ public class LdeviceService {
                 .flatMap(tServer -> tServer.getLDevice().stream());
     }
 
-    public Stream<TLDevice> getActiveLdevices(TIED tied) {
-        return getLdevices(tied)
-                .filter(ldevice -> getLdeviceStatus(ldevice).map(ActiveStatus.ON::equals).orElse(false));
-    }
-
     public Stream<TLDevice> getFilteredLdevices(TIED tied, Predicate<TLDevice> ldevicePredicate) {
         return getLdevices(tied).filter(ldevicePredicate);
     }
@@ -51,6 +46,6 @@ public class LdeviceService {
     }
 
     public Optional<ActiveStatus> getLdeviceStatus(TLDevice tlDevice) {
-        return lnService.getDaiModStValValue(tlDevice.getLN0());
+        return lnService.getPrivateCompasLNodeStatus(tlDevice.getLN0());
     }
 }
