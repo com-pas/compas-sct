@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class ExtRefService {
@@ -23,13 +24,23 @@ public class ExtRefService {
     /**
      * List all ExtRefs in this LDevice
      *
-     * @return list of ExtRefs. List is modifiable.
+     * @return Stream of ExtRefs
      */
     public Stream<TExtRef> getExtRefs(TLDevice tlDevice) {
         return getInputs(tlDevice)
                 .filter(TInputs::isSetExtRef)
                 .stream()
                 .flatMap(tInputs -> tInputs.getExtRef().stream());
+    }
+
+    /**
+     * List ExtRefs in this LDevice that satisfy the given predicate
+     *
+     * @return Stream of ExtRefs.
+     */
+    public Stream<TExtRef> getFilteredExtRefs(TLDevice tlDevice, Predicate<TExtRef> tExtRefPredicate) {
+        return getExtRefs(tlDevice)
+                .filter(tExtRefPredicate);
     }
 
     /**
@@ -61,8 +72,8 @@ public class ExtRefService {
      * @return true if the two ExtRef are fed by same Control Block, otherwise false
      */
     public boolean isExtRefFeedBySameControlBlock(TExtRef t1, TExtRef t2) {
-        String srcLNClass1 = (t1.isSetSrcLNClass()) ? t1.getSrcLNClass().get(0) : TLLN0Enum.LLN_0.value();
-        String srcLNClass2 = (t2.isSetSrcLNClass()) ? t2.getSrcLNClass().get(0) : TLLN0Enum.LLN_0.value();
+        String srcLNClass1 = (t1.isSetSrcLNClass()) ? t1.getSrcLNClass().getFirst() : TLLN0Enum.LLN_0.value();
+        String srcLNClass2 = (t2.isSetSrcLNClass()) ? t2.getSrcLNClass().getFirst() : TLLN0Enum.LLN_0.value();
         return Utils.equalsOrBothBlank(t1.getIedName(), t2.getIedName())
                 && Utils.equalsOrBothBlank(t1.getSrcLDInst(), t2.getSrcLDInst())
                 && srcLNClass1.equals(srcLNClass2)

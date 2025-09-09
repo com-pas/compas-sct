@@ -67,6 +67,28 @@ class ExtRefServiceTest {
     }
 
     @Test
+    void getFilteredExtRefs_should_succeed() {
+        //Given
+        TLDevice tlDevice = new TLDevice();
+        tlDevice.setLN0(new LN0());
+        TInputs tInputs = new TInputs();
+        tlDevice.getLN0().setInputs(tInputs);
+        TExtRef tExtRef1 = new TExtRef();
+        tExtRef1.setDesc("extref1");
+        TExtRef tExtRef2 = new TExtRef();
+        tExtRef2.setDesc("extref2");
+        tInputs.getExtRef().add(tExtRef1);
+        tInputs.getExtRef().add(tExtRef2);
+        // When
+        Stream<TExtRef> result = extRefService.getFilteredExtRefs(tlDevice, extRef -> extRef.getDesc().equals("extref1"));
+        // Then
+        assertThat(result)
+                .singleElement()
+                .extracting(TExtRef::getDesc)
+                .isEqualTo("extref1");
+    }
+
+    @Test
     void clearExtRefBinding_should_remove_binding() {
         //Given
         TExtRef tExtRef = createExtRef("Desc_1", "IED_Name_1", "LD_INST_1");
