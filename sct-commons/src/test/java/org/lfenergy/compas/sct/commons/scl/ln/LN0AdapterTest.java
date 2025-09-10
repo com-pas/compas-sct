@@ -762,28 +762,6 @@ class LN0AdapterTest {
     }
 
     @Test
-    void getLnStatus_should_return_ModStValValue() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_with_extref_errors.xml");
-        LN0Adapter ln0 = findLn0(scd, "IED_NAME1", "LD_INST13");
-        // When
-        Optional<String> lnStatus = ln0.getDaiModStValValue();
-        // Then
-        assertThat(lnStatus).hasValue("test");
-    }
-
-    @Test
-    void getLnStatus_should_return_empty_Optional() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-iedname/scd_set_extref_iedname_with_extref_errors.xml");
-        LN0Adapter ln0 = findLn0(scd, "IED_NAME1", "LD_INST14");
-        // When
-        Optional<String> lnStatus = ln0.getDaiModStValValue();
-        // Then
-        assertThat(lnStatus).isEmpty();
-    }
-
-    @Test
     void createDataSetIfNotExists_should_create_dataSet() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");

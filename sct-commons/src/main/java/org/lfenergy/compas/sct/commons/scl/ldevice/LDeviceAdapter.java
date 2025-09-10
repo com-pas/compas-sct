@@ -54,8 +54,6 @@ import java.util.*;
 @Slf4j
 public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
 
-    private static final String DA_SETSRCREF = "setSrcRef";
-
     /**
      * Constructor
      *
@@ -283,13 +281,6 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
         }
         return dataAttributeRefSet;
 
-    }
-
-    public Optional<String> getLDeviceStatus() {
-        if (!hasLN0()) {
-            return Optional.empty();
-        }
-        return getLN0Adapter().getDaiModStValValue();
     }
 
     /**

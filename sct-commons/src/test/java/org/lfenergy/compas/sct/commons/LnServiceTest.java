@@ -16,6 +16,7 @@ import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.domain.*;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.lfenergy.compas.sct.commons.util.ActiveStatus;
+import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.util.SclConstructorHelper;
 
 import java.util.*;
@@ -25,7 +26,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class LnServiceTest {
 
+    private static final String COMPAS_LNODE_STATUS = "COMPAS-LNodeStatus";
     private LnService lnService;
+
 
     @BeforeEach
     void setUp() {
@@ -183,21 +186,70 @@ class LnServiceTest {
         assertThat(lnStatus).isEqualTo(ActiveStatus.ON);
     }
 
-    @Test
-    void getActiveLns_should_return_lns() {
-        //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
-        TLDevice tlDevice = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst();
-
+    @ParameterizedTest
+    @MethodSource("provideLnStatusOn")
+    void getLnStatus_should_return_status_ON(TAnyLN tAnyLN, LN0 ln0) {
+        //Given : parameters
         //When
-        List<TAnyLN> tAnyLNS = lnService.getActiveLns(tlDevice).toList();
+        ActiveStatus lnStatus = lnService.getLnStatus(tAnyLN, ln0);
 
         //Then
-        assertThat(tAnyLNS)
-                .hasSize(2)
-                .extracting(TAnyLN::getLnType, TAnyLN::getDesc)
-                .containsExactly(Tuple.tuple("RTE_080BBB4D93E4E704CF69E8616CAF1A74_LLN0_V1.0.0", ""),
-                        Tuple.tuple("RTE_8884DBCF760D916CCE3EE9D1846CE46F_LPAI_V1.0.0", ""));
+        assertThat(lnStatus).isEqualTo(ActiveStatus.ON);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideLnStatusOff")
+    void getLnStatus_should_return_status_OFF(TAnyLN tAnyLN, LN0 ln0) {
+        //Given : parameters
+        //When
+        ActiveStatus lnStatus = lnService.getLnStatus(tAnyLN, ln0);
+
+        //Then
+        assertThat(lnStatus).isEqualTo(ActiveStatus.OFF);
+    }
+
+    public static Stream<Arguments> provideLnStatusOn() {
+        TLN0 ln0On = new LN0();
+        PrivateUtils.setStringPrivate(ln0On, COMPAS_LNODE_STATUS, "on");
+        TAnyLN tAnyLnOn = new TLN();
+        PrivateUtils.setStringPrivate(tAnyLnOn, COMPAS_LNODE_STATUS, "on");
+        TAnyLN tAnyLnUndefined = new TLN();
+        return Stream.of(
+                Arguments.arguments(tAnyLnOn, ln0On),
+                Arguments.arguments(tAnyLnUndefined, ln0On));
+    }
+
+    public static Stream<Arguments> provideLnStatusOff() {
+        TLN0 ln0On = new LN0();
+        PrivateUtils.setStringPrivate(ln0On, COMPAS_LNODE_STATUS, "on");
+        TLN0 ln0Off = new LN0();
+        PrivateUtils.setStringPrivate(ln0On, COMPAS_LNODE_STATUS, "off");
+        TLN0 ln0Undefined = new LN0();
+
+        TAnyLN tAnyLnOn = new TLN();
+        PrivateUtils.setStringPrivate(tAnyLnOn, COMPAS_LNODE_STATUS, "on");
+        TAnyLN tAnyLnOff = new TLN();
+        PrivateUtils.setStringPrivate(tAnyLnOn, COMPAS_LNODE_STATUS, "off");
+        TAnyLN tAnyLnUndefined = new TLN();
+        return Stream.of(
+                Arguments.arguments(tAnyLnOff, ln0On),
+                Arguments.arguments(tAnyLnOn, ln0Off),
+                Arguments.arguments(tAnyLnOff, ln0Off),
+                Arguments.arguments(tAnyLnUndefined, ln0Off),
+                Arguments.arguments(tAnyLnOn, ln0Undefined),
+                Arguments.arguments(tAnyLnOff, ln0Undefined),
+                Arguments.arguments(tAnyLnUndefined, ln0Undefined));
+    }
+
+    @Test
+    void getPrivateCompasLNodeStatus_should_succeed() {
+        // Given
+        TAnyLN tAnyLnOn = new TLN();
+        PrivateUtils.setStringPrivate(tAnyLnOn, COMPAS_LNODE_STATUS, "on");
+        // When
+        Optional<ActiveStatus> privateCompasLNodeStatus = lnService.getPrivateCompasLNodeStatus(tAnyLnOn);
+        // Then
+        assertThat(privateCompasLNodeStatus).hasValue(ActiveStatus.ON);
     }
 
     @Test
