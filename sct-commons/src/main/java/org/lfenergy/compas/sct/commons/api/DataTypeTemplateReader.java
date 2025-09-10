@@ -13,8 +13,6 @@ import java.util.stream.Stream;
 
 public interface DataTypeTemplateReader {
 
-    boolean isDoModAndDaStValExist(TDataTypeTemplates dtt, String lNodeTypeId);
-
     Stream<DoLinkedToDa> getAllDoLinkedToDa(TDataTypeTemplates tDataTypeTemplates);
 
     Stream<DoLinkedToDa> getFilteredDoLinkedToDa(TDataTypeTemplates dtt, String lNodeTypeId, DoLinkedToDaFilter doLinkedToDaFilter);
