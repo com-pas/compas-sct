@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.scl.sstation;
 
+import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.TFunction;
 import org.lfenergy.compas.scl2007b4.model.TLNode;
 import org.lfenergy.compas.scl2007b4.model.TText;
@@ -65,7 +66,7 @@ public class LNodeAdapter extends SclElementAdapter<FunctionAdapter, TLNode> {
         newLNode.setLdInst(currentElem.getLdInst());
         newLNode.setLnInst(currentElem.getLnInst());
         newLNode.setLnType(currentElem.getLnType());
-        newLNode.setPrefix(currentElem.getPrefix());
+        newLNode.setPrefix(StringUtils.trimToNull(currentElem.getPrefix()));
         if (currentElem.isSetText()) {
             TText newText = new TText();
             newText.setSource(currentElem.getText().getSource());
