@@ -347,8 +347,8 @@ public final class Utils {
         newLn.getLnClass().addAll(tln.getLnClass());
         newLn.setInst(tln.getInst());
         newLn.setLnType(tln.getLnType());
-        newLn.setPrefix(tln.getPrefix());
-        newLn.setDesc(tln.getDesc());
+        newLn.setPrefix(StringUtils.trimToNull(tln.getPrefix())); // trimToNull is important because getPrefix returns "" if null
+        newLn.setDesc(StringUtils.trimToNull(tln.getDesc())); // trimToNull is important because getDesc returns "" if null
         newLn.setInputs(tln.getInputs());
         newLn.setText(tln.getText());
         newLn.getPrivate().addAll(tln.getPrivate());

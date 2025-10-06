@@ -139,7 +139,7 @@ public final class SclConstructorHelper {
         tfcda.setLdInst(ldInst);
         if (StringUtils.isNotBlank(lnClass)) tfcda.getLnClass().add(lnClass);
         tfcda.setLnInst(lnInst);
-        tfcda.setPrefix(prefix);
+        tfcda.setPrefix(StringUtils.trimToNull(prefix));
         tfcda.setDoName(doName);
         tfcda.setDaName(daName);
         tfcda.setFc(fc);
