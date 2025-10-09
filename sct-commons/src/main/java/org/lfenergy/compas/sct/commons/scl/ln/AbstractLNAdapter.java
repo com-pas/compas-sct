@@ -293,7 +293,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 extRef.setDoName(bindingInfo.getDoName().toString());
             }
 
-            extRef.setPrefix(bindingInfo.getPrefix());
+            extRef.setPrefix(StringUtils.trimToNull(bindingInfo.getPrefix()));
             // invalid source info
             removeExtRefSourceBinding(extRef);
             isSrcReset = true;
@@ -306,7 +306,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 extRef.getSrcLNClass().add(sourceInfo.getSrcLNClass());
             }
             extRef.setSrcLDInst(sourceInfo.getSrcLDInst());
-            extRef.setSrcPrefix(sourceInfo.getSrcPrefix());
+            extRef.setSrcPrefix(StringUtils.trimToNull(sourceInfo.getSrcPrefix()));
             extRef.setSrcCBName(sourceInfo.getSrcCBName());
         }
     }
