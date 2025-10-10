@@ -60,6 +60,7 @@ SPDX-License-Identifier: Apache-2.0
 		<xs:attribute name="IEDSystemVersionInstance" type="xs:string" use="optional"/>
 		<xs:attribute name="IEDRedundancy" type="tIEDredundancy" use="optional"/>
 		<xs:attribute name="ChannelShortLabel" type="xs:string" use="optional"/>
+		<xs:attribute name="ChannelShortLabelQ" type="xs:string" use="optional"/>
 		<xs:attribute name="ChannelMREP" type="tChannelMREP" use="optional"/>
 		<xs:attribute name="ChannelLevModQ" type="tChannelLevMod" use="optional"/>
 		<xs:attribute name="ChannelLevMod" type="tChannelLevMod" use="optional"/>

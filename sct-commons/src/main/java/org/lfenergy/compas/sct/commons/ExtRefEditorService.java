@@ -369,7 +369,7 @@ public class ExtRefEditorService implements ExtRefEditor {
 
     private String getNewDaiValue(String daName, String lnPrefix, TExtRef extRef, TChannel setting) {
         return switch (daName) {
-            case DU_DA_NAME -> setting.isSetChannelShortLabel() ? setting.getChannelShortLabel() : null;
+            case DU_DA_NAME -> (LN_PREFIX_A.equals(lnPrefix) || LN_PREFIX_B.equals(lnPrefix)) ? setting.getChannelShortLabelQ() : setting.getChannelShortLabel();
             case SETVAL_DA_NAME -> {
                 if (LN_PREFIX_B.equals(lnPrefix) || LN_PREFIX_A.equals(lnPrefix)) {
                     yield setting.isSetChannelLevModQ() && !setting.getChannelLevModQ().equals(TChannelLevMod.NA) ? setting.getChannelLevModQ().value() : null;
