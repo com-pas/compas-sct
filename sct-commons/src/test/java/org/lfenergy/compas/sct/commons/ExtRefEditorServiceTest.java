@@ -48,6 +48,7 @@ class ExtRefEditorServiceTest {
         channel.setChannelType(TChannelType.DIGITAL);
         channel.setChannelNum("1");
         channel.setChannelShortLabel("MR.PX1");
+        channel.setChannelShortLabelQ("QUALITY OF MR.PX1");
         channel.setChannelLevMod(TChannelLevMod.POSITIVE_OR_RISING);
         channel.setChannelLevModQ(TChannelLevMod.OTHER);
         channel.setIEDType("BCU");
@@ -96,7 +97,7 @@ class ExtRefEditorServiceTest {
         AbstractLNAdapter<?> lnBrbdr = findLn(scd, "IED_NAME1", "LDEPF", "RBDR", "1", "b");
         assertThat(getDaiValue(lnBrbdr, CHNUM1_DO_NAME, DU_DA_NAME))
                 .isNotEqualTo("dU_old_val")
-                .isEqualTo("MR.PX1");
+                .isEqualTo("QUALITY OF MR.PX1");
         assertThat(getDaiValue(lnBrbdr, LEVMOD_DO_NAME, SETVAL_DA_NAME))
                 .isNotEqualTo("setVal_old_val")
                 .isEqualTo("Other");
@@ -117,6 +118,7 @@ class ExtRefEditorServiceTest {
         channel.setChannelType(TChannelType.DIGITAL);
         channel.setChannelNum("1");
         channel.setChannelShortLabel("MR.PX1");
+        channel.setChannelShortLabelQ("QUALITY OF MR.PX1");
         channel.setChannelLevMod(TChannelLevMod.POSITIVE_OR_RISING);
         channel.setChannelLevModQ(TChannelLevMod.OTHER);
         channel.setIEDType("BCU");
@@ -159,7 +161,7 @@ class ExtRefEditorServiceTest {
         AbstractLNAdapter<?> lnBrbdr = findLn(scd, "IED_NAME1", "LDEPF", "RBDR", "1", "b");
         assertThat(getDaiValue(lnBrbdr, CHNUM1_DO_NAME, DU_DA_NAME))
                 .isNotEqualTo("dU_old_val")
-                .isEqualTo("MR.PX1");
+                .isEqualTo("QUALITY OF MR.PX1");
         assertThat(getDaiValue(lnBrbdr, LEVMOD_DO_NAME, SETVAL_DA_NAME))
                 .isNotEqualTo("setVal_old_val")
                 .isEqualTo("Other");
@@ -180,6 +182,7 @@ class ExtRefEditorServiceTest {
         channel.setChannelType(TChannelType.DIGITAL);
         channel.setChannelNum("1");
         channel.setChannelShortLabel("MR.PX1");
+        channel.setChannelShortLabelQ("QUALITY OF MR.PX1");
         channel.setChannelLevMod(TChannelLevMod.POSITIVE_OR_RISING);
         channel.setChannelLevModQ(TChannelLevMod.OTHER);
         channel.setIEDType("BCU");
@@ -241,6 +244,7 @@ class ExtRefEditorServiceTest {
         analogueChannel1WithBayInternalScope.setChannelType(TChannelType.ANALOG);
         analogueChannel1WithBayInternalScope.setChannelNum("1");
         analogueChannel1WithBayInternalScope.setChannelShortLabel("V0");
+        analogueChannel1WithBayInternalScope.setChannelShortLabelQ("QUALITY OF V0");
         analogueChannel1WithBayInternalScope.setChannelLevMod(TChannelLevMod.POSITIVE_OR_RISING);
         analogueChannel1WithBayInternalScope.setChannelLevModQ(TChannelLevMod.OTHER);
         analogueChannel1WithBayInternalScope.setBAPVariant("8");
@@ -262,6 +266,7 @@ class ExtRefEditorServiceTest {
         analogueChannel10WithBayExternalBayScope.setChannelType(TChannelType.ANALOG);
         analogueChannel10WithBayExternalBayScope.setChannelNum("10");
         analogueChannel10WithBayExternalBayScope.setChannelShortLabel("U101");
+        analogueChannel10WithBayExternalBayScope.setChannelShortLabelQ("QUALITY OF U101");
         analogueChannel10WithBayExternalBayScope.setChannelLevMod(TChannelLevMod.POSITIVE_OR_RISING);
         analogueChannel10WithBayExternalBayScope.setChannelLevModQ(TChannelLevMod.OTHER);
         analogueChannel10WithBayExternalBayScope.setBAPVariant("8");
@@ -331,7 +336,7 @@ class ExtRefEditorServiceTest {
                     assertThat(tlDevice.getLN())
                             .filteredOn(tln -> tln.getLnClass().contains("RBDR") && tln.getInst().equals("1") &&  tln.getPrefix().equals("a"))
                             .allSatisfy(tln -> {
-                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("V0");
+                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("QUALITY OF V0");
                                 assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
                                 assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo("Other");
                                 assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME1LDTM1/U01ATVTR11.VolSv.q");
@@ -639,6 +644,7 @@ class ExtRefEditorServiceTest {
         digitalChannel.setChannelType(TChannelType.DIGITAL);
         digitalChannel.setChannelNum("1");
         digitalChannel.setChannelShortLabel("MR.PX1");
+        digitalChannel.setChannelShortLabelQ("QUALITY OF MR.PX1");
         if(!channelLevMod.isEmpty()){
             digitalChannel.setChannelLevMod(TChannelLevMod.valueOf(channelLevMod));
         }
@@ -660,6 +666,7 @@ class ExtRefEditorServiceTest {
         analogChannel.setChannelType(TChannelType.ANALOG);
         analogChannel.setChannelNum("1");
         analogChannel.setChannelShortLabel("MR.PX1");
+        analogChannel.setChannelShortLabelQ("QUALITY OF MR.PX1");
         if(!channelLevMod.isEmpty()){
             analogChannel.setChannelLevMod(TChannelLevMod.valueOf(channelLevMod));
         }
@@ -708,7 +715,7 @@ class ExtRefEditorServiceTest {
                     assertThat(tlDevice.getLN())
                             .filteredOn(tln -> tln.getLnClass().contains("RBDR") && tln.getInst().equals("1") &&  tln.getPrefix().equals("b"))
                             .allSatisfy(tln -> {
-                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("MR.PX1");
+                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("QUALITY OF MR.PX1");
                                 assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
                                 assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo(expectedChannelLevModq);
                                 assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME1LDPX/PTRC0.Str.q");
@@ -727,7 +734,7 @@ class ExtRefEditorServiceTest {
                     assertThat(tlDevice.getLN())
                             .filteredOn(tln -> tln.getLnClass().contains("RBDR") && tln.getInst().equals("1") &&  tln.getPrefix().equals("a"))
                             .allSatisfy(tln -> {
-                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("MR.PX1");
+                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("QUALITY OF MR.PX1");
                                 assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
                                 assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo(expectedChannelLevModq);
                                 assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME1LDPX/PTRC0.Str.q");
@@ -746,6 +753,7 @@ class ExtRefEditorServiceTest {
         digitalChannel.setChannelType(TChannelType.DIGITAL);
         digitalChannel.setChannelNum("1");
         digitalChannel.setChannelShortLabel("MR.PX1");
+        digitalChannel.setChannelShortLabelQ("QUALITY OF MR.PX1");
         digitalChannel.setChannelLevMod(TChannelLevMod.POSITIVE_OR_RISING);
         digitalChannel.setChannelLevModQ(TChannelLevMod.OTHER);
         digitalChannel.setIEDType("BCU");
@@ -787,6 +795,7 @@ class ExtRefEditorServiceTest {
         digitalChannel.setChannelType(TChannelType.DIGITAL);
         digitalChannel.setChannelNum("1");
         digitalChannel.setChannelShortLabel("MR.PX1");
+        digitalChannel.setChannelShortLabelQ("QUALITY OF MR.PX1");
         digitalChannel.setChannelLevMod(TChannelLevMod.POSITIVE_OR_RISING);
         digitalChannel.setChannelLevModQ(TChannelLevMod.OTHER);
         digitalChannel.setIEDType("BCU");
@@ -819,6 +828,7 @@ class ExtRefEditorServiceTest {
         digitalChannel.setChannelType(TChannelType.DIGITAL);
         digitalChannel.setChannelNum("1");
         digitalChannel.setChannelShortLabel("MR.PX1");
+        digitalChannel.setChannelShortLabelQ("QUALITY OF MR.PX1");
         digitalChannel.setChannelLevMod(TChannelLevMod.POSITIVE_OR_RISING);
         digitalChannel.setChannelLevModQ(TChannelLevMod.OTHER);
         digitalChannel.setIEDType("BCU");
@@ -852,6 +862,7 @@ class ExtRefEditorServiceTest {
         digitalChannel.setChannelType(TChannelType.DIGITAL);
         digitalChannel.setChannelNum("1");
         digitalChannel.setChannelShortLabel("MR.PX1");
+        digitalChannel.setChannelShortLabelQ("QUALITY OF MR.PX1");
         digitalChannel.setChannelLevMod(TChannelLevMod.POSITIVE_OR_RISING);
         digitalChannel.setChannelLevModQ(TChannelLevMod.OTHER);
         digitalChannel.setIEDType("BCU");
@@ -869,6 +880,7 @@ class ExtRefEditorServiceTest {
         analogChannel.setChannelType(TChannelType.ANALOG);
         analogChannel.setChannelNum("1");
         analogChannel.setChannelShortLabel("MR.PX1");
+        analogChannel.setChannelShortLabelQ("QUALITY OF MR.PX1");
         analogChannel.setChannelLevMod(TChannelLevMod.POSITIVE_OR_RISING);
         analogChannel.setChannelLevModQ(TChannelLevMod.OTHER);
         analogChannel.setIEDType("BCU");
@@ -918,7 +930,7 @@ class ExtRefEditorServiceTest {
                     assertThat(tlDevice.getLN())
                             .filteredOn(tln -> tln.getLnClass().contains("RBDR") && tln.getInst().equals("1") &&  tln.getPrefix().equals("a"))
                             .allSatisfy(tln -> {
-                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("MR.PX1");
+                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("QUALITY OF MR.PX1");
                                 assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
                                 assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo(TChannelLevMod.OTHER.value());
                                 assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME1LDPX/PTRC0.Str.q");
@@ -935,7 +947,7 @@ class ExtRefEditorServiceTest {
                     assertThat(tlDevice.getLN())
                             .filteredOn(tln -> tln.getLnClass().contains("RBDR") && tln.getInst().equals("1") &&  tln.getPrefix().equals("b"))
                             .allSatisfy(tln -> {
-                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("MR.PX1");
+                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("QUALITY OF MR.PX1");
                                 assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
                                 assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo(TChannelLevMod.OTHER.value());
                                 assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME1LDPX/PTRC0.Str.q");
@@ -952,6 +964,7 @@ class ExtRefEditorServiceTest {
         digitalChannel.setChannelType(TChannelType.DIGITAL);
         digitalChannel.setChannelNum("1");
         digitalChannel.setChannelShortLabel("MR.PX1");
+        digitalChannel.setChannelShortLabelQ("QUALITY OF MR.PX1");
         digitalChannel.setChannelLevMod(TChannelLevMod.POSITIVE_OR_RISING);
         digitalChannel.setChannelLevModQ(TChannelLevMod.OTHER);
         digitalChannel.setIEDType("BCU");
@@ -969,6 +982,7 @@ class ExtRefEditorServiceTest {
         analogChannel.setChannelType(TChannelType.ANALOG);
         analogChannel.setChannelNum("1");
         analogChannel.setChannelShortLabel("MR.PX1");
+        analogChannel.setChannelShortLabelQ("QUALITY OF MR.PX1");
         analogChannel.setChannelLevMod(TChannelLevMod.POSITIVE_OR_RISING);
         analogChannel.setChannelLevModQ(TChannelLevMod.OTHER);
         analogChannel.setIEDType("BCU");
@@ -1018,7 +1032,7 @@ class ExtRefEditorServiceTest {
                     assertThat(tlDevice.getLN())
                             .filteredOn(tln -> tln.getLnClass().contains("RBDR") && tln.getInst().equals("1") &&  tln.getPrefix().equals("a"))
                             .allSatisfy(tln -> {
-                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("MR.PX1");
+                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("QUALITY OF MR.PX1");
                                 assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
                                 assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo(TChannelLevMod.OTHER.value());
                                 assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME2LDPX/PTRC0.Str.q");
@@ -1035,7 +1049,7 @@ class ExtRefEditorServiceTest {
                     assertThat(tlDevice.getLN())
                             .filteredOn(tln -> tln.getLnClass().contains("RBDR") && tln.getInst().equals("1") &&  tln.getPrefix().equals("b"))
                             .allSatisfy(tln -> {
-                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("MR.PX1");
+                                assertThat(getDaiValue(tln, CHNUM1_DO_NAME, DU_DA_NAME)).isEqualTo("QUALITY OF MR.PX1");
                                 assertThat(getDaiValue(tln, MOD_DO_NAME, STVAL_DA_NAME)).isEqualTo("on");
                                 assertThat(getDaiValue(tln, LEVMOD_DO_NAME, SETVAL_DA_NAME)).isEqualTo(TChannelLevMod.OTHER.value());
                                 assertThat(getDaiValue(tln, SRCREF_DO_NAME, SETSRCREF_DA_NAME)).isEqualTo("IED_NAME2LDPX/PTRC0.Str.q");

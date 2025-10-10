@@ -26,7 +26,7 @@ import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newVal;
 public class LnService implements LnEditor {
 
     private static final DoLinkedToDaFilter DAI_FILTER_MOD_STVAL = DoLinkedToDaFilter.from(MOD_DO_NAME, STVAL_DA_NAME);
-    private static final String LNODE_STATUS_PRIVATE_TYPE = "COMPAS-LNodeStatus";
+    public static final String LNODE_STATUS_PRIVATE_TYPE = "COMPAS-LNodeStatus";
 
     public Stream<TAnyLN> getAnylns(TLDevice tlDevice) {
         return Stream.concat(Stream.of(tlDevice.getLN0()), tlDevice.getLN().stream());
@@ -58,10 +58,10 @@ public class LnService implements LnEditor {
 
     public boolean matchesLn(TAnyLN tAnyLN, String lnClass, String lnInst, String lnPrefix) {
         return switch (tAnyLN) {
-            case TLN ln -> lnClass.equals(ln.getLnClass().getFirst())
+            case TLN ln -> ln.getLnClass().contains(lnClass)
                            && StringUtils.trimToEmpty(lnInst).equals(StringUtils.trimToEmpty(ln.getInst()))
                            && (StringUtils.trimToEmpty(lnPrefix).equals(StringUtils.trimToEmpty(ln.getPrefix())));
-            case LN0 ignored -> lnClass.equals(TLLN0Enum.LLN_0.value());
+            case LN0 ignored -> TLLN0Enum.LLN_0.value().equals(lnClass);
             default -> throw new IllegalStateException("Unexpected value: " + tAnyLN);
         };
     }

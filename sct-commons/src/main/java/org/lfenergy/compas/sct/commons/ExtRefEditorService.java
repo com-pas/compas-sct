@@ -7,17 +7,14 @@ package org.lfenergy.compas.sct.commons;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.api.ExtRefEditor;
 import org.lfenergy.compas.sct.commons.api.LnEditor;
 import org.lfenergy.compas.sct.commons.domain.*;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.model.epf.EPF;
-import org.lfenergy.compas.sct.commons.model.epf.TCBScopeType;
-import org.lfenergy.compas.sct.commons.model.epf.TChannel;
-import org.lfenergy.compas.sct.commons.model.epf.TChannelType;
-import org.lfenergy.compas.sct.commons.model.epf.TChannelLevMod;
+import org.lfenergy.compas.sct.commons.model.epf.*;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
@@ -65,9 +62,9 @@ public class ExtRefEditorService implements ExtRefEditor {
      * 4. Active LNode source object that should match the provided parameters<br/>
      * 5. Valid DataTypeTemplate Object hierarchy that should match the DO/DA/BDA parameters<br/>
      *
-     * @param scl SCL object
-     * @param compasBay      TCompasBay represent Bay Private
-     * @param channel        TChannel represent parameters
+     * @param scl       SCL object
+     * @param compasBay TCompasBay represent Bay Private
+     * @param channel   TChannel represent parameters
      * @return the IED sources matching the LDEPF parameters
      */
     private List<TIED> getIedSources(SCL scl, TCompasBay compasBay, TChannel channel) {
@@ -77,8 +74,8 @@ public class ExtRefEditorService implements ExtRefEditor {
                     Optional<TCompasBay> tCompasBay = PrivateUtils.extractCompasPrivate(tied, TCompasBay.class);
                     return (channel.getBayScope().equals(TCBScopeType.BAY_EXTERNAL)
                             && tCompasBay.stream().noneMatch(bay -> bay.getUUID().equals(compasBay.getUUID())))
-                            || (channel.getBayScope().equals(TCBScopeType.BAY_INTERNAL)
-                            && tCompasBay.stream().anyMatch(bay -> bay.getUUID().equals(compasBay.getUUID())));
+                           || (channel.getBayScope().equals(TCBScopeType.BAY_INTERNAL)
+                               && tCompasBay.stream().anyMatch(bay -> bay.getUUID().equals(compasBay.getUUID())));
                 }).filter(tied -> doesIcdHeaderMatchLDEPFChannel(tied, channel))
                 .filter(tied -> ldeviceService.findLdevice(tied, channel.getLDInst())
                         .filter(tlDevice -> PrivateUtils.extractStringPrivate(tlDevice.getLN0(), COMPAS_LNODE_STATUS).map(status -> status.equals(ActiveStatus.ON.getValue())).orElse(false))
@@ -121,28 +118,28 @@ public class ExtRefEditorService implements ExtRefEditor {
      */
     private static Boolean doesExtRefMatchLDEPFChannel(TExtRef extRef, TChannel tChannel) {
         Boolean doesExtRefDescMatchAnalogChannel = tChannel.getChannelType().equals(TChannelType.ANALOG)
-                && extRef.getDesc().startsWith("DYN_LDEPF_ANALOG CHANNEL " + tChannel.getChannelNum() + "_1_AnalogueValue")
-                && extRef.getDesc().endsWith("_" + tChannel.getDAName() + "_1");
+                                                   && extRef.getDesc().startsWith("DYN_LDEPF_ANALOG CHANNEL " + tChannel.getChannelNum() + "_1_AnalogueValue")
+                                                   && extRef.getDesc().endsWith("_" + tChannel.getDAName() + "_1");
         Boolean doesExtRefDescMatchDigitalChannel = tChannel.getChannelType().equals(TChannelType.DIGITAL)
-                && extRef.getDesc().startsWith("DYN_LDEPF_DIGITAL CHANNEL " + tChannel.getChannelNum() + "_1_BOOLEAN")
-                && extRef.getDesc().endsWith("_" + tChannel.getDAName() + "_1");
+                                                    && extRef.getDesc().startsWith("DYN_LDEPF_DIGITAL CHANNEL " + tChannel.getChannelNum() + "_1_BOOLEAN")
+                                                    && extRef.getDesc().endsWith("_" + tChannel.getDAName() + "_1");
         return extRef.isSetDesc() && (doesExtRefDescMatchAnalogChannel || doesExtRefDescMatchDigitalChannel)
-                && extRef.isSetPLN() && Utils.lnClassEquals(extRef.getPLN(), tChannel.getLNClass())
-                && extRef.isSetPDO() && extRef.getPDO().equals(tChannel.getDOName());
+               && extRef.isSetPLN() && Utils.lnClassEquals(extRef.getPLN(), tChannel.getLNClass())
+               && extRef.isSetPDO() && extRef.getPDO().equals(tChannel.getDOName());
     }
 
     /**
      * Verify whether the IED satisfies the EPF channel for the private element `TCompasICDHeader`
      *
-     * @param tied TIED
-     * @param channel    TChannel
+     * @param tied    TIED
+     * @param channel TChannel
      * @return true if the TCompasICDHeader matches the EPF channel
      */
     private static boolean doesIcdHeaderMatchLDEPFChannel(TIED tied, TChannel channel) {
         Optional<TCompasICDHeader> tCompasICDHeader = PrivateUtils.extractCompasPrivate(tied, TCompasICDHeader.class);
         return tCompasICDHeader.map(compasICDHeader -> compasICDHeader.getIEDType().value().equals(channel.getIEDType())
-                        && compasICDHeader.getIEDredundancy().value().equals(channel.getIEDRedundancy().value())
-                        && compasICDHeader.getIEDSystemVersioninstance().toString().equals(channel.getIEDSystemVersionInstance()))
+                                                       && compasICDHeader.getIEDredundancy().value().equals(channel.getIEDRedundancy().value())
+                                                       && compasICDHeader.getIEDSystemVersioninstance().toString().equals(channel.getIEDSystemVersionInstance()))
                 .orElse(false);
     }
 
@@ -150,7 +147,7 @@ public class ExtRefEditorService implements ExtRefEditor {
      * Provides Active LN Object that satisfies the EPF channel attributes (lnClass, lnInst, prefix)
      *
      * @param tlDevice TLDevice
-     * @param channel        TChannel
+     * @param channel  TChannel
      * @return AnyLN object that matches the EPF channel
      */
     private Optional<TAnyLN> getActiveLNSourceByLDEPFChannel(TLDevice tlDevice, TChannel channel) {
@@ -163,9 +160,9 @@ public class ExtRefEditorService implements ExtRefEditor {
     /**
      * Verify whether the LN satisfies the EPF channel parameters for Data Type Template elements.
      *
-     * @param dtt TDataTypeTemplates
-     * @param tAnyLN TAnyLN
-     * @param channel   TChannel
+     * @param dtt     TDataTypeTemplates
+     * @param tAnyLN  TAnyLN
+     * @param channel TChannel
      * @return true if the LN matches the EPF channel
      */
     private boolean isValidDataTypeTemplate(TDataTypeTemplates dtt, TAnyLN tAnyLN, TChannel channel) {
@@ -185,7 +182,7 @@ public class ExtRefEditorService implements ExtRefEditor {
         if (isNotBlank(channel.getSBDAName())) {
             bdaNames.add(channel.getSBDAName());
         }
-       return dataTypeTemplatesService.findDoLinkedToDa(dtt, tAnyLN.getLnType(), new DoLinkedToDaFilter(doName,  sdoNames, daName, bdaNames)).isPresent();
+        return dataTypeTemplatesService.findDoLinkedToDa(dtt, tAnyLN.getLnType(), new DoLinkedToDaFilter(doName, sdoNames, daName, bdaNames)).isPresent();
     }
 
     @Override
@@ -265,8 +262,8 @@ public class ExtRefEditorService implements ExtRefEditor {
                                                 } else {
                                                     if (iedSources.size() > 1) {
                                                         errorHandler.get().add(SclReportItem.warning(null, "There is more than one IED source to bind the signal " +
-                                                                "/IED@name=" + extRefBayRef.iedName() + "/LDevice@inst=LDEPF/LN0" +
-                                                                "/ExtRef@desc=" + extRefBayRef.extRef().getDesc()));
+                                                                                                           "/IED@name=" + extRefBayRef.iedName() + "/LDevice@inst=LDEPF/LN0" +
+                                                                                                           "/ExtRef@desc=" + extRefBayRef.extRef().getDesc()));
                                                     }
                                                 }
                                             }))));
@@ -291,19 +288,19 @@ public class ExtRefEditorService implements ExtRefEditor {
                                     Optional<TDAI> purPoseDAI = lnEditor.getDOAndDAInstances(ln0, doLinkedPurPose);
 
                                     boolean isSetSrcRefExistAndEmpty = setSrcRefDAI.isPresent()
-                                            && (!setSrcRefDAI.get().isSetVal()
-                                            || (setSrcRefDAI.get().isSetVal()
-                                            && setSrcRefDAI.get().getVal().getFirst().getValue().isEmpty()));
+                                                                       && (!setSrcRefDAI.get().isSetVal()
+                                                                           || (setSrcRefDAI.get().isSetVal()
+                                                                               && setSrcRefDAI.get().getVal().getFirst().getValue().isEmpty()));
                                     boolean isPurposeExistAndMatchChannel = purPoseDAI.isPresent()
-                                            && purPoseDAI.get().isSetVal()
-                                            && (purPoseDAI.get().getVal().getFirst().getValue().startsWith("DYN_LDEPF_DIGITAL CHANNEL")
-                                            || purPoseDAI.get().getVal().getFirst().getValue().startsWith("DYN_LDEPF_ANALOG CHANNEL"));
-                                    if(isSetSrcRefExistAndEmpty && isPurposeExistAndMatchChannel) {
+                                                                            && purPoseDAI.get().isSetVal()
+                                                                            && (purPoseDAI.get().getVal().getFirst().getValue().startsWith("DYN_LDEPF_DIGITAL CHANNEL")
+                                                                                || purPoseDAI.get().getVal().getFirst().getValue().startsWith("DYN_LDEPF_ANALOG CHANNEL"));
+                                    if (isSetSrcRefExistAndEmpty && isPurposeExistAndMatchChannel) {
                                         DataObject dataObject = new DataObject();
                                         dataObject.setDoName(tdoi.getName());
                                         DataAttribute dataAttribute = new DataAttribute();
                                         dataAttribute.setDaName(SETSRCREF_DA_NAME);
-                                        dataAttribute.setDaiValues(List.of(new DaVal(null, ldepfLdevice.getLdName()+"/"+LPHD0_PROXY)));
+                                        dataAttribute.setDaiValues(List.of(new DaVal(null, ldepfLdevice.getLdName() + "/" + LPHD0_PROXY)));
                                         DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
                                         lnEditor.updateOrCreateDOAndDAInstances(ln0, doLinkedToDa);
                                     }
@@ -316,9 +313,7 @@ public class ExtRefEditorService implements ExtRefEditor {
         tExtRef.setLdInst(setting.getLDInst());
         tExtRef.getLnClass().add(setting.getLNClass());
         tExtRef.setLnInst(setting.getLNInst());
-        if (!isBlank(setting.getLNPrefix())) {
-            tExtRef.setPrefix(setting.getLNPrefix());
-        }
+        tExtRef.setPrefix(StringUtils.trimToNull(setting.getLNPrefix()));
         String doName = isBlank(setting.getDOInst()) || setting.getDOInst().equals("0") ? setting.getDOName() : setting.getDOName() + setting.getDOInst();
         tExtRef.setDoName(doName);
         // This is true for External Binding
@@ -334,31 +329,31 @@ public class ExtRefEditorService implements ExtRefEditor {
     private String computeDaiValue(String lnPrefix, TExtRef extRef, String daName) {
         if (LN_PREFIX_B.equals(lnPrefix) || LN_PREFIX_A.equals(lnPrefix)) {
             return extRef.getIedName() +
-                    extRef.getLdInst() + "/" +
-                    trimToEmpty(extRef.getPrefix()) +
-                    extRef.getLnClass().getFirst() +
-                    trimToEmpty(extRef.getLnInst()) + "." +
-                    extRef.getDoName() + "." + Q_DA_NAME;
+                   extRef.getLdInst() + "/" +
+                   trimToEmpty(extRef.getPrefix()) +
+                   extRef.getLnClass().getFirst() +
+                   trimToEmpty(extRef.getLnInst()) + "." +
+                   extRef.getDoName() + "." + Q_DA_NAME;
         } else {
             return extRef.getIedName() +
-                    extRef.getLdInst() + "/" +
-                    trimToEmpty(extRef.getPrefix()) +
-                    extRef.getLnClass().getFirst() +
-                    trimToEmpty(extRef.getLnInst()) + "." +
-                    extRef.getDoName() + "." +
-                    daName;
+                   extRef.getLdInst() + "/" +
+                   trimToEmpty(extRef.getPrefix()) +
+                   extRef.getLnClass().getFirst() +
+                   trimToEmpty(extRef.getLnInst()) + "." +
+                   extRef.getDoName() + "." +
+                   daName;
         }
     }
 
-   private void updateLDEPFDos(TDataTypeTemplates dtt, TIED tied, TLDevice tlDevice, TExtRef tExtRef, TChannel setting) {
-       // Digital
+    private void updateLDEPFDos(TDataTypeTemplates dtt, TIED tied, TLDevice tlDevice, TExtRef tExtRef, TChannel setting) {
+        // Digital
         if (setting.getChannelType().equals(TChannelType.DIGITAL)) {
             lnEditor.findLn(tlDevice, tAnyLN -> lnEditor.matchesLn(tAnyLN, LN_RBDR, setting.getChannelNum(), null))
                     .ifPresent(tln -> updateDaiValue(dtt, tied, tlDevice, tln, tExtRef, setting));
             lnEditor.findLn(tlDevice, tAnyLN -> lnEditor.matchesLn(tAnyLN, LN_RBDR, setting.getChannelNum(), LN_PREFIX_B))
                     .ifPresent(tln -> updateDaiValue(dtt, tied, tlDevice, tln, tExtRef, setting));
         }
-       // Analog
+        // Analog
         if (setting.getChannelType().equals(TChannelType.ANALOG)) {
             lnEditor.findLn(tlDevice, tAnyLN -> lnEditor.matchesLn(tAnyLN, LN_RADR, setting.getChannelNum(), null))
                     .ifPresent(tln -> updateDaiValue(dtt, tied, tlDevice, tln, tExtRef, setting));
@@ -374,12 +369,12 @@ public class ExtRefEditorService implements ExtRefEditor {
 
     private String getNewDaiValue(String daName, String lnPrefix, TExtRef extRef, TChannel setting) {
         return switch (daName) {
-            case DU_DA_NAME -> setting.isSetChannelShortLabel() ? setting.getChannelShortLabel(): null;
+            case DU_DA_NAME -> (LN_PREFIX_A.equals(lnPrefix) || LN_PREFIX_B.equals(lnPrefix)) ? setting.getChannelShortLabelQ() : setting.getChannelShortLabel();
             case SETVAL_DA_NAME -> {
-                if(LN_PREFIX_B.equals(lnPrefix) || LN_PREFIX_A.equals(lnPrefix)){
-                    yield setting.isSetChannelLevModQ() && !setting.getChannelLevModQ().equals(TChannelLevMod.NA) ? setting.getChannelLevModQ().value(): null;
+                if (LN_PREFIX_B.equals(lnPrefix) || LN_PREFIX_A.equals(lnPrefix)) {
+                    yield setting.isSetChannelLevModQ() && !setting.getChannelLevModQ().equals(TChannelLevMod.NA) ? setting.getChannelLevModQ().value() : null;
                 } else {
-                    yield setting.isSetChannelLevMod() && !setting.getChannelLevMod().equals(TChannelLevMod.NA) ? setting.getChannelLevMod().value(): null;
+                    yield setting.isSetChannelLevMod() && !setting.getChannelLevMod().equals(TChannelLevMod.NA) ? setting.getChannelLevMod().value() : null;
                 }
             }
             case STVAL_DA_NAME -> ActiveStatus.ON.getValue();
@@ -393,7 +388,7 @@ public class ExtRefEditorService implements ExtRefEditor {
                 .map(doLinkedToDa1 -> lnEditor.getDoLinkedToDaCompletedFromDAI(tied, tlDevice.getInst(), tln, doLinkedToDa1))
                 .findFirst()
                 .filter(doLinkedToDa1 -> {
-                    if (!doLinkedToDa1.isUpdatable()){
+                    if (!doLinkedToDa1.isUpdatable()) {
                         errorHandler.get().add(SclReportItem.warning(tied.getName() + "/" + LDEVICE_LDSUIED + "/" + LnId.from(tln).lnClass() + "/DOI@name=\"" + doLinkedToDaFilter.doName() + "\"/DAI@name=\"" + doLinkedToDaFilter.daName() + "\"/Val", "The DAI cannot be updated"));
                     }
                     return doLinkedToDa1.isUpdatable();

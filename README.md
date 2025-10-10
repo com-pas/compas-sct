@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 Alliander N.V.
+SPDX-FileCopyrightText: 2025 RTE FRANCE
 
 SPDX-License-Identifier: Apache-2.0
 -->
