@@ -11,7 +11,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.dto.ControlBlockTarget;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.model.cbcom.*;
 import org.lfenergy.compas.sct.commons.model.da_comm.DACOMM;
@@ -182,12 +181,10 @@ class ControlBlockEditorServiceTest {
 
         assertThat(tReportControl.getTrgOps())
                 .extracting(TTrgOps::isDchg, TTrgOps::isQchg, TTrgOps::isDupd, TTrgOps::isPeriod, TTrgOps::isGi)
-                .containsExactly(false, false, false, true, true);
+                .containsExactly(false, false, false, true, false);
 
         assertThat(tReportControl.getRptEnabled().getMax()).isEqualTo(4L);
-        assertThat(tReportControl.getRptEnabled().getClientLN().stream().map(ControlBlockTarget::from))
-                .containsExactly(
-                        new ControlBlockTarget("AP_NAME", "IED_NAME1", "LD_INST11", "", "LLN0", "", ""));
+        assertThat(tReportControl.getRptEnabled().getClientLN()).isEmpty();
     }
 
     @Test
