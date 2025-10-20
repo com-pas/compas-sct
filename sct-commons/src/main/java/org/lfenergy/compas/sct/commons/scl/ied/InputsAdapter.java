@@ -166,7 +166,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
                 String dataSetName = DATASET_NAME_PREFIX + datasetSuffix;
                 String cbName = CONTROLBLOCK_NAME_PREFIX + datasetSuffix;
                 createDataSetWithFCDA(extRef, sourceLDevice, sourceDa, dataSetName);
-                createControlBlockWithTarget(extRef, sourceLDevice, sourceDa, cbName, dataSetName);
+                createControlBlock(extRef, sourceLDevice, sourceDa, cbName, dataSetName);
                 setExtRefSrcAttributes(extRef, cbName);
             });
         } catch (ScdException e) {
@@ -187,15 +187,18 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
                 sourceDa.getFc());
     }
 
-    private void createControlBlockWithTarget(TExtRef extRef, LDeviceAdapter sourceLDevice, DataAttributeRef sourceDa, String cbName, String datSet) {
+    private void createControlBlock(TExtRef extRef, LDeviceAdapter sourceLDevice, DataAttributeRef sourceDa, String cbName, String datSet) {
         String sourceLDName = sourceLDevice.getLdName();
         String idSeed = "%s/%s.%s".formatted(StringUtils.trimToEmpty(sourceLDName), TLLN0Enum.LLN_0.value(), cbName);
-        ControlBlockAdapter controlBlockAdapter = sourceLDevice.getLN0Adapter().createControlBlockIfNotExists(cbName, idSeed, datSet, ControlBlockEnum.from(extRef.getServiceType()));
+        ControlBlockEnum controlBlockEnum = ControlBlockEnum.from(extRef.getServiceType());
+        ControlBlockAdapter controlBlockAdapter = sourceLDevice.getLN0Adapter().createControlBlockIfNotExists(cbName, idSeed, datSet, controlBlockEnum);
         if (sourceDa.getFc() != TFCEnum.ST && controlBlockAdapter.getCurrentElem() instanceof TReportControl tReportControl) {
             tReportControl.getTrgOps().setDchg(false);
             tReportControl.getTrgOps().setQchg(false);
         }
-        controlBlockAdapter.addTargetIfNotExists(getLNAdapter());
+        if (!ControlBlockEnum.REPORT.equals(controlBlockEnum)) {
+            controlBlockAdapter.addTargetIfNotExists(getLNAdapter());
+        }
     }
 
     private void setExtRefSrcAttributes(TExtRef extRef, String cbName) {

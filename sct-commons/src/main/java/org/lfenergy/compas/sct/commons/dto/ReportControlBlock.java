@@ -115,7 +115,7 @@ public class ReportControlBlock extends ControlBlock {
         newDefaultTrgOps.setQchg(true);
         newDefaultTrgOps.setDupd(false);
         newDefaultTrgOps.setPeriod(true);
-        newDefaultTrgOps.setGi(true);
+        newDefaultTrgOps.setGi(false);
         return newDefaultTrgOps;
     }
 

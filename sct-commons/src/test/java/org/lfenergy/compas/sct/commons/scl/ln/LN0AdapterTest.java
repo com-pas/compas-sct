@@ -880,7 +880,7 @@ class LN0AdapterTest {
 
         assertThat(tReportControl.getTrgOps())
                 .extracting(TTrgOps::isDchg, TTrgOps::isQchg, TTrgOps::isPeriod, TTrgOps::isGi)
-                .containsOnly(true);
+                .containsExactly(true, true, true, false);
         assertThat(tReportControl.getTrgOps().isDupd()).isFalse();
 
         assertThat(tReportControl.getOptFields())

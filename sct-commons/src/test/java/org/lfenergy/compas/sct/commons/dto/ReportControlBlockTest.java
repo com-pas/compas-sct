@@ -37,7 +37,7 @@ class ReportControlBlockTest {
 
         assertThat(reportControlBlock.getTrgOps())
             .extracting(TTrgOps::isDchg, TTrgOps::isQchg, TTrgOps::isPeriod, TTrgOps::isGi)
-            .containsOnly(true);
+            .containsExactly(true, true, true, false);
         assertThat(reportControlBlock.getTrgOps().isDupd()).isFalse();
 
         assertThat(reportControlBlock.getOptFields())
