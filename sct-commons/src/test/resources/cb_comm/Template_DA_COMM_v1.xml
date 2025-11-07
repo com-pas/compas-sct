@@ -10,13 +10,13 @@
         <SystemVersion MainSystemVersion="01.00"></SystemVersion>
     </Version>
 	<FCDAs>
-        <FCDA lnClass="ANCR" doName="DoName" daName="daNameST" fc="ST"></FCDA>
-        <FCDA lnClass="ANCR" doName="DoName" daName="daNameMX" fc="MX"></FCDA>
-        <FCDA lnClass="ANCR" doName="OtherDoName" daName="daNameST" fc="ST"></FCDA>
-        <FCDA lnClass="ANCR" doName="DoWithInst" daName="daNameST" fc="ST"></FCDA>
-        <FCDA lnClass="ANCR" doName="DoWithInst.subDo" daName="daNameST" fc="ST"></FCDA>
-        <FCDA lnClass="ANCR" doName="FirstDo" daName="daNameST" fc="ST"></FCDA>
-        <FCDA lnClass="ANCR" doName="SecondDo" daName="daNameST" fc="ST"></FCDA>
-        <FCDA lnClass="ANCR" doName="ThirdDo" daName="daNameST" fc="ST"></FCDA>
+        <FCDA lnClass="ANCR" doName="DoName" daName="daNameST" fc="ST" gooseType="GS"></FCDA>
+        <FCDA lnClass="ANCR" doName="DoName" daName="daNameMX" fc="MX" gooseType="GM"></FCDA>
+        <FCDA lnClass="ANCR" doName="OtherDoName" daName="daNameST" fc="ST" gooseType="GS"></FCDA>
+        <FCDA lnClass="ANCR" doName="DoWithInst" daName="daNameST" fc="ST" gooseType="GS"></FCDA>
+        <FCDA lnClass="ANCR" doName="DoWithInst.subDo" daName="daNameST" fc="ST" gooseType="GS"></FCDA>
+        <FCDA lnClass="ANCR" doName="FirstDo" daName="daNameST" fc="ST" gooseType="GS"></FCDA>
+        <FCDA lnClass="ANCR" doName="SecondDo" daName="daNameST" fc="ST" gooseType="GS"></FCDA>
+        <FCDA lnClass="ANCR" doName="ThirdDo" daName="daNameST" fc="ST" gooseType="GS"></FCDA>
 	</FCDAs>
 </DACOMM>

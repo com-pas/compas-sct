@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
@@ -287,6 +288,25 @@ class InputsAdapterTest {
         // Then
         assertThat(result).hasSameSizeAs(tExtRefList)
                 .hasSize(6);
+    }
+
+    @ParameterizedTest(name = "updateAllSourceDataSetsAndControlBlocks should use gooseType for extRef={0}")
+    @CsvSource({
+            "test daName ST, DS_LD_INST21_GSI",
+            "test daName MX, DS_LD_INST21_GMI"
+    })
+    void updateAllSourceDataSetsAndControlBlocks_should_use_goose_type(String extRef, String expectedDataSetName) {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success_test_goose_type.xml");
+        DACOMM dacomm = DaComTestMarshallerHelper.getDACOMMFromFile("/cb_comm/Template_DA_COMM_v1.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        InputsAdapter inputsAdapter = keepOnlyThisExtRef(sclRootAdapter, extRef);
+        // When
+        List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks(dacomm.getFCDAs().getFCDA());
+        // Then
+        assertThat(sclReportItems).isEmpty();
+        DataSetAdapter dataSet = findDataSet(scd, "IED_NAME2", "LD_INST21", expectedDataSetName);
+        assertThat(dataSet).isNotNull();
     }
 
 }
