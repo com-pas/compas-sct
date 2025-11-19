@@ -38,6 +38,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Named.named;
+import static org.lfenergy.compas.scl2007b4.model.TFCEnum.MX;
 import static org.lfenergy.compas.scl2007b4.model.TFCEnum.ST;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
@@ -137,17 +138,17 @@ class ControlBlockEditorServiceTest {
         // Check dataSet names
         findDataSet(scd, "IED_NAME2", "LD_INST21", "DS_LD_INST21_CYCI");
         findDataSet(scd, "IED_NAME2", "LD_INST21", "DS_LD_INST21_DQCI");
-        findDataSet(scd, "IED_NAME2", "LD_INST21", "DS_LD_INST21_GMI");
-        findDataSet(scd, "IED_NAME2", "LD_INST21", "DS_LD_INST21_SVI");
-        findDataSet(scd, "IED_NAME3", "LD_INST31", "DS_LD_INST31_GSE");
         findDataSet(scd, "IED_NAME2", "LD_INST21", "DS_LD_INST21_GSI");
+        findDataSet(scd, "IED_NAME2", "LD_INST21", "DS_LD_INST21_SVI");
+        findDataSet(scd, "IED_NAME3", "LD_INST31", "DS_LD_INST31_GME");
+        findDataSet(scd, "IED_NAME2", "LD_INST21", "DS_LD_INST21_GMI");
 
         // Check one DataSet content
         DataSetAdapter aDataSet = findDataSet(scd, "IED_NAME2", "LD_INST21", "DS_LD_INST21_GSI");
         assertThat(aDataSet.getCurrentElem().getFCDA()).hasSize(4);
         assertThat(aDataSet.getCurrentElem().getFCDA().stream().map(FCDARecord::toFCDARecord))
                 .containsExactly(
-                        new FCDARecord("LD_INST21", "ANCR", "1", "", "DoName", "daNameST", ST),
+                        new FCDARecord("LD_INST21", "ANCR", "1", "", "DoName", "daNameMX", MX),
                         new FCDARecord("LD_INST21", "ANCR", "1", "", "DoWithInst1", "daNameST", ST),
                         new FCDARecord("LD_INST21", "ANCR", "1", "", "DoWithInst2.subDo", "daNameST", ST),
                         new FCDARecord("LD_INST21", "ANCR", "1", "", "OtherDoName", "daNameST", ST)
@@ -170,7 +171,7 @@ class ControlBlockEditorServiceTest {
         assertControlBlockExists(scd, "IED_NAME2", "LD_INST21", "CB_LD_INST21_DQCI", "DS_LD_INST21_DQCI", "BFF9CA40F6C426", REPORT);
         assertControlBlockExists(scd, "IED_NAME2", "LD_INST21", "CB_LD_INST21_GMI", "DS_LD_INST21_GMI", "D2927E49982E88", GSE);
         assertControlBlockExists(scd, "IED_NAME2", "LD_INST21", "CB_LD_INST21_SVI", "DS_LD_INST21_SVI", "74C94A5A8C06B8", SAMPLED_VALUE);
-        assertControlBlockExists(scd, "IED_NAME3", "LD_INST31", "CB_LD_INST31_GSE", "DS_LD_INST31_GSE", "08FF9C43689DD3", GSE);
+        assertControlBlockExists(scd, "IED_NAME3", "LD_INST31", "CB_LD_INST31_GME", "DS_LD_INST31_GME", "DA38617C628017", GSE);
         assertControlBlockExists(scd, "IED_NAME2", "LD_INST21", "CB_LD_INST21_GSI", "DS_LD_INST21_GSI", "2FB2C6E1C5955E", GSE);
 
         // Check one ControlBlock content (ReportControl with sourceDA.fc=MX)
@@ -205,10 +206,10 @@ class ControlBlockEditorServiceTest {
         // check some ExtRef
         assertThat(findExtRef(scd, "IED_NAME1", "LD_INST11", "test bay internal"))
                 .extracting(TExtRef::getSrcCBName, TExtRef::getSrcLDInst)
-                .containsExactly("CB_LD_INST21_GSI", "LD_INST21");
+                .containsExactly("CB_LD_INST21_GMI", "LD_INST21");
         assertThat(findExtRef(scd, "IED_NAME1", "LD_INST11", "test bay external"))
                 .extracting(TExtRef::getSrcCBName, TExtRef::getSrcLDInst)
-                .containsExactly("CB_LD_INST31_GSE", "LD_INST31");
+                .containsExactly("CB_LD_INST31_GME", "LD_INST31");
         assertThat(findExtRef(scd, "IED_NAME1", "LD_INST11", "test ServiceType is SMV, no daName and DO contains ST and MX, but only ST is FCDA candidate"))
                 .extracting(TExtRef::getSrcCBName, TExtRef::getSrcLDInst)
                 .containsExactly("CB_LD_INST21_SVI", "LD_INST21");
