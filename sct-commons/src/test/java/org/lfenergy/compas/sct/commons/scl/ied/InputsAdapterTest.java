@@ -292,8 +292,8 @@ class InputsAdapterTest {
 
     @ParameterizedTest(name = "updateAllSourceDataSetsAndControlBlocks should use gooseType for extRef={0}")
     @CsvSource({
-            "test daName ST, DS_LD_INST21_GSI",
-            "test daName MX, DS_LD_INST21_GMI"
+            "test daName ST, DS_LD_INST21_GMI",
+            "test daName MX, DS_LD_INST21_GSI"
     })
     void updateAllSourceDataSetsAndControlBlocks_should_use_goose_type(String extRef, String expectedDataSetName) {
         // Given
