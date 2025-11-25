@@ -32,13 +32,13 @@
                 <LDevice inst="LDSUIED" ldName="PLOE53CBO1BCU1LDSUIED">
                     <LN0 lnClass="LLN0" inst="" lnType="LNEX1">
                     </LN0>
-                    <LN lnClass="LSVS" inst="9" lnType="LNLSVS">
+                    <LN lnClass="LSVS" inst="1" lnType="LNLSVS">
                         <DOI name="SvCBRef">
                             <DAI name="setSrcRef" valKind="RO" valImport="true">
                             </DAI>
                         </DOI>
                     </LN>
-                    <LN lnClass="LGOS" inst="3" lnType="LNLGOS">
+                    <LN lnClass="LGOS" inst="1" lnType="LNLGOS">
                         <DOI name="GoCBRef">
                             <Private type="RTE-PARAM">
                                 <rte:RTEPARAM shortLabel="REF-GO-LGOS-1" longLabel="REFERENCE DU GOOSE SUPERVISE PAR LGOS 1" conf="true"/>

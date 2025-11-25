@@ -572,7 +572,7 @@ class SclServiceTest {
         assertThat(lDeviceAdapter.getLNAdapters())
                 .hasSize(2)
                 .extracting(LNAdapter::getLNClass, LNAdapter::getLNInst).containsExactlyInAnyOrder(
-                        Tuple.tuple("LGOS", "3"), Tuple.tuple("LSVS", "9"));
+                        Tuple.tuple("LGOS", "1"), Tuple.tuple("LSVS", "1"));
         assertIsMarshallable(scd);
     }
 
@@ -582,9 +582,9 @@ class SclServiceTest {
         SCL scd = SclTestMarshaller.getSCLFromFile("/monitoring_lns/scd_monitoring_lsvs_lgos.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         LDeviceAdapter lDeviceAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1").getLDeviceAdapterByLdInst(LD_LDSUIED);
-        getDAIAdapters(lDeviceAdapter, "LGOS", "3", "GoCBRef", "setSrcRef")
+        getDAIAdapters(lDeviceAdapter, "LGOS", "1", "GoCBRef", "setSrcRef")
                 .forEach(daiAdapter -> daiAdapter.getCurrentElem().setValImport(false));
-        getDAIAdapters(lDeviceAdapter, "LSVS", "9", "SvCBRef", "setSrcRef")
+        getDAIAdapters(lDeviceAdapter, "LSVS", "1", "SvCBRef", "setSrcRef")
                 .forEach(daiAdapter -> daiAdapter.getCurrentElem().setValImport(false));
         // When
         List<SclReportItem> sclReportItems = sclService.manageMonitoringLns(scd);
@@ -597,7 +597,7 @@ class SclServiceTest {
         assertThat(lDeviceAdapter.getLNAdapters())
                 .hasSize(2)
                 .extracting(LNAdapter::getLNClass, LNAdapter::getLNInst).containsExactlyInAnyOrder(
-                        Tuple.tuple("LGOS", "3"), Tuple.tuple("LSVS", "9"));
+                        Tuple.tuple("LGOS", "1"), Tuple.tuple("LSVS", "1"));
         assertIsMarshallable(scd);
     }
 
@@ -663,5 +663,40 @@ class SclServiceTest {
                                     .map(tUnNaming -> ((TDAI)tUnNaming).getVal().getFirst().getValue())
                                     .containsExactlyInAnyOrder("IED_NAME2LD_INST21/LLN0.smv2", "IED_NAME2LD_INST22/LLN0.smv2");
                         });
+    }
+
+    @Test
+    void manageMonitoringLns_should_clean_remove_all_lsvs_lgos_with_instance_not_equals_one(){
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/monitoring_lns/scd_monitoring_lsvs_lgos_with_inst_one_and_not_one.xml");
+        // When
+        List<SclReportItem> sclReportItems = sclService.manageMonitoringLns(scd);
+        //Then
+        assertThat(sclReportItems).hasSize(1)
+                .extracting(SclReportItem::isError, SclReportItem::xpath, SclReportItem::message)
+                .containsExactly(tuple(false, "IED_NAME1/LDSUIED/LSVS", "There is no LN LSVS present in LDevice"));
+
+        assertThat(scd.getIED())
+                .filteredOn(tied -> tied.getName().equals("IED_NAME1"))
+                .flatExtracting(TIED::getAccessPoint)
+                .extracting(TAccessPoint::getServer)
+                .flatExtracting(TServer::getLDevice)
+                .filteredOn(tlDevice -> tlDevice.getInst().equals(LD_LDSUIED))
+                .extracting(TLDevice::getLN)
+                .allSatisfy(tlns -> {
+                    // Expected number of LGOS and LSVS
+                    assertThat(tlns).hasSize(2).extracting(tln -> tln.getLnClass().getFirst(), TLN::getInst).containsExactlyInAnyOrder(
+                            Tuple.tuple("LGOS", "1"), Tuple.tuple("LGOS", "2"));
+                    // LGOS setSrcRef values
+                    assertThat(tlns)
+                            .filteredOn(tln -> tln.getLnClass().contains("LGOS") && tln.getInst().equals("1")
+                                    || tln.getLnClass().contains("LGOS") && tln.getInst().equals("2"))
+                            .flatExtracting(TAnyLN::getDOI)
+                            .filteredOn(tdoi -> tdoi.getName().equals("GoCBRef"))
+                            .flatExtracting(TDOI::getSDIOrDAI)
+                            .filteredOn(tUnNaming -> tUnNaming.getClass().equals(TDAI.class) && ((TDAI)tUnNaming).getName().equals("setSrcRef"))
+                            .map(tUnNaming -> ((TDAI)tUnNaming).getVal().getFirst().getValue())
+                            .containsExactlyInAnyOrder("IED_NAME2LD_INST21/LLN0.goose1", "IED_NAME2LD_INST22/LLN0.goose1");
+                });
     }
 }
