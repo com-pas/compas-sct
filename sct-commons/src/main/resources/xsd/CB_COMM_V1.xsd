@@ -57,6 +57,7 @@ SPDX-License-Identifier: Apache-2.0
 		<xs:attribute name="doName" type="xs:string" use="required"/>
 		<xs:attribute name="daName" type="xs:string" use="required"/>
 		<xs:attribute name="fc" type="tfc" use="required"/>
+        <xs:attribute name="gooseType" type="tgooseType" use="required"/>
 	</xs:complexType>
 
 	<xs:simpleType name="tfc">
@@ -66,4 +67,10 @@ SPDX-License-Identifier: Apache-2.0
 		</xs:restriction>
 	</xs:simpleType>
 
+    <xs:simpleType name="tgooseType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="GS"/>
+            <xs:enumeration value="GM"/>
+        </xs:restriction>
+    </xs:simpleType>
 </xs:schema>

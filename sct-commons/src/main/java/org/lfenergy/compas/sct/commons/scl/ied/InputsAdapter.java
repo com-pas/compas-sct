@@ -162,7 +162,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
 
         try {
             sourceDas.forEach(sourceDa -> {
-                String datasetSuffix = generateDataSetSuffix(extRef, sourceDa, isBayInternal);
+                String datasetSuffix = generateDataSetSuffix(extRef, sourceDa, allowedFcdas, isBayInternal);
                 String dataSetName = DATASET_NAME_PREFIX + datasetSuffix;
                 String cbName = CONTROLBLOCK_NAME_PREFIX + datasetSuffix;
                 createDataSetWithFCDA(extRef, sourceLDevice, sourceDa, dataSetName);
@@ -210,10 +210,16 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         extRef.unsetSrcLNClass();
     }
 
-    private static String generateDataSetSuffix(TExtRef extRef, DataAttributeRef sourceDa, boolean isBayInternal) {
+    private String generateDataSetSuffix(TExtRef extRef, DataAttributeRef sourceDa, List<TFCDA> allowedFcdas, boolean isBayInternal) {
         return extRef.getLdInst().toUpperCase(Locale.ENGLISH) + ATTRIBUTE_VALUE_SEPARATOR
                + switch (extRef.getServiceType()) {
-            case GOOSE -> "G" + ((sourceDa.getFc() == TFCEnum.ST) ? "S" : "M");
+            case GOOSE -> {
+                // Dans le cas d'un GOOSE, on récupère le FCDA correspondant dans le fichier de configuration DA_COMM afin de connaître le gooseType
+                TFCDA allowedFcda = findFcdaInDaComm(sourceDa, allowedFcdas)
+                        .orElseThrow(() -> new ScdException("FCDA lnClass=%s doName=%s daName=%s fc=%s introuvable dans le fichier DA_COMM"
+                                .formatted(sourceDa.getLnClass(), sourceDa.getDoName(), sourceDa.getDaName(), sourceDa.getFc())));
+                yield allowedFcda.getGooseType().value();
+            }
             case SMV -> "SV";
             case REPORT -> (sourceDa.getFc() == TFCEnum.ST) ? "DQC" : "CYC";
             case POLL -> throw new IllegalArgumentException(MESSAGE_POLL_SERVICE_TYPE_NOT_SUPPORTED);
@@ -234,6 +240,10 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
     }
 
     private boolean isFcdaAllowed(DataAttributeRef dataAttributeRef, List<TFCDA> allowedFcdas) {
+        return findFcdaInDaComm(dataAttributeRef, allowedFcdas).isPresent();
+    }
+
+    private Optional<TFCDA> findFcdaInDaComm(DataAttributeRef dataAttributeRef, List<TFCDA> allowedFcdas) {
         String lnClass = dataAttributeRef.getLnClass();
         String doName = dataAttributeRef.getDoName().toStringWithoutInst();
         String daName = dataAttributeRef.getDaName().toString();
@@ -241,10 +251,12 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
         if (StringUtils.isBlank(lnClass) || StringUtils.isBlank(doName) || StringUtils.isBlank(daName) || StringUtils.isBlank(fc)) {
             throw new IllegalArgumentException("parameters must not be blank");
         }
-        return allowedFcdas.stream().anyMatch(tfcda -> tfcda.getDoName().equals(doName)
-                                                       && tfcda.getDaName().equals(daName)
-                                                       && tfcda.getLnClass().equals(lnClass)
-                                                       && tfcda.getFc().value().equals(fc));
+
+        return allowedFcdas.stream().filter(tfcda -> tfcda.getDoName().equals(doName)
+                && tfcda.getDaName().equals(daName)
+                && tfcda.getLnClass().equals(lnClass)
+                && tfcda.getFc().value().equals(fc))
+                .findFirst();
     }
 
     private Optional<SclReportItem> removeFilterSourceDaForReport(TExtRef extRef, Set<DataAttributeRef> sourceDas) {
