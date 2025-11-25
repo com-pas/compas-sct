@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
@@ -153,16 +154,16 @@ class InputsAdapterTest {
     public static Stream<Arguments> provideCreateFCDA() {
         return Stream.of(
             Arguments.of(named("should include signal internal to a Bay",
-                    "test bay internal"), "IED_NAME2/LD_INST21/DS_LD_INST21_GSI",
+                    "test bay internal"), "IED_NAME2/LD_INST21/DS_LD_INST21_GMI",
                 List.of(new FCDARecord("LD_INST21", "ANCR", "1", "", "DoName", "daNameST", TFCEnum.ST))),
             Arguments.of(named("should include signal external to a Bay",
-                    "test bay external"), "IED_NAME3/LD_INST31/DS_LD_INST31_GSE",
+                    "test bay external"), "IED_NAME3/LD_INST31/DS_LD_INST31_GME",
                 List.of(new FCDARecord("LD_INST31", "ANCR", "1", "", "DoName", "daNameST", TFCEnum.ST))),
             Arguments.of(named("keep source DA with fc = ST",
-                    "test daName ST"), "IED_NAME2/LD_INST21/DS_LD_INST21_GSI",
+                    "test daName ST"), "IED_NAME2/LD_INST21/DS_LD_INST21_GMI",
                 List.of(new FCDARecord("LD_INST21", "ANCR", "1", "", "DoName", "daNameST", TFCEnum.ST))),
             Arguments.of(named("keep source DA with fc = MX",
-                    "test daName MX"), "IED_NAME2/LD_INST21/DS_LD_INST21_GMI",
+                    "test daName MX"), "IED_NAME2/LD_INST21/DS_LD_INST21_GSI",
                 List.of(new FCDARecord("LD_INST21", "ANCR", "1", "", "DoName", "daNameMX", TFCEnum.MX))),
             Arguments.of(named("for GOOSE, should keep only valid fcda candidates",
                     "test ServiceType is GOOSE, no daName and DO contains ST and MX, but only ST is FCDA candidate"), "IED_NAME2/LD_INST21/DS_LD_INST21_GSI",
@@ -287,6 +288,25 @@ class InputsAdapterTest {
         // Then
         assertThat(result).hasSameSizeAs(tExtRefList)
                 .hasSize(6);
+    }
+
+    @ParameterizedTest(name = "updateAllSourceDataSetsAndControlBlocks should use gooseType for extRef={0}")
+    @CsvSource({
+            "test daName ST, DS_LD_INST21_GMI",
+            "test daName MX, DS_LD_INST21_GSI"
+    })
+    void updateAllSourceDataSetsAndControlBlocks_should_use_goose_type(String extRef, String expectedDataSetName) {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success_test_goose_type.xml");
+        DACOMM dacomm = DaComTestMarshallerHelper.getDACOMMFromFile("/cb_comm/Template_DA_COMM_v1.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        InputsAdapter inputsAdapter = keepOnlyThisExtRef(sclRootAdapter, extRef);
+        // When
+        List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks(dacomm.getFCDAs().getFCDA());
+        // Then
+        assertThat(sclReportItems).isEmpty();
+        DataSetAdapter dataSet = findDataSet(scd, "IED_NAME2", "LD_INST21", expectedDataSetName);
+        assertThat(dataSet).isNotNull();
     }
 
 }
