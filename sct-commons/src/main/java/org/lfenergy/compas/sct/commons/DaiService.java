@@ -4,7 +4,11 @@
 
 package org.lfenergy.compas.sct.commons;
 
-import org.lfenergy.compas.scl2007b4.model.*;
+import org.apache.commons.lang3.StringUtils;
+import org.lfenergy.compas.scl2007b4.model.TDAI;
+import org.lfenergy.compas.scl2007b4.model.TDOI;
+import org.lfenergy.compas.scl2007b4.model.TSDI;
+import org.lfenergy.compas.scl2007b4.model.TVal;
 
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -39,6 +43,18 @@ public class DaiService {
 
     public Optional<TDAI> findDai(TSDI tsdi, Predicate<TDAI> tdaiPredicate) {
         return getFilteredDais(tsdi, tdaiPredicate).findFirst();
+    }
+
+    public Optional<TDAI> findDai(TDOI tdoi, String daiName) {
+        return findDai(tdoi, tdai -> daiName.equals(tdai.getName()));
+    }
+
+    public Optional<TDAI> findDai(TSDI tsdi, String daiName) {
+        return findDai(tsdi, tdai -> daiName.equals(tdai.getName()));
+    }
+
+    public Optional<String> getDaiVal(TDAI tdai) {
+        return tdai.getVal().stream().findFirst().map(TVal::getValue).filter(StringUtils::isNotBlank);
     }
 
 }
