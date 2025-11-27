@@ -223,6 +223,8 @@ public class SclService implements SclEditor {
     public List<SclReportItem> manageMonitoringLns(SCL scd) {
         errorHandler.get().clear();
         try {
+            //Preprocessing : clean LSVS/LGOS if inst!=1 and monitor them if needed
+            removeLsvsLgos(scd);
             iedService.getFilteredIeds(scd, ied -> !ied.getName().contains(IED_TEST_NAME))
                     .forEach(tied -> {
                         Map<TServiceType, List<IedSource>> serviceTypeToIedSource = ldeviceService.getLdevices(tied)
@@ -243,6 +245,14 @@ public class SclService implements SclEditor {
         } finally {
             errorHandler.remove();
         }
+    }
+
+    private void removeLsvsLgos(SCL scd) {
+        scd.getIED().stream().flatMap(tied -> ldeviceService.findLdevice(tied, LDEVICE_LDSUIED).stream())
+                .forEach(tlDevice -> {
+                    List<TLN> tlnList = tlDevice.getLN();
+                    tlnList.removeIf(tln -> (tln.getLnClass().contains("LGOS") || tln.getLnClass().contains("LSVS")) && !tln.getInst().equals("1"));
+                });
     }
 
     private void manageMonitoringLns(List<IedSource> iedSources, SCL scd, TIED tied, TLDevice ldsuiedLdevice, String doName, MonitoringLnClassEnum monitoringLnClassEnum) {
