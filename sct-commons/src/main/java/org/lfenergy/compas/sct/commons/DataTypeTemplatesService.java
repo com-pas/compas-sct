@@ -94,6 +94,7 @@ public class DataTypeTemplatesService implements DataTypeTemplateReader {
                                                     dataAttribute.setBType(tda.getBType());
                                                     dataAttribute.setType(tda.getType());
                                                     dataAttribute.setValImport(tda.isValImport());
+                                                    dataAttribute.setValKind(tda.getValKind());
                                                     return Optional.of(new DoLinkedToDa(dataObject, dataAttribute));
                                                 }
                                                 // Search first DaType from DOType (from last DOType where DA is STRUCT)
@@ -113,6 +114,7 @@ public class DataTypeTemplatesService implements DataTypeTemplateReader {
                                                                         dataAttribute.setBType(tbda.getBType());
                                                                         dataAttribute.setType(tbda.getType());
                                                                         dataAttribute.setValImport(tbda.isValImport());
+                                                                        dataAttribute.setValKind(tbda.getValKind());
                                                                         dataAttribute.addDaVal(tbda.getVal());
                                                                         return Optional.of(new DoLinkedToDa(dataObject, dataAttribute));
                                                                     });
