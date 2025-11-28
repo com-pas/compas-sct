@@ -21,7 +21,7 @@ public interface LnEditor {
 
     Optional<TDAI> getDOAndDAInstances(TAnyLN tAnyLN, DoLinkedToDaFilter doLinkedToDaFilter);
 
-    void updateOrCreateDOAndDAInstances(TAnyLN tAnyLN, DoLinkedToDa doLinkedToDa);
+    TDAI updateOrCreateDOAndDAInstances(TAnyLN tAnyLN, DoLinkedToDa doLinkedToDa);
 
     DoLinkedToDa getDoLinkedToDaCompletedFromDAI(TIED tied, String ldInst, TAnyLN anyLN, DoLinkedToDa doLinkedToDa);
 
