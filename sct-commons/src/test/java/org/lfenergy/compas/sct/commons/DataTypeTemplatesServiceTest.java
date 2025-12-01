@@ -169,6 +169,7 @@ class DataTypeTemplatesServiceTest {
         dataAttribute.setBType(TPredefinedBasicTypeEnum.ENUM);
         dataAttribute.setType("RecCycModKind");
         dataAttribute.setValImport(true);
+        dataAttribute.setValKind(TValKindEnum.SET);
         dataAttribute.addDaVal(List.of(newVal("myValue")));
         DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
         DoLinkedToDaFilter doLinkedToDaFilter = new DoLinkedToDaFilter("Do", List.of("sdo1", "d"), "antRef", List.of("bda1", "bda2", "bda3"));
@@ -192,6 +193,7 @@ class DataTypeTemplatesServiceTest {
         dataAttribute.setBdaNames(List.of("bda1", "bda2"));
         dataAttribute.setBType(TPredefinedBasicTypeEnum.ENUM);
         dataAttribute.setType("EnumType1");
+        dataAttribute.setValKind(TValKindEnum.SET);
         DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
         // When
         Optional<DoLinkedToDa> result = dataTypeTemplatesService.findDoLinkedToDa(dtt, "LN1", new DoLinkedToDaFilter("Do1", List.of("sdo1", "sdo2"), "da2", List.of("bda1", "bda2")));
@@ -210,6 +212,7 @@ class DataTypeTemplatesServiceTest {
         dataAttribute.setDaName("da1");
         dataAttribute.setBType(TPredefinedBasicTypeEnum.BOOLEAN);
         dataAttribute.setFc(TFCEnum.ST);
+        dataAttribute.setValKind(TValKindEnum.SET);
         DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
         // When
         Optional<DoLinkedToDa> result = dataTypeTemplatesService.findDoLinkedToDa(dtt, "LN1", new DoLinkedToDaFilter("Do1", List.of(), "da1", List.of()));
