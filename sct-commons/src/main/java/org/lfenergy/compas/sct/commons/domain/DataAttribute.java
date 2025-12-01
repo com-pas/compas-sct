@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.lfenergy.compas.scl2007b4.model.TFCEnum;
 import org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum;
 import org.lfenergy.compas.scl2007b4.model.TVal;
+import org.lfenergy.compas.scl2007b4.model.TValKindEnum;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,7 @@ public class DataAttribute {
     private TPredefinedBasicTypeEnum bType;
     private TFCEnum fc;
     private boolean valImport;
+    private TValKindEnum valKind;
     private List<String> bdaNames = new ArrayList<>();
     private List<DaVal> daiValues = new ArrayList<>();
 
@@ -34,6 +36,7 @@ public class DataAttribute {
         dataAttribute.setBType(getBType());
         dataAttribute.setFc(getFc());
         dataAttribute.setValImport(isValImport());
+        dataAttribute.setValKind(getValKind());
         dataAttribute.getBdaNames().addAll(getBdaNames());
         dataAttribute.getDaiValues().addAll(getDaiValues());
         return dataAttribute;

@@ -96,6 +96,7 @@ public class DoTypeService {
         if (daOrBda.isSetType()) dataAttribute.setType(daOrBda.getType());
         if (daOrBda.isSetBType()) dataAttribute.setBType(daOrBda.getBType());
         if (daOrBda.isSetValImport()) dataAttribute.setValImport(daOrBda.isValImport());
+        if (daOrBda.isSetValKind()) dataAttribute.setValKind(daOrBda.getValKind());
         if (daOrBda.isSetVal()) dataAttribute.addDaVal(daOrBda.getVal());
         return dataAttribute;
     }
