@@ -7,11 +7,7 @@ package org.lfenergy.compas.sct.commons.api;
 import org.lfenergy.compas.scl2007b4.model.SCL;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.sct.commons.dto.ExtRefInfo;
-import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
-import org.lfenergy.compas.sct.commons.model.epf.EPF;
-
-import java.util.List;
 
 /**
  * Service class that will be used to create, update or delete elements related to the {@link TExtRef <em>TExtRef</em>} object.
@@ -21,7 +17,6 @@ import java.util.List;
  *   <ol>
  *      <li>{@link ExtRefEditor#updateExtRefBinders <em>Update the <b>TExtRef </b> reference object for given <b>ExtRefBindingInfo </b> model</em>}</li>
  *      <li>{@link ExtRefEditor#updateExtRefSource <em>Update the <b>TExtRef </b> reference object for given <b>ExtRefSourceInfo </b> model</em>}</li>
- *      <li>{@link ExtRefEditor#manageBindingForLDEPF <em>Manage <b>TExtRef</b> Binding For LDevice (inst=LDEPF) within LDEPF configuration</em>}</li>
  *   </ol>
  * </ul>
  */
@@ -45,15 +40,6 @@ public interface ExtRefEditor {
      * @throws ScdException throws when mandatory data of ExtRef are missing
      */
     TExtRef updateExtRefSource(SCL scd, ExtRefInfo extRefInfo) throws ScdException;
-
-    /**
-     * ExtRef Binding For LDevice (inst=LDEPF) that matching EPF configuration
-     *
-     * @param scd SCL
-     * @param epf EPF
-     * @return list of encountered errors
-     */
-    List<SclReportItem> manageBindingForLDEPF(SCL scd, EPF epf);
 
     /**
      * Pointing an unused channel to an existing object LPHD0.Proxy of the concerned IED.

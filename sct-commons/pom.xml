@@ -181,23 +181,6 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>epf</id>
-                        <goals>
-                            <goal>xjc</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${project.basedir}/src/main/resources/xsd/LDEPF.xsd</source>
-                            </sources>
-                            <xjbSources>
-                                <xjbSource>${project.basedir}/src/main/resources/binding_configuration.xjb</xjbSource>
-                            </xjbSources>
-                            <packageName>org.lfenergy.compas.sct.commons.model.epf</packageName>
-                            <noPackageLevelAnnotations>true</noPackageLevelAnnotations>
-                            <clearOutputDir>false</clearOutputDir>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>cbcom</id>
                         <goals>
                             <goal>xjc</goal>
