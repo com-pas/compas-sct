@@ -110,4 +110,39 @@ class LdeviceServiceTest {
                 .containsExactly("LDTM", "VirtualSAMULDTM");
     }
 
+    @Test
+    void isActive_should_return_true() {
+        // Given
+        TLDevice tlDevice = new TLDevice();
+        tlDevice.setLN0(new LN0());
+        tlDevice.getLN0().getPrivate().add(PrivateUtils.createStringPrivate("COMPAS-LNodeStatus", "on"));
+        // When
+        boolean result = ldeviceService.isActive(tlDevice);
+        // Then
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    void isActive_when_COMPAS_LNodeStatus_off_should_return_false() {
+        // Given
+        TLDevice tlDevice = new TLDevice();
+        tlDevice.setLN0(new LN0());
+        tlDevice.getLN0().getPrivate().add(PrivateUtils.createStringPrivate("COMPAS-LNodeStatus", "off"));
+        // When
+        boolean result = ldeviceService.isActive(tlDevice);
+        // Then
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void isActive_when_COMPAS_LNodeStatus_missing_should_return_false() {
+        // Given
+        TLDevice tlDevice = new TLDevice();
+        tlDevice.setLN0(new LN0());
+        // When
+        boolean result = ldeviceService.isActive(tlDevice);
+        // Then
+        assertThat(result).isFalse();
+    }
+
 }
