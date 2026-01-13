@@ -6,7 +6,6 @@ package org.lfenergy.compas.sct.commons.dto;
 
 
 import lombok.*;
-import org.lfenergy.compas.scl2007b4.model.TCompasBay;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.scl2007b4.model.TFCDA;
 
@@ -92,13 +91,5 @@ public class ExtRefInfo extends LNodeMetaDataEmbedder{
                 && Objects.equals(tfcda.getDoName(), signalInfo.getPDO())
                 && Objects.equals(tfcda.getDaName(), signalInfo.getPDA());
     }
-
-    /**
-     * ExtRef and related Bay model
-     * @param iedName The name of the IED containing bay
-     * @param compasBay The Bay object
-     * @param extRef The ExtRef object
-     */
-    public record ExtRefWithBayReference(String iedName, TCompasBay compasBay, TExtRef extRef){ }
 
 }

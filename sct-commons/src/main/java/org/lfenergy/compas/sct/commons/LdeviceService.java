@@ -48,4 +48,8 @@ public class LdeviceService {
     public Optional<ActiveStatus> getLdeviceStatus(TLDevice tlDevice) {
         return lnService.getPrivateCompasLNodeStatus(tlDevice.getLN0());
     }
+
+    public boolean isActive(TLDevice tlDevice) {
+        return getLdeviceStatus(tlDevice).filter(ActiveStatus.ON::equals).isPresent();
+    }
 }
