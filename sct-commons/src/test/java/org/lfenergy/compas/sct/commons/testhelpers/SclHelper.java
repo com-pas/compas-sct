@@ -23,7 +23,6 @@ import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.in;
 import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newConnectedAp;
 import static org.lfenergy.compas.sct.commons.util.Utils.lnClassEquals;
 
@@ -38,8 +37,6 @@ public final class SclHelper {
         throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
 
-    public static final String DO_GOCBREF = "GoCBRef";
-    public static final String DO_SVCBREF = "SvCBRef";
     public static final String LD_LDSUIED = "LDSUIED";
     public static final String IED_NAME_1 = "IED_NAME_1";
     public static final String IED_NAME_2 = "IED_NAME_2";
@@ -233,33 +230,6 @@ public final class SclHelper {
         return ln.getDOIAdapterByName(doiName).getDataAdapterByName(daiName).getCurrentElem().getVal().getFirst().getValue();
     }
 
-    public static Stream<TDAI> getDai(TAnyLN tAnyLN, String doiName, String daiName) {
-        return tAnyLN.getDOI().stream().filter(tdoi -> tdoi.getName().equals(doiName))
-                .flatMap(tdoi -> tdoi.getSDIOrDAI().stream())
-                .filter(TDAI.class::isInstance)
-                .map(TDAI.class::cast)
-                .filter(tdai -> daiName.equals(tdai.getName()));
-    }
-
-    public static TDAI getDai(TDOI tdoi, String daiName) {
-        return  tdoi.getSDIOrDAI().stream()
-                .filter(TDAI.class::isInstance)
-                .map(TDAI.class::cast)
-                .filter(tdai -> daiName.equals(tdai.getName()))
-                .findFirst()
-                .orElseThrow(() -> new AssertionFailedError(String.format("DAI %s not found in DOI %s", daiName, tdoi.getName())));
-    }
-
-    public static String getDaiValue(TAnyLN tAnyLN, String doiName, String daiName) {
-        TDAI tdai = getDai(tAnyLN, doiName, daiName).findFirst()
-                .orElseThrow(() -> new AssertionFailedError(String.format("DAI %s.%s not found in LN", doiName, daiName)));
-        return getValue(tdai);
-    }
-
-    public static String getDaiValue(TDOI tdoi, String daiName) {
-        return getValue(getDai(tdoi, daiName));
-    }
-
     public static SclRootAdapter createSclRootAdapterWithIed(String iedName) {
         SCL scl = new SCL();
         scl.setHeader(new THeader());
@@ -366,13 +336,6 @@ public final class SclHelper {
         scd.setDataTypeTemplates(tDataTypeTemplates);
 
         return new SclRootAdapter(scd);
-    }
-
-    public static List<TVal> getDaiValues(LDeviceAdapter lDeviceAdapter, String lnClass, String inst, String doName, String daName) {
-        return getDAIAdapters(lDeviceAdapter, lnClass, inst, doName, daName)
-                .map(daiAdapter -> daiAdapter.getCurrentElem().getVal())
-                .flatMap(List::stream)
-                .toList();
     }
 
     public static Stream<DOIAdapter.DAIAdapter> getDAIAdapters(LDeviceAdapter lDeviceAdapter, String lnClass, String inst, String doName, String daName) {
