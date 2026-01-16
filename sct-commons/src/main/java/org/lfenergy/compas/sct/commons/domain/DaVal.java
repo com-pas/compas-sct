@@ -5,4 +5,7 @@
 package org.lfenergy.compas.sct.commons.domain;
 
 public record DaVal(Long settingGroup, String val) {
+    public DaVal(String val) {
+        this(null, val);
+    }
 }

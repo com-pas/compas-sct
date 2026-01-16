@@ -17,12 +17,14 @@
             <DA name="objRefDa12" bType="ObjRef" fc="SP" valImport="true"/>
             <SDO name="sdo12" type="DO2"/>
         </DOType>
-        <DOType cdc="WYE" id="DO2">
+        <DOType cdc="ENS" id="DO2">
             <SDO name="sdo21" type="DO3"/>
             <SDO name="sdo22" type="DO3"/>
         </DOType>
-        <DOType cdc="WYE" id="DO3">
-            <DA name="sampleDa2" bType="Enum" fc="ST" type="RecCycModKind" valImport="true"/>
+        <DOType cdc="ACT" id="DO3">
+            <DA name="sampleDa2" bType="Enum" fc="ST" type="RecCycModKind" valImport="true" valKind="RO">
+                <Val>value</Val>
+            </DA>
             <DA fc="ST" name="structDa1" bType="Struct" type="DA1"/>
         </DOType>
         <DAType id="DA1">

@@ -12,7 +12,7 @@ import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.api.DataTypeTemplateReader;
 import org.lfenergy.compas.sct.commons.api.SclEditor;
 import org.lfenergy.compas.sct.commons.domain.DaVal;
-import org.lfenergy.compas.sct.commons.domain.DoLinkedToDaFilter;
+import org.lfenergy.compas.sct.commons.domain.DataRef;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
@@ -35,7 +35,8 @@ import org.lfenergy.compas.sct.commons.util.Utils;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.IED_TEST_NAME;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.LDEVICE_LDSUIED;
 import static org.lfenergy.compas.sct.commons.util.PrivateEnum.COMPAS_ICDHEADER;
 import static org.lfenergy.compas.sct.commons.util.Utils.copyLn;
 
@@ -259,10 +260,9 @@ public class SclService implements SclEditor {
         List<TLN> lgosOrLsvsLns = lnService.getFilteredLns(ldsuiedLdevice, tln -> monitoringLnClassEnum.value().equals(tln.getLnClass().getFirst())).toList();
         if (lgosOrLsvsLns.isEmpty())
             errorHandler.get().add(SclReportItem.warning(tied.getName() + "/" + LDEVICE_LDSUIED + "/" + monitoringLnClassEnum.value(), "There is no LN %s present in LDevice".formatted(monitoringLnClassEnum.value())));
-        DoLinkedToDaFilter doLinkedToDaFilter = new DoLinkedToDaFilter(doName, List.of(), DA_SETSRCREF, List.of());
-        lgosOrLsvsLns.forEach(lgosOrLsvs -> dataTypeTemplateService.getFilteredDoLinkedToDa(scd.getDataTypeTemplates(), lgosOrLsvs.getLnType(), doLinkedToDaFilter)
+        DataRef dataRef = new DataRef(doName, List.of(), DA_SETSRCREF, List.of());
+        lgosOrLsvsLns.forEach(lgosOrLsvs -> dataTypeTemplateService.findDoLinkedToDa(scd.getDataTypeTemplates(), lgosOrLsvs.getLnType(), dataRef)
                 .map(doLinkedToDa -> lnService.getDoLinkedToDaCompletedFromDAI(tied, LDEVICE_LDSUIED, lgosOrLsvs, doLinkedToDa))
-                .findFirst()
                 .filter(doLinkedToDa -> {
                     if (!doLinkedToDa.isUpdatable())
                         errorHandler.get().add(SclReportItem.warning(tied.getName() + "/" + LDEVICE_LDSUIED + "/" + monitoringLnClassEnum.value() + "/DOI@name=\"" + doName + "\"/DAI@name=\"setSrcRef\"/Val", "The DAI cannot be updated"));

@@ -5,8 +5,8 @@
 package org.lfenergy.compas.sct.commons.api;
 
 import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.sct.commons.domain.DataRef;
 import org.lfenergy.compas.sct.commons.domain.DoLinkedToDa;
-import org.lfenergy.compas.sct.commons.domain.DoLinkedToDaFilter;
 import org.lfenergy.compas.sct.commons.util.ActiveStatus;
 
 import java.util.Optional;
@@ -19,7 +19,7 @@ public interface LnEditor {
 
     Optional<TDAI> getDaiModStVal(TAnyLN tAnyLN);
 
-    Optional<TDAI> getDOAndDAInstances(TAnyLN tAnyLN, DoLinkedToDaFilter doLinkedToDaFilter);
+    Optional<TDAI> getDOAndDAInstances(TAnyLN tAnyLN, DataRef dataRef);
 
     TDAI updateOrCreateDOAndDAInstances(TAnyLN tAnyLN, DoLinkedToDa doLinkedToDa);
 
