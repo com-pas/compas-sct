@@ -44,10 +44,16 @@ public record DoLinkedToDa(DataObject dataObject, DataAttribute dataAttribute) {
     }
 
     /**
-     * Create DoLinkedToDaFilter from this
-     * @return new DoLinkedToDaFilter instance with same data Object and data Attribute Ref
+     * Create DataRef from this
+     * @return new DataRef instance with same data Object and data Attribute Ref
      */
-    public DoLinkedToDaFilter toFilter() {
-        return DoLinkedToDaFilter.from(getDoRef(), getDaRef());
+    public DataRef getDataRef() {
+        return DataRef.from(getDoRef(), getDaRef());
     }
+
+    @Override
+    public String toString() {
+        return getDoRef() + "." + getDaRef();
+    }
+
 }

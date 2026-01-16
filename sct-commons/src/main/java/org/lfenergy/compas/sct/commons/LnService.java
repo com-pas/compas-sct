@@ -25,7 +25,7 @@ import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newVal;
 @Slf4j
 public class LnService implements LnEditor {
 
-    private static final DoLinkedToDaFilter DAI_FILTER_MOD_STVAL = DoLinkedToDaFilter.from(MOD_DO_NAME, STVAL_DA_NAME);
+    private static final DataRef DAI_FILTER_MOD_STVAL = DataRef.from(MOD_DO_NAME, STVAL_DA_NAME);
     public static final String LNODE_STATUS_PRIVATE_TYPE = "COMPAS-LNodeStatus";
 
     public Stream<TAnyLN> getAnylns(TLDevice tlDevice) {
@@ -100,12 +100,12 @@ public class LnService implements LnEditor {
     }
 
     @Override
-    public Optional<TDAI> getDOAndDAInstances(TAnyLN tAnyLN, DoLinkedToDaFilter doLinkedToDaFilter) {
-        List<String> structNamesList = new ArrayList<>(doLinkedToDaFilter.sdoNames());
-        structNamesList.add(doLinkedToDaFilter.daName());
-        structNamesList.addAll(doLinkedToDaFilter.bdaNames());
+    public Optional<TDAI> getDOAndDAInstances(TAnyLN tAnyLN, DataRef dataRef) {
+        List<String> structNamesList = new ArrayList<>(dataRef.sdoNames());
+        structNamesList.add(dataRef.daName());
+        structNamesList.addAll(dataRef.bdaNames());
 
-        return tAnyLN.getDOI().stream().filter(doi -> doi.getName().equals(doLinkedToDaFilter.doName()))
+        return tAnyLN.getDOI().stream().filter(doi -> doi.getName().equals(dataRef.doName()))
                 .findFirst()
                 .flatMap(doi -> {
                     if (structNamesList.size() > 1) {
@@ -160,7 +160,7 @@ public class LnService implements LnEditor {
     @Override
     public DoLinkedToDa getDoLinkedToDaCompletedFromDAI(TIED tied, String ldInst, TAnyLN anyLN, DoLinkedToDa doLinkedToDa) {
         DoLinkedToDa result = doLinkedToDa.deepCopy();
-        getDOAndDAInstances(anyLN, doLinkedToDa.toFilter())
+        getDOAndDAInstances(anyLN, doLinkedToDa.getDataRef())
                 .ifPresent(tdai -> {
                     if (tdai.isSetVal()) {
                         result.dataAttribute().addDaVal(tdai.getVal());
