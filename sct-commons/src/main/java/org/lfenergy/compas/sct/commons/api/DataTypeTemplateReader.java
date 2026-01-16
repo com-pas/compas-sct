@@ -5,9 +5,10 @@
 package org.lfenergy.compas.sct.commons.api;
 
 import org.lfenergy.compas.scl2007b4.model.TDataTypeTemplates;
+import org.lfenergy.compas.sct.commons.domain.DataRef;
 import org.lfenergy.compas.sct.commons.domain.DoLinkedToDa;
-import org.lfenergy.compas.sct.commons.domain.DoLinkedToDaFilter;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -15,9 +16,11 @@ public interface DataTypeTemplateReader {
 
     Stream<DoLinkedToDa> getAllDoLinkedToDa(TDataTypeTemplates tDataTypeTemplates);
 
-    Stream<DoLinkedToDa> getFilteredDoLinkedToDa(TDataTypeTemplates dtt, String lNodeTypeId, DoLinkedToDaFilter doLinkedToDaFilter);
+    Stream<DoLinkedToDa> getAllDoLinkedToDa(TDataTypeTemplates dtt, String lNodeTypeId);
 
-    Optional<DoLinkedToDa> findDoLinkedToDa(TDataTypeTemplates dtt, String lNodeTypeId, DoLinkedToDaFilter doLinkedToDaFilter);
+    Stream<DoLinkedToDa> getAllDoLinkedToDa(TDataTypeTemplates dtt, String lNodeTypeId, String doName);
 
-    Stream<String> getEnumValues(TDataTypeTemplates dataTypeTemplates, String lnType, DoLinkedToDaFilter doLinkedToDaFilter);
+    Optional<DoLinkedToDa> findDoLinkedToDa(TDataTypeTemplates dtt, String lNodeTypeId, DataRef dataRef);
+
+    List<String> getEnumValues(TDataTypeTemplates dataTypeTemplates, String enumId);
 }

@@ -260,9 +260,9 @@ class LnServiceTest {
                 new LinkedList<>(List.of("antRef","bda1", "bda2", "bda3")),
                 "new value",null
         );
-        DoLinkedToDaFilter doLinkedToDaFilter = DoLinkedToDaFilter.from("Do.sdo1.d", "antRef.bda1.bda2.bda3");
+        DataRef dataRef = DataRef.from("Do.sdo1.d", "antRef.bda1.bda2.bda3");
         //When
-        Optional<TDAI> optionalTDAI = lnService.getDOAndDAInstances(tAnyLN, doLinkedToDaFilter);
+        Optional<TDAI> optionalTDAI = lnService.getDOAndDAInstances(tAnyLN, dataRef);
         //Then
         assertThat(optionalTDAI).isPresent();
         assertThat(optionalTDAI.get().getName()).isEqualTo("bda3");
@@ -277,9 +277,9 @@ class LnServiceTest {
                 new LinkedList<>(List.of("antRef","bda1", "bda2", "bda3")),
                 "new value",null
         );
-        DoLinkedToDaFilter doLinkedToDaFilter = DoLinkedToDaFilter.from("Do.sdo1.d", "antRef.unknown.bda2.bda3");
+        DataRef dataRef = DataRef.from("Do.sdo1.d", "antRef.unknown.bda2.bda3");
         //When
-        Optional<TDAI> optionalTDAI = lnService.getDOAndDAInstances(tAnyLN, doLinkedToDaFilter);
+        Optional<TDAI> optionalTDAI = lnService.getDOAndDAInstances(tAnyLN, dataRef);
         //Then
         assertThat(optionalTDAI).isEmpty();
     }
