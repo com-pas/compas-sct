@@ -14,6 +14,7 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -126,7 +127,7 @@ class LNodeTypeAdapterTest {
     void testGetDataAttributeRefs() {
         // Given
         DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT);
-        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("LN1").get());
+        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("LN1").orElseThrow());
         DataAttributeRef rootDataAttributeRef = new DataAttributeRef();
         rootDataAttributeRef.setDoName(new DoTypeName("Op"));
         DataAttributeRef filter = new DataAttributeRef();
@@ -151,39 +152,43 @@ class LNodeTypeAdapterTest {
 
     @Test
     @Tag("issue-321")
-    void testGetDataAttributeRefsString() {
+    void getDataAttributeRef_should_succeed() {
         // Given
         DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT);
-        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("LN1").get());
+        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("LN1").orElseThrow());
         // When
-        var dataAttributeRefs = lNodeTypeAdapter.getDataAttributeRefs("StrVal.origin.origin.ctlVal");
+        Optional<DataAttributeRef> dataAttributeRefs = lNodeTypeAdapter.getDataAttributeRef("StrVal.origin.origin.ctlVal");
         // Then
-        assertThat(dataAttributeRefs).isNotNull();
+        assertThat(dataAttributeRefs).isPresent();
     }
 
     @Test
-    void getDataAttributeRefs_should_find_DO_SDO_DA_and_BDA() {
+    void getDataAttributeRef_should_find_DO_SDO_DA_and_BDA() {
         // Given
         DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT_DO_SDO_DA_BDA);
         LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("LN1").orElseThrow());
         // When
-        DataAttributeRef dataAttributeRefs = lNodeTypeAdapter.getDataAttributeRefs("Do1.sdo1.sdo2.da2.bda1.bda2");
+        Optional<DataAttributeRef> optDataAttributeRef = lNodeTypeAdapter.getDataAttributeRef("Do1.sdo1.sdo2.da2.bda1.bda2");
         // Then
-        assertThat(dataAttributeRefs).extracting(DataAttributeRef::getDoRef, DataAttributeRef::getDaRef)
+        assertThat(optDataAttributeRef).isPresent();
+        DataAttributeRef dataAttributeRef = optDataAttributeRef.get();
+        assertThat(dataAttributeRef).extracting(DataAttributeRef::getDoRef, DataAttributeRef::getDaRef)
                 .containsExactly("Do1.sdo1.sdo2", "da2.bda1.bda2");
-        assertThat(dataAttributeRefs.getDoName().getCdc()).isEqualTo(TPredefinedCDCEnum.WYE);
-        assertThat(dataAttributeRefs.getDaName()).extracting(DaTypeName::getBType, DaTypeName::getFc)
+        assertThat(dataAttributeRef.getDoName().getCdc()).isEqualTo(TPredefinedCDCEnum.WYE);
+        assertThat(dataAttributeRef.getDaName()).extracting(DaTypeName::getBType, DaTypeName::getFc)
                 .containsExactly(TPredefinedBasicTypeEnum.ENUM, TFCEnum.ST);
     }
 
     @Test
-    void getDataAttributeRefs_should_find_DO_and_DA() {
+    void getDataAttributeRef_should_find_DO_and_DA() {
         // Given
         DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT_DO_SDO_DA_BDA);
         LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("LN1").orElseThrow());
         // When
-        DataAttributeRef dataAttributeRefs = lNodeTypeAdapter.getDataAttributeRefs("Do1.da1");
+        Optional<DataAttributeRef> optDataAttributeRefs = lNodeTypeAdapter.getDataAttributeRef("Do1.da1");
         // Then
+        assertThat(optDataAttributeRefs).isPresent();
+        DataAttributeRef dataAttributeRefs = optDataAttributeRefs.get();
         assertThat(dataAttributeRefs).extracting(DataAttributeRef::getDoRef, DataAttributeRef::getDaRef)
                 .containsExactly("Do1", "da1");
         assertThat(dataAttributeRefs.getDoName().getCdc()).isEqualTo(TPredefinedCDCEnum.WYE);
@@ -191,15 +196,46 @@ class LNodeTypeAdapterTest {
                 .containsExactly(TPredefinedBasicTypeEnum.BOOLEAN, TFCEnum.ST);
     }
 
+
+    @Test
+    void getDataAttributeRef_when_same_da_in_multiple_sdo_should_find_the_correct_DO_DA() {
+        // Given
+        DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT_DO_MULTIPLE_DA);
+        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("LN1").orElseThrow());
+        // When
+        Optional<DataAttributeRef> optDataAttributeRef = lNodeTypeAdapter.getDataAttributeRef("Do1.da1");
+        // Then
+        assertThat(optDataAttributeRef).isPresent();
+        DataAttributeRef dataAttributeRef = optDataAttributeRef.get();
+        assertThat(dataAttributeRef).extracting(DataAttributeRef::getDoRef, DataAttributeRef::getDaRef)
+                .containsExactly("Do1", "da1");
+        assertThat(dataAttributeRef.getDoName().getCdc()).isEqualTo(TPredefinedCDCEnum.WYE);
+        assertThat(dataAttributeRef.getDaName()).extracting(DaTypeName::getBType, DaTypeName::getFc)
+                .containsExactly(TPredefinedBasicTypeEnum.BOOLEAN, TFCEnum.ST);
+    }
+
+
     @ParameterizedTest
-    @ValueSource(strings = {"", "malformed", "Do1", "InexistantDo.da1", "Do1.inexistantDa", "Do1.da1.inexistantBda", "Do1.sdo1.inexistantSdo.da2", "Do1.sdo1.sdo2.da2.bda1.inexistantBda"})
-    void getDataAttributeRefs_when_dataRef_not_found_should_throw_exception(String dataRef) {
+    @ValueSource(strings = {"", "malformed", "Do1", "Do1.", ".da1"})
+    void getDataAttributeRef_when_dataRef_parameter_malformed_should_throw_exception(String dataRef) {
         // Given
         DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT_DO_SDO_DA_BDA);
         LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("LN1").orElseThrow());
         // When & Then
-        assertThatThrownBy(() -> lNodeTypeAdapter.getDataAttributeRefs(dataRef))
+        assertThatThrownBy(() -> lNodeTypeAdapter.getDataAttributeRef(dataRef))
                 .isInstanceOf(ScdException.class);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"InexistantDo.da1", "Do1.inexistantDa", "Do1.da1.inexistantBda", "Do1.sdo1.inexistantSdo.da2", "Do1.sdo1.sdo2.da2.bda1.inexistantBda"})
+    void getDataAttributeRef_when_dataRef_not_found_should_return_empty(String dataRef) {
+        // Given
+        DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT_DO_SDO_DA_BDA);
+        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("LN1").orElseThrow());
+        // When & Then
+        Optional<DataAttributeRef> optDataAttributeRef = lNodeTypeAdapter.getDataAttributeRef(dataRef);
+        // Then
+        assertThat(optDataAttributeRef).isEmpty();
     }
 
     @Test
@@ -207,7 +243,7 @@ class LNodeTypeAdapterTest {
     void testCheck() {
         // Given
         DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT);
-        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("LN1").get());
+        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("LN1").orElseThrow());
         DoTypeName doTypeName1 = new DoTypeName("");
         DaTypeName daTypeName1 = new DaTypeName("");
         // When Then
@@ -239,7 +275,7 @@ class LNodeTypeAdapterTest {
         // Given
         DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT_DIFF_CONTENT_SAME_ID);
         DaTypeName daTypeName = new DaTypeName("antRef","origin.ctlVal");
-        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("LN1").get());
+        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("LN1").orElseThrow());
         // When
         List<DataAttributeRef> dataAttributeRefs = assertDoesNotThrow(()-> lNodeTypeAdapter.getDataAttributeRefByDaName(daTypeName));
         // Then
@@ -271,7 +307,7 @@ class LNodeTypeAdapterTest {
     void elementXPath_should_return_expected_xpath_value() {
         // Given
         DataTypeTemplateAdapter dttAdapter = initDttAdapterFromFile(SCD_DTT);
-        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() ->dttAdapter.getLNodeTypeAdapterById("LN1").get());
+        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("LN1").orElseThrow());
         // When
         String result = lNodeTypeAdapter.elementXPath();
         // Then
@@ -299,7 +335,7 @@ class LNodeTypeAdapterTest {
         dttAdapter.getCurrentElem().getDOType().add(tdoType);
 
         dttAdapter.getCurrentElem().getLNodeType().add(tlNodeType);
-        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("ID").get());
+        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("ID").orElseThrow());
 
         ExtRefSignalInfo signalInfo = new ExtRefSignalInfo();
         signalInfo.setPDO("P_DO12");
@@ -335,7 +371,7 @@ class LNodeTypeAdapterTest {
         dttAdapter.getCurrentElem().getDOType().add(tdoType);
 
         dttAdapter.getCurrentElem().getLNodeType().add(tlNodeType);
-        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("ID").get());
+        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("ID").orElseThrow());
         //When Then
         assertThatThrownBy(() -> lNodeTypeAdapter.findMatchingDOType(signalInfo))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -368,7 +404,7 @@ class LNodeTypeAdapterTest {
         dttAdapter.getCurrentElem().getDOType().add(tdoType);
 
         dttAdapter.getCurrentElem().getLNodeType().add(tlNodeType);
-        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("ID").get());
+        LNodeTypeAdapter lNodeTypeAdapter = assertDoesNotThrow(() -> dttAdapter.getLNodeTypeAdapterById("ID").orElseThrow());
         //When Then
         assertThatThrownBy(() -> lNodeTypeAdapter.findMatchingDOType(signalInfo))
                 .isInstanceOf(IllegalArgumentException.class)
