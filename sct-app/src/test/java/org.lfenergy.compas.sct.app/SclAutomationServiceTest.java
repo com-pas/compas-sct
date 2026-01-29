@@ -26,7 +26,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
+import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertSclValidateXsd;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -79,7 +79,7 @@ class SclAutomationServiceTest {
         assertThat(scd.getCommunication()).isNull();
         assertThat(scd.getSubstation()).isEmpty();
         assertThat(scd.getIED()).isEmpty();
-        assertIsMarshallable(scd);
+        assertSclValidateXsd(scd);
         verify(sclEditor, times(1)).initScl(headerDTO.getId(), headerDTO.getVersion(), headerDTO.getRevision());
         verify(sclEditor, times(0)).addHistoryItem(any(SCL.class), anyString(), anyString(), anyString());
         verify(substationEditor, times(1)).addSubstation(any(SCL.class), any(SCL.class));
@@ -108,7 +108,7 @@ class SclAutomationServiceTest {
         assertThat(scd.getCommunication()).isNull();
         assertThat(scd.getSubstation()).isEmpty();
         assertThat(scd.getIED()).isEmpty();
-        assertIsMarshallable(scd);
+        assertSclValidateXsd(scd);
         verify(sclEditor, times(1)).initScl(headerDTO.getId(), headerDTO.getVersion(), headerDTO.getRevision());
         verify(sclEditor, times(1)).addHistoryItem(any(SCL.class), eq(historyItem.getWho()), eq(historyItem.getWhat()), eq(historyItem.getWhy()));
         verify(substationEditor, times(1)).addSubstation(any(SCL.class), any(SCL.class));

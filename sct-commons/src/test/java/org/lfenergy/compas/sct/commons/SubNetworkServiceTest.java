@@ -22,19 +22,19 @@ class SubNetworkServiceTest {
     @Test
     void getSubNetworks_from_scd_should_succeed() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-ied-dtt-com-import-stds/std.xml");
         // When
         List<TSubNetwork> tSubNetworks =  subNetworkService.getSubNetworks(scd).toList();
         // Then
         assertThat(tSubNetworks).hasSize(2);
     }
-    
+
     @Test
     void getSubNetworks_from_communication_should_succeed() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-ied-dtt-com-import-stds/std.xml");
         TCommunication communication = scd.getCommunication();
-        
+
         // When
         List<TSubNetwork> tSubNetworks =  subNetworkService.getSubNetworks(communication).toList();
         // Then
@@ -44,7 +44,7 @@ class SubNetworkServiceTest {
     @Test
     void findSubNetwork_when_SubNetwork_Exist_should_succeed() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-ied-dtt-com-import-stds/std.xml");
         // When Then
         assertThatCode(() -> subNetworkService.findSubNetwork(scd, tSubNetwork -> "RSPACE_PROCESS_NETWORK".equals(tSubNetwork.getName())).orElseThrow())
                 .doesNotThrowAnyException();
@@ -53,7 +53,7 @@ class SubNetworkServiceTest {
     @Test
     void findSubNetwork_when_SubNetwork_not_Exist_should_return_empty() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-ied-dtt-com-import-stds/std.xml");
         // When Then
         assertThat(subNetworkService.findSubNetwork(scd, tSubNetwork -> "unknown".equals(tSubNetwork.getName())))
                 .isEmpty();
@@ -62,7 +62,7 @@ class SubNetworkServiceTest {
     @Test
     void getFilteredSubNetworks() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-ied-dtt-com-import-stds/std.xml");
         // When
         List<TSubNetwork> tSubNetworks =  subNetworkService.getFilteredSubNetworks(scd, tSubNetwork -> "RSPACE_PROCESS_NETWORK".equals(tSubNetwork.getName())).toList();
         // Then

@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
@@ -35,7 +36,7 @@ class ExtRefSignalInfoTest {
         assertThat(signalInfo.getDesc()).isEqualTo(DTO.DESC);
         assertThat(signalInfo.getPDA()).isEqualTo(DTO.P_DA);
         assertThat(signalInfo.getPDO()).isEqualTo(DTO.P_DO);
-        assertThat(extRef.getPLN()).asList().contains(DTO.P_LN);
+        assertThat(extRef.getPLN()).asInstanceOf(InstanceOfAssertFactories.LIST).contains(DTO.P_LN);
         assertThat(signalInfo.getIntAddr()).isEqualTo(DTO.INT_ADDR);
         assertThat(signalInfo.getPServT()).isEqualTo(TServiceType.fromValue(DTO.P_SERV_T));
     }

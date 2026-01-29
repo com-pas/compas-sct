@@ -10,8 +10,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.domain.*;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
@@ -38,7 +39,7 @@ class LnServiceTest {
     @Test
     void getAnylns_should_return_lns() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TLDevice ldsuied = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst();
 
         //When
@@ -55,7 +56,7 @@ class LnServiceTest {
     @Test
     void findAnyLn_with_predicate_should_return_ln() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TLDevice ldsuied = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst();
 
         //When
@@ -70,7 +71,7 @@ class LnServiceTest {
     @Test
     void findAnyLn_with_lnClass_lnInst_lnPrefix_should_return_ln() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TLDevice ldtm = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().stream().filter(tlDevice -> "LDTM".equals(tlDevice.getInst())).findFirst().orElseThrow();
 
         //When
@@ -85,7 +86,7 @@ class LnServiceTest {
     @Test
     void findAnyLn_with_lnClass_lnInst_lnPrefix_should_return_ln0() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TLDevice ldsuied = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst();
 
         //When
@@ -100,7 +101,7 @@ class LnServiceTest {
     @Test
     void getLns_should_return_lns() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TLDevice ldsuied = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst();
 
         //When
@@ -116,7 +117,7 @@ class LnServiceTest {
     @Test
     void getFilteredLns_should_return_lns() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TLDevice ldsuied = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst();
 
         //When
@@ -132,7 +133,7 @@ class LnServiceTest {
     @Test
     void findLn_should_return_lns() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TLDevice ldsuied = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst();
 
         //When
@@ -147,7 +148,7 @@ class LnServiceTest {
     @Test
     void getFilteredAnyLns_should_return_lns() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TLDevice ldsuied = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst();
 
         //When
@@ -163,7 +164,7 @@ class LnServiceTest {
     @Test
     void getDaiModStValValue_should_return_status() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TLDevice tlDevice = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst();
 
         //When
@@ -176,7 +177,7 @@ class LnServiceTest {
     @Test
     void getLnStatus_should_return_status() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TLDevice tlDevice = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst();
 
         //When
@@ -285,14 +286,15 @@ class LnServiceTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"null:false", "false:false", "true:true"}, delimiter = ':')
-    void getCompletedDoLinkedToDaFromDAI_should_getDoLinkedToDaCompleted_when_valImport_set_or_not(boolean existingValImportSet, boolean expectedValImport) {
+    @NullSource
+    @ValueSource(booleans = {true, false})
+    void getCompletedDoLinkedToDaFromDAI_should_getDoLinkedToDaCompleted_when_valImport_set_or_not(Boolean valImport) {
         //Given
         TIED tied = new TIED();
         TAnyLN tAnyLN = initDOAndDAInstances(
                 new LinkedList<>(List.of("Do")),
                 new LinkedList<>(List.of("Da")),
-                "dai value", existingValImportSet
+                "dai value", valImport
         );
         DataObject dataObject = new DataObject();
         dataObject.setDoName("Do");
@@ -302,7 +304,7 @@ class LnServiceTest {
         //When
         DoLinkedToDa result = lnService.getDoLinkedToDaCompletedFromDAI(tied, "ldInst", tAnyLN, doLinkedToDa);
         //Then
-        assertThat(result.dataAttribute().isValImport()).isEqualTo(expectedValImport);
+        assertThat(result.dataAttribute().isValImport()).isEqualTo(Boolean.TRUE.equals(valImport));
         assertThat(result.dataAttribute().getDaiValues()).isEqualTo(List.of(new DaVal(null, "dai value")));
         assertThat(result).usingRecursiveComparison()
                 .ignoringFields("dataAttribute.valImport", "dataAttribute.daiValues")
@@ -390,14 +392,15 @@ class LnServiceTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"null:false", "false:false", "true:true"}, delimiter = ':')
-    void getCompletedDoLinkedToDaFromDAI_should_getDoLinkedToDaCompleted_when_struct(Boolean input, Boolean expected) {
+    @NullSource
+    @ValueSource(booleans = {true, false})
+    void getCompletedDoLinkedToDaFromDAI_should_getDoLinkedToDaCompleted_when_struct(Boolean valImport) {
         //Given
         TIED tied = new TIED();
         TAnyLN tAnyLN = initDOAndDAInstances(
                 new LinkedList<>(List.of("Do","sdo1", "d")),
                 new LinkedList<>(List.of("antRef","bda1", "bda2", "bda3")),
-                "dai value", input
+                "dai value", valImport
         );
         DataObject dataObject = new DataObject();
         dataObject.setDoName("Do");
@@ -411,7 +414,7 @@ class LnServiceTest {
         //When
         DoLinkedToDa result = lnService.getDoLinkedToDaCompletedFromDAI(tied, "ldInst", tAnyLN, doLinkedToDa);
         //Then
-        assertThat(result.dataAttribute().isValImport()).isEqualTo(expected);
+        assertThat(result.dataAttribute().isValImport()).isEqualTo(Boolean.TRUE.equals(valImport));
         assertThat(result.dataAttribute().getDaiValues()).isEqualTo(List.of(new DaVal(null, "dai value")));
         assertThat(result).usingRecursiveComparison()
                 .ignoringFields("dataAttribute.valImport", "dataAttribute.daiValues")

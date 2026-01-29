@@ -53,7 +53,8 @@ class PrivateUtilsTest {
         // When & Then
         assertThatThrownBy(constructor::newInstance)
                 .isInstanceOf(InvocationTargetException.class)
-                .getCause().isInstanceOf(UnsupportedOperationException.class);
+                .cause()
+                .isInstanceOf(UnsupportedOperationException.class);
     }
 
     @Test
@@ -612,7 +613,7 @@ class PrivateUtilsTest {
     }
 
     private static TIED createTIED() {
-        SCL sclFromFile = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SCL sclFromFile = SclTestMarshaller.getSCLFromResource("scd-ied-dtt-com-import-stds/std.xml");
         return sclFromFile.getIED().getFirst();
     }
 

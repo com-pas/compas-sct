@@ -5,8 +5,8 @@
 package org.lfenergy.compas.scl2007b4.model;
 
 import org.junit.jupiter.api.Test;
+import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.lfenergy.compas.sct.commons.util.PrivateUtils;
-import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,7 +19,7 @@ class NamespaceConfigurationTest {
         TPrivate aCompasPrivate = PrivateUtils.createPrivate(TCompasSclFileType.SCD);
         scl.getPrivate().add(aCompasPrivate);
         // When
-        String result = MarshallerWrapper.marshall(scl);
+        String result = SclTestMarshaller.marshal(scl);
         // Then
         assertThat(result)
                 .containsPattern("(?s)<SCL[^>]* xmlns=\"http://www\\.iec\\.ch/61850/2003/SCL\"")

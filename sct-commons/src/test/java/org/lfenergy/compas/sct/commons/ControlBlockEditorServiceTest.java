@@ -24,7 +24,6 @@ import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.DaComTestMarshallerHelper;
 import org.lfenergy.compas.sct.commons.testhelpers.FCDARecord;
-import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.lfenergy.compas.sct.commons.util.PrivateEnum;
 import org.lfenergy.compas.sct.commons.util.PrivateUtils;
@@ -41,7 +40,7 @@ import static org.junit.jupiter.api.Named.named;
 import static org.lfenergy.compas.scl2007b4.model.TFCEnum.MX;
 import static org.lfenergy.compas.scl2007b4.model.TFCEnum.ST;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
-import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
+import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertSclValidateXsd;
 import static org.lfenergy.compas.sct.commons.util.ControlBlockEnum.*;
 
 class ControlBlockEditorServiceTest {
@@ -56,7 +55,7 @@ class ControlBlockEditorServiceTest {
     @Test
     void analyzeDataGroups_should_success() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter1 = sclRootAdapter.getIEDAdapterByName("IED_NAME1");
         iedAdapter1.getCurrentElem().getAccessPoint().getFirst().getServices().getClientServices().setMaxAttributes(9L);
@@ -73,7 +72,7 @@ class ControlBlockEditorServiceTest {
     @Test
     void analyzeDataGroups_should_return_errors_messages() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME2");
         iedAdapter.getCurrentElem().getAccessPoint().getFirst().getServices().getConfDataSet().setMaxAttributes(1L);
@@ -103,7 +102,7 @@ class ControlBlockEditorServiceTest {
     @Test
     void removeControlBlocksAndDatasetAndExtRefSrc_should_remove_srcXXX_attributes_on_ExtRef() {
         // Given
-        SCL scl = SclTestMarshaller.getSCLFromFile("/scl-remove-controlBlocks-dataSet-extRefSrc/scl-with-control-blocks.xml");
+        SCL scl = SclTestMarshaller.getSCLFromResource("scl-remove-controlBlocks-dataSet-extRefSrc/scl-with-control-blocks.xml");
         // When
         controlBlockEditorService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scl);
         // Then
@@ -121,14 +120,14 @@ class ControlBlockEditorServiceTest {
                 .noneMatch(TExtRef::isSetSrcLNInst)
                 .noneMatch(TExtRef::isSetSrcCBName)
                 .noneMatch(TExtRef::isSetSrcLNClass);
-        assertIsMarshallable(scl);
+        assertSclValidateXsd(scl);
     }
 
     @Test
     void createDataSetAndControlBlocks_should_create_DataSet() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
-        DACOMM allowedFcdas = DaComTestMarshallerHelper.getDACOMMFromFile("/cb_comm/Template_DA_COMM_v1.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
+        DACOMM allowedFcdas = DaComTestMarshallerHelper.getDACOMMFromResource("cb_comm/Template_DA_COMM_v1.xml");
         // When
         List<SclReportItem> sclReportItems = controlBlockEditorService.createDataSetAndControlBlocks(scd, allowedFcdas);
         // Then
@@ -159,8 +158,8 @@ class ControlBlockEditorServiceTest {
     @Test
     void createDataSetAndControlBlocks_should_create_ControlBlocks() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
-        DACOMM allowedFcdas = DaComTestMarshallerHelper.getDACOMMFromFile("/cb_comm/Template_DA_COMM_v1.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
+        DACOMM allowedFcdas = DaComTestMarshallerHelper.getDACOMMFromResource("cb_comm/Template_DA_COMM_v1.xml");
         // When
         List<SclReportItem> sclReportItems = controlBlockEditorService.createDataSetAndControlBlocks(scd, allowedFcdas);
         // Then
@@ -191,8 +190,8 @@ class ControlBlockEditorServiceTest {
     @Test
     void createDataSetAndControlBlocks_should_set_ExtRef_srcXXX_attributes() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
-        DACOMM allowedFcdas = DaComTestMarshallerHelper.getDACOMMFromFile("/cb_comm/Template_DA_COMM_v1.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
+        DACOMM allowedFcdas = DaComTestMarshallerHelper.getDACOMMFromResource("cb_comm/Template_DA_COMM_v1.xml");
         // When
         List<SclReportItem> sclReportItems = controlBlockEditorService.createDataSetAndControlBlocks(scd, allowedFcdas);
         // Then
@@ -221,8 +220,8 @@ class ControlBlockEditorServiceTest {
     @Test
     void updateAllSourceDataSetsAndControlBlocks_should_sort_FCDA_inside_DataSet_and_avoid_duplicates() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success_test_fcda_sort.xml");
-        DACOMM allowedFcdas = DaComTestMarshallerHelper.getDACOMMFromFile("/cb_comm/Template_DA_COMM_v1.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success_test_fcda_sort.xml");
+        DACOMM allowedFcdas = DaComTestMarshallerHelper.getDACOMMFromResource("cb_comm/Template_DA_COMM_v1.xml");
         // When
         List<SclReportItem> sclReportItems = controlBlockEditorService.createDataSetAndControlBlocks(scd, allowedFcdas);
         // Then
@@ -242,7 +241,7 @@ class ControlBlockEditorServiceTest {
     @MethodSource("provideSubnetworksToReuse")
     void configureNetworkForAllControlBlocks_should_create_GSE_elements(List<TSubNetwork> subnetworksToReuse) {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
         CBCom cbCom = createCbCom();
         // When
         List<SclReportItem> sclReportItems = controlBlockEditorService.configureNetworkForAllControlBlocks(scd, cbCom, subnetworksToReuse);
@@ -278,14 +277,14 @@ class ControlBlockEditorServiceTest {
                 Tuple.tuple("MAC-Address", "01-0C-CD-01-00-02"),
                 Tuple.tuple("VLAN-ID", "12E")
         );
-        MarshallerWrapper.assertValidateXmlSchema(scd);
+        SclTestMarshaller.assertSclValidateXsd(scd);
     }
 
     @ParameterizedTest
     @MethodSource("provideSubnetworksToReuse")
     void configureNetworkForAllControlBlocks_should_create_SMV_elements(List<TSubNetwork> subnetworksToReuse) {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
         CBCom cbCom = createCbCom();
         // When
         List<SclReportItem> sclReportItems = controlBlockEditorService.configureNetworkForAllControlBlocks(scd, cbCom, subnetworksToReuse);
@@ -308,7 +307,7 @@ class ControlBlockEditorServiceTest {
                 Tuple.tuple("MAC-Address", "01-0C-CD-04-00-01"),
                 Tuple.tuple("VLAN-ID", "130")
         );
-        MarshallerWrapper.assertValidateXmlSchema(scd);
+        SclTestMarshaller.assertSclValidateXsd(scd);
     }
 
     public static Stream<Arguments> provideSubnetworksToReuse() {
@@ -339,7 +338,7 @@ class ControlBlockEditorServiceTest {
     @Test
     void configureNetworkForAllControlBlocks_should_create_GSE_with_incremental_appid_and_mac_addresses() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
         CBCom cbCom = createCbCom();
         cbCom.getAppIdRanges().getAppIdRange().getFirst().setStart("0009");
         cbCom.getAppIdRanges().getAppIdRange().getFirst().setEnd("000B");
@@ -376,7 +375,7 @@ class ControlBlockEditorServiceTest {
     @Test
     void configureNetworkForAllControlBlocks_should_restart_Mac_adress() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
         CBCom cbCom = createCbCom();
         cbCom.getMacRanges().getMacRange().getFirst().setStart("01-0C-CD-01-00-00");
         cbCom.getMacRanges().getMacRange().getFirst().setEnd("01-0C-CD-01-00-01");
@@ -412,7 +411,7 @@ class ControlBlockEditorServiceTest {
     @MethodSource("provideConfigureNetworkForAllControlBlocksErrors")
     void configureNetworkForAllControlBlocks_should_fail_when_no_settings_for_this_controlBlock(CBCom cbCom, String expectedMessage, String expectedXPath) {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
         // When
         List<SclReportItem> sclReportItems = controlBlockEditorService.configureNetworkForAllControlBlocks(scd, cbCom);
         // Then
@@ -444,7 +443,7 @@ class ControlBlockEditorServiceTest {
     @MethodSource("provideBlankCriteria")
     void configureNetworkForAllControlBlocks_when_setting_files_has_blank_criteria_should_return_error(Consumer<TVlan> setCriteriaBlank) {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
         CBCom cbCom = createCbCom();
         setCriteriaBlank.accept(cbCom.getVlans().getVlan().getFirst());
         //When
@@ -471,7 +470,7 @@ class ControlBlockEditorServiceTest {
     @MethodSource("provideMalformedNumbers")
     void configureNetworkForAllControlBlocks_when_malformed_numbers_should_return_error(Consumer<TVlan> setMalformedNumber) {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
         CBCom cbCom = createCbCom();
         setMalformedNumber.accept(cbCom.getVlans().getVlan().getFirst());
         //When
@@ -497,7 +496,7 @@ class ControlBlockEditorServiceTest {
     @MethodSource("provideOutOfBoundNumbers")
     void configureNetworkForAllControlBlocks_when_out_of_bound_numbers_should_return_error(Consumer<TVlan> setMalformedNumber) {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
         CBCom cbCom = createCbCom();
         setMalformedNumber.accept(cbCom.getVlans().getVlan().getFirst());
         //When
@@ -521,7 +520,7 @@ class ControlBlockEditorServiceTest {
     @Test
     void configureNetworkForAllControlBlocks_when_missing_connectedAp_should_return_error() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
         scd.getCommunication().getSubNetwork().getFirst().getConnectedAP().removeFirst();
         CBCom cbCom = createCbCom();
         //When
@@ -538,7 +537,7 @@ class ControlBlockEditorServiceTest {
     @Test
     void configureNetworkForAllControlBlocks_should_reuse_APPID_and_MAC_Address_from_previous_SCD_for_SMV_elements() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
         CBCom cbCom = createCbCom();
         TSubNetwork subnetworkToReuse = new TSubNetwork();
         TConnectedAP tConnectedAP = new TConnectedAP();
@@ -567,13 +566,13 @@ class ControlBlockEditorServiceTest {
                 Tuple.tuple("MAC-Address", "01-0C-CD-04-00-00"),
                 Tuple.tuple("VLAN-ID", "130")
         );
-        MarshallerWrapper.assertValidateXmlSchema(scd);
+        SclTestMarshaller.assertSclValidateXsd(scd);
     }
 
     @Test
     void configureNetworkForAllControlBlocks_should_reuse_APPID_and_MAC_Address_from_previous_SCD_for_GSE_elements() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
         CBCom cbCom = createCbCom();
         TSubNetwork subNetworkToReuse = new TSubNetwork();
         TConnectedAP tConnectedAP = new TConnectedAP();
@@ -615,14 +614,14 @@ class ControlBlockEditorServiceTest {
                 Tuple.tuple("MAC-Address", "01-0C-CD-01-00-02"),
                 Tuple.tuple("VLAN-ID", "12E")
         );
-        MarshallerWrapper.assertValidateXmlSchema(scd);
+        SclTestMarshaller.assertSclValidateXsd(scd);
     }
 
     @ParameterizedTest
     @MethodSource("provideRemovePrivateInfo")
     void configureNetworkForAllControlBlocks_when_missing_IED_privates_should_return_error(Consumer<TIED> removePrivateInfo) {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
         CBCom cbCom = createCbCom();
         removePrivateInfo.accept(scd.getIED().get(1));
         //When
@@ -648,7 +647,7 @@ class ControlBlockEditorServiceTest {
     @Test
     void removeControlBlocksAndDatasetAndExtRefSrc_should_remove_controlBlocks_and_Dataset_on_ln0() {
         // Given
-        SCL scl = SclTestMarshaller.getSCLFromFile("/scl-remove-controlBlocks-dataSet-extRefSrc/scl-with-control-blocks.xml");
+        SCL scl = SclTestMarshaller.getSCLFromResource("scl-remove-controlBlocks-dataSet-extRefSrc/scl-with-control-blocks.xml");
         // When
         controlBlockEditorService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scl);
         // Then
@@ -662,7 +661,7 @@ class ControlBlockEditorServiceTest {
                 .noneMatch(TAnyLN::isSetReportControl)
                 .noneMatch(LN0::isSetGSEControl)
                 .noneMatch(LN0::isSetSampledValueControl);
-        assertIsMarshallable(scl);
+        assertSclValidateXsd(scl);
     }
 
     private static TSMV newSmv(String ldInst, String cbName, String appId, String mac) {
@@ -688,7 +687,7 @@ class ControlBlockEditorServiceTest {
     @Test
     void removeControlBlocksAndDatasetAndExtRefSrc_should_remove_controlBlocks_and_Dataset_on_ln() {
         // Given
-        SCL scl = SclTestMarshaller.getSCLFromFile("/scl-remove-controlBlocks-dataSet-extRefSrc/scl-with-control-blocks.xml");
+        SCL scl = SclTestMarshaller.getSCLFromResource("scl-remove-controlBlocks-dataSet-extRefSrc/scl-with-control-blocks.xml");
         // When
         controlBlockEditorService.removeAllControlBlocksAndDatasetsAndExtRefSrcBindings(scl);
         // Then
@@ -702,7 +701,7 @@ class ControlBlockEditorServiceTest {
                 .noneMatch(TAnyLN::isSetDataSet)
                 .noneMatch(TAnyLN::isSetLogControl)
                 .noneMatch(TAnyLN::isSetReportControl);
-        assertIsMarshallable(scl);
+        assertSclValidateXsd(scl);
     }
 
     private static TGSE getCommunicationGSE(SCL scd, String iedName, String cbName) {

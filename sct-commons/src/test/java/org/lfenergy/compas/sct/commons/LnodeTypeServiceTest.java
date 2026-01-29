@@ -5,7 +5,9 @@
 package org.lfenergy.compas.sct.commons;
 
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.scl2007b4.model.SCL;
+import org.lfenergy.compas.scl2007b4.model.TDataTypeTemplates;
+import org.lfenergy.compas.scl2007b4.model.TLNodeType;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.List;
@@ -20,7 +22,7 @@ class LnodeTypeServiceTest {
     @Test
     void getLnodeTypes() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TDataTypeTemplates dataTypeTemplates = std.getDataTypeTemplates();
 
         //When
@@ -50,7 +52,7 @@ class LnodeTypeServiceTest {
     @Test
     void getFilteredLnodeTypes() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TDataTypeTemplates dataTypeTemplates = std.getDataTypeTemplates();
 
         //When
@@ -67,7 +69,7 @@ class LnodeTypeServiceTest {
     @Test
     void findLnodeType() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TDataTypeTemplates dataTypeTemplates = std.getDataTypeTemplates();
 
         //When
@@ -83,7 +85,7 @@ class LnodeTypeServiceTest {
     @Test
     void findLnodeType_should_find_by_id() {
         //Given
-        TDataTypeTemplates dataTypeTemplates = SclTestMarshaller.getSCLFromFile("/std/std_sample.std").getDataTypeTemplates();
+        TDataTypeTemplates dataTypeTemplates = SclTestMarshaller.getSCLFromResource("std/std_sample.std").getDataTypeTemplates();
         String lNodeTypeId = "RTE_8884DBCF760D916CCE3EE9D1846CE46F_LPAI_V1.0.0";
 
         //When

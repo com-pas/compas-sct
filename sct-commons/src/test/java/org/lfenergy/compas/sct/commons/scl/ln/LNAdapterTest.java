@@ -18,7 +18,6 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.*;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
-import org.lfenergy.compas.sct.commons.testhelpers.MarshallerWrapper;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.Arrays;
@@ -162,10 +161,10 @@ class LNAdapterTest {
     @Test
     void updateExtRefBinders_shouldUpdateExtRefs() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LD_INS2").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LD_INS2").orElseThrow());
         LNAdapter lnAdapter = (LNAdapter) AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
                 .withLnClass("ANCR")
@@ -181,14 +180,14 @@ class LNAdapterTest {
         assertDoesNotThrow(() -> lnAdapter.updateExtRefBinders(info));
         List<TExtRef> tExtRefs = lnAdapter.getExtRefs(null);
         assertThat(tExtRefs).hasSize(1);
-        assertThat(tExtRefs.get(0).getIedName()).isEqualTo(info.getBindingInfo().getIedName());
+        assertThat(tExtRefs.getFirst().getIedName()).isEqualTo(info.getBindingInfo().getIedName());
 
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("extRefInfoAndMessage")
     void updateExtRefBinders_shouldThrowsException(String testCase, ExtRefInfo info, String expectedMessage) {
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.getLDeviceAdapterByLdInst("LD_INS2"));
@@ -229,10 +228,10 @@ class LNAdapterTest {
     void extractExtRefFromExtRefInfo_when_the_given_binding_info_does_not_match_the_found_TExtRef_binding_info_shouldThrowScdException() {
 
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-cb/scd_get_cbs_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-cb/scd_get_cbs_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME1"));
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LD_INST11").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LD_INST11").orElseThrow());
         AbstractLNAdapter<?> lnAdapter = AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
                 .withLnClass(TLLN0Enum.LLN_0.value())
@@ -251,7 +250,7 @@ class LNAdapterTest {
     void extractExtRefFromExtRefInfo_when_the_given_binding_info_does_not_refer_to_an_existing_IED_LDevice_and_LNode_in_the_SCL_shouldThrowScdException() {
 
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-cb/scd_get_cbs_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-cb/scd_get_cbs_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME1"));
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.getLDeviceAdapterByLdInst("LD_INST11"));
@@ -283,7 +282,7 @@ class LNAdapterTest {
     void checkExtRefInfoCoherence_withExtRefInfoCoherence_shouldNotThrowException() {
 
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-cb/scd_get_cbs_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-cb/scd_get_cbs_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1");
         LDeviceAdapter lDeviceAdapter = iAdapter.getLDeviceAdapterByLdInst("LD_INST11");
@@ -323,7 +322,7 @@ class LNAdapterTest {
     @Test
     void should_extract_ExtRef_from_ExtRefInfo() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-cb/scd_get_cbs_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-cb/scd_get_cbs_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1");
         LDeviceAdapter lDeviceAdapter = iAdapter.getLDeviceAdapterByLdInst("LD_INST11");
@@ -364,11 +363,11 @@ class LNAdapterTest {
     void updateExtRefSource_when_trying_update_extRefSource_with_wrong_arguments_shouldNotTHrowException(ExtRefInfo incompleteExtrefInfo) {
 
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-cb/scd_get_cbs_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-cb/scd_get_cbs_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
 
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME1"));
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LD_INST11").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LD_INST11").orElseThrow());
         AbstractLNAdapter<?> lnAdapter = AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
                 .withLnClass(TLLN0Enum.LLN_0.value())
@@ -401,10 +400,10 @@ class LNAdapterTest {
     @Test
     void updateExtRefSource_should_not_throw_exception() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-cb/scd_get_cbs_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-cb/scd_get_cbs_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME1"));
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LD_INST11").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LD_INST11").orElseThrow());
         AbstractLNAdapter<?> lnAdapter = AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
                 .withLnClass(TLLN0Enum.LLN_0.value())
@@ -481,7 +480,7 @@ class LNAdapterTest {
     void updateDAI_when_DataAttributeRef_is_empty_should_throw_ScdException() {
         // Given
         DataAttributeRef dataAttributeRef = new DataAttributeRef();
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         LN0Adapter lnAdapter = findLn0(scd, "IED_NAME", "LD_INS1");
 
         // When Then
@@ -493,7 +492,7 @@ class LNAdapterTest {
     @Test
     void updateDAI_when_DataAttributeRef_DA_name_is_not_defined_should_throw_ScdException() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         AbstractLNAdapter<?> lnAdapter = findLn0(scd, "IED_NAME", "LD_INS1");
         DataAttributeRef dataAttributeRef = createDataAttributeRef(DO_TYPE_NAME, null);
 
@@ -506,7 +505,7 @@ class LNAdapterTest {
     @Test
     void updateDAI_when_DataAttributeRef_DO_name_is_not_defined_should_throw_ScdException() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         AbstractLNAdapter<?> lnAdapter = findLn0(scd, "IED_NAME", "LD_INS1");
         DataAttributeRef dataAttributeRef = createDataAttributeRef(null, DA_TYPE_NAME);
 
@@ -519,7 +518,7 @@ class LNAdapterTest {
     @Test
     void updateDAI_when_DTT_Fc_not_allowed_to_update_should_not_update_DAI_Val() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         AbstractLNAdapter<?> lnAdapter = findLn0(scd, "IED_NAME", "LD_INS1");
         DataAttributeRef dataAttributeRef = DataAttributeRef.copyFrom(RDDT_DO_SDO1_D_ANTREF_BDA1_BDA2_BDA3);
         dataAttributeRef.setFc(TFCEnum.BL);
@@ -534,13 +533,13 @@ class LNAdapterTest {
         TDAI tdai = findDai(lnAdapter, DATA_TYPE_REF).getCurrentElem();
         assertThat(getValue(tdai)).isEqualTo(OLD_VALUE);
 
-        MarshallerWrapper.assertValidateXmlSchema(scd);
+        SclTestMarshaller.assertSclValidateXsd(scd);
     }
 
     @Test
     void updateDAI_when_data_updatable_should_update_DOI_SDI_DAI_that_exists() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         AbstractLNAdapter<?> lnAdapter = findLn0(scd, "IED_NAME", "LD_INS1");
         assertThat(RDDT_DO_SDO1_D_ANTREF_BDA1_BDA2_BDA3.isUpdatable()).isTrue();
 
@@ -550,13 +549,13 @@ class LNAdapterTest {
         // Then
         AbstractDAIAdapter<?> daiAdapter = findDai(lnAdapter, DATA_TYPE_REF);
         assertThat(getValue(daiAdapter)).isEqualTo(NEW_VALUE);
-        MarshallerWrapper.assertValidateXmlSchema(scd);
+        SclTestMarshaller.assertSclValidateXsd(scd);
     }
 
     @Test
     void updateDAI_when_data_updatable_should_update_DOI_DAI_that_exists() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         AbstractLNAdapter<?> lnAdapter = findLn0(scd, "IED_NAME", "LD_INS1");
         assertThat(DATA_ATTRIBUTE_REF_DO_DA2.isUpdatable()).isTrue();
 
@@ -566,13 +565,13 @@ class LNAdapterTest {
         // Then
         AbstractDAIAdapter<?> daiAdapter = findDai(lnAdapter, DATA_ATTRIBUTE_REF_DO_DA2.getDataAttributes());
         assertThat(getValue(daiAdapter)).isEqualTo(NEW_VALUE);
-        MarshallerWrapper.assertValidateXmlSchema(scd);
+        SclTestMarshaller.assertSclValidateXsd(scd);
     }
 
     @Test
     void updateDAI_when_data_updatable_should_create_DOI_SDI_DAI_elements_with_new_value() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         AbstractLNAdapter<?> lnAdapter = findLn0(scd, "IED_NAME", "LD_INS2");
         assertThat(lnAdapter.getCurrentElem().getDOI()).isEmpty();
 
@@ -582,13 +581,13 @@ class LNAdapterTest {
         // Then
         TDAI tdai = findDai(lnAdapter, DATA_TYPE_REF).getCurrentElem();
         assertThat(getValue(tdai)).isEqualTo(NEW_VALUE);
-        MarshallerWrapper.assertValidateXmlSchema(scd);
+        SclTestMarshaller.assertSclValidateXsd(scd);
     }
 
     @Test
     void updateDAI_when_data_updatable_should_create_DOI_DAI_elements_with_new_value() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         AbstractLNAdapter<?> lnAdapter = findLn0(scd, "IED_NAME", "LD_INS2");
         DataAttributeRef dataAttributeRef = DATA_ATTRIBUTE_REF_DO_DA2;
         assertThat(lnAdapter.getCurrentElem().getDOI()).isEmpty();
@@ -599,16 +598,16 @@ class LNAdapterTest {
         // Then
         AbstractDAIAdapter<?> daiAdapter = findDai(lnAdapter, DATA_ATTRIBUTE_REF_DO_DA2.getDataAttributes());
         assertThat(getValue(daiAdapter)).isEqualTo(NEW_VALUE);
-        MarshallerWrapper.assertValidateXmlSchema(scd);
+        SclTestMarshaller.assertSclValidateXsd(scd);
     }
 
     @Test
     void updateDAI_when_not_updatable_should_not_update_DAI_values() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LD_INS1").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LD_INS1").orElseThrow());
         LN0Adapter lnAdapter = (LN0Adapter) AbstractLNAdapter.builder()
                 .withLDeviceAdapter(lDeviceAdapter)
                 .withLnClass(TLLN0Enum.LLN_0.value())
@@ -625,7 +624,7 @@ class LNAdapterTest {
     @Test
     void updateDAI_when_nothing_instantiated_should_create_DOI_and_DAI() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         AbstractLNAdapter<?> lnAdapter = findLn0(scd, "IED_NAME", "LD_INS1");
         lnAdapter.getCurrentElem().getDOI().clear();
         assertThat(lnAdapter.getCurrentElem().getDOI()).isEmpty();
@@ -637,13 +636,13 @@ class LNAdapterTest {
         TDAI dai = findDai(lnAdapter, DATA_ATTRIBUTE_REF_DO_DA2.getDataAttributes()).getCurrentElem();
         assertThat(dai.isValImport()).isTrue();
         assertThat(getValue(dai)).isEqualTo(NEW_VALUE);
-        MarshallerWrapper.assertValidateXmlSchema(scd);
+        SclTestMarshaller.assertSclValidateXsd(scd);
     }
 
     @Test
     void updateDAI_when_only_DOI_instantiated_should_create_DOI() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         AbstractLNAdapter<?> lnAdapter = findLn0(scd, "IED_NAME", "LD_INS1");
         lnAdapter.getDOIAdapterByName(DATA_ATTRIBUTE_REF_DO_DA2.getDoRef()).getSDIOrDAI().clear();
         assertThat(findDoiOrSdi(lnAdapter, DATA_ATTRIBUTE_REF_DO_DA2.getDoName().getName()).getSDIOrDAI()).isEmpty();
@@ -655,13 +654,13 @@ class LNAdapterTest {
         TDAI dai = findDai(lnAdapter, DATA_ATTRIBUTE_REF_DO_DA2.getDataAttributes()).getCurrentElem();
         assertThat(dai.isValImport()).isTrue();
         assertThat(getValue(dai)).isEqualTo(NEW_VALUE);
-        MarshallerWrapper.assertValidateXmlSchema(scd);
+        SclTestMarshaller.assertSclValidateXsd(scd);
     }
 
     @Test
     void updateDAI_when_already_instantiated_should_do_nothing() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         AbstractLNAdapter<?> lnAdapter = findLn0(scd, "IED_NAME", "LD_INS1");
         assertThat(findDai(lnAdapter, DATA_ATTRIBUTE_REF_DO_DA2.getDataAttributes())).isNotNull();
 
@@ -672,13 +671,13 @@ class LNAdapterTest {
         TDAI dai = findDai(lnAdapter, DATA_ATTRIBUTE_REF_DO_DA2.getDataAttributes()).getCurrentElem();
         assertThat(dai.isValImport()).isTrue();
         assertThat(getValue(dai)).isEqualTo(NEW_VALUE);
-        MarshallerWrapper.assertValidateXmlSchema(scd);
+        SclTestMarshaller.assertSclValidateXsd(scd);
     }
 
     @Test
     void updateDAI_with_SDO_and_BDA_when_no_elements_instantiated_should_create_SDI_DAI() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         AbstractLNAdapter<?> lnAdapter = findLn0(scd, "IED_NAME", "LD_INS1");
         lnAdapter.getCurrentElem().getDOI().clear();
         assertThat(lnAdapter.getCurrentElem().getDOI()).isEmpty();
@@ -690,13 +689,13 @@ class LNAdapterTest {
         TDAI dai = findDai(lnAdapter, RDDT_DO_SDO1_D_ANTREF_BDA1_BDA2_BDA3.getDataAttributes()).getCurrentElem();
         assertThat(dai.isValImport()).isTrue();
         assertThat(getValue(dai)).isEqualTo(NEW_VALUE);
-        MarshallerWrapper.assertValidateXmlSchema(scd);
+        SclTestMarshaller.assertSclValidateXsd(scd);
     }
 
     @Test
     void updateDAI_with_SDO_and_BDA_when_only_DOI_is_instantiated_should_create_DOI_SDI_DAI() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         AbstractLNAdapter<?> lnAdapter = findLn0(scd, "IED_NAME", "LD_INS1");
         lnAdapter.getDOIAdapterByName(DO_TYPE_NAME.getName()).getCurrentElem().getSDIOrDAI().clear();
         assertThat(findDoiOrSdi(lnAdapter, DO_TYPE_NAME.getName()).getSDIOrDAI()).isEmpty();
@@ -708,14 +707,14 @@ class LNAdapterTest {
         TDAI dai = findDai(lnAdapter, RDDT_DO_SDO1_D_ANTREF_BDA1_BDA2_BDA3.getDataAttributes()).getCurrentElem();
         assertThat(dai.isValImport()).isTrue();
         assertThat(getValue(dai)).isEqualTo(NEW_VALUE);
-        MarshallerWrapper.assertValidateXmlSchema(scd);
+        SclTestMarshaller.assertSclValidateXsd(scd);
     }
 
     @ParameterizedTest
     @ValueSource(ints = {0, 1, 2, 3, 4, 5})
     void updateDAI_with_SDO_and_BDA_when_some_SDI_instantiated_should_create_missing_SDI_DAI(int numberOfSdi) {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         AbstractLNAdapter<?> lnAdapter = findLn0(scd, "IED_NAME", "LD_INS1");
         String refOfExistingSDIs = String.join(".", Arrays.asList(DATA_TYPE_REF.split("\\.")).subList(0, numberOfSdi + 1));
         findDoiOrSdi(lnAdapter, refOfExistingSDIs).getSDIOrDAI().clear();
@@ -728,13 +727,13 @@ class LNAdapterTest {
         TDAI dai = findDai(lnAdapter, RDDT_DO_SDO1_D_ANTREF_BDA1_BDA2_BDA3.getDataAttributes()).getCurrentElem();
         assertThat(dai.isValImport()).isTrue();
         assertThat(getValue(dai)).isEqualTo(NEW_VALUE);
-        MarshallerWrapper.assertValidateXmlSchema(scd);
+        SclTestMarshaller.assertSclValidateXsd(scd);
     }
 
     @Test
     void updateDAI_with_SDO_and_BDA_when_only_DAI_is_missing_should_create_DAI() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         AbstractLNAdapter<?> lnAdapter = findLn0(scd, "IED_NAME", "LD_INS1");
         AbstractDAIAdapter<?> daiToRemove = findDai(lnAdapter, DATA_TYPE_REF);
         ((IDataParentAdapter) daiToRemove.getParentAdapter()).getSDIOrDAI().clear();
@@ -747,13 +746,13 @@ class LNAdapterTest {
         TDAI dai = findDai(lnAdapter, RDDT_DO_SDO1_D_ANTREF_BDA1_BDA2_BDA3.getDataAttributes()).getCurrentElem();
         assertThat(dai.isValImport()).isTrue();
         assertThat(getValue(dai)).isEqualTo(NEW_VALUE);
-        MarshallerWrapper.assertValidateXmlSchema(scd);
+        SclTestMarshaller.assertSclValidateXsd(scd);
     }
 
     @Test
     void updateDAI_with_SDO_and_BDA_when_already_instantiated_should_do_nothing() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         AbstractLNAdapter<?> lnAdapter = findLn0(scd, "IED_NAME", "LD_INS1");
         assertThat(findDai(lnAdapter, DATA_TYPE_REF)).isNotNull();
 
@@ -764,16 +763,16 @@ class LNAdapterTest {
         TDAI dai = findDai(lnAdapter, RDDT_DO_SDO1_D_ANTREF_BDA1_BDA2_BDA3.getDataAttributes()).getCurrentElem();
         assertThat(dai.isValImport()).isTrue();
         assertThat(getValue(dai)).isEqualTo(NEW_VALUE);
-        MarshallerWrapper.assertValidateXmlSchema(scd);
+        SclTestMarshaller.assertSclValidateXsd(scd);
     }
 
     @Test
     void getDAI_should_return_list_of_data_attribute() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/scd_with_dai_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/scd_with_dai_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LDSUIED").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LDSUIED").orElseThrow());
         LNAdapter lnAdapter = lDeviceAdapter.getLNAdapter("PIOC", "1", null);
         //When
         var dataAttributeRefs = lnAdapter.getDAI(new DataAttributeRef(), true);
@@ -796,10 +795,10 @@ class LNAdapterTest {
     @Test
     void addPrivate_with_type_and_source_should_create_Private() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/scd_with_dai_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/scd_with_dai_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LDSUIED").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LDSUIED").orElseThrow());
         LNAdapter lnAdapter = lDeviceAdapter.getLNAdapter("PIOC", "1", null);
         TPrivate tPrivate = new TPrivate();
         tPrivate.setType("Private Type");
@@ -825,7 +824,7 @@ class LNAdapterTest {
     @Test
     void getControlBlocks_should_find_ControlBlock_by_name() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1");
         LDeviceAdapter lDeviceAdapter = iAdapter.getLDeviceAdapterByLdInst("LD_INST12");
@@ -855,7 +854,7 @@ class LNAdapterTest {
     @Test
     void getTControlsByType_should_return_list_of_report_control_blocks() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-ied-dtt-com-import-stds/std.xml");
         LNAdapter lnAdapter = findLn(scd, "IED4d4fe1a8cda64cf88a5ee4176a1a0eef", "LDSUIED", "LPAI", "1", null);
         // When
         List<TReportControl> tControlsByType = lnAdapter.getTControlsByType(TReportControl.class);
@@ -867,7 +866,7 @@ class LNAdapterTest {
     @MethodSource("provideGetTControlsByTypeException")
     void getTControlsByType_when_unsupported_controlBlock_for_ln_should_throwException(Class<? extends TControl> tControlClass) {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-ied-dtt-com-import-stds/std.xml");
         LNAdapter lnAdapter = findLn(scd, "IED4d4fe1a8cda64cf88a5ee4176a1a0eef", "LDSUIED", "LPAI", "1", null);
         // When & Then
         assertThatThrownBy(() -> lnAdapter.getTControlsByType(tControlClass))
@@ -885,7 +884,7 @@ class LNAdapterTest {
     @CsvSource(value = {"ARtgHigh1.d:d", "ARtgHigh1.units.multiplier:multiplier", "Beh.d:d"}, delimiter = ':')
     void createDoiSdiDaiChainIfNotExists_should_create_dai_if_not_exist(String dataTypeRef, String expected) {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-ied-dtt-com-import-stds/std.xml");
         LNAdapter lnAdapter = findLn(scd, "IED4d4fe1a8cda64cf88a5ee4176a1a0eef", "LDSUIED", "LPAI", "1", null);
         // When
         AbstractDAIAdapter<?> daiAdapter = (AbstractDAIAdapter<?>) lnAdapter.createDoiSdiDaiChainIfNotExists(dataTypeRef, true);

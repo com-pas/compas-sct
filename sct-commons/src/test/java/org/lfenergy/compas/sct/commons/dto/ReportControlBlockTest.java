@@ -71,16 +71,6 @@ class ReportControlBlockTest {
     }
 
     @Test
-    void getServiceType_should_return_REPORT() {
-        // Given
-        ReportControlBlock reportControlBlock = new ReportControlBlock(NAME, ID, DATASET_REF);
-        // When
-        TServiceType serviceType = reportControlBlock.getServiceType();
-        // Then
-        assertThat(serviceType).isEqualTo(TServiceType.REPORT);
-    }
-
-    @Test
     void getControlBlockEnum_should_return_REPORT() {
         // Given
         ReportControlBlock reportControlBlock = new ReportControlBlock(NAME, ID, DATASET_REF);

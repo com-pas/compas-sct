@@ -6,10 +6,14 @@
 
 package org.lfenergy.compas.sct.commons.scl.ied;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.lfenergy.compas.scl2007b4.model.*;
+import org.lfenergy.compas.scl2007b4.model.SCL;
+import org.lfenergy.compas.scl2007b4.model.TAccessPoint;
+import org.lfenergy.compas.scl2007b4.model.TExtRef;
+import org.lfenergy.compas.scl2007b4.model.TIED;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
@@ -157,10 +161,10 @@ class AccessPointAdapterTest {
     }
 
     public static AccessPointAdapter provideAPForCheckLimitationForIED() {
-        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_ied_controls_dataset.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("limitation_cb_dataset_fcda/scd_check_limitation_ied_controls_dataset.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
-        return new AccessPointAdapter(iedAdapter, iedAdapter.getCurrentElem().getAccessPoint().get(0));
+        return new AccessPointAdapter(iedAdapter, iedAdapter.getCurrentElem().getAccessPoint().getFirst());
     }
 
     @Test
@@ -210,11 +214,11 @@ class AccessPointAdapterTest {
     @Test
     void checkLimitationForBoundIEDFCDAs_should_success_no_error() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1");
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getClientServices().setMaxAttributes(11L);
-        AccessPointAdapter accessPointAdapter = new AccessPointAdapter(iedAdapter, iedAdapter.getCurrentElem().getAccessPoint().get(0));
+        iedAdapter.getCurrentElem().getAccessPoint().getFirst().getServices().getClientServices().setMaxAttributes(11L);
+        AccessPointAdapter accessPointAdapter = new AccessPointAdapter(iedAdapter, iedAdapter.getCurrentElem().getAccessPoint().getFirst());
         List<TExtRef> tExtRefs = accessPointAdapter.getAllCoherentExtRefForAnalyze().tExtRefs();
         //When
         Optional<SclReportItem> sclReportItem = accessPointAdapter.checkLimitationForBoundIedFcdas(tExtRefs);
@@ -226,10 +230,10 @@ class AccessPointAdapterTest {
     @Test
     void checkLimitationForBoundIEDFCDAs_should_fail_one_error_message() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1");
-        AccessPointAdapter accessPointAdapter = new AccessPointAdapter(iedAdapter, iedAdapter.getCurrentElem().getAccessPoint().get(0));
+        AccessPointAdapter accessPointAdapter = new AccessPointAdapter(iedAdapter, iedAdapter.getCurrentElem().getAccessPoint().getFirst());
         accessPointAdapter.getCurrentElem().getServices().getClientServices().setMaxAttributes(4L);
         List<TExtRef> tExtRefs = accessPointAdapter.getAllCoherentExtRefForAnalyze().tExtRefs();
 
@@ -246,10 +250,10 @@ class AccessPointAdapterTest {
     @Test
     void checkLimitationForBoundIEDControls_should_fail_three_error_messages() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1");
-        AccessPointAdapter accessPointAdapter = new AccessPointAdapter(iedAdapter, iedAdapter.getCurrentElem().getAccessPoint().get(0));
+        AccessPointAdapter accessPointAdapter = new AccessPointAdapter(iedAdapter, iedAdapter.getCurrentElem().getAccessPoint().getFirst());
         List<TExtRef> tExtRefs = accessPointAdapter.getAllCoherentExtRefForAnalyze().tExtRefs();
         //When
         List<SclReportItem> sclReportItems = accessPointAdapter.checkLimitationForBoundIEDControls(tExtRefs);
@@ -265,14 +269,14 @@ class AccessPointAdapterTest {
     @Test
     void checkLimitationForBoundIEDControls_should_succeed_no_error_message() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1");
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getClientServices().setMaxAttributes(11L);
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getClientServices().setMaxGOOSE(5L);
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getClientServices().setMaxReports(2L);
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getClientServices().setMaxSMV(2L);
-        AccessPointAdapter accessPointAdapter = new AccessPointAdapter(iedAdapter, iedAdapter.getCurrentElem().getAccessPoint().get(0));
+        iedAdapter.getCurrentElem().getAccessPoint().getFirst().getServices().getClientServices().setMaxAttributes(11L);
+        iedAdapter.getCurrentElem().getAccessPoint().getFirst().getServices().getClientServices().setMaxGOOSE(5L);
+        iedAdapter.getCurrentElem().getAccessPoint().getFirst().getServices().getClientServices().setMaxReports(2L);
+        iedAdapter.getCurrentElem().getAccessPoint().getFirst().getServices().getClientServices().setMaxSMV(2L);
+        AccessPointAdapter accessPointAdapter = new AccessPointAdapter(iedAdapter, iedAdapter.getCurrentElem().getAccessPoint().getFirst());
         List<TExtRef> tExtRefs = accessPointAdapter.getAllCoherentExtRefForAnalyze().tExtRefs();
         //When
         List<SclReportItem> sclReportItems = accessPointAdapter.checkLimitationForBoundIEDControls(tExtRefs);
@@ -284,31 +288,31 @@ class AccessPointAdapterTest {
     @Test
     void getAllCoherentExtRefForAnalyze_succeed() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1");
-        AccessPointAdapter accessPointAdapter = new AccessPointAdapter(iedAdapter, iedAdapter.getCurrentElem().getAccessPoint().get(0));
+        AccessPointAdapter accessPointAdapter = new AccessPointAdapter(iedAdapter, iedAdapter.getCurrentElem().getAccessPoint().getFirst());
         //When
          AccessPointAdapter.ExtRefAnalyzeRecord extRefAnalyzeRecord = accessPointAdapter.getAllCoherentExtRefForAnalyze();
         //Then
         assertThat(extRefAnalyzeRecord)
                 .extracting(AccessPointAdapter.ExtRefAnalyzeRecord::sclReportItems)
-                .asList().isEmpty();
+                .asInstanceOf(InstanceOfAssertFactories.LIST)
+                .isEmpty();
     }
 
     @Test
     void getAllCoherentExtRefForAnalyze_fail_with_one_error() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_coherent_extRefs.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("limitation_cb_dataset_fcda/scd_check_coherent_extRefs.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1");
-        AccessPointAdapter accessPointAdapter = new AccessPointAdapter(iedAdapter, iedAdapter.getCurrentElem().getAccessPoint().get(0));
+        AccessPointAdapter accessPointAdapter = new AccessPointAdapter(iedAdapter, iedAdapter.getCurrentElem().getAccessPoint().getFirst());
         //When
         AccessPointAdapter.ExtRefAnalyzeRecord extRefAnalyzeRecord = accessPointAdapter.getAllCoherentExtRefForAnalyze();
         //Then
         assertThat(extRefAnalyzeRecord)
                 .extracting(AccessPointAdapter.ExtRefAnalyzeRecord::sclReportItems)
-                .asList().hasSize(1);
+                .asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(1);
     }
 }
-

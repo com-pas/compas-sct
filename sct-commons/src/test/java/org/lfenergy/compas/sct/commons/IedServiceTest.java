@@ -21,7 +21,7 @@ class IedServiceTest {
     @Test
     void getFilteredIeds_should_return_ldevices() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         IedService iedService = new IedService();
 
         //When
@@ -37,7 +37,7 @@ class IedServiceTest {
     @Test
     void findByName_should_return_ied_infos() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_binders_test.xml");
+        SCL std = SclTestMarshaller.getSCLFromResource("scl-srv-scd-extref-cb/scd_get_binders_test.xml");
         IedService iedService = new IedService();
 
         //When
@@ -52,7 +52,7 @@ class IedServiceTest {
     @Test
     void findByName_should_fail() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_binders_test.xml");
+        SCL std = SclTestMarshaller.getSCLFromResource("scl-srv-scd-extref-cb/scd_get_binders_test.xml");
         IedService iedService = new IedService();
 
         //When
@@ -65,7 +65,7 @@ class IedServiceTest {
     @Test
     void findIed_should_return_ldevice() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         IedService iedService = new IedService();
 
         //When

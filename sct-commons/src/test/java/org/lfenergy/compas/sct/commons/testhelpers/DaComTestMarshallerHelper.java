@@ -4,22 +4,28 @@
 
 package org.lfenergy.compas.sct.commons.testhelpers;
 
-import org.apache.commons.io.IOUtils;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.Unmarshaller;
 import org.lfenergy.compas.sct.commons.model.da_comm.DACOMM;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.io.InputStream;
+import java.util.Objects;
 
 public class DaComTestMarshallerHelper {
 
-    public static DACOMM getDACOMMFromFile(String filename) {
-        byte[] rawXml;
+    public static DACOMM getDACOMMFromResource(String resource) {
+        InputStream inputStream = Objects.requireNonNull(DaComTestMarshallerHelper.class.getClassLoader().getResourceAsStream(resource));
         try {
-            rawXml = IOUtils.resourceToByteArray(filename);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+            JAXBContext jaxbContext = JAXBContext.newInstance(DACOMM.class);
+            Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+            return (DACOMM) unmarshaller.unmarshal(inputStream);
+        } catch (JAXBException e) {
+            throw new RuntimeException(e);
         }
-        return new DaComParamTestMarshaller.Builder().build().unmarshall(rawXml);
     }
 
 }

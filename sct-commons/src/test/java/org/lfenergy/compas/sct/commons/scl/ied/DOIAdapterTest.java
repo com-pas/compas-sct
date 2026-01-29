@@ -93,7 +93,7 @@ class DOIAdapterTest {
         // When Then
         assertThatCode(() -> daiAdapter.update(vals)).doesNotThrowAnyException();
         assertThat(daiAdapter.getCurrentElem().getVal()).isNotEmpty();
-        TVal tVal = daiAdapter.getCurrentElem().getVal().get(0);
+        TVal tVal = daiAdapter.getCurrentElem().getVal().getFirst();
         assertThat(tVal.isSetSGroup()).isFalse();
         // Given
         final Map<Long, String> vals2 = new HashMap<>();
@@ -102,7 +102,7 @@ class DOIAdapterTest {
         // When Then
         assertThatCode(() -> daiAdapter.update(vals2)).doesNotThrowAnyException();
         assertThat(daiAdapter.getCurrentElem().getVal()).isNotEmpty();
-        tVal = daiAdapter.getCurrentElem().getVal().get(0);
+        tVal = daiAdapter.getCurrentElem().getVal().getFirst();
         assertThat(tVal.isSetSGroup()).isFalse();
     }
 
@@ -210,12 +210,12 @@ class DOIAdapterTest {
     @Tag("issue-321")
     void testFindDeepestMatch() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         // When Then
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
         // When Then
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LD_INS1").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LD_INS1").orElseThrow());
         LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
         // When Then
         DOIAdapter doiAdapter = assertDoesNotThrow(() -> ln0Adapter.getDOIAdapterByName("Do"));

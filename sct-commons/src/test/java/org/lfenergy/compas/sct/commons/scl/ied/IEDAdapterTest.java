@@ -12,11 +12,10 @@ import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
-import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
-import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
+import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
-import org.lfenergy.compas.sct.commons.util.MonitoringLnClassEnum;
+import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +30,7 @@ import static org.mockito.Mockito.when;
 
 class IEDAdapterTest {
 
-    private static final String SCD_IED_U_TEST = "/ied-test-schema-conf/ied_unit_test.xml";
+    private static final String SCD_IED_U_TEST = "ied-test-schema-conf/ied_unit_test.xml";
 
 
     @Test
@@ -89,7 +88,7 @@ class IEDAdapterTest {
     @Test
     void streamLDeviceAdapters_should_return_all_lDevices() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile(SCD_IED_U_TEST);
+        SCL scd = SclTestMarshaller.getSCLFromResource(SCD_IED_U_TEST);
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
         // When
@@ -101,7 +100,7 @@ class IEDAdapterTest {
     @Test
     void findLDeviceAdapterByLdInst_should_return_LDevice() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile(SCD_IED_U_TEST);
+        SCL scd = SclTestMarshaller.getSCLFromResource(SCD_IED_U_TEST);
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
         // When
@@ -113,7 +112,7 @@ class IEDAdapterTest {
     @Test
     void findLDeviceAdapterByLdInst_when_not_found_should_return_empty_optional() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile(SCD_IED_U_TEST);
+        SCL scd = SclTestMarshaller.getSCLFromResource(SCD_IED_U_TEST);
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
         // When
@@ -125,7 +124,7 @@ class IEDAdapterTest {
     @Test
     void getLDeviceAdapterByLdInst_should_return_LDevice() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile(SCD_IED_U_TEST);
+        SCL scd = SclTestMarshaller.getSCLFromResource(SCD_IED_U_TEST);
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
         // When
@@ -137,7 +136,7 @@ class IEDAdapterTest {
     @Test
     void getLDeviceAdapterByLdInst_when_not_found_should_throw_exception() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile(SCD_IED_U_TEST);
+        SCL scd = SclTestMarshaller.getSCLFromResource(SCD_IED_U_TEST);
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
         // When & Then
@@ -150,7 +149,7 @@ class IEDAdapterTest {
     @Tag("issue-321")
     void updateLDeviceNodesType_should_not_throw_exception() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile(SCD_IED_U_TEST);
+        SCL scd = SclTestMarshaller.getSCLFromResource(SCD_IED_U_TEST);
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         // When Then
         IEDAdapter iAdapter = assertDoesNotThrow( () -> sclRootAdapter.getIEDAdapterByName(DTO.HOLDER_IED_NAME));
@@ -160,7 +159,7 @@ class IEDAdapterTest {
         pairOldNewId.put("LNO2", DTO.HOLDER_IED_NAME + "_LNO2");
         // When Then
         assertThatCode(() -> iAdapter.updateLDeviceNodesType(pairOldNewId)).doesNotThrowAnyException();
-        LDeviceAdapter lDeviceAdapter = iAdapter.streamLDeviceAdapters().findFirst().get();
+        LDeviceAdapter lDeviceAdapter = iAdapter.streamLDeviceAdapters().findFirst().orElseThrow();
         assertThat(lDeviceAdapter.getLN0Adapter().getLnType()).isEqualTo(DTO.HOLDER_IED_NAME + "_LNO1");
     }
 
@@ -168,7 +167,7 @@ class IEDAdapterTest {
     @Tag("issue-321")
     void testGetExtRefBinders() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         // When Then
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
@@ -189,7 +188,7 @@ class IEDAdapterTest {
     @Tag("issue-321")
     void testIsSettingConfig() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         // When Then
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
@@ -204,7 +203,7 @@ class IEDAdapterTest {
     @Tag("issue-321")
     void testMatches() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         // When Then
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
@@ -261,11 +260,11 @@ class IEDAdapterTest {
     void checkDataGroupCoherence_should_fail_five_error_message() {
         //Given
         IEDAdapter iedAdapter = provideIEDForCheckLimitationForIED();
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getConfDataSet().setMaxAttributes(2L);
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getConfDataSet().setMax(5L);
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getSMVsc().setMax(2L);
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getGOOSE().setMax(2L);
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).getServices().getConfReportControl().setMax(0L);
+        iedAdapter.getCurrentElem().getAccessPoint().getFirst().getServices().getConfDataSet().setMaxAttributes(2L);
+        iedAdapter.getCurrentElem().getAccessPoint().getFirst().getServices().getConfDataSet().setMax(5L);
+        iedAdapter.getCurrentElem().getAccessPoint().getFirst().getServices().getSMVsc().setMax(2L);
+        iedAdapter.getCurrentElem().getAccessPoint().getFirst().getServices().getGOOSE().setMax(2L);
+        iedAdapter.getCurrentElem().getAccessPoint().getFirst().getServices().getConfReportControl().setMax(0L);
         //When
         List<SclReportItem> sclReportItems = iedAdapter.checkDataGroupCoherence();
         //Then
@@ -282,7 +281,7 @@ class IEDAdapterTest {
     void checkBindingDataGroupCoherence_should_succeed_no_error_message() {
         //Given
         IEDAdapter iedAdapter = provideIEDForCheckLimitationForBoundIED();
-        TClientServices tClientServices = iedAdapter.getParentAdapter().getIEDAdapterByName("IED_NAME1").getCurrentElem().getAccessPoint().get(0).getServices().getClientServices();
+        TClientServices tClientServices = iedAdapter.getParentAdapter().getIEDAdapterByName("IED_NAME1").getCurrentElem().getAccessPoint().getFirst().getServices().getClientServices();
         tClientServices.setMaxAttributes(11L);
         tClientServices.setMaxGOOSE(5L);
         tClientServices.setMaxReports(2L);
@@ -310,13 +309,13 @@ class IEDAdapterTest {
     }
 
     public static IEDAdapter provideIEDForCheckLimitationForBoundIED() {
-        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         return sclRootAdapter.getIEDAdapterByName("IED_NAME1");
     }
 
     public static IEDAdapter provideIEDForCheckLimitationForIED() {
-        SCL scd = SclTestMarshaller.getSCLFromFile("/limitation_cb_dataset_fcda/scd_check_limitation_ied_controls_dataset.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("limitation_cb_dataset_fcda/scd_check_limitation_ied_controls_dataset.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         return sclRootAdapter.getIEDAdapterByName("IED_NAME");
     }
@@ -324,7 +323,7 @@ class IEDAdapterTest {
     @Test
     void getCompasICDHeader_should_return_compas_icd_header(){
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile(SCD_IED_U_TEST);
+        SCL scd = SclTestMarshaller.getSCLFromResource(SCD_IED_U_TEST);
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
         TCompasICDHeader tCompasICDHeader = new TCompasICDHeader();
@@ -340,7 +339,7 @@ class IEDAdapterTest {
     @Test
     void getCompasSystemVersion_should_return_compas_icd_header(){
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile(SCD_IED_U_TEST);
+        SCL scd = SclTestMarshaller.getSCLFromResource(SCD_IED_U_TEST);
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
         TCompasSystemVersion tCompasSystemVersion = new TCompasSystemVersion();

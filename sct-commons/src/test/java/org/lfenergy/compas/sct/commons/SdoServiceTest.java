@@ -21,7 +21,7 @@ class SdoServiceTest {
     @Test
     void getSDOs() {
         //Given
-        TDataTypeTemplates dataTypeTemplates = SclTestMarshaller.getSCLFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda.xml").getDataTypeTemplates();
+        TDataTypeTemplates dataTypeTemplates = SclTestMarshaller.getSCLFromResource("dtt-test-schema-conf/scd_dtt_do_sdo_da_bda.xml").getDataTypeTemplates();
         TDOType tdoType = dataTypeTemplates.getDOType().getFirst();
 
         //When
@@ -37,7 +37,7 @@ class SdoServiceTest {
     @Test
     void getFilteredSDOs() {
         //Given
-        TDataTypeTemplates dataTypeTemplates = SclTestMarshaller.getSCLFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda.xml").getDataTypeTemplates();
+        TDataTypeTemplates dataTypeTemplates = SclTestMarshaller.getSCLFromResource("dtt-test-schema-conf/scd_dtt_do_sdo_da_bda.xml").getDataTypeTemplates();
         TDOType tdoType = dataTypeTemplates.getDOType().get(1);
 
         //When
@@ -53,7 +53,7 @@ class SdoServiceTest {
     @Test
     void findSDO() {
         //Given
-        TDataTypeTemplates dataTypeTemplates = SclTestMarshaller.getSCLFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda.xml").getDataTypeTemplates();
+        TDataTypeTemplates dataTypeTemplates = SclTestMarshaller.getSCLFromResource("dtt-test-schema-conf/scd_dtt_do_sdo_da_bda.xml").getDataTypeTemplates();
         TDOType tdoType = dataTypeTemplates.getDOType().get(1);
 
         //When
@@ -68,7 +68,7 @@ class SdoServiceTest {
     @Test
     void findSDO_should_find_by_id() {
         //Given
-        TDataTypeTemplates dataTypeTemplates = SclTestMarshaller.getSCLFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda.xml").getDataTypeTemplates();
+        TDataTypeTemplates dataTypeTemplates = SclTestMarshaller.getSCLFromResource("dtt-test-schema-conf/scd_dtt_do_sdo_da_bda.xml").getDataTypeTemplates();
         TDOType tdoType = dataTypeTemplates.getDOType().get(1);
 
         //When

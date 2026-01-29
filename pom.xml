@@ -2,9 +2,7 @@
 <!-- SPDX-FileCopyrightText: 2022 2021 2020 RTE FRANCE -->
 <!-- -->
 <!-- SPDX-License-Identifier: Apache-2.0 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.lfenergy.compas</groupId>
     <artifactId>compas-sct</artifactId>
@@ -32,77 +30,42 @@
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <!-- jacoco est utilisé par sonar pour afficher le rapport de couverture des tests -->
-        <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
-
         <!-- compas -->
-        <compas-core.version>0.21.0</compas-core.version>
+        <compas-core.version>0.22.0</compas-core.version>
         <compas-scl-xsd.version>0.0.4</compas-scl-xsd.version>
 
+        <!-- xml -->
+        <jakarta.xml.bind-api.version>4.0.4</jakarta.xml.bind-api.version>
+        <jaxb-runtime.version>4.0.6</jaxb-runtime.version>
+        <jaxb2-maven-plugin.version>3.3.0</jaxb2-maven-plugin.version>
+
+        <!-- json -->
+        <jackson-databind.version>2.21.0</jackson-databind.version>
+
         <!-- maven -->
-        <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
-        <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
-        <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
-        <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
-        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
-        <maven-dependency-plugin.version>3.6.1</maven-dependency-plugin.version>
+        <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
+        <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
+        <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
+        <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
+        <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
+        <maven-dependency-plugin.version>3.9.0</maven-dependency-plugin.version>
 
-        <jaxb2-maven-plugin.version>3.1.0</jaxb2-maven-plugin.version>
-
-        <junit-version>5.9.0</junit-version>
-        <logback-classic.version>1.5.6</logback-classic.version>
-        <assertj.version>3.22.0</assertj.version>
-        <lombok.version>1.18.30</lombok.version>
-        <mockito.version>5.5.0</mockito.version>
-        <jackson-databind.version>2.13.4.1</jackson-databind.version>
+        <!-- tests -->
+        <junit-version>5.14.2</junit-version>
+        <assertj.version>3.27.7</assertj.version>
+        <mockito.version>5.21.0</mockito.version>
+        <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
 
         <!-- utils -->
-        <commons-beanutils.version>1.9.4</commons-beanutils.version>
+        <lombok.version>1.18.42</lombok.version>
+        <slf4j-api.version>2.0.17</slf4j-api.version>
+        <commons-lang3.version>3.20.0</commons-lang3.version>
+        <commons-beanutils.version>1.11.0</commons-beanutils.version>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-        </dependency>
-    </dependencies>
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok</artifactId>
-                <version>${lombok.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-api</artifactId>
-                <version>${junit-version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-engine</artifactId>
-                <version>${junit-version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-params</artifactId>
-                <version>${junit-version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>${mockito.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-junit-jupiter</artifactId>
-                <version>${mockito.version}</version>
-                <scope>test</scope>
-            </dependency>
+
             <dependency>
                 <groupId>org.lfenergy.compas.core</groupId>
                 <artifactId>scl-extension</artifactId>
@@ -114,15 +77,24 @@
                 <version>${compas-scl-xsd.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.lfenergy.compas.core</groupId>
-                <artifactId>commons</artifactId>
-                <version>${compas-core.version}</version>
-                <scope>test</scope>
+                <groupId>org.glassfish.jaxb</groupId>
+                <artifactId>jaxb-runtime</artifactId>
+                <version>${jaxb-runtime.version}</version>
             </dependency>
             <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <version>${logback-classic.version}</version>
+                <groupId>jakarta.xml.bind</groupId>
+                <artifactId>jakarta.xml.bind-api</artifactId>
+                <version>${jakarta.xml.bind-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson-databind.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${junit-version}</version>
             </dependency>
             <dependency>
                 <groupId>org.assertj</groupId>
@@ -130,9 +102,29 @@
                 <version>${assertj.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson-databind.version}</version>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-junit-jupiter</artifactId>
+                <version>${mockito.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-beanutils</groupId>
+                <artifactId>commons-beanutils</artifactId>
+                <version>${commons-beanutils.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -150,6 +142,7 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven-compiler-plugin.version}</version>
                     <configuration>
+                        <release>${java.version}</release>
                         <source>${java.version}</source>
                         <target>${java.version}</target>
                     </configuration>
