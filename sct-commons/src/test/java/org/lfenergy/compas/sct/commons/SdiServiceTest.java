@@ -22,7 +22,7 @@ class SdiServiceTest {
     @Test
     void getSdis() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TDOI tdoi = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst().getLN().getFirst().getDOI().getFirst();
 
         //When
@@ -38,7 +38,7 @@ class SdiServiceTest {
     @Test
     void getFilteredSdis() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TDOI tdoi = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst().getLN().getFirst().getDOI().getFirst();
 
         //When
@@ -54,7 +54,7 @@ class SdiServiceTest {
     @Test
     void findSdi() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TDOI tdoi = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst().getLN().getFirst().getDOI().getFirst();
 
         //When
@@ -69,7 +69,7 @@ class SdiServiceTest {
     @Test
     void getSdis_in_sdi() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TSDI tsdi = (TSDI) std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst().getLN().getFirst().getDOI().get(2).getSDIOrDAI().getFirst();
 
         //When
@@ -85,7 +85,7 @@ class SdiServiceTest {
     @Test
     void getFilteredSdis_in_sdi() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TSDI sdi = (TSDI) std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst().getLN().getFirst().getDOI().get(2).getSDIOrDAI().getFirst();
 
         //When
@@ -101,7 +101,7 @@ class SdiServiceTest {
     @Test
     void findSdi_in_sdi() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TSDI sdi = (TSDI) std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst().getLN().getFirst().getDOI().get(2).getSDIOrDAI().getFirst();
 
         //When

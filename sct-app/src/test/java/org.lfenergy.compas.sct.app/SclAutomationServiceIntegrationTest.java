@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
+import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertSclValidateXsd;
 
 class SclAutomationServiceIntegrationTest {
 
@@ -54,8 +54,8 @@ class SclAutomationServiceIntegrationTest {
     @Test
     void createSCD_should_return_generatedSCD() {
         // Given
-        SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/scd.xml");
-        SCL std = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SCL ssd = SclTestMarshaller.getSCLFromResource("scd-ied-dtt-com-import-stds/scd.xml");
+        SCL std = SclTestMarshaller.getSCLFromResource("scd-ied-dtt-com-import-stds/std.xml");
         // When
         SCL scd = sclAutomationService.createSCD(ssd, headerDTO, List.of(std));
         // Then
@@ -65,7 +65,7 @@ class SclAutomationServiceIntegrationTest {
         assertThat(scd.getIED()).hasSize(1);
         assertThat(scd.getDataTypeTemplates()).isNotNull();
         assertThat(scd.getCommunication().getSubNetwork()).hasSize(2);
-        assertIsMarshallable(scd);
+        assertSclValidateXsd(scd);
     }
 
     @Test
@@ -76,17 +76,17 @@ class SclAutomationServiceIntegrationTest {
         historyItem.setWho("me");
         historyItem.setWhy("because");
         headerDTO.getHistoryItems().add(historyItem);
-        SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
-        SCL std1 = SclTestMarshaller.getSCLFromFile("/std_1.xml");
-        SCL std2 = SclTestMarshaller.getSCLFromFile("/std_2.xml");
-        SCL std3 = SclTestMarshaller.getSCLFromFile("/std_3.xml");
+        SCL ssd = SclTestMarshaller.getSCLFromResource("scd-substation-import-ssd/ssd.xml");
+        SCL std1 = SclTestMarshaller.getSCLFromResource("std_1.xml");
+        SCL std2 = SclTestMarshaller.getSCLFromResource("std_2.xml");
+        SCL std3 = SclTestMarshaller.getSCLFromResource("std_3.xml");
         // When
         SCL scd = sclAutomationService.createSCD(ssd, headerDTO, List.of(std1, std2, std3));
         // Then
         assertThat(scd.getHeader().getId()).isNotNull();
         assertThat(scd.getHeader().getHistory().getHitem()).hasSize(1);
         assertThat(scd.getSubstation()).hasSize(1);
-        assertIsMarshallable(scd);
+        assertSclValidateXsd(scd);
     }
 
     @Test
@@ -101,23 +101,23 @@ class SclAutomationServiceIntegrationTest {
         historyItemBis.setWho("me bis");
         historyItemBis.setWhy("because bis");
         headerDTO.getHistoryItems().addAll(Arrays.asList(historyItem, historyItemBis));
-        SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
-        SCL std1 = SclTestMarshaller.getSCLFromFile("/std_1.xml");
-        SCL std2 = SclTestMarshaller.getSCLFromFile("/std_2.xml");
-        SCL std3 = SclTestMarshaller.getSCLFromFile("/std_3.xml");
+        SCL ssd = SclTestMarshaller.getSCLFromResource("scd-substation-import-ssd/ssd.xml");
+        SCL std1 = SclTestMarshaller.getSCLFromResource("std_1.xml");
+        SCL std2 = SclTestMarshaller.getSCLFromResource("std_2.xml");
+        SCL std3 = SclTestMarshaller.getSCLFromResource("std_3.xml");
         // When
         SCL scd = sclAutomationService.createSCD(ssd, headerDTO, List.of(std1, std2, std3));
         // Then
         assertThat(scd.getHeader().getId()).isNotNull();
         assertThat(scd.getHeader().getHistory().getHitem()).hasSize(1);
         assertThat(scd.getHeader().getHistory().getHitem().getFirst().getWhat()).isEqualTo("what");
-        assertIsMarshallable(scd);
+        assertSclValidateXsd(scd);
     }
 
     @Test
     void createSCD_whenSSDWithoutSubstation_shouldThrowException() {
         // Given
-        SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd_without_substations.xml");
+        SCL ssd = SclTestMarshaller.getSCLFromResource("scd-substation-import-ssd/ssd_without_substations.xml");
         // When & Then
         List<SCL> stdListEmpty = List.of();
         assertThatThrownBy(() -> sclAutomationService.createSCD(ssd, headerDTO, stdListEmpty))
@@ -132,7 +132,7 @@ class SclAutomationServiceIntegrationTest {
         historyItem.setWho("me");
         historyItem.setWhy("because");
         headerDTO.getHistoryItems().add(historyItem);
-        SCL std1 = SclTestMarshaller.getSCLFromFile("/std_1.xml");
+        SCL std1 = SclTestMarshaller.getSCLFromResource("std_1.xml");
         List<SCL> stdList = List.of(std1);
 
         // When & Then
@@ -143,8 +143,8 @@ class SclAutomationServiceIntegrationTest {
     @Test
     void createSCD_whenheaderDTOIsNull_shouldThrowException() {
         // Given
-        SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
-        SCL std1 = SclTestMarshaller.getSCLFromFile("/std_1.xml");
+        SCL ssd = SclTestMarshaller.getSCLFromResource("scd-substation-import-ssd/ssd.xml");
+        SCL std1 = SclTestMarshaller.getSCLFromResource("std_1.xml");
         List<SCL> stdList = List.of(std1);
 
         // When & Then
@@ -155,8 +155,8 @@ class SclAutomationServiceIntegrationTest {
     @Test
     void createSCD_should_delete_ControlBlocks_DataSet_and_ExtRef_src_attributes() {
         // Given
-        SCL ssd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/ssd.xml");
-        SCL std = SclTestMarshaller.getSCLFromFile("/scl-remove-controlBlocks-dataSet-extRefSrc/scl-with-control-blocks.xml");
+        SCL ssd = SclTestMarshaller.getSCLFromResource("scd-ied-dtt-com-import-stds/ssd.xml");
+        SCL std = SclTestMarshaller.getSCLFromResource("scl-remove-controlBlocks-dataSet-extRefSrc/scl-with-control-blocks.xml");
         // When
         SCL scd = sclAutomationService.createSCD(ssd, headerDTO, List.of(std));
         // Then
@@ -170,7 +170,7 @@ class SclAutomationServiceIntegrationTest {
         assertThat(ln0.getDataSet()).isEmpty();
         assertThat(ln0.getInputs().getExtRef()).hasSize(2);
         assertThat(ln0.getInputs().getExtRef().getFirst().isSetSrcLDInst()).isFalse();
-        assertIsMarshallable(scd);
+        assertSclValidateXsd(scd);
     }
 
 }

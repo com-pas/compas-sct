@@ -12,18 +12,20 @@ import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.*;
+import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDa;
 import static org.lfenergy.compas.sct.commons.testhelpers.DataTypeUtils.createDo;
@@ -37,7 +39,7 @@ class SclElementsProviderServiceTest {
     @Test
     void getExtRefBinders_whenExtRefNotExist_shouldThrowScdException() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_binders_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-srv-scd-extref-cb/scd_get_binders_test.xml");
 
         ExtRefSignalInfo signalInfo = createSignalInfo("Do11.sdo11", "da11.bda111.bda112.bda113", "INT_ADDR11");
         signalInfo.setPLN("ANCR");
@@ -50,7 +52,7 @@ class SclElementsProviderServiceTest {
     @Test
     void getExtRefBinders_whenExtRefAndDOExist_shouldReturnSortedListBindingInfo() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_binders_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-srv-scd-extref-cb/scd_get_binders_test.xml");
 
         ExtRefSignalInfo signalInfo = createSignalInfo(
                 "Do11.sdo11", "da11.bda111.bda112.bda113", "INT_ADDR11"
@@ -80,19 +82,19 @@ class SclElementsProviderServiceTest {
     @Tag("issue-321")
     void getExtRefSourceInfo_whenExtRefMatchNoFCDA_shouldReturnEmptyList() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
         String iedName = "IED_NAME2";
         String ldInst = "LD_INST21";
         String lnClass = TLLN0Enum.LLN_0.value();
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
         // When Then
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iedAdapter.findLDeviceAdapterByLdInst(ldInst).get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iedAdapter.findLDeviceAdapterByLdInst(ldInst).orElseThrow());
         LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
         List<TExtRef> extRefs = ln0Adapter.getExtRefs(null);
         assertThat(extRefs).isNotEmpty();
 
-        ExtRefInfo extRefInfo = new ExtRefInfo(extRefs.get(0));
+        ExtRefInfo extRefInfo = new ExtRefInfo(extRefs.getFirst());
 
         extRefInfo.setHolderIEDName(iedName);
         extRefInfo.setHolderLDInst(ldInst);
@@ -109,19 +111,19 @@ class SclElementsProviderServiceTest {
     @Tag("issue-321")
     void getExtRefSourceInfo_whenExtRefMatchFCDA_shouldReturnListOfControlBlocks() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/issue_175_scd_get_cbs_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-srv-scd-extref-cb/issue_175_scd_get_cbs_test.xml");
         String iedName = "IED_NAME2";
         String ldInst = "LD_INST21";
         String lnClass = TLLN0Enum.LLN_0.value();
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
         // When Then
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iedAdapter.findLDeviceAdapterByLdInst(ldInst).get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iedAdapter.findLDeviceAdapterByLdInst(ldInst).orElseThrow());
         LN0Adapter ln0Adapter = lDeviceAdapter.getLN0Adapter();
         List<TExtRef> extRefs = ln0Adapter.getExtRefs(null);
         assertThat(extRefs).isNotEmpty();
 
-        ExtRefInfo extRefInfo = new ExtRefInfo(extRefs.get(0));
+        ExtRefInfo extRefInfo = new ExtRefInfo(extRefs.getFirst());
 
         extRefInfo.setHolderIEDName(iedName);
         extRefInfo.setHolderLDInst(ldInst);
@@ -132,13 +134,13 @@ class SclElementsProviderServiceTest {
 
         //Then
         assertThat(controlBlocks).hasSize(1);
-        assertThat(controlBlocks.get(0).getName()).isEqualTo("goose2");
+        assertThat(controlBlocks.getFirst().getName()).isEqualTo("goose2");
     }
 
     @Test
     void getDAI_should_return_all_dai_when_notUpdatable() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-srv-import-ieds/ied_1_test.xml");
         // When
         Set<DataAttributeRef> result = sclElementsProviderService.getDAI(scd, "IED_NAME1", "LD_INST12", new DataAttributeRef(), false);
         // THEN
@@ -148,7 +150,7 @@ class SclElementsProviderServiceTest {
     @Test
     void getDAI_should_return_all_dai_when_updatable() {
         // given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-srv-import-ieds/ied_1_test.xml");
 
         // when
         Set<DataAttributeRef> result = sclElementsProviderService.getDAI(scd, "IED_NAME1", "LD_INST12", new DataAttributeRef(), true);
@@ -185,7 +187,7 @@ class SclElementsProviderServiceTest {
     @Test
     void getDAI_should_aggregate_attribute_from_DAI() {
         // given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_test_aggregate_DAI.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-srv-import-ieds/ied_test_aggregate_DAI.xml");
 
         // when
         Set<DataAttributeRef> dais = sclElementsProviderService.getDAI(scd, "VirtualBCU", "LDMODEXPF", new DataAttributeRef(), false);
@@ -217,7 +219,7 @@ class SclElementsProviderServiceTest {
     @Test
     void getDAI_when_LDevice_not_found_should_throw_exception() {
         // given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-srv-import-ieds/ied_1_test.xml");
 
         // when & then
         DataAttributeRef dataAttributeRef = new DataAttributeRef();
@@ -228,7 +230,7 @@ class SclElementsProviderServiceTest {
     @Test
     void getDAI_should_filter_updatable_DA() {
         // given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_test_updatable_DAI.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-srv-import-ieds/ied_test_updatable_DAI.xml");
 
         // when
         Set<DataAttributeRef> dais = sclElementsProviderService.getDAI(scd, "VirtualBCU", "LDMODEXPF", new DataAttributeRef(), true);
@@ -260,7 +262,7 @@ class SclElementsProviderServiceTest {
     @Test
     void getDAI_should_filter_updatable_BDA() {
         // given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_test_updatable_DAI.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-srv-import-ieds/ied_test_updatable_DAI.xml");
 
         // when
         Set<DataAttributeRef> dais = sclElementsProviderService.getDAI(scd, "VirtualBCU", "LDMODEXPF", new DataAttributeRef(), true);
@@ -302,7 +304,7 @@ class SclElementsProviderServiceTest {
     @Test
     void getDAI_should_filter_updatable_DA_with_sGroup_Val() {
         // given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_test_updatable_DAI.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-srv-import-ieds/ied_test_updatable_DAI.xml");
 
         // when
         Set<DataAttributeRef> dais = sclElementsProviderService.getDAI(scd, "VirtualBCU", "LDCAP", new DataAttributeRef(), true);
@@ -321,7 +323,7 @@ class SclElementsProviderServiceTest {
     @Test
     void getDAI_should_filter_updatable_DA_with_sGroup_Val_without_ConfSg() {
         // given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_test_updatable_DAI.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-srv-import-ieds/ied_test_updatable_DAI.xml");
 
         // when
         Set<DataAttributeRef> dais = sclElementsProviderService.getDAI(scd, "VirtualBCU", "LDMOD", new DataAttributeRef(), true);
@@ -333,7 +335,7 @@ class SclElementsProviderServiceTest {
     @Test
     void getEnumTypeValues_whenCalledWithUnknownId_shouldReturnException() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-srv-import-ieds/ied_1_test.xml");
         // When Then
         assertThatThrownBy(() -> sclElementsProviderService.getEnumTypeValues(scd, "unknownID"))
                 .isInstanceOf(ScdException.class)
@@ -343,7 +345,7 @@ class SclElementsProviderServiceTest {
     @Test
     void getEnumTypeValues_whenCalledWithKnownId_shouldNotReturnException() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-srv-import-ieds/ied_1_test.xml");
         // When
         var enumList = assertDoesNotThrow(() -> sclElementsProviderService.getEnumTypeValues(scd, "RecCycModKind"));
         // Then

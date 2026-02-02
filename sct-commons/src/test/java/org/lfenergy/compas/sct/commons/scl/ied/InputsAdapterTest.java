@@ -22,11 +22,12 @@ import org.lfenergy.compas.sct.commons.testhelpers.FCDARecord;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 import org.opentest4j.AssertionFailedError;
 
-import java.util.*;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.junit.jupiter.api.Named.named;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
 
@@ -59,9 +60,9 @@ class InputsAdapterTest {
     @Test
     void updateAllSourceDataSetsAndControlBlocks_should_report_Target_Ied_missing_Private_compasBay_errors() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_ied_errors.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_ied_errors.xml");
         InputsAdapter inputsAdapter = findInputs(scd, "IED_NAME1", "LD_INST11");
-        DACOMM dacomm = DaComTestMarshallerHelper.getDACOMMFromFile("/cb_comm/Template_DA_COMM_v1.xml");
+        DACOMM dacomm = DaComTestMarshallerHelper.getDACOMMFromResource("cb_comm/Template_DA_COMM_v1.xml");
         // When
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks(dacomm.getFCDAs().getFCDA());
         // Then
@@ -74,9 +75,9 @@ class InputsAdapterTest {
     @Test
     void updateAllSourceDataSetsAndControlBlocks_should_report_Source_Ied_missing_Private_compasBay_errors() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_ied_errors.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_ied_errors.xml");
         InputsAdapter inputsAdapter = findInputs(scd, "IED_NAME3", "LD_INST31");
-        DACOMM dacomm = DaComTestMarshallerHelper.getDACOMMFromFile("/cb_comm/Template_DA_COMM_v1.xml");
+        DACOMM dacomm = DaComTestMarshallerHelper.getDACOMMFromResource("cb_comm/Template_DA_COMM_v1.xml");
         // When
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks(dacomm.getFCDAs().getFCDA());
         // Then
@@ -90,9 +91,9 @@ class InputsAdapterTest {
     @Test
     void updateAllSourceDataSetsAndControlBlocks_should_report_ExtRef_attribute_missing() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_extref_errors.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_extref_errors.xml");
         InputsAdapter inputsAdapter = findInputs(scd, "IED_NAME1", "LD_INST11");
-        DACOMM dacomm = DaComTestMarshallerHelper.getDACOMMFromFile("/cb_comm/Template_DA_COMM_v1.xml");
+        DACOMM dacomm = DaComTestMarshallerHelper.getDACOMMFromResource("cb_comm/Template_DA_COMM_v1.xml");
         // When
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks(dacomm.getFCDAs().getFCDA());
         // Then
@@ -112,9 +113,9 @@ class InputsAdapterTest {
     @Test
     void updateAllSourceDataSetsAndControlBlocks_should_succeed() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         InputsAdapter inputsAdapter = findInputs(scd, "IED_NAME1", "LD_INST11");
-        DACOMM dacomm = DaComTestMarshallerHelper.getDACOMMFromFile("/cb_comm/Template_DA_COMM_v1.xml");
+        DACOMM dacomm = DaComTestMarshallerHelper.getDACOMMFromResource("cb_comm/Template_DA_COMM_v1.xml");
         // When
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks(dacomm.getFCDAs().getFCDA());
         // Then
@@ -126,7 +127,7 @@ class InputsAdapterTest {
     void updateAllSourceDataSetsAndControlBlocks_should_create_dataset_and_fcda_for_valid_extRef(String extRefDesc, String dataSetPath,
                                                                                                  List<FCDARecord> expectedFcda) {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         InputsAdapter inputsAdapter = keepOnlyThisExtRef(sclRootAdapter, extRefDesc);
         String[] splitPath = dataSetPath.split("/");
@@ -136,7 +137,7 @@ class InputsAdapterTest {
         String expectedSourceIedName = splitPath[IED_NAME_PART];
         String expectedSourceLDeviceInst = splitPath[LDEVICE_INST_PART];
         String expectedDataSetName = splitPath[DATASET_NAME_PART];
-        DACOMM dacomm = DaComTestMarshallerHelper.getDACOMMFromFile("/cb_comm/Template_DA_COMM_v1.xml");
+        DACOMM dacomm = DaComTestMarshallerHelper.getDACOMMFromResource("cb_comm/Template_DA_COMM_v1.xml");
         // When
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks(dacomm.getFCDAs().getFCDA());
         // Then
@@ -190,10 +191,10 @@ class InputsAdapterTest {
     @MethodSource("provideDoNotCreateFCDA")
     void updateAllSourceDataSetsAndControlBlocks_when_no_valid_source_Da_found_should_not_create_FCDA(String extRefDesc) {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         InputsAdapter inputsAdapter = keepOnlyThisExtRef(sclRootAdapter, extRefDesc);
-        DACOMM dacomm = DaComTestMarshallerHelper.getDACOMMFromFile("/cb_comm/Template_DA_COMM_v1.xml");
+        DACOMM dacomm = DaComTestMarshallerHelper.getDACOMMFromResource("cb_comm/Template_DA_COMM_v1.xml");
         // When
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks(dacomm.getFCDAs().getFCDA());
         // Then
@@ -219,13 +220,13 @@ class InputsAdapterTest {
     @Test
     void updateAllSourceDataSetsAndControlBlocks_when_AccessPoint_does_not_have_dataset_creation_capability_should_report_error() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         InputsAdapter inputsAdapter = keepOnlyThisExtRef(sclRootAdapter, "test bay internal");
-        TExtRef extRef = inputsAdapter.getCurrentElem().getExtRef().get(0);
+        TExtRef extRef = inputsAdapter.getCurrentElem().getExtRef().getFirst();
         LDeviceAdapter sourceLDevice = findLDevice(sclRootAdapter.getCurrentElem(), extRef.getIedName(), extRef.getLdInst());
         sourceLDevice.getAccessPoint().setServices(new TServices());
-        DACOMM dacomm = DaComTestMarshallerHelper.getDACOMMFromFile("/cb_comm/Template_DA_COMM_v1.xml");
+        DACOMM dacomm = DaComTestMarshallerHelper.getDACOMMFromResource("cb_comm/Template_DA_COMM_v1.xml");
         // When
         List<SclReportItem> sclReportItems = inputsAdapter.updateAllSourceDataSetsAndControlBlocks(dacomm.getFCDAs().getFCDA());
         // Then
@@ -297,8 +298,8 @@ class InputsAdapterTest {
     })
     void updateAllSourceDataSetsAndControlBlocks_should_use_goose_type(String extRef, String expectedDataSetName) {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success_test_goose_type.xml");
-        DACOMM dacomm = DaComTestMarshallerHelper.getDACOMMFromFile("/cb_comm/Template_DA_COMM_v1.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/scd_create_dataset_and_controlblocks_success_test_goose_type.xml");
+        DACOMM dacomm = DaComTestMarshallerHelper.getDACOMMFromResource("cb_comm/Template_DA_COMM_v1.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         InputsAdapter inputsAdapter = keepOnlyThisExtRef(sclRootAdapter, extRef);
         // When

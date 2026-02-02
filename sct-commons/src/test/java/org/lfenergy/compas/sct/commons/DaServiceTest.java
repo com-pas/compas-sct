@@ -21,7 +21,7 @@ class DaServiceTest {
     @Test
     void getDAs() {
         //Given
-        TDataTypeTemplates dataTypeTemplates = SclTestMarshaller.getSCLFromFile("/std/std_sample.std").getDataTypeTemplates();
+        TDataTypeTemplates dataTypeTemplates = SclTestMarshaller.getSCLFromResource("std/std_sample.std").getDataTypeTemplates();
         TDOType tdoType = dataTypeTemplates.getDOType().getFirst();
 
         //When
@@ -36,7 +36,7 @@ class DaServiceTest {
     @Test
     void getFilteredDAs() {
         //Given
-        TDataTypeTemplates dataTypeTemplates = SclTestMarshaller.getSCLFromFile("/std/std_sample.std").getDataTypeTemplates();
+        TDataTypeTemplates dataTypeTemplates = SclTestMarshaller.getSCLFromResource("std/std_sample.std").getDataTypeTemplates();
         TDOType tdoType = dataTypeTemplates.getDOType().getFirst();
 
         //When
@@ -52,7 +52,7 @@ class DaServiceTest {
     @Test
     void findDA() {
         //Given
-        TDataTypeTemplates dataTypeTemplates = SclTestMarshaller.getSCLFromFile("/std/std_sample.std").getDataTypeTemplates();
+        TDataTypeTemplates dataTypeTemplates = SclTestMarshaller.getSCLFromResource("std/std_sample.std").getDataTypeTemplates();
         TDOType tdoType = dataTypeTemplates.getDOType().getFirst();
 
         //When
@@ -67,7 +67,7 @@ class DaServiceTest {
     @Test
     void findDA_should_find_by_name() {
         //Given
-        TDataTypeTemplates dataTypeTemplates = SclTestMarshaller.getSCLFromFile("/std/std_sample.std").getDataTypeTemplates();
+        TDataTypeTemplates dataTypeTemplates = SclTestMarshaller.getSCLFromResource("std/std_sample.std").getDataTypeTemplates();
         TDOType tdoType = dataTypeTemplates.getDOType().getFirst();
 
         //When

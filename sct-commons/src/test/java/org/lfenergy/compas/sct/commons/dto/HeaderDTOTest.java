@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons.dto;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.THitem;
 
@@ -23,8 +24,8 @@ class HeaderDTOTest {
         assertThat(headerDTO.getId()).isEqualTo(id);
         assertThat(headerDTO.getVersion()).isEqualTo("1.0");
         assertThat(headerDTO.getRevision()).isEqualTo("1.0");
-        assertThat(headerDTO.getHistoryItems()).asList().isNotEmpty();
-        HeaderDTO.HistoryItem historyItem = headerDTO.getHistoryItems().get(0);
+        assertThat(headerDTO.getHistoryItems()).asInstanceOf(InstanceOfAssertFactories.LIST).isNotEmpty();
+        HeaderDTO.HistoryItem historyItem = headerDTO.getHistoryItems().getFirst();
         assertThat(historyItem.getRevision()).isEqualTo("1.0");
         assertThat(historyItem.getVersion()).isEqualTo("1.0");
         assertThat(historyItem.getWhat()).isEqualTo("what");

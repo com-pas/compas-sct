@@ -36,7 +36,7 @@ class ControlBlockAdapterTest {
     @Tag("issue-321")
     void addTargetIfNotExists_should_add_target(){
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-ln-adapter/scd_with_ln.xml");
         LN0Adapter ln0 = findLn0(scd, "IED_NAME1", "LD_INST11");
         // When
         ln0.createDataSetIfNotExists("datSet", ControlBlockEnum.GSE);
@@ -61,7 +61,7 @@ class ControlBlockAdapterTest {
     @Test
     void addTargetIfNotExists_should_create_rptEnabled_of_reportControl() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-ln-adapter/scd_with_ln.xml");
         LN0Adapter ln0 = findLn0(scd, "IED_NAME1", "LD_INST11");
         TDataSet newDataSet = new TDataSet();
         newDataSet.setName("datSet");

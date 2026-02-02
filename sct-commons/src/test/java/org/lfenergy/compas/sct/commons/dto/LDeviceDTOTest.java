@@ -47,12 +47,12 @@ class LDeviceDTOTest {
     @Tag("issue-321")
     void from_whenCalledWithLDeviceAdapter_shouldFillValues() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         // When Then
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
         // When Then
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iAdapter.findLDeviceAdapterByLdInst("LD_INS1").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.findLDeviceAdapterByLdInst("LD_INS1").orElseThrow());
 
         // When
         LDeviceDTO lDeviceDTO = LDeviceDTO.from(lDeviceAdapter,null);

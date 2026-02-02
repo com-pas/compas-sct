@@ -16,8 +16,9 @@ import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+
 import static org.assertj.core.api.Assertions.*;
-import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertIsMarshallable;
+import static org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller.assertSclValidateXsd;
 
 class SclRootAdapterTest {
 
@@ -38,7 +39,7 @@ class SclRootAdapterTest {
         assertThat(sclRootAdapter.getSclRelease()).isEqualTo(SclRootAdapter.RELEASE);
         assertThat(sclRootAdapter.getSclVersion()).isEqualTo(SclRootAdapter.VERSION);
         assertThat(sclRootAdapter.getSclRevision()).isEqualTo(SclRootAdapter.REVISION);
-        assertIsMarshallable(sclRootAdapter.getCurrentElem());
+        assertSclValidateXsd(sclRootAdapter.getCurrentElem());
         // Given
         SCL scd = new SCL();
         // When Then
@@ -52,9 +53,9 @@ class SclRootAdapterTest {
     @Tag("issue-321")
     void testAddIED() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/add_ied_test.xml");
-        SCL icd1 = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/icd1_to_add_test.xml");
-        SCL icd2 = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/icd2_to_add_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-root-test-schema-conf/add_ied_test.xml");
+        SCL icd1 = SclTestMarshaller.getSCLFromResource("scl-root-test-schema-conf/icd1_to_add_test.xml");
+        SCL icd2 = SclTestMarshaller.getSCLFromResource("scl-root-test-schema-conf/icd2_to_add_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         SCL icd = new SCL();
         //When Then
@@ -71,13 +72,13 @@ class SclRootAdapterTest {
         //When Then
         assertThatCode(() -> sclRootAdapter.addIED(icd2, "IED_NAME2"))
                 .doesNotThrowAnyException();
-        assertIsMarshallable(scd);
+        assertSclValidateXsd(scd);
     }
 
     @Test
     void addPrivate_should_create_private() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-root-test-schema-conf/add_ied_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-root-test-schema-conf/add_ied_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         TPrivate tPrivate = new TPrivate();
         tPrivate.setType("Private Type");
@@ -87,7 +88,7 @@ class SclRootAdapterTest {
         sclRootAdapter.addPrivate(tPrivate);
         //Then
         assertThat(sclRootAdapter.getCurrentElem().getPrivate()).hasSize(1);
-        assertIsMarshallable(scd);
+        assertSclValidateXsd(scd);
     }
 
     @Test

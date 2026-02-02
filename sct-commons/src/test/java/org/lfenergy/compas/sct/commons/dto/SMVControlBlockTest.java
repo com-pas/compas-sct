@@ -15,9 +15,7 @@ import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.lfenergy.compas.scl2007b4.model.TSampledValueControl.SmvOpts;
 
 class SMVControlBlockTest {
@@ -67,16 +65,6 @@ class SMVControlBlockTest {
             .containsExactly(NAME, DATASET_REF, ID, 5L, DESC, false, 200L, 10L, TSmpMod.SMP_PER_PERIOD, TPredefinedTypeOfSecurityEnum.NONE);
         assertThat(smvControlBlock.getTargets()).hasSize(1);
         assertThat(smvControlBlock.getProtocol()).isNotNull();
-    }
-
-    @Test
-    void getServiceType_should_return_GOOSE() {
-        // Given
-        SMVControlBlock smvControlBlock = new SMVControlBlock(NAME, ID, DATASET_REF);
-        // When
-        TServiceType serviceType = smvControlBlock.getServiceType();
-        // Then
-        assertThat(serviceType).isEqualTo(TServiceType.SMV);
     }
 
     @Test

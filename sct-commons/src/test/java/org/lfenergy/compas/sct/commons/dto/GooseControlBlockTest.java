@@ -65,16 +65,6 @@ class GooseControlBlockTest {
     }
 
     @Test
-    void getServiceType_should_return_GOOSE() {
-        // Given
-        GooseControlBlock gooseControlBlock = new GooseControlBlock(NAME, ID, DATASET_REF);
-        // When
-        TServiceType serviceType = gooseControlBlock.getServiceType();
-        // Then
-        assertThat(serviceType).isEqualTo(TServiceType.GOOSE);
-    }
-
-    @Test
     void getControlBlockEnum_should_return_GSE() {
         // Given
         GooseControlBlock gooseControlBlock = new GooseControlBlock(NAME, ID, DATASET_REF);

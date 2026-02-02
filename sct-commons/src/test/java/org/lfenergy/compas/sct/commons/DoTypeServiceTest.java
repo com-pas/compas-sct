@@ -4,7 +4,6 @@
 
 package org.lfenergy.compas.sct.commons;
 
-import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl2007b4.model.*;
@@ -26,7 +25,7 @@ class DoTypeServiceTest {
     @Test
     void getDoTypes() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TDataTypeTemplates dataTypeTemplates = std.getDataTypeTemplates();
 
         //When
@@ -40,7 +39,7 @@ class DoTypeServiceTest {
     @Test
     void getFilteredDoTypes() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TDataTypeTemplates dataTypeTemplates = std.getDataTypeTemplates();
 
         //When
@@ -59,7 +58,7 @@ class DoTypeServiceTest {
     @Test
     void findDoType() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TDataTypeTemplates dataTypeTemplates = std.getDataTypeTemplates();
 
         //When
@@ -74,7 +73,7 @@ class DoTypeServiceTest {
     @Test
     void findDoType_should_find_by_id() {
         //Given
-        TDataTypeTemplates dataTypeTemplates = SclTestMarshaller.getSCLFromFile("/std/std_sample.std").getDataTypeTemplates();
+        TDataTypeTemplates dataTypeTemplates = SclTestMarshaller.getSCLFromResource("std/std_sample.std").getDataTypeTemplates();
         String doTypeId = "RTE_X_X_X_48BA5C40D0913654FA5291A28C0D9716_DPL_V1.0.0";
 
         //When
@@ -89,7 +88,7 @@ class DoTypeServiceTest {
     @Test
     void getAllSDOLinkedToDa_should_return_expected_dataReference() {
         //Given
-        String SCD_DTT_DO_SDO_DA_BDA = "/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda_test.xml";
+        String SCD_DTT_DO_SDO_DA_BDA = "dtt-test-schema-conf/scd_dtt_do_sdo_da_bda_test.xml";
         TDataTypeTemplates dtt = initDttFromFile(SCD_DTT_DO_SDO_DA_BDA);
 
         TDOType tdoType = doTypeService.findDoType(dtt, tdoType1 -> tdoType1.getId()
@@ -132,7 +131,7 @@ class DoTypeServiceTest {
     @Test
     void getAllSDOLinkedToDa_should_return_all_dai() {
         // GIVEN
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_1_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-srv-import-ieds/ied_1_test.xml");
         TDataTypeTemplates dtt = scd.getDataTypeTemplates();
 
         TDOType tdoType = doTypeService.findDoType(dtt, tdoType1 -> tdoType1.getId()
@@ -146,7 +145,7 @@ class DoTypeServiceTest {
         // Then
         assertThat(list)
                 .hasSize(811)
-                .allMatch(dataAttributeRef -> StringUtils.startsWith(dataAttributeRef.dataObject().getDoName(), "firstDONAME"))
+                .allMatch(dataAttributeRef -> dataAttributeRef.dataObject().getDoName().startsWith("firstDONAME"))
                 .areExactly(1, new Condition<>(dataAttributeRef -> dataAttributeRef.dataAttribute().getDaName().equals("da1"), "Il n'y a que certaines réponses contenant da1"))
                 .areExactly(270, new Condition<>(dataAttributeRef -> dataAttributeRef.dataAttribute().getDaName().equals("da11"), "Il n'y a que certaines réponses contenant da11"))
                 .areExactly(270, new Condition<>(dataAttributeRef -> dataAttributeRef.dataAttribute().getDaName().equals("da22"), "Il n'y a que certaines réponses contenant da22"))

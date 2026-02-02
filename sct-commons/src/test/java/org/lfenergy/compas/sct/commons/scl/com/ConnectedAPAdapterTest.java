@@ -79,7 +79,7 @@ class ConnectedAPAdapterTest {
         subNetwork.getConnectedAP().add(connectedAP);
         when(subNetworkAdapter.getCurrentElem()).thenReturn(subNetwork);
         ConnectedAPAdapter connectedAPAdapter = new ConnectedAPAdapter(subNetworkAdapter, connectedAP);
-        SCL icd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_with_filled_communication.xml");
+        SCL icd = SclTestMarshaller.getSCLFromResource("scl-srv-import-ieds/ied_with_filled_communication.xml");
         SclRootAdapter icdRootAdapter = new SclRootAdapter(icd);
         // WHEN
         connectedAPAdapter.copyAddressAndPhysConnFromIcd(icdRootAdapter.getCurrentElem());
@@ -98,7 +98,7 @@ class ConnectedAPAdapterTest {
         subNetwork.getConnectedAP().add(connectedAP);
         when(subNetworkAdapter.getCurrentElem()).thenReturn(subNetwork);
         ConnectedAPAdapter connectedAPAdapter = new ConnectedAPAdapter(subNetworkAdapter, connectedAP);
-        SCL icd = SclTestMarshaller.getSCLFromFile("/scl-srv-import-ieds/ied_with_filled_communication.xml");
+        SCL icd = SclTestMarshaller.getSCLFromResource("scl-srv-import-ieds/ied_with_filled_communication.xml");
         SclRootAdapter icdRootAdapter = new SclRootAdapter(icd);
         // WHEN
         connectedAPAdapter.copyAddressAndPhysConnFromIcd(icdRootAdapter.getCurrentElem());
@@ -146,7 +146,7 @@ class ConnectedAPAdapterTest {
             newDurationInMilliSec(5), newDurationInMilliSec(10));
         // Then
         assertThat(connectedAPAdapter.getCurrentElem().getGSE()).hasSize(1);
-        TGSE gse = connectedAPAdapter.getCurrentElem().getGSE().get(0);
+        TGSE gse = connectedAPAdapter.getCurrentElem().getGSE().getFirst();
         assertThat(gse.getLdInst()).isEqualTo("ldinst");
         assertThat(gse.getMinTime()).extracting(TDurationInMilliSec::getUnit, TDurationInMilliSec::getMultiplier, TDurationInMilliSec::getValue)
             .containsExactly("s", "m", new BigDecimal("5"));
@@ -169,7 +169,7 @@ class ConnectedAPAdapterTest {
             newDurationInMilliSec(30), newDurationInMilliSec(50));
         // Then
         assertThat(connectedAPAdapter.getCurrentElem().getGSE()).hasSize(1);
-        TGSE gse = connectedAPAdapter.getCurrentElem().getGSE().get(0);
+        TGSE gse = connectedAPAdapter.getCurrentElem().getGSE().getFirst();
         assertThat(gse.getLdInst()).isEqualTo("ldinst");
         assertThat(gse.getMinTime()).extracting(TDurationInMilliSec::getUnit, TDurationInMilliSec::getMultiplier, TDurationInMilliSec::getValue)
             .containsExactly("s", "m", new BigDecimal("30"));
@@ -187,7 +187,7 @@ class ConnectedAPAdapterTest {
         connectedAPAdapter.updateSmvOrCreateIfNotExists("ldinst", "cbName", List.of(SclConstructorHelper.newP("APPID", "0001")));
         // Then
         assertThat(connectedAPAdapter.getCurrentElem().getSMV()).hasSize(1);
-        TSMV smv = connectedAPAdapter.getCurrentElem().getSMV().get(0);
+        TSMV smv = connectedAPAdapter.getCurrentElem().getSMV().getFirst();
         assertThat(smv.getLdInst()).isEqualTo("ldinst");
         assertThat(smv.getAddress().getP()).extracting(TP::getType, TP::getValue)
             .containsExactly(Tuple.tuple("APPID", "0001"));
@@ -206,7 +206,7 @@ class ConnectedAPAdapterTest {
         connectedAPAdapter.updateSmvOrCreateIfNotExists("ldinst", "cbName", List.of(SclConstructorHelper.newP("APPID", "0004")));
         // Then
         assertThat(connectedAPAdapter.getCurrentElem().getSMV()).hasSize(1);
-        TSMV smv = connectedAPAdapter.getCurrentElem().getSMV().get(0);
+        TSMV smv = connectedAPAdapter.getCurrentElem().getSMV().getFirst();
         assertThat(smv.getLdInst()).isEqualTo("ldinst");
         assertThat(smv.getAddress().getP()).extracting(TP::getType, TP::getValue)
             .containsExactly(Tuple.tuple("APPID", "0004"));

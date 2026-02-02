@@ -37,7 +37,7 @@ import static org.mockito.Mockito.*;
 
 class LN0AdapterTest {
 
-    private static final String SCD_IED_U_TEST = "/ied-test-schema-conf/ied_unit_test.xml";
+    private static final String SCD_IED_U_TEST = "ied-test-schema-conf/ied_unit_test.xml";
     private static final String CB_NAME = "cbName";
     private static final String NEW_CB_ID_SEED = "newControlBlockId";
     private static final String NEW_CB_ID = "31CA70FACE2F62";
@@ -303,7 +303,7 @@ class LN0AdapterTest {
         List<ControlBlock> controlBlocks = ln0Adapter.getControlBlocksForMatchingFCDA(extRefInfo).toList();
         // Then
         assertThat(controlBlocks).hasSize(1);
-        assertThat(controlBlocks.getFirst().getServiceType()).isEqualTo(serviceType);
+        assertThat(controlBlocks.getFirst().getControlBlockEnum()).isEqualTo(ControlBlockEnum.from(serviceType));
     }
 
     private static Stream<Arguments> provideServiceType() {
@@ -423,7 +423,7 @@ class LN0AdapterTest {
     @Tag("issue-321")
     void testFindMatch() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile(SCD_IED_U_TEST);
+        SCL scd = SclTestMarshaller.getSCLFromResource(SCD_IED_U_TEST);
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         // When Then
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
@@ -519,7 +519,7 @@ class LN0AdapterTest {
     @Tag("issue-321")
     void testGetDAI() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         // When Then
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
@@ -548,7 +548,7 @@ class LN0AdapterTest {
     @Tag("issue-321")
     void getEnumValue_whenEnumUnknown_shouldReturnNothing() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         // When Then
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
@@ -565,7 +565,7 @@ class LN0AdapterTest {
     @Tag("issue-321")
     void getEnumValue_whenEnumKnown_shouldReturnEnumValues() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         // When Then
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
@@ -584,7 +584,7 @@ class LN0AdapterTest {
     @MethodSource("provideControlBlocks")
     void addControlBlock_should_add_ControlBlock(ControlBlock controlBlock) {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         // When Then
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
@@ -604,7 +604,7 @@ class LN0AdapterTest {
     @Tag("issue-321")
     void addControlBlock_should_add_ReportControlBlock() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         // When Then
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
@@ -625,7 +625,7 @@ class LN0AdapterTest {
     @Tag("issue-321")
     void addControlBlock_should_add_GooseControlBlock() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         // When Then
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
@@ -647,7 +647,7 @@ class LN0AdapterTest {
     @Tag("issue-321")
     void addControlBlock_should_add_SMVControlBlock() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         // When Then
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
@@ -669,7 +669,7 @@ class LN0AdapterTest {
     @Tag("issue-321")
     void addControlBlock_when_accessPoint_does_not_have_capability_should_throw_exception(ControlBlock controlBlock) {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
         LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iAdapter.getLDeviceAdapterByLdInst("LDSUIED"));
@@ -687,7 +687,7 @@ class LN0AdapterTest {
     @Tag("issue-321")
     void addControlBlock_when_controlBlock_already_exists_should_throw_exception(ControlBlock controlBlock) {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         // When Then
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
@@ -708,7 +708,7 @@ class LN0AdapterTest {
     @Tag("issue-321")
     void addControlBlock_when_dataSet_does_not_exist_should_throw_exception(ControlBlock controlBlock) {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-ied-dtt-com-import-stds/std.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         // When Then
         IEDAdapter iAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED4d4fe1a8cda64cf88a5ee4176a1a0eef"));
@@ -733,7 +733,7 @@ class LN0AdapterTest {
     @MethodSource("provideGetTControlsByType")
     void getTControlsByType_should_return_LN0_list_of_controls_for_this_class(Class<? extends TControl> tControlClass, Function<LN0, List<?>> getter) {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-ied-dtt-com-import-stds/std.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-ied-dtt-com-import-stds/std.xml");
         LN0Adapter ln0Adapter = findLn0(scd, "IED4d4fe1a8cda64cf88a5ee4176a1a0eef", "LDSUIED");
         // When
         List<? extends TControl> controlList = ln0Adapter.getTControlsByType(tControlClass);
@@ -764,7 +764,7 @@ class LN0AdapterTest {
     @Test
     void createDataSetIfNotExists_should_create_dataSet() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-ln-adapter/scd_with_ln.xml");
         LN0Adapter ln0 = findLn0(scd, "IED_NAME1", "LD_INST11");
         assertThat(ln0.getCurrentElem().getDataSet()).isEmpty();
         // When
@@ -780,7 +780,7 @@ class LN0AdapterTest {
     @Test
     void createDataSetIfNotExists_when_dataset_exists_should_not_create_dataset() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-ln-adapter/scd_with_ln.xml");
         LN0Adapter ln0 = findLn0(scd, "IED_NAME1", "LD_INST12");
         assertThat(ln0.getCurrentElem().getDataSet()).hasSize(1);
         // When
@@ -796,7 +796,7 @@ class LN0AdapterTest {
     @Test
     void createDataSetIfNotExists_when_ied_does_not_have_creation_capabilities_should_throw_exception() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-ln-adapter/scd_with_ln.xml");
         LN0Adapter ln0 = findLn0(scd, "IED_NAME2", "LD_INST21");
         // When & Then
         assertThatThrownBy(() -> ln0.createDataSetIfNotExists("existingDataSet", ControlBlockEnum.GSE))
@@ -807,7 +807,7 @@ class LN0AdapterTest {
     @Tag("issue-321")
     void createControlBlockIfNotExists_should_create_GSEControl() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-ln-adapter/scd_with_ln.xml");
         LN0Adapter sourceLn0 = findLn0(scd, "IED_NAME1", "LD_INST11");
         assertThat(sourceLn0.getCurrentElem().getDataSet()).isEmpty();
         final String NEW_DATASET_NAME = "newDataSet";
@@ -829,7 +829,7 @@ class LN0AdapterTest {
     @Tag("issue-321")
     void createControlBlockIfNotExists_should_create_SampledValueControl() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-ln-adapter/scd_with_ln.xml");
         LN0Adapter sourceLn0 = findLn0(scd, "IED_NAME1", "LD_INST11");
         assertThat(sourceLn0.getCurrentElem().getDataSet()).isEmpty();
         final String NEW_DATASET_NAME = "newDataSet";
@@ -858,7 +858,7 @@ class LN0AdapterTest {
     @Tag("issue-321")
     void createControlBlockIfNotExists_should_create_ReportControl() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-ln-adapter/scd_with_ln.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-ln-adapter/scd_with_ln.xml");
         LN0Adapter sourceLn0 = findLn0(scd, "IED_NAME1", "LD_INST11");
 
         assertThat(sourceLn0.getCurrentElem().getDataSet()).isEmpty();
@@ -981,7 +981,7 @@ class LN0AdapterTest {
     @Test
     void updateDoInRef_when_no_Val_in_DAI_purpose_should_return_error_message() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-test-update-inref/scd_update_inref_test.xml");
         LN0Adapter sourceLn0 = findLn0(scd, "IED_NAME1", "LD_Without_Val_in_DAI_purpose");
 
         // When
@@ -996,7 +996,7 @@ class LN0AdapterTest {
     @Test
     void updateDoInRef_when_DAI_name_purpose_not_compliant_should_not_treat_LN0() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-test-update-inref/scd_update_inref_test.xml");
         LN0Adapter sourceLn0 = findLn0(scd, "IED_NAME1", "LD_Without_purpose");
 
         // When
@@ -1012,7 +1012,7 @@ class LN0AdapterTest {
     @Tag("issue-321")
     void updateDoInRef_when_one_ExtRef_desc_matches_should_update_setSrcRef_and_not_setSrcCB() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-test-update-inref/scd_update_inref_test.xml");
         LN0Adapter sourceLn0 = findLn0(scd, "IED_NAME1", "LD_WITH_1_InRef_without_cbName");
         String doiNameInRef = "InRef7";
         // When
@@ -1038,7 +1038,7 @@ class LN0AdapterTest {
     @Test
     void updateDoInRef_when_one_ExtRef_desc_matches_should_update_setSrcRef_and_setSrcCB() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-test-update-inref/scd_update_inref_test.xml");
         LN0Adapter sourceLn0 = findLn0(scd, "IED_NAME1", "LD_WITH_1_InRef");
         String doiNameInRef = "InRef2";
         String originalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, SETSRCCB_DA_NAME);
@@ -1063,7 +1063,7 @@ class LN0AdapterTest {
     @Test
     void updateDoInRef_when_ExtRef_desc_matches_should_update_setSrcRef_and_setSrcCB_and_setTstRef_and_setTstCB() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-test-update-inref/scd_update_inref_test.xml");
         LN0Adapter sourceLn0 = findLn0(scd, "IED_NAME1", "LD_WITH_3_InRef");
         String doiNameInRef = "InRef3";
         String originalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, SETSRCCB_DA_NAME);
@@ -1099,7 +1099,7 @@ class LN0AdapterTest {
     @Test
     void updateDoInRef_when_DAI_purpose_of_Ldevice_LDEPF_ends_with_BOOLEAN_should_match_desc_that_ends_with_enum_and_update_setSrcRef_and_setSrcCB_and_setTstRef_and_setTstCB() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-test-update-inref/scd_update_inref_test.xml");
         LN0Adapter sourceLn0 = findLn0(scd, "IED_NAME1", "LDEPF");
         String doiNameInRef = "InRef3";
         String originalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, SETSRCCB_DA_NAME);
@@ -1135,7 +1135,7 @@ class LN0AdapterTest {
     @Test
     void updateDoInRef_when_ExtRef_desc_matches_and_dais_not_updatable_should_not_update_setSrcRef_and_setSrcCB_and_setTstRef_and_setTstCB() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-test-update-inref/scd_update_inref_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-test-update-inref/scd_update_inref_test.xml");
         LN0Adapter sourceLn0 = findLn0(scd, "IED_NAME1", "LD_WITH_3_InRef");
         String doiNameInRef = "InRef3";
         findDai(sourceLn0, "InRef3" + "." + SETSRCREF_DA_NAME).update(0L, "OLD_VAL");

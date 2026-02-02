@@ -269,7 +269,6 @@ public class LnService implements LnEditor {
                 .findFirst();
     }
 
-
     private Optional<TSDI> getSdiByName(TSDI sdi, String sdiName) {
         return sdi.getSDIOrDAI().stream()
                 .filter(unNaming -> unNaming.getClass().equals(TSDI.class))
