@@ -21,7 +21,7 @@ class VoltageLevelServiceTest {
     @Test
     void getVoltageLevels_should_succeed() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-substation-import-ssd/ssd.xml");
         // When
         List<TVoltageLevel> tVoltageLevels =  voltageLevelService.getVoltageLevels(scd).toList();
         // Then
@@ -31,7 +31,7 @@ class VoltageLevelServiceTest {
     @Test
     void findVoltageLevel_when_voltageLevelExist_should_succeed() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-substation-import-ssd/ssd.xml");
         // When Then
         assertThatCode(() -> voltageLevelService.findVoltageLevel(scd, tVoltageLevel1 -> "4".equals(tVoltageLevel1.getName())).orElseThrow())
                 .doesNotThrowAnyException();
@@ -40,7 +40,7 @@ class VoltageLevelServiceTest {
     @Test
     void findVoltageLevel_when_voltageLevelNotExist_should_return_empty() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scd-substation-import-ssd/ssd.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-substation-import-ssd/ssd.xml");
         // When Then
         assertThat(voltageLevelService.findVoltageLevel(scd, tVoltageLevel1 -> "5".equals(tVoltageLevel1.getName())))
                 .isEmpty();

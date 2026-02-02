@@ -31,7 +31,7 @@ class DataTypeTemplatesServiceTest {
     @Test
     void findDoLinkedToDa_should_find_DO_SDO_DA_and_all_BDA() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         TDataTypeTemplates dtt = scd.getDataTypeTemplates();
         DataObject dataObject = new DataObject();
         dataObject.setDoName("Do");
@@ -57,7 +57,7 @@ class DataTypeTemplatesServiceTest {
     @Test
     void findDoLinkedToDa_should_find_DO_SDO_DA_and_partial_BDA_list() {
         // Given
-        TDataTypeTemplates dtt = initDttFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda.xml");
+        TDataTypeTemplates dtt = initDttFromFile("dtt-test-schema-conf/scd_dtt_do_sdo_da_bda.xml");
         DataObject dataObject = new DataObject();
         dataObject.setDoName("Do1");
         dataObject.setCdc(TPredefinedCDCEnum.WYE);
@@ -79,7 +79,7 @@ class DataTypeTemplatesServiceTest {
     @Test
     void findDoLinkedToDa_should_find_DO_DA() {
         // Given
-        TDataTypeTemplates dtt = initDttFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda.xml");
+        TDataTypeTemplates dtt = initDttFromFile("dtt-test-schema-conf/scd_dtt_do_sdo_da_bda.xml");
         DataObject dataObject = new DataObject();
         dataObject.setDoName("Do1");
         dataObject.setCdc(TPredefinedCDCEnum.WYE);
@@ -130,7 +130,7 @@ class DataTypeTemplatesServiceTest {
     void getAllDOAndDA_should_return_all_dataReference() {
         // Given
         // File contain all combinations that can be made
-        TDataTypeTemplates dtt = initDttFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda_tests.xml");
+        TDataTypeTemplates dtt = initDttFromFile("dtt-test-schema-conf/scd_dtt_do_sdo_da_bda_tests.xml");
         // When
         List<DoLinkedToDa> result = dataTypeTemplatesService.getAllDoLinkedToDa(dtt).toList();
         // Then
@@ -303,7 +303,7 @@ class DataTypeTemplatesServiceTest {
     void getAllDOAndDA_with_lnodeType_should_return_all_dataReference_for_this_lnodetype() {
         // Given
         // File contain all combinations that can be made
-        TDataTypeTemplates dtt = initDttFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda_tests.xml");
+        TDataTypeTemplates dtt = initDttFromFile("dtt-test-schema-conf/scd_dtt_do_sdo_da_bda_tests.xml");
         String lNodeTypeId = "LN2";
         // When
         List<DoLinkedToDa> result = dataTypeTemplatesService.getAllDoLinkedToDa(dtt, lNodeTypeId).toList();
@@ -369,7 +369,7 @@ class DataTypeTemplatesServiceTest {
     void getAllDOAndDA_with_lnodeType_and_doName_should_return_all_dataReference_for_this_lnodetype_and_doName() {
         // Given
         // File contain all combinations that can be made
-        TDataTypeTemplates dtt = initDttFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda_tests.xml");
+        TDataTypeTemplates dtt = initDttFromFile("dtt-test-schema-conf/scd_dtt_do_sdo_da_bda_tests.xml");
         String lNodeTypeId = "LN2";
         String doName = "Do21";
         // When
@@ -414,7 +414,7 @@ class DataTypeTemplatesServiceTest {
     @Test
     void getEnumValues_should_succeed() {
         // Given
-        TDataTypeTemplates dtt = initDttFromFile("/dtt-test-schema-conf/scd_dtt_do_sdo_da_bda_tests.xml");
+        TDataTypeTemplates dtt = initDttFromFile("dtt-test-schema-conf/scd_dtt_do_sdo_da_bda_tests.xml");
         // When
         List<String> enumValues = dataTypeTemplatesService.getEnumValues(dtt, "RecCycModKind");
         // Then

@@ -87,7 +87,7 @@ class ExtRefEditorServiceTest {
     @Test
     void updateExtRefBinders_should_succed_when_AbstractLnAdapterUpdateExtRefBinders_succed() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         ExtRefInfo extRefInfo = DTO.createExtRefInfo();
         extRefInfo.setHolderIEDName("IED_NAME");
         extRefInfo.setHolderLDInst("LD_INS2");
@@ -108,7 +108,7 @@ class ExtRefEditorServiceTest {
     @Tag("issue-321")
     void updateExtRefSource_whenSignalInfoNullOrInvalid_shouldThrowScdException() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
         ExtRefInfo extRefInfo = new ExtRefInfo();
         extRefInfo.setHolderIEDName("IED_NAME2");
         extRefInfo.setHolderLDInst("LD_INST21");
@@ -127,7 +127,7 @@ class ExtRefEditorServiceTest {
     @Tag("issue-321")
     void updateExtRefSource_whenBindingInfoNullOrInvalid_shouldThrowScdException() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
         ExtRefInfo extRefInfo = new ExtRefInfo();
         extRefInfo.setHolderIEDName("IED_NAME2");
         extRefInfo.setHolderLDInst("LD_INST21");
@@ -152,7 +152,7 @@ class ExtRefEditorServiceTest {
     @Test
     void updateExtRefSource_whenBindingInternalByIedName_shouldThrowScdException() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
         ExtRefInfo extRefInfo = new ExtRefInfo();
         extRefInfo.setHolderIEDName("IED_NAME2");
         extRefInfo.setHolderLDInst("LD_INST21");
@@ -176,7 +176,7 @@ class ExtRefEditorServiceTest {
     @Test
     void updateExtRefSource_whenBindingInternaByServiceType_shouldThrowScdException() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
         ExtRefInfo extRefInfo = new ExtRefInfo();
         extRefInfo.setHolderIEDName("IED_NAME2");
         extRefInfo.setHolderLDInst("LD_INST21");
@@ -202,7 +202,7 @@ class ExtRefEditorServiceTest {
     @Tag("issue-321")
     void updateExtRefSource_whenSourceInfoNullOrInvalid_shouldThrowScdException() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
         ExtRefInfo extRefInfo = new ExtRefInfo();
         extRefInfo.setHolderIEDName("IED_NAME2");
         extRefInfo.setHolderLDInst("LD_INST21");
@@ -233,7 +233,7 @@ class ExtRefEditorServiceTest {
     @Test
     void updateExtRefSource_whenBindingExternalBinding_shouldThrowScdException() {
         //Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("scl-srv-scd-extref-cb/scd_get_cbs_test.xml");
         ExtRefInfo extRefInfo = new ExtRefInfo();
         extRefInfo.setHolderIEDName("IED_NAME2");
         extRefInfo.setHolderLDInst("LD_INST21");

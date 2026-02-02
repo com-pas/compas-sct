@@ -48,23 +48,6 @@ public abstract class ControlBlock extends LNodeMetaDataEmbedder {
     protected List<ControlBlockTarget> targets = new ArrayList<>();
 
     /**
-     * Get ServiceType
-     * @return ServiceType enum object
-     * @deprecated TServiceType provides  REPORT, SMV, GOOSE and POLL. It does not provide "LOG" for LogControl and provides "POLL" which is not a valid
-     * ControlBlock type. Use getControlBlockEnum() instead.
-     * @see ControlBlock#getControlBlockEnum()
-     */
-    @Deprecated(since = "16/01/2023")
-    public TServiceType getServiceType() {
-        return switch (getControlBlockEnum()){
-            case GSE -> TServiceType.GOOSE;
-            case SAMPLED_VALUE -> TServiceType.SMV;
-            case REPORT -> TServiceType.REPORT;
-            default -> throw new IllegalArgumentException("Unsupported ControlBlockEnum : " + getControlBlockEnum());
-        };
-    }
-
-    /**
      * Get ControlBlockEnum
      * @return ControlBlockEnum of the instance
      */

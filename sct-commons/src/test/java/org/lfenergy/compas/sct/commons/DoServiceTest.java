@@ -22,7 +22,7 @@ class DoServiceTest {
     @Test
     void getDos() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TLNodeType lnodeType = std.getDataTypeTemplates().getLNodeType().getFirst();
 
         //When
@@ -51,7 +51,7 @@ class DoServiceTest {
     @Test
     void getFilteredDos() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TLNodeType lnodeType = std.getDataTypeTemplates().getLNodeType().getFirst();
 
         //When
@@ -67,7 +67,7 @@ class DoServiceTest {
     @Test
     void findDo() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TLNodeType lnodeType = std.getDataTypeTemplates().getLNodeType().getFirst();
 
         //When
@@ -82,7 +82,7 @@ class DoServiceTest {
     @Test
     void findDo_should_find_by_name() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TLNodeType lnodeType = std.getDataTypeTemplates().getLNodeType().getFirst();
 
         //When

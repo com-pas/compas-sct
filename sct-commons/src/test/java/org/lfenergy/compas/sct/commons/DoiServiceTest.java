@@ -22,7 +22,7 @@ class DoiServiceTest {
     @Test
     void getDois() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         LN0 ln0 = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst().getLN0();
 
         //When
@@ -38,7 +38,7 @@ class DoiServiceTest {
     @Test
     void getFilteredDois() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         LN0 ln0 = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst().getLN0();
 
         //When
@@ -54,7 +54,7 @@ class DoiServiceTest {
     @Test
     void findDoi() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         LN0 ln0 = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst().getLN0();
 
         //When
@@ -69,7 +69,7 @@ class DoiServiceTest {
     @Test
     void findDoiByName() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         LN0 ln0 = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst().getLN0();
 
         //When

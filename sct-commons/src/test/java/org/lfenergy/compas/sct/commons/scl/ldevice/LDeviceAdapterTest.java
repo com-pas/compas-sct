@@ -42,7 +42,7 @@ class LDeviceAdapterTest {
 
     @BeforeEach
     public void init() {
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         iedAdapter = assertDoesNotThrow(() -> sclRootAdapter.getIEDAdapterByName("IED_NAME"));
     }
@@ -50,7 +50,7 @@ class LDeviceAdapterTest {
     @Test
     void updateLDName_when_ldName_should_update() {
         // Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TIED tied = std.getIED().getFirst();
         TLDevice tlDevice = tied.getAccessPoint().getFirst().getServer().getLDevice().getFirst();
         LDeviceAdapter lDeviceAdapter = new LDeviceAdapter(new IEDAdapter(new SclRootAdapter(std), tied), tlDevice);
@@ -67,7 +67,7 @@ class LDeviceAdapterTest {
     @Tag("issue-321")
     void testGetLNAdapters()  {
         // Given
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iedAdapter.findLDeviceAdapterByLdInst("LD_INS2").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iedAdapter.findLDeviceAdapterByLdInst("LD_INS2").orElseThrow());
         assertThat(lDeviceAdapter.getLNAdapters()).hasSize(1);
         // When Then
         assertDoesNotThrow(() -> lDeviceAdapter.getLNAdapter("ANCR","1",null));
@@ -79,7 +79,7 @@ class LDeviceAdapterTest {
     @Test
     void findLnAdapter_shouldReturnAdapter(){
         // Given
-        LDeviceAdapter lDeviceAdapter = iedAdapter.findLDeviceAdapterByLdInst("LD_INS2").get();
+        LDeviceAdapter lDeviceAdapter = iedAdapter.findLDeviceAdapterByLdInst("LD_INS2").orElseThrow();
         // When
         Optional<LNAdapter> lnAdapter = lDeviceAdapter.findLnAdapter("ANCR", "1", null);
         // Then
@@ -90,7 +90,7 @@ class LDeviceAdapterTest {
     @Test
     void getExtRefBinders_whenExist_shouldReturnExtRefBindingInfo() {
         //Given
-        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(()-> iedAdapter.findLDeviceAdapterByLdInst("LD_INS2").get());
+        LDeviceAdapter lDeviceAdapter = assertDoesNotThrow(() -> iedAdapter.findLDeviceAdapterByLdInst("LD_INS2").orElseThrow());
         ExtRefSignalInfo signalInfo = DTO.createExtRefSignalInfo();
         signalInfo.setPDO("Do.sdo1");
         signalInfo.setPDA("da.bda1.bda2.bda3");
@@ -150,7 +150,7 @@ class LDeviceAdapterTest {
         assertThat(dataAttributeRefs).hasSize(4);
 
         // Given
-        lDeviceAdapter = assertDoesNotThrow(()-> iedAdapter.findLDeviceAdapterByLdInst("LD_INS2").get());
+        lDeviceAdapter = assertDoesNotThrow(() -> iedAdapter.findLDeviceAdapterByLdInst("LD_INS2").orElseThrow());
         filter.setLnClass("ANCR");
         filter.setLnInst("1");
         // When
@@ -205,10 +205,10 @@ class LDeviceAdapterTest {
     @MethodSource("provideHasDataSetCreationCapabilityTrue")
     void hasDataSetCreationCapability_when_attribute_exists_should_return_true(String testCase, TServices tServices, ControlBlockEnum controlBlockEnum) {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).setServices(tServices);
+        iedAdapter.getCurrentElem().getAccessPoint().getFirst().setServices(tServices);
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst("LD_INS1");
         // When
         boolean hasCapability = lDeviceAdapter.hasDataSetCreationCapability(controlBlockEnum);
@@ -274,10 +274,10 @@ class LDeviceAdapterTest {
     @MethodSource("provideHasDataSetCreationCapabilityFalse")
     void hasDataSetCreationCapability_when_wrong_attribute_should_return_false(String testCase, TServices tServices, ControlBlockEnum controlBlockEnum) {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).setServices(tServices);
+        iedAdapter.getCurrentElem().getAccessPoint().getFirst().setServices(tServices);
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst("LD_INS1");
 
         // When
@@ -320,11 +320,11 @@ class LDeviceAdapterTest {
     @EnumSource(ControlBlockEnum.class)
     void hasDataSetCreationCapability_when_no_existing_services_attribute_should_return_false(ControlBlockEnum controlBlockEnum) {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst("LD_INS1");
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).setServices(new TServices());
+        iedAdapter.getCurrentElem().getAccessPoint().getFirst().setServices(new TServices());
 
         // When
         boolean hasCapability = lDeviceAdapter.hasDataSetCreationCapability(controlBlockEnum);
@@ -335,11 +335,11 @@ class LDeviceAdapterTest {
     @Test
     void hasDataSetCreationCapability_when_parameter_is_null_should_throw_exception() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst("LD_INS1");
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).setServices(new TServices());
+        iedAdapter.getCurrentElem().getAccessPoint().getFirst().setServices(new TServices());
 
         // When & Then
         Assertions.assertThatThrownBy(() -> lDeviceAdapter.hasDataSetCreationCapability(null))
@@ -351,10 +351,10 @@ class LDeviceAdapterTest {
     @MethodSource("provideHasControlBlockCreationCapabilityTrue")
     void hasControlBlockCreationCapability_when_attribute_exists_should_return_true(String testCase, TServices tServices, ControlBlockEnum controlBlockEnum) {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).setServices(tServices);
+        iedAdapter.getCurrentElem().getAccessPoint().getFirst().setServices(tServices);
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst("LD_INS1");
         // When
         boolean hasCapability = lDeviceAdapter.hasControlBlockCreationCapability(controlBlockEnum);
@@ -396,10 +396,10 @@ class LDeviceAdapterTest {
     @MethodSource("provideHasControlBlockCreationCapabilityFalse")
     void hasControlBlockCreationCapability_when_wrong_attribute_should_return_false(String testCase, TServices tServices, ControlBlockEnum controlBlockEnum) {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).setServices(tServices);
+        iedAdapter.getCurrentElem().getAccessPoint().getFirst().setServices(tServices);
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst("LD_INS1");
 
         // When
@@ -441,11 +441,11 @@ class LDeviceAdapterTest {
     @EnumSource(ControlBlockEnum.class)
     void hasControlBlockCreationCapability_when_no_existing_services_attribute_should_return_false(ControlBlockEnum controlBlockEnum) {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst("LD_INS1");
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).setServices(new TServices());
+        iedAdapter.getCurrentElem().getAccessPoint().getFirst().setServices(new TServices());
 
         // When
         boolean hasCapability = lDeviceAdapter.hasControlBlockCreationCapability(controlBlockEnum);
@@ -456,11 +456,11 @@ class LDeviceAdapterTest {
     @Test
     void hasControlBlockCreationCapability_when_parameter_is_null_should_throw_exception() {
         // Given
-        SCL scd = SclTestMarshaller.getSCLFromFile("/ied-test-schema-conf/ied_unit_test.xml");
+        SCL scd = SclTestMarshaller.getSCLFromResource("ied-test-schema-conf/ied_unit_test.xml");
         SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
         IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME");
         LDeviceAdapter lDeviceAdapter = iedAdapter.getLDeviceAdapterByLdInst("LD_INS1");
-        iedAdapter.getCurrentElem().getAccessPoint().get(0).setServices(new TServices());
+        iedAdapter.getCurrentElem().getAccessPoint().getFirst().setServices(new TServices());
 
         // When & Then
         Assertions.assertThatThrownBy(() -> lDeviceAdapter.hasControlBlockCreationCapability(null))

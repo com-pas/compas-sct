@@ -58,7 +58,7 @@ class LdeviceServiceTest {
     @Test
     void getLdevices_should_return_ldevices() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TIED tied = std.getIED().getFirst();
         //When
         List<TLDevice> tlDevices = ldeviceService.getLdevices(tied).toList();
@@ -73,7 +73,7 @@ class LdeviceServiceTest {
     @Test
     void getFilteredLdevices_should_return_ldevices() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TIED tied = std.getIED().getFirst();
         //When
         List<TLDevice> tlDevices = ldeviceService.getFilteredLdevices(tied, tlDevice -> "LDTM".equals(tlDevice.getInst())).toList();
@@ -87,7 +87,7 @@ class LdeviceServiceTest {
     @Test
     void findLdevice_with_predicate_should_return_ldevice() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TIED tied = std.getIED().getFirst();
         //When
         TLDevice ldevice = ldeviceService.findLdevice(tied, tlDevice -> "LDTM".equals(tlDevice.getInst())).orElseThrow();
@@ -100,7 +100,7 @@ class LdeviceServiceTest {
     @Test
     void findLdevice_with_ldInst_should_return_ldevice() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TIED tied = std.getIED().getFirst();
         //When
         TLDevice ldevice = ldeviceService.findLdevice(tied, "LDTM").orElseThrow();

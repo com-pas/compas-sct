@@ -23,7 +23,7 @@ class DaiServiceTest {
     @Test
     void getDais() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TDOI tdoi = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst().getLN0().getDOI().get(3);
 
         //When
@@ -39,7 +39,7 @@ class DaiServiceTest {
     @Test
     void getDais_in_sdi() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TSDI tsdi = (TSDI) std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst().getLN().getFirst().getDOI().getFirst().getSDIOrDAI().getFirst();
 
         //When
@@ -55,7 +55,7 @@ class DaiServiceTest {
     @Test
     void getFilteredDais() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TDOI tdoi = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst().getLN0().getDOI().get(3);
 
         //When
@@ -71,7 +71,7 @@ class DaiServiceTest {
     @Test
     void getFilteredDais_in_sdi() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TSDI tsdi = (TSDI) std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst().getLN().getFirst().getDOI().getFirst().getSDIOrDAI().getFirst();
 
         //When
@@ -87,7 +87,7 @@ class DaiServiceTest {
     @Test
     void findDai_by_predicate_should_return_dai() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TDOI tdoi = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst().getLN0().getDOI().get(3);
 
         //When
@@ -102,7 +102,7 @@ class DaiServiceTest {
     @Test
     void findDai_in_sdi_by_predicate_should_return_dai() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TSDI tsdi = (TSDI) std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst().getLN().getFirst().getDOI().getFirst().getSDIOrDAI().getFirst();
 
         //When
@@ -117,7 +117,7 @@ class DaiServiceTest {
     @Test
     void findDai_by_name_should_return_dai() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TDOI tdoi = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst().getLN0().getDOI().get(3);
 
         //When
@@ -132,7 +132,7 @@ class DaiServiceTest {
     @Test
     void findDai_in_sdi_by_name_should_return_dai() {
         //Given
-        SCL std = SclTestMarshaller.getSCLFromFile("/std/std_sample.std");
+        SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         TSDI tsdi = (TSDI) std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst().getLN().getFirst().getDOI().getFirst().getSDIOrDAI().getFirst();
 
         //When
