@@ -26,7 +26,7 @@ class LdeviceServiceTest {
 
     @BeforeEach
     void setUp() {
-        ldeviceService = new LdeviceService(new LnService());
+        ldeviceService = new LdeviceService();
     }
 
     @Test

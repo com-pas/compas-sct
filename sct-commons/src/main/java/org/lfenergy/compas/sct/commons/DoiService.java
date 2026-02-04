@@ -25,7 +25,7 @@ public class DoiService {
         return getFilteredDois(tAnyLN, tdoiPredicate).findFirst();
     }
 
-    public Optional<TDOI> findDoiByName(TAnyLN tAnyLN, String doiName) {
+    public Optional<TDOI> findDoi(TAnyLN tAnyLN, String doiName) {
         return findDoi(tAnyLN, tdoi -> tdoi.getName().equals(doiName));
     }
 

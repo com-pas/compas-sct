@@ -19,6 +19,14 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class LdeviceService {
 
+    /**
+     * Create a new instance without passing dependency.
+     * This will create a new instance of each dependency
+     */
+    public LdeviceService() {
+        this(new LnService());
+    }
+
     private final LnService lnService;
 
     public Stream<TLDevice> getLdevices(TIED tied) {
