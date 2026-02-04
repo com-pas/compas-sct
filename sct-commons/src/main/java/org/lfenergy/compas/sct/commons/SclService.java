@@ -273,7 +273,7 @@ public class SclService implements SclEditor {
                     for (int i = 0; i < iedSources.size(); i++) {
                         TLN lnToAdd = copyLn(lgosOrLsvs); //duplicate actual LGOS or LSVS in order to add LDSUIED with extRefs properties
                         IedSource iedSource = iedSources.get(i);
-                        TIED sourceIed = iedService.findByName(scd, iedSource.iedName()).orElseThrow(() -> new ScdException("IED.name '" + iedSource.iedName() + "' not found in SCD"));
+                        TIED sourceIed = iedService.findIed(scd, iedSource.iedName()).orElseThrow(() -> new ScdException("IED.name '" + iedSource.iedName() + "' not found in SCD"));
                         String sourceLdName = ldeviceService.findLdevice(sourceIed, iedSource.srcLdInst()).orElseThrow(() -> new ScdException(String.format("LDevice.inst '%s' not found in IED '%s'", iedSource.srcLdInst(), iedSource.iedName()))).getLdName();
                         lnToAdd.setInst(String.valueOf(i + 1));
                         DaVal newVal = new DaVal(null, sourceLdName + "/" + TLLN0Enum.LLN_0.value() + "." + iedSource.srcCBName());

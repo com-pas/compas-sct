@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons;
 
+import lombok.RequiredArgsConstructor;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.domain.DataAttribute;
 import org.lfenergy.compas.sct.commons.domain.DoLinkedToDa;
@@ -14,12 +15,21 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+@RequiredArgsConstructor
 public class DoTypeService {
 
-    final DaTypeService daTypeService = new DaTypeService();
-    final DaService daService = new DaService();
-    final SdoService sdoService = new SdoService();
-    final BDAService bdaService = new BDAService();
+    /**
+     * Create a new instance without passing dependency.
+     * This will create a new instance of each dependency
+     */
+    public DoTypeService() {
+        this(new DaTypeService(), new DaService(), new SdoService(), new BDAService());
+    }
+
+    final DaTypeService daTypeService;
+    final DaService daService;
+    final SdoService sdoService;
+    final BDAService bdaService;
 
     public Stream<TDOType> getDoTypes(TDataTypeTemplates tDataTypeTemplates) {
         return tDataTypeTemplates.getDOType().stream();
