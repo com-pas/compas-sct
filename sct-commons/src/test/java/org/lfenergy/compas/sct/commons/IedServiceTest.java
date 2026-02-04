@@ -41,7 +41,7 @@ class IedServiceTest {
         IedService iedService = new IedService();
 
         //When
-        TIED tied = iedService.findByName(std, "IED_NAME1").orElseThrow();
+        TIED tied = iedService.findIed(std, "IED_NAME1").orElseThrow();
 
         //Then
         assertThat(tied)
@@ -57,7 +57,7 @@ class IedServiceTest {
 
         //When
         //Then
-        assertThatCode(() -> iedService.findByName(std, null))
+        assertThatCode(() -> iedService.findIed(std, (String) null))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("The given iedName is null");
     }
