@@ -52,7 +52,7 @@ class DoiServiceTest {
     }
 
     @Test
-    void findDoi() {
+    void findDoi_by_predicate() {
         //Given
         SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         LN0 ln0 = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst().getLN0();
@@ -67,13 +67,13 @@ class DoiServiceTest {
     }
 
     @Test
-    void findDoiByName() {
+    void findDoi_by_name() {
         //Given
         SCL std = SclTestMarshaller.getSCLFromResource("std/std_sample.std");
         LN0 ln0 = std.getIED().getFirst().getAccessPoint().getFirst().getServer().getLDevice().getFirst().getLN0();
 
         //When
-        Optional<TDOI> doi = doiService.findDoiByName(ln0, "Beh");
+        Optional<TDOI> doi = doiService.findDoi(ln0, "Beh");
 
         //Then
         assertThat(doi).hasValueSatisfying(tdoi -> assertThat(tdoi.getName()).isEqualTo("Beh"));
