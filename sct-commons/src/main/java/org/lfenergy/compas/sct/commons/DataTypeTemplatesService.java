@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.sct.commons;
 
+import lombok.RequiredArgsConstructor;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.api.DataTypeTemplateReader;
 import org.lfenergy.compas.sct.commons.domain.DataAttribute;
@@ -11,21 +12,31 @@ import org.lfenergy.compas.sct.commons.domain.DataObject;
 import org.lfenergy.compas.sct.commons.domain.DataRef;
 import org.lfenergy.compas.sct.commons.domain.DoLinkedToDa;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static org.lfenergy.compas.scl2007b4.model.TPredefinedBasicTypeEnum.STRUCT;
+
+@RequiredArgsConstructor
 public class DataTypeTemplatesService implements DataTypeTemplateReader {
 
-    final LnodeTypeService lnodeTypeService = new LnodeTypeService();
-    final DoTypeService doTypeService = new DoTypeService();
-    final DaTypeService daTypeService = new DaTypeService();
-    final DoService doService = new DoService();
-    final DaService daService = new DaService();
-    final SdoService sdoService = new SdoService();
-    final BDAService bdaService = new BDAService();
+    /**
+     * Create a new instance without passing dependency.
+     * This will create a new instance of each dependency
+     */
+    public DataTypeTemplatesService() {
+        this(new LnodeTypeService(), new DoTypeService(new DaTypeService(), new DaService(), new SdoService(), new BDAService()), new DaTypeService(), new DoService(), new DaService(), new SdoService(), new BDAService());
+    }
+
+    final LnodeTypeService lnodeTypeService;
+    final DoTypeService doTypeService;
+    final DaTypeService daTypeService;
+    final DoService doService;
+    final DaService daService;
+    final SdoService sdoService;
+    final BDAService bdaService;
 
     @Override
     public Stream<DoLinkedToDa> getAllDoLinkedToDa(TDataTypeTemplates dtt) {
@@ -41,7 +52,7 @@ public class DataTypeTemplatesService implements DataTypeTemplateReader {
         return lnodeTypeService.findLnodeType(dtt, lNodeTypeId)
                 .stream()
                 .flatMap(tlNodeType -> doService.getDos(tlNodeType)
-                                .flatMap(tdo -> getAllDoLinkedToDa(dtt, tdo)));
+                        .flatMap(tdo -> getAllDoLinkedToDa(dtt, tdo)));
     }
 
     @Override
@@ -68,46 +79,54 @@ public class DataTypeTemplatesService implements DataTypeTemplateReader {
 
     @Override
     public Optional<DoLinkedToDa> findDoLinkedToDa(TDataTypeTemplates dtt, String lNodeTypeId, DataRef dataRef) {
-        List<String> dataRefList = new ArrayList<>(dataRef.sdoNames());
-        dataRefList.addAll(dataRef.bdaNames());
-
         return lnodeTypeService.findLnodeType(dtt, lNodeTypeId)
                 .flatMap(lNodeType -> doService.findDo(lNodeType, dataRef.doName())
                         // Search DoType for each DO
                         .flatMap(tdo -> doTypeService.findDoType(dtt, tdo.getType())
                                 .flatMap(tdoType -> {
                                     // Search last DoType from DOType (SDO) > DOType (SDO)
-                                    TDOType lastDoType = findDOTypeBySdoName(dtt, tdoType, dataRefList);
+                                    Optional<TDOType> optLastDoType = findDOTypeBySdoName(dtt, tdoType, dataRef.sdoNames());
+                                    if (optLastDoType.isEmpty()) {
+                                        // dataRef.sdoNames() is not empty and we didn't find one of the SDO
+                                        return Optional.empty();
+                                    }
                                     // Prepare DataObject
                                     DataObject dataObject = new DataObject(tdo.getName(), tdoType.getCdc(), dataRef.sdoNames());
                                     // Search first DA from last DoType
-                                    return daService.findDA(lastDoType, dataRef.daName())
+                                    return daService.findDA(optLastDoType.get(), dataRef.daName())
                                             .flatMap(tda -> {
                                                 // Prepare DataAttribute
                                                 DataAttribute dataAttribute = new DataAttribute();
                                                 dataAttribute.setDaName(tda.getName());
                                                 dataAttribute.setFc(tda.getFc());
-                                                // Check if first DA is STRUCT or not
-                                                if (!tda.getBType().equals(TPredefinedBasicTypeEnum.STRUCT)) {
-                                                    dataAttribute.addDaVal(tda.getVal());
-                                                    dataAttribute.setBType(tda.getBType());
-                                                    dataAttribute.setType(tda.getType());
-                                                    dataAttribute.setValImport(tda.isValImport());
-                                                    dataAttribute.setValKind(tda.getValKind());
-                                                    return Optional.of(new DoLinkedToDa(dataObject, dataAttribute));
+                                                // case dataRef.bdaNames() is empty
+                                                if (dataRef.bdaNames().isEmpty()) {
+                                                    if (tda.getBType() != STRUCT) {
+                                                        // Check that DA is not STRUCT
+                                                        dataAttribute.addDaVal(tda.getVal());
+                                                        dataAttribute.setBType(tda.getBType());
+                                                        dataAttribute.setType(tda.getType());
+                                                        dataAttribute.setValImport(tda.isValImport());
+                                                        dataAttribute.setValKind(tda.getValKind());
+                                                        return Optional.of(new DoLinkedToDa(dataObject, dataAttribute));
+                                                    }
+                                                    return Optional.empty(); // the DA has a bType STRUCT so it has BDA
+                                                }
+                                                // case dataRef.bdaNames() is not empty
+                                                if (tda.getBType() != STRUCT) {
+                                                    return Optional.empty();
                                                 }
                                                 // Search first DaType from DOType (from last DOType where DA is STRUCT)
-                                                return getDATypeByDaName(dtt, lastDoType, tda.getName())
+                                                return getDATypeByDaName(dtt, optLastDoType.get(), tda.getName())
                                                         .flatMap(tdaType -> {
-                                                            // Search last DAType from first DAType
-                                                            TDAType lastDAType = findDATypeByBdaName(dtt, tdaType, tbda -> tbda.isSetBType()
-                                                                                                                           && tbda.getBType().equals(TPredefinedBasicTypeEnum.STRUCT), dataRefList);
-
-                                                            // last DAType should contain BDA not STRUCT
-                                                            if (dataRefList.size() != 1) return Optional.empty();
-                                                            String lastBdaName = dataRefList.getFirst();
-                                                            return bdaService.findBDA(lastDAType, tbda -> tbda.getName().equals(lastBdaName)
-                                                                                                          && !tbda.getBType().equals(TPredefinedBasicTypeEnum.STRUCT))
+                                                            // Search last STRUCT DAType
+                                                            Optional<TDAType> optLastStructDAType = findDATypeByBdaName(dtt, tdaType, tbda -> tbda.isSetBType()
+                                                                                                                                              && tbda.getBType() == STRUCT, dataRef.bdaNames().subList(0, dataRef.bdaNames().size() - 1));
+                                                            if (optLastStructDAType.isEmpty()) {
+                                                                return Optional.empty(); // One of the BDA is missing
+                                                            }
+                                                            String lastBdaName = dataRef.bdaNames().getLast();
+                                                            return bdaService.findBDA(optLastStructDAType.get(), tbda -> tbda.getName().equals(lastBdaName) && tbda.getBType() != STRUCT)
                                                                     .flatMap(tbda -> {
                                                                         dataAttribute.getBdaNames().addAll(dataRef.bdaNames());
                                                                         dataAttribute.setBType(tbda.getBType());
@@ -139,25 +158,23 @@ public class DataTypeTemplatesService implements DataTypeTemplateReader {
                 .flatMap(tda -> daTypeService.findDaType(dtt, tda.getType()));
     }
 
-    private TDOType findDOTypeBySdoName(TDataTypeTemplates dtt, TDOType tdoType, List<String> sdoNames) {
-        if (sdoNames.isEmpty()) return tdoType;
+    private Optional<TDOType> findDOTypeBySdoName(TDataTypeTemplates dtt, TDOType tdoType, List<String> sdoNames) {
+        if (sdoNames.isEmpty()) {
+            return Optional.of(tdoType);
+        }
         return sdoService.findSDO(tdoType, sdoNames.getFirst())
                 .flatMap(tsdo -> doTypeService.findDoType(dtt, tsdo.getType()))
-                .map(tdoType2 -> {
-                    sdoNames.removeFirst();
-                    return findDOTypeBySdoName(dtt, tdoType2, sdoNames);
-                }).orElse(tdoType);
+                .flatMap(tdoType2 -> findDOTypeBySdoName(dtt, tdoType2, sdoNames.subList(1, sdoNames.size())));
     }
 
-    private TDAType findDATypeByBdaName(TDataTypeTemplates dtt, TDAType tdaType, Predicate<TBDA> tbdaPredicate, List<String> bdaNames) {
-        if (bdaNames.isEmpty()) return tdaType;
+    private Optional<TDAType> findDATypeByBdaName(TDataTypeTemplates dtt, TDAType tdaType, Predicate<TBDA> tbdaPredicate, List<String> bdaNames) {
+        if (bdaNames.isEmpty()) {
+            return Optional.of(tdaType);
+        }
         return bdaService.getFilteredBDAs(tdaType, tbdaPredicate)
                 .findFirst()
                 .flatMap(tbda -> daTypeService.findDaType(dtt, tbda.getType()))
-                .map(tdaType2 -> {
-                    bdaNames.removeFirst();
-                    return findDATypeByBdaName(dtt, tdaType2, tbdaPredicate, bdaNames);
-                }).orElse(tdaType);
+                .flatMap(tdaType2 -> findDATypeByBdaName(dtt, tdaType2, tbdaPredicate, bdaNames.subList(1, bdaNames.size())));
     }
 
 }
