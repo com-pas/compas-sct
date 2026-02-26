@@ -126,6 +126,7 @@ public class DataTypeTemplatesService implements DataTypeTemplateReader {
                                                                 // it means that one of the BDA in dataRef.bdaNames() is missing
                                                                 return Optional.empty();
                                                             }
+                                                            // Search last BDA, which must not be a STRUCT
                                                             String lastBdaName = dataRef.bdaNames().getLast();
                                                             return bdaService.findBDA(optLastStructDAType.get(), tbda -> tbda.getName().equals(lastBdaName) && tbda.getBType() != STRUCT)
                                                                     .flatMap(tbda -> {
@@ -172,7 +173,7 @@ public class DataTypeTemplatesService implements DataTypeTemplateReader {
         if (bdaNames.isEmpty()) {
             return Optional.of(tdaType);
         }
-        return bdaService.getFilteredBDAs(tdaType, tbda1 -> tbda1.getName().equals(bdaNames.getFirst()) && tbda1.isSetBType() && tbda1.getBType() == STRUCT)
+        return bdaService.getFilteredBDAs(tdaType, tbda1 -> tbda1.getName().equals(bdaNames.getFirst()) && tbda1.getBType() == STRUCT)
                 .findFirst()
                 .flatMap(tbda -> daTypeService.findDaType(dtt, tbda.getType()))
                 .flatMap(tdaType2 -> findStructDATypeByBdaName(dtt, tdaType2, bdaNames.subList(1, bdaNames.size())));
