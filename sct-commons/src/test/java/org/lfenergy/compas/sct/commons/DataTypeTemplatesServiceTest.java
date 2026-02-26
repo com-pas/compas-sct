@@ -6,6 +6,8 @@ package org.lfenergy.compas.sct.commons;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.domain.*;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
@@ -93,6 +95,31 @@ class DataTypeTemplatesServiceTest {
         Optional<DoLinkedToDa> result = dataTypeTemplatesService.findDoLinkedToDa(dtt, "LN1", new DataRef("Do1", List.of(), "da1", List.of()));
         // Then
         assertThat(result).get().usingRecursiveComparison().isEqualTo(doLinkedToDa);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "InexistantDo.sdo1.sdo2,da2.bda1.bda2",
+            "Do1.InexistantSdo.sdo2,da2.bda1.bda2",
+            "Do1.sdo1.InexistantSdo,da2.bda1.bda2",
+            "Do1.sdo1.sdo2,InexistantDa.bda1.bda2",
+            "Do1.sdo1.sdo2,da2.inexistantStructBda.bda2",
+            "Do1.sdo1.sdo2,da2.bda1.inexisentFinalBda",
+            "Do1.sdo1.sdo2,da2.bda1", // last BDA is a STRUCT, missing a final BDA
+            "Do1.sdo1.sdo2,da2", // DA is a struct, missing BDA
+            "Do1.sdo1,da2.bda1.bda2", // Missing a SDO
+            "Do1.sdo2,da2.bda1.bda2", // Missing a SDO
+            "sdo1.sdo2,da2.bda1.bda2", // Missing DO
+            "Do1.sdo1.sdo2,bda1.bda2", // Missing DA
+            "Do1.sdo1.sdo2,da2.bda2", // Missing a BDA
+    })
+    void findDoLinkedToDa_when_dataRef_not_found_should_return_empty(String doNames, String daNames) {
+        // Given
+        TDataTypeTemplates dtt = initDttFromFile("dtt-test-schema-conf/scd_dtt_do_sdo_da_bda.xml");
+        // When
+        Optional<DoLinkedToDa> result = dataTypeTemplatesService.findDoLinkedToDa(dtt, "LN1", DataRef.from(doNames, daNames));
+        // Then
+        assertThat(result).isEmpty();
     }
 
     @Test

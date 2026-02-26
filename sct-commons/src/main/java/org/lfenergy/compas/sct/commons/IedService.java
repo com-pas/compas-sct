@@ -22,7 +22,7 @@ public class IedService {
         return getFilteredIeds(scd, iedPredicate).findFirst();
     }
 
-    public Optional<TIED> findByName(SCL scd, String iedName) {
+    public Optional<TIED> findIed(SCL scd, String iedName) {
         if (null == iedName)
             throw new ScdException("The given iedName is null");
         return findIed(scd, tied -> iedName.equals(tied.getName()));
