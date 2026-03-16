@@ -274,7 +274,7 @@ class ControlBlockEditorServiceTest {
         assertThat(gse3.getAddress().getP()).extracting(TP::getType, TP::getValue).containsExactlyInAnyOrder(
                 Tuple.tuple("VLAN-PRIORITY", "2"),
                 Tuple.tuple("APPID", "0002"),
-                Tuple.tuple("MAC-Address", "01-0C-CD-01-00-02"),
+                Tuple.tuple("MAC-Address", "01-0C-CD-01-00-00"),
                 Tuple.tuple("VLAN-ID", "12E")
         );
         SclTestMarshaller.assertSclValidateXsd(scd);
@@ -304,7 +304,7 @@ class ControlBlockEditorServiceTest {
         assertThat(smv2.getAddress().getP()).extracting(TP::getType, TP::getValue).containsExactlyInAnyOrder(
                 Tuple.tuple("VLAN-PRIORITY", "4"),
                 Tuple.tuple("APPID", "4001"),
-                Tuple.tuple("MAC-Address", "01-0C-CD-04-00-01"),
+                Tuple.tuple("MAC-Address", "01-0C-CD-04-00-00"),
                 Tuple.tuple("VLAN-ID", "130")
         );
         SclTestMarshaller.assertSclValidateXsd(scd);
@@ -366,7 +366,7 @@ class ControlBlockEditorServiceTest {
                         Tuple.tuple("VLAN-ID", "12D"),
                         Tuple.tuple("VLAN-PRIORITY", "1"),
                         Tuple.tuple("APPID", "000B"),
-                        Tuple.tuple("MAC-Address", "01-02-03-04-01-01"),
+                        Tuple.tuple("MAC-Address", "01-02-03-04-00-FF"),
                         Tuple.tuple("VLAN-ID", "12E"),
                         Tuple.tuple("VLAN-PRIORITY", "2")
                 );
@@ -405,6 +405,67 @@ class ControlBlockEditorServiceTest {
                         Tuple.tuple("VLAN-ID", "12E"),
                         Tuple.tuple("VLAN-PRIORITY", "2")
                 );
+    }
+
+    @Test
+    void configureNetworkForAllControlBlocks_should_have_unique_mac_in_ied() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_unique_mac_in_ied.xml");
+        CBCom cbCom = createCbCom();
+        cbCom.getMacRanges().getMacRange().getFirst().setEnd("01-0C-CD-01-00-05");
+
+        // When
+        List<SclReportItem> sclReportItems = controlBlockEditorService.configureNetworkForAllControlBlocks(scd, cbCom);
+
+        // Then
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
+        assertThat(scd.getCommunication().getSubNetwork())
+                .flatExtracting(TSubNetwork::getConnectedAP)
+                .flatExtracting(TConnectedAP::getGSE)
+                .extracting(TControlBlock::getAddress)
+                .flatExtracting(TAddress::getP)
+                .extracting(TP::getType, TP::getValue)
+                .containsExactly(
+                        Tuple.tuple("APPID", "0000"),
+                        Tuple.tuple("MAC-Address", "01-0C-CD-01-00-00"),
+                        Tuple.tuple("VLAN-ID", "12D"),
+                        Tuple.tuple("VLAN-PRIORITY", "1"),
+                        Tuple.tuple("APPID", "0001"),
+                        Tuple.tuple("MAC-Address", "01-0C-CD-01-00-02"),
+                        Tuple.tuple("VLAN-ID", "12D"),
+                        Tuple.tuple("VLAN-PRIORITY", "1"),
+                        Tuple.tuple("APPID", "0002"),
+                        Tuple.tuple("MAC-Address", "01-0C-CD-01-00-01"),
+                        Tuple.tuple("VLAN-ID", "12E"),
+                        Tuple.tuple("VLAN-PRIORITY", "2"),
+                        Tuple.tuple("APPID", "0003"),
+                        Tuple.tuple("MAC-Address", "01-0C-CD-01-00-03"),
+                        Tuple.tuple("VLAN-ID", "12D"),
+                        Tuple.tuple("VLAN-PRIORITY", "1"),
+                        Tuple.tuple("APPID", "0004"),
+                        Tuple.tuple("MAC-Address", "01-0C-CD-01-00-04"),
+                        Tuple.tuple("VLAN-ID", "12D"),
+                        Tuple.tuple("VLAN-PRIORITY", "1")
+                );
+    }
+
+    @Test
+    void configureNetworkForAllControlBlocks_should_not_address_if_not_enought_mac_available() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_unique_mac_in_ied.xml");
+        CBCom cbCom = createCbCom();
+        cbCom.getMacRanges().getMacRange().getFirst().setEnd("01-0C-CD-01-00-03");
+
+        // When
+        List<SclReportItem> sclReportItems = controlBlockEditorService.configureNetworkForAllControlBlocks(scd, cbCom);
+
+        // Then
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isFalse();
+        assertThat(sclReportItems).hasSize(1)
+                .extracting(SclReportItem::message, SclReportItem::xpath)
+                .containsExactly(Tuple.tuple("Cannot configure communication for this ControlBlock because range of mac addresses is exhausted",
+                        """
+                        /SCL/IED[@name="IED_NAME4"]/AccessPoint[@name="AP_NAME"]/Server/LDevice[@inst="LD_INST41"]/LN0/GSEControl[@name="CB_LD_INST41_GMI"]"""));
     }
 
     @ParameterizedTest
@@ -611,7 +672,7 @@ class ControlBlockEditorServiceTest {
         assertThat(gse3.getAddress().getP()).extracting(TP::getType, TP::getValue).containsExactlyInAnyOrder(
                 Tuple.tuple("VLAN-PRIORITY", "2"),
                 Tuple.tuple("APPID", "0002"),
-                Tuple.tuple("MAC-Address", "01-0C-CD-01-00-02"),
+                Tuple.tuple("MAC-Address", "01-0C-CD-01-00-00"),
                 Tuple.tuple("VLAN-ID", "12E")
         );
         SclTestMarshaller.assertSclValidateXsd(scd);
@@ -629,8 +690,12 @@ class ControlBlockEditorServiceTest {
         //Then
         assertThat(sclReportItems).hasSize(3);
         assertThat(sclReportItems).extracting(SclReportItem::isError, SclReportItem::xpath)
-                .containsOnly(Tuple.tuple(true, """
-                        /SCL/IED[@name="IED_NAME2"]/AccessPoint[@name="AP_NAME"]/Server/LDevice[@inst="LD_INST21"]"""));
+                .contains(Tuple.tuple(true, """
+                                /SCL/IED[@name="IED_NAME2"]"""),
+                        Tuple.tuple(true, """
+                                /SCL/IED[@name="IED_NAME2"]"""),
+                        Tuple.tuple(true, """
+                                /SCL/IED[@name="IED_NAME2"]"""));
         assertThat(sclReportItems).extracting(SclReportItem::message).allSatisfy(message -> assertThat(message).containsAnyOf("COMPAS-ICDHeader", "COMPAS-SystemVersion"));
     }
 
