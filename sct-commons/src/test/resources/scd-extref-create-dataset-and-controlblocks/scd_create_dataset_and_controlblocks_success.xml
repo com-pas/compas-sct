@@ -54,6 +54,8 @@
                             <ExtRef desc="test ignore missing bindings attributes" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
                             <!-- test daName with BDA  -->
                             <ExtRef desc="test daName without BDA" iedName="IED_NAME2" ldInst="LD_INST21" lnClass="ANCR" lnInst="2" doName="ColPosA" serviceType="GOOSE" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
+                            <!-- test DA not found in DACOMM -->
+                            <ExtRef desc="test da not found in DACOMM, because ldInst does not match" iedName="IED_NAME2" ldInst="LD_INST22" lnClass="ANCR" lnInst="1" doName="DoName" daName="daNameST" serviceType="GOOSE" intAddr="INT_ADDR11" pDO="Do11.sdo11" pDA="da11.bda111.bda112.bda113"/>
                         </Inputs>
                     </LN0>
                 </LDevice>
@@ -84,6 +86,17 @@
             <Server>
                 <Authentication/>
                 <LDevice inst="LD_INST21" ldName="IED_NAME2LD_INST21">
+                    <LN0 lnClass="LLN0" inst="" lnType="LNEX1">
+                        <DOI name="Mod">
+                            <DAI name="stVal">
+                                <Val>on</Val>
+                            </DAI>
+                        </DOI>
+                    </LN0>
+                    <LN lnClass="ANCR" inst="1" lnType="lnType"/>
+                    <LN lnClass="ANCR" inst="2" lnType="lnType2"/>
+                </LDevice>
+                <LDevice inst="LD_INST22" ldName="IED_NAME2LD_INST22">
                     <LN0 lnClass="LLN0" inst="" lnType="LNEX1">
                         <DOI name="Mod">
                             <DAI name="stVal">

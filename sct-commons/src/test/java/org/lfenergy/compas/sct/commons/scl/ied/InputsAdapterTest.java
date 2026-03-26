@@ -213,7 +213,9 @@ class InputsAdapterTest {
                 Arguments.of(named("should not create FCDA for extref with a binding internal to the IED",
                         "test ignore internal binding")),
                 Arguments.of(named("should not create FCDA for extref with missing binding attributes",
-                        "test ignore missing bindings attributes"))
+                        "test ignore missing bindings attributes")),
+                Arguments.of(named("should not create FCDA for extref when sourceDa not in DaComm",
+                        "test da not found in DACOMM, because ldInst does not match"))
         );
     }
 

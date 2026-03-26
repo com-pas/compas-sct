@@ -4,19 +4,21 @@
 
 <DACOMM xmlns="http://www.rte-france.com/dacomm">
     <History>
-        <Hitem Version="01.00.00" When="20231013" Who="YHA" What="Création du référentiel"></Hitem>
+        <Hitem Version="01.00.00" When="20231013" Who="YHA" What="Création du référentiel"/>
     </History>
     <Version>
-        <SystemVersion MainSystemVersion="01.00"></SystemVersion>
+        <SystemVersion MainSystemVersion="01.00"/>
     </Version>
 	<FCDAs>
-        <FCDA lnClass="ANCR" doName="DoName" daName="daNameST" fc="ST" gooseType="GM"></FCDA>
-        <FCDA lnClass="ANCR" doName="DoName" daName="daNameMX" fc="MX" gooseType="GS"></FCDA>
-        <FCDA lnClass="ANCR" doName="OtherDoName" daName="daNameST" fc="ST" gooseType="GS"></FCDA>
-        <FCDA lnClass="ANCR" doName="DoWithInst" daName="daNameST" fc="ST" gooseType="GS"></FCDA>
-        <FCDA lnClass="ANCR" doName="DoWithInst.subDo" daName="daNameST" fc="ST" gooseType="GS"></FCDA>
-        <FCDA lnClass="ANCR" doName="FirstDo" daName="daNameST" fc="ST" gooseType="GS"></FCDA>
-        <FCDA lnClass="ANCR" doName="SecondDo" daName="daNameST" fc="ST" gooseType="GS"></FCDA>
-        <FCDA lnClass="ANCR" doName="ThirdDo" daName="daNameST" fc="ST" gooseType="GS"></FCDA>
+        <FCDA ldInst="LD_INST21" lnClass="ANCR" doName="DoName" daName="daNameST" fc="ST" gooseType="GM"/>
+        <FCDA ldInst="LD_INST21" lnClass="ANCR" doName="DoName" daName="daNameMX" fc="MX" gooseType="GS"/>
+        <FCDA ldInst="LD_INST21" lnClass="ANCR" doName="OtherDoName" daName="daNameST" fc="ST" gooseType="GS"/>
+        <FCDA ldInst="LD_INST21" lnClass="ANCR" doName="DoWithInst" daName="daNameST" fc="ST" gooseType="GS"/>
+        <FCDA ldInst="LD_INST21" lnClass="ANCR" doName="DoWithInst.subDo" daName="daNameST" fc="ST" gooseType="GS"/>
+        <FCDA ldInst="LD_INST21" lnClass="ANCR" doName="FirstDo" daName="daNameST" fc="ST" gooseType="GS"/>
+        <FCDA ldInst="LD_INST21" lnClass="ANCR" doName="SecondDo" daName="daNameST" fc="ST" gooseType="GS"/>
+        <FCDA ldInst="LD_INST21" lnClass="ANCR" doName="ThirdDo" daName="daNameST" fc="ST" gooseType="GS"/>
+        <FCDA ldInst="LD_INST31" lnClass="ANCR" doName="DoName" daName="daNameST" fc="ST" gooseType="GM"/>
+        <FCDA ldInst="LD_INST31" lnClass="ANCR" doName="DoName" daName="daNameST" fc="ST" gooseType="GM"/>
 	</FCDAs>
 </DACOMM>
