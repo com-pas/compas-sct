@@ -53,6 +53,7 @@ SPDX-License-Identifier: Apache-2.0
 	</xs:element>
 
 	<xs:complexType name="tFCDA">
+		<xs:attribute name="ldInst" type="xs:string" use="required"/>
 		<xs:attribute name="lnClass" type="xs:string" use="required"/>
 		<xs:attribute name="doName" type="xs:string" use="required"/>
 		<xs:attribute name="daName" type="xs:string" use="required"/>
