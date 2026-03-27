@@ -162,9 +162,12 @@ public class ControlBlockEditorService implements ControlBlockEditor {
 
     private Stream<Long> getMacFromControlBlock(SCL scl, TControl tControl, IedApLd iedApLd){
         TCommunication tCommunication = scl.getCommunication();
-        TConnectedAP tConnectedAP = subNetworkService.getSubNetworks(tCommunication)
-                .flatMap(tSubNetwork -> connectedAPService.getFilteredConnectedAP(tSubNetwork, connectedAP -> iedApLd.ied().getName().equals(connectedAP.getIedName()) && iedApLd.apName().equals(connectedAP.getApName())))
-                .findFirst().orElseThrow();
+        Optional<TConnectedAP> tConnectedAPOptional = subNetworkService.getSubNetworks(tCommunication)
+                .flatMap(tSubNetwork -> connectedAPService.getFilteredConnectedAP(tSubNetwork, connectedAP -> iedApLd.ied().getName().equals(connectedAP.getIedName()) && iedApLd.apName().equals(connectedAP.getApName()))).findFirst();
+        if(tConnectedAPOptional.isEmpty()){
+            return Stream.empty();
+        }
+        TConnectedAP tConnectedAP = tConnectedAPOptional.get();
         switch (tControl) {
             case TGSEControl ignored -> {
                 Optional<TGSE> optGse = tConnectedAP.isSetGSE() ?
@@ -203,8 +206,8 @@ public class ControlBlockEditorService implements ControlBlockEditor {
     }
 
     private List<Long> findMacFromLinkedExtRef(SCL scl, IedApLd iedApLd, TCBType tcbType) {
-        TCommunication tCommunication = scl.getCommunication();
-        Set<String> subIed = ldeviceService.getLdevices(iedApLd.ied()).
+        //We remove the addresses that are in a ExtRef of the IED.
+        List<TIED> subIed = ldeviceService.getLdevices(iedApLd.ied()).
                 flatMap(tlDevice -> {
                     if(tlDevice.getLN0().getInputs()!=null){
                         return tlDevice.getLN0().getInputs().getExtRef().stream();
@@ -213,41 +216,64 @@ public class ControlBlockEditorService implements ControlBlockEditor {
                 })
                 .filter(TExtRef::isSetSrcCBName)
                 .map(TExtRef::getIedName)
-                .filter(iedName -> !iedName.equals(iedApLd.ied().getName())).collect(Collectors.toSet());
-        List<Long> directLinkMacAdresses = scl.getIED().stream()
-                .filter(tied -> subIed.contains(tied.getName()))
+                .flatMap(iedName -> scl.getIED().stream().filter(tied -> tied.getName().equals(iedName) && !tied.getName().equals(iedApLd.ied().getName())))
+                .toList();
+
+        List<Long> directLinkMacAdresses = subIed.stream()
                 .flatMap(tied -> ldeviceService.getLdevices(tied)
                         .flatMap(lDevice -> controlService.getControls(lDevice.getLN0(), ControlBlockEnum.from(tcbType).getControlBlockClass())
                                 .flatMap(cBlock -> {
                                     TAccessPoint accessPoint = tied.getAccessPoint().stream().filter(ap -> ap.getServer().getLDevice().stream().anyMatch(tlDevice -> tlDevice.getLdName().equals(lDevice.getLdName()))).findFirst().orElseThrow();
                                     return getMacFromControlBlock(scl, cBlock, new IedApLd(tied, accessPoint.getName(), lDevice));
                                 }))).collect(Collectors.toList());
-        List<Long> linkedToReceivedCb = scl.getIED().stream()
-                .filter(tied -> subIed.contains(tied.getName()))
+
+        //We search for every IED that have an ExtRef that comes from the current IED and remove every address they have in their CB and ExtRef
+        List<TIED> iedWithExtRefFromCurrentCB = scl.getIED().stream()
+                .filter(tied -> !tied.getName().equals(iedApLd.ied().getName()))
+                .filter(tied -> ldeviceService.getLdevices(tied).
+                        flatMap(tlDevice -> {
+                            if(tlDevice.getLN0().getInputs()!=null){
+                                return tlDevice.getLN0().getInputs().getExtRef().stream();
+                            }
+                            return Stream.empty();
+                        })
+                        .anyMatch(tExtRef -> tExtRef.getIedName().equals(iedApLd.ied().getName()))
+                )
+                .toList();
+
+        //addresses from CB
+        List<Long> addressesFromCBIed = getAddressFromListOfIed(scl, tcbType, iedWithExtRefFromCurrentCB);
+
+        List<TIED> iedExtRefFromIedHavingCurrentCbInExtRef = iedWithExtRefFromCurrentCB.stream()
                 .flatMap(ldeviceService::getLdevices)
-                .flatMap(tlDevice ->{
-                    if (tlDevice.getLN0().getInputs()!=null){
+                .flatMap(tlDevice -> {
+                    if(tlDevice.getLN0().getInputs()!=null){
                         return tlDevice.getLN0().getInputs().getExtRef().stream();
                     }
                     return Stream.empty();
                 })
                 .filter(TExtRef::isSetSrcCBName)
-                .flatMap(tExtRef -> {
-                    TIED ied = scl.getIED().stream().filter(tied -> tied.getName().equals(tExtRef.getIedName())).findFirst().orElseThrow();
-                    TLDevice lDevice = ldeviceService.findLdevice(ied, tExtRef.getLdInst()).orElseThrow();
-                    TAccessPoint accessPoint = ied.getAccessPoint().stream().filter(ap -> ap.getServer().getLDevice().stream().anyMatch(tlDevice -> tlDevice.getLdName().equals(lDevice.getLdName()))).findFirst().orElseThrow();
-                    String apName = accessPoint.getName();
-                    TConnectedAP TConnectedAP = subNetworkService.getSubNetworks(tCommunication)
-                            .flatMap(tSubNetwork -> connectedAPService.getFilteredConnectedAP(tSubNetwork, connectedAP -> ied.getName().equals(connectedAP.getIedName()) && apName.equals(connectedAP.getApName())))
-                            .findFirst().orElseThrow();
-                    TControl cbFromLinked = controlService.getControls(lDevice.getLN0(), ControlBlockEnum.from(tcbType).getControlBlockClass())
-                            .filter(control -> control.getName().equals(tExtRef.getSrcCBName()))
-                            .findFirst().orElseThrow();
-                    return getMacFromControlBlock(scl, cbFromLinked, new IedApLd(ied, TConnectedAP.getApName(), lDevice));
-                })
+                .map(TExtRef::getIedName)
+                .flatMap(iedName -> scl.getIED().stream().filter(tied -> tied.getName().equals(iedName) && !tied.getName().equals(iedApLd.ied().getName())))
                 .toList();
-        directLinkMacAdresses.addAll(linkedToReceivedCb);
+
+        List<Long> addressesFromExtRefIed = getAddressFromListOfIed(scl, tcbType, iedExtRefFromIedHavingCurrentCbInExtRef);
+
+        directLinkMacAdresses.addAll(addressesFromCBIed);
+        directLinkMacAdresses.addAll(addressesFromExtRefIed);
         return directLinkMacAdresses;
+    }
+
+    private List<Long> getAddressFromListOfIed(SCL scl, TCBType tcbType, List<TIED> iedsToGetCBFrom) {
+        List<Long> addressesFromCBIed = iedsToGetCBFrom.stream()
+                .flatMap(tied -> ldeviceService.getLdevices(tied)
+                        .flatMap(lDevice -> controlService.getControls(lDevice.getLN0(), ControlBlockEnum.from(tcbType).getControlBlockClass())
+                                .flatMap(cBlock -> {
+                                    TAccessPoint accessPoint = tied.getAccessPoint().stream().filter(ap -> ap.getServer().getLDevice().stream().anyMatch(tlDevice -> tlDevice.getLdName().equals(lDevice.getLdName()))).findFirst().orElseThrow();
+                                    return getMacFromControlBlock(scl, cBlock, new IedApLd(tied, accessPoint.getName(), lDevice));
+                                })))
+                .toList();
+        return addressesFromCBIed;
     }
 
     private CbComSettings parseCbCom(CBCom cbCom, TCBType tcbType) {
