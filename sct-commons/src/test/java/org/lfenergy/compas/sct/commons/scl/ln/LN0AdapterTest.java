@@ -31,8 +31,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Named.named;
 import static org.lfenergy.compas.scl2007b4.model.TSampledValueControl.SmvOpts;
 import static org.lfenergy.compas.sct.commons.testhelpers.SclHelper.*;
-import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.SETSRCCB_DA_NAME;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.SETSRCREF_DA_NAME;
 import static org.mockito.Mockito.*;
 
 class LN0AdapterTest {
@@ -1061,43 +1061,7 @@ class LN0AdapterTest {
     }
 
     @Test
-    void updateDoInRef_when_ExtRef_desc_matches_should_update_setSrcRef_and_setSrcCB_and_setTstRef_and_setTstCB() {
-        // Given
-        SCL scd = SclTestMarshaller.getSCLFromResource("scd-test-update-inref/scd_update_inref_test.xml");
-        LN0Adapter sourceLn0 = findLn0(scd, "IED_NAME1", "LD_WITH_3_InRef");
-        String doiNameInRef = "InRef3";
-        String originalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, SETSRCCB_DA_NAME);
-        String expectedSrcRef = "IED_NAME1LD_WITH_3_InRef/PRANCR1.Do11.sdo11";
-        String expectedSrcCb = "IED_NAME1LD_WITH_3_InRef/prefixANCR1.GSE1";
-        String originalSetTstCB = getDaiValue(sourceLn0, doiNameInRef, SETTSTCB_DA_NAME);
-        String expectedTstRef = "IED_NAME1LD_WITH_3_InRef/PRANCR1.Do11.sdo11";
-        String expectedTstCB = "IED_NAME1LD_WITH_3_InRef/prefixANCR3.GSE3";
-
-        // When
-        List<SclReportItem> sclReportItems = sourceLn0.updateDoInRef();
-        // Then
-
-        String finalSetSrcRef = getDaiValue(sourceLn0, doiNameInRef, SETSRCREF_DA_NAME);
-        String finalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, SETSRCCB_DA_NAME);
-        String finalSetTstRef = getDaiValue(sourceLn0, doiNameInRef, SETTSTREF_DA_NAME);
-        String finalSetTstCB = getDaiValue(sourceLn0, doiNameInRef, SETTSTCB_DA_NAME);
-        assertThat(finalSetSrcRef)
-                .isNotBlank()
-                .isEqualTo(expectedSrcRef);
-        assertThat(finalSetSrcCB)
-                .isNotEqualTo(originalSetSrcCB)
-                .isEqualTo(expectedSrcCb);
-        assertThat(finalSetTstRef)
-                .isNotBlank()
-                .isEqualTo(expectedTstRef);
-        assertThat(finalSetTstCB)
-                .isNotEqualTo(originalSetTstCB)
-                .isEqualTo(expectedTstCB);
-        assertThat(sclReportItems).isEmpty();
-    }
-
-    @Test
-    void updateDoInRef_when_DAI_purpose_of_Ldevice_LDEPF_ends_with_BOOLEAN_should_match_desc_that_ends_with_enum_and_update_setSrcRef_and_setSrcCB_and_setTstRef_and_setTstCB() {
+    void updateDoInRef_when_DAI_purpose_of_Ldevice_LDEPF_ends_with_BOOLEAN_should_match_desc_that_ends_with_enum_and_update_setSrcRef_and_setSrcCB() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromResource("scd-test-update-inref/scd_update_inref_test.xml");
         LN0Adapter sourceLn0 = findLn0(scd, "IED_NAME1", "LDEPF");
@@ -1105,45 +1069,30 @@ class LN0AdapterTest {
         String originalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, SETSRCCB_DA_NAME);
         String expectedSrcRef = "IED_NAME1LDEPF/PRANCR1.Do11.sdo11";
         String expectedSrcCb = "IED_NAME1LDEPF/prefixANCR1.GSE1";
-        String originalSetTstCB = getDaiValue(sourceLn0, doiNameInRef, SETTSTCB_DA_NAME);
-        String expectedTstRef = "IED_NAME1LDEPF/PRANCR1.Do11.sdo11";
-        String expectedTstCB = "IED_NAME1LDEPF/prefixANCR3.GSE3";
 
         // When
         List<SclReportItem> sclReportItems = sourceLn0.updateDoInRef();
         // Then
-
+        assertThat(sclReportItems).isEmpty();
         String finalSetSrcRef = getDaiValue(sourceLn0, doiNameInRef, SETSRCREF_DA_NAME);
         String finalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, SETSRCCB_DA_NAME);
-        String finalSetTstRef = getDaiValue(sourceLn0, doiNameInRef, SETTSTREF_DA_NAME);
-        String finalSetTstCB = getDaiValue(sourceLn0, doiNameInRef, SETTSTCB_DA_NAME);
         assertThat(finalSetSrcRef)
                 .isNotBlank()
                 .isEqualTo(expectedSrcRef);
         assertThat(finalSetSrcCB)
                 .isNotEqualTo(originalSetSrcCB)
                 .isEqualTo(expectedSrcCb);
-        assertThat(finalSetTstRef)
-                .isNotBlank()
-                .isEqualTo(expectedTstRef);
-        assertThat(finalSetTstCB)
-                .isNotEqualTo(originalSetTstCB)
-                .isEqualTo(expectedTstCB);
-        assertThat(sclReportItems).isEmpty();
     }
 
     @Test
-    void updateDoInRef_when_ExtRef_desc_matches_and_dais_not_updatable_should_not_update_setSrcRef_and_setSrcCB_and_setTstRef_and_setTstCB() {
+    void updateDoInRef_when_ExtRef_desc_matches_and_dais_not_updatable_should_not_update_setSrcRef_and_setSrcCB() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromResource("scd-test-update-inref/scd_update_inref_test.xml");
         LN0Adapter sourceLn0 = findLn0(scd, "IED_NAME1", "LD_WITH_3_InRef");
         String doiNameInRef = "InRef3";
         findDai(sourceLn0, "InRef3" + "." + SETSRCREF_DA_NAME).update(0L, "OLD_VAL");
-        findDai(sourceLn0, "InRef3" + "." + SETTSTREF_DA_NAME).update(0L, "OLD_VAL");
         findDai(sourceLn0, "InRef3" + "." + SETSRCREF_DA_NAME).getCurrentElem().setValImport(false);
         findDai(sourceLn0, "InRef3" + "." + SETSRCCB_DA_NAME).getCurrentElem().setValImport(false);
-        findDai(sourceLn0, "InRef3" + "." + SETTSTREF_DA_NAME).getCurrentElem().setValImport(false);
-        findDai(sourceLn0, "InRef3" + "." + SETTSTCB_DA_NAME).getCurrentElem().setValImport(false);
         String expectedVal = "OLD_VAL";
 
         // When
@@ -1152,18 +1101,13 @@ class LN0AdapterTest {
 
         String finalSetSrcRef = getDaiValue(sourceLn0, doiNameInRef, SETSRCREF_DA_NAME);
         String finalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, SETSRCCB_DA_NAME);
-        String finalSetTstRef = getDaiValue(sourceLn0, doiNameInRef, SETTSTREF_DA_NAME);
-        String finalSetTstCB = getDaiValue(sourceLn0, doiNameInRef, SETTSTCB_DA_NAME);
 
         assertThat(finalSetSrcRef).isEqualTo(expectedVal);
         assertThat(finalSetSrcCB).isEqualTo(expectedVal);
-        assertThat(finalSetTstRef).isEqualTo(expectedVal);
-        assertThat(finalSetTstCB).isEqualTo(expectedVal);
         assertThat(sclReportItems)
-                .hasSize(4)
+                .hasSize(2)
                 .extracting(SclReportItem::message)
-                .containsExactly("The DAI setSrcRef cannot be updated", "The DAI setSrcCB cannot be updated",
-                        "The DAI setTstRef cannot be updated", "The DAI setTstCB cannot be updated");
+                .containsExactly("The DAI setSrcRef cannot be updated", "The DAI setSrcCB cannot be updated");
     }
 
 
