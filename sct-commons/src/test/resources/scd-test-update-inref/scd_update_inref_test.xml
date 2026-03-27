@@ -31,8 +31,6 @@
                             <DAI name="setSrcCB" valKind="RO" valImport="true">
                                 <Val>OLD_VAL</Val>
                             </DAI>
-                            <DAI name="setTstRef" valKind="RO" valImport="false"/>
-                            <DAI name="setTstCB" valKind="RO" valImport="false"/>
                         </DOI>
                         <Inputs>
                             <ExtRef iedName="IED_NAME1" desc="LD_WITH_1_InRef_DOI_InRef2_1" ldInst="LD_WITH_1_InRef"
@@ -52,10 +50,6 @@
                             </DAI>
                             <DAI name="setSrcRef" valKind="RO" valImport="true"/>
                             <DAI name="setSrcCB" valKind="RO" valImport="true">
-                                <Val>OLD_VAL</Val>
-                            </DAI>
-                            <DAI name="setTstRef" valKind="RO" valImport="true"/>
-                            <DAI name="setTstCB" valKind="RO" valImport="true">
                                 <Val>OLD_VAL</Val>
                             </DAI>
                         </DOI>
@@ -78,10 +72,6 @@
                             <DAI name="setSrcCB" valKind="RO" valImport="true">
                                 <Val>OLD_VAL</Val>
                             </DAI>
-                            <DAI name="setTstRef" valKind="RO" valImport="true"/>
-                            <DAI name="setTstCB" valKind="RO" valImport="true">
-                                <Val>OLD_VAL</Val>
-                            </DAI>
                         </DOI>
                         <Inputs>
                             <ExtRef iedName="IED_NAME1" desc="DYN_LDEPF_DIGITAL CHANNEL 36_1_FaultDirectionKind_13_dirGeneral_1" ldInst="LDEPF" lnClass="ANCR" lnInst="1" prefix="PR" intAddr="INT_ADDR11" pDO="Do11.sdo11" doName="Do11.sdo11" srcLDInst="LD22" srcCBName="GSE1" srcPrefix="prefix" srcLNClass="ANCR" srcLNInst="1"/>
@@ -102,8 +92,6 @@
                             <DAI name="setSrcCB" valKind="RO" valImport="false">
                                 <Val>OLD_VAL</Val>
                             </DAI>
-                            <DAI name="setTstRef" valKind="RO" valImport="false"/>
-                            <DAI name="setTstCB" valKind="RO" valImport="false"/>
                         </DOI>
                         <Inputs>
                             <ExtRef iedName="IED_NAME1" desc="LD_WITH_1_Bad_InRef_DOI_InRef4_5" ldInst="LD_WITH_1_InRef" lnClass="ANCR" lnInst="1" prefix="PR" intAddr="INT_ADDR11" pDO="Do11.sdo11" doName="Do11.sdo11"/>
@@ -122,8 +110,6 @@
                             <DAI name="setSrcCB" valKind="RO" valImport="false">
                                 <Val>OLD_VAL</Val>
                             </DAI>
-                            <DAI name="setTstRef" valKind="RO" valImport="false"/>
-                            <DAI name="setTstCB" valKind="RO" valImport="false"/>
                         </DOI>
                         <Inputs>
                             <ExtRef iedName="IED_NAME1" desc="LD_WITH_2_InRef_same_SUFFIX_DOI_InRef5_1" ldInst="LD_WITH_1_InRef" lnClass="ANCR" lnInst="1" prefix="PR" intAddr="INT_ADDR11" pDO="Do11.sdo11" doName="Do11.sdo11"/>
@@ -140,8 +126,6 @@
                             <DAI name="setSrcCB" valKind="RO" valImport="false">
                                 <Val>OLD_VAL</Val>
                             </DAI>
-                            <DAI name="setTstRef" valKind="RO" valImport="false"/>
-                            <DAI name="setTstCB" valKind="RO" valImport="false"/>
                         </DOI>
                         <Inputs>
                             <ExtRef iedName="IED_NAME1" desc="LD_Without_purpose_DOI_InRef6_1" ldInst="LD_WITH_1_InRef" lnClass="ANCR" lnInst="1" prefix="PR" intAddr="INT_ADDR11" pDO="Do11.sdo11" doName="Do11.sdo11"/>
@@ -160,8 +144,6 @@
                             <DAI name="setSrcCB" valKind="RO" valImport="true">
                                 <Val>OLD_VAL</Val>
                             </DAI>
-                            <DAI name="setTstRef" valKind="RO" valImport="true"/>
-                            <DAI name="setTstCB" valKind="RO" valImport="true"/>
                         </DOI>
                         <Inputs>
                             <ExtRef iedName="IED_NAME1" desc="LD_WITH_1_InRef_without_cbName_DOI_InRef7_1"
@@ -197,9 +179,7 @@
         </LNodeType>
         <DOType id="INREFTYPE" cdc="ORG">
             <DA name="setSrcRef" bType="ObjRef" fc="SP" valImport="true"/>
-            <DA name="setTstRef" bType="ObjRef" fc="SP" valImport="true"/>
             <DA name="setSrcCB" bType="ObjRef" fc="SP" valImport="true"/>
-            <DA name="setTstCB" bType="ObjRef" fc="SP" valImport="true"/>
             <DA name="purpose" bType="VisString255" fc="DC"/>
         </DOType>
     </DataTypeTemplates>

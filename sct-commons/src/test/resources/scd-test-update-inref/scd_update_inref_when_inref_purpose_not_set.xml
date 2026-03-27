@@ -17,8 +17,6 @@
                             <DAI name="setSrcCB" valKind="RO" valImport="false">
                                 <Val>OLD_VAL</Val>
                             </DAI>
-                            <DAI name="setTstRef" valKind="RO" valImport="false"/>
-                            <DAI name="setTstCB" valKind="RO" valImport="false"/>
                         </DOI>
                         <Inputs>
                             <ExtRef iedName="IED_NAME1" desc="LD_Without_purpose_DOI_InRef6_1" ldInst="LD_WITH_1_InRef"

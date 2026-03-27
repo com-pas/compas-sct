@@ -17,8 +17,6 @@
                             </DAI>
                             <DAI name="setSrcRef" valKind="RO" valImport="true"/>
                             <DAI name="setSrcCB" valKind="RO" valImport="true"/>
-                            <DAI name="setTstRef" valKind="RO" valImport="true"/>
-                            <DAI name="setTstCB" valKind="RO" valImport="true"/>
                         </DOI>
                         <Inputs>
                             <ExtRef intAddr="INT_ADDR11" pDO="Do11.sdo11" desc="purpose value AA_1"/>
