@@ -23,7 +23,8 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.SETSRCCB_DA_NAME;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.SETSRCREF_DA_NAME;
 import static org.lfenergy.compas.sct.commons.util.SclConstructorHelper.newVal;
 
 class DOIAdapterTest {
@@ -375,7 +376,7 @@ class DOIAdapterTest {
     }
 
     @Test
-    void updateDaiFromExtRef_when_ExtRef_desc_suffix_ends_with_1_and_3_should_update_setSrcXX_and_setTstXX_values() {
+    void updateDaiFromExtRef_when_ExtRef_desc_suffix_ends_with_1_and_3_should_update_setSrcXX_values() {
         // Given
         DOIAdapter doiAdapter = createDOIAdapterInScl();
         TDAI daiSrcRef = new TDAI();
@@ -384,12 +385,6 @@ class DOIAdapterTest {
         TDAI daiSrcCb = new TDAI();
         daiSrcCb.setName(SETSRCCB_DA_NAME);
         doiAdapter.getCurrentElem().getSDIOrDAI().add(daiSrcCb);
-        TDAI daiTstRef = new TDAI();
-        daiTstRef.setName(SETTSTREF_DA_NAME);
-        doiAdapter.getCurrentElem().getSDIOrDAI().add(daiTstRef);
-        TDAI daiTstCb = new TDAI();
-        daiTstCb.setName(SETTSTCB_DA_NAME);
-        doiAdapter.getCurrentElem().getSDIOrDAI().add(daiTstCb);
 
         TExtRef extRef1 = givenExtRef(1, true);
         TExtRef extRef3 = givenExtRef(3, true);
@@ -405,16 +400,10 @@ class DOIAdapterTest {
         assertThat(getDaiValOfDoi(doiAdapter, SETSRCCB_DA_NAME)).isPresent()
                 .get().extracting(TVal::getValue)
                 .isEqualTo("IED_NAME_1LD_INST_1/SRC_PREFIX_1LLN0SRC_LN_INST_1.CB_NAME_1");
-        assertThat(getDaiValOfDoi(doiAdapter, SETTSTREF_DA_NAME)).isPresent()
-                .get().extracting(TVal::getValue)
-                .isEqualTo("IED_NAME_3LD_INST_3/PREFIX_3ANCR3.DO_NAME_3");
-        assertThat(getDaiValOfDoi(doiAdapter, SETTSTCB_DA_NAME)).isPresent()
-                .get().extracting(TVal::getValue)
-                .isEqualTo("IED_NAME_3LD_INST_3/SRC_PREFIX_3LLN0SRC_LN_INST_3.CB_NAME_3");
     }
 
     @Test
-    void updateDaiFromExtRef_when_ExtRef_desc_suffix_ends_with_1_and_3_without_CB_should_update_only_setSrcRef_and_setTstRef_values() {
+    void updateDaiFromExtRef_when_ExtRef_desc_suffix_ends_with_1_and_3_without_CB_should_update_only_setSrcRef_value() {
         // Given
         DOIAdapter doiAdapter = createDOIAdapterInScl();
         TDAI daiSrcRef = new TDAI();
@@ -423,12 +412,6 @@ class DOIAdapterTest {
         TDAI daiSrcCb = new TDAI();
         daiSrcCb.setName(SETSRCCB_DA_NAME);
         doiAdapter.getCurrentElem().getSDIOrDAI().add(daiSrcCb);
-        TDAI daiTstRef = new TDAI();
-        daiTstRef.setName(SETTSTREF_DA_NAME);
-        doiAdapter.getCurrentElem().getSDIOrDAI().add(daiTstRef);
-        TDAI daiTstCb = new TDAI();
-        daiTstCb.setName(SETTSTCB_DA_NAME);
-        doiAdapter.getCurrentElem().getSDIOrDAI().add(daiTstCb);
 
         TExtRef extRef1 = givenExtRef(1, false);
         TExtRef extRef3 = givenExtRef(3, false);
@@ -442,11 +425,6 @@ class DOIAdapterTest {
                 .get().extracting(TVal::getValue)
                 .isEqualTo("IED_NAME_1LD_INST_1/PREFIX_1ANCR1.DO_NAME_1");
         assertThat(getDaiValOfDoi(doiAdapter, SETSRCCB_DA_NAME))
-                .isNotPresent();
-        assertThat(getDaiValOfDoi(doiAdapter, SETTSTREF_DA_NAME)).isPresent()
-                .get().extracting(TVal::getValue)
-                .isEqualTo("IED_NAME_3LD_INST_3/PREFIX_3ANCR3.DO_NAME_3");
-        assertThat(getDaiValOfDoi(doiAdapter, SETTSTCB_DA_NAME))
                 .isNotPresent();
     }
 
@@ -512,12 +490,6 @@ class DOIAdapterTest {
         TDAI daiSrcCb = new TDAI();
         daiSrcCb.setName(SETSRCCB_DA_NAME);
         doiAdapter.getCurrentElem().getSDIOrDAI().add(daiSrcCb);
-        TDAI daiTstRef = new TDAI();
-        daiTstRef.setName(SETTSTREF_DA_NAME);
-        doiAdapter.getCurrentElem().getSDIOrDAI().add(daiTstRef);
-        TDAI daiTstCb = new TDAI();
-        daiTstCb.setName(SETTSTCB_DA_NAME);
-        doiAdapter.getCurrentElem().getSDIOrDAI().add(daiTstCb);
 
         TExtRef extRef1 = new TExtRef();
         extRef1.setDesc("ExtRef_desc_1");
@@ -542,32 +514,6 @@ class DOIAdapterTest {
                 .isEqualTo("IED_NAME_1LD_INST_1/LN_CLASS_1.DO_NAME_1");
         assertThat(getDaiValOfDoi(doiAdapter, SETSRCCB_DA_NAME))
                 .isNotPresent();
-        assertThat(getDaiValOfDoi(doiAdapter, SETTSTREF_DA_NAME)).isPresent()
-                .get().extracting(TVal::getValue)
-                .isEqualTo("IED_NAME_3LD_INST_3/LN_CLASS_3.DO_NAME_3");
-        assertThat(getDaiValOfDoi(doiAdapter, SETTSTCB_DA_NAME))
-                .isNotPresent();
-    }
-
-    @Test
-    void updateDaiFromExtRef_when_ExtRef_desc_not_end_with_1_should_throw_exception() {
-        // Given
-        DOIAdapter.DAIAdapter daiAdapter = initInnerDAIAdapter("Do", "da");
-        DOIAdapter doiAdapter = daiAdapter.getParentAdapter();
-        TDAI daiSrcRef = new TDAI();
-        daiSrcRef.setName(SETSRCREF_DA_NAME);
-        doiAdapter.getCurrentElem().getSDIOrDAI().add(daiSrcRef);
-        TDAI daiSrcCb = new TDAI();
-        daiSrcCb.setName(SETSRCCB_DA_NAME);
-        doiAdapter.getCurrentElem().getSDIOrDAI().add(daiSrcCb);
-
-        TExtRef extRef1 = new TExtRef();
-        extRef1.setDesc("ExtRefDesc");
-        List<TExtRef> extRefList = List.of(extRef1);
-
-        // When Then
-        assertThatThrownBy(() -> doiAdapter.updateDaiFromExtRef(extRefList))
-                .isInstanceOf(NumberFormatException.class);
     }
 
     @Test
@@ -686,9 +632,7 @@ class DOIAdapterTest {
         tdoType.setId("REF");
         TDA tda1 = createDa(SETSRCREF_DA_NAME);
         TDA tda2 = createDa(SETSRCCB_DA_NAME);
-        TDA tda3 = createDa(SETTSTREF_DA_NAME);
-        TDA tda4 = createDa(SETTSTCB_DA_NAME);
-        tdoType.getSDOOrDA().addAll(List.of(tda1, tda2, tda3, tda4));
+        tdoType.getSDOOrDA().addAll(List.of(tda1, tda2));
 
         TDataTypeTemplates tDataTypeTemplates = new TDataTypeTemplates();
         tDataTypeTemplates.getLNodeType().add(tlNodeType);

@@ -17,8 +17,6 @@
                             </DAI>
                             <DAI name="setSrcRef" valKind="RO" valImport="true"/>
                             <DAI name="setSrcCB" valKind="RO" valImport="true"/>
-                            <DAI name="setTstRef" valKind="RO" valImport="true"/>
-                            <DAI name="setTstCB" valKind="RO" valImport="true"/>
                         </DOI>
                         <Inputs>
                             <ExtRef iedName="IED_NAME1" ldInst="LD2" desc="purpose value AA_1"

@@ -11,9 +11,12 @@ import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
-import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.SETSRCCB_DA_NAME;
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.SETSRCREF_DA_NAME;
 
 
 /**
@@ -43,8 +46,6 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TAnyLN>, TDOI> implements IDataParentAdapter {
 
     protected static final String DAI_NOT_UPDATABLE_MESSAGE = "The DAI %s cannot be updated";
-
-    private static final Comparator<TExtRef> EXTREF_DESC_SUFFIX_COMPARATOR = Comparator.comparingInt(extRef -> extractDescSuffix(extRef.getDesc()));
 
     /**
      * Constructor
@@ -95,38 +96,24 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
     /**
      * Update the DAI/Val according to the ExtRef attributes.
      * If the ExtRef.desc start with DAI[name='purpose']/Val and end with "_1" (nominal case):
-     *  - DAI[name='setSrcRef']/Val is updated with ExtRef attributes concatenation
-     *  - DAI[name='setSrcCB']/Val is updated with ExtRef attributes concatenation if ExtRef.srcCBName is present
-     * If the ExtRef.desc start with DAI[name='purpose']/Val and end with "_2" or greater (test case):
-     *  - DAI[name='setTstRef']/Val is updated with ExtRef attributes concatenation
-     *  - DAI[name='setTstCB']/Val is updated with ExtRef attributes concatenation if ExtRef.srcCBName is present
+     * - DAI[name='setSrcRef']/Val is updated with ExtRef attributes concatenation
+     * - DAI[name='setSrcCB']/Val is updated with ExtRef attributes concatenation if ExtRef.srcCBName is present
      *
      * @param tExtRefs all the ExtRefs contained in the current LDevice/LLN0
      * @return a filled SclReportItem if an error occurs, empty SclReportItem otherwise
      */
     public List<SclReportItem> updateDaiFromExtRef(List<TExtRef> tExtRefs) {
         List<SclReportItem> sclReportItems = new ArrayList<>();
-        Optional<TExtRef> tExtRefMinOptional = tExtRefs.stream().min(EXTREF_DESC_SUFFIX_COMPARATOR);
-        if (tExtRefMinOptional.isPresent() && extractDescSuffix(tExtRefMinOptional.get().getDesc()) == 1) {
-            TExtRef tExtRefMin = tExtRefMinOptional.get();
-            String valueSrcRef = createInRefValNominalString(tExtRefMin);
-            updateDAI(SETSRCREF_DA_NAME, valueSrcRef).ifPresent(sclReportItems::add);
-            if (tExtRefMin.isSetSrcCBName()) {
-                String valueSrcCb = createInRefValTestString(tExtRefMin);
-                updateDAI(SETSRCCB_DA_NAME, valueSrcCb).ifPresent(sclReportItems::add);
-            }
-
-            Optional<TExtRef> tExtRefMaxOptional = tExtRefs.stream().max(EXTREF_DESC_SUFFIX_COMPARATOR);
-            if (tExtRefMaxOptional.isPresent() && extractDescSuffix(tExtRefMaxOptional.get().getDesc()) > 1) {
-                TExtRef tExtRefMax = tExtRefMaxOptional.get();
-                String valueTstRef = createInRefValNominalString(tExtRefMax);
-                updateDAI(SETTSTREF_DA_NAME, valueTstRef).ifPresent(sclReportItems::add);
-                if (tExtRefMax.isSetSrcCBName()) {
-                    String valueTstCb = createInRefValTestString(tExtRefMax);
-                    updateDAI(SETTSTCB_DA_NAME, valueTstCb).ifPresent(sclReportItems::add);
-                }
-            }
-        }
+        tExtRefs.stream()
+                .filter(tExtRef -> tExtRef.getDesc().endsWith("_1"))
+                .forEach(tExtRefMin -> {
+                    String valueSrcRef = createInRefValNominalString(tExtRefMin);
+                    updateDAI(SETSRCREF_DA_NAME, valueSrcRef).ifPresent(sclReportItems::add);
+                    if (tExtRefMin.isSetSrcCBName()) {
+                        String valueSrcCb = createInRefValTestString(tExtRefMin);
+                        updateDAI(SETSRCCB_DA_NAME, valueSrcCb).ifPresent(sclReportItems::add);
+                    }
+                });
         return sclReportItems;
     }
 
@@ -138,8 +125,8 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
      * @return warning message when DAI not updatable, otherwise return empty and update DAI with value
      */
     public Optional<SclReportItem> updateDAI(String daName, String value) {
-            DataAttributeRef daiFilterSrcRef = new DataAttributeRef(getParentAdapter(), new DoTypeName(getName()), new DaTypeName(daName));
-            Optional<DataAttributeRef> foundDais = getParentAdapter().getDAI(daiFilterSrcRef, true).stream().findFirst();
+        DataAttributeRef daiFilterSrcRef = new DataAttributeRef(getParentAdapter(), new DoTypeName(getName()), new DaTypeName(daName));
+        Optional<DataAttributeRef> foundDais = getParentAdapter().getDAI(daiFilterSrcRef, true).stream().findFirst();
         if (foundDais.isEmpty()) {
             return Optional.of(SclReportItem.warning(getXPath() + "/DAI@name=\"" + daName + "\"/Val", DAI_NOT_UPDATABLE_MESSAGE.formatted(daName)));
         }
@@ -148,10 +135,6 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
         getParentAdapter().updateDAI(filterForUpdate);
         return Optional.empty();
 
-    }
-
-    private static int extractDescSuffix(String desc) throws NumberFormatException {
-        return Integer.parseInt(Objects.requireNonNull(Utils.extractField(desc, "_", -1)));
     }
 
     private String createInRefValNominalString(TExtRef extRef) {
