@@ -436,6 +436,48 @@ class ControlBlockEditorServiceTest {
     }
 
     @Test
+    void configureNetworkForAllControlBlocks_should_exclude_only_concerned_addresses() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/test_exclude_only_concerned_address_of_ied_having_extref.xml");
+        CBCom cbCom = createCbCom();
+        cbCom.getMacRanges().getMacRange().getFirst().setStart("00-00-00-00-00-01");
+        cbCom.getMacRanges().getMacRange().getFirst().setEnd("00-00-00-00-00-03");
+        // When
+        List<SclReportItem> sclReportItems = controlBlockEditorService.configureNetworkForAllControlBlocks(scd, cbCom);
+        // Then
+        assertThat(sclReportItems).isEmpty();
+        assertThat(scd.getCommunication().getSubNetwork())
+                .flatExtracting(TSubNetwork::getConnectedAP)
+                .flatExtracting(TConnectedAP::getGSE)
+                .extracting(TControlBlock::getCbName, this::extractMacAddress)
+                .containsExactlyInAnyOrder(
+                        Tuple.tuple("CB1a", "00-00-00-00-00-01"),
+                        Tuple.tuple("CB1b", "00-00-00-00-00-02"),
+                        Tuple.tuple("CB2", "00-00-00-00-00-02"));
+    }
+
+    @Test
+    void configureNetworkForAllControlBlocks_should_get_only_mac_used_by_extref_of_extref_ied() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/test_exclude_only_mac_addresses_used_by_extref_of_extref_ied.xml");
+        CBCom cbCom = createCbCom();
+        cbCom.getMacRanges().getMacRange().getFirst().setStart("00-00-00-00-00-01");
+        cbCom.getMacRanges().getMacRange().getFirst().setEnd("00-00-00-00-00-03");
+        // When
+        List<SclReportItem> sclReportItems = controlBlockEditorService.configureNetworkForAllControlBlocks(scd, cbCom);
+        // Then
+        assertThat(sclReportItems).isEmpty();
+        assertThat(scd.getCommunication().getSubNetwork())
+                .flatExtracting(TSubNetwork::getConnectedAP)
+                .flatExtracting(TConnectedAP::getGSE)
+                .extracting(TControlBlock::getCbName, this::extractMacAddress)
+                .containsExactlyInAnyOrder(
+                        Tuple.tuple("CB1a", "00-00-00-00-00-01"),
+                        Tuple.tuple("CB1b", "00-00-00-00-00-02"),
+                        Tuple.tuple("CB2", "00-00-00-00-00-02"));
+    }
+
+    @Test
     void configureNetworkForAllControlBlocks_should_exclude_mac() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/test_exclude_mac_address_of_extref.xml");
