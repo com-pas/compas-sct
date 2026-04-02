@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- SPDX-FileCopyrightText: 2026 RTE FRANCE -->
+<!-- -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<SCL version="2007" revision="B" release="4" xmlns="http://www.iec.ch/61850/2003/SCL" xmlns:compas="https://www.lfenergy.org/compas/extension/v1">
+    <Header id="hId" version="2007" revision="B" toolID="COMPAS"/>
+    <Communication>
+        <SubNetwork type="IP" name="SUBNETWORK1">
+            <ConnectedAP iedName="IED_1" apName="AP_NAME"/>
+            <ConnectedAP iedName="IED_2" apName="AP_NAME"/>
+            <ConnectedAP iedName="IED_3" apName="AP_NAME"/>
+            <ConnectedAP iedName="IED_4" apName="AP_NAME"/>
+        </SubNetwork>
+    </Communication>
+    <IED name="IED_1">
+        <Private type="COMPAS-SystemVersion">
+            <compas:SystemVersion MainSystemVersion="01.00" MinorSystemVersion="009.001.001"/>
+        </Private>
+        <Private type="COMPAS-ICDHeader">
+            <compas:ICDHeader ICDSystemVersionUUID="System_Version_IED_1" IEDType="BCU" IEDSubstationinstance="22" IEDName="IED_1" VendorName="SCLE SFE" IEDmodel="ARKENS-SV1120-HGAAA-EB5" IEDredundancy="A" IEDSystemVersioninstance="1" BayLabel="3THEIX2" hwRev="0.0.2." swRev="1.0a"
+                              headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+        </Private>
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LD_INST11" ldName="IED_1LD_INST11">
+                    <LN0 lnClass="LLN0" inst="" lnType="LNEX1">
+                        <GSEControl appID="appId1a" name="CB1a"/>
+                        <GSEControl appID="appId1b" name="CB1b"/>
+                    </LN0>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
+    <IED name="IED_2">
+        <Private type="COMPAS-SystemVersion">
+            <compas:SystemVersion MainSystemVersion="01.00" MinorSystemVersion="009.001.001"/>
+        </Private>
+        <Private type="COMPAS-ICDHeader">
+            <compas:ICDHeader ICDSystemVersionUUID="System_Version_IED_2" IEDType="BCU" IEDSubstationinstance="22" IEDName="IED_2" VendorName="SCLE SFE" IEDmodel="ARKENS-SV1120-HGAAA-EB5" IEDredundancy="A" IEDSystemVersioninstance="1" BayLabel="3THEIX2" hwRev="0.0.2." swRev="1.0a"
+                              headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+        </Private>
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LD_INST21" ldName="IED_2LD_INST21">
+                    <LN0 lnClass="LLN0" inst="" lnType="LNEX1">
+                        <Inputs>
+                            <ExtRef iedName="IED_1" ldInst="LD_INST11" lnClass="LLN0" srcCBName="CB1a"/>
+                        </Inputs>
+                        <GSEControl appID="appId2" name="CB2"/>
+                    </LN0>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
+    <IED name="IED_3">
+        <Private type="COMPAS-SystemVersion">
+            <compas:SystemVersion MainSystemVersion="01.00" MinorSystemVersion="009.001.001"/>
+        </Private>
+        <Private type="COMPAS-ICDHeader">
+            <compas:ICDHeader ICDSystemVersionUUID="System_Version_IED_3" IEDType="BCU" IEDSubstationinstance="22" IEDName="IED_3" VendorName="SCLE SFE" IEDmodel="ARKENS-SV1120-HGAAA-EB5" IEDredundancy="A" IEDSystemVersioninstance="1" BayLabel="3THEIX2" hwRev="0.0.2." swRev="1.0a"
+                              headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+        </Private>
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LD_INST31" ldName="IED_3LD_INST31">
+                    <LN0 lnClass="LLN0" inst="" lnType="LNEX1">
+                        <Inputs>
+                            <ExtRef iedName="IED_1" ldInst="LD_INST11" lnClass="LLN0" srcCBName="CB1a"/>
+                            <ExtRef iedName="IED_2" ldInst="LD_INST21" lnClass="LLN0" srcCBName="CB2"/>
+                        </Inputs>
+                    </LN0>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
+    <IED name="IED_4">
+        <Private type="COMPAS-SystemVersion">
+            <compas:SystemVersion MainSystemVersion="01.00" MinorSystemVersion="009.001.001"/>
+        </Private>
+        <Private type="COMPAS-ICDHeader">
+            <compas:ICDHeader ICDSystemVersionUUID="System_Version_IED_4" IEDType="BCU" IEDSubstationinstance="22" IEDName="IED_4" VendorName="SCLE SFE" IEDmodel="ARKENS-SV1120-HGAAA-EB5" IEDredundancy="A" IEDSystemVersioninstance="1" BayLabel="3THEIX2" hwRev="0.0.2." swRev="1.0a"
+                              headerId="ARKENS-SV1120-HGAAA-EB5_SCU" headerVersion="1.2a" headerRevision="412995"/>
+        </Private>
+        <AccessPoint name="AP_NAME">
+            <Server>
+                <Authentication/>
+                <LDevice inst="LD_INST41" ldName="IED_4LD_INST41">
+                    <LN0 lnClass="LLN0" inst="" lnType="LNEX1">
+                        <Inputs>
+                            <ExtRef iedName="IED_1" ldInst="LD_INST11" lnClass="LLN0" srcCBName="CB1a"/>
+                        </Inputs>
+                    </LN0>
+                </LDevice>
+            </Server>
+        </AccessPoint>
+    </IED>
+    <DataTypeTemplates>
+        <LNodeType lnClass="LLN0" id="LNEX1">
+            <DO name="Mod" type="Do0"/>
+        </LNodeType>
+        <DOType cdc="ENC" id="Do0">
+            <DA fc="ST" name="stVal" bType="Enum" type="BehaviourModeKind"/>
+        </DOType>
+        <EnumType id="BehaviourModeKind">
+            <EnumVal ord="1">on</EnumVal>
+            <EnumVal ord="2">off</EnumVal>
+            <EnumVal ord="3">test</EnumVal>
+        </EnumType>
+    </DataTypeTemplates>
+</SCL>
