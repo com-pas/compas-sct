@@ -5,9 +5,7 @@
 package org.lfenergy.compas.sct.commons.domain;
 
 
-import static org.lfenergy.compas.sct.commons.util.CommonConstants.MOD_DO_NAME;
-import static org.lfenergy.compas.sct.commons.util.CommonConstants.STVAL_DA_NAME;
-
+import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 
 public record DoLinkedToDa(DataObject dataObject, DataAttribute dataAttribute) {
 
@@ -31,7 +29,7 @@ public record DoLinkedToDa(DataObject dataObject, DataAttribute dataAttribute) {
      * @return true if updatable, false otherwise
      */
     public boolean isUpdatable() {
-        return isDOModDAstVal() || dataAttribute.isUpdatable();
+        return isDOModDAstVal() || isDONamPltDAValRev() || dataAttribute.isUpdatable();
     }
 
     /**
@@ -41,6 +39,15 @@ public record DoLinkedToDa(DataObject dataObject, DataAttribute dataAttribute) {
      */
     private boolean isDOModDAstVal() {
         return dataObject.getDoName().equals(MOD_DO_NAME) && dataAttribute.getDaName().equals(STVAL_DA_NAME);
+    }
+
+    /**
+     * Checks if DO is NamPlt and DA is valRev
+     *
+     * @return true if DO is "NamPlt" and DA is "valRev", false otherwise
+     */
+    private boolean isDONamPltDAValRev() {
+        return dataObject.getDoName().equals(NAMPLT_DO_NAME) && dataAttribute.getDaName().equals(VALREV_DA_NAME);
     }
 
     /**
