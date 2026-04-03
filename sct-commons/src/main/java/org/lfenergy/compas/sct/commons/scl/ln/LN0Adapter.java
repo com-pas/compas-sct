@@ -11,8 +11,10 @@ import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.ied.InputsAdapter;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 
@@ -192,8 +194,17 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
 
     private List<TExtRef> getBoundExtRefsByDesc(String desc) {
         return getExtRefs().stream()
-                .filter(tExtRef -> tExtRef.isSetIedName() && tExtRef.isSetLdInst() && tExtRef.isSetLnClass() && tExtRef.isSetDoName() &&
-                        tExtRef.isSetDesc() && tExtRef.getDesc().contains(desc))
+                //This separation is done so in case we have 2 identical ExtRef with a different type, we always prioritize the one who have the same type as the purpose value.
+                .flatMap(tExtRef -> {
+                    boolean isSetDesc = tExtRef.isSetIedName() && tExtRef.isSetLdInst() && tExtRef.isSetLnClass() && tExtRef.isSetDoName() && tExtRef.isSetDesc();
+                    if(isSetDesc && tExtRef.getDesc().contains(desc)){
+                        return Stream.of(tExtRef);
+                    }
+                    else if(isSetDesc && tExtRef.getDesc().contains(desc.substring(0, desc.lastIndexOf("_")))){
+                        return Stream.of(tExtRef);
+                    }
+                    return Stream.empty();
+                })
                 .toList();
     }
 }
