@@ -1061,6 +1061,31 @@ class LN0AdapterTest {
     }
 
     @Test
+    void updateDoInRef_when_2_search_ExtRef_desc_matches_should_update_setSrcRef_and_setSrcCB() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-test-update-inref/scd_update_inref_test.xml");
+        LN0Adapter sourceLn0 = findLn0(scd, "IED_NAME1", "LD_WITH_2_STEP_SEARCH_InRef");
+        String doiNameInRef = "InRef9";
+        String originalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, SETSRCCB_DA_NAME);
+        String expectedSrcRef = "IED_NAME1LD_WITH_2_STEP_SEARCH_InRef/PRANCR1.Do11.sdo11";
+        String expectedSrcCb = "IED_NAME1LD_WITH_2_STEP_SEARCH_InRef/prefixANCR1.GSE1";
+
+        // When
+        List<SclReportItem> sclReportItems = sourceLn0.updateDoInRef();
+
+        // Then
+        String finalSetSrcRef = getDaiValue(sourceLn0, doiNameInRef, SETSRCREF_DA_NAME);
+        String finalSetSrcCB = getDaiValue(sourceLn0, doiNameInRef, SETSRCCB_DA_NAME);
+        assertThat(finalSetSrcRef)
+                .isNotBlank()
+                .isEqualTo(expectedSrcRef);
+        assertThat(finalSetSrcCB)
+                .isNotEqualTo(originalSetSrcCB)
+                .isEqualTo(expectedSrcCb);
+        assertThat(sclReportItems).isEmpty();
+    }
+
+    @Test
     void updateDoInRef_when_DAI_purpose_of_Ldevice_LDEPF_ends_with_BOOLEAN_should_match_desc_that_ends_with_enum_and_update_setSrcRef_and_setSrcCB() {
         // Given
         SCL scd = SclTestMarshaller.getSCLFromResource("scd-test-update-inref/scd_update_inref_test.xml");
