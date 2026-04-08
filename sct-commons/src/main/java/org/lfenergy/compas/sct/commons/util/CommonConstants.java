@@ -16,6 +16,8 @@ public final class CommonConstants {
     public static final String HEADER_REVISION = "headerRevision";
     public static final String MOD_DO_NAME = "Mod";
     public static final String STVAL_DA_NAME = "stVal";
+    public static final String NAMPLT_DO_NAME = "NamPlt";
+    public static final String VALREV_DA_NAME = "valRev";
     public static final String ATTRIBUTE_VALUE_SEPARATOR = "_";
     public static final String CONTROLBLOCK_NAME_PREFIX = "CB" + ATTRIBUTE_VALUE_SEPARATOR;
     public static final String DATASET_NAME_PREFIX = "DS" + ATTRIBUTE_VALUE_SEPARATOR;

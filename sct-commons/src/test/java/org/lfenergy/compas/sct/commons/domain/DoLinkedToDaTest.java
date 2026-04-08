@@ -79,6 +79,19 @@ class DoLinkedToDaTest {
     }
 
     @Test
+    void isUpdatable_should_return_true_whenIsDONamPltDAValRev() {
+        // Given
+        DataObject dataObject = new DataObject();
+        dataObject.setDoName("NamPlt");
+        DataAttribute dataAttribute = new DataAttribute();
+        dataAttribute.setDaName("valRev");
+
+        DoLinkedToDa doLinkedToDa = new DoLinkedToDa(dataObject, dataAttribute);
+        // When Then
+        assertThat(doLinkedToDa.isUpdatable()).isTrue();
+    }
+
+    @Test
     void isUpdatable_should_return_true_whenValImportIsTrue() {
         // Given
         DataObject dataObject = new DataObject();
