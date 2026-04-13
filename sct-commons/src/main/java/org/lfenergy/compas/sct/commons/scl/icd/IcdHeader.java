@@ -7,7 +7,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.lfenergy.compas.scl2007b4.model.TCompasICDHeader;
 import org.lfenergy.compas.scl2007b4.model.TCompasIEDRedundancy;
-import org.lfenergy.compas.scl2007b4.model.TCompasIEDType;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
 import java.math.BigInteger;
@@ -24,7 +23,7 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 public class IcdHeader {
 
     private final String icdSystemVersionUUID;
-    private final TCompasIEDType iedType;
+    private final String iedType;
     @EqualsAndHashCode.Exclude
     private final BigInteger iedSubstationinstance;
     @EqualsAndHashCode.Exclude

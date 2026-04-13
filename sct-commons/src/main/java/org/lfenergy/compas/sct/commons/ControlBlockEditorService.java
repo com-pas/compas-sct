@@ -395,7 +395,7 @@ public class ControlBlockEditorService implements ControlBlockEditor {
         return new CriteriaOrError(
                 new Criteria(cbType,
                         systemVersionWithoutV,
-                        TIEDType.fromValue(compasICDHeader.get().getIEDType().value()),
+                        TIEDType.fromValue(compasICDHeader.get().getIEDType()),
                         TIEDRedundancy.fromValue(compasICDHeader.get().getIEDredundancy().value()),
                         compasICDHeader.get().getIEDSystemVersioninstance(),
                         bayIntOrExt), null);
