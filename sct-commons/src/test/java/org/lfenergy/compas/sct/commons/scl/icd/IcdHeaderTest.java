@@ -9,7 +9,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.lfenergy.compas.scl2007b4.model.TCompasICDHeader;
 import org.lfenergy.compas.scl2007b4.model.TCompasIEDRedundancy;
-import org.lfenergy.compas.scl2007b4.model.TCompasIEDType;
 
 import java.math.BigInteger;
 import java.util.stream.Stream;
@@ -92,7 +91,7 @@ class IcdHeaderTest {
         TCompasICDHeader tCompasICDHeaderModifiedicdSystemVersionUUID = createHeader();
         tCompasICDHeaderModifiedicdSystemVersionUUID.setICDSystemVersionUUID("patate");
         TCompasICDHeader tCompasICDHeaderModifiediedType = createHeader();
-        tCompasICDHeaderModifiediedType.setIEDType(TCompasIEDType.AUT);
+        tCompasICDHeaderModifiediedType.setIEDType("AUT");
         TCompasICDHeader tCompasICDHeaderModifiedvendorName = createHeader();
         tCompasICDHeaderModifiedvendorName.setVendorName("patate");
         TCompasICDHeader tCompasICDHeaderModifiediedModel = createHeader();
@@ -148,7 +147,7 @@ class IcdHeaderTest {
     private static TCompasICDHeader createHeader() {
         TCompasICDHeader tCompasICDHeader = new TCompasICDHeader();
         tCompasICDHeader.setICDSystemVersionUUID("icdSystemVersionUUID");
-        tCompasICDHeader.setIEDType(TCompasIEDType.SCU);
+        tCompasICDHeader.setIEDType("SCU");
         tCompasICDHeader.setIEDSubstationinstance(BigInteger.ONE);
         tCompasICDHeader.setIEDSystemVersioninstance(BigInteger.ONE);
         tCompasICDHeader.setIEDName("iedName");
