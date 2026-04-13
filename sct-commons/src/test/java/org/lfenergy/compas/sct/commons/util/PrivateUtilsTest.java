@@ -596,7 +596,7 @@ class PrivateUtilsTest {
                 )
                 .containsExactly(
                         "IED4d4fe1a8cda64cf88a5ee4176a1a0eef",
-                        TCompasIEDType.SCU,
+                        "SCU",
                         BigInteger.ONE,
                         BigInteger.ONE,
                         null,
