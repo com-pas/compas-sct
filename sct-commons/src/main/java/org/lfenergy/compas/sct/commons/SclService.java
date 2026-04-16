@@ -27,7 +27,6 @@ import org.lfenergy.compas.sct.commons.scl.ied.DAITracker;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
-import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
 import org.lfenergy.compas.sct.commons.util.MonitoringLnClassEnum;
 import org.lfenergy.compas.sct.commons.util.PrivateUtils;
 import org.lfenergy.compas.sct.commons.util.Utils;
@@ -88,9 +87,9 @@ public class SclService implements SclEditor {
         }
         if (hUpdated && !headerDTO.getHistoryItems().isEmpty()) {
             headerAdapter.addHistoryItem(
-                    headerDTO.getHistoryItems().get(0).getWho(),
-                    headerDTO.getHistoryItems().get(0).getWhat(),
-                    headerDTO.getHistoryItems().get(0).getWhy()
+                    headerDTO.getHistoryItems().getFirst().getWho(),
+                    headerDTO.getHistoryItems().getFirst().getWhat(),
+                    headerDTO.getHistoryItems().getFirst().getWhy()
             );
         }
     }
@@ -193,9 +192,9 @@ public class SclService implements SclEditor {
                         if (!mapICDSystemVersionUuidAndSTDFile.containsKey(icdSysVerUuid))
                             throw new ScdException("There is no STD file found corresponding to " + icdHeader);
                         // import /ied /dtt in Scd
-                        SCL std = mapICDSystemVersionUuidAndSTDFile.get(icdSysVerUuid).stdList().get(0);
+                        SCL std = mapICDSystemVersionUuidAndSTDFile.get(icdSysVerUuid).stdList().getFirst();
                         SclRootAdapter stdRootAdapter = new SclRootAdapter(std);
-                        IEDAdapter stdIedAdapter = new IEDAdapter(stdRootAdapter, std.getIED().get(0));
+                        IEDAdapter stdIedAdapter = new IEDAdapter(stdRootAdapter, std.getIED().getFirst());
                         Optional<TPrivate> optionalTPrivate = stdIedAdapter.getPrivateHeader(COMPAS_ICDHEADER.getPrivateType());
                         if (optionalTPrivate.isPresent() && optionalTPrivate.flatMap(PrivateUtils::extractCompasICDHeader).map(IcdHeader::new).get().equals(icdHeader)) {
                             PrivateUtils.copyCompasICDHeaderFromLNodePrivateIntoSTDPrivate(optionalTPrivate.get(), icdHeader.toTCompasICDHeader());
@@ -207,18 +206,6 @@ public class SclService implements SclEditor {
                     }
                 });
     }
-
-    @Override
-    public List<SclReportItem> updateDoInRef(SCL scd) {
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
-        return sclRootAdapter.streamIEDAdapters()
-                .flatMap(IEDAdapter::streamLDeviceAdapters)
-                .map(LDeviceAdapter::getLN0Adapter)
-                .map(LN0Adapter::updateDoInRef)
-                .flatMap(List::stream)
-                .toList();
-    }
-
 
     @Override
     public List<SclReportItem> manageMonitoringLns(SCL scd) {
