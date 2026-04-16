@@ -5,18 +5,13 @@
 package org.lfenergy.compas.sct.commons.scl.ln;
 
 
-import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.dto.*;
+import org.lfenergy.compas.scl2007b4.model.LN0;
+import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
+import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
+import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
 import org.lfenergy.compas.sct.commons.scl.ied.InputsAdapter;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
-import java.util.List;
-import java.util.Optional;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
 
 /**
  * A representation of the model object
@@ -63,8 +58,6 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
  * @see AbstractLNAdapter
  */
 public class LN0Adapter extends AbstractLNAdapter<LN0> {
-
-    private static final Pattern LDEFP_DIGITAL_CHANNEL_PATTERN = Pattern.compile("DYN_LDEPF_DIGITAL CHANNEL \\d+_\\d+_BOOLEAN");
 
     /**
      * Constructor
@@ -163,48 +156,4 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
         currentElem.unsetSampledValueControl();
     }
 
-    /**
-     * Update DAIs of DO InRef in all LN0 of the SCD using matching ExtRef information.
-     *
-     * @return A list of SclReport Objects that contain errors
-     */
-    public List<SclReportItem> updateDoInRef() {
-        return getDOIAdapters().stream()
-                .filter(doiAdapter -> doiAdapter.getCurrentElem().isSetName()
-                        && doiAdapter.getCurrentElem().getName().startsWith(INREF_PREFIX)
-                        && doiAdapter.findDataAdapterByName(PURPOSE_DA_NAME).isPresent())
-                .map(doiAdapter -> doiAdapter.getDataAdapterByName(PURPOSE_DA_NAME).getCurrentElem().getVal().stream()
-                        .findFirst()
-                        .map(tVal -> doiAdapter.updateDaiFromExtRef(getExtRefsBoundToInRef(tVal.getValue())))
-                        .orElse(List.of(SclReportItem.warning(getXPath(), "The DOI %s can't be bound with an ExtRef".formatted(getXPath()))))
-                )
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
-    }
-
-    private List<TExtRef> getExtRefsBoundToInRef(String desc) {
-        List<TExtRef> boundExtRefs = getBoundExtRefsByDesc(desc);
-        // Special case for LDEPF DIGITAL CHANNEL of type BOOLEAN RSR-1048
-        if (boundExtRefs.isEmpty() && LDEFP_DIGITAL_CHANNEL_PATTERN.matcher(desc).matches()) {
-            String descWithoutType = desc.substring(0, desc.lastIndexOf("_"));
-            return getBoundExtRefsByDesc(descWithoutType);
-        }
-        return boundExtRefs;
-    }
-
-    private List<TExtRef> getBoundExtRefsByDesc(String desc) {
-        return getExtRefs().stream()
-                //This separation is done so in case we have 2 identical ExtRef with a different type, we always prioritize the one who have the same type as the purpose value.
-                .flatMap(tExtRef -> {
-                    boolean isSetDesc = tExtRef.isSetIedName() && tExtRef.isSetLdInst() && tExtRef.isSetLnClass() && tExtRef.isSetDoName() && tExtRef.isSetDesc();
-                    if(isSetDesc && tExtRef.getDesc().contains(desc)){
-                        return Stream.of(tExtRef);
-                    }
-                    else if(isSetDesc && tExtRef.getDesc().contains(desc.substring(0, desc.lastIndexOf("_")))){
-                        return Stream.of(tExtRef);
-                    }
-                    return Stream.empty();
-                })
-                .toList();
-    }
 }
