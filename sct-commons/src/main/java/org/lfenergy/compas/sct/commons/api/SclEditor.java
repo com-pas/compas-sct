@@ -4,10 +4,12 @@
 
 package org.lfenergy.compas.sct.commons.api;
 
-import jakarta.xml.bind.JAXBContext;
 import lombok.NonNull;
 import org.lfenergy.compas.scl2007b4.model.SCL;
-import org.lfenergy.compas.sct.commons.dto.*;
+import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
+import org.lfenergy.compas.sct.commons.dto.HeaderDTO;
+import org.lfenergy.compas.sct.commons.dto.SclReportItem;
+import org.lfenergy.compas.sct.commons.dto.SubNetworkDTO;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 
 import java.util.List;
@@ -38,7 +40,6 @@ import java.util.UUID;
  * </ul>
  * @see ExtRefEditor
  * @see SubstationEditor
- * @see HmiEditor
  */
 public interface SclEditor {
 
@@ -136,14 +137,6 @@ public interface SclEditor {
      *                          </ul>
      */
     void importSTDElementsInSCD(SCL scd, List<SCL> stds) throws ScdException;
-
-    /**
-     * Update DAIs of DO InRef in all LN0 of the SCD using matching ExtRef information.
-     *
-     * @param scd SCL file for which DOs InRef should be updated with matching ExtRef information
-     * @return list of encountered errors
-     */
-    List<SclReportItem> updateDoInRef(SCL scd);
 
     /**
      * Update and/or create Monitoring LNs (LSVS and LGOS) for bound GOOSE and SMV Control Blocks

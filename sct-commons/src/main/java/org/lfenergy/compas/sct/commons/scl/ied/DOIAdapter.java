@@ -5,18 +5,16 @@
 package org.lfenergy.compas.sct.commons.scl.ied;
 
 import org.lfenergy.compas.scl2007b4.model.*;
-import org.lfenergy.compas.sct.commons.dto.*;
-import org.lfenergy.compas.sct.commons.scl.ObjectReference;
+import org.lfenergy.compas.sct.commons.dto.DaTypeName;
+import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
+import org.lfenergy.compas.sct.commons.dto.DoTypeName;
+import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import static org.lfenergy.compas.sct.commons.util.CommonConstants.SETSRCCB_DA_NAME;
-import static org.lfenergy.compas.sct.commons.util.CommonConstants.SETSRCREF_DA_NAME;
 
 
 /**
@@ -94,30 +92,6 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
     }
 
     /**
-     * Update the DAI/Val according to the ExtRef attributes.
-     * If the ExtRef.desc start with DAI[name='purpose']/Val and end with "_1" (nominal case):
-     * - DAI[name='setSrcRef']/Val is updated with ExtRef attributes concatenation
-     * - DAI[name='setSrcCB']/Val is updated with ExtRef attributes concatenation if ExtRef.srcCBName is present
-     *
-     * @param tExtRefs all the ExtRefs contained in the current LDevice/LLN0
-     * @return a filled SclReportItem if an error occurs, empty SclReportItem otherwise
-     */
-    public List<SclReportItem> updateDaiFromExtRef(List<TExtRef> tExtRefs) {
-        List<SclReportItem> sclReportItems = new ArrayList<>();
-        tExtRefs.stream()
-                .filter(tExtRef -> tExtRef.getDesc().endsWith("_1"))
-                .forEach(tExtRefMin -> {
-                    String valueSrcRef = createInRefValNominalString(tExtRefMin);
-                    updateDAI(SETSRCREF_DA_NAME, valueSrcRef).ifPresent(sclReportItems::add);
-                    if (tExtRefMin.isSetSrcCBName()) {
-                        String valueSrcCb = createInRefValTestString(tExtRefMin);
-                        updateDAI(SETSRCCB_DA_NAME, valueSrcCb).ifPresent(sclReportItems::add);
-                    }
-                });
-        return sclReportItems;
-    }
-
-    /**
      * Check and update DAI identified by name with given value
      *
      * @param daName name of DAI to update
@@ -135,14 +109,6 @@ public class DOIAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TA
         getParentAdapter().updateDAI(filterForUpdate);
         return Optional.empty();
 
-    }
-
-    private String createInRefValNominalString(TExtRef extRef) {
-        return new ObjectReference(extRef, ExtrefTarget.SRC_REF).getReference();
-    }
-
-    private String createInRefValTestString(TExtRef extRef) {
-        return new ObjectReference(extRef, ExtrefTarget.SRC_CB).getReference();
     }
 
     /**

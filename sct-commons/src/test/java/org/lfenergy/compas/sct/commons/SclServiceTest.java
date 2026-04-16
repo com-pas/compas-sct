@@ -8,22 +8,16 @@ import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.api.DataTypeTemplateReader;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.DOIAdapter;
-import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
-import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
 import org.lfenergy.compas.sct.commons.testhelpers.SclTestMarshaller;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -343,124 +337,6 @@ class SclServiceTest {
         assertThatCode(() -> sclService.importSTDElementsInSCD(scd, stdList))
                 .isInstanceOf(ScdException.class)
                 .hasMessage("There is no STD file found corresponding to headerId = f8dbc8c1-2db7-4652-a9d6-0b414bdeccfa, headerVersion = 01.00.00, headerRevision = 01.00.00 and ICDSystemVersionUUID = IED4d4fe1a8cda64cf88a5ee4176a1a0eef");
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @CsvSource({
-            "Test update setSrcRef Value,LD_WITH_1_InRef,InRef2,setSrcRef,IED_NAME1LD_WITH_1_InRef/PRANCR1.Do11.sdo11",
-            "Test update setSrcCB Value,LD_WITH_1_InRef,InRef2,setSrcCB,OLD_VAL",
-            "Test update setSrcRef Value,LD_WITH_3_InRef,InRef3,setSrcRef,IED_NAME1LD_WITH_3_InRef/PRANCR1.Do11.sdo11",
-            "Test update setSrcCB Value,LD_WITH_3_InRef,InRef3,setSrcCB,IED_NAME1LD_WITH_3_InRef/prefixANCR1.GSE1"
-    })
-    void updateDoInRef_shouldReturnUpdatedFile(String testName, String ldInst, String doName, String daName, String expected) {
-        // Given
-        SCL givenScl = SclTestMarshaller.getSCLFromResource("scd-test-update-inref/scd_update_inref_issue_231_test_ok.xml");
-        // When
-        List<SclReportItem> sclReportItems = sclService.updateDoInRef(givenScl);
-        // Then
-        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
-        assertSclValidateXsd(givenScl);
-        assertThat(getValFromDaiName(givenScl, "IED_NAME1", ldInst, doName, daName)
-                .map(TVal::getValue))
-                .hasValue(expected);
-        assertSclValidateXsd(givenScl);
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @CsvSource({
-            "Test with only 1 ExtRef should not update DO when IedName not present,LD_WITH_1_InRef_ExtRef_Without_IedName,InRef4,setSrcRef",
-            "Test with only 1 ExtRef should not update DO when LdInst not present,LD_WITH_1_InRef_ExtRef_Without_LdInst,InRef5,setSrcRef",
-            "Test with only 1 ExtRef should not update DO when lnClass not present,LD_WITH_1_InRef_ExtRef_Without_LnClass,InRef6,setSrcRef"
-    })
-    void updateDoInRef_should_not_update_DAI(String testName, String ldInst, String doName, String daName) {
-        // Given
-        SCL givenScl = SclTestMarshaller.getSCLFromResource("scd-test-update-inref/scd_update_inref_issue_231_test_ok.xml");
-        // When
-        List<SclReportItem> sclReportItems = sclService.updateDoInRef(givenScl);
-        // Then
-        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
-        assertThat(getValFromDaiName(givenScl, "IED_NAME1", ldInst, doName, daName)).isNotPresent();
-    }
-
-    @Test
-    void updateDoInRef_when_No_ExtRef_for_InRef_should_not_return_error() {
-        // Given
-        SCL givenScl = SclTestMarshaller.getSCLFromResource("scd-test-update-inref/scd_update_inref_no_Extref.xml");
-        // When
-        List<SclReportItem> sclReportItems = sclService.updateDoInRef(givenScl);
-        // Then
-        assertThat(sclReportItems).isEmpty();
-    }
-
-    @Test
-    void updateDoInRef_when_ExtRef_bind_and_desc_suffix_not_match_should_not_return_error() {
-        // Given
-        SCL givenScl = SclTestMarshaller.getSCLFromResource("scd-test-update-inref/scd_update_inref_extref_bind_desc_suffix_not_match.xml");
-        // When
-        List<SclReportItem> sclReportItems = sclService.updateDoInRef(givenScl);
-        // Then
-        assertThat(sclReportItems).isEmpty();
-    }
-
-    @Test
-    void updateDoInRef_when_ExtRef_bind_should_succeed() {
-        // Given
-        SCL givenScl = SclTestMarshaller.getSCLFromResource("scd-test-update-inref/scd_update_inref_extref_bind.xml");
-        // When
-        List<SclReportItem> sclReportItems = sclService.updateDoInRef(givenScl);
-        // Then
-        assertThat(sclReportItems).isEmpty();
-        assertThat(givenScl.getIED())
-                .filteredOn(tied -> tied.getName().equals("IED_NAME1"))
-                .flatExtracting(TIED::getAccessPoint)
-                .extracting(TAccessPoint::getServer)
-                .flatExtracting(TServer::getLDevice)
-                .filteredOn(tlDevice -> tlDevice.getInst().equals("LD1"))
-                .map(TLDevice::getLN0)
-                .flatExtracting(TAnyLN::getDOI)
-                .filteredOn(tdoi -> tdoi.getName().equals("InRef1"))
-                .flatExtracting(TDOI::getSDIOrDAI)
-                .filteredOn(tUnNaming -> tUnNaming.getClass().equals(TDAI.class) && ((TDAI)tUnNaming).getName().equals("setSrcRef"))
-                .map(tUnNaming -> ((TDAI)tUnNaming).getVal().getFirst().getValue())
-                .containsExactly("IED_NAME1LD2/PRANCR1.Do11.sdo11");
-    }
-
-    @Test
-    void updateDoInRef_when_ExtRef_bind_should_not_return_error() {
-        // Given
-        SCL givenScl = SclTestMarshaller.getSCLFromResource("scd-test-update-inref/scd_update_inref_extref_not_bind.xml");
-        // When
-        List<SclReportItem> sclReportItems = sclService.updateDoInRef(givenScl);
-        // Then
-        assertThat(sclReportItems).isEmpty();
-    }
-
-    @Test
-    void updateDoInRef_when_Inref_purpose_not_set_should_return_report_with_warning() {
-        // Given
-        SCL givenScl = SclTestMarshaller.getSCLFromResource("scd-test-update-inref/scd_update_inref_when_inref_purpose_not_set.xml");
-        // When
-        List<SclReportItem> sclReportItems = sclService.updateDoInRef(givenScl);
-        // Then
-        assertThat(sclReportItems.stream().filter(sclReportItem -> !sclReportItem.isError()).map(SclReportItem::message))
-                .hasSize(1)
-                .containsExactly("The DOI /SCL/IED[@name=\"IED_NAME1\"]/AccessPoint/Server/LDevice[@inst=\"LD_Without_Val_in_DAI_purpose\"]/LN0 can't be bound with an ExtRef");
-    }
-
-    private Optional<TVal> getValFromDaiName(SCL scl, String iedName, String ldInst, String doiName, String daiName) {
-        SclRootAdapter sclRootAdapter = new SclRootAdapter(scl);
-        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName(iedName);
-        Optional<LDeviceAdapter> lDeviceAdapter = iedAdapter.findLDeviceAdapterByLdInst(ldInst);
-        LN0Adapter ln0Adapter = lDeviceAdapter.orElseThrow().getLN0Adapter();
-        Optional<DOIAdapter> doiAdapter = ln0Adapter.getDOIAdapters().stream()
-                .filter(doiAdapter1 -> doiAdapter1.getCurrentElem().getName().equals(doiName))
-                .findFirst();
-        return doiAdapter.flatMap(adapter -> adapter.getCurrentElem().getSDIOrDAI().stream()
-                .filter(tUnNaming -> tUnNaming.getClass().equals(TDAI.class))
-                .map(TDAI.class::cast)
-                .filter(tdai -> tdai.getName().equals(daiName) && !tdai.getVal().isEmpty())
-                .map(tdai -> tdai.getVal().getFirst())
-                .findFirst());
     }
 
     @Test
