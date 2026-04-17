@@ -916,7 +916,7 @@ class ControlBlockEditorServiceTest {
         gseVlan.setCBType(tcbType);
         gseVlan.setXY("01.00");
         gseVlan.setZW("009.001");
-        gseVlan.setIEDType(TIEDType.BCU);
+        gseVlan.setIEDType("BCU");
         gseVlan.setIEDRedundancy(TIEDRedundancy.A);
         gseVlan.setIEDSystemVersionInstance("1");
         gseVlan.setBayIntOrExt(tBayIntOrExt);
