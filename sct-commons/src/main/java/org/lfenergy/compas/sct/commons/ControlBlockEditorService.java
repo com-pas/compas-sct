@@ -395,7 +395,7 @@ public class ControlBlockEditorService implements ControlBlockEditor {
         return new CriteriaOrError(
                 new Criteria(cbType,
                         systemVersionWithoutV,
-                        TIEDType.fromValue(compasICDHeader.get().getIEDType()),
+                        compasICDHeader.get().getIEDType(),
                         TIEDRedundancy.fromValue(compasICDHeader.get().getIEDredundancy().value()),
                         compasICDHeader.get().getIEDSystemVersioninstance(),
                         bayIntOrExt), null);
@@ -504,7 +504,7 @@ public class ControlBlockEditorService implements ControlBlockEditor {
     /**
      * Key to search for a control block communication setting
      */
-    public record Criteria(TCBType cbType, String systemVersionWithoutV, TIEDType iedType, TIEDRedundancy iedRedundancy, BigInteger iedSystemVersionInstance, TBayIntOrExt bayIntOrExt) {
+    public record Criteria(TCBType cbType, String systemVersionWithoutV, String iedType, TIEDRedundancy iedRedundancy, BigInteger iedSystemVersionInstance, TBayIntOrExt bayIntOrExt) {
     }
 
     /**
