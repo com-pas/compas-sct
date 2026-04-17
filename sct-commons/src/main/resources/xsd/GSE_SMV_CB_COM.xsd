@@ -57,7 +57,7 @@
         <xs:attribute name="CBType" type="tCBType" use="required"/>
         <xs:attribute name="XY" type="xs:string" use="required"/>
         <xs:attribute name="ZW" type="xs:string" use="required"/>
-        <xs:attribute name="IEDType" type="tIEDType" use="required"/>
+        <xs:attribute name="IEDType" type="xs:string" use="required"/>
         <xs:attribute name="IEDRedundancy" type="tIEDRedundancy" use="required"/>
         <xs:attribute name="IEDSystemVersionInstance" type="xs:string" use="required"/>
         <xs:attribute name="BayIntOrExt" type="tBayIntOrExt" use="required"/>
@@ -113,50 +113,5 @@
             </xs:sequence>
         </xs:complexType>
     </xs:element>
-
-    <xs:simpleType name="tIEDType">
-        <xs:annotation>
-            <xs:documentation xml:lang="en">
-                IED type to be used to identity the set of LDevice.inst handled by the IED
-            </xs:documentation>
-        </xs:annotation>
-        <xs:restriction base="xs:string">
-            <xs:enumeration value="SCU"/>
-            <xs:enumeration value="SCU-MCB"/>
-            <xs:enumeration value="SCU-TG"/>
-            <xs:enumeration value="SCU-ORG"/>
-            <xs:enumeration value="STD"/>
-            <xs:enumeration value="BCU"/>
-            <xs:enumeration value="BCU-LIGNE"/>
-            <xs:enumeration value="BCU-CBO"/>
-            <xs:enumeration value="BPU"/>
-            <xs:enumeration value="MU"/>
-            <xs:enumeration value="SAMU"/>
-            <xs:enumeration value="PROT"/>
-            <xs:enumeration value="TAC"/>
-            <xs:enumeration value="PX"/>
-            <xs:enumeration value="PDIS"/>
-            <xs:enumeration value="PDB"/>
-            <xs:enumeration value="AUT"/>
-            <xs:enumeration value="PDIF"/>
-            <xs:enumeration value="GRP"/>
-            <xs:enumeration value="GRPR"/>
-            <xs:enumeration value="ASLD"/>
-            <xs:enumeration value="GW"/>
-            <xs:enumeration value="TG"/>
-            <xs:enumeration value="TOPO"/>
-            <xs:enumeration value="SWC"/>
-            <xs:enumeration value="SWT"/>
-            <xs:enumeration value="SW"/>
-            <xs:enumeration value="OUT"/>
-            <xs:enumeration value="CLUS"/>
-            <xs:enumeration value="VIRT"/>
-            <xs:enumeration value="ICT"/>
-            <xs:enumeration value="SYN"/>
-            <xs:enumeration value="OND"/>
-            <xs:enumeration value="ADEFINIR"/>
-            <xs:enumeration value="IEDTEST"/>
-        </xs:restriction>
-    </xs:simpleType>
 
 </xs:schema>
