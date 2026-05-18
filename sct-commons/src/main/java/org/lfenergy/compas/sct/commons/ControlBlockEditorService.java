@@ -127,34 +127,37 @@ public class ControlBlockEditorService implements ControlBlockEditor {
                 .flatMap(tied -> {
                     List<Long> excludedMacAddresses = findExcludedMacAddresses(scl, tied, tcbType);
                     Iterator<Long> authorizedMacAdressList = macAddresseList.stream().filter(mac -> !excludedMacAddresses.contains(mac)).iterator();
-                    return ldeviceService.getLdevices(tied)
-                            .flatMap(lDevice -> controlService.getControls(lDevice.getLN0(), ControlBlockEnum.from(tcbType).getControlBlockClass())
-                                    .map(tControl -> {
-                                        TAccessPoint accessPoint = tied.getAccessPoint().stream().filter(ap -> ap.getServer().getLDevice().stream().anyMatch(tlDevice -> tlDevice.getLdName().equals(lDevice.getLdName()))).findFirst().orElseThrow();
-                                        String apName = accessPoint.getName();
-                                        IedApLd iedApLd = new IedApLd(tied, apName, lDevice);
-                                        CriteriaOrError criteriaOrError = getCriteria(tied, tcbType, tControl.getName());
-                                        if (criteriaOrError.errorMessage != null) {
-                                            return Optional.of(SclReportItem.error("""
-                                                    /SCL/IED[@name="%s"]""".formatted(tied.getName()), criteriaOrError.errorMessage));
-                                        }
+                    return tied.getAccessPoint().stream()
+                            .filter(TAccessPoint::isSetServer)
+                            .flatMap(tAccessPoint -> tAccessPoint.getServer().getLDevice().stream()
+                                    .flatMap(lDevice ->
+                                            controlService.getControls(lDevice.getLN0(), ControlBlockEnum.from(tcbType).getControlBlockClass())
+                                                    .map(tControl -> {
+                                                        String apName = tAccessPoint.getName();
+                                                        IedApLd iedApLd = new IedApLd(tied, apName, lDevice);
+                                                        CriteriaOrError criteriaOrError = getCriteria(tied, tcbType, tControl.getName());
+                                                        if (criteriaOrError.errorMessage != null) {
+                                                            return Optional.of(SclReportItem.error("""
+                                                                    /SCL/IED[@name="%s"]""".formatted(tied.getName()), criteriaOrError.errorMessage));
+                                                        }
 
-                                        Settings settings = cbComSettings.settingsByCriteria.get(criteriaOrError.criteria);
-                                        if (settings == null) {
-                                            return newError(iedApLd, tControl, "Cannot configure communication for this ControlBlock because: No controlBlock communication settings found with these " + criteriaOrError.criteria);
-                                        }
-                                        AppId reuseAppId = appIdsToReuse.get(new CbKey(tied.getName(), lDevice.getInst(), tControl.getName()));
-                                        Mac reuseMac = macsToReuse.get(new CbKey(tied.getName(), lDevice.getInst(), tControl.getName()));
-                                        TCommunication tCommunication = scl.getCommunication();
+                                                        Settings settings = cbComSettings.settingsByCriteria.get(criteriaOrError.criteria);
+                                                        if (settings == null) {
+                                                            return newError(iedApLd, tControl, "Cannot configure communication for this ControlBlock because: No controlBlock communication settings found with these " + criteriaOrError.criteria);
+                                                        }
+                                                        AppId reuseAppId = appIdsToReuse.get(new CbKey(tied.getName(), lDevice.getInst(), tControl.getName()));
+                                                        Mac reuseMac = macsToReuse.get(new CbKey(tied.getName(), lDevice.getInst(), tControl.getName()));
+                                                        TCommunication tCommunication = scl.getCommunication();
 
-                                        Optional<TConnectedAP> optionalTConnectedAP = subNetworkService.getSubNetworks(tCommunication)
-                                                .flatMap(tSubNetwork -> connectedAPService.getFilteredConnectedAP(tSubNetwork, connectedAP -> tied.getName().equals(connectedAP.getIedName()) && apName.equals(connectedAP.getApName())))
-                                                .findFirst();
-                                        if (optionalTConnectedAP.isEmpty()) {
-                                            return newError(iedApLd, tControl, "Cannot configure communication for ControlBlock because no ConnectedAP found for AccessPoint");
-                                        }
-                                        return configureControlBlockNetwork(tCommunication, settings, appIdIterator, authorizedMacAdressList, tControl, iedApLd, reuseAppId, reuseMac);
-                                    }).flatMap(Optional::stream));
+                                                        Optional<TConnectedAP> optionalTConnectedAP = subNetworkService.getSubNetworks(tCommunication)
+                                                                .flatMap(tSubNetwork -> connectedAPService.getFilteredConnectedAP(tSubNetwork, connectedAP -> tied.getName().equals(connectedAP.getIedName()) && apName.equals(connectedAP.getApName())))
+                                                                .findFirst();
+                                                        if (optionalTConnectedAP.isEmpty()) {
+                                                            return newError(iedApLd, tControl, "Cannot configure communication for ControlBlock because no ConnectedAP found for AccessPoint");
+                                                        }
+                                                        return configureControlBlockNetwork(tCommunication, settings, appIdIterator, authorizedMacAdressList, tControl, iedApLd, reuseAppId, reuseMac);
+                                                    })
+                                                    .flatMap(Optional::stream)));
                 });
     }
 
@@ -196,9 +199,8 @@ public class ControlBlockEditorService implements ControlBlockEditor {
                                 .flatMap(tConnectedAP -> Stream.concat(tConnectedAP.getGSE().stream(), tConnectedAP.getSMV().stream()))
                                 .filter(cBlock -> cBlock.getCbName().equals(cbKey.cbName()) && cBlock.getLdInst().equals(cbKey.LDInst()))))
                 .filter(TControlBlock::isSetAddress)
-                .flatMap(cBlock -> {
-                    return Utils.extractFromP(MAC_ADDRESS_P_TYPE, cBlock.getAddress().getP()).stream();
-                })
+                .map(cBlock -> Utils.extractFromP(MAC_ADDRESS_P_TYPE, cBlock.getAddress().getP()))
+                .flatMap(Optional::stream)
                 .map(Utils::macAddressToLong);
     }
 
@@ -299,7 +301,7 @@ public class ControlBlockEditorService implements ControlBlockEditor {
                 .flatMap(tSubNetwork -> tSubNetwork.getConnectedAP().stream())
                 .flatMap(tConnectedAP -> Stream.concat(tConnectedAP.getGSE().stream(), tConnectedAP.getSMV().stream())
                         .flatMap(tControlBlock -> AppId.from(tControlBlock.getAddress())
-                                .map(appId-> new SimpleEntry<>(new CbKey(tConnectedAP.getIedName(), tControlBlock.getLdInst(), tControlBlock.getCbName()), appId))
+                                .map(appId -> new SimpleEntry<>(new CbKey(tConnectedAP.getIedName(), tControlBlock.getLdInst(), tControlBlock.getCbName()), appId))
                                 .stream()
                         )
                 )
@@ -379,7 +381,7 @@ public class ControlBlockEditorService implements ControlBlockEditor {
             return new CriteriaOrError(null, "No private COMPAS-SystemVersion found in this IED");
         }
         if (StringUtils.isBlank(compasSystemVersion.get().getMainSystemVersion())
-                || (StringUtils.isBlank(compasSystemVersion.get().getMinorSystemVersion()))) {
+            || (StringUtils.isBlank(compasSystemVersion.get().getMinorSystemVersion()))) {
             return new CriteriaOrError(null, "Missing MainSystemVersion or MinorSystemVersion attribute in COMPAS-SystemVersion private of IED");
         }
         String systemVersionWithoutV = removeVFromSystemVersion(compasSystemVersion.get());
@@ -554,14 +556,14 @@ public class ControlBlockEditorService implements ControlBlockEditor {
             }
             return Utils.extractFromP(APPID_P_TYPE, address.getP())
                     .map(appId -> Integer.parseInt(appId, HEXADECIMAL_BASE))
-                            .map(AppId::new);
+                    .map(AppId::new);
         }
     }
 
     /**
      * MAC-Address
      *
-     * @param mac   MAC-Address
+     * @param mac MAC-Address
      */
     record Mac(long mac) {
         static Optional<Mac> from(TAddress address) {
@@ -569,8 +571,8 @@ public class ControlBlockEditorService implements ControlBlockEditor {
                 return Optional.empty();
             }
             return Utils.extractFromP(MAC_ADDRESS_P_TYPE, address.getP())
-                            .map(Utils::macAddressToLong)
-                            .map(Mac::new);
+                    .map(Utils::macAddressToLong)
+                    .map(Mac::new);
         }
     }
 }
