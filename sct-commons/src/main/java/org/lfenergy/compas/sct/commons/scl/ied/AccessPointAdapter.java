@@ -180,14 +180,11 @@ public class AccessPointAdapter extends SclElementAdapter<IEDAdapter, TAccessPoi
      * @return Optional of encountered error or empty
      */
     public Optional<SclReportItem> checkLimitationForBoundIedFcdas(List<TExtRef> tExtRefs) {
-        long max;
-        if (currentElem.getServices() == null) {
-            max = MAX_OCCURRENCE_NO_LIMIT_VALUE;
-        } else {
-            TClientServices tClientServices = currentElem.getServices().getClientServices();
-            max = tClientServices != null && tClientServices.isSetMaxAttributes() ? tClientServices.getMaxAttributes() : MAX_OCCURRENCE_NO_LIMIT_VALUE;
-        }
-        if (max == MAX_OCCURRENCE_NO_LIMIT_VALUE) {
+        TClientServices tClientServices = (currentElem.getServices() == null)
+                ? getParentAdapter().getCurrentElem().getServices().getClientServices()
+                : currentElem.getServices().getClientServices();
+        long max = tClientServices != null && tClientServices.isSetMaxAttributes() ? tClientServices.getMaxAttributes() : MAX_OCCURRENCE_NO_LIMIT_VALUE;
+        if (max == MAX_OCCURRENCE_NO_LIMIT_VALUE){
             return Optional.empty();
         }
         long value = tExtRefs.stream()
@@ -303,10 +300,15 @@ public class AccessPointAdapter extends SclElementAdapter<IEDAdapter, TAccessPoi
      * @return max number authorized by config
      */
     private long getMaxInstanceAuthorizedForBoundIED(ServicesConfigEnum servicesConfigEnum) {
+        TClientServices tClientServices;
         if (currentElem.getServices() == null || currentElem.getServices().getClientServices() == null) {
-            return AccessPointAdapter.MAX_OCCURRENCE_NO_LIMIT_VALUE;
+            if(this.getParentAdapter().getCurrentElem().getServices() == null  || this.getParentAdapter().getCurrentElem().getServices().getClientServices() == null){
+                return AccessPointAdapter.MAX_OCCURRENCE_NO_LIMIT_VALUE;
+            }
+            tClientServices = this.getParentAdapter().getCurrentElem().getServices().getClientServices();
+        }else{
+            tClientServices = currentElem.getServices().getClientServices();
         }
-        TClientServices tClientServices = currentElem.getServices().getClientServices();
         return switch (servicesConfigEnum) {
             case FCDA -> tClientServices.isSetMaxAttributes() ? tClientServices.getMaxAttributes() : AccessPointAdapter.MAX_OCCURRENCE_NO_LIMIT_VALUE;
             case REPORT -> tClientServices.isSetMaxReports() ? tClientServices.getMaxReports() : AccessPointAdapter.MAX_OCCURRENCE_NO_LIMIT_VALUE;
