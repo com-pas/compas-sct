@@ -799,6 +799,31 @@ class ControlBlockEditorServiceTest {
         assertThat(sclReportItems).extracting(SclReportItem::message).allSatisfy(message -> assertThat(message).containsAnyOf("COMPAS-ICDHeader", "COMPAS-SystemVersion"));
     }
 
+    @Test
+    void configureNetworkForAllControlBlocks_when_AccessPoint_ha_no_Server_should_not_throw_exception() {
+        // Given
+        SCL scd = SclTestMarshaller.getSCLFromResource("scd-extref-create-dataset-and-controlblocks/scd_create_controlblock_network_configuration.xml");
+        TAccessPoint accessPointWithoutServer = new TAccessPoint();
+        accessPointWithoutServer.setName("AP_ADMIN");
+        scd.getIED().getFirst().getAccessPoint().addFirst(accessPointWithoutServer);
+        CBCom cbCom = createCbCom();
+        // When
+        List<SclReportItem> sclReportItems = controlBlockEditorService.configureNetworkForAllControlBlocks(scd, cbCom, List.of());
+        // Then
+        assertThat(sclReportItems.stream().noneMatch(SclReportItem::isError)).isTrue();
+        TGSE gse1 = getCommunicationGSE(scd, "IED_NAME2", "CB_LD_INST21_GSI");
+        assertThat(gse1.getLdInst()).isEqualTo("LD_INST21");
+        assertThat(SclDuration.from(gse1.getMinTime())).isEqualTo(new SclDuration("10", "s", "m"));
+        assertThat(SclDuration.from(gse1.getMaxTime())).isEqualTo(new SclDuration("2000", "s", "m"));
+        assertThat(gse1.getAddress().getP()).extracting(TP::getType, TP::getValue).containsExactlyInAnyOrder(
+                Tuple.tuple("VLAN-PRIORITY", "1"),
+                Tuple.tuple("APPID", "0000"),
+                Tuple.tuple("MAC-Address", "01-0C-CD-01-00-00"),
+                Tuple.tuple("VLAN-ID", "12D")
+        );
+        SclTestMarshaller.assertSclValidateXsd(scd);
+    }
+
     private static Stream<Arguments> provideRemovePrivateInfo() {
         return Stream.of(
                 Arguments.of((Consumer<TIED>) tied -> PrivateUtils.removePrivates(tied, PrivateEnum.COMPAS_SYSTEM_VERSION)),
