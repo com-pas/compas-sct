@@ -6,16 +6,12 @@
 
 package org.lfenergy.compas.sct.commons.scl;
 
-import org.lfenergy.compas.scl2007b4.model.TExtRef;
-import org.lfenergy.compas.scl2007b4.model.TInputs;
-import org.lfenergy.compas.scl2007b4.model.TLDevice;
-import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
+import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -27,9 +23,10 @@ public class ExtRefService {
      * @return Stream of ExtRefs
      */
     public Stream<TExtRef> getExtRefs(TLDevice tlDevice) {
-        return getInputs(tlDevice)
+        return Stream.concat(Stream.of(tlDevice.getLN0()), tlDevice.getLN().stream())
+                .filter(TAnyLN::isSetInputs)
+                .map(TAnyLN::getInputs)
                 .filter(TInputs::isSetExtRef)
-                .stream()
                 .flatMap(tInputs -> tInputs.getExtRef().stream());
     }
 
@@ -75,12 +72,12 @@ public class ExtRefService {
         String srcLNClass1 = (t1.isSetSrcLNClass()) ? t1.getSrcLNClass().getFirst() : TLLN0Enum.LLN_0.value();
         String srcLNClass2 = (t2.isSetSrcLNClass()) ? t2.getSrcLNClass().getFirst() : TLLN0Enum.LLN_0.value();
         return Utils.equalsOrBothBlank(t1.getIedName(), t2.getIedName())
-                && Utils.equalsOrBothBlank(t1.getSrcLDInst(), t2.getSrcLDInst())
-                && srcLNClass1.equals(srcLNClass2)
-                && Utils.equalsOrBothBlank(t1.getSrcLNInst(), t2.getSrcLNInst())
-                && Utils.equalsOrBothBlank(t1.getSrcPrefix(), t2.getSrcPrefix())
-                && Utils.equalsOrBothBlank(t1.getSrcCBName(), t2.getSrcCBName())
-                && Objects.equals(t1.getServiceType(), t2.getServiceType());
+               && Utils.equalsOrBothBlank(t1.getSrcLDInst(), t2.getSrcLDInst())
+               && srcLNClass1.equals(srcLNClass2)
+               && Utils.equalsOrBothBlank(t1.getSrcLNInst(), t2.getSrcLNInst())
+               && Utils.equalsOrBothBlank(t1.getSrcPrefix(), t2.getSrcPrefix())
+               && Utils.equalsOrBothBlank(t1.getSrcCBName(), t2.getSrcCBName())
+               && Objects.equals(t1.getServiceType(), t2.getServiceType());
     }
 
     /**
@@ -95,13 +92,6 @@ public class ExtRefService {
                 filteredList.add(tExtRef);
         });
         return filteredList;
-    }
-
-    private Optional<TInputs> getInputs(TLDevice tlDevice){
-        if (!tlDevice.isSetLN0() || !tlDevice.getLN0().isSetInputs()) {
-            return Optional.empty();
-        }
-        return Optional.of(tlDevice.getLN0().getInputs());
     }
 
 }

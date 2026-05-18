@@ -10,7 +10,6 @@ import org.lfenergy.compas.scl2007b4.model.TLLN0Enum;
 import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
 import org.lfenergy.compas.sct.commons.dto.ExtRefSignalInfo;
 import org.lfenergy.compas.sct.commons.scl.ObjectReference;
-import org.lfenergy.compas.sct.commons.scl.ied.InputsAdapter;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 
 /**
@@ -122,15 +121,6 @@ public class LN0Adapter extends AbstractLNAdapter<LN0> {
     @Override
     public String getPrefix() {
         return "";
-    }
-
-    /**
-     * Gets Inputs node as an adapter
-     *
-     * @return an InputsAdapter
-     */
-    public InputsAdapter getInputsAdapter() {
-        return new InputsAdapter(this, currentElem.getInputs());
     }
 
     /**

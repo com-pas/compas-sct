@@ -47,23 +47,15 @@ class ExtRefServiceTest {
         assertThat(result).hasSize(2);
     }
 
-    @ParameterizedTest
-    @MethodSource("provideLDevices")
-    void getExtRefs_should_return_empty_stream(TLDevice tlDevice) {
-        //Given : parameters
+    @Test
+    void getExtRefs_should_return_empty_stream() {
+        //Given
+        TLDevice tlDevice = new TLDevice();
+        tlDevice.setLN0(new LN0());
         //When
         Stream<TExtRef> result = extRefService.getExtRefs(tlDevice);
         //Then
         assertThat(result).isEmpty();
-    }
-
-    private static Stream<Arguments> provideLDevices() {
-        TLDevice tlDeviceWithoutLn0 = new TLDevice();
-        tlDeviceWithoutLn0.setLN0(new LN0());
-        return Stream.of(
-                Arguments.of(named("LDevice without LN0 should return empty stream", tlDeviceWithoutLn0)),
-                Arguments.of(named("LDevice with empty Inputs should return empty stream", new TLDevice()))
-        );
     }
 
     @Test

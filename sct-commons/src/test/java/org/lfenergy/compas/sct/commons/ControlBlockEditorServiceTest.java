@@ -15,6 +15,7 @@ import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.model.cbcom.*;
 import org.lfenergy.compas.sct.commons.model.da_comm.DACOMM;
 import org.lfenergy.compas.sct.commons.scl.ControlService;
+import org.lfenergy.compas.sct.commons.scl.ExtRefService;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.DataSetAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
@@ -49,7 +50,7 @@ class ControlBlockEditorServiceTest {
 
     @BeforeEach
     void init() {
-        controlBlockEditorService = new ControlBlockEditorService(new ControlService(), new LdeviceService(new LnService()), new ConnectedAPService(), new SubNetworkService());
+        controlBlockEditorService = new ControlBlockEditorService(new ControlService(), new LdeviceService(new LnService()), new ConnectedAPService(), new SubNetworkService(), new ExtRefService());
     }
 
     @Test
