@@ -15,6 +15,7 @@ import org.lfenergy.compas.sct.commons.domain.DaVal;
 import org.lfenergy.compas.sct.commons.domain.DataRef;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.scl.ExtRefService;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.com.CommunicationAdapter;
 import org.lfenergy.compas.sct.commons.scl.com.ConnectedAPAdapter;
@@ -50,7 +51,7 @@ public class SclService implements SclEditor {
     private final IedService iedService;
     private final LdeviceService ldeviceService;
     private final LnService lnService;
-    private final ExtRefReaderService extRefReaderService;
+    private final ExtRefService extRefService;
     private final DataTypeTemplateReader dataTypeTemplateService;
 
     @Getter
@@ -216,7 +217,7 @@ public class SclService implements SclEditor {
             iedService.getFilteredIeds(scd, ied -> !ied.getName().contains(IED_TEST_NAME))
                     .forEach(tied -> {
                         Map<TServiceType, List<IedSource>> serviceTypeToIedSource = ldeviceService.getLdevices(tied)
-                                .flatMap(tlDevice -> extRefReaderService.getExtRefs(tlDevice.getLN0()))
+                                .flatMap(extRefService::getExtRefs)
                                 .filter(tExtRef -> tExtRef.isSetServiceType() && tExtRef.isSetSrcCBName() && (tExtRef.getServiceType().equals(TServiceType.GOOSE) || tExtRef.getServiceType().equals(TServiceType.SMV)))
                                 .collect(Collectors.groupingBy(tExtRef -> new IedSource(tExtRef.getIedName(), tExtRef.getSrcCBName(), tExtRef.getSrcLDInst(), tExtRef.getServiceType())))
                                 .keySet()

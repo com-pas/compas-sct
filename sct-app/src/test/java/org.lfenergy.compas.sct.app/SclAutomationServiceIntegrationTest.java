@@ -16,6 +16,7 @@ import org.lfenergy.compas.sct.commons.api.SubstationEditor;
 import org.lfenergy.compas.sct.commons.dto.HeaderDTO;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ControlService;
+import org.lfenergy.compas.sct.commons.scl.ExtRefService;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
@@ -33,12 +34,12 @@ class SclAutomationServiceIntegrationTest {
     private SclAutomationService sclAutomationService;
     private static final IedService iedService = new IedService();
     private static final LnService lnService = new LnService();
-    private static final ExtRefReaderService extRefReaderService = new ExtRefReaderService();
+    private static final ExtRefService extRefService = new ExtRefService();
     private static final DataTypeTemplateReader dataTypeTemplatesService = new DataTypeTemplatesService() ;
     private static final LdeviceService ldeviceService = new LdeviceService(lnService);
-    private static final SclEditor sclEditor = new SclService(iedService, ldeviceService, lnService, extRefReaderService, dataTypeTemplatesService) ;
+    private static final SclEditor sclEditor = new SclService(iedService, ldeviceService, lnService, extRefService, dataTypeTemplatesService);
     private static final SubstationEditor substationEditor = new SubstationService(new VoltageLevelService());
-    private static final ControlBlockEditor controlBlockEditor = new ControlBlockEditorService(new ControlService(), new LdeviceService(new LnService()), new ConnectedAPService(), new SubNetworkService());
+    private static final ControlBlockEditor controlBlockEditor = new ControlBlockEditorService(new ControlService(), new LdeviceService(new LnService()), new ConnectedAPService(), new SubNetworkService(), extRefService);
 
     private HeaderDTO headerDTO;
 

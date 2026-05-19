@@ -13,6 +13,7 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
+import org.lfenergy.compas.sct.commons.scl.ied.InputsAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LN0Adapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
@@ -20,6 +21,7 @@ import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * A representation of the model object
@@ -163,10 +165,19 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
      * @return list of <em>LNAdapter</em> object
      */
     public List<LNAdapter> getLNAdapters() {
+        return streamLnAdapters()
+                .toList();
+    }
+
+    /**
+     * Stream current LDevice LNodes (except LN0)
+     *
+     * @return stream of <em>LNAdapter</em> object
+     */
+    public Stream<LNAdapter> streamLnAdapters() {
         return currentElem.getLN()
                 .stream()
-                .map(tln -> new LNAdapter(this, tln))
-                .toList();
+                .map(tln -> new LNAdapter(this, tln));
     }
 
     /**
@@ -220,7 +231,7 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
      */
     public List<ExtRefBindingInfo> getExtRefBinders(ExtRefSignalInfo signalInfo) {
         DataTypeTemplateAdapter dttAdapter = parentAdapter.getParentAdapter().getDataTypeTemplateAdapter();
-        return getLNAdaptersIncludingLN0().stream()
+        return streamLNAdaptersIncludingLN0()
                 .filter(abstractLNAdapter -> StringUtils.isBlank(signalInfo.getPLN()) || abstractLNAdapter.getLNClass().equals(signalInfo.getPLN()))
                 .map(lnAdapter -> {
                     String lnType = lnAdapter.getLnType();
@@ -295,13 +306,25 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
         return aLNAdapters;
     }
 
+    /**
+     * Stream all LN of LDevice including LN0
+     *
+     * @return list of all LN of LDevice
+     */
+    public Stream<AbstractLNAdapter<?>> streamLNAdaptersIncludingLN0() {
+        return Stream.concat(Stream.of(getLN0Adapter()), streamLnAdapters());
+    }
+
     public List<SclReportItem> createDataSetAndControlBlocks(List<org.lfenergy.compas.sct.commons.model.da_comm.TFCDA> allowedFcdas) {
-        LN0Adapter ln0Adapter = getLN0Adapter();
-        if (!ln0Adapter.hasInputs()) {
-            return Collections.emptyList();
-        }
-        return ln0Adapter.getInputsAdapter()
-                .updateAllSourceDataSetsAndControlBlocks(allowedFcdas);
+        return streamInputsAdapters()
+                .flatMap(inputsAdapter -> inputsAdapter.updateAllSourceDataSetsAndControlBlocks(allowedFcdas).stream())
+                .toList();
+    }
+
+    public Stream<InputsAdapter> streamInputsAdapters() {
+        return streamLNAdaptersIncludingLN0()
+                .filter(AbstractLNAdapter::hasInputs)
+                .map(AbstractLNAdapter::getInputsAdapter);
     }
 
     public Set<DataAttributeRef> findSourceDA(TExtRef extRef) {

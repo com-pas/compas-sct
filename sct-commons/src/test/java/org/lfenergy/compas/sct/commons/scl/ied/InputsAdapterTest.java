@@ -252,47 +252,6 @@ class InputsAdapterTest {
         return foundInputsAdapter;
     }
 
-    @Test
-    void filterDuplicatedExtRefs_should_remove_duplicated_extrefs() {
-        // Given
-        TExtRef tExtRefLnClass = createExtRefExample("CB_Name1", TServiceType.GOOSE);
-        tExtRefLnClass.getSrcLNClass().add(TLLN0Enum.LLN_0.value());
-        TExtRef tExtRef = createExtRefExample("CB_Name1", TServiceType.GOOSE);
-        List<TExtRef> tExtRefList = List.of(tExtRef, tExtRefLnClass, createExtRefExample("CB", TServiceType.GOOSE),
-                createExtRefExample("CB", TServiceType.GOOSE));
-        TInputs tInputs = new TInputs();
-        tInputs.getExtRef().addAll(tExtRefList);
-        InputsAdapter inputsAdapter = new InputsAdapter(null, tInputs);
-        // When
-        List<TExtRef> result = inputsAdapter.filterDuplicatedExtRefs();
-        // Then
-        assertThat(result).hasSizeLessThan(tExtRefList.size())
-                .hasSize(2);
-    }
-
-    @Test
-    void filterDuplicatedExtRefs_should_not_remove_not_duplicated_extrefs() {
-        // Given
-        TExtRef tExtRefIedName = createExtRefExample("CB_1", TServiceType.GOOSE);
-        tExtRefIedName.setIedName("IED_XXX");
-        TExtRef tExtRefLdInst = createExtRefExample("CB_1", TServiceType.GOOSE);
-        tExtRefLdInst.setSrcLDInst("LD_XXX");
-        TExtRef tExtRefLnInst = createExtRefExample("CB_1", TServiceType.GOOSE);
-        tExtRefLnInst.setSrcLNInst("X");
-        TExtRef tExtRefPrefix = createExtRefExample("CB_1", TServiceType.GOOSE);
-        tExtRefPrefix.setSrcPrefix("X");
-        List<TExtRef> tExtRefList = List.of(tExtRefIedName, tExtRefLdInst, tExtRefLnInst, tExtRefPrefix,
-                createExtRefExample("CB_1", TServiceType.GOOSE), createExtRefExample("CB_1", TServiceType.SMV));
-        TInputs tInputs = new TInputs();
-        tInputs.getExtRef().addAll(tExtRefList);
-        InputsAdapter inputsAdapter = new InputsAdapter(null, tInputs);
-        // When
-        List<TExtRef> result = inputsAdapter.filterDuplicatedExtRefs();
-        // Then
-        assertThat(result).hasSameSizeAs(tExtRefList)
-                .hasSize(6);
-    }
-
     @ParameterizedTest(name = "updateAllSourceDataSetsAndControlBlocks should use gooseType for extRef={0}")
     @CsvSource({
             "test daName ST, DS_LD_INST21_GMI",

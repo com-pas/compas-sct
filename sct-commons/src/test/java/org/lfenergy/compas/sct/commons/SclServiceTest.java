@@ -12,6 +12,7 @@ import org.lfenergy.compas.scl2007b4.model.*;
 import org.lfenergy.compas.sct.commons.api.DataTypeTemplateReader;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
+import org.lfenergy.compas.sct.commons.scl.ExtRefService;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.LNAdapter;
@@ -34,14 +35,14 @@ class SclServiceTest {
 
     private final IedService iedService = new IedService();
     private final LnService lnService = new LnService();
-    private final ExtRefReaderService extRefReaderService = new ExtRefReaderService();
+    private final ExtRefService extRefService = new ExtRefService();
     private final DataTypeTemplateReader dataTypeTemplatesService = new DataTypeTemplatesService();
     private final LdeviceService ldeviceService = new LdeviceService(lnService);
     private SclService sclService;
 
     @BeforeEach
     void setUp() {
-        sclService = new SclService(iedService, ldeviceService, lnService, extRefReaderService, dataTypeTemplatesService);
+        sclService = new SclService(iedService, ldeviceService, lnService, extRefService, dataTypeTemplatesService);
     }
 
     @Test

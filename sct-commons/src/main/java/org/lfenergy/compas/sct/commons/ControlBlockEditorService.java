@@ -13,6 +13,7 @@ import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.model.cbcom.*;
 import org.lfenergy.compas.sct.commons.model.da_comm.DACOMM;
 import org.lfenergy.compas.sct.commons.scl.ControlService;
+import org.lfenergy.compas.sct.commons.scl.ExtRefService;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
@@ -50,6 +51,7 @@ public class ControlBlockEditorService implements ControlBlockEditor {
     private final LdeviceService ldeviceService;
     private final ConnectedAPService connectedAPService;
     private final SubNetworkService subNetworkService;
+    private final ExtRefService extRefService;
 
     @Override
     public List<SclReportItem> analyzeDataGroups(SCL scd) {
@@ -169,8 +171,7 @@ public class ControlBlockEditorService implements ControlBlockEditor {
         List<TIED> iedWithExtRefFromCurrentCB = scl.getIED().stream()
                 .filter(tied -> !tied.getName().equals(ied.getName()))
                 .filter(tied -> ldeviceService.getLdevices(tied)
-                        .filter(lDevice -> lDevice.getLN0().isSetInputs())
-                        .flatMap(tlDevice -> tlDevice.getLN0().getInputs().getExtRef().stream())
+                        .flatMap(extRefService::getExtRefs)
                         .anyMatch(tExtRef -> ied.getName().equals(tExtRef.getIedName()))
                 )
                 .toList();
@@ -189,8 +190,7 @@ public class ControlBlockEditorService implements ControlBlockEditor {
 
     private Stream<Long> getExtRefAddress(SCL scl, TIED tied) {
         return ldeviceService.getLdevices(tied)
-                .filter(lDevice -> lDevice.getLN0().isSetInputs())
-                .flatMap(tlDevice -> tlDevice.getLN0().getInputs().getExtRef().stream())
+                .flatMap(extRefService::getExtRefs)
                 .filter(TExtRef::isSetSrcCBName)
                 .map(tExtRef -> new CbKey(tExtRef.getIedName(), tExtRef.getLdInst(), tExtRef.getSrcCBName()))
                 .flatMap(cbKey -> scl.getCommunication().getSubNetwork().stream()

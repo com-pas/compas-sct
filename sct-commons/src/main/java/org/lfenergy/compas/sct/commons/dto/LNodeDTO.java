@@ -13,7 +13,6 @@ import org.lfenergy.compas.scl2007b4.model.TAnyLN;
 import org.lfenergy.compas.scl2007b4.model.TExtRef;
 import org.lfenergy.compas.scl2007b4.model.TLNodeType;
 import org.lfenergy.compas.sct.commons.DataSetService;
-import org.lfenergy.compas.sct.commons.ExtRefReaderService;
 import org.lfenergy.compas.sct.commons.LnodeTypeService;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
@@ -71,10 +70,11 @@ public class LNodeDTO {
 
     /**
      * Constructor
-     * @param inst input
-     * @param lnClass input
+     *
+     * @param inst     input
+     * @param lnClass  input
      * @param lnPrefix input
-     * @param lnType input
+     * @param lnType   input
      */
     public LNodeDTO(String inst, String lnClass, String lnPrefix, String lnType) {
         this.inst = inst;
@@ -85,48 +85,49 @@ public class LNodeDTO {
 
     /**
      * Initialize LN
+     *
      * @param nodeAdapter input
-     * @param options input
+     * @param options     input
+     * @param <T>         LNode type (LLN0 or other LN's)
      * @return LNodeDTO object
-     * @param <T> LNode type (LLN0 or other LN's)
      */
     public static <T extends TAnyLN> LNodeDTO from(AbstractLNAdapter<T> nodeAdapter, LogicalNodeOptions options) {
         log.info(Utils.entering());
         LNodeDTO lNodeDTO = new LNodeDTO();
-        if(nodeAdapter == null) return lNodeDTO;
+        if (nodeAdapter == null) return lNodeDTO;
 
         lNodeDTO.nodeType = nodeAdapter.getLnType();
         lNodeDTO.nodeClass = nodeAdapter.getLNClass();
-        if(!nodeAdapter.getPrefix().isBlank()){
+        if (!nodeAdapter.getPrefix().isBlank()) {
             lNodeDTO.prefix = nodeAdapter.getPrefix();
         }
         lNodeDTO.inst = nodeAdapter.getLNInst();
-        if(options == null) {
+        if (options == null) {
             log.info(Utils.leaving());
             return lNodeDTO;
         }
 
-        if(options.isWithExtRef()) {
-            List<TExtRef> extRefList =  nodeAdapter.getExtRefs(null);
+        if (options.isWithExtRef()) {
+            List<TExtRef> extRefList = nodeAdapter.getExtRefs(null);
             LDeviceAdapter lDeviceAdapter = nodeAdapter.getParentAdapter();
             String holderIedName = lDeviceAdapter.getParentAdapter().getName();
             String holderLDInst = lDeviceAdapter.getInst();
             lNodeDTO.extRefs.addAll(
                     extRefList.stream()
                             .map(tExtRef ->
-                                ExtRefInfo.from(tExtRef,holderIedName,holderLDInst,lNodeDTO.nodeClass,
-                                        lNodeDTO.inst,lNodeDTO.prefix
-                                ))
-                            .collect(Collectors.toList())
+                                    ExtRefInfo.from(tExtRef, holderIedName, holderLDInst, lNodeDTO.nodeClass,
+                                            lNodeDTO.inst, lNodeDTO.prefix
+                                    ))
+                            .toList()
             );
         }
 
-        if(options.isWithDatSet()) {
+        if (options.isWithDatSet()) {
             DataSetService dataSetService = new DataSetService();
             lNodeDTO.datSets = dataSetService.getDataSets(nodeAdapter.getCurrentElem()).map(DataSetInfo::new).collect(Collectors.toSet());
         }
 
-        if(options.isWithDataAttributeRef()) {
+        if (options.isWithDataAttributeRef()) {
             DataTypeTemplateAdapter dttAdapter = nodeAdapter.getDataTypeTemplateAdapter();
             LNodeTypeAdapter lNodeTypeAdapter = dttAdapter.getLNodeTypeAdapterById(nodeAdapter.getLnType())
                     .orElseThrow(
@@ -138,15 +139,15 @@ public class LNodeDTO {
                             )
                     );
             DataAttributeRef filter = DataAttributeRef.builder()
-                .lnInst(nodeAdapter.getLNInst())
-                .lnClass(nodeAdapter.getLNClass())
-                .prefix(nodeAdapter.getPrefix())
-                .lnType(nodeAdapter.getLnType()).build();
+                    .lnInst(nodeAdapter.getLNInst())
+                    .lnClass(nodeAdapter.getLNClass())
+                    .prefix(nodeAdapter.getPrefix())
+                    .lnType(nodeAdapter.getLnType()).build();
             List<DataAttributeRef> dataAttributeRefList = lNodeTypeAdapter.getDataAttributeRefs(filter);
             lNodeDTO.addAllDataAttributeRef(dataAttributeRefList);
         }
 
-        if(options.isWithCB()) {
+        if (options.isWithCB()) {
             //TODO
         }
         log.info(Utils.leaving());
@@ -162,9 +163,11 @@ public class LNodeDTO {
         String lnType = tAnyLN.getLnType();
         LNodeDTO lNodeDTO = new LNodeDTO(inst, lnClass, prefix, lnType);
         if (options.isWithExtRef()) {
-            List<ExtRefInfo> extRefInfos = new ExtRefReaderService().getExtRefs(tAnyLN)
-                    .map(extRef -> ExtRefInfo.from(extRef, iedName, ldInst, lnClass, inst, prefix))
-                    .toList();
+            List<ExtRefInfo> extRefInfos = tAnyLN.isSetInputs() ?
+                    tAnyLN.getInputs().getExtRef().stream()
+                            .map(extRef -> ExtRefInfo.from(extRef, iedName, ldInst, lnClass, inst, prefix))
+                            .toList()
+                    : List.of();
             lNodeDTO.addAllExtRefInfo(extRefInfos);
         }
         if (options.isWithDatSet()) {
@@ -195,45 +198,50 @@ public class LNodeDTO {
 
     /**
      * Sets LNode Inst value
+     *
      * @param inst input
      */
-    public void setInst(String inst){
+    public void setInst(String inst) {
         this.inst = inst;
     }
 
     /**
      * Sets LNode Class value
+     *
      * @param lnClass input
      */
-    public void setNodeClass(String lnClass){
+    public void setNodeClass(String lnClass) {
         this.nodeClass = lnClass;
     }
 
     /**
-     *  Sets LNode Type
+     * Sets LNode Type
+     *
      * @param lnType
      */
-    public void setNodeType(String lnType){
+    public void setNodeType(String lnType) {
         this.nodeType = lnType;
     }
 
     /**
      * Sets LNode Prefix value
+     *
      * @param prefix input
      */
-    public void setPrefix(String prefix){
+    public void setPrefix(String prefix) {
         this.prefix = prefix;
     }
 
     /**
      * Extracts LNode ExtRef informations
+     *
      * @param lnAdapter input
      * @return LNodeDTO object
      */
     public static LNodeDTO extractExtRefInfo(LNAdapter lnAdapter) {
         String lnClass = lnAdapter.getLNClass() == null ? "" : lnAdapter.getLNClass();
-        LNodeDTO lNodeDTO = new LNodeDTO(lnAdapter.getLNInst(),lnClass,lnAdapter.getPrefix(), lnAdapter.getLnType());
-        if(lnAdapter.hasInputs()){
+        LNodeDTO lNodeDTO = new LNodeDTO(lnAdapter.getLNInst(), lnClass, lnAdapter.getPrefix(), lnAdapter.getLnType());
+        if (lnAdapter.hasInputs()) {
             lnAdapter.getExtRefs(null).forEach(tExtRef -> {
                 ExtRefInfo extRefInfo = new ExtRefInfo(tExtRef);
                 lNodeDTO.addExtRefInfo(extRefInfo);
@@ -244,6 +252,7 @@ public class LNodeDTO {
 
     /**
      * Adds ExtRef Info to LNode ExtRefs
+     *
      * @param extRef input
      */
     public void addExtRefInfo(ExtRefInfo extRef) {
@@ -252,6 +261,7 @@ public class LNodeDTO {
 
     /**
      * Adds list of ExtRef Info into LNode
+     *
      * @param extRefs input
      */
     public void addAllExtRefInfo(List<ExtRefInfo> extRefs) {
@@ -260,6 +270,7 @@ public class LNodeDTO {
 
     /**
      * Adds Control Block to LNode Control Blocks
+     *
      * @param controlBlock input
      */
     public void addControlBlock(ControlBlock controlBlock) {
@@ -278,14 +289,16 @@ public class LNodeDTO {
 
     /**
      * Adds lis of Control Block to LNode Control Blocks
+     *
      * @param controlBlockInfoList input
      */
-    public void addAllControlBlocks(List<ControlBlock> controlBlockInfoList){
+    public void addAllControlBlocks(List<ControlBlock> controlBlockInfoList) {
         controlBlockInfoList.forEach(this::addControlBlock);
     }
 
     /**
      * Adds list of DataSet to LNode
+     *
      * @param dataSetList input
      */
     public void addAllDatSets(List<DataSetInfo> dataSetList) {
@@ -294,6 +307,7 @@ public class LNodeDTO {
 
     /**
      * Adds DataTypeTemplate's sumarised data
+     *
      * @param dataAttributeRef input
      */
     public void addDataAttributeRef(DataAttributeRef dataAttributeRef) {
@@ -302,6 +316,7 @@ public class LNodeDTO {
 
     /**
      * Adds list of DataTypeTemplate's sumarised data
+     *
      * @param dataAttributeRefs input
      */
     public void addAllDataAttributeRef(List<DataAttributeRef> dataAttributeRefs) {
@@ -310,14 +325,16 @@ public class LNodeDTO {
 
     /**
      * Gets DataTypeTemplate's sumarised data
+     *
      * @return Set of DataAttributeRef object
      */
-    public Set<DataAttributeRef> getDataAttributeRefs(){
+    public Set<DataAttributeRef> getDataAttributeRefs() {
         return Set.of(dataAttributeRefs.toArray(new DataAttributeRef[0]));
     }
 
     /**
      * Adds DataSet information to LNode
+     *
      * @param dataSetInfo input
      */
     public void addDataSet(DataSetInfo dataSetInfo) {

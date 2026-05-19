@@ -192,11 +192,11 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
                 .stream()
                 .filter(tExtRef ->
                         ((filter.getDesc() == null && tExtRef.getDesc().isEmpty())
-                                || Objects.equals(filter.getDesc(), tExtRef.getDesc())) &&
-                                Objects.equals(filter.getPDO(), tExtRef.getPDO()) &&
-                                Objects.equals(filter.getPDA(), tExtRef.getPDA()) &&
-                                Objects.equals(filter.getIntAddr(), tExtRef.getIntAddr()) &&
-                                Objects.equals(filter.getPServT(), tExtRef.getPServT()))
+                         || Objects.equals(filter.getDesc(), tExtRef.getDesc())) &&
+                        Objects.equals(filter.getPDO(), tExtRef.getPDO()) &&
+                        Objects.equals(filter.getPDA(), tExtRef.getPDA()) &&
+                        Objects.equals(filter.getIntAddr(), tExtRef.getIntAddr()) &&
+                        Objects.equals(filter.getPServT(), tExtRef.getPServT()))
                 .toList();
     }
 
@@ -224,9 +224,9 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         boolean extRefExist = currentElem.getInputs().getExtRef()
                 .stream()
                 .anyMatch(tExtRef -> Objects.equals(signalInfo.getDesc(), tExtRef.getDesc()) &&
-                        Objects.equals(tExtRef.getPDO(), signalInfo.getPDO()) &&
-                        Objects.equals(signalInfo.getIntAddr(), tExtRef.getIntAddr()) &&
-                        Objects.equals(signalInfo.getPServT(), tExtRef.getPServT()));
+                                     Objects.equals(tExtRef.getPDO(), signalInfo.getPDO()) &&
+                                     Objects.equals(signalInfo.getIntAddr(), tExtRef.getIntAddr()) &&
+                                     Objects.equals(signalInfo.getPServT(), tExtRef.getPServT()));
         if (!extRefExist) {
             throw new ScdException("ExtRef signal does not exist in target LN");
         }
@@ -389,7 +389,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         } else if (TReportControl.class.equals(cls)) {
             return (List<V>) currentElem.getReportControl();
         }
-        throw new IllegalArgumentException("Unsupported ControlBlock "+cls.getSimpleName()+" for Lnode");
+        throw new IllegalArgumentException("Unsupported ControlBlock " + cls.getSimpleName() + " for Lnode");
     }
 
     /**
@@ -400,9 +400,9 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      */
     private boolean isCBKnown(String cbName) {
         return isLN0()
-                && (((LN0) currentElem).getGSEControl().stream().anyMatch(tgse -> tgse.getName().equals(cbName)) ||
-                ((LN0) currentElem).getSampledValueControl().stream().anyMatch(tsmv -> tsmv.getName().equals(cbName)))
-                || currentElem.getReportControl().stream().anyMatch(trpt -> trpt.getName().equals(cbName));
+               && (((LN0) currentElem).getGSEControl().stream().anyMatch(tgse -> tgse.getName().equals(cbName)) ||
+                   ((LN0) currentElem).getSampledValueControl().stream().anyMatch(tsmv -> tsmv.getName().equals(cbName)))
+               || currentElem.getReportControl().stream().anyMatch(trpt -> trpt.getName().equals(cbName));
     }
 
     /**
@@ -561,8 +561,8 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
     /**
      * Returns a list of Data Attribute Reference for DataAttribute (updatable or not)
      *
-     * @param dataAttributeRef          Data Attribute Reference (used as filter)
-     * @param updatableOnly true to retrieve DataTypeTemplate's related to only updatable DAI, false to retrieve all
+     * @param dataAttributeRef Data Attribute Reference (used as filter)
+     * @param updatableOnly    true to retrieve DataTypeTemplate's related to only updatable DAI, false to retrieve all
      * @return List of Data Attribute Reference (updatable or not)
      * @throws ScdException SCD illegal arguments exception
      */
@@ -802,7 +802,16 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         List<DataAttributeRef> dataAttributeRefs = lNodeTypeAdapter.getDataAttributeRefs(filter);
 
         return matchesDataAttributes(dataAttribute) ||
-                dataAttributeRefs.stream().anyMatch(dataAttributeRef -> dataAttributeRef.getDataAttributes().startsWith(dataAttribute));
+               dataAttributeRefs.stream().anyMatch(dataAttributeRef -> dataAttributeRef.getDataAttributes().startsWith(dataAttribute));
+    }
+
+    /**
+     * Gets Inputs node as an adapter
+     *
+     * @return an InputsAdapter
+     */
+    public InputsAdapter getInputsAdapter() {
+        return new InputsAdapter(this, currentElem.getInputs());
     }
 
     /**
@@ -813,7 +822,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
      */
     protected boolean matchesDataAttributes(String dataAttribute) {
         return currentElem.getDataSet().stream().anyMatch(tDataSet -> tDataSet.getName().equals(dataAttribute)) ||
-                currentElem.getReportControl().stream().anyMatch(rptCtl -> rptCtl.getName().equals(dataAttribute));
+               currentElem.getReportControl().stream().anyMatch(rptCtl -> rptCtl.getName().equals(dataAttribute));
     }
 
     /**
@@ -831,7 +840,7 @@ public abstract class AbstractLNAdapter<T extends TAnyLN> extends SclElementAdap
         List<TVal> tVals;
         IDataAdapter daiAdapter = daiTracker.getBdaiOrDaiAdapter();
         if (daiAdapter.getClass().equals(SDIAdapter.DAIAdapter.class)) {
-            tVals = ((RootSDIAdapter.DAIAdapter) daiAdapter).getCurrentElem().getVal();
+            tVals = ((SDIAdapter.DAIAdapter) daiAdapter).getCurrentElem().getVal();
         } else if (daiAdapter.getClass().equals(RootSDIAdapter.DAIAdapter.class)) {
             tVals = ((RootSDIAdapter.DAIAdapter) daiAdapter).getCurrentElem().getVal();
         } else {
