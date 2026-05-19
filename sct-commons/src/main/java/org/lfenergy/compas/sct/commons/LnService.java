@@ -160,6 +160,10 @@ public class LnService implements LnEditor {
     @Override
     public DoLinkedToDa getDoLinkedToDaCompletedFromDAI(TIED tied, String ldInst, TAnyLN anyLN, DoLinkedToDa doLinkedToDa) {
         DoLinkedToDa result = doLinkedToDa.deepCopy();
+        boolean servicesInIed = tied.isSetServices()
+                && tied.getServices() != null
+                && tied.getServices().getSettingGroups() != null
+                && tied.getServices().getSettingGroups().getConfSG() != null;
         getDOAndDAInstances(anyLN, doLinkedToDa.getDataRef())
                 .ifPresent(tdai -> {
                     if (tdai.isSetVal()) {
@@ -179,7 +183,7 @@ public class LnService implements LnEditor {
                                                                                        && tAccessPoint.getServices() != null
                                                                                        && tAccessPoint.getServices().getSettingGroups() != null
                                                                                        && tAccessPoint.getServices().getSettingGroups().getConfSG() != null);
-                            result.dataAttribute().setValImport((!tdai.isSetValImport() || tdai.isValImport()) && isIedHasConfSG);
+                            result.dataAttribute().setValImport((!tdai.isSetValImport() || tdai.isValImport()) && (isIedHasConfSG || servicesInIed));
                         } else {
                             log.warn("Inconsistency in the SCD file - DAI= {} with fc= {} must have a sGroup attribute", tdai.getName(), result.dataAttribute().getFc());
                             result.dataAttribute().setValImport(false);

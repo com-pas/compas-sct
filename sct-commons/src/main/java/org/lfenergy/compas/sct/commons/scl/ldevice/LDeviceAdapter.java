@@ -348,10 +348,14 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
     public boolean hasDataSetCreationCapability(ControlBlockEnum controlBlockEnum) {
         Objects.requireNonNull(controlBlockEnum);
         TAccessPoint accessPoint = getAccessPoint();
-        if (!accessPoint.isSetServices()) {
+        TServices services;
+        if (accessPoint.isSetServices()) {
+            services = accessPoint.getServices();
+        } else if (parentAdapter.getCurrentElem().isSetServices()) {
+            services = parentAdapter.getCurrentElem().getServices();
+        } else {
             return false;
         }
-        TServices services = accessPoint.getServices();
         return switch (controlBlockEnum) {
             case REPORT -> services.isSetReportSettings() && hasDatSetConfOrDyn(services.getReportSettings());
             case GSE -> services.isSetGSESettings() && hasDatSetConfOrDyn(services.getGSESettings());
@@ -374,10 +378,14 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
     public boolean hasControlBlockCreationCapability(ControlBlockEnum controlBlockEnum) {
         Objects.requireNonNull(controlBlockEnum);
         TAccessPoint accessPoint = getAccessPoint();
-        if (!accessPoint.isSetServices()) {
+        TServices services;
+        if (accessPoint.isSetServices()) {
+            services = accessPoint.getServices();
+        } else if (parentAdapter.getCurrentElem().isSetServices()) {
+            services = parentAdapter.getCurrentElem().getServices();
+        } else {
             return false;
         }
-        TServices services = accessPoint.getServices();
         return switch (controlBlockEnum) {
             case REPORT -> services.isSetReportSettings() && hasCBNameConf(services.getReportSettings());
             case GSE -> services.isSetGSESettings() && hasCBNameConf(services.getGSESettings());
