@@ -12,7 +12,6 @@ import org.lfenergy.compas.sct.commons.dto.DataAttributeRef;
 import org.lfenergy.compas.sct.commons.dto.SclReportItem;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.model.da_comm.TFCDA;
-import org.lfenergy.compas.sct.commons.scl.ExtRefService;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.SclRootAdapter;
 import org.lfenergy.compas.sct.commons.scl.ldevice.LDeviceAdapter;
@@ -39,7 +38,7 @@ import static org.lfenergy.compas.sct.commons.util.CommonConstants.*;
  * @see AbstractLNAdapter
  */
 @Slf4j
-public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
+public class InputsAdapter extends SclElementAdapter<AbstractLNAdapter<? extends TAnyLN>, TInputs> {
 
     private static final String MESSAGE_SOURCE_LDEVICE_NOT_FOUND = "The signal ExtRef ExtRefldinst does not match any " +
                                                                    "LDevice with same inst attribute in source IED %s";
@@ -62,7 +61,7 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
      * @param parentAdapter Parent container reference
      * @param tInputs       Current reference
      */
-    public InputsAdapter(LN0Adapter parentAdapter, TInputs tInputs) {
+    public InputsAdapter(AbstractLNAdapter<? extends TAnyLN> parentAdapter, TInputs tInputs) {
         super(parentAdapter, tInputs);
     }
 
@@ -276,15 +275,6 @@ public class InputsAdapter extends SclElementAdapter<LN0Adapter, TInputs> {
 
     private SclRootAdapter getSclRootAdapter() {
         return getIedAdapter().getParentAdapter();
-    }
-
-    /**
-     * Remove ExtRef which are fed by same Control Block
-     *
-     * @return list ExtRefs without duplication
-     */
-    public List<TExtRef> filterDuplicatedExtRefs() {
-        return new ExtRefService().filterDuplicatedExtRefs(currentElem.getExtRef());
     }
 
 }
