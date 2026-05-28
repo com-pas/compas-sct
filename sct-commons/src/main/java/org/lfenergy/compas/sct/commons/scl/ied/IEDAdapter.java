@@ -27,7 +27,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * A representation of the model object
- * <em><b>{@link org.lfenergy.compas.scl2007b4.model.TIED IED}</b></em>.
+ * <em><b>{@link TIED IED}</b></em>.
  * <p>
  * The following features are supported:
  * </p>
@@ -55,8 +55,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  *
  * @see LDeviceAdapter
  * @see AbstractLNAdapter
- * @see org.lfenergy.compas.sct.commons.scl.ied.AbstractDAIAdapter
- * @see org.lfenergy.compas.scl2007b4.model.TSettingGroups
+ * @see AbstractDAIAdapter
+ * @see TSettingGroups
  * @see <a href="https://github.com/com-pas/compas-sct/issues/3" target="_blank">Issue !3 (Add new IEDs)</a>
  */
 public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
@@ -297,9 +297,14 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
                                 String.format("LD (%s) is unknown in %s", ldInst, getName())
                         )
                 );
+        return hasConfSg(accessPoint.getServices()) || hasConfSg(currentElem.getServices());
+    }
 
-        TServices srv = accessPoint.getServices();
-        return srv != null && srv.getSettingGroups() != null && srv.getSettingGroups().getConfSG() != null;
+
+    private static boolean hasConfSg(TServices services) {
+        return services != null
+                && services.getSettingGroups() != null
+                && services.getSettingGroups().getConfSG() != null;
     }
 
     /**

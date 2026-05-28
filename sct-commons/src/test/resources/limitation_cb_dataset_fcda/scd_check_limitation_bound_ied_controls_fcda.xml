@@ -6,6 +6,9 @@
 <SCL version="2007" revision="B" release="4" xmlns="http://www.iec.ch/61850/2003/SCL">
     <Header id="hId" version="2007" revision="B" toolID="COMPAS"/>
     <IED name="IED_NAME1">
+        <Services>
+            <ClientServices maxAttributes="8" maxGOOSE="2" maxReports="0" maxSMV="1" />
+        </Services>
         <AccessPoint name="AP_NAME">
             <Server>
                 <Authentication/>
