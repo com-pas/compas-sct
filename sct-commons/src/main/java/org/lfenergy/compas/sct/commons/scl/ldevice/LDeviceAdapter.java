@@ -12,6 +12,7 @@ import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.SclElementAdapter;
 import org.lfenergy.compas.sct.commons.scl.dtt.DataTypeTemplateAdapter;
+import org.lfenergy.compas.sct.commons.scl.ied.AccessPointAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.IEDAdapter;
 import org.lfenergy.compas.sct.commons.scl.ied.InputsAdapter;
 import org.lfenergy.compas.sct.commons.scl.ln.AbstractLNAdapter;
@@ -21,6 +22,8 @@ import org.lfenergy.compas.sct.commons.util.ControlBlockEnum;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
+import java.util.function.Predicate;
+import java.util.function.ToLongFunction;
 import java.util.stream.Stream;
 
 /**
@@ -346,21 +349,11 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
      * @return true if parent AccessPoint has the capability, false otherwise
      */
     public boolean hasDataSetCreationCapability(ControlBlockEnum controlBlockEnum) {
-        Objects.requireNonNull(controlBlockEnum);
-        TAccessPoint accessPoint = getAccessPoint();
-        TServices services;
-        if (accessPoint.isSetServices()) {
-            services = accessPoint.getServices();
-        } else if (parentAdapter.getCurrentElem().isSetServices()) {
-            services = parentAdapter.getCurrentElem().getServices();
-        } else {
-            return false;
-        }
         return switch (controlBlockEnum) {
-            case REPORT -> services.isSetReportSettings() && hasDatSetConfOrDyn(services.getReportSettings());
-            case GSE -> services.isSetGSESettings() && hasDatSetConfOrDyn(services.getGSESettings());
-            case SAMPLED_VALUE -> services.isSetSMVSettings() && hasDatSetConfOrDyn(services.getSMVSettings());
-            case LOG -> services.isSetLogSettings() && hasDatSetConfOrDyn(services.getLogSettings());
+            case REPORT -> getServicesVal(services ->services.isSetReportSettings() && hasDatSetConfOrDyn(services.getReportSettings()));
+            case GSE -> getServicesVal(services ->services.isSetGSESettings() && hasDatSetConfOrDyn(services.getGSESettings()));
+            case SAMPLED_VALUE -> getServicesVal(services ->services.isSetSMVSettings() && hasDatSetConfOrDyn(services.getSMVSettings()));
+            case LOG -> getServicesVal(services ->services.isSetLogSettings() && hasDatSetConfOrDyn(services.getLogSettings()));
         };
     }
 
@@ -376,22 +369,20 @@ public class LDeviceAdapter extends SclElementAdapter<IEDAdapter, TLDevice> {
      * @return true if parent AccessPoint has the capability, false otherwise
      */
     public boolean hasControlBlockCreationCapability(ControlBlockEnum controlBlockEnum) {
-        Objects.requireNonNull(controlBlockEnum);
-        TAccessPoint accessPoint = getAccessPoint();
-        TServices services;
-        if (accessPoint.isSetServices()) {
-            services = accessPoint.getServices();
-        } else if (parentAdapter.getCurrentElem().isSetServices()) {
-            services = parentAdapter.getCurrentElem().getServices();
-        } else {
-            return false;
-        }
         return switch (controlBlockEnum) {
-            case REPORT -> services.isSetReportSettings() && hasCBNameConf(services.getReportSettings());
-            case GSE -> services.isSetGSESettings() && hasCBNameConf(services.getGSESettings());
-            case SAMPLED_VALUE -> services.isSetSMVSettings() && hasCBNameConf(services.getSMVSettings());
-            case LOG -> services.isSetLogSettings() && hasCBNameConf(services.getLogSettings());
+            case REPORT -> getServicesVal(services ->  services.isSetReportSettings() && hasCBNameConf(services.getReportSettings()));
+            case GSE -> getServicesVal(services ->services.isSetGSESettings() && hasCBNameConf(services.getGSESettings()));
+            case SAMPLED_VALUE -> getServicesVal(services ->services.isSetSMVSettings() && hasCBNameConf(services.getSMVSettings()));
+            case LOG -> getServicesVal(services ->services.isSetLogSettings() && hasCBNameConf(services.getLogSettings()));
         };
+    }
+
+    private boolean getServicesVal(Predicate<TServices> predicate) {
+        TAccessPoint accessPoint = getAccessPoint();
+        TIED ied = this.getParentAdapter().getCurrentElem();
+        return (accessPoint.isSetServices() && predicate.test(accessPoint.getServices()))
+                || (ied.isSetServices() && predicate.test(ied.getServices()));
+
     }
 
     private boolean hasCBNameConf(TServiceSettings tServiceSettings) {

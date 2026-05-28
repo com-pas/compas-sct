@@ -179,10 +179,7 @@ public class LnService implements LnEditor {
                                                              .filter(tAccessPoint -> tAccessPoint.getServer() != null
                                                                                      && tAccessPoint.getServer().getLDevice().stream()
                                                                                              .anyMatch(tlDevice -> tlDevice.getInst().equals(ldInst)))
-                                                             .anyMatch(tAccessPoint -> tAccessPoint.isSetServices()
-                                                                                       && tAccessPoint.getServices() != null
-                                                                                       && tAccessPoint.getServices().getSettingGroups() != null
-                                                                                       && tAccessPoint.getServices().getSettingGroups().getConfSG() != null);
+                                                             .anyMatch(tAccessPoint1 -> hasConfSg(tAccessPoint1.getServices()) || hasConfSg(tied.getServices()));
                             result.dataAttribute().setValImport((!tdai.isSetValImport() || tdai.isValImport()) && (isIedHasConfSG || servicesInIed));
                         } else {
                             log.warn("Inconsistency in the SCD file - DAI= {} with fc= {} must have a sGroup attribute", tdai.getName(), result.dataAttribute().getFc());
@@ -193,6 +190,12 @@ public class LnService implements LnEditor {
                     }
                 });
         return result;
+    }
+
+    private static boolean hasConfSg(TServices services) {
+        return services != null
+                && services.getSettingGroups() != null
+                && services.getSettingGroups().getConfSG() != null;
     }
 
     private boolean hasSettingGroup(TDAI tdai) {

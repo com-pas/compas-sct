@@ -297,11 +297,14 @@ public class IEDAdapter extends SclElementAdapter<SclRootAdapter, TIED> {
                                 String.format("LD (%s) is unknown in %s", ldInst, getName())
                         )
                 );
+        return hasConfSg(accessPoint.getServices()) || hasConfSg(currentElem.getServices());
+    }
 
-        TServices srv = null;
-        if(accessPoint.getServices()!=null) srv = accessPoint.getServices();
-        else if(this.getCurrentElem().getServices()!=null) srv = this.getCurrentElem().getServices();
-        return srv != null && srv.getSettingGroups() != null && srv.getSettingGroups().getConfSG() != null;
+
+    private static boolean hasConfSg(TServices services) {
+        return services != null
+                && services.getSettingGroups() != null
+                && services.getSettingGroups().getConfSG() != null;
     }
 
     /**
