@@ -160,10 +160,6 @@ public class LnService implements LnEditor {
     @Override
     public DoLinkedToDa getDoLinkedToDaCompletedFromDAI(TIED tied, String ldInst, TAnyLN anyLN, DoLinkedToDa doLinkedToDa) {
         DoLinkedToDa result = doLinkedToDa.deepCopy();
-        boolean servicesInIed = tied.isSetServices()
-                && tied.getServices() != null
-                && tied.getServices().getSettingGroups() != null
-                && tied.getServices().getSettingGroups().getConfSG() != null;
         getDOAndDAInstances(anyLN, doLinkedToDa.getDataRef())
                 .ifPresent(tdai -> {
                     if (tdai.isSetVal()) {
@@ -174,13 +170,13 @@ public class LnService implements LnEditor {
                     }
                     if (result.dataAttribute().getFc() == TFCEnum.SG || result.dataAttribute().getFc() == TFCEnum.SE) {
                         if (hasSettingGroup(tdai)) {
-                            boolean isIedHasConfSG = tied.isSetAccessPoint() &&
+                            boolean isAccessPointConfSG = tied.isSetAccessPoint() &&
                                                      tied.getAccessPoint().stream()
                                                              .filter(tAccessPoint -> tAccessPoint.getServer() != null
                                                                                      && tAccessPoint.getServer().getLDevice().stream()
                                                                                              .anyMatch(tlDevice -> tlDevice.getInst().equals(ldInst)))
-                                                             .anyMatch(tAccessPoint1 -> hasConfSg(tAccessPoint1.getServices()) || hasConfSg(tied.getServices()));
-                            result.dataAttribute().setValImport((!tdai.isSetValImport() || tdai.isValImport()) && (isIedHasConfSG || servicesInIed));
+                                                             .anyMatch(tAccessPoint1 -> hasConfSg(tAccessPoint1.getServices()));
+                            result.dataAttribute().setValImport((!tdai.isSetValImport() || tdai.isValImport()) && (isAccessPointConfSG || hasConfSg(tied.getServices())));
                         } else {
                             log.warn("Inconsistency in the SCD file - DAI= {} with fc= {} must have a sGroup attribute", tdai.getName(), result.dataAttribute().getFc());
                             result.dataAttribute().setValImport(false);
