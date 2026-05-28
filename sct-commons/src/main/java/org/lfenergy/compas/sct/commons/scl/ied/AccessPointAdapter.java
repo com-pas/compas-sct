@@ -17,6 +17,8 @@ import org.lfenergy.compas.sct.commons.util.ServicesConfigEnum;
 import org.lfenergy.compas.sct.commons.util.Utils;
 
 import java.util.*;
+import java.util.function.Predicate;
+import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -157,19 +159,17 @@ public class AccessPointAdapter extends SclElementAdapter<IEDAdapter, TAccessPoi
      * @return max number authorized by config
      */
     private long getMaxInstanceAuthorized(ServicesConfigEnum servicesConfigEnum) {
-        if (currentElem.getServices() == null)
-            return MAX_OCCURRENCE_NO_LIMIT_VALUE;
-        TServices tServices = currentElem.getServices();
-
         return switch (servicesConfigEnum) {
-            case DATASET -> tServices.isSetConfDataSet() && tServices.getConfDataSet().isSetMax() ?
-                    tServices.getConfDataSet().getMax() : MAX_OCCURRENCE_NO_LIMIT_VALUE;
-            case FCDA -> tServices.isSetConfDataSet() && tServices.getConfDataSet().isSetMaxAttributes() ?
-                    tServices.getConfDataSet().getMaxAttributes() : MAX_OCCURRENCE_NO_LIMIT_VALUE;
-            case REPORT -> tServices.isSetConfReportControl() && tServices.getConfReportControl().isSetMax() ?
-                    tServices.getConfReportControl().getMax() : MAX_OCCURRENCE_NO_LIMIT_VALUE;
-            case GSE -> tServices.isSetGOOSE() && tServices.getGOOSE().isSetMax() ? tServices.getGOOSE().getMax() : MAX_OCCURRENCE_NO_LIMIT_VALUE;
-            case SMV -> tServices.isSetSMVsc() && tServices.getSMVsc().isSetMax() ? tServices.getSMVsc().getMax() : MAX_OCCURRENCE_NO_LIMIT_VALUE;
+            case DATASET -> getServicesVal(tServices -> tServices.isSetConfDataSet() && tServices.getConfDataSet().isSetMax(),
+                    tServices -> tServices.getConfDataSet().getMax());
+            case FCDA -> getServicesVal(tServices -> tServices.isSetConfDataSet() && tServices.getConfDataSet().isSetMaxAttributes(),
+                    tServices -> tServices.getConfDataSet().getMaxAttributes());
+            case REPORT -> getServicesVal(tServices -> tServices.isSetConfReportControl() && tServices.getConfReportControl().isSetMax(),
+                    tServices -> tServices.getConfReportControl().getMax());
+            case GSE -> getServicesVal(tServices -> tServices.isSetGOOSE() && tServices.getGOOSE().isSetMax(),
+                    tServices -> tServices.getGOOSE().getMax());
+            case SMV -> getServicesVal(tServices -> tServices.isSetSMVsc() && tServices.getSMVsc().isSetMax(),
+                    tServices -> tServices.getSMVsc().getMax());
         };
     }
 
@@ -180,14 +180,8 @@ public class AccessPointAdapter extends SclElementAdapter<IEDAdapter, TAccessPoi
      * @return Optional of encountered error or empty
      */
     public Optional<SclReportItem> checkLimitationForBoundIedFcdas(List<TExtRef> tExtRefs) {
-        long max;
-        if (currentElem.getServices() == null) {
-            max = MAX_OCCURRENCE_NO_LIMIT_VALUE;
-        } else {
-            TClientServices tClientServices = currentElem.getServices().getClientServices();
-            max = tClientServices != null && tClientServices.isSetMaxAttributes() ? tClientServices.getMaxAttributes() : MAX_OCCURRENCE_NO_LIMIT_VALUE;
-        }
-        if (max == MAX_OCCURRENCE_NO_LIMIT_VALUE) {
+        long max = getClientServiceVal(TClientServices::isSetMaxAttributes, TClientServices::getMaxAttributes);
+        if (max == MAX_OCCURRENCE_NO_LIMIT_VALUE){
             return Optional.empty();
         }
         long value = tExtRefs.stream()
@@ -214,6 +208,22 @@ public class AccessPointAdapter extends SclElementAdapter<IEDAdapter, TAccessPoi
         return value <= max ? Optional.empty() :
                 Optional.of(SclReportItem.error(getParentAdapter().getXPath(),
                         "The Client IED %s subscribes to too much FCDA: %d > %d max".formatted(getParentAdapter().getName(), value, max)));
+    }
+
+    private long getClientServiceVal(Predicate<TClientServices> isSet, ToLongFunction<TClientServices> get) {
+        return getServicesVal(tServices -> tServices.isSetClientServices() && isSet.test(tServices.getClientServices()), tServices -> get.applyAsLong(tServices.getClientServices()));
+    }
+
+    private long getServicesVal(Predicate<TServices> isSet, ToLongFunction<TServices> get) {
+        if (currentElem.isSetServices() && isSet.test(currentElem.getServices())) {
+            return get.applyAsLong(currentElem.getServices());
+        } else {
+            TIED ied = this.getParentAdapter().getCurrentElem();
+            if (ied.isSetServices() && isSet.test(ied.getServices())) {
+                return get.applyAsLong(ied.getServices());
+            }
+        }
+        return AccessPointAdapter.MAX_OCCURRENCE_NO_LIMIT_VALUE;
     }
 
     /**
@@ -303,15 +313,11 @@ public class AccessPointAdapter extends SclElementAdapter<IEDAdapter, TAccessPoi
      * @return max number authorized by config
      */
     private long getMaxInstanceAuthorizedForBoundIED(ServicesConfigEnum servicesConfigEnum) {
-        if (currentElem.getServices() == null || currentElem.getServices().getClientServices() == null) {
-            return AccessPointAdapter.MAX_OCCURRENCE_NO_LIMIT_VALUE;
-        }
-        TClientServices tClientServices = currentElem.getServices().getClientServices();
         return switch (servicesConfigEnum) {
-            case FCDA -> tClientServices.isSetMaxAttributes() ? tClientServices.getMaxAttributes() : AccessPointAdapter.MAX_OCCURRENCE_NO_LIMIT_VALUE;
-            case REPORT -> tClientServices.isSetMaxReports() ? tClientServices.getMaxReports() : AccessPointAdapter.MAX_OCCURRENCE_NO_LIMIT_VALUE;
-            case GSE -> tClientServices.isSetMaxGOOSE() ? tClientServices.getMaxGOOSE() : AccessPointAdapter.MAX_OCCURRENCE_NO_LIMIT_VALUE;
-            case SMV -> tClientServices.isSetMaxSMV() ? tClientServices.getMaxSMV() : AccessPointAdapter.MAX_OCCURRENCE_NO_LIMIT_VALUE;
+            case FCDA -> getClientServiceVal(TClientServices::isSetMaxAttributes, TClientServices::getMaxAttributes);
+            case REPORT -> getClientServiceVal(TClientServices::isSetMaxReports, TClientServices::getMaxReports);
+            case GSE -> getClientServiceVal(TClientServices::isSetMaxGOOSE, TClientServices::getMaxGOOSE);
+            case SMV -> getClientServiceVal(TClientServices::isSetMaxSMV, TClientServices::getMaxSMV);
             default -> throw new ScdException("Unsupported value: " + servicesConfigEnum);
         };
 

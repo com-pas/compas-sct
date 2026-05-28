@@ -267,6 +267,25 @@ class AccessPointAdapterTest {
     }
 
     @Test
+    void checkLimitationForBoundIEDControls_should_succeed_no_server_access_point_and_server_ied() {
+        //Given
+        SCL scd = SclTestMarshaller.getSCLFromResource("limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");
+        SclRootAdapter sclRootAdapter = new SclRootAdapter(scd);
+        IEDAdapter iedAdapter = sclRootAdapter.getIEDAdapterByName("IED_NAME1");
+        iedAdapter.getCurrentElem().getServices().getClientServices().setMaxAttributes(11L);
+        iedAdapter.getCurrentElem().getServices().getClientServices().setMaxGOOSE(5L);
+        iedAdapter.getCurrentElem().getServices().getClientServices().setMaxReports(2L);
+        iedAdapter.getCurrentElem().getServices().getClientServices().setMaxSMV(2L);
+        iedAdapter.getCurrentElem().getAccessPoint().forEach(tAccessPoint -> tAccessPoint.setServices(null));
+        AccessPointAdapter accessPointAdapter = new AccessPointAdapter(iedAdapter, iedAdapter.getCurrentElem().getAccessPoint().getFirst());
+        List<TExtRef> tExtRefs = accessPointAdapter.getAllCoherentExtRefForAnalyze().tExtRefs();
+        //When
+        List<SclReportItem> sclReportItems = accessPointAdapter.checkLimitationForBoundIEDControls(tExtRefs);
+        //Then
+        assertThat(sclReportItems).isEmpty();
+    }
+
+    @Test
     void checkLimitationForBoundIEDControls_should_succeed_no_error_message() {
         //Given
         SCL scd = SclTestMarshaller.getSCLFromResource("limitation_cb_dataset_fcda/scd_check_limitation_bound_ied_controls_fcda.xml");

@@ -190,26 +190,6 @@ class ReportControlBlockTest {
     }
 
     @Test
-    @Tag("issue-321")
-    void testGetControlBlockServiceSetting(){
-        // Given
-        ReportControlBlock reportControlBlock = createReportControlBlock();
-        // When Then
-        assertThat(reportControlBlock.getControlBlockServiceSetting(null)).isEqualTo(TServiceSettingsNoDynEnum.FIX);
-
-        TServices tServices = Mockito.mock(TServices.class);
-        TReportSettings reportSettings = Mockito.mock(TReportSettings.class);
-        Mockito.when(tServices.getReportSettings()).thenReturn(reportSettings);
-        Mockito.when(reportSettings.getCbName()).thenReturn(TServiceSettingsNoDynEnum.CONF);
-        // When Then
-        assertThat(reportControlBlock.getControlBlockServiceSetting(tServices)).isEqualTo(TServiceSettingsNoDynEnum.CONF);
-
-        Mockito.when(tServices.getReportSettings()).thenReturn(null);
-        // When Then
-        assertThat(reportControlBlock.getControlBlockServiceSetting(tServices)).isEqualTo(TServiceSettingsNoDynEnum.FIX);
-    }
-
-    @Test
     void validateSecurityEnabledValue_should_do_nothing() {
         // Given
         ReportControlBlock reportControlBlock = new ReportControlBlock(NAME, ID, DATASET_REF);

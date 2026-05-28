@@ -110,23 +110,6 @@ public abstract class ControlBlock extends LNodeMetaDataEmbedder {
     protected abstract void validateSecurityEnabledValue(TServices tServices) throws ScdException;
 
     /**
-     * Get Control block settings from Service
-     * @param tServices Service object
-     * @return ServiceSettingsNoDynEnum enum value
-     */
-    public TServiceSettingsNoDynEnum getControlBlockServiceSetting(TServices tServices){
-        if(tServices == null) {
-            return TServiceSettingsNoDynEnum.FIX;
-        }
-        return switch (getControlBlockEnum()){
-            case GSE -> (tServices.getGSESettings() != null) ? tServices.getGSESettings().getCbName() : TServiceSettingsNoDynEnum.FIX;
-            case SAMPLED_VALUE -> (tServices.getSMVSettings() != null) ? tServices.getSMVSettings().getCbName() : TServiceSettingsNoDynEnum.FIX;
-            case REPORT -> (tServices.getReportSettings() != null) ? tServices.getReportSettings().getCbName() : TServiceSettingsNoDynEnum.FIX;
-            default -> TServiceSettingsNoDynEnum.FIX;
-        };
-    }
-
-    /**
      * Add the ControlBlock to an LN or LN0 element
      * @param tAnyLN tLN or tLNO element
      * @return the added TControl
