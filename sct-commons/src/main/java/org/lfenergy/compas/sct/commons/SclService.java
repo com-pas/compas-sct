@@ -13,6 +13,7 @@ import org.lfenergy.compas.sct.commons.api.DataTypeTemplateReader;
 import org.lfenergy.compas.sct.commons.api.SclEditor;
 import org.lfenergy.compas.sct.commons.domain.DaVal;
 import org.lfenergy.compas.sct.commons.domain.DataRef;
+import org.lfenergy.compas.sct.commons.domain.DoLinkedToDa;
 import org.lfenergy.compas.sct.commons.dto.*;
 import org.lfenergy.compas.sct.commons.exception.ScdException;
 import org.lfenergy.compas.sct.commons.scl.ExtRefService;
@@ -47,6 +48,7 @@ public class SclService implements SclEditor {
     private static final String DO_GOCBREF = "GoCBRef";
     private static final String DO_SVCBREF = "SvCBRef";
     private static final String DA_SETSRCREF = "setSrcRef";
+    private static final String DA_SETSRCCB = "setSrcCB";
 
     private final IedService iedService;
     private final LdeviceService ldeviceService;
@@ -248,12 +250,17 @@ public class SclService implements SclEditor {
         List<TLN> lgosOrLsvsLns = lnService.getFilteredLns(ldsuiedLdevice, tln -> monitoringLnClassEnum.value().equals(tln.getLnClass().getFirst())).toList();
         if (lgosOrLsvsLns.isEmpty())
             errorHandler.get().add(SclReportItem.warning(tied.getName() + "/" + LDEVICE_LDSUIED + "/" + monitoringLnClassEnum.value(), "There is no LN %s present in LDevice".formatted(monitoringLnClassEnum.value())));
-        DataRef dataRef = new DataRef(doName, List.of(), DA_SETSRCREF, List.of());
-        lgosOrLsvsLns.forEach(lgosOrLsvs -> dataTypeTemplateService.findDoLinkedToDa(scd.getDataTypeTemplates(), lgosOrLsvs.getLnType(), dataRef)
+        DataRef dataRefDaRef = new DataRef(doName, List.of(), DA_SETSRCREF, List.of());
+        DataRef dataRefDaCb = new DataRef(doName, List.of(), DA_SETSRCCB, List.of());
+        dataRefSetDaVal(iedSources, scd, tied, ldsuiedLdevice, doName, monitoringLnClassEnum, lgosOrLsvsLns, dataRefDaRef, dataRefDaCb);
+    }
+
+    private void dataRefSetDaVal(List<IedSource> iedSources, SCL scd, TIED tied, TLDevice ldsuiedLdevice, String doName, MonitoringLnClassEnum monitoringLnClassEnum, List<TLN> lgosOrLsvsLns, DataRef dataRefDaRef, DataRef dataRefDaCB) {
+        lgosOrLsvsLns.forEach(lgosOrLsvs -> dataTypeTemplateService.findDoLinkedToDa(scd.getDataTypeTemplates(), lgosOrLsvs.getLnType(), dataRefDaRef)
                 .map(doLinkedToDa -> lnService.getDoLinkedToDaCompletedFromDAI(tied, LDEVICE_LDSUIED, lgosOrLsvs, doLinkedToDa))
                 .filter(doLinkedToDa -> {
                     if (!doLinkedToDa.isUpdatable())
-                        errorHandler.get().add(SclReportItem.warning(tied.getName() + "/" + LDEVICE_LDSUIED + "/" + monitoringLnClassEnum.value() + "/DOI@name=\"" + doName + "\"/DAI@name=\"setSrcRef\"/Val", "The DAI cannot be updated"));
+                        errorHandler.get().add(SclReportItem.warning(tied.getName() + "/" + LDEVICE_LDSUIED + "/" + monitoringLnClassEnum.value() + "/DOI@name=\"" + doName + "\"/DAI@name=\"" + dataRefDaRef.daName() + "\"/Val", "The DAI cannot be updated"));
                     return doLinkedToDa.isUpdatable();
                 })
                 .ifPresent(doLinkedToDa -> {
@@ -268,11 +275,28 @@ public class SclService implements SclEditor {
                         doLinkedToDa.dataAttribute().getDaiValues().clear();
                         doLinkedToDa.dataAttribute().getDaiValues().add(newVal);
                         lnService.updateOrCreateDOAndDAInstances(lnToAdd, doLinkedToDa);
-                        log.info("Processing %d IED Source in LDName=%s  - added LN (lnClass=%s, inst=%s, prefix=%s) - update DOI(name=%s)/DAI(name=%s) with value=%s".formatted(iedSources.size(), ldsuiedLdevice.getLdName(), lgosOrLsvs.getLnClass().getFirst(), String.valueOf(i + 1), lgosOrLsvs.getPrefix(), doName, DA_SETSRCREF, newVal.val()));
+                        addValDaCB(scd, tied, doName, monitoringLnClassEnum, dataRefDaCB, lgosOrLsvs, newVal, lnToAdd);
+                        log.info("Processing %d IED Source in LDName=%s  - added LN (lnClass=%s, inst=%s, prefix=%s) - update DOI(name=%s)/DAI(name=%s) with value=%s".formatted(iedSources.size(), ldsuiedLdevice.getLdName(), lgosOrLsvs.getLnClass().getFirst(), String.valueOf(i + 1), lgosOrLsvs.getPrefix(), doName, dataRefDaCB.daName(), newVal.val()));
                         ldsuiedLdevice.getLN().add(lnToAdd);
                     }
                     ldsuiedLdevice.getLN().remove(lgosOrLsvs); //We can remove this LGOS or LSVS as we already added new ones
                 }));
+    }
+
+    private void addValDaCB(SCL scd, TIED tied, String doName, MonitoringLnClassEnum monitoringLnClassEnum, DataRef dataRefDaCB, TLN lgosOrLsvs, DaVal newVal, TLN lnToAdd) {
+        Optional<DoLinkedToDa> daCB =  dataTypeTemplateService.findDoLinkedToDa(scd.getDataTypeTemplates(), lgosOrLsvs.getLnType(), dataRefDaCB);
+        daCB.ifPresent(doLinkedToDaCB -> {
+            DoLinkedToDa doLinkedToDaCBCopy = lnService.getDoLinkedToDaCompletedFromDAI(tied, LDEVICE_LDSUIED, lgosOrLsvs, doLinkedToDaCB);
+            if (doLinkedToDaCBCopy.isUpdatable()) {
+                doLinkedToDaCBCopy.dataAttribute().getDaiValues().clear();
+                doLinkedToDaCBCopy.dataAttribute().getDaiValues().add(newVal);
+                lnService.updateOrCreateDOAndDAInstances(lnToAdd, doLinkedToDaCBCopy);
+            }
+            else{
+                errorHandler.get().add(SclReportItem.warning(
+                        tied.getName() + "/" + LDEVICE_LDSUIED + "/" + monitoringLnClassEnum.value() + "/DOI@name=\"" + doName + "\"/DAI@name=\"" + dataRefDaCB.daName() + "\"/Val", "The DAI cannot be updated"));
+            }
+        });
     }
 
     record IedSource(String iedName, String srcCBName, String srcLdInst, TServiceType serviceType){}
