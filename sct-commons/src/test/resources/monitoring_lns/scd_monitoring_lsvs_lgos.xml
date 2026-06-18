@@ -36,11 +36,15 @@
                         <DOI name="SvCBRef">
                             <DAI name="setSrcRef" valKind="RO" valImport="true">
                             </DAI>
+                            <DAI name="setSrcCB" valKind="RO" valImport="true">
+                            </DAI>
                         </DOI>
                     </LN>
                     <LN lnClass="LGOS" inst="1" lnType="LNLGOS">
                         <DOI name="GoCBRef">
                             <DAI name="setSrcRef" valKind="RO" valImport="true">
+                            </DAI>
+                            <DAI name="setSrcCB" valKind="RO" valImport="true">
                             </DAI>
                         </DOI>
                     </LN>
@@ -121,6 +125,7 @@
         </DOType>
         <DOType id="DOLN" cdc="ORG">
             <DA name="setSrcRef" bType="ObjRef" dchg="true" fc="SP"/>
+            <DA name="setSrcCB" bType="ObjRef" dchg="true" fc="SP"/>
         </DOType>
     </DataTypeTemplates>
 </SCL>

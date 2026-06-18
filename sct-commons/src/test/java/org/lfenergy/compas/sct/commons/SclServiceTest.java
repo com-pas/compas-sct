@@ -382,6 +382,27 @@ class SclServiceTest {
                             .filteredOn(tUnNaming -> tUnNaming.getClass().equals(TDAI.class) && ((TDAI)tUnNaming).getName().equals("setSrcRef"))
                             .map(tUnNaming -> ((TDAI)tUnNaming).getVal().getFirst().getValue())
                             .containsExactlyInAnyOrder("IED_NAME2LD_INST21/LLN0.smv2", "IED_NAME2LD_INST22/LLN0.smv2");
+
+                    // LGOS setSrcCb values
+                    assertThat(tlns)
+                            .filteredOn(tln -> tln.getLnClass().contains("LGOS") && tln.getInst().equals("1")
+                                    || tln.getLnClass().contains("LGOS") && tln.getInst().equals("2"))
+                            .flatExtracting(TAnyLN::getDOI)
+                            .filteredOn(tdoi -> tdoi.getName().equals("GoCBRef"))
+                            .flatExtracting(TDOI::getSDIOrDAI)
+                            .filteredOn(tUnNaming -> tUnNaming.getClass().equals(TDAI.class) && ((TDAI)tUnNaming).getName().equals("setSrcCB"))
+                            .map(tUnNaming -> ((TDAI)tUnNaming).getVal().getFirst().getValue())
+                            .containsExactlyInAnyOrder("IED_NAME2LD_INST21/LLN0.goose1", "IED_NAME2LD_INST22/LLN0.goose1");
+                    // LSVS setSrcCb values
+                    assertThat(tlns)
+                            .filteredOn(tln -> (tln.getLnClass().contains("LSVS") && tln.getInst().equals("1")
+                                    || tln.getLnClass().contains("LSVS") && tln.getInst().equals("2")))
+                            .flatExtracting(TAnyLN::getDOI)
+                            .filteredOn(tdoi -> tdoi.getName().equals("SvCBRef"))
+                            .flatExtracting(TDOI::getSDIOrDAI)
+                            .filteredOn(tUnNaming -> tUnNaming.getClass().equals(TDAI.class) && ((TDAI)tUnNaming).getName().equals("setSrcCB"))
+                            .map(tUnNaming -> ((TDAI)tUnNaming).getVal().getFirst().getValue())
+                            .containsExactlyInAnyOrder("IED_NAME2LD_INST21/LLN0.smv2", "IED_NAME2LD_INST22/LLN0.smv2");
                 });
     }
 
